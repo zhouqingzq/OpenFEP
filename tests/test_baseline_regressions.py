@@ -2,9 +2,17 @@ from __future__ import annotations
 
 import unittest
 
+from segmentum.agent import SegmentAgent
+from segmentum.drives import DriveSystem, StrategicLayer
+from segmentum.environment import Observation
 from segmentum.evaluation import RunMetrics
 from segmentum.fep import infer_policy
 from segmentum.memory import LongTermMemory
+from segmentum.predictive_coding import (
+    InteroceptiveBeliefState,
+    compose_upstream_observation,
+    predictive_coding_profile,
+)
 from segmentum.runtime import SegmentRuntime
 from segmentum.state import AgentState, Strategy, TickInput
 from segmentum.world_model import GenerativeWorldModel
@@ -109,6 +117,142 @@ class WorldModelUpdateTests(unittest.TestCase):
         self.assertLess(
             abs(target_danger - model.beliefs["danger"]),
             abs(target_danger - start_danger),
+        )
+
+
+class HierarchicalBeliefStateTests(unittest.TestCase):
+    def test_large_prediction_error_propagates_weighted_residual(self) -> None:
+        state = InteroceptiveBeliefState()
+        update = state.posterior_update(
+            incoming_observation={
+                "food": 0.95,
+                "danger": 0.05,
+                "novelty": 0.50,
+                "shelter": 0.40,
+                "temperature": 0.50,
+                "social": 0.30,
+            },
+            top_down_prediction={
+                "food": 0.20,
+                "danger": 0.80,
+                "novelty": 0.50,
+                "shelter": 0.40,
+                "temperature": 0.50,
+                "social": 0.30,
+            },
+        )
+
+        self.assertTrue(update.digestion_exceeded)
+        self.assertGreater(abs(update.propagated_error["food"]), 0.0)
+        self.assertGreater(abs(update.propagated_error["danger"]), 0.0)
+        self.assertGreater(update.error_precision["food"], 0.80)
+        self.assertGreater(update.kalman_gain["food"], 0.0)
+
+    def test_small_prediction_error_is_locally_absorbed(self) -> None:
+        state = InteroceptiveBeliefState()
+        update = state.posterior_update(
+            incoming_observation={
+                "food": 0.51,
+                "danger": 0.31,
+                "novelty": 0.50,
+                "shelter": 0.40,
+                "temperature": 0.50,
+                "social": 0.30,
+            },
+            top_down_prediction={
+                "food": 0.50,
+                "danger": 0.30,
+                "novelty": 0.50,
+                "shelter": 0.40,
+                "temperature": 0.50,
+                "social": 0.30,
+            },
+        )
+
+        self.assertFalse(update.digestion_exceeded)
+        self.assertEqual(update.propagated_error["food"], 0.0)
+        self.assertEqual(update.propagated_error["danger"], 0.0)
+
+    def test_runtime_accepts_predictive_profile_override(self) -> None:
+        runtime = SegmentRuntime.load_or_create(
+            seed=17,
+            reset=True,
+            predictive_hyperparameters=predictive_coding_profile("hair_trigger"),
+            reset_predictive_precisions=True,
+        )
+
+        self.assertAlmostEqual(
+            runtime.agent.interoceptive_layer.belief_state.digestion_threshold,
+            0.03,
+        )
+        self.assertAlmostEqual(
+            runtime.agent.world_model.sensorimotor_layer.belief_state.base_error_precision,
+            0.90,
+        )
+        self.assertAlmostEqual(
+            runtime.agent.strategic_layer.belief_state.initial_precision,
+            0.98,
+        )
+
+    def test_strategic_dispatch_uses_belief_state_fast_weights(self) -> None:
+        layer = StrategicLayer()
+        drives = DriveSystem()
+        layer.belief_state.top_down_mix = 0.0
+
+        priors, prediction = layer.dispatch_prediction(
+            energy=0.80,
+            stress=0.20,
+            fatigue=0.10,
+            temperature=0.50,
+            dopamine=0.10,
+            drive_system=drives,
+        )
+
+        self.assertEqual(prediction, layer.belief_state.beliefs)
+
+        layer.belief_state.top_down_mix = 1.0
+        priors, prediction = layer.dispatch_prediction(
+            energy=0.80,
+            stress=0.20,
+            fatigue=0.10,
+            temperature=0.50,
+            dopamine=0.10,
+            drive_system=drives,
+        )
+
+        self.assertEqual(prediction, priors)
+
+    def test_perceive_exposes_explicit_hierarchical_signals(self) -> None:
+        agent = SegmentAgent()
+        observation = Observation(
+            food=0.92,
+            danger=0.08,
+            novelty=0.64,
+            shelter=0.51,
+            temperature=0.47,
+            social=0.35,
+        )
+
+        _, prediction, _, _, hierarchy = agent.perceive(observation)
+
+        self.assertEqual(prediction, hierarchy.interoceptive_prediction)
+        self.assertEqual(
+            hierarchy.interoceptive_prediction,
+            hierarchy.interoceptive_update.prediction,
+        )
+        self.assertEqual(
+            hierarchy.sensorimotor_observation,
+            compose_upstream_observation(
+                hierarchy.sensorimotor_prediction,
+                hierarchy.interoceptive_update.propagated_error,
+            ),
+        )
+        self.assertEqual(
+            hierarchy.strategic_observation,
+            compose_upstream_observation(
+                hierarchy.strategic_prediction,
+                hierarchy.sensorimotor_update.propagated_error,
+            ),
         )
 
 

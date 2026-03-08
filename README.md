@@ -90,6 +90,24 @@ Write the structured trace to an explicit path:
 py -3.11 E:\workspace\segments\main.py --cycles 20 --trace-path E:\workspace\segments\data\segment_trace.jsonl
 ```
 
+Run with a named predictive-coding precision schedule:
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20 --precision-profile hair_trigger --reset-state
+```
+
+Override the per-layer precision and digestion hyperparameters from JSON:
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20 --predictive-config E:\workspace\segments\data\predictive_config.example.json --reset-state
+```
+
+When resuming from an existing snapshot, also reset the dynamic fast-weight precisions back to the selected hyperparameter defaults:
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20 --precision-profile high_precision --reset-predictive-precisions
+```
+
 Optional OpenAI-compatible inner speech support:
 
 ```powershell
@@ -152,4 +170,26 @@ Current acceptance profiles:
 
 - `m0`: stable baseline gate for push/PR validation.
 - `nightly`: stricter diversity gate for scheduled or manually triggered long-run monitoring.
+
+## Precision Schedule Comparison
+
+Compare built-in predictive-coding profiles on the same seed and inspect how much residual error each layer propagates upward:
+
+```powershell
+py -3.11 E:\workspace\segments\scripts\compare_precision_profiles.py --cycles 32
+```
+
+Append a custom JSON hyperparameter set to the comparison:
+
+```powershell
+py -3.11 E:\workspace\segments\scripts\compare_precision_profiles.py --cycles 32 --custom-config E:\workspace\segments\data\predictive_config.example.json --custom-label tuned
+```
+
+The comparison script reports, for each profile:
+
+- average free energy after each cycle,
+- action entropy and dominant-action share,
+- per-layer average precision,
+- per-layer average residual and propagated error,
+- per-layer propagation rate (how often a layer fails to fully digest bottom-up prediction error).
 

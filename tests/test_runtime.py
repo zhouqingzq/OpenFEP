@@ -108,6 +108,14 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
             ]
             self.assertEqual(len(trace_records), 3)
             self.assertEqual(trace_records[-1]["running_metrics"]["cycles_completed"], 3)
+            hierarchy = trace_records[-1]["hierarchy"]
+            self.assertIn("strategic_prediction", hierarchy)
+            self.assertIn("sensorimotor_prediction", hierarchy)
+            self.assertIn("interoceptive_update", hierarchy)
+            self.assertIn(
+                "propagated_error",
+                hierarchy["interoceptive_update"],
+            )
 
             reloaded = SegmentRuntime.load_or_create(
                 state_path=state_path,

@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 import sys
 
+from segmentum.predictive_coding import (
+    PredictiveCodingHyperparameters,
+    predictive_coding_profile,
+    predictive_coding_profile_names,
+)
 from segmentum.runtime import SegmentRuntime
 
 
@@ -59,6 +65,23 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Suppress per-cycle prototype logs and print only the final summary.",
     )
+    parser.add_argument(
+        "--precision-profile",
+        choices=predictive_coding_profile_names(),
+        default=os.getenv("SEGMENTUM_PRECISION_PROFILE", "balanced"),
+        help="Named predictive-coding hyperparameter profile.",
+    )
+    parser.add_argument(
+        "--predictive-config",
+        type=Path,
+        default=None,
+        help="Optional JSON file overriding layer precision and digestion hyperparameters.",
+    )
+    parser.add_argument(
+        "--reset-predictive-precisions",
+        action="store_true",
+        help="When loading a snapshot, reset dynamic precisions to the chosen profile/config defaults.",
+    )
     return parser
 
 
@@ -67,11 +90,20 @@ def main() -> None:
         raise SystemExit("Project Segmentum requires Python 3.11+.")
 
     args = _build_parser().parse_args()
+    predictive_hyperparameters = predictive_coding_profile(args.precision_profile)
+    if args.predictive_config is not None:
+        payload = json.loads(args.predictive_config.read_text(encoding="utf-8"))
+        predictive_hyperparameters = PredictiveCodingHyperparameters.from_dict(
+            payload,
+            default=predictive_hyperparameters,
+        )
     runtime = SegmentRuntime.load_or_create(
         state_path=args.state_path,
         trace_path=args.trace_path,
         seed=args.seed,
         reset=args.reset_state,
+        predictive_hyperparameters=predictive_hyperparameters,
+        reset_predictive_precisions=args.reset_predictive_precisions,
     )
     runtime.run(
         cycles=args.cycles,

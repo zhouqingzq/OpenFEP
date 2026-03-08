@@ -1,0 +1,32 @@
+{
+  "interoceptive": {
+    "initial_precision": 0.55,
+    "top_down_mix": 0.7,
+    "base_error_precision": 0.95,
+    "error_precision_scale": 1.6,
+    "min_precision": 0.05,
+    "max_precision": 3.0,
+    "digestion_threshold": 0.04,
+    "precision_decay": 0.01
+  },
+  "sensorimotor": {
+    "initial_precision": 0.8,
+    "top_down_mix": 0.56,
+    "base_error_precision": 0.8,
+    "error_precision_scale": 1.25,
+    "min_precision": 0.05,
+    "max_precision": 3.0,
+    "digestion_threshold": 0.08,
+    "precision_decay": 0.02
+  },
+  "strategic": {
+    "initial_precision": 1.0,
+    "top_down_mix": 0.36,
+    "base_error_precision": 0.65,
+    "error_precision_scale": 1.0,
+    "min_precision": 0.05,
+    "max_precision": 3.0,
+    "digestion_threshold": 0.12,
+    "precision_decay": 0.03
+  }
+}

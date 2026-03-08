@@ -14,17 +14,27 @@ from .interoception import ProcessInteroceptor
 from .llm import InnerSpeechEngine, build_inner_speech_engine
 from .logging_utils import ConsciousnessLogger
 from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, quarantine_snapshot
+from .predictive_coding import PredictiveCodingHyperparameters
 from .state import AgentState, PolicyTendency, TickInput
 from .tracing import JsonlTraceWriter, derive_trace_path
 from .types import InterventionScore, SleepSummary
 
 
-STATE_VERSION = "0.2"
-SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.1"}
+STATE_VERSION = "0.3"
+SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.2", "0.1"}
 
 
 def format_state(values: dict[str, float]) -> str:
     return ", ".join(f"{key}={value:.2f}" for key, value in values.items())
+
+
+def format_update_summary(label: str, update) -> str:
+    return (
+        f"{label} raw={update.mean_abs_raw_error():.3f} "
+        f"weighted={update.mean_abs_weighted_error():.3f} "
+        f"propagated={update.mean_abs_propagated_error():.3f} "
+        f"digested={not update.digestion_exceeded}"
+    )
 
 
 def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
@@ -70,6 +80,8 @@ class SegmentRuntime:
         trace_path: str | Path | None = None,
         seed: int = 17,
         reset: bool = False,
+        predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
+        reset_predictive_precisions: bool = False,
     ) -> SegmentRuntime:
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
@@ -80,7 +92,10 @@ class SegmentRuntime:
         if not path or reset or not path.exists():
             world = SimulatedWorld(seed=seed)
             return cls(
-                agent=SegmentAgent(rng=world.rng),
+                agent=SegmentAgent(
+                    rng=world.rng,
+                    predictive_hyperparameters=predictive_hyperparameters,
+                ),
                 world=world,
                 state_path=path,
                 trace_path=resolved_trace_path,
@@ -106,7 +121,12 @@ class SegmentRuntime:
             )
 
         world = SimulatedWorld.from_dict(payload.get("world"))
-        agent = SegmentAgent.from_dict(payload.get("agent"), rng=world.rng)
+        agent = SegmentAgent.from_dict(
+            payload.get("agent"),
+            rng=world.rng,
+            predictive_hyperparameters=predictive_hyperparameters,
+            reset_predictive_precisions=reset_predictive_precisions,
+        )
         metrics = RunMetrics.from_dict(payload.get("metrics"))
         host_state = AgentState.from_dict(payload.get("host_state"))
         return cls(
@@ -189,7 +209,15 @@ class SegmentRuntime:
         summary = self.metrics.summary()
         if verbose:
             print("-" * 64)
-            print("Final beliefs:", format_state(self.agent.world_model.beliefs))
+            print("Final strategic beliefs:", format_state(self.agent.strategic_layer.beliefs))
+            print(
+                "Final sensorimotor beliefs:",
+                format_state(self.agent.world_model.beliefs),
+            )
+            print(
+                "Final interoceptive beliefs:",
+                format_state(self.agent.interoceptive_layer.belief_state.beliefs),
+            )
             print(f"Semantic summaries stored: {len(self.agent.semantic_memory)}")
             print(f"Long-term memory episodes: {len(self.agent.long_term_memory.episodes)}")
             print("Metrics:", json.dumps(summary, ensure_ascii=True, sort_keys=True))
@@ -215,7 +243,9 @@ class SegmentRuntime:
     ) -> dict[str, object]:
         self.agent.cycle += 1
         observation = self.world.observe()
-        observed, prediction, errors, free_energy_before = self.agent.perceive(observation)
+        observed, prediction, errors, free_energy_before, hierarchy = self.agent.perceive(
+            observation
+        )
 
         similar = self.agent.long_term_memory.retrieve_similar(
             observed,
@@ -236,7 +266,7 @@ class SegmentRuntime:
             self.agent.apply_action_feedback(direct_feedback)
 
         validation_observation = self.world.observe()
-        _, _, _, free_energy_after = self.agent.perceive(validation_observation)
+        _, _, _, free_energy_after, _ = self.agent.perceive(validation_observation)
         self.agent.integrate_outcome(
             choice=choice,
             observed=observed,
@@ -269,6 +299,7 @@ class SegmentRuntime:
                 observed=observed,
                 prediction=prediction,
                 errors=errors,
+                hierarchy=hierarchy,
                 diagnostics=diagnostics.ranked_options,
                 choice=choice,
                 expected_fe=expected_fe,
@@ -289,6 +320,7 @@ class SegmentRuntime:
                 observed=observed,
                 prediction=prediction,
                 errors=errors,
+                hierarchy=hierarchy,
                 diagnostics=diagnostics.ranked_options,
                 choice=choice,
                 expected_fe=expected_fe,
@@ -398,6 +430,7 @@ class SegmentRuntime:
         observed: dict[str, float],
         prediction: dict[str, float],
         errors: dict[str, float],
+        hierarchy,
         diagnostics: list[InterventionScore],
         choice: str,
         expected_fe: float,
@@ -442,6 +475,7 @@ class SegmentRuntime:
             "observation": observed,
             "prediction": prediction,
             "errors": errors,
+            "hierarchy": asdict(hierarchy),
             "decision_ranking": [
                 {
                     "choice": option.choice,
@@ -475,6 +509,7 @@ class SegmentRuntime:
         observed: dict[str, float],
         prediction: dict[str, float],
         errors: dict[str, float],
+        hierarchy,
         diagnostics: list[InterventionScore],
         choice: str,
         expected_fe: float,
@@ -492,6 +527,58 @@ class SegmentRuntime:
         print(f"  sensed      {format_state(observed)}")
         print(f"  predicted   {format_state(prediction)}")
         print(f"  error       {format_state(errors)}")
+        print(
+            "  top-down    "
+            f"prior->{format_state(hierarchy.strategic_prior)}"
+        )
+        print(
+            "  top-down    "
+            f"strategic->{format_state(hierarchy.strategic_prediction)}"
+        )
+        print(
+            "  top-down    "
+            f"sensorimotor->{format_state(hierarchy.sensorimotor_prediction)}"
+        )
+        print(
+            "  top-down    "
+            f"interoceptive->{format_state(hierarchy.interoceptive_prediction)}"
+        )
+        print(
+            "  bottom-up   "
+            f"intero obs={format_state(hierarchy.observation)}"
+        )
+        print(
+            "  bottom-up   "
+            f"{format_update_summary('intero', hierarchy.interoceptive_update)}"
+        )
+        print(
+            "  bottom-up   "
+            f"intero->sensor signal={format_state(hierarchy.sensorimotor_observation)}"
+        )
+        print(
+            "  bottom-up   "
+            f"{format_update_summary('sensor', hierarchy.sensorimotor_update)}"
+        )
+        print(
+            "  bottom-up   "
+            f"sensor->strategic signal={format_state(hierarchy.strategic_observation)}"
+        )
+        print(
+            "  bottom-up   "
+            f"{format_update_summary('strategic', hierarchy.strategic_update)}"
+        )
+        print(
+            "  precision   "
+            f"intero={format_state(hierarchy.interoceptive_update.error_precision)}"
+        )
+        print(
+            "  precision   "
+            f"sensor={format_state(hierarchy.sensorimotor_update.error_precision)}"
+        )
+        print(
+            "  precision   "
+            f"strategic={format_state(hierarchy.strategic_update.error_precision)}"
+        )
         print(f"  scoring     {format_action_scores(diagnostics)}")
 
         drive_str = ", ".join(

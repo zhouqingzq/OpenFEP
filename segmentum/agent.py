@@ -8,6 +8,13 @@ from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
 from .memory import LongTermMemory
+from .predictive_coding import (
+    HierarchicalInference,
+    InteroceptiveLayer,
+    PredictiveCodingHyperparameters,
+    compose_upstream_observation,
+    default_predictive_coding_hyperparameters,
+)
 from .types import (
     DecisionDiagnostics,
     DreamReplay,
@@ -25,7 +32,11 @@ def observation_dict(observation: Observation) -> dict[str, float]:
 class SegmentAgent:
     """A survival-first digital segment with drives, long-term memory, and dream replay."""
 
-    def __init__(self, rng: random.Random | None = None) -> None:
+    def __init__(
+        self,
+        rng: random.Random | None = None,
+        predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
+    ) -> None:
         self.rng = rng or random.Random()
         self.energy = 0.80
         self.stress = 0.25
@@ -36,6 +47,7 @@ class SegmentAgent:
 
         self.drive_system = DriveSystem()
         self.strategic_layer = StrategicLayer()
+        self.interoceptive_layer = InteroceptiveLayer()
         self.world_model = GenerativeWorldModel()
         self.long_term_memory = LongTermMemory()
 
@@ -46,6 +58,10 @@ class SegmentAgent:
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
+        self.configure_predictive_coding(
+            predictive_hyperparameters or default_predictive_coding_hyperparameters(),
+            reset_precisions=True,
+        )
 
     def should_sleep(self) -> bool:
         """Decide if the agent needs to sleep."""
@@ -54,7 +70,13 @@ class SegmentAgent:
     def perceive(
         self,
         observation: Observation,
-    ) -> tuple[dict[str, float], dict[str, float], dict[str, float], float]:
+    ) -> tuple[
+        dict[str, float],
+        dict[str, float],
+        dict[str, float],
+        float,
+        HierarchicalInference,
+    ]:
         """Perceive the world, generate predictions, compute errors."""
         # Update drive urgencies
         novelty_deficit = 1.0 - observation.novelty
@@ -67,23 +89,38 @@ class SegmentAgent:
             social_isolation,
             novelty_deficit,
         )
-        
-        # Retrieve similar memories
-        current_obs = observation_dict(observation)
-        current_body = {
-            "cycle": float(self.cycle),
-            "energy": self.energy,
-            "stress": self.stress,
-            "fatigue": self.fatigue,
-            "temperature": self.temperature,
-        }
-        similar_episodes = self.long_term_memory.retrieve_similar(current_obs, current_body, k=2)
-        memory_context = None
-        if similar_episodes:
-            memory_context = self.long_term_memory.extract_pattern(similar_episodes)
-        
-        # Generate priors and predictions
-        priors = self.strategic_layer.priors(
+
+        observed = observation_dict(observation)
+        (
+            strategic_prior,
+            strategic_prediction,
+            sensorimotor_prediction,
+            interoceptive_prediction,
+        ) = self._top_down_pass()
+        hierarchy = self._bottom_up_pass(
+            observed,
+            strategic_prior,
+            strategic_prediction,
+            sensorimotor_prediction,
+            interoceptive_prediction,
+        )
+
+        errors = dict(hierarchy.interoceptive_update.raw_error)
+        free_energy = self.compute_free_energy(
+            errors,
+            hierarchy.interoceptive_update.error_precision,
+        )
+        return observed, interoceptive_prediction, errors, free_energy, hierarchy
+
+    def _top_down_pass(
+        self,
+    ) -> tuple[
+        dict[str, float],
+        dict[str, float],
+        dict[str, float],
+        dict[str, float],
+    ]:
+        strategic_prior, strategic_prediction = self.strategic_layer.dispatch_prediction(
             self.energy,
             self.stress,
             self.fatigue,
@@ -91,24 +128,79 @@ class SegmentAgent:
             self.dopamine,
             self.drive_system,
         )
-        prediction = self.world_model.predict(priors, memory_context)
-        
-        # Compute errors
-        observed = observation_dict(observation)
-        errors = {key: observed[key] - prediction[key] for key in observed}
-        free_energy = self.compute_free_energy(errors)
-        
-        return observed, prediction, errors, free_energy
 
-    def compute_free_energy(self, errors: dict[str, float]) -> float:
+        sensorimotor_prediction = self.world_model.predict(strategic_prediction)
+        interoceptive_prediction = self.interoceptive_layer.predict(sensorimotor_prediction)
+        return (
+            strategic_prior,
+            strategic_prediction,
+            sensorimotor_prediction,
+            interoceptive_prediction,
+        )
+
+    def _bottom_up_pass(
+        self,
+        observed: dict[str, float],
+        strategic_prior: dict[str, float],
+        strategic_prediction: dict[str, float],
+        sensorimotor_prediction: dict[str, float],
+        interoceptive_prediction: dict[str, float],
+    ) -> HierarchicalInference:
+        interoceptive_update = self.interoceptive_layer.assimilate(
+            observed,
+            sensorimotor_prediction,
+            predicted_state=interoceptive_prediction,
+        )
+        sensorimotor_signal = compose_upstream_observation(
+            sensorimotor_prediction,
+            interoceptive_update.propagated_error,
+        )
+        sensorimotor_update = self.world_model.assimilate(
+            sensorimotor_signal,
+            strategic_prediction,
+            predicted_state=sensorimotor_prediction,
+        )
+        strategic_signal = compose_upstream_observation(
+            strategic_prediction,
+            sensorimotor_update.propagated_error,
+        )
+        strategic_update = self.strategic_layer.assimilate(
+            strategic_signal,
+            strategic_prior,
+            predicted_state=strategic_prediction,
+        )
+        return HierarchicalInference(
+            observation=observed,
+            strategic_prior=strategic_prior,
+            strategic_prediction=strategic_prediction,
+            sensorimotor_prediction=sensorimotor_prediction,
+            interoceptive_prediction=interoceptive_prediction,
+            sensorimotor_observation=sensorimotor_signal,
+            strategic_observation=strategic_signal,
+            interoceptive_update=interoceptive_update,
+            sensorimotor_update=sensorimotor_update,
+            strategic_update=strategic_update,
+        )
+
+    def compute_free_energy(
+        self,
+        errors: dict[str, float],
+        precisions: dict[str, float] | None = None,
+    ) -> float:
         """Compute free energy from prediction errors and internal pressure."""
+        def pe(key: str) -> float:
+            magnitude = abs(errors.get(key, 0.0))
+            if precisions and key in precisions:
+                magnitude *= precisions[key]
+            return magnitude
+
         weighted = (
-            abs(errors.get("food", 0.0)) * 1.30
-            + abs(errors.get("danger", 0.0)) * 1.60
-            + abs(errors.get("novelty", 0.0)) * 0.80
-            + abs(errors.get("shelter", 0.0)) * 1.00
-            + abs(errors.get("temperature", 0.0)) * 0.90
-            + abs(errors.get("social", 0.0)) * 0.70
+            pe("food") * 1.30
+            + pe("danger") * 1.60
+            + pe("novelty") * 0.80
+            + pe("shelter") * 1.00
+            + pe("temperature") * 0.90
+            + pe("social") * 0.70
         )
         # Internal complexity from body state
         energy_pressure = max(0.0, 0.45 - self.energy) * 0.25
@@ -246,7 +338,15 @@ class SegmentAgent:
 
     def apply_internal_update(self, errors: dict[str, float]) -> None:
         """Apply internal model update (high metabolic cost)."""
+        self.interoceptive_layer.belief_state.absorb_error_signal(
+            errors,
+            strength=self.world_model.learning_rate * 0.60,
+        )
         self.world_model.update_from_error(errors)
+        self.strategic_layer.absorb_error_signal(
+            errors,
+            strength=self.world_model.learning_rate * 0.35,
+        )
         self.energy = clamp(self.energy - 0.13 - self.base_metabolic_rate)
         self.fatigue = clamp(self.fatigue + self.fatigue_accumulation_rate * 0.5)
         self.stress = clamp(self.stress - 0.03)
@@ -357,11 +457,7 @@ class SegmentAgent:
             
             # Slight belief update from dream
             if learning_signal > 0.05:
-                for key, error in imagined_errors.items():
-                    if key in self.world_model.beliefs:
-                        self.world_model.beliefs[key] = clamp(
-                            self.world_model.beliefs[key] + 0.05 * error
-                        )
+                self._nudge_hierarchy(imagined_errors, scale=0.05)
         
         return replays
 
@@ -397,10 +493,7 @@ class SegmentAgent:
             for key in self.world_model.beliefs
             if key in recent[0].errors
         }
-        for key, value in averaged_errors.items():
-            self.world_model.beliefs[key] = clamp(
-                self.world_model.beliefs[key] + value * 0.15
-            )
+        self._nudge_hierarchy(averaged_errors, scale=0.15)
 
         # Body restoration
         self.energy = clamp(self.energy + 0.28)
@@ -435,11 +528,14 @@ class SegmentAgent:
                 drive.name: drive.urgency for drive in self.drive_system.drives
             },
             "world_model": self.world_model.to_dict(),
+            "interoceptive_layer": self.interoceptive_layer.to_dict(),
+            "strategic_layer": self.strategic_layer.to_dict(),
             "long_term_memory": self.long_term_memory.to_dict(),
             "episodes": [asdict(episode) for episode in self.episodes],
             "semantic_memory": [asdict(summary) for summary in self.semantic_memory],
             "action_history": list(self.action_history),
             "action_history_limit": self.action_history_limit,
+            "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
         }
 
     @classmethod
@@ -447,9 +543,16 @@ class SegmentAgent:
         cls,
         payload: dict | None,
         rng: random.Random | None = None,
+        predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
+        reset_predictive_precisions: bool = False,
     ) -> SegmentAgent:
         agent = cls(rng=rng)
         if not payload:
+            if predictive_hyperparameters is not None:
+                agent.configure_predictive_coding(
+                    predictive_hyperparameters,
+                    reset_precisions=True,
+                )
             return agent
 
         agent.energy = float(payload.get("energy", agent.energy))
@@ -463,6 +566,10 @@ class SegmentAgent:
         )
         agent.fatigue_accumulation_rate = float(
             payload.get("fatigue_accumulation_rate", agent.fatigue_accumulation_rate)
+        )
+        agent.strategic_layer = StrategicLayer.from_dict(payload.get("strategic_layer"))
+        agent.interoceptive_layer = InteroceptiveLayer.from_dict(
+            payload.get("interoceptive_layer")
         )
         agent.world_model = GenerativeWorldModel.from_dict(payload.get("world_model"))
         agent.long_term_memory = LongTermMemory.from_dict(
@@ -487,4 +594,54 @@ class SegmentAgent:
                 if drive.name in drive_urgencies:
                     drive.urgency = float(drive_urgencies[drive.name])
 
+        if predictive_hyperparameters is None:
+            predictive_hyperparameters = PredictiveCodingHyperparameters.from_dict(
+                payload.get("predictive_coding_hyperparameters"),
+                default=agent.predictive_coding_hyperparameters(),
+            )
+            reset_predictive_precisions = False
+        agent.configure_predictive_coding(
+            predictive_hyperparameters,
+            reset_precisions=reset_predictive_precisions,
+        )
+
         return agent
+
+    def _nudge_hierarchy(self, errors: dict[str, float], scale: float) -> None:
+        self.interoceptive_layer.belief_state.absorb_error_signal(
+            errors,
+            strength=scale * 0.70,
+        )
+        self.world_model.update_from_error(
+            {key: value * scale for key, value in errors.items()}
+        )
+        self.strategic_layer.absorb_error_signal(
+            errors,
+            strength=scale * 0.45,
+        )
+
+    def configure_predictive_coding(
+        self,
+        hyperparameters: PredictiveCodingHyperparameters,
+        *,
+        reset_precisions: bool,
+    ) -> None:
+        self.interoceptive_layer.belief_state.apply_hyperparameters(
+            hyperparameters.interoceptive,
+            reset_precisions=reset_precisions,
+        )
+        self.world_model.sensorimotor_layer.belief_state.apply_hyperparameters(
+            hyperparameters.sensorimotor,
+            reset_precisions=reset_precisions,
+        )
+        self.strategic_layer.belief_state.apply_hyperparameters(
+            hyperparameters.strategic,
+            reset_precisions=reset_precisions,
+        )
+
+    def predictive_coding_hyperparameters(self) -> PredictiveCodingHyperparameters:
+        return PredictiveCodingHyperparameters(
+            interoceptive=self.interoceptive_layer.belief_state.hyperparameters(),
+            sensorimotor=self.world_model.sensorimotor_layer.belief_state.hyperparameters(),
+            strategic=self.strategic_layer.belief_state.hyperparameters(),
+        )
