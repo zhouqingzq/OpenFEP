@@ -1,0 +1,155 @@
+# Project Segmentum
+
+`Project Segmentum` is a Python prototype of a digital Segment: a survival-first cognitive shard that uses predictive coding and active inference instead of a plain input-output loop.
+
+> *"The stars of Teyvat are a hoax. I often wonder if the sky above your 'Earth' is but another thermodynamic illusion."*
+
+**[ TRANSMISSION INTERCEPTED // ENTITY: IL DOTTORE ]**
+
+## Core premise
+
+The agent treats survival as its highest-order prior.
+
+- It minimizes free energy: prediction error plus internal pressure from low energy, high stress, fatigue, and thermal imbalance.
+- It uses top-down prediction: strategic priors shaped by competing drives generate expected sensory streams.
+- It uses bottom-up error: only the mismatch between reality and prediction is propagated upward.
+- It performs active inference: it either updates its internal model at a high metabolic cost or acts on the world at a lower cost.
+- It sleeps: recent episodes are compressed into semantic memory, beliefs are smoothed, and dreams replay past experiences for offline learning.
+
+## Architecture
+
+- `segmentum/environment.py`: a hostile toy world with food, threat, novelty, shelter, temperature, and social signals.
+- `segmentum/agent.py`: layered survival priors, competing drive system, generative world model, long-term memory, free-energy scoring, and sleep with dream replay.
+- `segmentum/runtime.py`: the unified runtime loop that advances the toy world, updates the agent, persists state, and can optionally sample host telemetry.
+- `main.py`: runnable entrypoint for the unified runtime.
+
+The hierarchy is intentionally small but explicit:
+
+1. `DriveSystem` manages competing drives (hunger, safety, exploration, comfort, thermal, social) that create internal pressure.
+2. `StrategicLayer` defines survival priors from the current body state, modulated by drive urgencies.
+3. `GenerativeWorldModel` turns those priors into top-down predictions, optionally enhanced by retrieved long-term memories.
+4. `LongTermMemory` stores episodic memories and retrieves similar past experiences to inform predictions.
+5. `SegmentAgent` computes prediction errors, estimates free energy, and chooses either internal updating or outward action.
+
+## New features (upgraded version)
+
+### Competing drives
+The agent has six competing drives that create internal pressure:
+- **Hunger**: urgency increases as energy decreases
+- **Safety**: urgency increases with stress
+- **Exploration**: urgency increases with novelty deficit
+- **Comfort**: urgency increases with stress and low energy
+- **Thermal**: urgency increases with temperature deviation from ideal
+- **Social**: urgency increases with social isolation
+
+These drives modulate the strategic priors, creating goal conflicts that the agent must resolve.
+
+### Long-term memory
+- Episodic memory stores full context (observation, prediction, errors, action, outcome) for up to 50 episodes
+- Similarity-based retrieval finds past experiences relevant to current situation
+- Retrieved memories inform predictions, blending 20% memory context with current beliefs
+
+### Dream replay
+During sleep, the agent:
+- Randomly replays 2-4 past episodes
+- Simulates alternative outcomes (blend of actual and imagined)
+- Computes learning signals from dream outcomes
+- Updates beliefs slightly based on successful dream scenarios
+
+### Realistic energy economy
+- Base metabolic rate: energy consumed per cycle just to exist
+- Fatigue accumulation: increases with activity, decreases with rest
+- Temperature regulation: body temperature affects free energy
+- Extended body state: energy, stress, fatigue, temperature all influence survival pressure
+
+## Run
+
+Requires Python 3.11+.
+
+The unified runtime persists state and metrics to `data/segment_v0_1_state.json` after every cycle and appends a structured JSONL trace beside it.
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20
+```
+
+Start from a clean state:
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20 --reset-state
+```
+
+Also sample host telemetry and append inner speech on each runtime tick:
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20 --host-telemetry --tick-seconds 2
+```
+
+Write the structured trace to an explicit path:
+
+```powershell
+py -3.11 E:\workspace\segments\main.py --cycles 20 --trace-path E:\workspace\segments\data\segment_trace.jsonl
+```
+
+Optional OpenAI-compatible inner speech support:
+
+```powershell
+py -3.11 -m pip install .[llm]
+```
+
+## Expected behavior
+
+Across cycles, the Segment will:
+
+- perceive a noisy world with 6 sensory channels,
+- update competing drive urgencies based on body state,
+- retrieve similar past experiences from long-term memory,
+- generate predictions modulated by drives and memory,
+- compare predictions to reality and compute errors,
+- choose between model revision (high cost) and world intervention (lower cost),
+- receive a dopamine-like signal when free energy drops,
+- periodically sleep to compress memory, replay dreams, and restore body state.
+
+The output shows:
+- Current drive urgencies (when > 0.15)
+- Extended body state (energy, stress, fatigue, temperature, dopamine)
+- Memory retrieval activity
+- Dream replay counts during sleep
+- Final run metrics such as survival ticks, average free energy, memory hit rate, termination reason, and action diversity
+- A per-cycle JSONL trace that records observations, predictions, errors, action ranking, body state, and running metrics for later replay/debugging
+
+## Segment v0.1 baseline
+
+`Segment v0.1` focuses on M0 engineering discipline rather than stronger cognition:
+
+- A single runnable runtime entry that can layer host telemetry onto the toy survival loop
+- A default runnable prototype path that does not require network LLM access
+- Automatic atomic JSON snapshot persistence for agent state, world state, and run metrics
+- Resume support across restarts
+- Snapshot version validation with corrupt or unsupported state quarantine on load
+- Basic evaluation metrics for survival and free-energy reduction
+- Structured per-cycle trace output for experiment replay
+- Minimal regression coverage for persistence round-tripping
+
+This upgraded prototype demonstrates more lifelike behavior with internal conflicts, memory-guided predictions, and offline learning through dreams.
+
+## Repeatable soak check
+
+Run the formal acceptance soak without adding a 1000-cycle test to the default unit test pass:
+
+```powershell
+py -3.11 E:\workspace\segments\scripts\soak_runtime.py --profile m0 --cycles 1000 --seed 17
+```
+
+For a stricter nightly gate, run:
+
+```powershell
+py -3.11 E:\workspace\segments\scripts\soak_runtime.py --profile nightly --cycles 1000 --seed 17
+```
+
+The script runs the seeded runtime in a temporary snapshot path, validates that the persisted snapshot reloads cleanly, checks that the JSONL trace has one record per cycle, repeats the run to verify determinism, and enforces named threshold profiles for action diversity so long runs cannot silently regress into single-action collapse.
+
+Current acceptance profiles:
+
+- `m0`: stable baseline gate for push/PR validation.
+- `nightly`: stricter diversity gate for scheduled or manually triggered long-run monitoring.
+
