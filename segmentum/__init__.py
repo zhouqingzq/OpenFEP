@@ -2,6 +2,28 @@
 
 from .daemon import HeartbeatDaemon, run_daemon
 from .runtime import SegmentRuntime
+from .self_model import (
+    BodySchema,
+    CapabilityModel,
+    ErrorClassifier,
+    ResourceState,
+    SelfModel,
+    ThreatModel,
+    build_default_self_model,
+)
 from .state import AgentState, Strategy
 
-__all__ = ["AgentState", "Strategy", "HeartbeatDaemon", "SegmentRuntime", "run_daemon"]
+__all__ = [
+    "AgentState",
+    "Strategy",
+    "HeartbeatDaemon",
+    "SegmentRuntime",
+    "run_daemon",
+    "BodySchema",
+    "CapabilityModel",
+    "ErrorClassifier",
+    "ResourceState",
+    "SelfModel",
+    "ThreatModel",
+    "build_default_self_model",
+]

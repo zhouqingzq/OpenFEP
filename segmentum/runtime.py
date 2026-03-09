@@ -15,6 +15,7 @@ from .llm import InnerSpeechEngine, build_inner_speech_engine
 from .logging_utils import ConsciousnessLogger
 from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, quarantine_snapshot
 from .predictive_coding import PredictiveCodingHyperparameters
+from .self_model import ClassificationResult, SelfModel, build_default_self_model
 from .state import AgentState, PolicyTendency, TickInput
 from .tracing import JsonlTraceWriter, derive_trace_path
 from .types import InterventionScore, SleepSummary
@@ -54,6 +55,7 @@ class SegmentRuntime:
         interoceptor: ProcessInteroceptor | None = None,
         inner_speech_engine: InnerSpeechEngine | None = None,
         consciousness_logger: ConsciousnessLogger | None = None,
+        self_model: SelfModel | None = None,
         state_path: str | Path | None = None,
         trace_path: str | Path | None = None,
         state_load_status: str = "fresh",
@@ -66,6 +68,7 @@ class SegmentRuntime:
         self.interoceptor = interoceptor or ProcessInteroceptor()
         self.inner_speech_engine = inner_speech_engine or build_inner_speech_engine()
         self.consciousness_logger = consciousness_logger or ConsciousnessLogger()
+        self.self_model = self_model or build_default_self_model()
         self.state_path = Path(state_path) if state_path else None
         resolved_trace_path = Path(trace_path) if trace_path else derive_trace_path(self.state_path)
         self.trace_writer = (
@@ -186,6 +189,12 @@ class SegmentRuntime:
                 raise
             except Exception as exc:
                 termination_reason = f"exception:{type(exc).__name__}"
+                self._record_error_event(
+                    exc,
+                    stage="runtime_step",
+                    verbose=verbose,
+                    cycle=self.agent.cycle,
+                )
                 self._warn(
                     f"runtime step failed at cycle {self.agent.cycle}: {exc}",
                     verbose=verbose,
@@ -389,6 +398,12 @@ class SegmentRuntime:
             raise
         except Exception as exc:
             self.metrics.telemetry_error_count += 1
+            self._record_error_event(
+                exc,
+                stage="host_telemetry",
+                verbose=verbose,
+                cycle=self.agent.cycle,
+            )
             self._warn(f"host telemetry step failed: {exc}", verbose=verbose)
             return None
 
@@ -397,6 +412,12 @@ class SegmentRuntime:
             self.save_snapshot()
         except Exception as exc:
             self.metrics.persistence_error_count += 1
+            self._record_error_event(
+                exc,
+                stage="snapshot_persistence",
+                verbose=verbose,
+                cycle=self.agent.cycle,
+            )
             self._warn(f"snapshot persistence failed: {exc}", verbose=verbose)
 
     def _write_trace_with_guard(
@@ -410,11 +431,76 @@ class SegmentRuntime:
             self.trace_writer.append(record)
         except Exception as exc:
             self.metrics.persistence_error_count += 1
+            self._record_error_event(
+                exc,
+                stage="trace_persistence",
+                verbose=verbose,
+                cycle=self.agent.cycle,
+            )
             self._warn(f"trace persistence failed: {exc}", verbose=verbose)
 
     def _warn(self, message: str, verbose: bool) -> None:
         if verbose:
             print(f"  warning     {message}")
+
+    def _sync_self_model_resource_state(self) -> None:
+        token_budget = max(1, self.self_model.body_schema.token_budget)
+        internal_energy = max(0.0, min(1.0, self.host_state.internal_energy))
+        self.self_model.resource_state.tokens_remaining = int(
+            round(internal_energy * token_budget)
+        )
+        self.self_model.resource_state.cpu_budget = max(
+            0.05,
+            1.0 - max(0.0, self.host_state.prediction_error),
+        )
+        self.self_model.resource_state.memory_free = max(
+            0.0,
+            1024.0 * (1.0 - max(0.0, self.host_state.surprise_load)),
+        )
+
+    def _record_error_event(
+        self,
+        exc: Exception,
+        *,
+        stage: str,
+        verbose: bool,
+        cycle: int,
+    ) -> ClassificationResult:
+        self._sync_self_model_resource_state()
+        result = self.self_model.inspect_event(exc)
+        self._emit_self_model_warning(result, stage=stage, verbose=verbose)
+        if self.trace_writer and stage != "trace_persistence":
+            try:
+                self.trace_writer.append(
+                    {
+                        "event": "error",
+                        "stage": stage,
+                        "cycle": cycle,
+                        "error_type": type(exc).__name__,
+                        "error_message": str(exc),
+                        "self_model": {
+                            "classification": result.classification,
+                            "surprise_source": result.surprise_source,
+                            "detected_threats": list(result.detected_threats),
+                            "resource_state": dict(result.resource_state),
+                        },
+                    }
+                )
+            except Exception:
+                pass
+        return result
+
+    def _emit_self_model_warning(
+        self,
+        result: ClassificationResult,
+        *,
+        stage: str,
+        verbose: bool,
+    ) -> None:
+        if not verbose:
+            return
+        for line in result.to_log_string().splitlines():
+            self._warn(f"{stage} {line}", verbose=verbose)
 
     def _snapshot_payload(self) -> dict[str, object]:
         return {

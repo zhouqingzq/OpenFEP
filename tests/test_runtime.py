@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import redirect_stdout
+import io
 import json
 import random
 import tempfile
@@ -45,6 +47,30 @@ class FailingWorld:
 
     def observe(self):  # noqa: ANN001
         raise RuntimeError("sensor failure")
+
+
+class HTTPTimeout(RuntimeError):
+    pass
+
+
+class TokenLimitExceeded(RuntimeError):
+    pass
+
+
+class ExternalFailureWorld:
+    def __init__(self) -> None:
+        self.rng = random.Random(17)
+
+    def observe(self):  # noqa: ANN001
+        raise HTTPTimeout("upstream website timed out")
+
+
+class InternalFailureWorld:
+    def __init__(self) -> None:
+        self.rng = random.Random(17)
+
+    def observe(self):  # noqa: ANN001
+        raise TokenLimitExceeded("local token budget exhausted")
 
 
 class SnapshotFailingRuntime(SegmentRuntime):
@@ -180,6 +206,52 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
 
         self.assertEqual(summary["cycles_completed"], 0)
         self.assertEqual(summary["termination_reason"], "exception:RuntimeError")
+
+    def test_runtime_logs_world_error_classification_for_external_failures(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            trace_path = Path(tmp_dir) / "segment_trace.jsonl"
+            runtime = SegmentRuntime.load_or_create(
+                seed=7,
+                reset=True,
+                trace_path=trace_path,
+            )
+            runtime.world = ExternalFailureWorld()
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                summary = runtime.run(cycles=1, verbose=True)
+
+            output = stdout.getvalue()
+            self.assertEqual(summary["termination_reason"], "exception:HTTPTimeout")
+            self.assertIn("classification=world_error", output)
+            self.assertIn("surprise_source=exteroceptive", output)
+
+            trace_records = [
+                json.loads(line)
+                for line in trace_path.read_text(encoding="utf-8").splitlines()
+            ]
+            error_record = trace_records[-1]
+            self.assertEqual(error_record["event"], "error")
+            self.assertEqual(error_record["error_type"], "HTTPTimeout")
+            self.assertEqual(
+                error_record["self_model"]["classification"],
+                "world_error",
+            )
+
+    def test_runtime_logs_self_error_classification_for_internal_failures(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=7, reset=True)
+        runtime.world = InternalFailureWorld()
+        runtime.host_state.internal_energy = 0.0
+
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            summary = runtime.run(cycles=1, verbose=True)
+
+        output = stdout.getvalue()
+        self.assertEqual(summary["termination_reason"], "exception:TokenLimitExceeded")
+        self.assertIn("classification=self_error", output)
+        self.assertIn("surprise_source=interoceptive", output)
+        self.assertIn("detected_threats=['token_exhaustion']", output)
 
     def test_runtime_counts_telemetry_failures_without_stopping_loop(self) -> None:
         runtime = SegmentRuntime.load_or_create(seed=7, reset=True)
