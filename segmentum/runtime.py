@@ -13,16 +13,17 @@ from .fep import advance_state, infer_policy
 from .interoception import ProcessInteroceptor
 from .llm import InnerSpeechEngine, build_inner_speech_engine
 from .logging_utils import ConsciousnessLogger
+from .memory import MemoryDecision
 from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, quarantine_snapshot
 from .predictive_coding import PredictiveCodingHyperparameters
 from .self_model import ClassificationResult, SelfModel, build_default_self_model
 from .state import AgentState, PolicyTendency, TickInput
 from .tracing import JsonlTraceWriter, derive_trace_path
-from .types import InterventionScore, SleepSummary
+from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 
 
-STATE_VERSION = "0.3"
-SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.2", "0.1"}
+STATE_VERSION = "0.4"
+SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.3", "0.2", "0.1"}
 
 
 def format_state(values: dict[str, float]) -> str:
@@ -40,7 +41,12 @@ def format_update_summary(label: str, update) -> str:
 
 def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
     return " | ".join(
-        f"{option.choice} fe={option.expected_free_energy:.3f} cost={option.cost:.2f}"
+        f"{option.choice} score={option.policy_score:.3f} "
+        f"efe={option.expected_free_energy:.3f} "
+        f"risk={option.risk:.3f} "
+        f"mem={option.memory_bias:.3f} "
+        f"pat={option.pattern_bias:.3f} "
+        f"id={option.identity_bias:.3f}"
         for option in choice_ranking
     )
 
@@ -252,31 +258,25 @@ class SegmentRuntime:
     ) -> dict[str, object]:
         self.agent.cycle += 1
         observation = self.world.observe()
-        observed, prediction, errors, free_energy_before, hierarchy = self.agent.perceive(
-            observation
-        )
-
-        similar = self.agent.long_term_memory.retrieve_similar(
-            observed,
-            self._body_state(),
-            k=1,
-        )
-        memory_hits = len(similar)
-
-        diagnostics = self.agent.choose_intervention(prediction, errors)
+        decision = self.agent.decision_cycle(observation)
+        observed = decision["observed"]
+        prediction = decision["prediction"]
+        errors = decision["errors"]
+        free_energy_before = float(decision["free_energy_before"])
+        hierarchy = decision["hierarchy"]
+        diagnostics = decision["diagnostics"]
+        assert isinstance(diagnostics, DecisionDiagnostics)
+        memory_hits = len(diagnostics.retrieved_memories)
         choice = diagnostics.chosen.choice
         expected_fe = diagnostics.chosen.expected_free_energy
         choice_cost = diagnostics.chosen.cost
 
-        if choice == "internal_update":
-            self.agent.apply_internal_update(errors)
-        else:
-            direct_feedback = self.world.apply_action(choice)
-            self.agent.apply_action_feedback(direct_feedback)
+        direct_feedback = self.world.apply_action(choice)
+        self.agent.apply_action_feedback(direct_feedback)
 
         validation_observation = self.world.observe()
         _, _, _, free_energy_after, _ = self.agent.perceive(validation_observation)
-        self.agent.integrate_outcome(
+        memory_decision = self.agent.integrate_outcome(
             choice=choice,
             observed=observed,
             prediction=prediction,
@@ -309,13 +309,14 @@ class SegmentRuntime:
                 prediction=prediction,
                 errors=errors,
                 hierarchy=hierarchy,
-                diagnostics=diagnostics.ranked_options,
+                diagnostics=diagnostics,
                 choice=choice,
                 expected_fe=expected_fe,
                 choice_cost=choice_cost,
                 free_energy_before=free_energy_before,
                 free_energy_after=free_energy_after,
                 memory_hits=memory_hits,
+                memory_decision=memory_decision,
                 sleep_summary=sleep_summary,
                 alive=alive,
                 host_tick=host_tick,
@@ -330,13 +331,14 @@ class SegmentRuntime:
                 prediction=prediction,
                 errors=errors,
                 hierarchy=hierarchy,
-                diagnostics=diagnostics.ranked_options,
+                diagnostics=diagnostics,
                 choice=choice,
                 expected_fe=expected_fe,
                 choice_cost=choice_cost,
                 free_energy_before=free_energy_before,
                 free_energy_after=free_energy_after,
                 memory_hits=memory_hits,
+                memory_decision=memory_decision,
                 sleep_summary=sleep_summary,
                 host_tick=host_tick,
             )
@@ -517,13 +519,14 @@ class SegmentRuntime:
         prediction: dict[str, float],
         errors: dict[str, float],
         hierarchy,
-        diagnostics: list[InterventionScore],
+        diagnostics: DecisionDiagnostics,
         choice: str,
         expected_fe: float,
         choice_cost: float,
         free_energy_before: float,
         free_energy_after: float,
         memory_hits: int,
+        memory_decision: MemoryDecision,
         sleep_summary: SleepSummary | None,
         alive: bool,
         host_tick: dict[str, object] | None,
@@ -565,11 +568,44 @@ class SegmentRuntime:
             "decision_ranking": [
                 {
                     "choice": option.choice,
+                    "policy_score": option.policy_score,
                     "expected_free_energy": option.expected_free_energy,
+                    "predicted_error": option.predicted_error,
+                    "ambiguity": option.action_ambiguity,
+                    "action_ambiguity": option.action_ambiguity,
+                    "risk": option.risk,
+                    "preferred_probability": option.preferred_probability,
+                    "memory_bias": option.memory_bias,
+                    "pattern_bias": option.pattern_bias,
+                    "identity_bias": option.identity_bias,
+                    "value_score": option.value_score,
+                    "dominant_component": option.dominant_component,
+                    "predicted_outcome": option.predicted_outcome,
+                    "predicted_effects": option.predicted_effects,
                     "cost": option.cost,
                 }
-                for option in diagnostics
+                for option in diagnostics.ranked_options
             ],
+            "decision_loop": {
+                "prediction_error": diagnostics.chosen.predicted_error,
+                "current_prediction_error": diagnostics.prediction_error,
+                "predicted_outcome": diagnostics.chosen.predicted_outcome,
+                "preferred_probability": diagnostics.chosen.preferred_probability,
+                "risk": diagnostics.chosen.risk,
+                "ambiguity": diagnostics.chosen.action_ambiguity,
+                "expected_free_energy": diagnostics.chosen.expected_free_energy,
+                "value_score": memory_decision.value_score,
+                "memory_bias": diagnostics.chosen.memory_bias,
+                "pattern_bias": diagnostics.chosen.pattern_bias,
+                "identity_bias": diagnostics.chosen.identity_bias,
+                "policy_score": diagnostics.chosen.policy_score,
+                "policy_scores": diagnostics.policy_scores,
+                "chosen_action": choice,
+                "total_surprise": memory_decision.total_surprise,
+                "explanation": diagnostics.explanation,
+            },
+            "retrieved_memories": diagnostics.retrieved_memories,
+            "episodic_memory": memory_decision.to_dict(),
             "running_metrics": self.metrics.summary(),
             "recent_action_history": list(self.agent.action_history),
         }
@@ -596,18 +632,20 @@ class SegmentRuntime:
         prediction: dict[str, float],
         errors: dict[str, float],
         hierarchy,
-        diagnostics: list[InterventionScore],
+        diagnostics: DecisionDiagnostics,
         choice: str,
         expected_fe: float,
         choice_cost: float,
         free_energy_before: float,
         free_energy_after: float,
         memory_hits: int,
+        memory_decision: MemoryDecision,
         sleep_summary: SleepSummary | None,
         host_tick: dict[str, object] | None,
     ) -> None:
         print(
             f"[cycle {self.agent.cycle:02d}] choice={choice:>15}  "
+            f"score={diagnostics.chosen.policy_score:.3f}  "
             f"expected_fe={expected_fe:.3f}  cost={choice_cost:.2f}"
         )
         print(f"  sensed      {format_state(observed)}")
@@ -665,7 +703,7 @@ class SegmentRuntime:
             "  precision   "
             f"strategic={format_state(hierarchy.strategic_update.error_precision)}"
         )
-        print(f"  scoring     {format_action_scores(diagnostics)}")
+        print(f"  scoring     {format_action_scores(diagnostics.ranked_options)}")
 
         drive_str = ", ".join(
             f"{drive.name}={drive.urgency:.2f}"
@@ -685,6 +723,21 @@ class SegmentRuntime:
 
         if memory_hits:
             print(f"  memory      retrieved {memory_hits} similar episode(s)")
+        print(
+            "  episodic    "
+            f"value={memory_decision.value_score:.2f}, "
+            f"pe={memory_decision.prediction_error:.3f}, "
+            f"total={memory_decision.total_surprise:.3f}, "
+            f"created={memory_decision.episode_created}"
+        )
+        print(
+            "  policy      "
+            f"pe={diagnostics.prediction_error:.3f}, "
+            f"memory={diagnostics.chosen.memory_bias:.3f}, "
+            f"pattern={diagnostics.chosen.pattern_bias:.3f}, "
+            f"identity={diagnostics.chosen.identity_bias:.3f}"
+        )
+        print(f"  explain     {diagnostics.explanation}")
 
         if sleep_summary:
             print(

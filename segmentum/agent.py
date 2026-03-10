@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 import random
 from statistics import mean
 
 from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
-from .memory import LongTermMemory
+from .memory import LongTermMemory, MemoryDecision, compute_prediction_error
 from .predictive_coding import (
     HierarchicalInference,
     InteroceptiveLayer,
@@ -27,6 +27,149 @@ from .world_model import GenerativeWorldModel
 
 def observation_dict(observation: Observation) -> dict[str, float]:
     return asdict(observation)
+
+
+@dataclass(frozen=True)
+class IdentityTraits:
+    risk_aversion: float = 0.65
+    resource_conservatism: float = 0.55
+
+
+class PolicyEvaluator:
+    """Score candidate actions with explicit policy components."""
+
+    def __init__(self, identity_traits: IdentityTraits) -> None:
+        self.identity_traits = identity_traits
+
+    def identity_bias(
+        self,
+        *,
+        projected_state: dict[str, float],
+        predicted_outcome: dict[str, float],
+        cost: float,
+    ) -> float:
+        danger = projected_state.get("danger", 0.0)
+        shelter = projected_state.get("shelter", 0.0)
+        energy_delta = predicted_outcome.get("energy_delta", 0.0) - cost
+        stress_delta = predicted_outcome.get("stress_delta", 0.0)
+        fatigue_delta = predicted_outcome.get("fatigue_delta", 0.0)
+        thermal_offset = abs(projected_state.get("temperature", 0.5) - 0.5)
+
+        risk_bias = self.identity_traits.risk_aversion * (
+            (0.45 - danger) * 0.80
+            + shelter * 0.15
+            - max(0.0, stress_delta) * 0.35
+        )
+        resource_bias = self.identity_traits.resource_conservatism * (
+            energy_delta * 1.20
+            - max(0.0, fatigue_delta) * 0.25
+            - thermal_offset * 0.20
+        )
+        return max(-1.0, min(1.0, risk_bias + resource_bias))
+
+    def dominant_component(
+        self,
+        *,
+        expected_free_energy: float,
+        memory_bias: float,
+        pattern_bias: float,
+        identity_bias: float,
+    ) -> str:
+        components = [
+            ("expected_free_energy", abs(expected_free_energy)),
+            ("memory_bias", abs(memory_bias)),
+            ("pattern_bias", abs(pattern_bias)),
+            ("identity_bias", abs(identity_bias)),
+        ]
+        components.sort(key=lambda item: (-item[1], item[0]))
+        return components[0][0]
+
+    def explain(
+        self,
+        diagnostics: DecisionDiagnostics,
+        action: str | None = None,
+    ) -> str:
+        if action is None:
+            chosen = diagnostics.chosen
+        else:
+            chosen = next(
+                (
+                    option
+                    for option in diagnostics.ranked_options
+                    if option.choice == action
+                ),
+                diagnostics.chosen,
+            )
+        alternative = next(
+            (
+                option
+                for option in diagnostics.ranked_options
+                if option.choice != chosen.choice
+            ),
+            None,
+        )
+        if chosen.dominant_component == "memory_bias":
+            reason = (
+                f"memory_bias ({chosen.memory_bias:.3f}) was the strongest term, "
+                "so similar episodes outweighed more speculative alternatives."
+            )
+        elif chosen.dominant_component == "pattern_bias":
+            reason = (
+                f"pattern_bias ({chosen.pattern_bias:.3f}) dominated, "
+                "reflecting recurring episodic patterns for this action."
+            )
+        elif chosen.dominant_component == "identity_bias":
+            reason = (
+                f"identity_bias ({chosen.identity_bias:.3f}) dominated, "
+                "which matches my risk-averse and resource-conserving traits."
+            )
+        else:
+            reason = (
+                f"expected free energy ({chosen.expected_free_energy:.3f}) stayed lowest, "
+                "so risk, ambiguity, and predicted error were minimized."
+            )
+
+        if chosen.preferred_probability >= 0.50:
+            probability_band = "high"
+        elif chosen.preferred_probability >= 0.10:
+            probability_band = "moderate"
+        else:
+            probability_band = "low"
+        if chosen.risk <= 1.0:
+            risk_band = "low"
+        elif chosen.risk <= 3.0:
+            risk_band = "moderate"
+        else:
+            risk_band = "high"
+
+        comparison = ""
+        if alternative is not None:
+            if chosen.expected_free_energy <= alternative.expected_free_energy:
+                comparison = (
+                    f" The overall expected free energy was lower than {alternative.choice} "
+                    f"({chosen.expected_free_energy:.3f} vs {alternative.expected_free_energy:.3f}), "
+                    f"and {chosen.choice} scored {chosen.policy_score:.3f} versus "
+                    f"{alternative.choice} at {alternative.policy_score:.3f}."
+                )
+            else:
+                comparison = (
+                    f" Even though {alternative.choice} had lower expected free energy "
+                    f"({alternative.expected_free_energy:.3f} vs {chosen.expected_free_energy:.3f}), "
+                    f"{chosen.choice} still achieved the strongest final policy score "
+                    f"({chosen.policy_score:.3f} vs {alternative.policy_score:.3f}) "
+                    f"after memory, pattern, and identity terms were included."
+                )
+        return (
+            f"I chose {chosen.choice}. "
+            f"This action predicted outcome '{chosen.predicted_outcome}'. "
+            f"According to my preference model this outcome has {probability_band} "
+            f"preferred probability ({chosen.preferred_probability:.2f}), "
+            f"resulting in {risk_band} risk ({chosen.risk:.3f}). "
+            f"{reason}{comparison} "
+            f"This aligns with my resource_conservatism="
+            f"{self.identity_traits.resource_conservatism:.2f} and "
+            f"risk_aversion={self.identity_traits.risk_aversion:.2f}."
+        )
 
 
 class SegmentAgent:
@@ -50,11 +193,20 @@ class SegmentAgent:
         self.interoceptive_layer = InteroceptiveLayer()
         self.world_model = GenerativeWorldModel()
         self.long_term_memory = LongTermMemory()
+        self.identity_traits = IdentityTraits()
+        self.policy_evaluator = PolicyEvaluator(self.identity_traits)
 
         self.episodes: list[MemoryEpisode] = []
         self.semantic_memory: list[SleepSummary] = []
         self.action_history: list[str] = []
         self.action_history_limit = 32
+        self.last_body_state_snapshot = {
+            "energy": self.energy,
+            "stress": self.stress,
+            "fatigue": self.fatigue,
+            "temperature": self.temperature,
+        }
+        self.last_decision_diagnostics: DecisionDiagnostics | None = None
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -235,11 +387,13 @@ class SegmentAgent:
 
     def evaluate_action_options(
         self,
+        observed: dict[str, float],
         prediction: dict[str, float],
         priors: dict[str, float],
-    ) -> dict[str, tuple[float, float]]:
-        """Evaluate all action options with realistic metabolic costs."""
-        options: dict[str, tuple[float, float]] = {}
+        free_energy_before: float,
+    ) -> dict[str, dict[str, object]]:
+        """Project candidate actions into explicit policy components."""
+        options: dict[str, dict[str, object]] = {}
         for action, cost in ACTION_COSTS.items():
             imagined = self.world_model.imagine_action(action, prediction)
             imagined_energy = clamp(
@@ -262,24 +416,56 @@ class SegmentAgent:
                 self.drive_system,
             )
             residual_errors = {key: next_priors[key] - imagined[key] for key in priors}
-            
-            # Body pressure from metabolic state
-            energy_pressure = max(0.0, 0.50 - imagined_energy) * 0.90
-            stress_pressure = imagined_stress * 0.18
-            fatigue_pressure = imagined_fatigue * 0.22
-            thermal_pressure = abs(imagined_temp - 0.5) * 0.20
-            body_pressure = energy_pressure + stress_pressure + fatigue_pressure + thermal_pressure
-            
-            expected_fe = self.compute_free_energy(residual_errors) + cost + body_pressure
-            options[action] = expected_fe, cost
+            predicted_error = compute_prediction_error(next_priors, imagined)
+            action_ambiguity = cost + mean(abs(value) for value in residual_errors.values()) * 0.35
+            predicted_effects = {
+                "energy_delta": imagined_energy - self.energy,
+                "stress_delta": imagined_stress - self.stress,
+                "fatigue_delta": imagined_fatigue - self.fatigue,
+                "temperature_delta": imagined_temp - self.temperature,
+                "free_energy_drop": free_energy_before - (predicted_error + action_ambiguity),
+            }
+            projected_snapshot = {
+                "observation": imagined,
+                "prediction": next_priors,
+                "errors": residual_errors,
+                "body_state": {
+                    "energy": imagined_energy,
+                    "stress": imagined_stress,
+                    "fatigue": imagined_fatigue,
+                    "temperature": imagined_temp,
+                    "dopamine": self.dopamine,
+                },
+            }
+            preference = self.long_term_memory.preference_model.evaluate_state(
+                {
+                    **projected_snapshot,
+                    "predicted_outcome": predicted_effects,
+                }
+            )
+            options[action] = {
+                "predicted_state": imagined,
+                "predicted_error": predicted_error,
+                "action_ambiguity": action_ambiguity,
+                "risk": preference.risk,
+                "preferred_probability": preference.preferred_probability,
+                "expected_free_energy": preference.risk + predicted_error + action_ambiguity,
+                "predicted_outcome": preference.outcome,
+                "predicted_effects": predicted_effects,
+                "value_score": preference.value_score,
+                "cost": cost,
+                "observation_distance": compute_prediction_error(observed, imagined),
+            }
         return options
 
-    def choose_intervention(
+    def decision_cycle(
         self,
-        prediction: dict[str, float],
-        errors: dict[str, float],
-    ) -> DecisionDiagnostics:
-        """Choose between internal update and external action."""
+        observation: Observation,
+    ) -> dict[str, object]:
+        observed, prediction, errors, free_energy_before, hierarchy = self.perceive(
+            observation
+        )
+        prediction_error = compute_prediction_error(observed, prediction)
         priors = self.strategic_layer.priors(
             self.energy,
             self.stress,
@@ -288,32 +474,147 @@ class SegmentAgent:
             self.dopamine,
             self.drive_system,
         )
-        internal_fe, internal_cost = self.evaluate_internal_update(priors, errors)
-        action_options = self.evaluate_action_options(prediction, priors)
-
-        ranked_options = [
-            InterventionScore(
-                choice="internal_update",
-                expected_free_energy=internal_fe,
-                cost=internal_cost,
-            )
-        ]
-        ranked_options.extend(
-            InterventionScore(
-                choice=action,
-                expected_free_energy=expected_fe,
-                cost=cost,
-            )
-            for action, (expected_fe, cost) in action_options.items()
+        similar_memories = self.long_term_memory.retrieve_similar_memories(
+            {
+                "observation": observed,
+                "prediction": prediction,
+                "errors": errors,
+                "body_state": {
+                    "cycle": float(self.cycle),
+                    "energy": self.energy,
+                    "stress": self.stress,
+                    "fatigue": self.fatigue,
+                    "temperature": self.temperature,
+                    "dopamine": self.dopamine,
+                },
+            },
+            k=3,
         )
-        for option in ranked_options:
-            option.expected_free_energy += self._action_regression_penalty(option.choice)
-        ranked_options.sort(key=lambda option: option.expected_free_energy)
-
-        return DecisionDiagnostics(
+        action_options = self.evaluate_action_options(
+            observed,
+            prediction,
+            priors,
+            free_energy_before,
+        )
+        ranked_options: list[InterventionScore] = []
+        for action, option in action_options.items():
+            predicted_state = dict(option["predicted_state"])
+            predicted_effects = dict(option["predicted_effects"])
+            expected_fe = float(option["expected_free_energy"])
+            memory_bias = self.long_term_memory.memory_bias(action, similar_memories)
+            pattern_bias = self.long_term_memory.pattern_bias(
+                action,
+                action_history=self.action_history,
+            )
+            identity_bias = self.policy_evaluator.identity_bias(
+                projected_state=predicted_state,
+                predicted_outcome=predicted_effects,
+                cost=float(option["cost"]),
+            )
+            policy_score = -expected_fe + memory_bias + pattern_bias + identity_bias
+            dominant_component = self.policy_evaluator.dominant_component(
+                expected_free_energy=expected_fe,
+                memory_bias=memory_bias,
+                pattern_bias=pattern_bias,
+                identity_bias=identity_bias,
+            )
+            ranked_options.append(
+                InterventionScore(
+                    choice=action,
+                    policy_score=policy_score,
+                    expected_free_energy=expected_fe,
+                    predicted_error=float(option["predicted_error"]),
+                    action_ambiguity=float(option["action_ambiguity"]),
+                    risk=float(option["risk"]),
+                    preferred_probability=float(option["preferred_probability"]),
+                    memory_bias=memory_bias,
+                    pattern_bias=pattern_bias,
+                    identity_bias=identity_bias,
+                    value_score=float(option["value_score"]),
+                    predicted_outcome=str(option["predicted_outcome"]),
+                    predicted_effects=predicted_effects,
+                    dominant_component=dominant_component,
+                    cost=float(option["cost"]),
+                )
+            )
+        ranked_options.sort(
+            key=lambda option: (
+                option.policy_score,
+                -option.expected_free_energy,
+                option.choice,
+            ),
+            reverse=True,
+        )
+        diagnostics = DecisionDiagnostics(
             chosen=ranked_options[0],
             ranked_options=ranked_options,
+            prediction_error=prediction_error,
+            retrieved_memories=similar_memories,
+            policy_scores={
+                option.choice: option.policy_score for option in ranked_options
+            },
+            explanation="",
         )
+        diagnostics.explanation = self.policy_evaluator.explain(diagnostics)
+        self.last_decision_diagnostics = diagnostics
+        return {
+            "observed": observed,
+            "prediction": prediction,
+            "errors": errors,
+            "free_energy_before": free_energy_before,
+            "hierarchy": hierarchy,
+            "diagnostics": diagnostics,
+        }
+
+    def choose_intervention(
+        self,
+        prediction: dict[str, float],
+        errors: dict[str, float],
+    ) -> DecisionDiagnostics:
+        """Backward-compatible chooser for older callers."""
+        prediction_error = compute_prediction_error(prediction, prediction)
+        neutral_preference = self.long_term_memory.preference_model.evaluate_state(
+            {
+                "observation": dict(prediction),
+                "prediction": dict(prediction),
+                "errors": dict(errors),
+                "body_state": {
+                    "energy": self.energy,
+                    "stress": self.stress,
+                    "fatigue": self.fatigue,
+                    "temperature": self.temperature,
+                    "dopamine": self.dopamine,
+                },
+                "predicted_outcome": {},
+            }
+        )
+        expected_free_energy = neutral_preference.risk + prediction_error
+        diagnostics = DecisionDiagnostics(
+            chosen=InterventionScore(
+                choice="rest",
+                policy_score=-expected_free_energy,
+                expected_free_energy=expected_free_energy,
+                predicted_error=prediction_error,
+                action_ambiguity=0.0,
+                risk=neutral_preference.risk,
+                preferred_probability=neutral_preference.preferred_probability,
+                memory_bias=0.0,
+                pattern_bias=0.0,
+                identity_bias=0.0,
+                value_score=neutral_preference.value_score,
+                predicted_outcome=neutral_preference.outcome,
+                predicted_effects={},
+                dominant_component="expected_free_energy",
+                cost=0.0,
+            ),
+            ranked_options=[],
+            prediction_error=prediction_error,
+            retrieved_memories=[],
+            policy_scores={},
+            explanation="I chose rest because no richer decision context was available.",
+        )
+        self.last_decision_diagnostics = diagnostics
+        return diagnostics
 
     def _action_regression_penalty(self, action: str) -> float:
         recent = self.action_history[-12:]
@@ -368,6 +669,11 @@ class SegmentAgent:
             self.temperature + direct_feedback.get("temperature_delta", 0.0)
         )
 
+    def explain_decision(self, action: str | None = None) -> str:
+        if self.last_decision_diagnostics is None:
+            return "No decision has been evaluated yet."
+        return self.policy_evaluator.explain(self.last_decision_diagnostics, action=action)
+
     def integrate_outcome(
         self,
         choice: str,
@@ -376,48 +682,52 @@ class SegmentAgent:
         errors: dict[str, float],
         free_energy_before: float,
         free_energy_after: float,
-    ) -> None:
+    ) -> MemoryDecision:
         """Integrate the outcome and store in memory."""
-        fe_drop = max(0.0, free_energy_before - free_energy_after)
-        self.dopamine = clamp((self.dopamine * 0.72) + fe_drop * 0.50)
-        
+        fe_delta = free_energy_before - free_energy_after
+        reward_signal = max(0.0, fe_delta)
+        self.dopamine = clamp((self.dopamine * 0.72) + reward_signal * 0.50)
+
         body_state = {
             "energy": self.energy,
             "stress": self.stress,
             "fatigue": self.fatigue,
             "temperature": self.temperature,
         }
-        
-        self.episodes.append(
-            MemoryEpisode(
-                cycle=self.cycle,
-                choice=choice,
-                free_energy_before=free_energy_before,
-                free_energy_after=free_energy_after,
-                dopamine_gain=fe_drop,
-                observation=observed,
-                prediction=prediction,
-                errors=errors,
-                body_state=body_state,
-            )
-        )
-        
-        # Store in long-term memory
+
+        previous_body_state = dict(self.last_body_state_snapshot)
         outcome = {
-            "energy_delta": body_state["energy"] - (self.episodes[-2].body_state["energy"] if len(self.episodes) > 1 else self.energy),
-            "stress_delta": body_state["stress"] - (self.episodes[-2].body_state["stress"] if len(self.episodes) > 1 else self.stress),
-            "free_energy_drop": fe_drop,
+            "energy_delta": body_state["energy"] - previous_body_state["energy"],
+            "stress_delta": body_state["stress"] - previous_body_state["stress"],
+            "free_energy_drop": fe_delta,
         }
-        self.long_term_memory.store_episode(
+        memory_decision = self.long_term_memory.maybe_store_episode(
             self.cycle,
             observed,
             prediction,
             errors,
             choice,
             outcome,
+            body_state=body_state,
         )
+        if memory_decision.episode_created:
+            self.episodes.append(
+                MemoryEpisode(
+                    cycle=self.cycle,
+                    choice=choice,
+                    free_energy_before=free_energy_before,
+                    free_energy_after=free_energy_after,
+                    dopamine_gain=reward_signal,
+                    observation=observed,
+                    prediction=prediction,
+                    errors=errors,
+                    body_state=body_state,
+                )
+            )
         self.action_history.append(choice)
         self.action_history = self.action_history[-self.action_history_limit :]
+        self.last_body_state_snapshot = dict(body_state)
+        return memory_decision
 
     def dream_replay(self, episodes: list[MemoryEpisode]) -> list[DreamReplay]:
         """Replay and learn from past episodes during sleep."""
@@ -535,6 +845,8 @@ class SegmentAgent:
             "semantic_memory": [asdict(summary) for summary in self.semantic_memory],
             "action_history": list(self.action_history),
             "action_history_limit": self.action_history_limit,
+            "identity_traits": asdict(self.identity_traits),
+            "last_body_state_snapshot": dict(self.last_body_state_snapshot),
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
         }
 
@@ -587,6 +899,40 @@ class SegmentAgent:
         agent.action_history_limit = int(
             payload.get("action_history_limit", agent.action_history_limit)
         )
+        identity_traits = payload.get("identity_traits")
+        if isinstance(identity_traits, dict):
+            agent.identity_traits = IdentityTraits(
+                risk_aversion=float(
+                    identity_traits.get(
+                        "risk_aversion",
+                        agent.identity_traits.risk_aversion,
+                    )
+                ),
+                resource_conservatism=float(
+                    identity_traits.get(
+                        "resource_conservatism",
+                        agent.identity_traits.resource_conservatism,
+                    )
+                ),
+            )
+            agent.policy_evaluator = PolicyEvaluator(agent.identity_traits)
+        last_body_state_snapshot = payload.get("last_body_state_snapshot")
+        if isinstance(last_body_state_snapshot, dict):
+            agent.last_body_state_snapshot = {
+                "energy": float(last_body_state_snapshot.get("energy", agent.energy)),
+                "stress": float(last_body_state_snapshot.get("stress", agent.stress)),
+                "fatigue": float(last_body_state_snapshot.get("fatigue", agent.fatigue)),
+                "temperature": float(
+                    last_body_state_snapshot.get("temperature", agent.temperature)
+                ),
+            }
+        else:
+            agent.last_body_state_snapshot = {
+                "energy": agent.energy,
+                "stress": agent.stress,
+                "fatigue": agent.fatigue,
+                "temperature": agent.temperature,
+            }
 
         drive_urgencies = payload.get("drive_urgencies", {})
         if isinstance(drive_urgencies, dict):

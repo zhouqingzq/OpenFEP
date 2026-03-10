@@ -48,11 +48,35 @@ class DreamReplay:
 @dataclass
 class InterventionScore:
     choice: str
+    policy_score: float
     expected_free_energy: float
+    predicted_error: float
+    action_ambiguity: float
+    risk: float
+    preferred_probability: float
+    memory_bias: float
+    pattern_bias: float
+    identity_bias: float
+    value_score: float
+    predicted_outcome: str
+    predicted_effects: dict[str, float]
+    dominant_component: str
     cost: float
+
+    def policy_components(self) -> dict[str, float]:
+        return {
+            "negative_expected_free_energy": -self.expected_free_energy,
+            "memory_bias": self.memory_bias,
+            "pattern_bias": self.pattern_bias,
+            "identity_bias": self.identity_bias,
+        }
 
 
 @dataclass
 class DecisionDiagnostics:
     chosen: InterventionScore
     ranked_options: list[InterventionScore]
+    prediction_error: float
+    retrieved_memories: list[dict[str, object]]
+    policy_scores: dict[str, float]
+    explanation: str

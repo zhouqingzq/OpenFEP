@@ -134,6 +134,38 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
             ]
             self.assertEqual(len(trace_records), 3)
             self.assertEqual(trace_records[-1]["running_metrics"]["cycles_completed"], 3)
+            snapshot_payload = json.loads(state_path.read_text(encoding="utf-8"))
+            stored_episodes = snapshot_payload["agent"]["long_term_memory"]["episodes"]
+            self.assertGreaterEqual(len(stored_episodes), 1)
+            self.assertIn("embedding", stored_episodes[0])
+            self.assertIn("value_score", stored_episodes[0])
+            self.assertIn("predicted_outcome", stored_episodes[0])
+            self.assertIn("preferred_probability", stored_episodes[0])
+            self.assertIn("risk", stored_episodes[0])
+            self.assertIn("total_surprise", stored_episodes[0])
+            episodic_memory = trace_records[-1]["episodic_memory"]
+            self.assertIn("value_score", episodic_memory)
+            self.assertIn("predicted_outcome", episodic_memory)
+            self.assertIn("preferred_probability", episodic_memory)
+            self.assertIn("risk", episodic_memory)
+            self.assertIn("prediction_error", episodic_memory)
+            self.assertIn("total_surprise", episodic_memory)
+            self.assertIn("episode_created", episodic_memory)
+            decision_loop = trace_records[-1]["decision_loop"]
+            self.assertIn("prediction_error", decision_loop)
+            self.assertIn("predicted_outcome", decision_loop)
+            self.assertIn("preferred_probability", decision_loop)
+            self.assertIn("risk", decision_loop)
+            self.assertIn("ambiguity", decision_loop)
+            self.assertIn("expected_free_energy", decision_loop)
+            self.assertIn("memory_bias", decision_loop)
+            self.assertIn("pattern_bias", decision_loop)
+            self.assertIn("identity_bias", decision_loop)
+            self.assertIn("policy_score", decision_loop)
+            self.assertIn("policy_scores", decision_loop)
+            self.assertIn("chosen_action", decision_loop)
+            self.assertIn("total_surprise", decision_loop)
+            self.assertIn("explanation", decision_loop)
             hierarchy = trace_records[-1]["hierarchy"]
             self.assertIn("strategic_prediction", hierarchy)
             self.assertIn("sensorimotor_prediction", hierarchy)
@@ -153,6 +185,58 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
             self.assertGreaterEqual(second_summary["cycles_completed"], 5)
             self.assertEqual(reloaded.agent.cycle, 5)
             self.assertGreaterEqual(len(reloaded.agent.long_term_memory.episodes), 3)
+
+    def test_integrate_outcome_keeps_negative_free_energy_drop_for_memory(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=17, reset=True)
+        runtime.agent.cycle = 1
+
+        decision = runtime.agent.integrate_outcome(
+            choice="hide",
+            observed={
+                "food": 0.20,
+                "danger": 0.95,
+                "novelty": 0.20,
+                "shelter": 0.30,
+                "temperature": 0.45,
+                "social": 0.20,
+            },
+            prediction={
+                "food": 0.70,
+                "danger": 0.10,
+                "novelty": 0.45,
+                "shelter": 0.55,
+                "temperature": 0.50,
+                "social": 0.35,
+            },
+            errors={
+                "food": -0.50,
+                "danger": 0.85,
+                "novelty": -0.25,
+                "shelter": -0.25,
+                "temperature": -0.05,
+                "social": -0.15,
+            },
+            free_energy_before=0.20,
+            free_energy_after=0.60,
+        )
+
+        self.assertTrue(decision.episode_created)
+        stored = runtime.agent.long_term_memory.episodes[-1]
+        self.assertAlmostEqual(stored["outcome"]["free_energy_drop"], -0.40)
+        self.assertEqual(stored["predicted_outcome"], "survival_threat")
+        self.assertIn("risk", stored)
+        self.assertAlmostEqual(stored["value_score"], -1.0)
+
+    def test_explain_decision_is_deterministic(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=17, reset=True)
+
+        runtime.step(verbose=False)
+
+        first = runtime.agent.explain_decision()
+        second = runtime.agent.explain_decision()
+        self.assertEqual(first, second)
+        self.assertTrue(first.startswith("I chose "))
+        self.assertIn("According to my preference model", first)
 
     def test_runtime_persists_host_telemetry_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
