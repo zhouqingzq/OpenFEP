@@ -2,12 +2,18 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import random
-from statistics import mean
+from statistics import mean, pvariance
+from typing import Callable
 
 from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
-from .memory import LongTermMemory, MemoryDecision, compute_prediction_error
+from .memory import (
+    LongTermMemory,
+    MemoryDecision,
+    compute_prediction_error,
+    compute_total_surprise,
+)
 from .predictive_coding import (
     HierarchicalInference,
     InteroceptiveLayer,
@@ -15,11 +21,15 @@ from .predictive_coding import (
     compose_upstream_observation,
     default_predictive_coding_hyperparameters,
 )
+from .sleep_consolidator import SleepConsolidator
 from .types import (
     DecisionDiagnostics,
     DreamReplay,
     InterventionScore,
     MemoryEpisode,
+    SemanticMemoryEntry,
+    SleepConsolidationResult,
+    SleepRule,
     SleepSummary,
 )
 from .world_model import GenerativeWorldModel
@@ -73,12 +83,16 @@ class PolicyEvaluator:
         expected_free_energy: float,
         memory_bias: float,
         pattern_bias: float,
+        policy_bias: float,
+        epistemic_bonus: float,
         identity_bias: float,
     ) -> str:
         components = [
             ("expected_free_energy", abs(expected_free_energy)),
             ("memory_bias", abs(memory_bias)),
             ("pattern_bias", abs(pattern_bias)),
+            ("policy_bias", abs(policy_bias)),
+            ("epistemic_bonus", abs(epistemic_bonus)),
             ("identity_bias", abs(identity_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
@@ -117,6 +131,16 @@ class PolicyEvaluator:
             reason = (
                 f"pattern_bias ({chosen.pattern_bias:.3f}) dominated, "
                 "reflecting recurring episodic patterns for this action."
+            )
+        elif chosen.dominant_component == "policy_bias":
+            reason = (
+                f"policy_bias ({chosen.policy_bias:.3f}) dominated, "
+                "reflecting a sleep-consolidated bias learned from repeated state-action outcomes."
+            )
+        elif chosen.dominant_component == "epistemic_bonus":
+            reason = (
+                f"epistemic_bonus ({chosen.epistemic_bonus:.3f}) dominated, "
+                "so unresolved ambiguity in this state encouraged information-seeking exploration."
             )
         elif chosen.dominant_component == "identity_bias":
             reason = (
@@ -179,6 +203,8 @@ class SegmentAgent:
         self,
         rng: random.Random | None = None,
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
+        sleep_llm_extractor: Callable[[list[SleepRule], list[dict[str, object]]], list[SleepRule]]
+        | None = None,
     ) -> None:
         self.rng = rng or random.Random()
         self.energy = 0.80
@@ -195,9 +221,11 @@ class SegmentAgent:
         self.long_term_memory = LongTermMemory()
         self.identity_traits = IdentityTraits()
         self.policy_evaluator = PolicyEvaluator(self.identity_traits)
+        self.sleep_llm_extractor = sleep_llm_extractor
 
         self.episodes: list[MemoryEpisode] = []
-        self.semantic_memory: list[SleepSummary] = []
+        self.semantic_memory: list[SemanticMemoryEntry] = []
+        self.sleep_history: list[SleepSummary] = []
         self.action_history: list[str] = []
         self.action_history_limit = 32
         self.last_body_state_snapshot = {
@@ -207,6 +235,7 @@ class SegmentAgent:
             "temperature": self.temperature,
         }
         self.last_decision_diagnostics: DecisionDiagnostics | None = None
+        self._sleeping = False
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -217,7 +246,12 @@ class SegmentAgent:
 
     def should_sleep(self) -> bool:
         """Decide if the agent needs to sleep."""
-        return self.energy < 0.30 or self.fatigue > 0.75 or len(self.episodes) >= 10
+        return (
+            self.energy < 0.30
+            or self.fatigue > 0.75
+            or len(self.episodes) >= 10
+            or self.long_term_memory.should_sleep(self.cycle)
+        )
 
     def perceive(
         self,
@@ -385,87 +419,258 @@ class SegmentAgent:
         expected_fe = self.compute_free_energy(residual_errors) + 0.15
         return expected_fe, 0.13
 
+    def _matching_semantic_rules(
+        self,
+        cluster_id: int | None,
+        action: str,
+    ) -> list[SemanticMemoryEntry]:
+        if cluster_id is None:
+            return []
+        return [
+            entry
+            for entry in self.semantic_memory
+            if entry.cluster == cluster_id and entry.action == action
+        ]
+
+    def _predict_with_slow_weights(
+        self,
+        *,
+        cluster_id: int | None,
+        action: str,
+        projected_snapshot: dict[str, object],
+        predicted_effects: dict[str, float],
+    ) -> tuple[str, float, float, float]:
+        preference = self.long_term_memory.preference_model.evaluate_state(
+            {
+                **projected_snapshot,
+                "predicted_outcome": predicted_effects,
+            }
+        )
+        predicted_outcome = preference.outcome
+        preferred_probability = preference.preferred_probability
+        risk = preference.risk
+        value_score = preference.value_score
+
+        if cluster_id is None:
+            return predicted_outcome, preferred_probability, risk, value_score
+
+        outcome_distribution = self.world_model.outcome_distribution(cluster_id, action)
+        transition_distribution = self.world_model.transition_distribution(cluster_id, action)
+        threat_prior = self.world_model.get_threat_prior(cluster_id)
+        preference_penalty = self.world_model.get_preference_penalty(cluster_id, action)
+        semantic_rules = self._matching_semantic_rules(cluster_id, action)
+        semantic_penalty = sum(
+            entry.confidence
+            for entry in semantic_rules
+            if entry.rule_type == "risk_pattern"
+        )
+        semantic_bonus = sum(
+            entry.confidence
+            for entry in semantic_rules
+            if entry.rule_type != "risk_pattern"
+        )
+
+        transition_threat = 0.0
+        for next_cluster, probability in transition_distribution.items():
+            try:
+                transition_threat += float(probability) * self.world_model.get_threat_prior(
+                    int(next_cluster)
+                )
+            except ValueError:
+                continue
+
+        if outcome_distribution:
+            predicted_outcome = sorted(
+                outcome_distribution.items(),
+                key=lambda item: (-item[1], item[0]),
+            )[0][0]
+            preferred_probability = max(
+                1e-12,
+                float(outcome_distribution.get(predicted_outcome, 0.0)),
+            )
+            risk = self.long_term_memory.preference_model.risk(predicted_outcome)
+            value_score = self.long_term_memory.preference_model.normalized_score(
+                predicted_outcome
+            )
+
+        risk = max(
+            0.0,
+            risk
+            + (threat_prior * 4.0)
+            + (transition_threat * 3.0)
+            + max(0.0, -preference_penalty) * 1.5
+            + semantic_penalty * 0.8
+            - max(0.0, preference_penalty) * 0.5
+            - semantic_bonus * 0.3,
+        )
+        preferred_probability = max(
+            1e-12,
+            min(
+                1.0,
+                preferred_probability
+                * (1.0 - min(0.85, threat_prior * 0.6 + semantic_penalty * 0.15))
+                + max(0.0, preference_penalty) * 0.05
+                + semantic_bonus * 0.02,
+            ),
+        )
+        value_score = max(-1.0, min(1.0, value_score + preference_penalty - semantic_penalty * 0.2))
+        return predicted_outcome, preferred_probability, risk, value_score
+
+    def _apply_sleep_consolidation(
+        self,
+        consolidation: SleepConsolidationResult,
+    ) -> tuple[int, int, int]:
+        new_entries = 0
+        seen_rule_ids = {entry.rule_id for entry in self.semantic_memory}
+        for entry in consolidation.semantic_memory_entries:
+            if entry.rule_id in seen_rule_ids:
+                continue
+            self.semantic_memory.append(entry)
+            seen_rule_ids.add(entry.rule_id)
+            new_entries += 1
+
+        threat_updates = 0
+        preference_updates = 0
+        for update in consolidation.model_updates:
+            if update.update_type == "threat_prior":
+                self.world_model.adjust_threat_prior(update.cluster, update.delta)
+                threat_updates += 1
+                continue
+            if update.update_type == "preference_penalty":
+                self.world_model.adjust_preference_penalty(
+                    update.cluster,
+                    update.action,
+                    update.delta,
+                )
+                preference_updates += 1
+        return new_entries, threat_updates, preference_updates
+
+    def _project_action(
+        self,
+        *,
+        action: str,
+        observed: dict[str, float],
+        prediction: dict[str, float],
+        priors: dict[str, float],
+        free_energy_before: float,
+        current_cluster_id: int | None,
+    ) -> dict[str, object]:
+        cost = ACTION_COSTS[action]
+        imagined = self.world_model.imagine_action(action, prediction)
+        imagined_energy = clamp(
+            self.energy - cost - self.base_metabolic_rate
+            + ACTION_BODY_EFFECTS[action]["energy_delta"]
+        )
+        imagined_stress = clamp(self.stress + ACTION_BODY_EFFECTS[action]["stress_delta"])
+        imagined_fatigue = clamp(
+            self.fatigue + self.fatigue_accumulation_rate
+            + ACTION_BODY_EFFECTS[action]["fatigue_delta"]
+        )
+        imagined_temp = clamp(
+            self.temperature + ACTION_BODY_EFFECTS[action]["temperature_delta"]
+        )
+        next_priors = self.strategic_layer.priors(
+            imagined_energy,
+            imagined_stress,
+            imagined_fatigue,
+            imagined_temp,
+            self.dopamine,
+            self.drive_system,
+        )
+        residual_errors = {key: next_priors[key] - imagined[key] for key in priors}
+        predicted_error = compute_prediction_error(next_priors, imagined)
+        action_ambiguity = cost + mean(abs(value) for value in residual_errors.values()) * 0.35
+        predicted_effects = {
+            "energy_delta": imagined_energy - self.energy,
+            "stress_delta": imagined_stress - self.stress,
+            "fatigue_delta": imagined_fatigue - self.fatigue,
+            "temperature_delta": imagined_temp - self.temperature,
+            "free_energy_drop": free_energy_before - (predicted_error + action_ambiguity),
+        }
+        projected_snapshot = {
+            "observation": imagined,
+            "prediction": next_priors,
+            "errors": residual_errors,
+            "body_state": {
+                "energy": imagined_energy,
+                "stress": imagined_stress,
+                "fatigue": imagined_fatigue,
+                "temperature": imagined_temp,
+                "dopamine": self.dopamine,
+            },
+        }
+        (
+            predicted_outcome,
+            preferred_probability,
+            risk,
+            value_score,
+        ) = self._predict_with_slow_weights(
+            cluster_id=current_cluster_id,
+            action=action,
+            projected_snapshot=projected_snapshot,
+            predicted_effects=predicted_effects,
+        )
+        return {
+            "predicted_state": imagined,
+            "predicted_error": predicted_error,
+            "action_ambiguity": action_ambiguity,
+            "risk": risk,
+            "preferred_probability": preferred_probability,
+            "expected_free_energy": risk + predicted_error + action_ambiguity,
+            "predicted_outcome": predicted_outcome,
+            "predicted_effects": predicted_effects,
+            "value_score": value_score,
+            "cost": cost,
+            "observation_distance": compute_prediction_error(observed, imagined),
+        }
+
     def evaluate_action_options(
         self,
         observed: dict[str, float],
         prediction: dict[str, float],
         priors: dict[str, float],
         free_energy_before: float,
+        current_cluster_id: int | None,
     ) -> dict[str, dict[str, object]]:
         """Project candidate actions into explicit policy components."""
         options: dict[str, dict[str, object]] = {}
-        for action, cost in ACTION_COSTS.items():
-            imagined = self.world_model.imagine_action(action, prediction)
-            imagined_energy = clamp(
-                self.energy - cost - self.base_metabolic_rate
-                + ACTION_BODY_EFFECTS[action]["energy_delta"]
+        for action in ACTION_COSTS:
+            options[action] = self._project_action(
+                action=action,
+                observed=observed,
+                prediction=prediction,
+                priors=priors,
+                free_energy_before=free_energy_before,
+                current_cluster_id=current_cluster_id,
             )
-            imagined_stress = clamp(self.stress + ACTION_BODY_EFFECTS[action]["stress_delta"])
-            imagined_fatigue = clamp(
-                self.fatigue + self.fatigue_accumulation_rate
-                + ACTION_BODY_EFFECTS[action]["fatigue_delta"]
-            )
-            imagined_temp = clamp(self.temperature + ACTION_BODY_EFFECTS[action]["temperature_delta"])
-            
-            next_priors = self.strategic_layer.priors(
-                imagined_energy,
-                imagined_stress,
-                imagined_fatigue,
-                imagined_temp,
-                self.dopamine,
-                self.drive_system,
-            )
-            residual_errors = {key: next_priors[key] - imagined[key] for key in priors}
-            predicted_error = compute_prediction_error(next_priors, imagined)
-            action_ambiguity = cost + mean(abs(value) for value in residual_errors.values()) * 0.35
-            predicted_effects = {
-                "energy_delta": imagined_energy - self.energy,
-                "stress_delta": imagined_stress - self.stress,
-                "fatigue_delta": imagined_fatigue - self.fatigue,
-                "temperature_delta": imagined_temp - self.temperature,
-                "free_energy_drop": free_energy_before - (predicted_error + action_ambiguity),
-            }
-            projected_snapshot = {
-                "observation": imagined,
-                "prediction": next_priors,
-                "errors": residual_errors,
-                "body_state": {
-                    "energy": imagined_energy,
-                    "stress": imagined_stress,
-                    "fatigue": imagined_fatigue,
-                    "temperature": imagined_temp,
-                    "dopamine": self.dopamine,
-                },
-            }
-            preference = self.long_term_memory.preference_model.evaluate_state(
-                {
-                    **projected_snapshot,
-                    "predicted_outcome": predicted_effects,
-                }
-            )
-            options[action] = {
-                "predicted_state": imagined,
-                "predicted_error": predicted_error,
-                "action_ambiguity": action_ambiguity,
-                "risk": preference.risk,
-                "preferred_probability": preference.preferred_probability,
-                "expected_free_energy": preference.risk + predicted_error + action_ambiguity,
-                "predicted_outcome": preference.outcome,
-                "predicted_effects": predicted_effects,
-                "value_score": preference.value_score,
-                "cost": cost,
-                "observation_distance": compute_prediction_error(observed, imagined),
-            }
         return options
 
     def decision_cycle(
         self,
         observation: Observation,
     ) -> dict[str, object]:
+        if self._sleeping:
+            raise RuntimeError(
+                "Action space is frozen: agent is in sleep consolidation phase. "
+                "External interaction is not permitted until sleep completes."
+            )
         observed, prediction, errors, free_energy_before, hierarchy = self.perceive(
             observation
         )
         prediction_error = compute_prediction_error(observed, prediction)
+        current_state_snapshot = {
+            "observation": observed,
+            "prediction": prediction,
+            "errors": errors,
+            "body_state": {
+                "cycle": float(self.cycle),
+                "energy": self.energy,
+                "stress": self.stress,
+                "fatigue": self.fatigue,
+                "temperature": self.temperature,
+                "dopamine": self.dopamine,
+            },
+        }
         priors = self.strategic_layer.priors(
             self.energy,
             self.stress,
@@ -475,26 +680,16 @@ class SegmentAgent:
             self.drive_system,
         )
         similar_memories = self.long_term_memory.retrieve_similar_memories(
-            {
-                "observation": observed,
-                "prediction": prediction,
-                "errors": errors,
-                "body_state": {
-                    "cycle": float(self.cycle),
-                    "energy": self.energy,
-                    "stress": self.stress,
-                    "fatigue": self.fatigue,
-                    "temperature": self.temperature,
-                    "dopamine": self.dopamine,
-                },
-            },
+            current_state_snapshot,
             k=3,
         )
+        current_cluster_id = self.long_term_memory.infer_cluster_id(current_state_snapshot)
         action_options = self.evaluate_action_options(
             observed,
             prediction,
             priors,
             free_energy_before,
+            current_cluster_id,
         )
         ranked_options: list[InterventionScore] = []
         for action, option in action_options.items():
@@ -506,16 +701,30 @@ class SegmentAgent:
                 action,
                 action_history=self.action_history,
             )
+            policy_bias = self.world_model.get_policy_bias(current_cluster_id, action)
+            epistemic_bonus = self.world_model.get_epistemic_bonus(
+                current_cluster_id,
+                action,
+            )
             identity_bias = self.policy_evaluator.identity_bias(
                 projected_state=predicted_state,
                 predicted_outcome=predicted_effects,
                 cost=float(option["cost"]),
             )
-            policy_score = -expected_fe + memory_bias + pattern_bias + identity_bias
+            policy_score = (
+                -expected_fe
+                + memory_bias
+                + pattern_bias
+                + policy_bias
+                + epistemic_bonus
+                + identity_bias
+            )
             dominant_component = self.policy_evaluator.dominant_component(
                 expected_free_energy=expected_fe,
                 memory_bias=memory_bias,
                 pattern_bias=pattern_bias,
+                policy_bias=policy_bias,
+                epistemic_bonus=epistemic_bonus,
                 identity_bias=identity_bias,
             )
             ranked_options.append(
@@ -529,6 +738,8 @@ class SegmentAgent:
                     preferred_probability=float(option["preferred_probability"]),
                     memory_bias=memory_bias,
                     pattern_bias=pattern_bias,
+                    policy_bias=policy_bias,
+                    epistemic_bonus=epistemic_bonus,
                     identity_bias=identity_bias,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
@@ -600,6 +811,8 @@ class SegmentAgent:
                 preferred_probability=neutral_preference.preferred_probability,
                 memory_bias=0.0,
                 pattern_bias=0.0,
+                policy_bias=0.0,
+                epistemic_bonus=0.0,
                 identity_bias=0.0,
                 value_score=neutral_preference.value_score,
                 predicted_outcome=neutral_preference.outcome,
@@ -729,6 +942,283 @@ class SegmentAgent:
         self.last_body_state_snapshot = dict(body_state)
         return memory_decision
 
+    def _replay_prediction_error(
+        self,
+        episodes: list[dict[str, object]],
+    ) -> float:
+        if not episodes:
+            return 0.0
+        return mean(
+            compute_prediction_error(
+                dict(payload.get("observation", {})),
+                self.world_model.beliefs,
+            )
+            for payload in episodes
+        )
+
+    def estimate_action_prediction_error(
+        self,
+        observation: Observation,
+        action: str,
+        *,
+        include_slow_weights: bool = True,
+    ) -> tuple[float, int | None]:
+        observed = observation_dict(observation)
+        drive_urgencies = {
+            drive.name: drive.urgency for drive in self.drive_system.drives
+        }
+        try:
+            novelty_deficit = 1.0 - observation.novelty
+            social_isolation = 1.0 - observation.social
+            self.drive_system.update_urgencies(
+                self.energy,
+                self.stress,
+                self.fatigue,
+                self.temperature,
+                social_isolation,
+                novelty_deficit,
+            )
+            priors = self.strategic_layer.priors(
+                self.energy,
+                self.stress,
+                self.fatigue,
+                self.temperature,
+                self.dopamine,
+                self.drive_system,
+            )
+            prediction = self.world_model.predict(priors)
+            errors = {
+                key: observed.get(key, 0.0) - prediction.get(key, 0.0)
+                for key in sorted(set(observed) | set(prediction))
+            }
+            free_energy_before = self.compute_free_energy(errors)
+            current_state_snapshot = {
+                "observation": observed,
+                "prediction": prediction,
+                "errors": errors,
+                "body_state": {
+                    "energy": self.energy,
+                    "stress": self.stress,
+                    "fatigue": self.fatigue,
+                    "temperature": self.temperature,
+                    "dopamine": self.dopamine,
+                },
+            }
+            current_cluster_id = self.long_term_memory.infer_cluster_id(
+                current_state_snapshot
+            )
+            projected_action = self._project_action(
+                action=action,
+                observed=observed,
+                prediction=prediction,
+                priors=priors,
+                free_energy_before=free_energy_before,
+                current_cluster_id=current_cluster_id,
+            )
+            prediction_error = float(projected_action["observation_distance"])
+            if include_slow_weights:
+                prediction_error = (
+                    prediction_error
+                    + max(0.0, 1.0 - float(projected_action["preferred_probability"]))
+                ) / 2.0
+            return (prediction_error, current_cluster_id)
+        finally:
+            for drive in self.drive_system.drives:
+                if drive.name in drive_urgencies:
+                    drive.urgency = drive_urgencies[drive.name]
+
+    def _replay_action_prediction_error(
+        self,
+        episodes: list[dict[str, object]],
+    ) -> float:
+        if not episodes:
+            return 0.0
+
+        body_snapshot = {
+            "energy": self.energy,
+            "stress": self.stress,
+            "fatigue": self.fatigue,
+            "temperature": self.temperature,
+        }
+        replay_errors: list[float] = []
+        try:
+            for payload in episodes:
+                observation_payload = payload.get("observation")
+                action = str(payload.get("action_taken", payload.get("action", "")))
+                if not isinstance(observation_payload, dict) or not action:
+                    continue
+                body_state = payload.get("body_state")
+                if isinstance(body_state, dict):
+                    self.energy = float(body_state.get("energy", self.energy))
+                    self.stress = float(body_state.get("stress", self.stress))
+                    self.fatigue = float(body_state.get("fatigue", self.fatigue))
+                    self.temperature = float(
+                        body_state.get("temperature", self.temperature)
+                    )
+                try:
+                    prediction_error, _ = self.estimate_action_prediction_error(
+                        Observation(**observation_payload),
+                        action,
+                    )
+                except TypeError:
+                    continue
+                replay_errors.append(prediction_error)
+        finally:
+            self.energy = body_snapshot["energy"]
+            self.stress = body_snapshot["stress"]
+            self.fatigue = body_snapshot["fatigue"]
+            self.temperature = body_snapshot["temperature"]
+        if not replay_errors:
+            return 0.0
+        return mean(replay_errors)
+
+    def _update_transition_model_from_replay(
+        self,
+        transitions: list[dict[str, object]],
+    ) -> int:
+        updates = 0
+        for transition in transitions:
+            cluster_id = transition.get("state_cluster")
+            action = transition.get("action")
+            next_cluster = transition.get("next_cluster")
+            if not isinstance(cluster_id, int) or not isinstance(next_cluster, int):
+                continue
+            if not isinstance(action, str) or not action:
+                continue
+            if self.world_model.update_transition_count(cluster_id, action, next_cluster):
+                updates += 1
+        return updates
+
+    def _mine_sleep_patterns(
+        self,
+        replay_batch: list[dict[str, object]],
+    ) -> tuple[int, int, int, int]:
+        grouped: dict[tuple[int, str], list[dict[str, object]]] = {}
+        for payload in replay_batch:
+            cluster_id = payload.get("cluster_id")
+            action = str(payload.get("action_taken", payload.get("action", "")))
+            if not isinstance(cluster_id, int) or not action:
+                continue
+            grouped.setdefault((cluster_id, action), []).append(payload)
+
+        patterns_found = 0
+        world_model_updates = 0
+        policy_bias_updates = 0
+        epistemic_bonus_updates = 0
+        for (cluster_id, action), payloads in sorted(grouped.items()):
+            if len(payloads) < self.long_term_memory.minimum_support:
+                continue
+            counts: dict[str, float] = {}
+            for payload in payloads:
+                outcome = str(payload.get("predicted_outcome", "neutral"))
+                counts[outcome] = counts.get(outcome, 0.0) + 1.0
+            total = sum(counts.values())
+            if total <= 0.0:
+                continue
+            empirical = {
+                outcome: count / total for outcome, count in sorted(counts.items())
+            }
+            baseline = self.world_model.outcome_distribution(cluster_id, action)
+            patterns_found += 1
+            if (
+                not baseline
+                or self.world_model._kl_divergence(empirical, baseline)
+                > self.world_model.kl_divergence_threshold
+            ):
+                self.world_model.set_outcome_distribution(cluster_id, action, empirical)
+                world_model_updates += 1
+
+            high_risk_probability = mean(
+                1.0 if float(payload.get("risk", 0.0)) >= 3.0 else 0.0
+                for payload in payloads
+            )
+            outcome_variance = (
+                pvariance(float(payload.get("value_score", 0.0)) for payload in payloads)
+                if len(payloads) > 1
+                else 0.0
+            )
+            mean_risk = mean(float(payload.get("risk", 0.0)) for payload in payloads)
+            if outcome_variance >= 0.15:
+                self.world_model.adjust_epistemic_bonus(
+                    cluster_id,
+                    action,
+                    delta=min(
+                        0.40,
+                        0.08
+                        * (len(payloads) / self.long_term_memory.minimum_support)
+                        * (1.0 + outcome_variance),
+                    ),
+                )
+                epistemic_bonus_updates += 1
+                continue
+
+            if high_risk_probability >= 0.60:
+                self.world_model.adjust_policy_bias(
+                    cluster_id,
+                    action,
+                    delta=-min(
+                        0.45,
+                        0.08
+                        * high_risk_probability
+                        * (mean_risk / 3.0)
+                        * (len(payloads) / self.long_term_memory.minimum_support),
+                    ),
+                )
+                policy_bias_updates += 1
+        return (
+            patterns_found,
+            world_model_updates,
+            policy_bias_updates,
+            epistemic_bonus_updates,
+        )
+
+    def _predicted_outcome_probability(self, payload: dict[str, object]) -> float:
+        cluster_id = payload.get("cluster_id")
+        action = str(payload.get("action_taken", payload.get("action", "")))
+        outcome = str(payload.get("predicted_outcome", "neutral"))
+        if not isinstance(cluster_id, int) or not action:
+            return 0.0
+        return float(
+            self.world_model.outcome_distribution(cluster_id, action).get(outcome, 0.0)
+        )
+
+    def _surprise_based_forgetting(
+        self,
+        replay_batch: list[dict[str, object]],
+    ) -> tuple[int, int]:
+        if not replay_batch:
+            return 0, 0
+
+        episodes_deleted = 0
+        episodes_archived = 0
+        for payload in list(replay_batch):
+            predicted_probability = self._predicted_outcome_probability(payload)
+            if predicted_probability <= 0.0:
+                continue
+
+            prediction_error = 1.0 - predicted_probability
+            risk = -self.long_term_memory.preference_model.log_preferred_probability(
+                str(payload.get("predicted_outcome", "neutral"))
+            )
+            total_surprise = compute_total_surprise(prediction_error, risk)
+            payload["dream_prediction_error"] = prediction_error
+            payload["dream_total_surprise"] = total_surprise
+
+            if total_surprise < self.long_term_memory.surprise_threshold:
+                if self.long_term_memory.delete_episode(payload):
+                    episodes_deleted += 1
+                continue
+
+            episode_age = self.cycle - int(payload.get("timestamp", payload.get("cycle", 0)))
+            if episode_age > self.long_term_memory.max_active_age:
+                if self.long_term_memory.archive_episode(
+                    payload,
+                    archive_cycle=self.cycle,
+                    reason="age_out_unexplained",
+                ):
+                    episodes_archived += 1
+        return episodes_archived, episodes_deleted
+
     def dream_replay(self, episodes: list[MemoryEpisode]) -> list[DreamReplay]:
         """Replay and learn from past episodes during sleep."""
         if not episodes:
@@ -772,18 +1262,39 @@ class SegmentAgent:
         return replays
 
     def sleep(self) -> SleepSummary:
-        """Sleep: consolidate memory, replay dreams, restore body."""
+        """Sleep: consolidate memory, replay dreams, restore body.
+
+        The action space is frozen for the duration of sleep.  Any attempt to
+        call ``decision_cycle`` while ``_sleeping`` is ``True`` will raise.
+        """
+        self._sleeping = True
+        try:
+            return self._sleep_inner()
+        finally:
+            self._sleeping = False
+
+    def _sleep_inner(self) -> SleepSummary:
+        sleep_cycle_id = len(self.sleep_history) + 1
         recent = self.episodes[-10:] if len(self.episodes) >= 10 else self.episodes
-        if not recent:
+        if not recent and not self.long_term_memory.episodes:
             summary = SleepSummary(
-                0.0, "rest", dict(self.world_model.beliefs), 0, 0
+                0.0,
+                "rest",
+                dict(self.world_model.beliefs),
+                0,
+                0,
+                sleep_cycle_id=sleep_cycle_id,
             )
-            self.semantic_memory.append(summary)
+            self.sleep_history.append(summary)
             return summary
+
+        replay_batch = self.long_term_memory.prioritized_replay_sample(rng=self.rng)
+        clusters_created = self.long_term_memory.assign_clusters()
+        prediction_error_before = self._replay_action_prediction_error(replay_batch)
 
         # Dream replay
         dreams = self.dream_replay(recent)
-        
+
         # Compute statistics
         gains = [ep.free_energy_before - ep.free_energy_after for ep in recent]
         action_scores: dict[str, list[float]] = {}
@@ -797,20 +1308,63 @@ class SegmentAgent:
             else "rest"
         )
 
-        # Belief consolidation
-        averaged_errors = {
-            key: mean(episode.errors[key] for episode in recent)
-            for key in self.world_model.beliefs
-            if key in recent[0].errors
-        }
-        self._nudge_hierarchy(averaged_errors, scale=0.15)
+        # Belief consolidation from replayed experience.
+        averaged_errors: dict[str, float] = {}
+        if replay_batch:
+            replay_errors = [
+                dict(payload.get("errors", {}))
+                for payload in replay_batch
+                if isinstance(payload.get("errors"), dict)
+            ]
+            if replay_errors:
+                averaged_errors = {
+                    key: mean(error.get(key, 0.0) for error in replay_errors)
+                    for key in self.world_model.beliefs
+                }
+                self._nudge_hierarchy(averaged_errors, scale=0.12)
+        elif recent:
+            averaged_errors = {
+                key: mean(episode.errors[key] for episode in recent)
+                for key in self.world_model.beliefs
+                if key in recent[0].errors
+            }
+            self._nudge_hierarchy(averaged_errors, scale=0.15)
+
+        transition_dataset = self.long_term_memory.reconstruct_transitions(replay_batch)
+        transition_updates = self._update_transition_model_from_replay(transition_dataset)
+        (
+            patterns_found,
+            world_pattern_updates,
+            policy_bias_updates,
+            epistemic_bonus_updates,
+        ) = self._mine_sleep_patterns(replay_batch)
+        consolidator = SleepConsolidator(
+            surprise_threshold=self.long_term_memory.surprise_threshold,
+            minimum_support=self.long_term_memory.sleep_minimum_support,
+            llm_extractor=self.sleep_llm_extractor,
+        )
+        consolidation = consolidator.consolidate(
+            sleep_cycle_id=sleep_cycle_id,
+            current_cycle=self.cycle,
+            episodes=replay_batch,
+            transition_statistics=self.world_model.transition_model,
+            outcome_distributions=self.world_model.outcome_model,
+        )
+        semantic_entries_written, threat_updates, preference_updates = self._apply_sleep_consolidation(
+            consolidation
+        )
+        prediction_error_after = self._replay_action_prediction_error(replay_batch)
+        episodes_archived, episodes_deleted = self._surprise_based_forgetting(replay_batch)
+        compression_removed = self.long_term_memory.compress_episodes()
 
         # Body restoration
         self.energy = clamp(self.energy + 0.28)
         self.stress = clamp(self.stress - 0.20)
         self.fatigue = clamp(self.fatigue - 0.35)
         self.temperature = clamp(self.temperature + (0.5 - self.temperature) * 0.3)
-        self.dopamine = clamp(self.dopamine + max(0.0, mean(gains)) * 0.25)
+        self.dopamine = clamp(
+            self.dopamine + max(0.0, mean(gains) if gains else 0.0) * 0.25
+        )
 
         summary = SleepSummary(
             average_free_energy_drop=mean(gains) if gains else 0.0,
@@ -818,8 +1372,27 @@ class SegmentAgent:
             stable_beliefs=dict(self.world_model.beliefs),
             dream_replay_count=len(dreams),
             memory_consolidations=len(averaged_errors),
+            sleep_cycle_id=sleep_cycle_id,
+            episodes_sampled=len(replay_batch),
+            clusters_created=clusters_created,
+            patterns_found=patterns_found,
+            world_model_updates=transition_updates + world_pattern_updates,
+            policy_bias_updates=policy_bias_updates,
+            epistemic_bonus_updates=epistemic_bonus_updates,
+            episodes_archived=episodes_archived,
+            episodes_deleted=episodes_deleted,
+            memory_compressed=episodes_archived + episodes_deleted + compression_removed,
+            prediction_error_before=prediction_error_before,
+            prediction_error_after=prediction_error_after,
+            rules_extracted=len(consolidation.rules),
+            threat_updates=threat_updates,
+            preference_updates=preference_updates,
+            semantic_entries_written=semantic_entries_written,
+            compression_removed=compression_removed,
+            llm_used=consolidation.llm_used,
+            rule_ids=[rule.rule_id for rule in consolidation.rules],
         )
-        self.semantic_memory.append(summary)
+        self.sleep_history.append(summary)
         # Keep only last 3 episodes in working memory
         self.episodes = self.episodes[-3:]
         return summary
@@ -842,7 +1415,8 @@ class SegmentAgent:
             "strategic_layer": self.strategic_layer.to_dict(),
             "long_term_memory": self.long_term_memory.to_dict(),
             "episodes": [asdict(episode) for episode in self.episodes],
-            "semantic_memory": [asdict(summary) for summary in self.semantic_memory],
+            "semantic_memory": [asdict(entry) for entry in self.semantic_memory],
+            "sleep_history": [asdict(summary) for summary in self.sleep_history],
             "action_history": list(self.action_history),
             "action_history_limit": self.action_history_limit,
             "identity_traits": asdict(self.identity_traits),
@@ -890,8 +1464,21 @@ class SegmentAgent:
         agent.episodes = [
             MemoryEpisode(**episode) for episode in payload.get("episodes", [])
         ]
+        semantic_memory_payload = list(payload.get("semantic_memory", []))
+        sleep_history_payload = list(payload.get("sleep_history", []))
+        if semantic_memory_payload and not sleep_history_payload:
+            if isinstance(semantic_memory_payload[0], dict) and "average_free_energy_drop" in semantic_memory_payload[0]:
+                sleep_history_payload = semantic_memory_payload
+                semantic_memory_payload = []
         agent.semantic_memory = [
-            SleepSummary(**summary) for summary in payload.get("semantic_memory", [])
+            SemanticMemoryEntry(**entry)
+            for entry in semantic_memory_payload
+            if isinstance(entry, dict)
+        ]
+        agent.sleep_history = [
+            SleepSummary(**summary)
+            for summary in sleep_history_payload
+            if isinstance(summary, dict)
         ]
         agent.action_history = [
             str(choice) for choice in payload.get("action_history", [])

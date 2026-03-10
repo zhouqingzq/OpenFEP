@@ -18,6 +18,7 @@ from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, qu
 from .predictive_coding import PredictiveCodingHyperparameters
 from .self_model import ClassificationResult, SelfModel, build_default_self_model
 from .state import AgentState, PolicyTendency, TickInput
+from .sleep_consolidator import build_sleep_llm_extractor
 from .tracing import JsonlTraceWriter, derive_trace_path
 from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 
@@ -46,6 +47,8 @@ def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
         f"risk={option.risk:.3f} "
         f"mem={option.memory_bias:.3f} "
         f"pat={option.pattern_bias:.3f} "
+        f"pol={option.policy_bias:.3f} "
+        f"epi={option.epistemic_bonus:.3f} "
         f"id={option.identity_bias:.3f}"
         for option in choice_ranking
     )
@@ -69,6 +72,8 @@ class SegmentRuntime:
         self.world = world or SimulatedWorld()
         self.agent = agent or SegmentAgent(rng=self.world.rng)
         self.agent.rng = self.world.rng
+        if self.agent.sleep_llm_extractor is None:
+            self.agent.sleep_llm_extractor = build_sleep_llm_extractor()
         self.metrics = metrics or RunMetrics()
         self.host_state = host_state or AgentState()
         self.interoceptor = interoceptor or ProcessInteroceptor()
@@ -233,7 +238,8 @@ class SegmentRuntime:
                 "Final interoceptive beliefs:",
                 format_state(self.agent.interoceptive_layer.belief_state.beliefs),
             )
-            print(f"Semantic summaries stored: {len(self.agent.semantic_memory)}")
+            print(f"Semantic rules stored: {len(self.agent.semantic_memory)}")
+            print(f"Sleep cycles stored: {len(self.agent.sleep_history)}")
             print(f"Long-term memory episodes: {len(self.agent.long_term_memory.episodes)}")
             print("Metrics:", json.dumps(summary, ensure_ascii=True, sort_keys=True))
 
@@ -577,6 +583,8 @@ class SegmentRuntime:
                     "preferred_probability": option.preferred_probability,
                     "memory_bias": option.memory_bias,
                     "pattern_bias": option.pattern_bias,
+                    "policy_bias": option.policy_bias,
+                    "epistemic_bonus": option.epistemic_bonus,
                     "identity_bias": option.identity_bias,
                     "value_score": option.value_score,
                     "dominant_component": option.dominant_component,
@@ -597,6 +605,8 @@ class SegmentRuntime:
                 "value_score": memory_decision.value_score,
                 "memory_bias": diagnostics.chosen.memory_bias,
                 "pattern_bias": diagnostics.chosen.pattern_bias,
+                "policy_bias": diagnostics.chosen.policy_bias,
+                "epistemic_bonus": diagnostics.chosen.epistemic_bonus,
                 "identity_bias": diagnostics.chosen.identity_bias,
                 "policy_score": diagnostics.chosen.policy_score,
                 "policy_scores": diagnostics.policy_scores,
@@ -735,6 +745,8 @@ class SegmentRuntime:
             f"pe={diagnostics.prediction_error:.3f}, "
             f"memory={diagnostics.chosen.memory_bias:.3f}, "
             f"pattern={diagnostics.chosen.pattern_bias:.3f}, "
+            f"policy_bias={diagnostics.chosen.policy_bias:.3f}, "
+            f"epistemic={diagnostics.chosen.epistemic_bonus:.3f}, "
             f"identity={diagnostics.chosen.identity_bias:.3f}"
         )
         print(f"  explain     {diagnostics.explanation}")
@@ -746,6 +758,15 @@ class SegmentRuntime:
                 f"preferred_action={sleep_summary.preferred_action}, "
                 f"dreams={sleep_summary.dream_replay_count}, "
                 f"consolidations={sleep_summary.memory_consolidations}, "
+                f"sampled={sleep_summary.episodes_sampled}, "
+                f"clusters={sleep_summary.clusters_created}, "
+                f"patterns={sleep_summary.patterns_found}, "
+                f"wm_updates={sleep_summary.world_model_updates}, "
+                f"policy_updates={sleep_summary.policy_bias_updates}, "
+                f"epistemic_updates={sleep_summary.epistemic_bonus_updates}, "
+                f"archived={sleep_summary.episodes_archived}, "
+                f"deleted={sleep_summary.episodes_deleted}, "
+                f"pe={sleep_summary.prediction_error_before:.3f}->{sleep_summary.prediction_error_after:.3f}, "
                 f"beliefs={format_state(sleep_summary.stable_beliefs)}"
             )
 
@@ -770,4 +791,5 @@ class SegmentRuntime:
     def export_snapshot(self) -> dict[str, object]:
         payload = self._snapshot_payload()
         payload["semantic_memory"] = [asdict(item) for item in self.agent.semantic_memory]
+        payload["sleep_history"] = [asdict(item) for item in self.agent.sleep_history]
         return payload

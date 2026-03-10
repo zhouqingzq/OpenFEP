@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -33,6 +33,71 @@ class SleepSummary:
     stable_beliefs: dict[str, float]
     dream_replay_count: int
     memory_consolidations: int
+    sleep_cycle_id: int = 0
+    episodes_sampled: int = 0
+    clusters_created: int = 0
+    patterns_found: int = 0
+    world_model_updates: int = 0
+    policy_bias_updates: int = 0
+    epistemic_bonus_updates: int = 0
+    episodes_archived: int = 0
+    episodes_deleted: int = 0
+    memory_compressed: int = 0
+    prediction_error_before: float = 0.0
+    prediction_error_after: float = 0.0
+    rules_extracted: int = 0
+    threat_updates: int = 0
+    preference_updates: int = 0
+    semantic_entries_written: int = 0
+    compression_removed: int = 0
+    llm_used: bool = False
+    rule_ids: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class SleepRule:
+    rule_id: str
+    type: str
+    cluster: int
+    action: str
+    observed_outcome: str
+    confidence: float
+    support: int
+    average_surprise: float
+    average_prediction_error: float
+    timestamp: int
+    narrative_insight: str = ""
+
+
+@dataclass(frozen=True)
+class SemanticMemoryEntry:
+    rule_id: str
+    rule_type: str
+    cluster: int
+    action: str
+    confidence: float
+    timestamp: int
+    observed_outcome: str = "neutral"
+    support: int = 1
+
+
+@dataclass(frozen=True)
+class ModelUpdate:
+    update_type: str
+    cluster: int
+    action: str
+    delta: float
+    target: str
+    rule_id: str
+
+
+@dataclass(frozen=True)
+class SleepConsolidationResult:
+    rules: list[SleepRule]
+    semantic_memory_entries: list[SemanticMemoryEntry]
+    model_updates: list[ModelUpdate]
+    llm_used: bool = False
+    rules_before_llm: list[SleepRule] = field(default_factory=list)
 
 
 @dataclass
@@ -56,6 +121,8 @@ class InterventionScore:
     preferred_probability: float
     memory_bias: float
     pattern_bias: float
+    policy_bias: float
+    epistemic_bonus: float
     identity_bias: float
     value_score: float
     predicted_outcome: str
@@ -68,6 +135,8 @@ class InterventionScore:
             "negative_expected_free_energy": -self.expected_free_energy,
             "memory_bias": self.memory_bias,
             "pattern_bias": self.pattern_bias,
+            "policy_bias": self.policy_bias,
+            "epistemic_bonus": self.epistemic_bonus,
             "identity_bias": self.identity_bias,
         }
 

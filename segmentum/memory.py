@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
-from math import sqrt
+from math import log, sqrt
 from statistics import mean
 
 from .preferences import PreferenceModel, ValueHierarchy
@@ -142,7 +143,7 @@ def compute_surprise(prediction_error: float) -> float:
     return abs(prediction_error)
 
 
-RISK_WEIGHT = 0.7
+RISK_WEIGHT = 1.0
 
 
 def compute_total_surprise(
@@ -219,7 +220,7 @@ def _state_vector_order() -> list[str]:
         "temperature",
         "social",
     ]
-    body_keys = ["cycle", "energy", "stress", "fatigue", "temperature", "dopamine"]
+    body_keys: list[str] = []
     ordered = [f"obs_{key}" for key in observation_keys]
     ordered.extend(f"pred_{key}" for key in observation_keys)
     ordered.extend(f"err_{key}" for key in observation_keys)
@@ -244,9 +245,20 @@ class LongTermMemory:
 
     episodes: list[dict] = field(default_factory=list)
     semantic_patterns: list[dict] = field(default_factory=list)
-    max_episodes: int = 50
+    max_episodes: int = 1024
     surprise_threshold: float = 0.40
     duplicate_similarity_threshold: float = 0.999
+    sleep_interval: int = 200
+    memory_threshold: int = 512
+    sleep_batch_size: int = 128
+    minimum_support: int = 5
+    sleep_minimum_support: int = 3
+    compression_similarity_threshold: float = 0.95
+    cluster_distance_threshold: float = 0.15
+    max_active_age: int = 5000
+    cluster_centroids: list[list[float]] = field(default_factory=list)
+    cluster_counts: list[int] = field(default_factory=list)
+    archived_episodes: list[dict] = field(default_factory=list)
     preference_model: PreferenceModel = field(default_factory=PreferenceModel)
 
     @property
@@ -463,6 +475,189 @@ class LongTermMemory:
                     bias -= (streak - 3) * 0.10
         return max(-1.0, min(1.0, bias))
 
+    def should_sleep(self, cycle_count: int) -> bool:
+        if cycle_count > 0 and self.sleep_interval > 0 and cycle_count % self.sleep_interval == 0:
+            return True
+        return len(self.episodes) > self.memory_threshold
+
+    def prioritized_replay_sample(
+        self,
+        *,
+        rng,
+    ) -> list[dict[str, object]]:
+        if not self.episodes:
+            return []
+
+        latest_timestamp = max(self._episode_cycle(episode) for episode in self.episodes)
+        scored: list[tuple[float, float, dict[str, object]]] = []
+        for payload in self.episodes:
+            preferred_probability = max(
+                1e-12,
+                float(payload.get("preferred_probability", 0.0)),
+            )
+            risk = -log(preferred_probability)
+            timestamp = self._episode_cycle(payload)
+            recency_weight = 1.0 / (1.0 + max(0.0, latest_timestamp - timestamp))
+            priority = (
+                float(payload.get("prediction_error", 0.0))
+                + risk
+                + recency_weight
+            )
+            scored.append((priority, timestamp, payload))
+
+        scored.sort(key=lambda item: (-item[0], -item[1], str(item[2].get("action", ""))))
+        sample_size = min(self.sleep_batch_size, len(scored))
+        high_priority_count = min(len(scored), int(round(sample_size * 0.8)))
+        high_priority = [payload for _, _, payload in scored[:high_priority_count]]
+        remaining = [payload for _, _, payload in scored[high_priority_count:]]
+        random_count = sample_size - len(high_priority)
+        random_replay = (
+            rng.sample(remaining, min(random_count, len(remaining)))
+            if remaining and random_count > 0
+            else []
+        )
+        selected_ids = {id(payload) for payload in high_priority + random_replay}
+        fallback = [
+            payload for _, _, payload in scored
+            if id(payload) not in selected_ids
+        ]
+        replay_batch = list(high_priority)
+        replay_batch.extend(random_replay)
+        replay_batch.extend(fallback[: sample_size - len(replay_batch)])
+        replay_batch.sort(key=self._episode_cycle)
+        return replay_batch
+
+    def assign_clusters(self) -> int:
+        if not self.episodes:
+            self.cluster_centroids = []
+            self.cluster_counts = []
+            return 0
+
+        if self._needs_cluster_rebuild():
+            self.cluster_centroids = []
+            self.cluster_counts = []
+            for payload in self.episodes:
+                payload.pop("cluster_id", None)
+
+        created = 0
+        for payload in sorted(self.episodes, key=self._episode_cycle):
+            if isinstance(payload.get("cluster_id"), int):
+                continue
+            embedding = self._episode_embedding(payload)
+            cluster_id, was_created = self._assign_embedding_to_cluster(embedding)
+            payload["cluster_id"] = cluster_id
+            if was_created:
+                created += 1
+        return created
+
+    def infer_cluster_id(self, current_state: dict[str, object]) -> int | None:
+        if not self.cluster_centroids:
+            return None
+        state_vector = _flatten_state_snapshot(
+            {
+                "observation": dict(current_state.get("observation", {})),
+                "prediction": dict(current_state.get("prediction", {})),
+                "errors": dict(current_state.get("errors", {})),
+                "body_state": dict(current_state.get("body_state", {})),
+            }
+        )
+        embedding = self._build_embedding(state_vector)
+        cluster_id, distance = self._nearest_cluster(embedding)
+        if cluster_id is None or distance >= self.cluster_distance_threshold:
+            return None
+        return cluster_id
+
+    def reconstruct_transitions(
+        self,
+        episodes: list[dict[str, object]],
+    ) -> list[dict[str, object]]:
+        ordered = sorted(episodes, key=self._episode_cycle)
+        transitions: list[dict[str, object]] = []
+        for current, successor in zip(ordered, ordered[1:]):
+            cluster_id = current.get("cluster_id")
+            next_cluster_id = successor.get("cluster_id")
+            if not isinstance(cluster_id, int) or not isinstance(next_cluster_id, int):
+                continue
+            transitions.append(
+                {
+                    "state_cluster": cluster_id,
+                    "action": str(current.get("action_taken", current.get("action", ""))),
+                    "next_cluster": next_cluster_id,
+                    "timestamp": int(self._episode_cycle(current)),
+                }
+            )
+        return transitions
+
+    def delete_episode(self, payload: dict[str, object]) -> bool:
+        try:
+            self.episodes.remove(payload)
+        except ValueError:
+            return False
+        self._refresh_semantic_patterns()
+        return True
+
+    def archive_episode(
+        self,
+        payload: dict[str, object],
+        *,
+        archive_cycle: int,
+        reason: str,
+    ) -> bool:
+        archived = dict(payload)
+        archived["archived_at_cycle"] = archive_cycle
+        archived["archive_reason"] = reason
+        self.archived_episodes.append(archived)
+        return self.delete_episode(payload)
+
+    def compress_episodes(self) -> int:
+        if len(self.episodes) < 2:
+            return 0
+
+        ordered_payloads = sorted(
+            self.episodes,
+            key=lambda payload: (
+                str(payload.get("action_taken", payload.get("action", ""))),
+                self._episode_cycle(payload),
+            ),
+        )
+        compressed: list[dict[str, object]] = []
+        used: set[int] = set()
+        removed = 0
+        for index, payload in enumerate(ordered_payloads):
+            if index in used:
+                continue
+            base_episode = Episode.from_dict(payload)
+            base_embedding = base_episode.embedding or self._build_embedding(base_episode.state_vector)
+            group = [payload]
+            used.add(index)
+            for other_index in range(index + 1, len(ordered_payloads)):
+                if other_index in used:
+                    continue
+                candidate = ordered_payloads[other_index]
+                if str(candidate.get("action_taken", candidate.get("action", ""))) != base_episode.action_taken:
+                    continue
+                candidate_episode = Episode.from_dict(candidate)
+                candidate_embedding = candidate_episode.embedding or self._build_embedding(candidate_episode.state_vector)
+                if _cosine_similarity(base_embedding, candidate_embedding) < self.compression_similarity_threshold:
+                    continue
+                group.append(candidate)
+                used.add(other_index)
+            if len(group) == 1:
+                retained = dict(payload)
+                retained["consolidated"] = bool(retained.get("consolidated", False))
+                retained["compressed_count"] = int(retained.get("compressed_count", 1))
+                compressed.append(retained)
+                continue
+            merged_payload = self._merge_episode_group(group)
+            merged_payload["consolidated"] = True
+            compressed.append(merged_payload)
+            removed += len(group) - 1
+
+        compressed.sort(key=self._episode_cycle)
+        self.episodes = compressed[-self.max_episodes :]
+        self._refresh_semantic_patterns()
+        return removed
+
     def _resolve_reference_cycle(
         self,
         current_observation: dict[str, float],
@@ -498,6 +693,17 @@ class LongTermMemory:
             "max_episodes": self.max_episodes,
             "surprise_threshold": self.surprise_threshold,
             "duplicate_similarity_threshold": self.duplicate_similarity_threshold,
+            "sleep_interval": self.sleep_interval,
+            "memory_threshold": self.memory_threshold,
+            "sleep_batch_size": self.sleep_batch_size,
+            "minimum_support": self.minimum_support,
+            "sleep_minimum_support": self.sleep_minimum_support,
+            "compression_similarity_threshold": self.compression_similarity_threshold,
+            "cluster_distance_threshold": self.cluster_distance_threshold,
+            "max_active_age": self.max_active_age,
+            "cluster_centroids": [list(centroid) for centroid in self.cluster_centroids],
+            "cluster_counts": list(self.cluster_counts),
+            "archived_episodes": list(self.archived_episodes),
             "preference_model": self.preference_model.to_dict(),
             "value_hierarchy": self.preference_model.legacy_value_hierarchy_dict(),
         }
@@ -516,11 +722,32 @@ class LongTermMemory:
         return cls(
             episodes=list(payload.get("episodes", [])),
             semantic_patterns=list(payload.get("semantic_patterns", [])),
-            max_episodes=int(payload.get("max_episodes", 50)),
+            max_episodes=int(payload.get("max_episodes", 1024)),
             surprise_threshold=float(payload.get("surprise_threshold", 0.40)),
             duplicate_similarity_threshold=float(
                 payload.get("duplicate_similarity_threshold", 0.999)
             ),
+            sleep_interval=int(payload.get("sleep_interval", 200)),
+            memory_threshold=int(payload.get("memory_threshold", 512)),
+            sleep_batch_size=int(payload.get("sleep_batch_size", 128)),
+            minimum_support=int(payload.get("minimum_support", 5)),
+            sleep_minimum_support=int(payload.get("sleep_minimum_support", 3)),
+            compression_similarity_threshold=float(
+                payload.get("compression_similarity_threshold", 0.95)
+            ),
+            cluster_distance_threshold=float(
+                payload.get("cluster_distance_threshold", 0.15)
+            ),
+            max_active_age=int(payload.get("max_active_age", 5000)),
+            cluster_centroids=[
+                [float(value) for value in centroid]
+                for centroid in list(payload.get("cluster_centroids", []))
+                if isinstance(centroid, list)
+            ],
+            cluster_counts=[
+                int(value) for value in list(payload.get("cluster_counts", []))
+            ],
+            archived_episodes=list(payload.get("archived_episodes", [])),
             preference_model=PreferenceModel.from_dict(preference_payload),
         )
 
@@ -566,6 +793,70 @@ class LongTermMemory:
     ) -> list[float]:
         ordered_keys = _state_vector_order()
         return [float(state_vector.get(key, 0.0)) for key in ordered_keys]
+
+    def _needs_cluster_rebuild(self) -> bool:
+        if len(self.cluster_centroids) != len(self.cluster_counts):
+            return True
+        if not self.cluster_centroids:
+            return any("cluster_id" in payload for payload in self.episodes)
+        for payload in self.episodes:
+            cluster_id = payload.get("cluster_id")
+            if cluster_id is None:
+                continue
+            if not isinstance(cluster_id, int) or cluster_id < 0:
+                return True
+            if cluster_id >= len(self.cluster_centroids):
+                return True
+        return False
+
+    def _episode_embedding(self, payload: dict[str, object]) -> list[float]:
+        episode = Episode.from_dict(payload)
+        return episode.embedding or self._build_embedding(episode.state_vector)
+
+    def _assign_embedding_to_cluster(
+        self,
+        embedding: list[float],
+    ) -> tuple[int, bool]:
+        cluster_id, distance = self._nearest_cluster(embedding)
+        if cluster_id is None or distance >= self.cluster_distance_threshold:
+            self.cluster_centroids.append(list(embedding))
+            self.cluster_counts.append(1)
+            return len(self.cluster_centroids) - 1, True
+
+        count = self.cluster_counts[cluster_id]
+        centroid = self.cluster_centroids[cluster_id]
+        updated_count = count + 1
+        self.cluster_centroids[cluster_id] = [
+            ((value * count) + sample) / updated_count
+            for value, sample in zip(centroid, embedding)
+        ]
+        self.cluster_counts[cluster_id] = updated_count
+        return cluster_id, False
+
+    def _nearest_cluster(
+        self,
+        embedding: list[float],
+    ) -> tuple[int | None, float]:
+        if not self.cluster_centroids:
+            return None, float("inf")
+
+        best_index = None
+        best_distance = float("inf")
+        for index, centroid in enumerate(self.cluster_centroids):
+            distance = _cosine_distance(embedding, centroid)
+            if distance < best_distance:
+                best_distance = distance
+                best_index = index
+        return best_index, best_distance
+
+    def _mean_vector(self, vectors: list[list[float]]) -> list[float]:
+        if not vectors:
+            return []
+        width = len(vectors[0])
+        return [
+            mean(vector[index] for vector in vectors)
+            for index in range(width)
+        ]
 
     def _is_duplicate_episode(self, candidate: Episode) -> bool:
         for payload in self.episodes:
@@ -634,3 +925,52 @@ class LongTermMemory:
                 if isinstance(cycle, (int, float)):
                     return float(cycle)
         return 0.0
+
+    def _merge_episode_group(
+        self,
+        payloads: list[dict[str, object]],
+    ) -> dict[str, object]:
+        episodes = [Episode.from_dict(payload) for payload in payloads]
+        average_state_vector = {
+            key: mean(episode.state_vector.get(key, 0.0) for episode in episodes)
+            for key in {
+                state_key
+                for episode in episodes
+                for state_key in episode.state_vector
+            }
+        }
+        average_outcome = {
+            key: mean(episode.outcome_state.get(key, 0.0) for episode in episodes)
+            for key in {
+                outcome_key
+                for episode in episodes
+                for outcome_key in episode.outcome_state
+            }
+        }
+        label_counts = Counter(episode.predicted_outcome for episode in episodes)
+        merged = Episode(
+            timestamp=int(round(mean(episode.timestamp for episode in episodes))),
+            state_vector=average_state_vector,
+            action_taken=episodes[0].action_taken,
+            outcome_state=average_outcome,
+            predicted_outcome=sorted(
+                label_counts.items(),
+                key=lambda item: (-item[1], item[0]),
+            )[0][0],
+            prediction_error=mean(episode.prediction_error for episode in episodes),
+            risk=mean(episode.risk for episode in episodes),
+            value_score=mean(episode.value_score for episode in episodes),
+            total_surprise=mean(episode.total_surprise for episode in episodes),
+            embedding=self._mean_vector(
+                [episode.embedding or self._build_embedding(episode.state_vector) for episode in episodes]
+            ),
+            preferred_probability=mean(episode.preferred_probability for episode in episodes),
+            preference_log_value=mean(episode.preference_log_value for episode in episodes),
+        )
+        merged_payload = merged.to_dict()
+        merged_payload["compressed_count"] = len(payloads)
+        return merged_payload
+
+
+def _cosine_distance(left: list[float], right: list[float]) -> float:
+    return 1.0 - _cosine_similarity(left, right)

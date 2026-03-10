@@ -1,0 +1,11 @@
+{
+  "action": "forage",
+  "cluster": 0,
+  "prediction_error_after_sleep": 0.372936,
+  "prediction_error_before_sleep": 0.634562,
+  "rule_ids": [
+    "sleep-1-0-forage-survival_threat"
+  ],
+  "scenario": "M2.3 prediction flattening",
+  "seed": 29
+}

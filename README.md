@@ -171,6 +171,71 @@ Closed-loop evidence:
 
    `PreferenceModel -> preferred_probability / risk / value_score -> total_surprise gate -> embedding -> local long-term memory store`
 
+## M2.3 Acceptance Evidence
+
+The canonical acceptance samples for `M2.3: Sleep Consolidation` live in:
+
+- `data/segment_v0_4_sleep_state.json` — full agent snapshot after sleep
+- `data/segment_v0_4_sleep_trace.jsonl` — heuristic-only sleep cycle trace
+- `artifacts/segment_v0_4_prediction_flattening.json` — prediction error before/after fixture
+- `artifacts/segment_v0_4_sleep_llm_trace.jsonl` — LLM-enhanced sleep cycle trace
+
+Regenerate all deterministically with:
+
+```powershell
+py -3.11 E:\workspace\segments\scripts\generate_sleep_artifact.py
+```
+
+### Pipeline architecture
+
+Sleep consolidation is a two-stage pipeline that always runs both stages:
+
+1. **Heuristic rule extraction** — deterministic statistical grouping by `(cluster, action, outcome)` with support/dominance gating and multi-signal confidence scoring.
+2. **LLM extraction stage** — always present. Defaults to `HeuristicSleepExtractor` (deterministic confidence validation). When an LLM backend is configured (via `SleepLLMExtractor` or `LLMSleepRuleRefiner`), the stage calls the model to refine, merge, or augment rules based on causal plausibility.
+
+The stage is never skipped. `SleepConsolidator` always holds an extractor; what varies is the backend.
+
+### Closed-loop evidence (heuristic path)
+
+1. `high-surprise anomaly`
+   In `data/segment_v0_4_sleep_trace.jsonl`, the `anomaly_experience` record stores a repeated `forage` anomaly with `predicted_outcome = "survival_threat"` and `total_surprise = 1005.2300489856774`.
+
+2. `sleep rule extraction`
+   The `sleep_cycle` record extracts a semantic rule:
+
+   - `rule_id = "sleep-1-0-forage-survival_threat"`
+   - `rule_type = "risk_pattern"`
+   - `cluster = 0`
+   - `action = "forage"`
+   - `confidence = 0.99`
+
+3. `slow-weight write-back`
+   The same sleep record shows the learned rule being written into slow weights:
+
+   - `policy_biases["0"]["forage"] = -0.45`
+   - `preference_penalties["0"]["forage"] = -1.2`
+   - `threat_priors["0"] = 0.55`
+
+4. `episode compression after consolidation`
+   `data/segment_v0_4_sleep_state.json` stores `sleep_history[0].compression_removed = 4`, and the episodic store shrinks from 5 raw anomaly episodes to 1 consolidated episode with `compressed_count = 5`.
+
+5. `reduced surprise on the repeat encounter`
+   In the `repeat_encounter` record, the agent now selects `hide` instead of re-encoding the dangerous `forage` anomaly. The repeated situation yields `episode_created = false` and `total_surprise = 0.23004898567736703`, which is far below the pre-sleep anomaly surprise.
+
+6. `prediction error flattening`
+   `artifacts/segment_v0_4_prediction_flattening.json` records `prediction_error_before_sleep = 0.634562` and `prediction_error_after_sleep = 0.372936` (seed 29, `sleep_minimum_support = 3`), confirming the sleep cycle compresses the agent's prediction error for the learned action-outcome pair.
+
+### Closed-loop evidence (LLM-enhanced path)
+
+`artifacts/segment_v0_4_sleep_llm_trace.jsonl` records a sleep cycle with `llm_used = true`:
+
+- `rules_before_llm` — heuristic rules prior to LLM refinement
+- `rules_after_llm` — rules after LLM confidence adjustment
+- `semantic_rules_written = 1` — LLM-refined rules written to semantic memory
+- `threat_updates = 1`, `preference_updates = 1` — slow weights updated from LLM-refined rules
+
+Tests validate that LLM-boosted confidence propagates into semantic memory entries and produces larger slow-weight deltas than the heuristic-only baseline.
+
 ## Segment v0.1 baseline
 
 `Segment v0.1` focuses on M0 engineering discipline rather than stronger cognition:
