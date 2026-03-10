@@ -135,6 +135,42 @@ The output shows:
 - Final run metrics such as survival ticks, average free energy, memory hit rate, termination reason, and action diversity
 - A per-cycle JSONL trace that records observations, predictions, errors, action ranking, body state, and running metrics for later replay/debugging
 
+## M2.2 Acceptance Evidence
+
+The canonical acceptance sample for `M2.2: Episodic Memory and Value Hierarchy` now lives in:
+
+- `data/segment_v0_1_state.json`
+- `data/segment_v0_1_state_trace.jsonl`
+
+These files were regenerated from the current runtime with `seed=17`, `cycles=3`, and `reset=True`.
+
+Closed-loop evidence:
+
+1. `CC / PreferenceModel`
+   The persisted snapshot now stores the full probabilistic preference model, including hard-coded log-preferences and derived log-probabilities:
+
+   - `survival_threat = -1000.0`
+   - `integrity_loss = -100.0`
+   - `resource_loss = -10.0`
+   - `neutral = 0.0`
+   - `resource_gain = 5.0`
+   - `log_probabilities["resource_loss"] = -15.006715652344035`
+   - `log_probabilities["resource_gain"] = -0.006715652344033707`
+
+2. `risk / value evaluation`
+   In `data/segment_v0_1_state_trace.jsonl`, cycle 1 shows the policy evaluator using that preference model to score imagined outcomes. The chosen action predicts `resource_gain` with `preferred_probability = 0.993306847254501` and `risk = 0.006715652344033707`.
+
+3. `surprise gate`
+   The same cycle records the actual episodic memory decision as `predicted_outcome = "resource_loss"`, `prediction_error = 0.08373443960068973`, `risk = 15.006715652344035`, and `total_surprise = 10.588435396241513`. This exceeds the persisted `surprise_threshold = 0.4`, so `episode_created = true`.
+
+4. `episode embedding`
+   The stored episode in `data/segment_v0_1_state.json` includes a dense `embedding` vector alongside `state_vector`, `prediction_error`, `preferred_probability`, `risk`, and `total_surprise`.
+
+5. `local store`
+   The accepted episode is persisted under `agent.long_term_memory.episodes` in `data/segment_v0_1_state.json`, proving the full path:
+
+   `PreferenceModel -> preferred_probability / risk / value_score -> total_surprise gate -> embedding -> local long-term memory store`
+
 ## Segment v0.1 baseline
 
 `Segment v0.1` focuses on M0 engineering discipline rather than stronger cognition:
