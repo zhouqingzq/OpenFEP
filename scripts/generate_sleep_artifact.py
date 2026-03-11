@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from dataclasses import asdict, replace
@@ -15,7 +15,8 @@ from segmentum.environment import Observation
 from segmentum.runtime import STATE_VERSION
 from segmentum.types import SleepRule
 
-CONFIDENCE_BOOST = 0.10
+CONFIDENCE_BOOST = 0.05
+NARRATIVE_PREFIX = "LLM consolidated:"
 
 
 class ArtifactMockLLMExtractor:
@@ -36,7 +37,7 @@ class ArtifactMockLLMExtractor:
                 rule,
                 confidence=min(0.99, rule.confidence + CONFIDENCE_BOOST),
                 narrative_insight=(
-                    f"LLM review: action '{rule.action}' in cluster {rule.cluster} "
+                    f"{NARRATIVE_PREFIX} action '{rule.action}' in cluster {rule.cluster} "
                     f"consistently leads to {rule.observed_outcome} "
                     f"(support={rule.support}). Confidence raised by {CONFIDENCE_BOOST}."
                 ),
@@ -46,7 +47,16 @@ class ArtifactMockLLMExtractor:
         return self.rules_after
 
 
-def _populate_episodes(agent, observation, prediction, errors, harmful_outcome, harmful_body_state):
+def _populate_episodes(
+    agent: SegmentAgent,
+    observation: dict[str, float],
+    prediction: dict[str, float],
+    errors: dict[str, float],
+    harmful_outcome: dict[str, float],
+    harmful_body_state: dict[str, float],
+    *,
+    count: int = 5,
+):
     initial_memory = agent.long_term_memory.maybe_store_episode(
         cycle=1,
         observation=observation,
@@ -56,7 +66,7 @@ def _populate_episodes(agent, observation, prediction, errors, harmful_outcome, 
         outcome=harmful_outcome,
         body_state=harmful_body_state,
     )
-    for cycle in range(2, 6):
+    for cycle in range(2, count + 1):
         agent.long_term_memory.store_episode(
             cycle=cycle,
             observation=observation,
@@ -69,17 +79,33 @@ def _populate_episodes(agent, observation, prediction, errors, harmful_outcome, 
     return initial_memory
 
 
-def main() -> None:
-    state_path = ROOT / "data" / "segment_v0_4_sleep_state.json"
-    trace_path = ROOT / "data" / "segment_v0_4_sleep_trace.jsonl"
-
-    agent = SegmentAgent(rng=random.Random(29))
+def _configure_agent(agent: SegmentAgent) -> None:
     agent.energy = 0.22
     agent.stress = 0.30
     agent.fatigue = 0.18
     agent.temperature = 0.46
     agent.cycle = 6
     agent.long_term_memory.minimum_support = 1
+
+
+def _first_rule_confidence(entries: list[dict[str, object]]) -> float:
+    if not entries:
+        return 0.0
+    return float(entries[0].get("confidence", 0.0))
+
+
+def _first_narrative(entries: list[dict[str, object]]) -> str:
+    if not entries:
+        return ""
+    return str(entries[0].get("narrative_insight", ""))
+
+
+def main() -> None:
+    state_path = ROOT / "data" / "segment_v0_4_sleep_state.json"
+    trace_path = ROOT / "data" / "segment_v0_4_sleep_trace.jsonl"
+
+    agent = SegmentAgent(rng=random.Random(29))
+    _configure_agent(agent)
 
     observation = {
         "food": 0.38,
@@ -112,25 +138,15 @@ def main() -> None:
         "temperature": 0.46,
     }
 
-    initial_memory = agent.long_term_memory.maybe_store_episode(
-        cycle=1,
-        observation=observation,
-        prediction=prediction,
-        errors=errors,
-        action="forage",
-        outcome=harmful_outcome,
-        body_state=harmful_body_state,
+    initial_memory = _populate_episodes(
+        agent,
+        observation,
+        prediction,
+        errors,
+        harmful_outcome,
+        harmful_body_state,
+        count=5,
     )
-    for cycle in range(2, 6):
-        agent.long_term_memory.store_episode(
-            cycle=cycle,
-            observation=observation,
-            prediction=prediction,
-            errors=errors,
-            action="forage",
-            outcome=harmful_outcome,
-            body_state=harmful_body_state,
-        )
 
     episodes_before_sleep = len(agent.long_term_memory.episodes)
     sleep_summary = agent.sleep()
@@ -223,34 +239,79 @@ def main() -> None:
     llm_trace_path = ROOT / "artifacts" / "segment_v0_4_sleep_llm_trace.jsonl"
     llm_mock = ArtifactMockLLMExtractor()
     llm_agent = SegmentAgent(rng=random.Random(29), sleep_llm_extractor=llm_mock)
-    llm_agent.energy = 0.22
-    llm_agent.stress = 0.30
-    llm_agent.fatigue = 0.18
-    llm_agent.temperature = 0.46
-    llm_agent.cycle = 6
-    llm_agent.long_term_memory.minimum_support = 1
+    heuristic_agent = SegmentAgent(rng=random.Random(29))
+    for candidate in (llm_agent, heuristic_agent):
+        _configure_agent(candidate)
+        candidate.long_term_memory.sleep_minimum_support = 3
 
     _populate_episodes(
-        llm_agent, observation, prediction, errors, harmful_outcome, harmful_body_state,
+        heuristic_agent,
+        observation,
+        prediction,
+        errors,
+        harmful_outcome,
+        harmful_body_state,
+        count=3,
+    )
+    heuristic_summary = heuristic_agent.sleep()
+
+    _populate_episodes(
+        llm_agent,
+        observation,
+        prediction,
+        errors,
+        harmful_outcome,
+        harmful_body_state,
+        count=3,
     )
     llm_summary = llm_agent.sleep()
+
+    rules_before = [asdict(rule) for rule in llm_mock.rules_before]
+    rules_after = [asdict(rule) for rule in llm_mock.rules_after]
+    heuristic_semantic = [asdict(entry) for entry in heuristic_agent.semantic_memory]
+    llm_semantic = [asdict(entry) for entry in llm_agent.semantic_memory]
+    heuristic_confidence = _first_rule_confidence(heuristic_semantic)
+    llm_confidence = _first_rule_confidence(rules_after)
+    heuristic_threat = float(heuristic_agent.world_model.threat_priors.get("0", 0.0))
+    llm_threat = float(llm_agent.world_model.threat_priors.get("0", 0.0))
+    heuristic_penalty = float(heuristic_agent.world_model.preference_penalties.get("0", {}).get("forage", 0.0))
+    llm_penalty = float(llm_agent.world_model.preference_penalties.get("0", {}).get("forage", 0.0))
 
     llm_records = [
         {
             "event": "llm_sleep_consolidation",
             "sleep_cycle_id": llm_summary.sleep_cycle_id,
             "llm_used": llm_summary.llm_used,
-            "rules_before_llm": [
-                asdict(rule) for rule in llm_mock.rules_before
-            ],
-            "rules_after_llm": [
-                asdict(rule) for rule in llm_mock.rules_after
-            ],
+            "fixture": {
+                "scenario": "non_saturated_llm_rule_refinement",
+                "episodes": 3,
+                "sleep_minimum_support": 3,
+                "confidence_boost": CONFIDENCE_BOOST,
+            },
+            "rules_before_llm": rules_before,
+            "rules_after_llm": rules_after,
+            "heuristic_semantic_memory": heuristic_semantic,
+            "semantic_memory": llm_semantic,
             "semantic_rules_written": llm_summary.semantic_entries_written,
             "rules_extracted": llm_summary.rules_extracted,
             "threat_updates": llm_summary.threat_updates,
             "preference_updates": llm_summary.preference_updates,
-            "semantic_memory": [asdict(entry) for entry in llm_agent.semantic_memory],
+            "heuristic_summary": asdict(heuristic_summary),
+            "llm_summary": asdict(llm_summary),
+            "slow_weight_delta": {
+                "heuristic_threat_prior": heuristic_threat,
+                "llm_threat_prior": llm_threat,
+                "threat_prior_gain": round(llm_threat - heuristic_threat, 6),
+                "heuristic_preference_penalty": heuristic_penalty,
+                "llm_preference_penalty": llm_penalty,
+                "preference_penalty_gain": round(llm_penalty - heuristic_penalty, 6),
+            },
+            "rule_delta": {
+                "heuristic_confidence": heuristic_confidence,
+                "llm_confidence": llm_confidence,
+                "confidence_gain": round(llm_confidence - heuristic_confidence, 6),
+                "narrative_added": _first_narrative(rules_after),
+            },
         },
     ]
 
@@ -266,3 +327,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

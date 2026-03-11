@@ -1,4 +1,4 @@
-# Project Segmentum
+﻿# Project Segmentum
 
 `Project Segmentum` is a Python prototype of a digital Segment: a survival-first cognitive shard that uses predictive coding and active inference instead of a plain input-output loop.
 
@@ -175,10 +175,10 @@ Closed-loop evidence:
 
 The canonical acceptance samples for `M2.3: Sleep Consolidation` live in:
 
-- `data/segment_v0_4_sleep_state.json` — full agent snapshot after sleep
-- `data/segment_v0_4_sleep_trace.jsonl` — heuristic-only sleep cycle trace
-- `artifacts/segment_v0_4_prediction_flattening.json` — prediction error before/after fixture
-- `artifacts/segment_v0_4_sleep_llm_trace.jsonl` — LLM-enhanced sleep cycle trace
+- `data/segment_v0_4_sleep_state.json` 鈥?full agent snapshot after sleep
+- `data/segment_v0_4_sleep_trace.jsonl` 鈥?heuristic-only sleep cycle trace
+- `artifacts/segment_v0_4_prediction_flattening.json` 鈥?prediction error before/after fixture
+- `artifacts/segment_v0_4_sleep_llm_trace.jsonl` 鈥?LLM-enhanced sleep cycle trace
 
 Regenerate all deterministically with:
 
@@ -190,8 +190,8 @@ py -3.11 E:\workspace\segments\scripts\generate_sleep_artifact.py
 
 Sleep consolidation is a two-stage pipeline that always runs both stages:
 
-1. **Heuristic rule extraction** — deterministic statistical grouping by `(cluster, action, outcome)` with support/dominance gating and multi-signal confidence scoring.
-2. **LLM extraction stage** — always present. Defaults to `HeuristicSleepExtractor` (deterministic confidence validation). When an LLM backend is configured (via `SleepLLMExtractor` or `LLMSleepRuleRefiner`), the stage calls the model to refine, merge, or augment rules based on causal plausibility.
+1. **Heuristic rule extraction** 鈥?deterministic statistical grouping by `(cluster, action, outcome)` with support/dominance gating and multi-signal confidence scoring.
+2. **LLM extraction stage** 鈥?always present. Defaults to `HeuristicSleepExtractor` (deterministic confidence validation). When an LLM backend is configured (via `SleepLLMExtractor` or `LLMSleepRuleRefiner`), the stage calls the model to refine, merge, or augment rules based on causal plausibility.
 
 The stage is never skipped. `SleepConsolidator` always holds an extractor; what varies is the backend.
 
@@ -227,14 +227,15 @@ The stage is never skipped. `SleepConsolidator` always holds an extractor; what 
 
 ### Closed-loop evidence (LLM-enhanced path)
 
-`artifacts/segment_v0_4_sleep_llm_trace.jsonl` records a sleep cycle with `llm_used = true`:
+`artifacts/segment_v0_4_sleep_llm_trace.jsonl` now uses a dedicated non-saturated fixture (`episodes = 3`, `sleep_minimum_support = 3`) so LLM gain is visible instead of being clipped away:
 
-- `rules_before_llm` — heuristic rules prior to LLM refinement
-- `rules_after_llm` — rules after LLM confidence adjustment
-- `semantic_rules_written = 1` — LLM-refined rules written to semantic memory
-- `threat_updates = 1`, `preference_updates = 1` — slow weights updated from LLM-refined rules
+- `rules_before_llm[0].confidence = 0.94` - heuristic rule before refinement
+- `rules_after_llm[0].confidence = 0.99` - LLM-raised confidence on the same rule
+- `rules_after_llm[0].narrative_insight` - serialized LLM rationale, absent from `rules_before_llm`
+- `slow_weight_delta.threat_prior_gain = 0.021` - higher threat prior than the heuristic baseline
+- `slow_weight_delta.preference_penalty_gain = -0.0375` - more negative avoidance penalty than the heuristic baseline
 
-Tests validate that LLM-boosted confidence propagates into semantic memory entries and produces larger slow-weight deltas than the heuristic-only baseline.
+Tests validate that LLM-refined confidence is strictly higher than the heuristic baseline and that the resulting slow weights are strictly stronger, not merely equal.
 
 ## Segment v0.1 baseline
 
@@ -293,4 +294,6 @@ The comparison script reports, for each profile:
 - per-layer average precision,
 - per-layer average residual and propagated error,
 - per-layer propagation rate (how often a layer fails to fully digest bottom-up prediction error).
+
+
 

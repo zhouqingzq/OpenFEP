@@ -1,4 +1,4 @@
-"""Tests that validate LLM-enhanced sleep consolidation as a first-class path.
+﻿"""Tests that validate LLM-enhanced sleep consolidation as a first-class path.
 
 A deterministic ``MockSleepLLMExtractor`` simulates what a real LLM would do:
 boost confidence on high-support risk rules, leave others alone.  The tests
@@ -20,10 +20,10 @@ from segmentum.sleep_consolidator import (
 from segmentum.types import SleepRule
 
 # ---------------------------------------------------------------------------
-# Deterministic mock — Task 2
+# Deterministic mock 鈥?Task 2
 # ---------------------------------------------------------------------------
 
-CONFIDENCE_BOOST = 0.10
+CONFIDENCE_BOOST = 0.05
 
 
 class MockSleepLLMExtractor:
@@ -89,7 +89,7 @@ HARMFUL_BODY_STATE = {
 }
 
 
-def _populate_anomaly_episodes(agent: SegmentAgent, count: int = 5) -> None:
+def _populate_anomaly_episodes(agent: SegmentAgent, count: int = 3) -> None:
     """Store ``count`` identical high-surprise episodes."""
     for cycle in range(1, count + 1):
         agent.long_term_memory.store_episode(
@@ -104,7 +104,7 @@ def _populate_anomaly_episodes(agent: SegmentAgent, count: int = 5) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Tests — Task 3
+# Tests 鈥?Task 3
 # ---------------------------------------------------------------------------
 
 
@@ -181,15 +181,23 @@ class SleepLLMConsolidationTests(unittest.TestCase):
         agent.sleep()
 
         # threat_priors are derived from confidence * support; higher confidence
-        # should yield >= threat prior.
+        # should yield a strictly larger slow-weight update in this fixture.
         for cluster_key in agent.world_model.threat_priors:
             llm_threat = agent.world_model.threat_priors[cluster_key]
             base_threat = baseline.world_model.threat_priors.get(cluster_key, 0.0)
-            self.assertGreaterEqual(
+            self.assertGreater(
                 llm_threat,
                 base_threat,
                 f"Cluster {cluster_key}: LLM threat prior {llm_threat} "
-                f"should be >= baseline {base_threat}",
+                f"should be > baseline {base_threat}",
+            )
+            llm_penalty = agent.world_model.preference_penalties.get(cluster_key, {}).get("forage", 0.0)
+            base_penalty = baseline.world_model.preference_penalties.get(cluster_key, {}).get("forage", 0.0)
+            self.assertLess(
+                llm_penalty,
+                base_penalty,
+                f"Cluster {cluster_key}: LLM preference penalty {llm_penalty} "
+                f"should be more negative than baseline {base_penalty}",
             )
 
     def test_sleep_summary_records_llm_participation(self) -> None:
@@ -287,8 +295,11 @@ class SleepLLMConsolidationTests(unittest.TestCase):
         self.assertTrue(result.rules_before_llm)
         # The pre-LLM rules should have lower confidence than post-LLM rules.
         for before, after in zip(result.rules_before_llm, result.rules):
-            self.assertLessEqual(before.confidence, after.confidence)
+            self.assertLess(before.confidence, after.confidence)
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
