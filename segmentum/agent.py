@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import random
@@ -9,6 +9,7 @@ from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
 from .memory import (
+    AutobiographicalMemory,
     LongTermMemory,
     MemoryDecision,
     compute_prediction_error,
@@ -21,7 +22,10 @@ from .predictive_coding import (
     compose_upstream_observation,
     default_predictive_coding_hyperparameters,
 )
-from .sleep_consolidator import SleepConsolidator
+from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
+from .preferences import Goal, GoalStack
+from .self_model import CapabilityModel, SelfModel, build_default_self_model
+from .sleep_consolidator import SleepConsolidation, SleepConsolidator
 from .types import (
     DecisionDiagnostics,
     DreamReplay,
@@ -48,12 +52,20 @@ class IdentityTraits:
 class PolicyEvaluator:
     """Score candidate actions with explicit policy components."""
 
-    def __init__(self, identity_traits: IdentityTraits) -> None:
+    def __init__(
+        self,
+        identity_traits: IdentityTraits,
+        self_model: SelfModel,
+        goal_stack: GoalStack,
+    ) -> None:
         self.identity_traits = identity_traits
+        self.self_model = self_model
+        self.goal_stack = goal_stack
 
     def identity_bias(
         self,
         *,
+        action: str,
         projected_state: dict[str, float],
         predicted_outcome: dict[str, float],
         cost: float,
@@ -75,7 +87,73 @@ class PolicyEvaluator:
             - max(0.0, fatigue_delta) * 0.25
             - thermal_offset * 0.20
         )
-        return max(-1.0, min(1.0, risk_bias + resource_bias))
+
+        policy_memory_bias = 0.0
+        policies = self.self_model.preferred_policies
+        if policies is not None:
+            if action in policies.learned_preferences:
+                policy_memory_bias += 0.25
+            if action in policies.learned_avoidances:
+                policy_memory_bias -= 0.35
+            frequency = float(policies.action_distribution.get(action, 0.0))
+            policy_memory_bias += (frequency - 0.20) * 0.30
+
+        threat_bias = self._threat_awareness_bias(action, cost)
+        narrative_bias = self._narrative_bias(action)
+
+        return max(-1.0, min(1.0, risk_bias + resource_bias + policy_memory_bias + threat_bias + narrative_bias))
+
+    def _threat_awareness_bias(self, action: str, cost: float) -> float:
+        """Couple SelfModel.threat_model to action scoring."""
+        tm = self.self_model.threat_model
+        rs = self.self_model.resource_state
+        bs = self.self_model.body_schema
+
+        token_prox = (
+            tm.token_exhaustion_threshold / max(1, rs.tokens_remaining)
+            if tm.token_exhaustion_threshold > 0
+            else 0.0
+        )
+        memory_prox = (
+            tm.memory_overflow_threshold / max(1.0, rs.memory_free)
+            if tm.memory_overflow_threshold > 0
+            else 0.0
+        )
+        sensitivity = max(token_prox, memory_prox)
+
+        if sensitivity <= 0.3:
+            return 0.0
+
+        # Penalise costly actions proportional to threat sensitivity.
+        penalty = -sensitivity * cost * 4.0
+        # Bonus for the cheapest action (rest) when near resource limits.
+        if action == "rest":
+            penalty += sensitivity * 0.35
+        return penalty
+
+    def _narrative_bias(self, action: str) -> float:
+        """Couple IdentityNarrative to action scoring."""
+        narrative = self.self_model.identity_narrative
+        if narrative is None:
+            return 0.0
+
+        bias = 0.0
+        action_lower = action.lower()
+        for pattern in narrative.behavioral_patterns:
+            if action_lower in pattern.lower():
+                bias += 0.25
+        if narrative.core_identity and action_lower in narrative.core_identity.lower():
+            bias += 0.20
+
+        # Risk-profile coupling: a risk-seeking identity penalises
+        # overly cautious actions and favours active ones.
+        if narrative.core_identity and "risk-seeking" in narrative.core_identity.lower():
+            if action in ("hide", "rest"):
+                bias -= 0.25
+            elif action in ("forage", "scan", "exploit_shelter"):
+                bias += 0.15
+
+        return max(-0.6, min(0.6, bias))
 
     def dominant_component(
         self,
@@ -86,6 +164,7 @@ class PolicyEvaluator:
         policy_bias: float,
         epistemic_bonus: float,
         identity_bias: float,
+        goal_alignment: float,
     ) -> str:
         components = [
             ("expected_free_energy", abs(expected_free_energy)),
@@ -94,15 +173,16 @@ class PolicyEvaluator:
             ("policy_bias", abs(policy_bias)),
             ("epistemic_bonus", abs(epistemic_bonus)),
             ("identity_bias", abs(identity_bias)),
+            ("goal_alignment", abs(goal_alignment)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
         return components[0][0]
 
-    def explain(
+    def explain_structured(
         self,
         diagnostics: DecisionDiagnostics,
         action: str | None = None,
-    ) -> str:
+    ) -> dict[str, object]:
         if action is None:
             chosen = diagnostics.chosen
         else:
@@ -145,7 +225,12 @@ class PolicyEvaluator:
         elif chosen.dominant_component == "identity_bias":
             reason = (
                 f"identity_bias ({chosen.identity_bias:.3f}) dominated, "
-                "which matches my risk-averse and resource-conserving traits."
+                "which matches my learned preferences and autobiographical style."
+            )
+        elif chosen.dominant_component == "goal_alignment":
+            reason = (
+                f"goal_alignment ({chosen.goal_alignment:.3f}) dominated, "
+                f"so the action best served my active goal {diagnostics.active_goal}."
             )
         else:
             reason = (
@@ -181,19 +266,107 @@ class PolicyEvaluator:
                     f"({alternative.expected_free_energy:.3f} vs {chosen.expected_free_energy:.3f}), "
                     f"{chosen.choice} still achieved the strongest final policy score "
                     f"({chosen.policy_score:.3f} vs {alternative.policy_score:.3f}) "
-                    f"after memory, pattern, and identity terms were included."
+                    f"after memory, pattern, identity, and goal terms were included."
                 )
-        return (
+
+        policies = self.self_model.preferred_policies
+        narrative = self.self_model.identity_narrative
+        historical_frequency = 0.0
+        dominant_strategy = "expected_free_energy"
+        typical_actions: set[str] = set()
+        if narrative is not None:
+            for pattern in narrative.behavioral_patterns:
+                if "tend to " not in pattern:
+                    continue
+                typical_actions.add(pattern.split("tend to ", 1)[1].split(" (", 1)[0].lower())
+        if policies is not None:
+            historical_frequency = float(policies.action_distribution.get(chosen.choice, 0.0))
+            dominant_strategy = policies.dominant_strategy or dominant_strategy
+        learned_preference = bool(policies is not None and chosen.choice in policies.learned_preferences)
+        learned_avoidance = bool(policies is not None and chosen.choice in policies.learned_avoidances)
+        identity_consistency = (
+            chosen.choice.lower() in typical_actions
+            or learned_preference
+            or historical_frequency >= 0.20
+        ) and not learned_avoidance
+        matches_dominant_strategy = chosen.dominant_component == dominant_strategy
+
+        if policies is None:
+            consistency_statement = "This is an early decision, so no stable pattern has been consolidated yet."
+        elif identity_consistency and matches_dominant_strategy:
+            consistency_statement = (
+                "This choice is consistent with my established pattern: "
+                f"I {dominant_strategy} and historically choose {chosen.choice} "
+                f"{historical_frequency:.0%} of the time."
+            )
+        else:
+            consistency_statement = (
+                "This choice deviates from my usual pattern "
+                f"(dominant strategy: {dominant_strategy}). "
+                f"Reason for deviation: {chosen.dominant_component}."
+            )
+
+        consistency_info = {
+            "dominant_strategy": dominant_strategy,
+            "matches_dominant_strategy": matches_dominant_strategy,
+            "historical_action_frequency": historical_frequency,
+            "identity_consistency": identity_consistency,
+            "consistency_statement": consistency_statement,
+        }
+
+        bias_references = [
+            f"memory_bias={chosen.memory_bias:.3f}",
+            f"pattern_bias={chosen.pattern_bias:.3f}",
+            f"policy_bias={chosen.policy_bias:.3f}",
+        ]
+        bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
+        explanation_text = (
             f"I chose {chosen.choice}. "
             f"This action predicted outcome '{chosen.predicted_outcome}'. "
             f"According to my preference model this outcome has {probability_band} "
             f"preferred probability ({chosen.preferred_probability:.2f}), "
             f"resulting in {risk_band} risk ({chosen.risk:.3f}). "
+            f"My active goal is {diagnostics.active_goal}, so I favored actions aligned with it. "
             f"{reason}{comparison} "
+            f"{consistency_statement}{bias_sentence} "
             f"This aligns with my resource_conservatism="
             f"{self.identity_traits.resource_conservatism:.2f} and "
             f"risk_aversion={self.identity_traits.risk_aversion:.2f}."
         )
+        return {
+            "action": chosen.choice,
+            "active_goal": diagnostics.active_goal,
+            "goal_alignment": chosen.goal_alignment,
+            "dominant_component": chosen.dominant_component,
+            "historical_action_frequency": historical_frequency,
+            "identity_consistency": identity_consistency,
+            "consistency": consistency_info,
+            "reason": reason,
+            "comparison": comparison.strip(),
+            "text": explanation_text,
+        }
+
+    def explain(
+        self,
+        diagnostics: DecisionDiagnostics,
+        action: str | None = None,
+    ) -> str:
+        return str(self.explain_structured(diagnostics, action=action)["text"])
+
+class DecisionLoop:
+    """Explicit M2 decision loop surface for structured phase tracking."""
+
+    phase_names = (
+        "perception",
+        "prediction",
+        "memory_retrieval",
+        "goal_alignment_evaluation",
+        "policy_evaluation",
+        "action_selection",
+    )
+
+    def describe(self) -> list[str]:
+        return list(self.phase_names)
 
 
 class SegmentAgent:
@@ -218,9 +391,23 @@ class SegmentAgent:
         self.strategic_layer = StrategicLayer()
         self.interoceptive_layer = InteroceptiveLayer()
         self.world_model = GenerativeWorldModel()
-        self.long_term_memory = LongTermMemory()
+        self.long_term_memory = AutobiographicalMemory()
+        self.autobiographical_memory = self.long_term_memory
         self.identity_traits = IdentityTraits()
-        self.policy_evaluator = PolicyEvaluator(self.identity_traits)
+        self.self_model = build_default_self_model()
+        self.self_model.capability_model = CapabilityModel(
+            available_actions=tuple(ACTION_COSTS),
+            api_limits=self.self_model.capability_model.api_limits,
+        )
+        self.goal_stack = GoalStack()
+        self.goal_stack.log_sink = self.self_model.log_sink
+        self.policy_evaluator = PolicyEvaluator(
+            self.identity_traits,
+            self.self_model,
+            self.goal_stack,
+        )
+        self.decision_loop = DecisionLoop()
+        self.counterfactual_learning = CounterfactualLearning()
         self.sleep_llm_extractor = sleep_llm_extractor
 
         self.episodes: list[MemoryEpisode] = []
@@ -228,6 +415,12 @@ class SegmentAgent:
         self.sleep_history: list[SleepSummary] = []
         self.action_history: list[str] = []
         self.action_history_limit = 32
+        self.decision_history: list[dict[str, object]] = []
+        self.decision_history_limit = 512
+        self.drive_history: list[dict[str, float]] = []
+        self.drive_history_limit = 128
+        self.free_energy_history: list[float] = []
+        self.free_energy_history_limit = 64
         self.last_body_state_snapshot = {
             "energy": self.energy,
             "stress": self.stress,
@@ -236,12 +429,110 @@ class SegmentAgent:
         }
         self.last_decision_diagnostics: DecisionDiagnostics | None = None
         self._sleeping = False
+        self.counterfactual_insights: list[CounterfactualInsight] = []
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
         self.configure_predictive_coding(
             predictive_hyperparameters or default_predictive_coding_hyperparameters(),
             reset_precisions=True,
+        )
+        self._sync_self_model_body_schema()
+
+    def _sync_self_model_body_schema(self) -> None:
+        self.self_model.body_schema = self.self_model.body_schema.__class__(
+            energy=self.energy,
+            token_budget=self.self_model.body_schema.token_budget,
+            memory_usage=float(len(self.long_term_memory.episodes)),
+            compute_load=self.self_model.body_schema.compute_load,
+        )
+
+    def _current_state_snapshot(
+        self,
+        observed: dict[str, float],
+        prediction: dict[str, float],
+        errors: dict[str, float],
+    ) -> dict[str, object]:
+        return {
+            "observation": observed,
+            "prediction": prediction,
+            "errors": errors,
+            "body_state": {
+                "cycle": float(self.cycle),
+                "energy": self.energy,
+                "stress": self.stress,
+                "fatigue": self.fatigue,
+                "temperature": self.temperature,
+                "dopamine": self.dopamine,
+            },
+            "free_energy_history": list(self.free_energy_history),
+        }
+
+    def _record_decision_history(
+        self,
+        diagnostics: DecisionDiagnostics,
+    ) -> None:
+        record = {
+            "tick": self.cycle,
+            "action": diagnostics.chosen.choice,
+            "dominant_component": diagnostics.chosen.dominant_component,
+            "risk": diagnostics.chosen.risk,
+            "active_goal": diagnostics.active_goal,
+            "goal_alignment": diagnostics.chosen.goal_alignment,
+            "preferred_probability": diagnostics.chosen.preferred_probability,
+            "policy_score": diagnostics.chosen.policy_score,
+        }
+        self.decision_history.append(record)
+        if len(self.decision_history) > self.decision_history_limit:
+            self.decision_history = self.decision_history[-self.decision_history_limit :]
+
+        drive_snapshot = {
+            drive.name: float(drive.urgency) for drive in self.drive_system.drives
+        }
+        self.drive_history.append(drive_snapshot)
+        if len(self.drive_history) > self.drive_history_limit:
+            self.drive_history = self.drive_history[-self.drive_history_limit :]
+
+    def _refresh_self_model_continuity(
+        self,
+        sleep_summary: SleepSummary | None = None,
+        weight_adjustments: list[object] | None = None,
+    ) -> None:
+        last_tick = 0
+        if self.self_model.preferred_policies is not None:
+            last_tick = self.self_model.preferred_policies.last_updated_tick
+        recent_history = [
+            entry for entry in self.decision_history if int(entry.get("tick", 0)) > last_tick
+        ]
+        if not recent_history:
+            recent_history = list(self.decision_history)
+        self.self_model.update_preferred_policies(
+            recent_history,
+            counterfactual_insights=self.counterfactual_insights,
+            drive_history=self.drive_history[-32:],
+            current_tick=self.cycle,
+        )
+        self.self_model.update_identity_narrative(
+            episodic_memory=list(self.long_term_memory.episodes),
+            preference_labels=self.long_term_memory.preference_model.legacy_value_hierarchy_dict(),
+            current_tick=self.cycle,
+            decision_history=list(self.decision_history),
+            sleep_metrics=asdict(sleep_summary) if sleep_summary is not None else {},
+            conflict_history=list(self.goal_stack.conflict_history),
+            weight_adjustments=(
+                list(weight_adjustments)
+                if weight_adjustments is not None
+                else list(self.goal_stack.weight_adjustments)
+            ),
+            chapter_signal=self.goal_stack.consume_chapter_signal(),
+        )
+
+    def explain_decision_details(self, action: str | None = None) -> dict[str, object]:
+        if self.last_decision_diagnostics is None:
+            return {"text": "No decision has been evaluated yet."}
+        return self.policy_evaluator.explain_structured(
+            self.last_decision_diagnostics,
+            action=action,
         )
 
     def should_sleep(self) -> bool:
@@ -554,6 +845,7 @@ class SegmentAgent:
         priors: dict[str, float],
         free_energy_before: float,
         current_cluster_id: int | None,
+        active_goal: Goal | None = None,
     ) -> dict[str, object]:
         cost = ACTION_COSTS[action]
         imagined = self.world_model.imagine_action(action, prediction)
@@ -610,13 +902,20 @@ class SegmentAgent:
             projected_snapshot=projected_snapshot,
             predicted_effects=predicted_effects,
         )
+        expected_free_energy = self.long_term_memory.preference_model.expected_free_energy(
+            outcome=predicted_outcome,
+            predicted_error=predicted_error,
+            action_ambiguity=action_ambiguity,
+            goal=active_goal,
+            baseline_risk=risk,
+        )
         return {
             "predicted_state": imagined,
             "predicted_error": predicted_error,
             "action_ambiguity": action_ambiguity,
             "risk": risk,
             "preferred_probability": preferred_probability,
-            "expected_free_energy": risk + predicted_error + action_ambiguity,
+            "expected_free_energy": expected_free_energy,
             "predicted_outcome": predicted_outcome,
             "predicted_effects": predicted_effects,
             "value_score": value_score,
@@ -631,10 +930,17 @@ class SegmentAgent:
         priors: dict[str, float],
         free_energy_before: float,
         current_cluster_id: int | None,
+        active_goal: Goal | None = None,
     ) -> dict[str, dict[str, object]]:
         """Project candidate actions into explicit policy components."""
+        allowed = self.self_model.capability_model.available_actions
+        candidate_actions = (
+            [a for a in ACTION_COSTS if a in allowed] if allowed else list(ACTION_COSTS)
+        )
+        if not candidate_actions:
+            candidate_actions = list(ACTION_COSTS)
         options: dict[str, dict[str, object]] = {}
-        for action in ACTION_COSTS:
+        for action in candidate_actions:
             options[action] = self._project_action(
                 action=action,
                 observed=observed,
@@ -642,6 +948,7 @@ class SegmentAgent:
                 priors=priors,
                 free_energy_before=free_energy_before,
                 current_cluster_id=current_cluster_id,
+                active_goal=active_goal,
             )
         return options
 
@@ -658,19 +965,15 @@ class SegmentAgent:
             observation
         )
         prediction_error = compute_prediction_error(observed, prediction)
-        current_state_snapshot = {
-            "observation": observed,
-            "prediction": prediction,
-            "errors": errors,
-            "body_state": {
-                "cycle": float(self.cycle),
-                "energy": self.energy,
-                "stress": self.stress,
-                "fatigue": self.fatigue,
-                "temperature": self.temperature,
-                "dopamine": self.dopamine,
-            },
-        }
+        self.free_energy_history.append(free_energy_before)
+        if len(self.free_energy_history) > self.free_energy_history_limit:
+            self.free_energy_history = self.free_energy_history[-self.free_energy_history_limit :]
+        current_state_snapshot = self._current_state_snapshot(observed, prediction, errors)
+        goal_context = self.goal_stack.get_goal_context_for_decision(
+            current_state_snapshot,
+            tick=self.cycle,
+        )
+        active_goal = Goal[str(goal_context["active_goal"])]
         priors = self.strategic_layer.priors(
             self.energy,
             self.stress,
@@ -690,6 +993,7 @@ class SegmentAgent:
             priors,
             free_energy_before,
             current_cluster_id,
+            active_goal=active_goal,
         )
         ranked_options: list[InterventionScore] = []
         for action, option in action_options.items():
@@ -707,9 +1011,17 @@ class SegmentAgent:
                 action,
             )
             identity_bias = self.policy_evaluator.identity_bias(
+                action=action,
                 projected_state=predicted_state,
                 predicted_outcome=predicted_effects,
                 cost=float(option["cost"]),
+            )
+            goal_alignment = self.goal_stack.goal_alignment_score(
+                goal=active_goal,
+                action=action,
+                projected_state=predicted_state,
+                predicted_effects=predicted_effects,
+                current_state=current_state_snapshot,
             )
             policy_score = (
                 -expected_fe
@@ -718,6 +1030,7 @@ class SegmentAgent:
                 + policy_bias
                 + epistemic_bonus
                 + identity_bias
+                + goal_alignment
             )
             dominant_component = self.policy_evaluator.dominant_component(
                 expected_free_energy=expected_fe,
@@ -726,6 +1039,7 @@ class SegmentAgent:
                 policy_bias=policy_bias,
                 epistemic_bonus=epistemic_bonus,
                 identity_bias=identity_bias,
+                goal_alignment=goal_alignment,
             )
             ranked_options.append(
                 InterventionScore(
@@ -741,6 +1055,7 @@ class SegmentAgent:
                     policy_bias=policy_bias,
                     epistemic_bonus=epistemic_bonus,
                     identity_bias=identity_bias,
+                    goal_alignment=goal_alignment,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
                     predicted_effects=predicted_effects,
@@ -748,6 +1063,22 @@ class SegmentAgent:
                     cost=float(option["cost"]),
                 )
             )
+        # Value-consistency override: when danger is extreme, the survival
+        # value hierarchy (survival > resource_gain) prevents forage from
+        # winning purely on EFE advantage.  The override equalises forage
+        # with the best safe alternative so that additive bias terms (memory,
+        # policy, identity) remain the actual tie-breakers.
+        obs_danger = observed.get("danger", 0.0)
+        if obs_danger > 0.80:
+            best_safe = max(
+                (o.policy_score for o in ranked_options if o.choice != "forage"),
+                default=None,
+            )
+            if best_safe is not None:
+                for option in ranked_options:
+                    if option.choice == "forage" and option.policy_score > best_safe:
+                        option.policy_score = best_safe - 0.10
+
         ranked_options.sort(
             key=lambda option: (
                 option.policy_score,
@@ -765,9 +1096,14 @@ class SegmentAgent:
                 option.choice: option.policy_score for option in ranked_options
             },
             explanation="",
+            active_goal=str(goal_context["active_goal"]),
+            goal_context=goal_context,
         )
-        diagnostics.explanation = self.policy_evaluator.explain(diagnostics)
+        diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
+        diagnostics.explanation = str(diagnostics.structured_explanation["text"])
         self.last_decision_diagnostics = diagnostics
+        self.goal_stack.note_action_choice(self.cycle, diagnostics.chosen.choice)
+        self._record_decision_history(diagnostics)
         return {
             "observed": observed,
             "prediction": prediction,
@@ -814,6 +1150,7 @@ class SegmentAgent:
                 policy_bias=0.0,
                 epistemic_bonus=0.0,
                 identity_bias=0.0,
+                goal_alignment=0.0,
                 value_score=neutral_preference.value_score,
                 predicted_outcome=neutral_preference.outcome,
                 predicted_effects={},
@@ -825,6 +1162,8 @@ class SegmentAgent:
             retrieved_memories=[],
             policy_scores={},
             explanation="I chose rest because no richer decision context was available.",
+            active_goal=self.goal_stack.active_goal.name,
+            goal_context=self.goal_stack.get_goal_context_for_decision({"body_state": {"energy": self.energy}}),
         )
         self.last_decision_diagnostics = diagnostics
         return diagnostics
@@ -940,6 +1279,7 @@ class SegmentAgent:
         self.action_history.append(choice)
         self.action_history = self.action_history[-self.action_history_limit :]
         self.last_body_state_snapshot = dict(body_state)
+        self.goal_stack.backfill_conflict_outcome(self.cycle, memory_decision.total_surprise)
         return memory_decision
 
     def _replay_prediction_error(
@@ -1007,6 +1347,7 @@ class SegmentAgent:
             current_cluster_id = self.long_term_memory.infer_cluster_id(
                 current_state_snapshot
             )
+            active_goal = self.goal_stack.evaluate_priority(current_state_snapshot, record_conflict=False)
             projected_action = self._project_action(
                 action=action,
                 observed=observed,
@@ -1014,6 +1355,7 @@ class SegmentAgent:
                 priors=priors,
                 free_energy_before=free_energy_before,
                 current_cluster_id=current_cluster_id,
+                active_goal=active_goal,
             )
             prediction_error = float(projected_action["observation_distance"])
             if include_slow_weights:
@@ -1288,7 +1630,7 @@ class SegmentAgent:
             self.sleep_history.append(summary)
             return summary
 
-        replay_batch = self.long_term_memory.prioritized_replay_sample(rng=self.rng)
+        replay_batch = self.long_term_memory.replay_during_sleep(rng=self.rng)
         clusters_created = self.long_term_memory.assign_clusters()
         prediction_error_before = self._replay_action_prediction_error(replay_batch)
 
@@ -1354,6 +1696,21 @@ class SegmentAgent:
             consolidation
         )
         prediction_error_after = self._replay_action_prediction_error(replay_batch)
+
+        # Counterfactual phase: replay high-surprise episodes with alternative
+        # actions, compute EFE, and absorb policy insights.
+        cf_insights, cf_summary = run_counterfactual_phase(
+            agent_energy=self.energy,
+            current_cycle=self.cycle,
+            episodes=replay_batch,
+            world_model=self.world_model,
+            preference_model=self.long_term_memory.preference_model,
+            rng=self.rng,
+            surprise_threshold=self.long_term_memory.surprise_threshold,
+        )
+        self.energy = clamp(self.energy - cf_summary.energy_spent)
+        self.counterfactual_insights.extend(cf_insights)
+
         episodes_archived, episodes_deleted = self._surprise_based_forgetting(replay_batch)
         compression_removed = self.long_term_memory.compress_episodes()
 
@@ -1365,6 +1722,8 @@ class SegmentAgent:
         self.dopamine = clamp(
             self.dopamine + max(0.0, mean(gains) if gains else 0.0) * 0.25
         )
+
+        conflict_adjustments = self.goal_stack.review_conflicts(self.cycle)
 
         summary = SleepSummary(
             average_free_energy_drop=mean(gains) if gains else 0.0,
@@ -1391,13 +1750,21 @@ class SegmentAgent:
             compression_removed=compression_removed,
             llm_used=consolidation.llm_used,
             rule_ids=[rule.rule_id for rule in consolidation.rules],
+            counterfactual_episodes_evaluated=cf_summary.episodes_evaluated,
+            counterfactual_insights_generated=cf_summary.insights_generated,
+            counterfactual_insights_absorbed=cf_summary.insights_absorbed,
+            counterfactual_energy_spent=cf_summary.energy_spent,
+            counterfactual_log=cf_summary.counterfactual_log,
         )
         self.sleep_history.append(summary)
+        self._refresh_self_model_continuity(summary, weight_adjustments=conflict_adjustments)
+        self._sync_self_model_body_schema()
         # Keep only last 3 episodes in working memory
         self.episodes = self.episodes[-3:]
         return summary
 
     def to_dict(self) -> dict:
+        self._sync_self_model_body_schema()
         return {
             "energy": self.energy,
             "stress": self.stress,
@@ -1417,8 +1784,19 @@ class SegmentAgent:
             "episodes": [asdict(episode) for episode in self.episodes],
             "semantic_memory": [asdict(entry) for entry in self.semantic_memory],
             "sleep_history": [asdict(summary) for summary in self.sleep_history],
+            "counterfactual_insights": [
+                insight.to_dict() for insight in self.counterfactual_insights
+            ],
             "action_history": list(self.action_history),
             "action_history_limit": self.action_history_limit,
+            "decision_history": list(self.decision_history),
+            "decision_history_limit": self.decision_history_limit,
+            "drive_history": list(self.drive_history),
+            "drive_history_limit": self.drive_history_limit,
+            "free_energy_history": list(self.free_energy_history),
+            "free_energy_history_limit": self.free_energy_history_limit,
+            "goal_stack": self.goal_stack.to_dict(),
+            "self_model": self.self_model.to_dict(),
             "identity_traits": asdict(self.identity_traits),
             "last_body_state_snapshot": dict(self.last_body_state_snapshot),
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
@@ -1458,9 +1836,10 @@ class SegmentAgent:
             payload.get("interoceptive_layer")
         )
         agent.world_model = GenerativeWorldModel.from_dict(payload.get("world_model"))
-        agent.long_term_memory = LongTermMemory.from_dict(
+        agent.long_term_memory = AutobiographicalMemory.from_dict(
             payload.get("long_term_memory")
         )
+        agent.autobiographical_memory = agent.long_term_memory
         agent.episodes = [
             MemoryEpisode(**episode) for episode in payload.get("episodes", [])
         ]
@@ -1480,11 +1859,38 @@ class SegmentAgent:
             for summary in sleep_history_payload
             if isinstance(summary, dict)
         ]
+        agent.counterfactual_insights = [
+            CounterfactualInsight.from_dict(entry)
+            for entry in payload.get("counterfactual_insights", [])
+            if isinstance(entry, dict)
+        ]
         agent.action_history = [
             str(choice) for choice in payload.get("action_history", [])
         ]
         agent.action_history_limit = int(
             payload.get("action_history_limit", agent.action_history_limit)
+        )
+        agent.decision_history = [
+            dict(entry)
+            for entry in payload.get("decision_history", [])
+            if isinstance(entry, dict)
+        ]
+        agent.decision_history_limit = int(
+            payload.get("decision_history_limit", agent.decision_history_limit)
+        )
+        agent.drive_history = [
+            {str(key): float(value) for key, value in entry.items()}
+            for entry in payload.get("drive_history", [])
+            if isinstance(entry, dict)
+        ]
+        agent.drive_history_limit = int(
+            payload.get("drive_history_limit", agent.drive_history_limit)
+        )
+        agent.free_energy_history = [
+            float(value) for value in payload.get("free_energy_history", [])
+        ]
+        agent.free_energy_history_limit = int(
+            payload.get("free_energy_history_limit", agent.free_energy_history_limit)
         )
         identity_traits = payload.get("identity_traits")
         if isinstance(identity_traits, dict):
@@ -1502,7 +1908,21 @@ class SegmentAgent:
                     )
                 ),
             )
-            agent.policy_evaluator = PolicyEvaluator(agent.identity_traits)
+        agent.goal_stack = GoalStack.from_dict(payload.get("goal_stack"))
+        agent.self_model = SelfModel.from_dict(payload.get("self_model"))
+        agent.goal_stack.log_sink = agent.self_model.log_sink
+        if not agent.self_model.capability_model.available_actions:
+            agent.self_model.capability_model = CapabilityModel(
+                available_actions=tuple(ACTION_COSTS),
+                api_limits=agent.self_model.capability_model.api_limits,
+            )
+        agent.policy_evaluator = PolicyEvaluator(
+            agent.identity_traits,
+            agent.self_model,
+            agent.goal_stack,
+        )
+        agent.decision_loop = DecisionLoop()
+        agent.counterfactual_learning = CounterfactualLearning()
         last_body_state_snapshot = payload.get("last_body_state_snapshot")
         if isinstance(last_body_state_snapshot, dict):
             agent.last_body_state_snapshot = {
@@ -1537,6 +1957,7 @@ class SegmentAgent:
             predictive_hyperparameters,
             reset_precisions=reset_predictive_precisions,
         )
+        agent._sync_self_model_body_schema()
 
         return agent
 
@@ -1578,3 +1999,27 @@ class SegmentAgent:
             sensorimotor=self.world_model.sensorimotor_layer.belief_state.hyperparameters(),
             strategic=self.strategic_layer.belief_state.hyperparameters(),
         )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

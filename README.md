@@ -237,6 +237,45 @@ The stage is never skipped. `SleepConsolidator` always holds an extractor; what 
 
 Tests validate that LLM-refined confidence is strictly higher than the heuristic baseline and that the resulting slow weights are strictly stronger, not merely equal.
 
+
+## M2.4 Acceptance Evidence
+
+The canonical acceptance samples for `M2.4: Counterfactual Learning` live in:
+
+- `data/segment_v0_5_counterfactual_state.json` - full agent snapshot after counterfactual sleep
+- `data/segment_v0_5_counterfactual_trace.jsonl` - chronological counterfactual trace
+- `artifacts/segment_v0_5_counterfactual_summary.json` - fixed summary fixture for the acceptance scenario
+
+Regenerate all deterministically with:
+
+```powershell
+py -3.11 E:\workspace\segments\scripts\generate_counterfactual_artifact.py
+```
+
+### Closed-loop evidence
+
+1. `virtual sandbox reasoning`
+   `data/segment_v0_5_counterfactual_trace.jsonl` contains a `counterfactual_sleep_cycle` record whose `counterfactual_log[0]` is `type = "virtual_sandbox_reasoning"` with `label = "虚拟沙盒推演"`.
+
+2. `one-step counterfactual branch evaluation`
+   The same trace shows the engine evaluating untaken actions against the stored dangerous `forage` episode. The acceptance fixture records `counterfactual_episodes_evaluated = 3` and `counterfactual_insights_generated = 5`.
+
+3. `counterfactual absorption without real execution`
+   `artifacts/segment_v0_5_counterfactual_summary.json` records `absorbed_counterfactual_action = "hide"` even though the seeded raw episodes only contain the actually executed action `forage`.
+
+4. `future preference change`
+   The same summary shows the policy shift caused specifically by counterfactual absorption:
+
+   - `forage_bias_pre_counterfactual = -0.45`
+   - `forage_bias_after = -0.60`
+   - `hide_bias_pre_counterfactual = 0.0`
+   - `hide_bias_after = 0.15`
+   - `policy_delta = 0.15`
+
+   This demonstrates that the agent learned to avoid the dead-end and favor a safer untaken alternative without first retrying it in the real world.
+
+5. `structured persistence`
+   `data/segment_v0_5_counterfactual_state.json` stores the resulting `counterfactual_insights` on the agent and the `counterfactual_log` inside `sleep_history`, preserving the full causal trail for replay and audit.
 ## Segment v0.1 baseline
 
 `Segment v0.1` focuses on M0 engineering discipline rather than stronger cognition:
@@ -294,6 +333,8 @@ The comparison script reports, for each profile:
 - per-layer average precision,
 - per-layer average residual and propagated error,
 - per-layer propagation rate (how often a layer fails to fully digest bottom-up prediction error).
+
+
 
 
 

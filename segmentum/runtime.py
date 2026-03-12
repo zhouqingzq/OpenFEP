@@ -586,6 +586,7 @@ class SegmentRuntime:
                     "policy_bias": option.policy_bias,
                     "epistemic_bonus": option.epistemic_bonus,
                     "identity_bias": option.identity_bias,
+                    "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
                     "dominant_component": option.dominant_component,
                     "predicted_outcome": option.predicted_outcome,
@@ -608,11 +609,15 @@ class SegmentRuntime:
                 "policy_bias": diagnostics.chosen.policy_bias,
                 "epistemic_bonus": diagnostics.chosen.epistemic_bonus,
                 "identity_bias": diagnostics.chosen.identity_bias,
+                "goal_alignment": diagnostics.chosen.goal_alignment,
+                "active_goal": diagnostics.active_goal,
+                "goal_context": diagnostics.goal_context,
                 "policy_score": diagnostics.chosen.policy_score,
                 "policy_scores": diagnostics.policy_scores,
                 "chosen_action": choice,
                 "total_surprise": memory_decision.total_surprise,
                 "explanation": diagnostics.explanation,
+                "explanation_details": diagnostics.structured_explanation,
             },
             "retrieved_memories": diagnostics.retrieved_memories,
             "episodic_memory": memory_decision.to_dict(),
@@ -793,3 +798,4 @@ class SegmentRuntime:
         payload["semantic_memory"] = [asdict(item) for item in self.agent.semantic_memory]
         payload["sleep_history"] = [asdict(item) for item in self.agent.sleep_history]
         return payload
+

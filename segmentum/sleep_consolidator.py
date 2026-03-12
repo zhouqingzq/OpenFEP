@@ -331,6 +331,7 @@ class SleepConsolidator:
                     rules = refined
             except Exception:
                 pass
+        rules = self._resolve_conflicts(rules)
         semantic_entries = self._semantic_entries(rules)
         model_updates = self._model_updates(rules)
         return SleepConsolidationResult(
@@ -404,6 +405,36 @@ class SleepConsolidator:
             )
         return rules
 
+    def _resolve_conflicts(self, rules: list[SleepRule]) -> list[SleepRule]:
+        """Detect and resolve contradictory rules for the same cluster+action.
+
+        When two rules target the same (cluster, action) but predict opposing
+        outcome types (one risk_pattern, one opportunity_pattern), only the
+        rule with the stronger evidence (confidence * support) survives.
+        Ties are broken in favour of risk (safety-first).
+        """
+        groups: dict[tuple[int, str], list[SleepRule]] = defaultdict(list)
+        for rule in rules:
+            groups[(rule.cluster, rule.action)].append(rule)
+
+        resolved: list[SleepRule] = []
+        for (_cluster, _action), group in sorted(groups.items()):
+            risk_rules = [r for r in group if r.type == "risk_pattern"]
+            opportunity_rules = [r for r in group if r.type == "opportunity_pattern"]
+
+            if risk_rules and opportunity_rules:
+                best_risk = max(risk_rules, key=lambda r: (r.confidence * r.support, r.support))
+                best_opp = max(opportunity_rules, key=lambda r: (r.confidence * r.support, r.support))
+                risk_strength = best_risk.confidence * best_risk.support
+                opp_strength = best_opp.confidence * best_opp.support
+                if risk_strength >= opp_strength:
+                    resolved.append(best_risk)
+                else:
+                    resolved.append(best_opp)
+            else:
+                resolved.extend(group)
+        return resolved
+
     def _semantic_entries(self, rules: list[SleepRule]) -> list[SemanticMemoryEntry]:
         return [
             SemanticMemoryEntry(
@@ -455,3 +486,39 @@ class SleepConsolidator:
                 )
             )
         return updates
+
+class SleepConsolidation:
+    """Named M2 sleep surface that wraps the existing consolidator."""
+
+    def __init__(
+        self,
+        *,
+        surprise_threshold: float,
+        minimum_support: int = 3,
+        llm_extractor: Callable[[list[SleepRule], list[dict[str, object]]], list[SleepRule]]
+        | None = None,
+    ) -> None:
+        self._consolidator = SleepConsolidator(
+            surprise_threshold=surprise_threshold,
+            minimum_support=minimum_support,
+            llm_extractor=llm_extractor,
+        )
+
+    def consolidate(
+        self,
+        *,
+        sleep_cycle_id: int,
+        current_cycle: int,
+        episodes: list[dict[str, object]],
+        transition_statistics: dict[str, dict[str, float]],
+        outcome_distributions: dict[str, dict[str, float]],
+    ) -> SleepConsolidationResult:
+        return self._consolidator.consolidate(
+            sleep_cycle_id=sleep_cycle_id,
+            current_cycle=current_cycle,
+            episodes=episodes,
+            transition_statistics=transition_statistics,
+            outcome_distributions=outcome_distributions,
+        )
+
+    run = consolidate

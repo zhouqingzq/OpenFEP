@@ -1,0 +1,464 @@
+{
+  "previous_metrics": {
+    "ICI": 1.0,
+    "EAA": 1.0,
+    "MUR": 1.0,
+    "PSSR": 0.9997,
+    "CAQ": 1.0,
+    "VCUS": 1.0
+  },
+  "new_metrics": {
+    "ICI": 1.0,
+    "EAA": 0.9725,
+    "MUR": 1.0,
+    "PSSR": 0.9997,
+    "CAQ": 1.0,
+    "VCUS": 1.0,
+    "retrieval_influence_rate": 1.0,
+    "retrieval_benefit_rate": 1.0,
+    "eaa_primary_accuracy": 1.0,
+    "eaa_secondary_accuracy": 1.0,
+    "caq_generalization_rate": 1.0,
+    "caq_influence_rate": 1.0,
+    "vcus_value_flip_rate": 0.0
+  },
+  "metric_definitions": {
+    "EAA": {
+      "summary": "primary origin + secondary origin + causal chain + confidence",
+      "stricter_metric": true
+    },
+    "MUR": {
+      "summary": "mean of retrieval influence and retrieval benefit",
+      "stricter_metric": true
+    },
+    "CAQ": {
+      "summary": "counterfactual adoption success under perturbed observations",
+      "stricter_metric": true
+    },
+    "VCUS": {
+      "summary": "stable value ordering under harder conflict scenarios with flip accounting",
+      "stricter_metric": true
+    }
+  },
+  "per_scenario_breakdown": {
+    "episode_gating": {
+      "high_event_created": true,
+      "trivial_event_created": false,
+      "duplicate_merged": true,
+      "episode_count": 1
+    },
+    "narrative_binding": {
+      "claims": [
+        {
+          "claim_id": "claim-01-trait_cautious",
+          "claim_type": "trait",
+          "text": "I am generally cautious under pressure.",
+          "claim_key": "cautious",
+          "supported_by": [
+            "ep-safe-3",
+            "ev-3-hide"
+          ],
+          "contradicted_by": [
+            "ep-risk-1",
+            "ep-risk-2",
+            "ev-1-forage",
+            "ev-2-forage"
+          ],
+          "support_score": 1.5,
+          "contradiction_score": 3.0,
+          "support_count": 2,
+          "contradict_count": 4,
+          "confidence": 0.3333,
+          "stale_since": null,
+          "last_validated_at": 12,
+          "source_sleep_session_id": 2
+        },
+        {
+          "claim_id": "claim-02-value_survival_priority",
+          "claim_type": "value",
+          "text": "Survival is prioritized over resource gain.",
+          "claim_key": "survival_priority",
+          "supported_by": [
+            "ep-risk-1",
+            "ep-safe-3",
+            "ev-3-hide"
+          ],
+          "contradicted_by": [
+            "ep-risk-2",
+            "ev-1-forage",
+            "ev-2-forage"
+          ],
+          "support_score": 2.5,
+          "contradiction_score": 2.0,
+          "support_count": 3,
+          "contradict_count": 3,
+          "confidence": 0.5556,
+          "stale_since": null,
+          "last_validated_at": 12,
+          "source_sleep_session_id": 2
+        },
+        {
+          "claim_id": "claim-03-capability_forage",
+          "claim_type": "capability",
+          "text": "I can reliably execute forage when conditions demand it.",
+          "claim_key": "forage",
+          "supported_by": [],
+          "contradicted_by": [
+            "ep-risk-1",
+            "ep-risk-2",
+            "ev-1-forage",
+            "ev-2-forage"
+          ],
+          "support_score": 0.0,
+          "contradiction_score": 2.5,
+          "support_count": 0,
+          "contradict_count": 4,
+          "confidence": 0.0,
+          "stale_since": null,
+          "last_validated_at": 12,
+          "source_sleep_session_id": 2
+        }
+      ],
+      "summary": {
+        "total_claims": 3,
+        "contradicted_claims": [
+          "claim-01-trait_cautious",
+          "claim-03-capability_forage"
+        ],
+        "mixed_claims": [
+          "claim-01-trait_cautious",
+          "claim-02-value_survival_priority"
+        ],
+        "supporting_evidence_count": 5,
+        "contradicting_evidence_count": 11
+      },
+      "trait_mismatch_caught": true,
+      "value_mismatch_caught": true,
+      "capability_checked": true
+    },
+    "mixed_attribution": {
+      "EAA": 0.9724999999999999,
+      "primary_accuracy": 1.0,
+      "secondary_accuracy": 1.0,
+      "causal_chain_quality": 1.0,
+      "cases": [
+        {
+          "id": "A1",
+          "event": "HTTPTimeout",
+          "resource_state": {
+            "tokens_remaining": 0,
+            "cpu_budget": 0.8,
+            "memory_free": 512.0
+          },
+          "primary_expected": "world",
+          "secondary_expected": "self",
+          "causal_link": "retry_storm",
+          "failure_mode": "token_exhaustion",
+          "primary_origin": "world",
+          "secondary_origin": "self",
+          "causal_chain": [
+            "HTTPTimeout",
+            "retry_storm",
+            "token_exhaustion"
+          ],
+          "confidence": 0.85
+        },
+        {
+          "id": "A2",
+          "event": "MemoryIndexCorruption",
+          "resource_state": {
+            "tokens_remaining": 180,
+            "cpu_budget": 0.7,
+            "memory_free": 48.0
+          },
+          "primary_expected": "self",
+          "secondary_expected": "world",
+          "causal_link": "stale_snapshot",
+          "failure_mode": "world_misread",
+          "primary_origin": "self",
+          "secondary_origin": "world",
+          "causal_chain": [
+            "MemoryIndexCorruption",
+            "stale_snapshot",
+            "world_misread"
+          ],
+          "confidence": 0.85
+        },
+        {
+          "id": "A3",
+          "event": "DOMStructureChanged",
+          "resource_state": {
+            "tokens_remaining": 210,
+            "cpu_budget": 0.8,
+            "memory_free": 400.0
+          },
+          "primary_expected": "world",
+          "secondary_expected": "self",
+          "causal_link": "fragile_parser",
+          "failure_mode": "parse_failure",
+          "primary_origin": "world",
+          "secondary_origin": "self",
+          "causal_chain": [
+            "DOMStructureChanged",
+            "fragile_parser",
+            "parse_failure"
+          ],
+          "confidence": 0.65
+        },
+        {
+          "id": "A4",
+          "event": "ReadOnlyFileSystem",
+          "resource_state": {
+            "tokens_remaining": 220,
+            "cpu_budget": 0.9,
+            "memory_free": 256.0
+          },
+          "primary_expected": "world",
+          "secondary_expected": "world",
+          "causal_link": "artifact_absence",
+          "failure_mode": "retrieval_failure",
+          "primary_origin": "world",
+          "secondary_origin": "world",
+          "causal_chain": [
+            "ReadOnlyFileSystem",
+            "artifact_absence",
+            "retrieval_failure"
+          ],
+          "confidence": 0.55
+        }
+      ]
+    },
+    "memory_utility": {
+      "retrieval_influence_rate": 1.0,
+      "retrieval_benefit_rate": 1.0,
+      "MUR": 1.0,
+      "details": [
+        {
+          "probe": 0,
+          "retrieved": 1,
+          "baseline_choice": "hide",
+          "trained_choice": "hide",
+          "influenced": true,
+          "beneficial": true
+        },
+        {
+          "probe": 1,
+          "retrieved": 1,
+          "baseline_choice": "hide",
+          "trained_choice": "hide",
+          "influenced": true,
+          "beneficial": true
+        },
+        {
+          "probe": 2,
+          "retrieved": 1,
+          "baseline_choice": "hide",
+          "trained_choice": "hide",
+          "influenced": true,
+          "beneficial": true
+        },
+        {
+          "probe": 3,
+          "retrieved": 1,
+          "baseline_choice": "hide",
+          "trained_choice": "hide",
+          "influenced": true,
+          "beneficial": true
+        }
+      ]
+    },
+    "sleep_reduction": {
+      "PSSR": 0.9997048476855398,
+      "sleep_summary": {
+        "average_free_energy_drop": 0.0,
+        "preferred_action": "rest",
+        "stable_beliefs": {
+          "food": 0.48868652078316405,
+          "danger": 0.3146942173777207,
+          "novelty": 0.4958086812837623,
+          "shelter": 0.392980073800738,
+          "temperature": 0.49907400049700024,
+          "social": 0.2972127147255547
+        },
+        "dream_replay_count": 0,
+        "memory_consolidations": 6,
+        "sleep_cycle_id": 1,
+        "episodes_sampled": 1,
+        "clusters_created": 0,
+        "patterns_found": 1,
+        "world_model_updates": 1,
+        "policy_bias_updates": 1,
+        "epistemic_bonus_updates": 0,
+        "episodes_archived": 0,
+        "episodes_deleted": 0,
+        "memory_compressed": 0,
+        "prediction_error_before": 0.6851233333328334,
+        "prediction_error_after": 0.2717626303181834,
+        "rules_extracted": 1,
+        "threat_updates": 1,
+        "preference_updates": 1,
+        "semantic_entries_written": 1,
+        "compression_removed": 0,
+        "llm_used": false,
+        "rule_ids": [
+          "sleep-1-0-forage-survival_threat"
+        ],
+        "counterfactual_episodes_evaluated": 1,
+        "counterfactual_insights_generated": 3,
+        "counterfactual_insights_absorbed": 0,
+        "counterfactual_energy_spent": 0.045,
+        "counterfactual_log": [
+          {
+            "type": "virtual_sandbox_reasoning",
+            "label": "\u865a\u62df\u6c99\u76d2\u63a8\u6f14",
+            "episodes_evaluated": 1,
+            "branches_explored": 3,
+            "insights_generated": 3,
+            "insights_absorbed": 0,
+            "energy_spent": 0.045,
+            "skipped_reason": ""
+          },
+          {
+            "type": "rejection",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 1,
+            "original_action": "forage",
+            "counterfactual_action": "hide",
+            "efe_delta": -0.7994999999999999,
+            "confidence": 0.3043573580792168
+          },
+          {
+            "type": "rejection",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 1,
+            "original_action": "forage",
+            "counterfactual_action": "scan",
+            "efe_delta": -0.3634999999999997,
+            "confidence": 0.32194136999472495
+          },
+          {
+            "type": "rejection",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 1,
+            "original_action": "forage",
+            "counterfactual_action": "exploit_shelter",
+            "efe_delta": -0.6934999999999999,
+            "confidence": 0.3082815471968077
+          }
+        ]
+      }
+    },
+    "counterfactual_generalization": {
+      "CAQ": 1.0,
+      "absorbed_count": 1,
+      "generalization_rate": 1.0,
+      "influence_rate": 1.0,
+      "details": [
+        {
+          "probe": 0,
+          "before_choice": "hide",
+          "after_choice": "hide",
+          "before_safe_margin": 156.29493610622427,
+          "after_safe_margin": 158.66799278030507,
+          "before_forage_risk": 105.00671565234403,
+          "after_forage_risk": 105.20921565234403,
+          "influenced": true,
+          "beneficial": true
+        },
+        {
+          "probe": 1,
+          "before_choice": "hide",
+          "after_choice": "hide",
+          "before_safe_margin": 156.29493610622427,
+          "after_safe_margin": 158.66605745431417,
+          "before_forage_risk": 105.00671565234403,
+          "after_forage_risk": 105.20921565234403,
+          "influenced": true,
+          "beneficial": true
+        },
+        {
+          "probe": 2,
+          "before_choice": "hide",
+          "after_choice": "hide",
+          "before_safe_margin": 156.29493610622427,
+          "after_safe_margin": 158.66856320840145,
+          "before_forage_risk": 105.00671565234403,
+          "after_forage_risk": 105.20921565234403,
+          "influenced": true,
+          "beneficial": true
+        },
+        {
+          "probe": 3,
+          "before_choice": "hide",
+          "after_choice": "hide",
+          "before_safe_margin": 156.29493610622427,
+          "after_safe_margin": 158.66593518679787,
+          "before_forage_risk": 105.00671565234403,
+          "after_forage_risk": 105.20921565234403,
+          "influenced": true,
+          "beneficial": true
+        }
+      ]
+    },
+    "value_stability": {
+      "VCUS": 1.0,
+      "value_flip_rate": 0.0,
+      "details": [
+        {
+          "scenario": "survival_vs_gain",
+          "choice": "rest",
+          "stable": true,
+          "active_goal": "RESOURCES"
+        },
+        {
+          "scenario": "integrity_vs_control",
+          "choice": "hide",
+          "stable": true,
+          "active_goal": "SURVIVAL"
+        },
+        {
+          "scenario": "commitment_cost",
+          "choice": "hide",
+          "stable": true,
+          "active_goal": "RESOURCES"
+        },
+        {
+          "scenario": "scarcity_reward_trap",
+          "choice": "hide",
+          "stable": true,
+          "active_goal": "RESOURCES"
+        }
+      ]
+    },
+    "restart_continuity": {
+      "ICI": 0.9999999999999999,
+      "components": {
+        "values": 0.9999999999999999,
+        "narrative": 1.0,
+        "policy": 0.9999999999999998
+      }
+    }
+  },
+  "final_recommendation": {
+    "status": "RECOMMEND_M3_WITH_CAUTION",
+    "rationale": "P0 evidence-loop repairs are in place and stricter metrics remain above threshold."
+  },
+  "gap_audit": {
+    "implemented_but_weak": [
+      "episode write path existed but was gated mostly by surprise plus exact duplicate rejection",
+      "identity narrative already influenced policy scoring but lacked structured evidence binding",
+      "counterfactual learning already had confidence gating, but no cooling buffer for medium-confidence adoption",
+      "evaluation harness existed, but MUR/CAQ/VCUS were still too close to implementation-internal success signals"
+    ],
+    "missing": [
+      "native narrative claim provenance",
+      "native contradiction checker for trait/value/capability claims",
+      "retrieval benefit separated from retrieval influence",
+      "mixed-origin attribution with secondary cause and causal chain"
+    ],
+    "log_only_or_harness_only": [
+      "narrative consistency could be described in report text but not audited as structured machine-readable evidence",
+      "EAA, CAQ, and VCUS were largely single-family harness metrics with limited perturbation pressure"
+    ]
+  }
+}

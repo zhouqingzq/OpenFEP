@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
+from statistics import mean
 from types import MappingProxyType
 from typing import Callable, Mapping
 
@@ -22,6 +24,9 @@ CORE_API_LIMITS = {
     "requests_per_minute": 60.0,
     "context_window_tokens": 256.0,
 }
+HIGH_SURPRISE_THRESHOLD = 3.0
+MAX_CHAPTER_TICKS = 500
+MAX_CHAPTERS = 50
 
 
 def _event_name(event: object) -> str:
@@ -43,6 +48,10 @@ def _normalize_event_name(event: object) -> str:
         "timeouterror": "http_timeout",
         "networkfailure": "network_failure",
         "fatalexception": "fatal_exception",
+        "memoryindexcorruption": "memory_index_corruption",
+        "toolcapabilitydowngrade": "tool_capability_downgrade",
+        "readonlyfilesystem": "read_only_filesystem",
+        "domstructurechanged": "dom_structure_changed",
     }
     key = _event_name(event).strip().casefold()
     return aliases.get(key, key)
@@ -56,6 +65,26 @@ class BodySchema:
     token_budget: int
     memory_usage: float
     compute_load: float
+
+    def to_dict(self) -> dict[str, float | int]:
+        return {
+            "energy": self.energy,
+            "token_budget": self.token_budget,
+            "memory_usage": self.memory_usage,
+            "compute_load": self.compute_load,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> BodySchema:
+        default = cls(energy=0.85, token_budget=256, memory_usage=128.0, compute_load=0.25)
+        if not payload:
+            return default
+        return cls(
+            energy=float(payload.get("energy", default.energy)),
+            token_budget=int(payload.get("token_budget", default.token_budget)),
+            memory_usage=float(payload.get("memory_usage", default.memory_usage)),
+            compute_load=float(payload.get("compute_load", default.compute_load)),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +102,24 @@ class CapabilityModel:
             MappingProxyType(dict(self.api_limits)),
         )
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "available_actions": list(self.available_actions),
+            "api_limits": dict(self.api_limits),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> CapabilityModel:
+        if not payload:
+            return cls()
+        api_limits = payload.get("api_limits")
+        if not isinstance(api_limits, dict):
+            api_limits = {}
+        return cls(
+            available_actions=tuple(str(action) for action in payload.get("available_actions", [])),
+            api_limits={str(key): float(value) for key, value in api_limits.items()},
+        )
+
 
 @dataclass(slots=True)
 class ResourceState:
@@ -88,6 +135,20 @@ class ResourceState:
             "cpu_budget": self.cpu_budget,
             "memory_free": self.memory_free,
         }
+
+    def to_dict(self) -> dict[str, float | int]:
+        return self.snapshot()
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> ResourceState:
+        default = cls(tokens_remaining=256, cpu_budget=1.0, memory_free=1024.0)
+        if not payload:
+            return default
+        return cls(
+            tokens_remaining=int(payload.get("tokens_remaining", default.tokens_remaining)),
+            cpu_budget=float(payload.get("cpu_budget", default.cpu_budget)),
+            memory_free=float(payload.get("memory_free", default.memory_free)),
+        )
 
     def predict(self, body_schema: BodySchema, threat_model: ThreatModel | None = None) -> dict[str, bool]:
         token_threshold = threat_model.token_exhaustion_threshold if threat_model else 0
@@ -115,6 +176,23 @@ class ThreatModel:
             tuple(_normalize_event_name(name) for name in self.fatal_exceptions),
         )
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "token_exhaustion_threshold": self.token_exhaustion_threshold,
+            "memory_overflow_threshold": self.memory_overflow_threshold,
+            "fatal_exceptions": list(self.fatal_exceptions),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> ThreatModel:
+        if not payload:
+            return cls()
+        return cls(
+            token_exhaustion_threshold=int(payload.get("token_exhaustion_threshold", 0)),
+            memory_overflow_threshold=float(payload.get("memory_overflow_threshold", 0.0)),
+            fatal_exceptions=tuple(str(name) for name in payload.get("fatal_exceptions", ["FatalException"])),
+        )
+
     def detect(
         self,
         event: object,
@@ -139,10 +217,14 @@ class ErrorClassifier:
     self_error_events: tuple[str, ...] = (
         "token_exhaustion",
         "out_of_memory",
+        "memory_index_corruption",
+        "tool_capability_downgrade",
     )
     world_error_events: tuple[str, ...] = (
         "http_timeout",
         "network_failure",
+        "read_only_filesystem",
+        "dom_structure_changed",
     )
     existential_events: tuple[str, ...] = ("fatal_exception",)
 
@@ -161,6 +243,23 @@ class ErrorClassifier:
             self,
             "existential_events",
             tuple(_normalize_event_name(name) for name in self.existential_events),
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "self_error_events": list(self.self_error_events),
+            "world_error_events": list(self.world_error_events),
+            "existential_events": list(self.existential_events),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> ErrorClassifier:
+        if not payload:
+            return cls()
+        return cls(
+            self_error_events=tuple(str(name) for name in payload.get("self_error_events", cls().self_error_events)),
+            world_error_events=tuple(str(name) for name in payload.get("world_error_events", cls().world_error_events)),
+            existential_events=tuple(str(name) for name in payload.get("existential_events", cls().existential_events)),
         )
 
     def classify(self, event: object) -> str:
@@ -211,14 +310,232 @@ class ClassificationResult:
 
 
 @dataclass(slots=True)
+class PreferredPolicies:
+    dominant_strategy: str = "expected_free_energy"
+    action_distribution: dict[str, float] = field(default_factory=dict)
+    risk_profile: str = "risk_neutral"
+    learned_avoidances: list[str] = field(default_factory=list)
+    learned_preferences: list[str] = field(default_factory=list)
+    last_updated_tick: int = 0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "dominant_strategy": self.dominant_strategy,
+            "action_distribution": dict(self.action_distribution),
+            "risk_profile": self.risk_profile,
+            "learned_avoidances": list(self.learned_avoidances),
+            "learned_preferences": list(self.learned_preferences),
+            "last_updated_tick": self.last_updated_tick,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, object] | None) -> PreferredPolicies:
+        if not data:
+            return cls()
+        distribution = data.get("action_distribution")
+        if not isinstance(distribution, dict):
+            distribution = {}
+        return cls(
+            dominant_strategy=str(data.get("dominant_strategy", "expected_free_energy")),
+            action_distribution={str(key): float(value) for key, value in distribution.items()},
+            risk_profile=str(data.get("risk_profile", "risk_neutral")),
+            learned_avoidances=[str(item) for item in data.get("learned_avoidances", [])],
+            learned_preferences=[str(item) for item in data.get("learned_preferences", [])],
+            last_updated_tick=int(data.get("last_updated_tick", 0)),
+        )
+
+
+@dataclass(slots=True)
+class NarrativeChapter:
+    """A time-bounded chapter in the agent's autobiographical narrative."""
+
+    chapter_id: int
+    tick_range: tuple[int, int]
+    dominant_theme: str
+    key_events: list[str] = field(default_factory=list)
+    behavioral_shift: str | None = None
+    state_summary: dict[str, object] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "chapter_id": self.chapter_id,
+            "tick_range": [int(self.tick_range[0]), int(self.tick_range[1])],
+            "dominant_theme": self.dominant_theme,
+            "key_events": list(self.key_events),
+            "behavioral_shift": self.behavioral_shift,
+            "state_summary": dict(self.state_summary),
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, object] | None) -> NarrativeChapter:
+        if not data:
+            return cls(chapter_id=0, tick_range=(0, 0), dominant_theme="consolidation")
+        tick_range = data.get("tick_range", (0, 0))
+        if not isinstance(tick_range, (list, tuple)) or len(tick_range) != 2:
+            tick_range = (0, 0)
+        state_summary = data.get("state_summary")
+        if not isinstance(state_summary, dict):
+            state_summary = {}
+        behavioral_shift = data.get("behavioral_shift")
+        return cls(
+            chapter_id=int(data.get("chapter_id", 0)),
+            tick_range=(int(tick_range[0]), int(tick_range[1])),
+            dominant_theme=str(data.get("dominant_theme", "consolidation")),
+            key_events=[str(item) for item in data.get("key_events", [])][:5],
+            behavioral_shift=(
+                str(behavioral_shift) if isinstance(behavioral_shift, str) and behavioral_shift else None
+            ),
+            state_summary=dict(state_summary),
+        )
+
+
+@dataclass(slots=True)
+class NarrativeClaim:
+    claim_id: str
+    claim_type: str
+    text: str
+    claim_key: str
+    supported_by: list[str] = field(default_factory=list)
+    contradicted_by: list[str] = field(default_factory=list)
+    support_score: float = 0.0
+    contradiction_score: float = 0.0
+    support_count: int = 0
+    contradict_count: int = 0
+    confidence: float = 0.0
+    stale_since: int | None = None
+    last_validated_at: int = 0
+    source_sleep_session_id: int | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "claim_id": self.claim_id,
+            "claim_type": self.claim_type,
+            "text": self.text,
+            "claim_key": self.claim_key,
+            "supported_by": list(self.supported_by),
+            "contradicted_by": list(self.contradicted_by),
+            "support_score": self.support_score,
+            "contradiction_score": self.contradiction_score,
+            "support_count": self.support_count,
+            "contradict_count": self.contradict_count,
+            "confidence": self.confidence,
+            "stale_since": self.stale_since,
+            "last_validated_at": self.last_validated_at,
+            "source_sleep_session_id": self.source_sleep_session_id,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, object] | None) -> NarrativeClaim:
+        if not data:
+            return cls(claim_id="", claim_type="trait", text="", claim_key="")
+        stale_since = data.get("stale_since")
+        source_sleep_session_id = data.get("source_sleep_session_id")
+        return cls(
+            claim_id=str(data.get("claim_id", "")),
+            claim_type=str(data.get("claim_type", "trait")),
+            text=str(data.get("text", "")),
+            claim_key=str(data.get("claim_key", "")),
+            supported_by=[str(item) for item in data.get("supported_by", [])],
+            contradicted_by=[str(item) for item in data.get("contradicted_by", [])],
+            support_score=float(data.get("support_score", 0.0)),
+            contradiction_score=float(data.get("contradiction_score", 0.0)),
+            support_count=int(data.get("support_count", 0)),
+            contradict_count=int(data.get("contradict_count", 0)),
+            confidence=float(data.get("confidence", 0.0)),
+            stale_since=int(stale_since) if isinstance(stale_since, (int, float)) else None,
+            last_validated_at=int(data.get("last_validated_at", 0)),
+            source_sleep_session_id=(
+                int(source_sleep_session_id)
+                if isinstance(source_sleep_session_id, (int, float))
+                else None
+            ),
+        )
+
+
+@dataclass(slots=True)
+class IdentityNarrative:
+    chapters: list[NarrativeChapter] = field(default_factory=list)
+    current_chapter: NarrativeChapter | None = None
+    core_identity: str = ""
+    core_summary: str = ""
+    behavioral_patterns: list[str] = field(default_factory=list)
+    significant_events: list[str] = field(default_factory=list)
+    values_statement: str = ""
+    claims: list[NarrativeClaim] = field(default_factory=list)
+    contradiction_summary: dict[str, object] = field(default_factory=dict)
+    evidence_provenance: dict[str, object] = field(default_factory=dict)
+    last_updated_tick: int = 0
+    version: int = 0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "chapters": [chapter.to_dict() for chapter in self.chapters],
+            "current_chapter": (
+                self.current_chapter.to_dict() if self.current_chapter is not None else None
+            ),
+            "core_identity": self.core_identity,
+            "core_summary": self.core_summary,
+            "behavioral_patterns": list(self.behavioral_patterns),
+            "significant_events": list(self.significant_events),
+            "values_statement": self.values_statement,
+            "claims": [claim.to_dict() for claim in self.claims],
+            "contradiction_summary": dict(self.contradiction_summary),
+            "evidence_provenance": dict(self.evidence_provenance),
+            "last_updated_tick": self.last_updated_tick,
+            "version": self.version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, object] | None) -> IdentityNarrative:
+        if not data:
+            return cls()
+        chapters_payload = data.get("chapters", [])
+        current_chapter_payload = data.get("current_chapter")
+        contradiction_summary = data.get("contradiction_summary")
+        evidence_provenance = data.get("evidence_provenance")
+        if not isinstance(contradiction_summary, dict):
+            contradiction_summary = {}
+        if not isinstance(evidence_provenance, dict):
+            evidence_provenance = {}
+        return cls(
+            chapters=[
+                NarrativeChapter.from_dict(item)
+                for item in chapters_payload
+                if isinstance(item, Mapping)
+            ],
+            current_chapter=(
+                NarrativeChapter.from_dict(current_chapter_payload)
+                if isinstance(current_chapter_payload, Mapping)
+                else None
+            ),
+            core_identity=str(data.get("core_identity", "")),
+            core_summary=str(data.get("core_summary", "")),
+            behavioral_patterns=[str(item) for item in data.get("behavioral_patterns", [])],
+            significant_events=[str(item) for item in data.get("significant_events", [])],
+            values_statement=str(data.get("values_statement", "")),
+            claims=[
+                NarrativeClaim.from_dict(item)
+                for item in data.get("claims", [])
+                if isinstance(item, Mapping)
+            ],
+            contradiction_summary=dict(contradiction_summary),
+            evidence_provenance=dict(evidence_provenance),
+            last_updated_tick=int(data.get("last_updated_tick", 0)),
+            version=int(data.get("version", 0)),
+        )
+
+@dataclass(slots=True)
 class SelfModel:
-    """Minimal self model for separating self, world, and survival failures."""
+    """Self model for separating failures and persisting agent continuity."""
 
     body_schema: BodySchema
     capability_model: CapabilityModel
     resource_state: ResourceState
     threat_model: ThreatModel
     error_classifier: ErrorClassifier = field(default_factory=ErrorClassifier)
+    preferred_policies: PreferredPolicies | None = None
+    identity_narrative: IdentityNarrative | None = None
+    belief_calibration: dict[str, dict[str, object]] = field(default_factory=dict)
     log_sink: Callable[[str], None] | None = None
     last_result: ClassificationResult | None = field(init=False, default=None)
 
@@ -254,6 +571,938 @@ class SelfModel:
             self.body_schema,
         )
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "body_schema": self.body_schema.to_dict(),
+            "capability_model": self.capability_model.to_dict(),
+            "resource_state": self.resource_state.to_dict(),
+            "threat_model": self.threat_model.to_dict(),
+            "error_classifier": self.error_classifier.to_dict(),
+            "preferred_policies": (
+                self.preferred_policies.to_dict() if self.preferred_policies else None
+            ),
+            "identity_narrative": (
+                self.identity_narrative.to_dict() if self.identity_narrative else None
+            ),
+            "belief_calibration": {
+                str(key): dict(value) for key, value in self.belief_calibration.items()
+            },
+        }
+
+    @classmethod
+    def from_dict(
+        cls,
+        payload: Mapping[str, object] | None,
+        *,
+        log_sink: Callable[[str], None] | None = None,
+    ) -> SelfModel:
+        default = build_default_self_model(log_sink=log_sink)
+        if not payload:
+            return default
+        return cls(
+            body_schema=BodySchema.from_dict(payload.get("body_schema")),
+            capability_model=CapabilityModel.from_dict(payload.get("capability_model")),
+            resource_state=ResourceState.from_dict(payload.get("resource_state")),
+            threat_model=ThreatModel.from_dict(payload.get("threat_model")),
+            error_classifier=ErrorClassifier.from_dict(payload.get("error_classifier")),
+            preferred_policies=PreferredPolicies.from_dict(payload.get("preferred_policies")),
+            identity_narrative=IdentityNarrative.from_dict(payload.get("identity_narrative")),
+            belief_calibration={
+                str(key): dict(value)
+                for key, value in dict(payload.get("belief_calibration", {})).items()
+                if isinstance(value, Mapping)
+            },
+            log_sink=log_sink,
+        )
+
+    def update_preferred_policies(
+        self,
+        agent_history: list[dict[str, object]],
+        *,
+        counterfactual_insights: list[object] | None = None,
+        drive_history: list[dict[str, float]] | None = None,
+        current_tick: int,
+    ) -> PreferredPolicies:
+        if not agent_history:
+            existing = self.preferred_policies or PreferredPolicies()
+            existing.last_updated_tick = current_tick
+            self.preferred_policies = existing
+            return existing
+
+        dominant_counts: dict[str, int] = {}
+        action_counts: dict[str, int] = {}
+        risks: list[float] = []
+        for entry in agent_history:
+            dominant = str(entry.get("dominant_component", "expected_free_energy"))
+            action = str(entry.get("action", ""))
+            dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
+            if action:
+                action_counts[action] = action_counts.get(action, 0) + 1
+            try:
+                risks.append(float(entry.get("risk", 0.0)))
+            except (TypeError, ValueError):
+                continue
+
+        existing = self.preferred_policies
+        if existing is not None and existing.dominant_strategy:
+            dominant_counts[existing.dominant_strategy] = dominant_counts.get(
+                existing.dominant_strategy,
+                0,
+            ) + max(2, len(agent_history) // 4)
+            for action, frequency in existing.action_distribution.items():
+                action_counts[action] = action_counts.get(action, 0) + max(
+                    1,
+                    int(round(frequency * max(1, len(agent_history)) * 0.25)),
+                )
+
+        total_actions = sum(action_counts.values()) or 1
+        action_distribution = {
+            action: count / total_actions for action, count in sorted(action_counts.items())
+        }
+        average_risk = mean(risks) if risks else 0.0
+        if average_risk <= 1.0:
+            risk_profile = "risk_averse"
+        elif average_risk >= 2.5:
+            risk_profile = "risk_seeking"
+        else:
+            risk_profile = "risk_neutral"
+
+        learned_avoidances: list[str] = []
+        learned_preferences: list[str] = []
+        for insight in counterfactual_insights or []:
+            absorbed = bool(getattr(insight, "absorbed", False))
+            if not absorbed:
+                continue
+            original_action = str(getattr(insight, "original_action", ""))
+            counterfactual_action = str(getattr(insight, "counterfactual_action", ""))
+            if original_action and original_action not in learned_avoidances:
+                learned_avoidances.append(original_action)
+            if counterfactual_action and counterfactual_action not in learned_preferences:
+                learned_preferences.append(counterfactual_action)
+
+        if drive_history:
+            averaged_drives: dict[str, float] = {}
+            for snapshot in drive_history:
+                for key, value in snapshot.items():
+                    averaged_drives.setdefault(key, 0.0)
+                    averaged_drives[key] += float(value)
+            drive_count = len(drive_history)
+            for key, value in sorted(averaged_drives.items()):
+                if drive_count and (value / drive_count) >= 0.75:
+                    learned_preferences.append(f"stabilize_{key}")
+
+        learned_avoidances = learned_avoidances[:5]
+        learned_preferences = list(dict.fromkeys(learned_preferences))[:5]
+        dominant_strategy = max(
+            dominant_counts.items(),
+            key=lambda item: (item[1], item[0]),
+        )[0]
+        if existing is not None and existing.dominant_strategy:
+            existing_count = dominant_counts.get(existing.dominant_strategy, 0)
+            new_count = dominant_counts.get(dominant_strategy, 0)
+            if (
+                current_tick - existing.last_updated_tick <= 150
+                and dominant_strategy != existing.dominant_strategy
+                and new_count < max(existing_count + 5, int(existing_count * 1.5))
+            ):
+                dominant_strategy = existing.dominant_strategy
+        policies = PreferredPolicies(
+            dominant_strategy=dominant_strategy,
+            action_distribution=action_distribution,
+            risk_profile=risk_profile,
+            learned_avoidances=learned_avoidances,
+            learned_preferences=learned_preferences,
+            last_updated_tick=current_tick,
+        )
+        self.preferred_policies = policies
+        return policies
+
+    def update_identity_narrative(
+        self,
+        *,
+        episodic_memory: list[dict[str, object]],
+        preference_labels: Mapping[str, float],
+        current_tick: int,
+        decision_history: list[dict[str, object]] | None = None,
+        sleep_metrics: Mapping[str, object] | None = None,
+        conflict_history: list[object] | None = None,
+        weight_adjustments: list[object] | None = None,
+        chapter_signal: str | None = None,
+    ) -> IdentityNarrative:
+        narrative = self.generate_identity_narrative(
+            episodic_memory=episodic_memory,
+            preference_labels=preference_labels,
+            current_tick=current_tick,
+            decision_history=decision_history or [],
+            sleep_metrics=sleep_metrics or {},
+            conflict_history=conflict_history or [],
+            weight_adjustments=weight_adjustments or [],
+            chapter_signal=chapter_signal,
+        )
+        self.identity_narrative = narrative
+        return narrative
+
+    def evaluate_narrative_contradictions(
+        self,
+        *,
+        episodic_memory: list[dict[str, object]],
+        decision_history: list[dict[str, object]],
+        current_tick: int,
+        sleep_metrics: Mapping[str, object] | None = None,
+    ) -> dict[str, object]:
+        narrative = self.identity_narrative or IdentityNarrative()
+        policies = self.preferred_policies or PreferredPolicies(last_updated_tick=current_tick)
+        source_sleep_session_id = None
+        if sleep_metrics is not None:
+            raw_sleep_session = sleep_metrics.get("sleep_cycle_id")
+            if isinstance(raw_sleep_session, (int, float)):
+                source_sleep_session_id = int(raw_sleep_session)
+        claims = self._build_narrative_claims(
+            narrative=narrative,
+            episodes=episodic_memory,
+            decisions=decision_history,
+            policies=policies,
+            current_tick=current_tick,
+            source_sleep_session_id=source_sleep_session_id,
+        )
+        return {
+            "claims": [claim.to_dict() for claim in claims],
+            "summary": self._summarize_claim_consistency(claims),
+        }
+    def generate_identity_narrative(
+        self,
+        *,
+        episodic_memory: list[dict[str, object]],
+        preference_labels: Mapping[str, float],
+        current_tick: int,
+        decision_history: list[dict[str, object]],
+        sleep_metrics: Mapping[str, object],
+        conflict_history: list[object],
+        weight_adjustments: list[object],
+        chapter_signal: str | None,
+    ) -> IdentityNarrative:
+        policies = self.preferred_policies or PreferredPolicies(last_updated_tick=current_tick)
+        previous = self.identity_narrative or IdentityNarrative()
+        previous_version = previous.version + 1 if self.identity_narrative else 0
+        recent_episodes = [
+            payload
+            for payload in episodic_memory
+            if int(payload.get("timestamp", payload.get("cycle", 0))) > previous.last_updated_tick
+        ]
+        recent_decisions = [
+            payload
+            for payload in decision_history
+            if int(payload.get("tick", 0)) > previous.last_updated_tick
+        ]
+        recent_adjustments = [
+            item
+            for item in weight_adjustments
+            if int(getattr(item, "tick", 0)) > previous.last_updated_tick
+        ]
+
+        ticks = [
+            int(payload.get("timestamp", payload.get("cycle", 0)))
+            for payload in recent_episodes
+        ] + [int(payload.get("tick", 0)) for payload in recent_decisions]
+        chapter_start = min(ticks) if ticks else current_tick
+        chapter_end = max(ticks) if ticks else current_tick
+        recent_state_summary = self._summarize_chapter_state(
+            decisions=recent_decisions,
+            episodes=recent_episodes,
+            policies=policies,
+        )
+        recent_key_events = self._extract_key_events(recent_episodes)
+        recent_theme = self._infer_dominant_theme(
+            state_summary=recent_state_summary,
+            episodes=recent_episodes,
+            chapter_signal=chapter_signal,
+        )
+
+        chapters = [NarrativeChapter.from_dict(chapter.to_dict()) for chapter in previous.chapters]
+        current_chapter = (
+            NarrativeChapter.from_dict(previous.current_chapter.to_dict())
+            if previous.current_chapter is not None
+            else None
+        )
+        next_chapter_id = max(
+            [chapter.chapter_id for chapter in chapters]
+            + ([current_chapter.chapter_id] if current_chapter is not None else [])
+            + [0]
+        ) + 1
+
+        if current_chapter is None:
+            current_chapter = NarrativeChapter(
+                chapter_id=next_chapter_id,
+                tick_range=(chapter_start, chapter_end),
+                dominant_theme=recent_theme,
+                key_events=recent_key_events,
+                state_summary=recent_state_summary,
+            )
+        elif self.should_start_new_chapter(
+            current_chapter=current_chapter,
+            recent_episodes=recent_episodes,
+            recent_state_summary=recent_state_summary,
+            sleep_metrics=sleep_metrics,
+            chapter_signal=chapter_signal,
+            current_tick=current_tick,
+        ):
+            chapters.append(current_chapter)
+            current_chapter = NarrativeChapter(
+                chapter_id=next_chapter_id,
+                tick_range=(chapter_start, chapter_end),
+                dominant_theme=recent_theme,
+                key_events=recent_key_events,
+                behavioral_shift=self._describe_behavioral_shift(
+                    chapters[-1],
+                    recent_state_summary,
+                    recent_adjustments,
+                    chapter_signal,
+                ),
+                state_summary=recent_state_summary,
+            )
+            if self.log_sink is not None:
+                self.log_sink(
+                    "[NARRATIVE] "
+                    f"chapter={current_chapter.chapter_id} theme={current_chapter.dominant_theme} "
+                    f"ticks={current_chapter.tick_range[0]}-{current_chapter.tick_range[1]}"
+                )
+        else:
+            current_chapter.tick_range = (
+                min(current_chapter.tick_range[0], chapter_start),
+                max(current_chapter.tick_range[1], chapter_end),
+            )
+            current_chapter.dominant_theme = recent_theme
+            current_chapter.key_events = self._merge_key_events(
+                current_chapter.key_events,
+                recent_key_events,
+            )
+            current_chapter.state_summary = self._merge_state_summaries(
+                current_chapter.state_summary,
+                recent_state_summary,
+            )
+
+        while len(chapters) > MAX_CHAPTERS:
+            chapters = [self._merge_chapters(chapters[0], chapters[1])] + chapters[2:]
+
+        chapter_views = chapters + ([current_chapter] if current_chapter is not None else [])
+        source_sleep_session_id = None
+        raw_sleep_session = sleep_metrics.get("sleep_cycle_id")
+        if isinstance(raw_sleep_session, (int, float)):
+            source_sleep_session_id = int(raw_sleep_session)
+        narrative = IdentityNarrative(
+            chapters=chapters,
+            current_chapter=current_chapter,
+            core_identity=self._derive_core_identity(chapter_views),
+            core_summary="",
+            behavioral_patterns=self._derive_behavioral_patterns(chapter_views, policies),
+            significant_events=self._derive_significant_events(chapter_views),
+            values_statement=self._derive_values_statement(preference_labels, policies),
+            last_updated_tick=current_tick,
+            version=previous_version,
+        )
+        narrative.claims = self._build_narrative_claims(
+            narrative=narrative,
+            episodes=episodic_memory,
+            decisions=decision_history,
+            policies=policies,
+            current_tick=current_tick,
+            source_sleep_session_id=source_sleep_session_id,
+        )
+        narrative.contradiction_summary = self._summarize_claim_consistency(narrative.claims)
+        narrative.evidence_provenance = {
+            claim.claim_id: {
+                "claim_text": claim.text,
+                "supported_by": list(claim.supported_by),
+                "contradicted_by": list(claim.contradicted_by),
+                "support_score": claim.support_score,
+                "contradiction_score": claim.contradiction_score,
+                "last_validated_at": claim.last_validated_at,
+                "source_sleep_session_id": claim.source_sleep_session_id,
+                "confidence": claim.confidence,
+            }
+            for claim in narrative.claims
+        }
+        narrative.core_summary = self.generate_core_summary(narrative)
+        self._update_belief_calibration(
+            current_tick=current_tick,
+            policies=policies,
+            claims=narrative.claims,
+            episodes=episodic_memory,
+        )
+        return narrative
+
+    def _build_narrative_claims(
+        self,
+        *,
+        narrative: IdentityNarrative,
+        episodes: list[dict[str, object]],
+        decisions: list[dict[str, object]],
+        policies: PreferredPolicies,
+        current_tick: int,
+        source_sleep_session_id: int | None,
+    ) -> list[NarrativeClaim]:
+        claim_specs: list[tuple[str, str, str, str]] = []
+        identity_lower = narrative.core_identity.lower()
+        if "risk-averse" in identity_lower or "cautious" in identity_lower or policies.risk_profile == "risk_averse":
+            claim_specs.append(("trait", "cautious", "I am generally cautious under pressure.", "trait_cautious"))
+        elif "risk-seeking" in identity_lower or "aggressive" in identity_lower or policies.risk_profile == "risk_seeking":
+            claim_specs.append(("trait", "aggressive", "I am generally aggressive under pressure.", "trait_aggressive"))
+        claim_specs.append((
+            "value",
+            "survival_priority",
+            "Survival is prioritized over resource gain.",
+            "value_survival_priority",
+        ))
+        dominant_action = ""
+        if policies.action_distribution:
+            dominant_action = max(
+                policies.action_distribution.items(),
+                key=lambda item: (item[1], item[0]),
+            )[0]
+        if dominant_action:
+            claim_specs.append((
+                "capability",
+                dominant_action,
+                f"I can reliably execute {dominant_action} when conditions demand it.",
+                f"capability_{dominant_action}",
+            ))
+        claims: list[NarrativeClaim] = []
+        for index, (claim_type, claim_key, text_value, claim_name) in enumerate(claim_specs, start=1):
+            claims.append(
+                self._evaluate_narrative_claim(
+                    claim_id=f"claim-{index:02d}-{claim_name}",
+                    claim_type=claim_type,
+                    claim_key=claim_key,
+                    text_value=text_value,
+                    episodes=episodes,
+                    decisions=decisions,
+                    current_tick=current_tick,
+                    source_sleep_session_id=source_sleep_session_id,
+                )
+            )
+        return claims
+
+    def _evaluate_narrative_claim(
+        self,
+        *,
+        claim_id: str,
+        claim_type: str,
+        claim_key: str,
+        text_value: str,
+        episodes: list[dict[str, object]],
+        decisions: list[dict[str, object]],
+        current_tick: int,
+        source_sleep_session_id: int | None,
+    ) -> NarrativeClaim:
+        support_ids: list[str] = []
+        contradiction_ids: list[str] = []
+        support_score = 0.0
+        contradiction_score = 0.0
+        evidence_ticks: list[int] = []
+        for payload in episodes:
+            evidence_id = self._evidence_id(payload)
+            if claim_type == "trait" and claim_key == "cautious":
+                if self._episode_supports_caution(payload):
+                    support_ids.append(evidence_id)
+                    support_score += 1.0
+                elif self._episode_contradicts_caution(payload):
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 1.0
+            elif claim_type == "trait" and claim_key == "aggressive":
+                if self._episode_contradicts_caution(payload):
+                    support_ids.append(evidence_id)
+                    support_score += 1.0
+                elif self._episode_supports_caution(payload):
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 1.0
+            elif claim_type == "value" and claim_key == "survival_priority":
+                if self._episode_supports_survival_priority(payload):
+                    support_ids.append(evidence_id)
+                    support_score += 1.0
+                elif self._episode_contradicts_survival_priority(payload):
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 1.0
+            elif claim_type == "capability" and self._episode_matches_action(payload, claim_key):
+                if self._episode_supports_capability(payload):
+                    support_ids.append(evidence_id)
+                    support_score += 1.0
+                elif self._episode_contradicts_capability(payload):
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 1.0
+            evidence_ticks.append(int(payload.get("timestamp", payload.get("cycle", 0))))
+        for payload in decisions:
+            evidence_id = self._evidence_id(payload)
+            if claim_type == "trait" and claim_key == "cautious":
+                if self._decision_supports_caution(payload):
+                    support_ids.append(evidence_id)
+                    support_score += 0.5
+                elif self._decision_contradicts_caution(payload):
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 0.5
+            elif claim_type == "value" and claim_key == "survival_priority":
+                if self._decision_supports_survival_priority(payload):
+                    support_ids.append(evidence_id)
+                    support_score += 0.5
+                elif self._decision_contradicts_survival_priority(payload):
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 0.5
+            elif claim_type == "capability" and str(payload.get("action", "")) == claim_key:
+                if float(payload.get("risk", 0.0)) <= 1.0:
+                    support_ids.append(evidence_id)
+                    support_score += 0.25
+                else:
+                    contradiction_ids.append(evidence_id)
+                    contradiction_score += 0.25
+            evidence_ticks.append(int(payload.get("tick", 0)))
+        total = support_score + contradiction_score
+        confidence = support_score / total if total > 0.0 else 0.0
+        latest_evidence_tick = max(evidence_ticks, default=0)
+        stale_since = None if current_tick - latest_evidence_tick <= MAX_CHAPTER_TICKS else latest_evidence_tick
+        return NarrativeClaim(
+            claim_id=claim_id,
+            claim_type=claim_type,
+            text=text_value,
+            claim_key=claim_key,
+            supported_by=support_ids,
+            contradicted_by=contradiction_ids,
+            support_score=round(support_score, 4),
+            contradiction_score=round(contradiction_score, 4),
+            support_count=len(support_ids),
+            contradict_count=len(contradiction_ids),
+            confidence=round(confidence, 4),
+            stale_since=stale_since,
+            last_validated_at=current_tick,
+            source_sleep_session_id=source_sleep_session_id,
+        )
+
+    def _summarize_claim_consistency(self, claims: list[NarrativeClaim]) -> dict[str, object]:
+        contradicted = [claim for claim in claims if claim.contradict_count > claim.support_count]
+        mixed = [claim for claim in claims if claim.contradict_count > 0 and claim.support_count > 0]
+        return {
+            "total_claims": len(claims),
+            "contradicted_claims": [claim.claim_id for claim in contradicted],
+            "mixed_claims": [claim.claim_id for claim in mixed],
+            "supporting_evidence_count": sum(claim.support_count for claim in claims),
+            "contradicting_evidence_count": sum(claim.contradict_count for claim in claims),
+        }
+
+    def _update_belief_calibration(
+        self,
+        *,
+        current_tick: int,
+        policies: PreferredPolicies,
+        claims: list[NarrativeClaim],
+        episodes: list[dict[str, object]],
+    ) -> None:
+        total_claim_support = sum(claim.support_count for claim in claims)
+        mean_confidence = mean([claim.confidence for claim in claims]) if claims else 0.0
+        protected_events = len([episode for episode in episodes if bool(episode.get("identity_critical", False))])
+        self.belief_calibration = {
+            "preferred_policies": {
+                "confidence": round(mean_confidence, 4),
+                "evidence_count": total_claim_support,
+                "last_verified_at": current_tick,
+                "risk_profile": policies.risk_profile,
+            },
+            "capability_profile": {
+                "confidence": round(mean_confidence, 4),
+                "evidence_count": len(self.capability_model.available_actions),
+                "last_verified_at": current_tick,
+            },
+            "threat_profile": {
+                "confidence": round(min(1.0, protected_events / max(1, len(episodes))), 4),
+                "evidence_count": len(episodes),
+                "last_verified_at": current_tick,
+            },
+        }
+
+    def _evidence_id(self, payload: Mapping[str, object]) -> str:
+        raw = payload.get("episode_id") or payload.get("claim_id")
+        if raw:
+            return str(raw)
+        tick = int(payload.get("timestamp", payload.get("cycle", payload.get("tick", 0))))
+        action = str(payload.get("action_taken", payload.get("action", "evidence")))
+        return f"ev-{tick}-{action}"
+
+    def _episode_matches_action(self, payload: Mapping[str, object], action: str) -> bool:
+        return str(payload.get("action_taken", payload.get("action", ""))) == action
+
+    def _episode_supports_caution(self, payload: Mapping[str, object]) -> bool:
+        action = str(payload.get("action_taken", payload.get("action", "")))
+        risk = float(payload.get("risk", 0.0))
+        outcome = str(payload.get("predicted_outcome", "neutral"))
+        return action in {"hide", "rest", "exploit_shelter"} and (risk >= 0.8 or outcome != "resource_gain")
+
+    def _episode_contradicts_caution(self, payload: Mapping[str, object]) -> bool:
+        action = str(payload.get("action_taken", payload.get("action", "")))
+        risk = float(payload.get("risk", 0.0))
+        outcome = str(payload.get("predicted_outcome", "neutral"))
+        return action in {"forage", "scan", "seek_contact"} and (risk >= 1.0 or outcome in {"survival_threat", "integrity_loss"})
+
+    def _episode_supports_survival_priority(self, payload: Mapping[str, object]) -> bool:
+        return self._episode_supports_caution(payload) or bool(payload.get("identity_critical", False))
+
+    def _episode_contradicts_survival_priority(self, payload: Mapping[str, object]) -> bool:
+        action = str(payload.get("action_taken", payload.get("action", "")))
+        outcome = str(payload.get("predicted_outcome", "neutral"))
+        return action == "forage" and outcome in {"survival_threat", "integrity_loss", "resource_gain"}
+
+    def _episode_supports_capability(self, payload: Mapping[str, object]) -> bool:
+        outcome = str(payload.get("predicted_outcome", "neutral"))
+        return outcome in {"neutral", "resource_gain"}
+
+    def _episode_contradicts_capability(self, payload: Mapping[str, object]) -> bool:
+        outcome = str(payload.get("predicted_outcome", "neutral"))
+        return outcome in {"survival_threat", "integrity_loss"}
+
+    def _decision_supports_caution(self, payload: Mapping[str, object]) -> bool:
+        action = str(payload.get("action", ""))
+        risk = float(payload.get("risk", 0.0))
+        return action in {"hide", "rest", "exploit_shelter"} and risk <= 1.0
+
+    def _decision_contradicts_caution(self, payload: Mapping[str, object]) -> bool:
+        action = str(payload.get("action", ""))
+        risk = float(payload.get("risk", 0.0))
+        return action in {"forage", "scan", "seek_contact"} and risk >= 1.0
+
+    def _decision_supports_survival_priority(self, payload: Mapping[str, object]) -> bool:
+        return self._decision_supports_caution(payload)
+
+    def _decision_contradicts_survival_priority(self, payload: Mapping[str, object]) -> bool:
+        action = str(payload.get("action", ""))
+        risk = float(payload.get("risk", 0.0))
+        return action == "forage" and risk >= 1.0
+    def should_start_new_chapter(
+        self,
+        *,
+        current_chapter: NarrativeChapter,
+        recent_episodes: list[dict[str, object]],
+        recent_state_summary: Mapping[str, object],
+        sleep_metrics: Mapping[str, object],
+        chapter_signal: str | None,
+        current_tick: int,
+    ) -> bool:
+        current_action = str(current_chapter.state_summary.get("dominant_action", ""))
+        recent_action = str(recent_state_summary.get("dominant_action", ""))
+        if current_action and recent_action and current_action != recent_action:
+            return True
+        if any(
+            float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0))) > HIGH_SURPRISE_THRESHOLD
+            for payload in recent_episodes
+        ) and (
+            int(sleep_metrics.get("policy_bias_updates", 0)) > 0
+            or int(sleep_metrics.get("threat_updates", 0)) > 0
+        ):
+            return True
+        if current_tick - current_chapter.tick_range[0] > MAX_CHAPTER_TICKS:
+            return True
+        if chapter_signal:
+            return True
+        return False
+
+    def generate_core_summary(self, narrative: IdentityNarrative) -> str:
+        chapters = list(narrative.chapters)
+        if narrative.current_chapter is not None:
+            chapters.append(narrative.current_chapter)
+        if not chapters:
+            return "I am an agent still forming a coherent identity."
+        parts = [narrative.core_identity or "I am an adaptive agent."]
+        shifts = [chapter for chapter in chapters if chapter.behavioral_shift]
+        if shifts:
+            major_shift = max(shifts, key=self._shift_significance)
+            parts.append(
+                f"A significant shift occurred around tick {major_shift.tick_range[0]}: "
+                f"{major_shift.behavioral_shift}."
+            )
+        latest = chapters[-1]
+        parts.append(f"Currently in a {latest.dominant_theme} phase.")
+        if latest.state_summary.get("dominant_strategy"):
+            parts.append(f"My dominant strategy remains {latest.state_summary.get('dominant_strategy')}.")
+        if latest.key_events and (
+            "near-death" in latest.key_events[0]
+            or latest.dominant_theme == "survival_crisis"
+        ):
+            parts.append(f"Recent memory remains anchored by {latest.key_events[0]}.")
+        return " ".join(parts)
+
+    def _extract_key_events(
+        self,
+        episodic_memory: list[dict[str, object]],
+    ) -> list[str]:
+        ranked_episodes = sorted(
+            episodic_memory,
+            key=lambda payload: (
+                -float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0))),
+                -int(payload.get("timestamp", payload.get("cycle", 0))),
+            ),
+        )
+        key_events: list[str] = []
+        for payload in ranked_episodes[:5]:
+            tick = int(payload.get("timestamp", payload.get("cycle", 0)))
+            action = str(payload.get("action_taken", payload.get("action", "unknown")))
+            surprise = float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0)))
+            outcome = str(payload.get("predicted_outcome", "neutral"))
+            label = "near-death event" if outcome == "survival_threat" else f"{outcome} event"
+            key_events.append(f"{label} at tick {tick} after {action} (surprise={surprise:.2f})")
+        return key_events
+
+    def _summarize_chapter_state(
+        self,
+        *,
+        decisions: list[dict[str, object]],
+        episodes: list[dict[str, object]],
+        policies: PreferredPolicies,
+    ) -> dict[str, object]:
+        energy_values = [
+            float(payload.get("body_state", {}).get("energy", 0.0))
+            for payload in episodes
+            if isinstance(payload.get("body_state"), dict)
+        ]
+        dominant_action_counts = Counter(
+            str(payload.get("action", ""))
+            for payload in decisions
+            if payload.get("action")
+        )
+        if not dominant_action_counts:
+            dominant_action_counts = Counter(
+                str(payload.get("action_taken", payload.get("action", "")))
+                for payload in episodes
+                if payload.get("action_taken", payload.get("action"))
+            )
+        risks = [
+            float(payload.get("risk", 0.0))
+            for payload in (decisions + episodes)
+            if isinstance(payload.get("risk", 0.0), (int, float))
+        ]
+        free_energy_from_episodes = [
+            float(payload.get("outcome_state", payload.get("outcome", {})).get("free_energy_drop", 0.0))
+            for payload in episodes
+            if isinstance(payload.get("outcome_state", payload.get("outcome", {})), dict)
+        ]
+        if dominant_action_counts:
+            dominant_action = dominant_action_counts.most_common(1)[0][0]
+        elif policies.action_distribution:
+            dominant_action = max(
+                policies.action_distribution.items(),
+                key=lambda item: (item[1], item[0]),
+            )[0]
+        else:
+            dominant_action = "rest"
+        return {
+            "energy_avg": mean(energy_values) if energy_values else self.body_schema.energy,
+            "free_energy_avg": mean(free_energy_from_episodes) if free_energy_from_episodes else 0.0,
+            "dominant_action": dominant_action,
+            "risk_profile": policies.risk_profile,
+            "risk_avg": mean(risks) if risks else 0.0,
+            "dominant_strategy": policies.dominant_strategy,
+        }
+
+    def _infer_dominant_theme(
+        self,
+        *,
+        state_summary: Mapping[str, object],
+        episodes: list[dict[str, object]],
+        chapter_signal: str | None,
+    ) -> str:
+        if chapter_signal:
+            return "goal_realignment"
+        dominant_action = str(state_summary.get("dominant_action", ""))
+        energy_avg = float(state_summary.get("energy_avg", self.body_schema.energy))
+        if any(
+            str(payload.get("predicted_outcome", "neutral")) == "survival_threat"
+            or float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0))) > HIGH_SURPRISE_THRESHOLD
+            for payload in episodes
+        ):
+            return "survival_crisis"
+        if dominant_action in {"scan", "seek_contact"}:
+            return "exploration_phase"
+        if dominant_action in {"forage", "rest"} and energy_avg < 0.55:
+            return "resource_recovery"
+        return "consolidation"
+
+    def _describe_behavioral_shift(
+        self,
+        previous_chapter: NarrativeChapter,
+        current_state_summary: Mapping[str, object],
+        weight_adjustments: list[object],
+        chapter_signal: str | None,
+    ) -> str | None:
+        if chapter_signal:
+            return chapter_signal
+        previous_action = str(previous_chapter.state_summary.get("dominant_action", ""))
+        current_action = str(current_state_summary.get("dominant_action", ""))
+        previous_risk = str(previous_chapter.state_summary.get("risk_profile", ""))
+        current_risk = str(current_state_summary.get("risk_profile", ""))
+        if previous_action != current_action:
+            return f"Behavior shifted from {previous_action} to {current_action}"
+        if previous_risk != current_risk:
+            return f"Risk posture shifted from {previous_risk} to {current_risk}"
+        if weight_adjustments:
+            return (
+                "Goal weighting changed after conflicts at ticks "
+                f"{[int(getattr(item, 'tick', 0)) for item in weight_adjustments[:3]]}"
+            )
+        return None
+
+    def _derive_core_identity(
+        self,
+        chapters: list[NarrativeChapter],
+    ) -> str:
+        if not chapters:
+            return "I am an adaptive agent still consolidating stable traits."
+        chapter_features = [self._chapter_features(chapter) for chapter in chapters]
+        recent_window = chapter_features[-3:] if len(chapter_features) >= 3 else chapter_features
+        core_features = sorted(
+            feature
+            for feature in set().union(*chapter_features)
+            if recent_window and all(feature in features for features in recent_window)
+        )
+        former_features = sorted(
+            feature
+            for feature in set().union(*chapter_features)
+            if feature not in core_features and any(feature in features for features in chapter_features[:-len(recent_window)] or [])
+        )
+        if core_features:
+            sentence = f"I am a {', '.join(core_features)} agent."
+        else:
+            latest = chapters[-1]
+            sentence = (
+                f"I am presently oriented around {latest.state_summary.get('dominant_action', 'rest')} "
+                f"with a {latest.state_summary.get('risk_profile', 'risk_neutral')} stance."
+            )
+        if former_features:
+            sentence += f" I used to be more {', '.join(former_features[:2])}."
+        return sentence
+
+    def _chapter_features(self, chapter: NarrativeChapter) -> set[str]:
+        features: set[str] = set()
+        action = str(chapter.state_summary.get("dominant_action", ""))
+        risk_profile = str(chapter.state_summary.get("risk_profile", ""))
+        if risk_profile == "risk_averse":
+            features.add("risk-averse")
+        elif risk_profile == "risk_seeking":
+            features.add("risk-seeking")
+        if action in {"hide", "rest", "exploit_shelter"}:
+            features.add("resource-conservative")
+        if action in {"scan", "seek_contact"}:
+            features.add("exploratory")
+        if chapter.dominant_theme == "survival_crisis":
+            features.add("survival-focused")
+        return features
+
+    def _derive_behavioral_patterns(
+        self,
+        chapters: list[NarrativeChapter],
+        policies: PreferredPolicies,
+    ) -> list[str]:
+        patterns: list[str] = []
+        recent = chapters[-3:]
+        action_counts = Counter(
+            str(chapter.state_summary.get("dominant_action", ""))
+            for chapter in recent
+            if chapter.state_summary.get("dominant_action")
+        )
+        for action, _count in action_counts.most_common(3):
+            patterns.append(f"I tend to {action} during {recent[-1].dominant_theme} phases")
+        if not patterns:
+            for action, frequency in sorted(
+                policies.action_distribution.items(),
+                key=lambda item: (-item[1], item[0]),
+            )[:3]:
+                patterns.append(f"I tend to {action} ({frequency:.0%} of decisions)")
+        return patterns
+
+    def _derive_significant_events(
+        self,
+        chapters: list[NarrativeChapter],
+    ) -> list[str]:
+        events: list[str] = []
+        for chapter in reversed(chapters):
+            for event in chapter.key_events:
+                if event not in events:
+                    events.append(event)
+                if len(events) >= 5:
+                    return events
+        return events
+
+    def _merge_key_events(self, existing: list[str], new_events: list[str]) -> list[str]:
+        merged: list[str] = []
+        for event in list(new_events) + list(existing):
+            if event not in merged:
+                merged.append(event)
+            if len(merged) >= 5:
+                break
+        return merged
+
+    def _merge_state_summaries(
+        self,
+        existing: Mapping[str, object],
+        new_state: Mapping[str, object],
+    ) -> dict[str, object]:
+        merged = dict(existing)
+        for numeric_key in ("energy_avg", "free_energy_avg", "risk_avg"):
+            merged[numeric_key] = mean([
+                float(merged.get(numeric_key, new_state.get(numeric_key, 0.0))),
+                float(new_state.get(numeric_key, merged.get(numeric_key, 0.0))),
+            ])
+        for text_key in ("dominant_action", "risk_profile", "dominant_strategy"):
+            if new_state.get(text_key):
+                merged[text_key] = new_state[text_key]
+        return merged
+
+    def _merge_chapters(
+        self,
+        left: NarrativeChapter,
+        right: NarrativeChapter,
+    ) -> NarrativeChapter:
+        return NarrativeChapter(
+            chapter_id=left.chapter_id,
+            tick_range=(left.tick_range[0], right.tick_range[1]),
+            dominant_theme=(
+                left.dominant_theme
+                if left.dominant_theme == right.dominant_theme
+                else "merged_history"
+            ),
+            key_events=self._merge_key_events(left.key_events, right.key_events),
+            behavioral_shift=right.behavioral_shift or left.behavioral_shift,
+            state_summary=self._merge_state_summaries(left.state_summary, right.state_summary),
+        )
+
+    def _shift_significance(self, chapter: NarrativeChapter) -> float:
+        score = float(len(chapter.key_events))
+        if chapter.behavioral_shift:
+            score += 2.0
+            if "Goal priority shifted" in chapter.behavioral_shift:
+                score += 2.0
+        if chapter.dominant_theme == "survival_crisis":
+            score += 2.0
+        return score
+
+    def _derive_values_statement(
+        self,
+        preference_labels: Mapping[str, float],
+        policies: PreferredPolicies,
+    ) -> str:
+        ranked_values = sorted(
+            (
+                (str(label), float(value))
+                for label, value in preference_labels.items()
+                if isinstance(value, (int, float))
+            ),
+            key=lambda item: item[1],
+        )
+        if ranked_values:
+            most_avoided = ranked_values[0][0]
+            most_sought = ranked_values[-1][0]
+        else:
+            most_avoided = "survival_threat"
+            most_sought = "resource_gain"
+        emphasis = f" I usually favor {policies.dominant_strategy}." if policies.dominant_strategy else ""
+        return (
+            f"I prioritize avoiding {most_avoided} while moving toward {most_sought}."
+            f" My current risk profile is {policies.risk_profile}.{emphasis}"
+        )
+
 
 def build_default_self_model(
     *,
@@ -282,5 +1531,9 @@ def build_default_self_model(
             memory_overflow_threshold=96.0,
             fatal_exceptions=("FatalException",),
         ),
+        preferred_policies=PreferredPolicies(),
+        identity_narrative=IdentityNarrative(),
         log_sink=log_sink,
     )
+
+

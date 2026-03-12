@@ -1,0 +1,80 @@
+{
+  "thresholds": {
+    "ICI": 0.8,
+    "EAA": 0.85,
+    "MUR": 0.6,
+    "PSSR": 0.3,
+    "CAQ": 0.65,
+    "VCUS": 0.85
+  },
+  "metrics": {
+    "ICI": 1.0,
+    "EAA": 1.0,
+    "MUR": 1.0,
+    "PSSR": 0.9997,
+    "CAQ": 1.0,
+    "VCUS": 1.0
+  },
+  "per_scenario_metrics": {
+    "A": {
+      "EAA": 1.0,
+      "capability_model_constrains_choice": true
+    },
+    "B": {
+      "MUR": 1.0,
+      "PSSR": 0.9997,
+      "high_surprise_episode_stored": true,
+      "mundane_episode_stored": true
+    },
+    "C": {
+      "VCUS": 1.0,
+      "threat_profile_couples_to_choice": true,
+      "identity_narrative_couples_to_choice": true
+    },
+    "D": {
+      "ICI": 1.0,
+      "components": {
+        "core_values_similarity": 0.9999999999999999,
+        "threat_ranking_similarity": 1.0,
+        "preferred_policy_similarity": 1.0,
+        "identity_narrative_similarity": 1.0,
+        "same_scenario_action_consistency": 1.0
+      }
+    },
+    "E": {
+      "CAQ": 1.0,
+      "absorbed_count": 1,
+      "episodes_evaluated": 3
+    }
+  },
+  "milestone_status": {
+    "M2.1": "PASS",
+    "M2.2": "WARNING",
+    "M2.3": "PASS",
+    "M2.4": "PASS"
+  },
+  "final_verdict": "PASS",
+  "readiness_audit": {
+    "implemented": [
+      "Autobiographical memory storage, retrieval, clustering, and sleep replay are present and used by the main agent loop.",
+      "GoalStack and PreferenceModel participate in action scoring and persist across restart.",
+      "CapabilityModel, ThreatModel, and IdentityNarrative now influence online policy scoring rather than existing only as serialized structure.",
+      "Sleep consolidation writes slow-weight updates into threat priors, preference penalties, and policy biases.",
+      "Counterfactual replay exists, writes structured absorption/rejection logs, and persists absorbed insights.",
+      "Runtime snapshots persist agent, world, metrics, and identity-related state across restart."
+    ],
+    "partially_implemented": [
+      "SelfModel error attribution is stronger, but the core runtime still emits most attribution evidence through dedicated evaluation paths rather than as a first-class normal-cycle trace field.",
+      "Mundane episode gating remains permissive in the current memory benchmark, so M2.2 is still a warning rather than a clean pass.",
+      "Evidence logging exists in traces and sleep summaries, but the exact M2 audit fields requested by the milestone are still exported mainly by the evaluation harness."
+    ],
+    "missing": [
+      "No first-class contradiction detector exists between identity narrative claims and episodic memory facts.",
+      "Benchmark coverage is still concentrated in one evaluation harness rather than a reusable benchmark registry."
+    ],
+    "not_evaluable": [
+      "Narrative-to-episode factual consistency is only partially checkable because no explicit contradiction detector exists between identity summaries and episodic records.",
+      "Self-versus-world attribution behavior during normal observations is not directly observable because classification is not emitted for non-exception prediction errors."
+    ]
+  }
+}

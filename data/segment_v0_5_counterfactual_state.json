@@ -1,0 +1,775 @@
+{
+  "agent": {
+    "action_history": [],
+    "action_history_limit": 32,
+    "base_metabolic_rate": 0.015,
+    "counterfactual_insights": [
+      {
+        "absorbed": false,
+        "cluster_id": 0,
+        "confidence": 0.30159689947177626,
+        "counterfactual_action": "hide",
+        "counterfactual_efe": 15.133035803994135,
+        "efe_delta": -989.8736798483499,
+        "original_action": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 1,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      },
+      {
+        "absorbed": false,
+        "cluster_id": 0,
+        "confidence": 0.293317636764069,
+        "counterfactual_action": "exploit_shelter",
+        "counterfactual_efe": 15.136486926029159,
+        "efe_delta": -989.8702287263148,
+        "original_action": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 1,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      },
+      {
+        "absorbed": false,
+        "cluster_id": 0,
+        "confidence": 0.30159689947177626,
+        "counterfactual_action": "hide",
+        "counterfactual_efe": 15.133035803994135,
+        "efe_delta": -989.8736798483499,
+        "original_action": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 2,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      },
+      {
+        "absorbed": false,
+        "cluster_id": 0,
+        "confidence": 0.293317636764069,
+        "counterfactual_action": "exploit_shelter",
+        "counterfactual_efe": 15.136486926029159,
+        "efe_delta": -989.8702287263148,
+        "original_action": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 2,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      },
+      {
+        "absorbed": true,
+        "cluster_id": 0,
+        "confidence": 1.0,
+        "counterfactual_action": "hide",
+        "counterfactual_efe": 15.133035803994135,
+        "efe_delta": -989.8736798483499,
+        "original_action": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 3,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      }
+    ],
+    "cycle": 20,
+    "dopamine": 0.12,
+    "drive_urgencies": {
+      "comfort": 0.0,
+      "exploration": 0.0,
+      "hunger": 0.0,
+      "safety": 0.0,
+      "social": 0.0,
+      "thermal": 0.0
+    },
+    "energy": 0.885,
+    "episodes": [],
+    "fatigue": 0.0,
+    "fatigue_accumulation_rate": 0.08,
+    "identity_traits": {
+      "resource_conservatism": 0.55,
+      "risk_aversion": 0.65
+    },
+    "interoceptive_layer": {
+      "base_error_precision": 0.8,
+      "beliefs": {
+        "danger": 0.33436453593285115,
+        "food": 0.4735680384064272,
+        "novelty": 0.4902325576477696,
+        "shelter": 0.3836229802066476,
+        "social": 0.2935082896452213,
+        "temperature": 0.4978450650990194
+      },
+      "digestion_threshold": 0.06,
+      "error_precision_scale": 1.4,
+      "initial_precision": 0.45,
+      "max_precision": 3.0,
+      "min_precision": 0.05,
+      "precision_decay": 0.01,
+      "precisions": {
+        "danger": 1.015983406110157,
+        "food": 1.0014484286431609,
+        "novelty": 0.9704703109455242,
+        "shelter": 0.9828332179758497,
+        "social": 0.9643035020188084,
+        "temperature": 0.9560966471900942
+      },
+      "top_down_mix": 0.72
+    },
+    "last_body_state_snapshot": {
+      "energy": 0.8,
+      "fatigue": 0.2,
+      "stress": 0.25,
+      "temperature": 0.48
+    },
+    "long_term_memory": {
+      "archived_episodes": [],
+      "cluster_centroids": [
+        [
+          0.12,
+          0.82,
+          0.22000000000000003,
+          0.1,
+          0.4600000000000001,
+          0.18,
+          0.6,
+          0.2,
+          0.4,
+          0.4,
+          0.5,
+          0.3,
+          -0.48,
+          0.6199999999999999,
+          -0.18000000000000002,
+          -0.30000000000000004,
+          -0.03999999999999998,
+          -0.12
+        ]
+      ],
+      "cluster_counts": [
+        5
+      ],
+      "cluster_distance_threshold": 0.15,
+      "compression_similarity_threshold": 0.95,
+      "duplicate_similarity_threshold": 0.999,
+      "episodes": [
+        {
+          "action": "forage",
+          "action_taken": "forage",
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "compressed_count": 5,
+          "consolidated": true,
+          "cycle": 3,
+          "embedding": [
+            0.12,
+            0.82,
+            0.22,
+            0.1,
+            0.46,
+            0.18,
+            0.6,
+            0.2,
+            0.4,
+            0.4,
+            0.5,
+            0.3,
+            -0.48,
+            0.6199999999999999,
+            -0.18000000000000002,
+            -0.30000000000000004,
+            -0.03999999999999998,
+            -0.12
+          ],
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "outcome": {
+            "energy_delta": -0.1,
+            "fatigue_delta": 0.18,
+            "free_energy_drop": -0.45,
+            "stress_delta": 0.28,
+            "temperature_delta": 0.02
+          },
+          "outcome_state": {
+            "energy_delta": -0.1,
+            "fatigue_delta": 0.18,
+            "free_energy_drop": -0.45,
+            "stress_delta": 0.28,
+            "temperature_delta": 0.02
+          },
+          "predicted_outcome": "survival_threat",
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          },
+          "prediction_error": 0.29,
+          "preference_log_value": -1000.0,
+          "preferred_probability": 0.0,
+          "risk": 1005.006715652344,
+          "state_snapshot": {
+            "body_state": {
+              "energy": 0.5,
+              "fatigue": 0.25,
+              "stress": 0.4,
+              "temperature": 0.46
+            },
+            "errors": {
+              "danger": 0.6199999999999999,
+              "food": -0.48,
+              "novelty": -0.18000000000000002,
+              "shelter": -0.30000000000000004,
+              "social": -0.12,
+              "temperature": -0.03999999999999998
+            },
+            "observation": {
+              "danger": 0.82,
+              "food": 0.12,
+              "novelty": 0.22,
+              "shelter": 0.1,
+              "social": 0.18,
+              "temperature": 0.46
+            },
+            "prediction": {
+              "danger": 0.2,
+              "food": 0.6,
+              "novelty": 0.4,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            }
+          },
+          "state_vector": {
+            "body_energy": 0.5,
+            "body_fatigue": 0.25,
+            "body_stress": 0.4,
+            "body_temperature": 0.46,
+            "err_danger": 0.6199999999999999,
+            "err_food": -0.48,
+            "err_novelty": -0.18000000000000002,
+            "err_shelter": -0.30000000000000004,
+            "err_social": -0.12,
+            "err_temperature": -0.03999999999999998,
+            "obs_danger": 0.82,
+            "obs_food": 0.12,
+            "obs_novelty": 0.22,
+            "obs_shelter": 0.1,
+            "obs_social": 0.18,
+            "obs_temperature": 0.46,
+            "pred_danger": 0.2,
+            "pred_food": 0.6,
+            "pred_novelty": 0.4,
+            "pred_shelter": 0.4,
+            "pred_social": 0.3,
+            "pred_temperature": 0.5
+          },
+          "timestamp": 3,
+          "total_surprise": 1005.296715652344,
+          "value_label": "survival_threat",
+          "value_score": -1.0,
+          "weighted_surprise": 1005.296715652344
+        }
+      ],
+      "max_active_age": 5000,
+      "max_episodes": 1024,
+      "memory_threshold": 512,
+      "minimum_support": 1,
+      "preference_model": {
+        "log_preferences": {
+          "integrity_loss": -100.0,
+          "neutral": 0.0,
+          "resource_gain": 5.0,
+          "resource_loss": -10.0,
+          "survival_threat": -1000.0
+        },
+        "log_probabilities": {
+          "integrity_loss": -105.00671565234403,
+          "neutral": -5.006715652344034,
+          "resource_gain": -0.006715652344033707,
+          "resource_loss": -15.006715652344035,
+          "survival_threat": -1005.006715652344
+        },
+        "outcomes": [
+          "survival_threat",
+          "integrity_loss",
+          "resource_loss",
+          "neutral",
+          "resource_gain"
+        ],
+        "probabilities": {
+          "integrity_loss": 2.4897906369168703e-46,
+          "neutral": 0.0066928488906295115,
+          "resource_gain": 0.993306847254501,
+          "resource_loss": 3.038548695455042e-07,
+          "survival_threat": 0.0
+        }
+      },
+      "semantic_patterns": [
+        {
+          "action": "forage",
+          "count": 1,
+          "mean_prediction_error": 0.29,
+          "mean_utility": -1.0,
+          "mean_value_score": -1.0,
+          "recurrence": 1.0
+        }
+      ],
+      "sleep_batch_size": 128,
+      "sleep_interval": 200,
+      "sleep_minimum_support": 1,
+      "surprise_threshold": 0.4,
+      "value_hierarchy": {
+        "integrity": -100.0,
+        "neutral": 0.0,
+        "resource": -10.0,
+        "resource_gain": 5.0,
+        "resource_loss": -10.0,
+        "survival": -1000.0
+      }
+    },
+    "predictive_coding_hyperparameters": {
+      "interoceptive": {
+        "base_error_precision": 0.8,
+        "digestion_threshold": 0.06,
+        "error_precision_scale": 1.4,
+        "initial_precision": 0.45,
+        "max_precision": 3.0,
+        "min_precision": 0.05,
+        "precision_decay": 0.01,
+        "top_down_mix": 0.72
+      },
+      "sensorimotor": {
+        "base_error_precision": 0.65,
+        "digestion_threshold": 0.1,
+        "error_precision_scale": 1.1,
+        "initial_precision": 0.7,
+        "max_precision": 3.0,
+        "min_precision": 0.05,
+        "precision_decay": 0.02,
+        "top_down_mix": 0.55
+      },
+      "strategic": {
+        "base_error_precision": 0.55,
+        "digestion_threshold": 0.14,
+        "error_precision_scale": 0.9,
+        "initial_precision": 0.95,
+        "max_precision": 3.0,
+        "min_precision": 0.05,
+        "precision_decay": 0.03,
+        "top_down_mix": 0.63
+      }
+    },
+    "semantic_memory": [
+      {
+        "action": "forage",
+        "cluster": 0,
+        "confidence": 0.99,
+        "observed_outcome": "survival_threat",
+        "rule_id": "sleep-1-0-forage-survival_threat",
+        "rule_type": "risk_pattern",
+        "support": 5,
+        "timestamp": 20
+      }
+    ],
+    "sleep_history": [
+      {
+        "average_free_energy_drop": 0.0,
+        "clusters_created": 0,
+        "compression_removed": 4,
+        "counterfactual_energy_spent": 0.09500000000000001,
+        "counterfactual_episodes_evaluated": 3,
+        "counterfactual_insights_absorbed": 1,
+        "counterfactual_insights_generated": 5,
+        "counterfactual_log": [
+          {
+            "branches_explored": 7,
+            "energy_spent": 0.09500000000000001,
+            "episodes_evaluated": 3,
+            "insights_absorbed": 1,
+            "insights_generated": 5,
+            "label": "\u865a\u62df\u6c99\u76d2\u63a8\u6f14",
+            "skipped_reason": "",
+            "type": "virtual_sandbox_reasoning"
+          },
+          {
+            "confidence": 0.30159689947177626,
+            "counterfactual_action": "hide",
+            "efe_delta": -989.8736798483499,
+            "original_action": "forage",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 1,
+            "type": "rejection"
+          },
+          {
+            "confidence": 0.293317636764069,
+            "counterfactual_action": "exploit_shelter",
+            "efe_delta": -989.8702287263148,
+            "original_action": "forage",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 1,
+            "type": "rejection"
+          },
+          {
+            "confidence": 0.30159689947177626,
+            "counterfactual_action": "hide",
+            "efe_delta": -989.8736798483499,
+            "original_action": "forage",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 2,
+            "type": "rejection"
+          },
+          {
+            "confidence": 0.293317636764069,
+            "counterfactual_action": "exploit_shelter",
+            "efe_delta": -989.8702287263148,
+            "original_action": "forage",
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 2,
+            "type": "rejection"
+          },
+          {
+            "cluster_id": 0,
+            "confidence": 1.0,
+            "counterfactual_action": "hide",
+            "efe_delta": -989.8736798483499,
+            "new_cf_bias": 0.15,
+            "new_orig_bias": -0.6,
+            "original_action": "forage",
+            "policy_delta": 0.15,
+            "source_episode_cycle": 3,
+            "timestamp": 20,
+            "type": "absorption"
+          }
+        ],
+        "dream_replay_count": 0,
+        "episodes_archived": 0,
+        "episodes_deleted": 0,
+        "episodes_sampled": 5,
+        "epistemic_bonus_updates": 0,
+        "llm_used": false,
+        "memory_compressed": 4,
+        "memory_consolidations": 6,
+        "patterns_found": 1,
+        "policy_bias_updates": 1,
+        "prediction_error_after": 0.40866462484755206,
+        "prediction_error_before": 0.6709495833328334,
+        "preference_updates": 1,
+        "preferred_action": "rest",
+        "rule_ids": [
+          "sleep-1-0-forage-survival_threat"
+        ],
+        "rules_extracted": 1,
+        "semantic_entries_written": 1,
+        "sleep_cycle_id": 1,
+        "stable_beliefs": {
+          "danger": 0.3146942173777207,
+          "food": 0.48868652078316405,
+          "novelty": 0.4958086812837623,
+          "shelter": 0.392980073800738,
+          "social": 0.2972127147255547,
+          "temperature": 0.49907400049700024
+        },
+        "threat_updates": 1,
+        "world_model_updates": 2
+      }
+    ],
+    "strategic_layer": {
+      "belief_state": {
+        "base_error_precision": 0.55,
+        "beliefs": {
+          "danger": 0.3126935580459725,
+          "food": 0.4902446080161331,
+          "novelty": 0.4964003063732313,
+          "shelter": 0.3939612328170186,
+          "social": 0.29760810544602584,
+          "temperature": 0.4992062293667407
+        },
+        "digestion_threshold": 0.14,
+        "error_precision_scale": 0.9,
+        "initial_precision": 0.95,
+        "max_precision": 3.0,
+        "min_precision": 0.05,
+        "precision_decay": 0.03,
+        "precisions": {
+          "danger": 1.1399503947528709,
+          "food": 1.1357808400974707,
+          "novelty": 1.1269260920339248,
+          "shelter": 1.1304547639609661,
+          "social": 1.1251684465624319,
+          "temperature": 1.1228319159276243
+        },
+        "top_down_mix": 0.63
+      },
+      "danger_ceiling": 0.2,
+      "energy_floor": 0.5,
+      "novelty_floor": 0.3,
+      "shelter_floor": 0.4,
+      "social_floor": 0.25,
+      "temperature_ideal": 0.5
+    },
+    "stress": 0.2,
+    "temperature": 0.47200000000000003,
+    "world_model": {
+      "beliefs": {
+        "danger": 0.3146942173777207,
+        "food": 0.48868652078316405,
+        "novelty": 0.4958086812837623,
+        "shelter": 0.392980073800738,
+        "social": 0.2972127147255547,
+        "temperature": 0.49907400049700024
+      },
+      "epistemic_uncertainty_bonuses": {},
+      "kl_divergence_threshold": 0.25,
+      "learning_rate": 0.4,
+      "outcome_model": {
+        "0:forage": {
+          "survival_threat": 1.0
+        }
+      },
+      "policy_biases": {
+        "0": {
+          "forage": -0.6,
+          "hide": 0.15
+        }
+      },
+      "preference_penalties": {
+        "0": {
+          "forage": -1.2
+        }
+      },
+      "sensorimotor_layer": {
+        "base_error_precision": 0.65,
+        "beliefs": {
+          "danger": 0.3146942173777207,
+          "food": 0.48868652078316405,
+          "novelty": 0.4958086812837623,
+          "shelter": 0.392980073800738,
+          "social": 0.2972127147255547,
+          "temperature": 0.49907400049700024
+        },
+        "digestion_threshold": 0.1,
+        "error_precision_scale": 1.1,
+        "initial_precision": 0.7,
+        "max_precision": 3.0,
+        "min_precision": 0.05,
+        "precision_decay": 0.02,
+        "precisions": {
+          "danger": 1.017105886948774,
+          "food": 1.0116185029607139,
+          "novelty": 0.9999295669714836,
+          "shelter": 1.0045935875358754,
+          "social": 0.997603414563943,
+          "temperature": 0.9945080145313405
+        },
+        "top_down_mix": 0.55
+      },
+      "threat_priors": {
+        "0": 0.55
+      },
+      "transition_counts": {
+        "0:forage": {
+          "0": 4.0
+        }
+      },
+      "transition_model": {
+        "0:forage": {
+          "0": 1.0
+        }
+      }
+    }
+  },
+  "artifact": {
+    "absorbed_counterfactual_action": "hide",
+    "cluster": 0,
+    "counterfactual_energy_spent": 0.095,
+    "counterfactual_episodes_evaluated": 3,
+    "counterfactual_insights_absorbed": 1,
+    "counterfactual_insights_generated": 5,
+    "episodes_before_sleep": 5,
+    "forage_bias_after": -0.6,
+    "forage_bias_pre_counterfactual": -0.45,
+    "forage_bias_pre_sleep": 0.0,
+    "hide_bias_after": 0.15,
+    "hide_bias_pre_counterfactual": 0.0,
+    "hide_bias_pre_sleep": 0.0,
+    "policy_delta": 0.15,
+    "sandbox_label": "\u865a\u62df\u6c99\u76d2\u63a8\u6f14",
+    "scenario": "M2.4 counterfactual learning",
+    "seed": 42
+  },
+  "state_version": "0.4"
+}

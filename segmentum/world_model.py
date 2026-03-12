@@ -18,6 +18,8 @@ class GenerativeWorldModel:
     transition_model: dict[str, dict[str, float]] = field(default_factory=dict)
     outcome_model: dict[str, dict[str, float]] = field(default_factory=dict)
     policy_biases: dict[str, dict[str, float]] = field(default_factory=dict)
+    counterfactual_biases: dict[str, float] = field(default_factory=dict)
+    counterfactual_candidate_buffer: dict[str, dict[str, float]] = field(default_factory=dict)
     epistemic_uncertainty_bonuses: dict[str, dict[str, float]] = field(default_factory=dict)
     threat_priors: dict[str, float] = field(default_factory=dict)
     preference_penalties: dict[str, dict[str, float]] = field(default_factory=dict)
@@ -125,9 +127,11 @@ class GenerativeWorldModel:
         }
 
     def get_policy_bias(self, cluster_id: int | None, action: str) -> float:
-        if cluster_id is None:
-            return 0.0
-        return float(self.policy_biases.get(str(cluster_id), {}).get(action, 0.0))
+        cluster_bias = 0.0
+        if cluster_id is not None:
+            cluster_bias = float(self.policy_biases.get(str(cluster_id), {}).get(action, 0.0))
+        global_cf_bias = float(self.counterfactual_biases.get(action, 0.0))
+        return cluster_bias + global_cf_bias
 
     def get_epistemic_bonus(self, cluster_id: int | None, action: str) -> float:
         if cluster_id is None:
@@ -205,6 +209,10 @@ class GenerativeWorldModel:
             "policy_biases": {
                 key: dict(value) for key, value in self.policy_biases.items()
             },
+            "counterfactual_biases": dict(self.counterfactual_biases),
+            "counterfactual_candidate_buffer": {
+                key: dict(value) for key, value in self.counterfactual_candidate_buffer.items()
+            },
             "epistemic_uncertainty_bonuses": {
                 key: dict(value) for key, value in self.epistemic_uncertainty_bonuses.items()
             },
@@ -242,6 +250,22 @@ class GenerativeWorldModel:
             policy_biases={
                 str(key): {str(inner_key): float(inner_value) for inner_key, inner_value in value.items()}
                 for key, value in dict(payload.get("policy_biases", {})).items()
+                if isinstance(value, dict)
+            },
+            counterfactual_biases={
+                str(key): float(value)
+                for key, value in dict(payload.get("counterfactual_biases", {})).items()
+            },
+            counterfactual_candidate_buffer={
+                str(key): {
+                    str(inner_key): (
+                        float(inner_value)
+                        if isinstance(inner_value, (int, float))
+                        else str(inner_value)
+                    )
+                    for inner_key, inner_value in value.items()
+                }
+                for key, value in dict(payload.get("counterfactual_candidate_buffer", {})).items()
                 if isinstance(value, dict)
             },
             epistemic_uncertainty_bonuses={

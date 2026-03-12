@@ -101,6 +101,14 @@ class MemoryDecision:
     preferred_probability: float = 0.0
     risk: float = 0.0
     preference_log_value: float = 0.0
+    episode_score: float = 0.0
+    value_relevance: float = 0.0
+    policy_delta: float = 0.0
+    threat_significance: float = 0.0
+    redundancy_penalty: float = 0.0
+    support_delta: int = 0
+    merged_into_episode_id: str | None = None
+    gating_reasons: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -114,6 +122,14 @@ class MemoryDecision:
             "preferred_probability": self.preferred_probability,
             "risk": self.risk,
             "preference_log_value": self.preference_log_value,
+            "episode_score": self.episode_score,
+            "value_relevance": self.value_relevance,
+            "policy_delta": self.policy_delta,
+            "threat_significance": self.threat_significance,
+            "redundancy_penalty": self.redundancy_penalty,
+            "support_delta": self.support_delta,
+            "merged_into_episode_id": self.merged_into_episode_id,
+            "gating_reasons": list(self.gating_reasons),
         }
 
     @property
@@ -248,6 +264,9 @@ class LongTermMemory:
     max_episodes: int = 1024
     surprise_threshold: float = 0.40
     duplicate_similarity_threshold: float = 0.999
+    suppression_similarity_threshold: float = 0.992
+    novelty_window: int = 8
+    episode_score_threshold: float = 0.58
     sleep_interval: int = 200
     memory_threshold: int = 512
     sleep_batch_size: int = 128
@@ -293,6 +312,7 @@ class LongTermMemory:
             outcome=outcome,
         )
         payload = episode.to_dict()
+        self._initialize_episode_payload(payload)
         self.episodes.append(payload)
         if len(self.episodes) > self.max_episodes:
             self.episodes = self.episodes[-self.max_episodes :]
@@ -321,7 +341,12 @@ class LongTermMemory:
             action=action,
             outcome=outcome,
         )
-        if episode.total_surprise <= self.surprise_threshold:
+        gate = self._score_episode_candidate(episode)
+        if (
+            episode.total_surprise <= self.surprise_threshold
+            and gate["episode_score"] < self.episode_score_threshold
+            and not gate["identity_critical"]
+        ):
             return MemoryDecision(
                 value_score=episode.value_score,
                 prediction_error=episode.prediction_error,
@@ -331,8 +356,14 @@ class LongTermMemory:
                 preferred_probability=episode.preferred_probability,
                 risk=episode.risk,
                 preference_log_value=episode.preference_log_value,
+                episode_score=gate["episode_score"],
+                value_relevance=gate["value_relevance"],
+                policy_delta=gate["policy_delta"],
+                threat_significance=gate["threat_significance"],
+                redundancy_penalty=gate["redundancy_penalty"],
+                gating_reasons=tuple(gate["reasons"]),
             )
-        if self._is_duplicate_episode(episode):
+        if gate["redundancy_penalty"] >= 0.65 and not gate["identity_critical"]:
             return MemoryDecision(
                 value_score=episode.value_score,
                 prediction_error=episode.prediction_error,
@@ -342,9 +373,40 @@ class LongTermMemory:
                 preferred_probability=episode.preferred_probability,
                 risk=episode.risk,
                 preference_log_value=episode.preference_log_value,
+                episode_score=gate["episode_score"],
+                value_relevance=gate["value_relevance"],
+                policy_delta=gate["policy_delta"],
+                threat_significance=gate["threat_significance"],
+                redundancy_penalty=gate["redundancy_penalty"],
+                gating_reasons=tuple(gate["reasons"]),
             )
 
-        self.episodes.append(episode.to_dict())
+        merged_payload = self._find_merge_target(episode)
+        if merged_payload is not None:
+            self._merge_into_existing_episode(merged_payload, episode, gate)
+            self._refresh_semantic_patterns()
+            return MemoryDecision(
+                value_score=episode.value_score,
+                prediction_error=episode.prediction_error,
+                total_surprise=episode.total_surprise,
+                episode_created=False,
+                predicted_outcome=episode.predicted_outcome,
+                preferred_probability=episode.preferred_probability,
+                risk=episode.risk,
+                preference_log_value=episode.preference_log_value,
+                episode_score=gate["episode_score"],
+                value_relevance=gate["value_relevance"],
+                policy_delta=gate["policy_delta"],
+                threat_significance=gate["threat_significance"],
+                redundancy_penalty=gate["redundancy_penalty"],
+                support_delta=1,
+                merged_into_episode_id=str(merged_payload.get("episode_id", "")) or None,
+                gating_reasons=tuple(gate["reasons"] + ["merged_into_existing_episode"]),
+            )
+
+        payload = episode.to_dict()
+        self._initialize_episode_payload(payload, gate)
+        self.episodes.append(payload)
         if len(self.episodes) > self.max_episodes:
             self.episodes = self.episodes[-self.max_episodes :]
         self._refresh_semantic_patterns()
@@ -357,6 +419,12 @@ class LongTermMemory:
             preferred_probability=episode.preferred_probability,
             risk=episode.risk,
             preference_log_value=episode.preference_log_value,
+            episode_score=gate["episode_score"],
+            value_relevance=gate["value_relevance"],
+            policy_delta=gate["policy_delta"],
+            threat_significance=gate["threat_significance"],
+            redundancy_penalty=gate["redundancy_penalty"],
+            gating_reasons=tuple(gate["reasons"]),
         )
 
     def retrieve_similar_memories(
@@ -475,6 +543,60 @@ class LongTermMemory:
                     bias -= (streak - 3) * 0.10
         return max(-1.0, min(1.0, bias))
 
+    def life_history_timeline(
+        self,
+        *,
+        max_events: int = 20,
+        surprise_floor: float = 0.0,
+    ) -> list[dict[str, object]]:
+        """Return a chronological autobiographical timeline of significant episodes.
+
+        Merges active and archived episodes, ranks by surprise, and returns
+        an ordered list of landmark events suitable for narrative generation
+        or life-history replay.
+        """
+        all_episodes: list[dict[str, object]] = []
+        for payload in self.episodes:
+            entry = dict(payload)
+            entry["source"] = "active"
+            all_episodes.append(entry)
+        for payload in self.archived_episodes:
+            entry = dict(payload)
+            entry["source"] = "archived"
+            all_episodes.append(entry)
+
+        if surprise_floor > 0.0:
+            all_episodes = [
+                entry
+                for entry in all_episodes
+                if float(entry.get("total_surprise", entry.get("weighted_surprise", 0.0)))
+                >= surprise_floor
+            ]
+
+        all_episodes.sort(
+            key=lambda entry: (
+                -float(entry.get("total_surprise", entry.get("weighted_surprise", 0.0))),
+                -self._episode_cycle(entry),
+            ),
+        )
+        top = all_episodes[:max_events]
+        top.sort(key=self._episode_cycle)
+
+        timeline: list[dict[str, object]] = []
+        for entry in top:
+            timeline.append({
+                "tick": int(self._episode_cycle(entry)),
+                "action": str(entry.get("action_taken", entry.get("action", "unknown"))),
+                "outcome": str(entry.get("predicted_outcome", "neutral")),
+                "surprise": float(
+                    entry.get("total_surprise", entry.get("weighted_surprise", 0.0))
+                ),
+                "value_score": float(entry.get("value_score", 0.0)),
+                "cluster_id": entry.get("cluster_id"),
+                "source": entry.get("source", "active"),
+            })
+        return timeline
+
     def should_sleep(self, cycle_count: int) -> bool:
         if cycle_count > 0 and self.sleep_interval > 0 and cycle_count % self.sleep_interval == 0:
             return True
@@ -526,6 +648,18 @@ class LongTermMemory:
         replay_batch.extend(fallback[: sample_size - len(replay_batch)])
         replay_batch.sort(key=self._episode_cycle)
         return replay_batch
+
+    def replay_during_sleep(
+        self,
+        *,
+        rng,
+        limit: int | None = None,
+    ) -> list[dict[str, object]]:
+        """Return a replay batch for the offline sleep phase."""
+        batch = self.prioritized_replay_sample(rng=rng)
+        if limit is None:
+            return batch
+        return batch[: max(0, int(limit))]
 
     def assign_clusters(self) -> int:
         if not self.episodes:
@@ -693,6 +827,9 @@ class LongTermMemory:
             "max_episodes": self.max_episodes,
             "surprise_threshold": self.surprise_threshold,
             "duplicate_similarity_threshold": self.duplicate_similarity_threshold,
+            "suppression_similarity_threshold": self.suppression_similarity_threshold,
+            "novelty_window": self.novelty_window,
+            "episode_score_threshold": self.episode_score_threshold,
             "sleep_interval": self.sleep_interval,
             "memory_threshold": self.memory_threshold,
             "sleep_batch_size": self.sleep_batch_size,
@@ -727,6 +864,11 @@ class LongTermMemory:
             duplicate_similarity_threshold=float(
                 payload.get("duplicate_similarity_threshold", 0.999)
             ),
+            suppression_similarity_threshold=float(
+                payload.get("suppression_similarity_threshold", 0.992)
+            ),
+            novelty_window=int(payload.get("novelty_window", 8)),
+            episode_score_threshold=float(payload.get("episode_score_threshold", 0.58)),
             sleep_interval=int(payload.get("sleep_interval", 200)),
             memory_threshold=int(payload.get("memory_threshold", 512)),
             sleep_batch_size=int(payload.get("sleep_batch_size", 128)),
@@ -877,6 +1019,153 @@ class LongTermMemory:
         utility = outcome.get("free_energy_drop", 0.0) + value_score - prediction_error
         return max(-1.0, min(1.0, utility))
 
+    def _score_episode_candidate(self, episode: Episode) -> dict[str, object]:
+        value_relevance = abs(float(episode.value_score))
+        policy_delta = min(
+            1.0,
+            max(0.0, episode.risk / 8.0) + max(0.0, -episode.preference_log_value / 12.0),
+        )
+        threat_significance = min(
+            1.0,
+            max(0.0, episode.risk / 4.0)
+            + (0.30 if episode.predicted_outcome == "survival_threat" else 0.0)
+            + (0.15 if episode.predicted_outcome == "integrity_loss" else 0.0),
+        )
+        redundancy_penalty = self._redundancy_penalty(episode)
+        identity_critical = self._is_identity_critical_episode(episode)
+        episode_score = (
+            (0.38 * min(1.0, episode.total_surprise))
+            + (0.27 * value_relevance)
+            + (0.17 * policy_delta)
+            + (0.24 * threat_significance)
+            - (0.34 * redundancy_penalty)
+        )
+        reasons: list[str] = []
+        if identity_critical:
+            reasons.append("identity_critical_exception")
+        if value_relevance >= 0.75:
+            reasons.append("high_value_relevance")
+        if policy_delta >= 0.55:
+            reasons.append("policy_relevant")
+        if threat_significance >= 0.60:
+            reasons.append("threat_significant")
+        if redundancy_penalty >= 0.40:
+            reasons.append("redundancy_penalty")
+        if self._recent_similarity(episode) >= self.suppression_similarity_threshold:
+            reasons.append("novelty_suppression_window")
+        return {
+            "episode_score": max(0.0, min(1.5, episode_score)),
+            "value_relevance": value_relevance,
+            "policy_delta": policy_delta,
+            "threat_significance": threat_significance,
+            "redundancy_penalty": redundancy_penalty,
+            "identity_critical": identity_critical,
+            "reasons": reasons,
+        }
+
+    def _initialize_episode_payload(
+        self,
+        payload: dict[str, object],
+        gate: dict[str, object] | None = None,
+    ) -> None:
+        cycle = int(self._episode_cycle(payload))
+        action = str(payload.get("action_taken", payload.get("action", "unknown")))
+        payload.setdefault("episode_id", f"ep-{cycle:06d}-{action}")
+        payload.setdefault("occurrence_count", 1)
+        payload.setdefault("support", int(payload.get("occurrence_count", 1)))
+        payload.setdefault("support_count", int(payload.get("occurrence_count", 1)))
+        payload.setdefault("first_seen_cycle", cycle)
+        payload.setdefault("last_seen_cycle", cycle)
+        identity_critical = bool(payload.get("identity_critical", False))
+        if gate is not None:
+            payload["episode_score"] = float(gate.get("episode_score", 0.0))
+            payload["value_relevance"] = float(gate.get("value_relevance", 0.0))
+            payload["policy_delta"] = float(gate.get("policy_delta", 0.0))
+            payload["threat_significance"] = float(gate.get("threat_significance", 0.0))
+            payload["redundancy_penalty"] = float(gate.get("redundancy_penalty", 0.0))
+            payload["gating_reasons"] = list(gate.get("reasons", []))
+            identity_critical = bool(gate.get("identity_critical", False))
+        payload["identity_critical"] = identity_critical
+        if identity_critical:
+            payload["lifecycle_stage"] = "protected_identity_critical_episode"
+        else:
+            payload.setdefault("lifecycle_stage", "validated_episode")
+
+    def _redundancy_penalty(self, episode: Episode) -> float:
+        if not self.episodes:
+            return 0.0
+        similarity = self._recent_similarity(episode)
+        same_action_recent = sum(
+            1
+            for payload in self.episodes[-self.novelty_window :]
+            if str(payload.get("action_taken", payload.get("action", ""))) == episode.action_taken
+        )
+        density_penalty = min(0.35, same_action_recent * 0.05)
+        if similarity < 0.90:
+            return density_penalty
+        return min(1.0, density_penalty + ((similarity - 0.90) / 0.10))
+
+    def _recent_similarity(self, candidate: Episode) -> float:
+        similarities = []
+        for payload in self.episodes[-self.novelty_window :]:
+            existing = Episode.from_dict(payload)
+            if existing.action_taken != candidate.action_taken:
+                continue
+            similarities.append(_cosine_similarity(candidate.embedding, existing.embedding))
+        return max(similarities, default=0.0)
+
+    def _is_identity_critical_episode(self, episode: Episode) -> bool:
+        if episode.predicted_outcome in {"survival_threat", "integrity_loss"}:
+            return True
+        if episode.risk >= 3.0:
+            return True
+        return float(episode.outcome_state.get("free_energy_drop", 0.0)) <= -0.30
+
+    def _find_merge_target(self, candidate: Episode) -> dict[str, object] | None:
+        best_payload: dict[str, object] | None = None
+        best_similarity = 0.0
+        for payload in self.episodes[-self.novelty_window :]:
+            existing = Episode.from_dict(payload)
+            if existing.action_taken != candidate.action_taken:
+                continue
+            similarity = _cosine_similarity(candidate.embedding, existing.embedding)
+            if similarity >= self.suppression_similarity_threshold and similarity > best_similarity:
+                best_similarity = similarity
+                best_payload = payload
+        return best_payload
+
+    def _merge_into_existing_episode(
+        self,
+        payload: dict[str, object],
+        episode: Episode,
+        gate: dict[str, object],
+    ) -> None:
+        occurrences = int(payload.get("occurrence_count", 1)) + 1
+        payload["occurrence_count"] = occurrences
+        payload["support"] = occurrences
+        payload["support_count"] = occurrences
+        payload["last_seen_cycle"] = int(episode.timestamp)
+        payload["total_surprise"] = max(float(payload.get("total_surprise", 0.0)), episode.total_surprise)
+        payload["weighted_surprise"] = float(payload["total_surprise"])
+        payload["episode_score"] = max(float(payload.get("episode_score", 0.0)), float(gate["episode_score"]))
+        payload["value_relevance"] = max(float(payload.get("value_relevance", 0.0)), float(gate["value_relevance"]))
+        payload["policy_delta"] = max(float(payload.get("policy_delta", 0.0)), float(gate["policy_delta"]))
+        payload["threat_significance"] = max(
+            float(payload.get("threat_significance", 0.0)),
+            float(gate["threat_significance"]),
+        )
+        payload["redundancy_penalty"] = max(
+            float(payload.get("redundancy_penalty", 0.0)),
+            float(gate["redundancy_penalty"]),
+        )
+        reasons = list(payload.get("gating_reasons", []))
+        for reason in list(gate["reasons"]) + ["support_increment"]:
+            if reason not in reasons:
+                reasons.append(reason)
+        payload["gating_reasons"] = reasons
+        if bool(gate.get("identity_critical", False)):
+            payload["identity_critical"] = True
+            payload["lifecycle_stage"] = "protected_identity_critical_episode"
     def _refresh_semantic_patterns(self) -> None:
         by_action: dict[str, list[dict[str, object]]] = {}
         for payload in self.episodes:
@@ -974,3 +1263,14 @@ class LongTermMemory:
 
 def _cosine_distance(left: list[float], right: list[float]) -> float:
     return 1.0 - _cosine_similarity(left, right)
+
+class AutobiographicalMemory(LongTermMemory):
+    """Named M2 memory surface for persistent autobiographical continuity."""
+
+    def replay_during_sleep(
+        self,
+        *,
+        rng,
+        limit: int | None = None,
+    ) -> list[dict[str, object]]:
+        return super().replay_during_sleep(rng=rng, limit=limit)

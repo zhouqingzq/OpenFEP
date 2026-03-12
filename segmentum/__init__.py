@@ -2,6 +2,10 @@
 
 from .daemon import HeartbeatDaemon, run_daemon
 from .runtime import SegmentRuntime
+from .memory import AutobiographicalMemory
+from .preferences import Goal, GoalStack, ValueHierarchy
+from .sleep_consolidator import SleepConsolidation
+from .counterfactual import CounterfactualLearning
 from .self_model import (
     BodySchema,
     CapabilityModel,
@@ -18,6 +22,12 @@ __all__ = [
     "Strategy",
     "HeartbeatDaemon",
     "SegmentRuntime",
+    "AutobiographicalMemory",
+    "Goal",
+    "GoalStack",
+    "ValueHierarchy",
+    "SleepConsolidation",
+    "CounterfactualLearning",
     "run_daemon",
     "BodySchema",
     "CapabilityModel",

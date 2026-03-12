@@ -1,0 +1,19 @@
+{
+  "absorbed_counterfactual_action": "hide",
+  "cluster": 0,
+  "counterfactual_energy_spent": 0.095,
+  "counterfactual_episodes_evaluated": 3,
+  "counterfactual_insights_absorbed": 1,
+  "counterfactual_insights_generated": 5,
+  "episodes_before_sleep": 5,
+  "forage_bias_after": -0.6,
+  "forage_bias_pre_counterfactual": -0.45,
+  "forage_bias_pre_sleep": 0.0,
+  "hide_bias_after": 0.15,
+  "hide_bias_pre_counterfactual": 0.0,
+  "hide_bias_pre_sleep": 0.0,
+  "policy_delta": 0.15,
+  "sandbox_label": "\u865a\u62df\u6c99\u76d2\u63a8\u6f14",
+  "scenario": "M2.4 counterfactual learning",
+  "seed": 42
+}

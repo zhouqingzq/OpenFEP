@@ -52,6 +52,12 @@ class SleepSummary:
     compression_removed: int = 0
     llm_used: bool = False
     rule_ids: list[str] = field(default_factory=list)
+    counterfactual_episodes_evaluated: int = 0
+    counterfactual_insights_generated: int = 0
+    counterfactual_insights_absorbed: int = 0
+    counterfactual_energy_spent: float = 0.0
+    # M2.4: structured log of counterfactual reasoning (absorption/rejection entries).
+    counterfactual_log: list[dict[str, object]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -124,6 +130,7 @@ class InterventionScore:
     policy_bias: float
     epistemic_bonus: float
     identity_bias: float
+    goal_alignment: float
     value_score: float
     predicted_outcome: str
     predicted_effects: dict[str, float]
@@ -138,6 +145,7 @@ class InterventionScore:
             "policy_bias": self.policy_bias,
             "epistemic_bonus": self.epistemic_bonus,
             "identity_bias": self.identity_bias,
+            "goal_alignment": self.goal_alignment,
         }
 
 
@@ -149,3 +157,6 @@ class DecisionDiagnostics:
     retrieved_memories: list[dict[str, object]]
     policy_scores: dict[str, float]
     explanation: str
+    active_goal: str = ""
+    goal_context: dict[str, object] = field(default_factory=dict)
+    structured_explanation: dict[str, object] = field(default_factory=dict)
