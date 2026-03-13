@@ -702,7 +702,11 @@ class SegmentRuntime:
                 "evidence": dict(self.last_error_attribution.evidence),
             }
         if sleep_summary:
-            trace_record["sleep_summary"] = asdict(sleep_summary)
+            sleep_dict = asdict(sleep_summary)
+            cm = sleep_summary.consolidation_metrics
+            if cm is not None:
+                sleep_dict["consolidation_metrics"] = cm.to_dict()
+            trace_record["sleep_summary"] = sleep_dict
         if host_tick:
             policy = host_tick["policy"]
             tick_input = host_tick["tick_input"]
@@ -849,7 +853,13 @@ class SegmentRuntime:
                 f"archived={sleep_summary.episodes_archived}, "
                 f"deleted={sleep_summary.episodes_deleted}, "
                 f"pe={sleep_summary.prediction_error_before:.3f}->{sleep_summary.prediction_error_after:.3f}, "
-                f"beliefs={format_state(sleep_summary.stable_beliefs)}"
+                + (
+                    f"cond_pe={sleep_summary.consolidation_metrics.conditioned_pe_before:.3f}"
+                    f"->{sleep_summary.consolidation_metrics.conditioned_pe_after:.3f}, "
+                    if sleep_summary.consolidation_metrics
+                    else ""
+                )
+                + f"beliefs={format_state(sleep_summary.stable_beliefs)}"
             )
 
         if host_tick:

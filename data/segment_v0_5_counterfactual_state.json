@@ -1327,6 +1327,29 @@
         "average_free_energy_drop": 0.0,
         "clusters_created": 0,
         "compression_removed": 4,
+        "consolidation_metrics": {
+          "cluster_pe": [
+            {
+              "action": "forage",
+              "cluster_id": 0,
+              "episode_count": 5,
+              "has_rule": true,
+              "pe_after": 0.40866462484755206,
+              "pe_before": 0.6709495833328334
+            }
+          ],
+          "conditioned_pe_after": 0.40866462484755206,
+          "conditioned_pe_before": 0.6709495833328334,
+          "normalised_pe_after": 1.409188361543283,
+          "normalised_pe_before": 2.3136192528718396,
+          "novelty_baseline": 0.29,
+          "raw_pe_after": 0.40866462484755206,
+          "raw_pe_before": 0.6709495833328334,
+          "windowed_pe_history": [
+            0.40866462484755206
+          ],
+          "windowed_pe_mean": 0.40866462484755206
+        },
         "counterfactual_energy_spent": 0.09500000000000001,
         "counterfactual_episodes_evaluated": 3,
         "counterfactual_insights_absorbed": 1,

@@ -1,6 +1,31 @@
 {
   "action": "forage",
   "cluster": 0,
+  "consolidation_metrics": {
+    "cluster_pe": [
+      {
+        "action": "forage",
+        "cluster_id": 0,
+        "delta": -0.261627,
+        "episode_count": 5,
+        "has_rule": true,
+        "pe_after": 0.375163,
+        "pe_before": 0.63679,
+        "reduction_ratio": 0.410852
+      }
+    ],
+    "conditioned_pe_after": 0.375163,
+    "conditioned_pe_before": 0.63679,
+    "normalised_pe_after": 1.679836,
+    "normalised_pe_before": 2.851299,
+    "novelty_baseline": 0.223333,
+    "raw_pe_after": 0.375163,
+    "raw_pe_before": 0.63679,
+    "windowed_pe_history": [
+      0.375163
+    ],
+    "windowed_pe_mean": 0.375163
+  },
   "prediction_error_after_sleep": 0.372936,
   "prediction_error_before_sleep": 0.634562,
   "rule_ids": [

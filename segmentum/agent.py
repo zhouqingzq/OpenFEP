@@ -30,6 +30,8 @@ from .preferences import Goal, GoalStack
 from .self_model import CapabilityModel, SelfModel, build_default_self_model
 from .sleep_consolidator import SleepConsolidation, SleepConsolidator
 from .types import (
+    ClusterPE,
+    ConsolidationMetrics,
     DecisionDiagnostics,
     DreamReplay,
     InterventionScore,
@@ -44,6 +46,14 @@ from .world_model import GenerativeWorldModel
 
 def observation_dict(observation: Observation) -> dict[str, float]:
     return asdict(observation)
+
+
+def _deserialize_sleep_summary(payload: dict) -> SleepSummary:
+    """Reconstruct a SleepSummary from a dict, handling ConsolidationMetrics."""
+    data = dict(payload)
+    cm_raw = data.pop("consolidation_metrics", None)
+    cm = ConsolidationMetrics.from_dict(cm_raw) if isinstance(cm_raw, dict) else None
+    return SleepSummary(**data, consolidation_metrics=cm)
 
 
 @dataclass(frozen=True)
@@ -1798,6 +1808,153 @@ class SegmentAgent:
             return 0.0
         return mean(replay_errors)
 
+    def _grouped_replay_pe(
+        self,
+        replay_batch: list[dict[str, object]],
+    ) -> dict[tuple[int, str], float]:
+        """Compute per-(cluster, action) mean PE using current world model."""
+        groups: dict[tuple[int, str], list[dict[str, object]]] = {}
+        for payload in replay_batch:
+            cluster_id = payload.get("cluster_id")
+            act = action_name(payload.get("action_taken", payload.get("action", "")))
+            if not isinstance(cluster_id, int) or not act:
+                continue
+            groups.setdefault((cluster_id, act), []).append(payload)
+        return {
+            key: self._replay_action_prediction_error(payloads)
+            for key, payloads in sorted(groups.items())
+        }
+
+    def _conditioned_consolidation_metrics(
+        self,
+        replay_batch: list[dict[str, object]],
+        pe_before_raw: float,
+        pe_after_raw: float,
+        pe_before_grouped: dict[tuple[int, str], float],
+        pe_after_grouped: dict[tuple[int, str], float],
+        rule_ids: list[str],
+    ) -> ConsolidationMetrics:
+        """Compute conditioned PE metrics that isolate learning signal from drift.
+
+        Instead of a single global mean PE, this method:
+        1. Groups episodes by (cluster, action) and computes per-group PE
+           before/after sleep, so environment drift in unrelated clusters
+           doesn't mask learning in the rule-affected cluster.
+        2. Marks which groups have associated rules, then reports the
+           aggregated conditioned PE only for groups with rules.
+        3. Estimates a novelty baseline from low-surprise episodes and
+           normalises PE against it to remove background drift.
+        4. Maintains a windowed PE history across sleep cycles for
+           long-run convergence tracking.
+        """
+        def _weighted_mean(
+            rows: list[ClusterPE],
+            selector: str,
+        ) -> float:
+            total_weight = sum(max(0, row.episode_count) for row in rows)
+            if total_weight <= 0:
+                return 0.0
+            return sum(
+                getattr(row, selector) * max(0, row.episode_count)
+                for row in rows
+            ) / total_weight
+
+        # --- group episodes by (cluster, action) ---
+        groups: dict[tuple[int, str], list[dict[str, object]]] = {}
+        for payload in replay_batch:
+            cluster_id = payload.get("cluster_id")
+            act = action_name(payload.get("action_taken", payload.get("action", "")))
+            if not isinstance(cluster_id, int) or not act:
+                continue
+            groups.setdefault((cluster_id, act), []).append(payload)
+
+        # Determine which (cluster, action) pairs have rules
+        rule_clusters: set[tuple[int, str]] = set()
+        for rid in rule_ids:
+            # rule_id format: "sleep-{cycle_id}-{cluster}-{action}-{outcome}"
+            parts = rid.split("-")
+            if len(parts) >= 4:
+                try:
+                    rc = int(parts[2])
+                    ra = parts[3]
+                    rule_clusters.add((rc, ra))
+                except (ValueError, IndexError):
+                    pass
+        for entry in self.semantic_memory:
+            rule_clusters.add((entry.cluster, entry.action))
+
+        # --- per-cluster PE before/after ---
+        cluster_pe_list: list[ClusterPE] = []
+        for (cid, act), payloads in sorted(groups.items()):
+            has_rule = (cid, act) in rule_clusters
+            cluster_pe_list.append(ClusterPE(
+                cluster_id=cid,
+                action=act,
+                pe_before=pe_before_grouped.get((cid, act), 0.0),
+                pe_after=pe_after_grouped.get((cid, act), 0.0),
+                episode_count=len(payloads),
+                has_rule=has_rule,
+            ))
+
+        # --- novelty baseline: mean raw PE from episodes NOT in rule-targeted
+        # clusters, representing background drift + model imprecision ---
+        non_ruled = [c for c in cluster_pe_list if not c.has_rule]
+        if non_ruled:
+            novelty_baseline = _weighted_mean(non_ruled, "pe_before")
+        else:
+            # Fallback: use raw per-episode prediction_error from replay batch
+            raw_pes = [
+                float(p.get("prediction_error", 0.0))
+                for p in replay_batch
+                if isinstance(p.get("prediction_error"), (int, float))
+            ]
+            novelty_baseline = mean(raw_pes) if raw_pes else 0.0
+        safe_baseline = max(novelty_baseline, 1e-6)
+        # Normalise the conditioned metric, not the legacy raw metric, so
+        # unrelated-cluster drift does not leak back into the score.
+        normalised_before = (
+            _weighted_mean([c for c in cluster_pe_list if c.has_rule], "pe_before")
+            / safe_baseline
+            if cluster_pe_list
+            else 0.0
+        )
+        normalised_after = (
+            _weighted_mean([c for c in cluster_pe_list if c.has_rule], "pe_after")
+            / safe_baseline
+            if cluster_pe_list
+            else 0.0
+        )
+
+        # --- conditioned PE: only clusters with rules ---
+        ruled = [c for c in cluster_pe_list if c.has_rule]
+        conditioned_before = _weighted_mean(ruled, "pe_before")
+        conditioned_after = _weighted_mean(ruled, "pe_after")
+
+        # --- windowed history (last N conditioned PE values) ---
+        window_size = 5
+        pe_history: list[float] = []
+        for s in self.sleep_history:
+            cm = s.consolidation_metrics
+            if cm is not None and cm.conditioned_pe_after > 0.0:
+                pe_history.append(cm.conditioned_pe_after)
+        if conditioned_after > 0.0:
+            pe_history.append(conditioned_after)
+        pe_history = pe_history[-window_size:]
+        windowed_mean = mean(pe_history) if pe_history else 0.0
+
+        return ConsolidationMetrics(
+            cluster_pe=cluster_pe_list,
+            conditioned_pe_before=conditioned_before,
+            conditioned_pe_after=conditioned_after,
+            novelty_baseline=novelty_baseline,
+            normalised_pe_before=normalised_before,
+            normalised_pe_after=normalised_after,
+            windowed_pe_history=pe_history,
+            windowed_pe_mean=windowed_mean,
+            raw_pe_before=pe_before_raw,
+            raw_pe_after=pe_after_raw,
+        )
+
     def _update_transition_model_from_replay(
         self,
         transitions: list[dict[str, object]],
@@ -2025,6 +2182,7 @@ class SegmentAgent:
         replay_batch = self.long_term_memory.replay_during_sleep(rng=self.rng)
         clusters_created = self.long_term_memory.assign_clusters()
         prediction_error_before = self._replay_action_prediction_error(replay_batch)
+        pe_before_grouped = self._grouped_replay_pe(replay_batch)
 
         # Dream replay
         dreams = self.dream_replay(recent)
@@ -2088,6 +2246,15 @@ class SegmentAgent:
             consolidation
         )
         prediction_error_after = self._replay_action_prediction_error(replay_batch)
+        pe_after_grouped = self._grouped_replay_pe(replay_batch)
+        consolidation_metrics = self._conditioned_consolidation_metrics(
+            replay_batch,
+            pe_before_raw=prediction_error_before,
+            pe_after_raw=prediction_error_after,
+            pe_before_grouped=pe_before_grouped,
+            pe_after_grouped=pe_after_grouped,
+            rule_ids=[rule.rule_id for rule in consolidation.rules],
+        )
 
         # Counterfactual phase: replay high-surprise episodes with alternative
         # actions, compute EFE, and absorb policy insights.
@@ -2136,6 +2303,7 @@ class SegmentAgent:
             memory_compressed=episodes_archived + episodes_deleted + compression_removed,
             prediction_error_before=prediction_error_before,
             prediction_error_after=prediction_error_after,
+            consolidation_metrics=consolidation_metrics,
             rules_extracted=len(consolidation.rules),
             threat_updates=threat_updates,
             preference_updates=preference_updates,
@@ -2254,7 +2422,7 @@ class SegmentAgent:
             if isinstance(entry, dict)
         ]
         agent.sleep_history = [
-            SleepSummary(**summary)
+            _deserialize_sleep_summary(summary)
             for summary in sleep_history_payload
             if isinstance(summary, dict)
         ]
@@ -2403,4 +2571,3 @@ class SegmentAgent:
             sensorimotor=self.world_model.sensorimotor_layer.belief_state.hyperparameters(),
             strategic=self.strategic_layer.belief_state.hyperparameters(),
         )
-

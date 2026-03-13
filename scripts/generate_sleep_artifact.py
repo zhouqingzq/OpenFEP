@@ -88,6 +88,15 @@ def _configure_agent(agent: SegmentAgent) -> None:
     agent.long_term_memory.minimum_support = 1
 
 
+def _sleep_summary_to_dict(summary) -> dict[str, object]:
+    """Serialise a SleepSummary, using .to_dict() for ConsolidationMetrics."""
+    d = asdict(summary)
+    cm = summary.consolidation_metrics
+    if cm is not None:
+        d["consolidation_metrics"] = cm.to_dict()
+    return d
+
+
 def _first_rule_confidence(entries: list[dict[str, object]]) -> float:
     if not entries:
         return 0.0
@@ -211,7 +220,7 @@ def main() -> None:
         {
             "event": "sleep_cycle",
             "cycle": agent.cycle,
-            "sleep_summary": asdict(sleep_summary),
+            "sleep_summary": _sleep_summary_to_dict(sleep_summary),
             "semantic_memory": [asdict(entry) for entry in agent.semantic_memory],
             "policy_biases": agent.world_model.policy_biases,
             "threat_priors": agent.world_model.threat_priors,

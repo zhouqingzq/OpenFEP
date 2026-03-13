@@ -46,6 +46,7 @@ class SleepSummary:
     memory_compressed: int = 0
     prediction_error_before: float = 0.0
     prediction_error_after: float = 0.0
+    consolidation_metrics: ConsolidationMetrics | None = None
     rules_extracted: int = 0
     threat_updates: int = 0
     preference_updates: int = 0
@@ -237,6 +238,117 @@ class DreamReplay:
     replayed_action: str
     imagined_outcome: dict[str, float]
     learning_signal: float
+
+
+@dataclass
+class ClusterPE:
+    """Prediction error breakdown for a single cluster during sleep."""
+
+    cluster_id: int
+    action: str
+    pe_before: float
+    pe_after: float
+    episode_count: int
+    has_rule: bool
+
+    @property
+    def delta(self) -> float:
+        return self.pe_after - self.pe_before
+
+    @property
+    def reduction_ratio(self) -> float:
+        if self.pe_before <= 0.0:
+            return 0.0
+        return 1.0 - self.pe_after / self.pe_before
+
+
+@dataclass
+class ConsolidationMetrics:
+    """Conditioned PE metrics that isolate learning signal from drift noise.
+
+    Instead of comparing a raw global mean PE before/after sleep, this
+    breaks the measurement into per-cluster-action slices, applies a
+    novelty baseline correction, and tracks a windowed history so that
+    long-run convergence can be assessed.
+    """
+
+    # --- per-cluster conditioned PE ---
+    cluster_pe: list[ClusterPE] = field(default_factory=list)
+
+    # --- aggregated conditioned PE (only clusters that have rules) ---
+    conditioned_pe_before: float = 0.0
+    conditioned_pe_after: float = 0.0
+
+    # --- novelty-baseline-normalised PE ---
+    novelty_baseline: float = 0.0
+    normalised_pe_before: float = 0.0
+    normalised_pe_after: float = 0.0
+
+    # --- windowed rolling average (last N sleep cycles) ---
+    windowed_pe_history: list[float] = field(default_factory=list)
+    windowed_pe_mean: float = 0.0
+
+    # --- raw (kept for backward compatibility) ---
+    raw_pe_before: float = 0.0
+    raw_pe_after: float = 0.0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "cluster_pe": [
+                {
+                    "cluster_id": c.cluster_id,
+                    "action": c.action,
+                    "pe_before": round(c.pe_before, 6),
+                    "pe_after": round(c.pe_after, 6),
+                    "delta": round(c.delta, 6),
+                    "reduction_ratio": round(c.reduction_ratio, 6),
+                    "episode_count": c.episode_count,
+                    "has_rule": c.has_rule,
+                }
+                for c in self.cluster_pe
+            ],
+            "conditioned_pe_before": round(self.conditioned_pe_before, 6),
+            "conditioned_pe_after": round(self.conditioned_pe_after, 6),
+            "novelty_baseline": round(self.novelty_baseline, 6),
+            "normalised_pe_before": round(self.normalised_pe_before, 6),
+            "normalised_pe_after": round(self.normalised_pe_after, 6),
+            "windowed_pe_history": [round(v, 6) for v in self.windowed_pe_history],
+            "windowed_pe_mean": round(self.windowed_pe_mean, 6),
+            "raw_pe_before": round(self.raw_pe_before, 6),
+            "raw_pe_after": round(self.raw_pe_after, 6),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "ConsolidationMetrics":
+        if not payload:
+            return cls()
+        cluster_pe_raw = payload.get("cluster_pe", [])
+        cluster_pe = [
+            ClusterPE(
+                cluster_id=int(c.get("cluster_id", 0)),
+                action=str(c.get("action", "")),
+                pe_before=float(c.get("pe_before", 0.0)),
+                pe_after=float(c.get("pe_after", 0.0)),
+                episode_count=int(c.get("episode_count", 0)),
+                has_rule=bool(c.get("has_rule", False)),
+            )
+            for c in cluster_pe_raw
+            if isinstance(c, dict)
+        ]
+        return cls(
+            cluster_pe=cluster_pe,
+            conditioned_pe_before=float(payload.get("conditioned_pe_before", 0.0)),
+            conditioned_pe_after=float(payload.get("conditioned_pe_after", 0.0)),
+            novelty_baseline=float(payload.get("novelty_baseline", 0.0)),
+            normalised_pe_before=float(payload.get("normalised_pe_before", 0.0)),
+            normalised_pe_after=float(payload.get("normalised_pe_after", 0.0)),
+            windowed_pe_history=[
+                float(v) for v in payload.get("windowed_pe_history", [])
+            ],
+            windowed_pe_mean=float(payload.get("windowed_pe_mean", 0.0)),
+            raw_pe_before=float(payload.get("raw_pe_before", 0.0)),
+            raw_pe_after=float(payload.get("raw_pe_after", 0.0)),
+        )
 
 
 @dataclass
