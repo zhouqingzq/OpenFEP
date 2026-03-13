@@ -7,7 +7,7 @@ from dataclasses import asdict, replace
 from statistics import mean
 from typing import Callable
 
-from .action_schema import ActionSchema, action_name
+from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .types import (
     ModelUpdate,
     SemanticMemoryEntry,
@@ -427,6 +427,9 @@ class SleepConsolidator:
                     average_surprise=average_surprise,
                     average_prediction_error=average_prediction_error,
                     timestamp=current_cycle,
+                    action_descriptor=ensure_action_schema(
+                        payloads[0].get("action_taken", action)
+                    ).to_dict(),
                 )
             )
         return rules
@@ -511,6 +514,9 @@ class SleepConsolidator:
                     average_surprise=average_surprise,
                     average_prediction_error=average_prediction_error,
                     timestamp=current_cycle,
+                    action_descriptor=ensure_action_schema(
+                        best_window[0].get("action_taken", action)
+                    ).to_dict(),
                     sequence_condition=SequenceCondition(
                         steps=[SequenceStep(action_name=action, outcome=outcome)],
                         window_ticks=window_ticks,

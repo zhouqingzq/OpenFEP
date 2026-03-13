@@ -6,6 +6,8 @@ from statistics import mean
 from types import MappingProxyType
 from typing import Callable, Mapping
 
+from .action_schema import ActionSchema, action_name, ensure_action_schema
+
 
 SELF_ERROR = "self_error"
 WORLD_ERROR = "world_error"
@@ -97,6 +99,8 @@ class ThreatProfile:
 
 
 def _event_name(event: object) -> str:
+    if isinstance(event, RuntimeFailureEvent):
+        return event.name
     if isinstance(event, BaseException):
         return type(event).__name__
     name = getattr(event, "__name__", None)
@@ -122,6 +126,37 @@ def _normalize_event_name(event: object) -> str:
     }
     key = _event_name(event).strip().casefold()
     return aliases.get(key, key)
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeFailureEvent:
+    name: str
+    stage: str
+    category: str = ""
+    origin_hint: str = ""
+    details: Mapping[str, object] = field(default_factory=dict)
+    resource_state: Mapping[str, float | int] | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "details", MappingProxyType(dict(self.details)))
+        if self.resource_state is not None:
+            object.__setattr__(
+                self,
+                "resource_state",
+                MappingProxyType(dict(self.resource_state)),
+            )
+
+    def to_dict(self) -> dict[str, object]:
+        payload = {
+            "name": self.name,
+            "stage": self.stage,
+            "category": self.category,
+            "origin_hint": self.origin_hint,
+            "details": dict(self.details),
+        }
+        if self.resource_state is not None:
+            payload["resource_state"] = dict(self.resource_state)
+        return payload
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,18 +194,46 @@ class CapabilityModel:
     """Immutable prior over what the agent can do and where it is constrained."""
 
     available_actions: tuple[str, ...] = ()
+    action_schemas: tuple[ActionSchema, ...] = ()
     api_limits: Mapping[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "available_actions", tuple(self.available_actions))
+        action_schemas = tuple(
+            ensure_action_schema(action) for action in self.action_schemas
+        )
+        if not action_schemas and self.available_actions:
+            action_schemas = tuple(
+                ActionSchema(name=str(action)) for action in self.available_actions
+            )
+        object.__setattr__(
+            self,
+            "action_schemas",
+            action_schemas,
+        )
+        object.__setattr__(
+            self,
+            "available_actions",
+            tuple(schema.name for schema in action_schemas),
+        )
         object.__setattr__(
             self,
             "api_limits",
             MappingProxyType(dict(self.api_limits)),
         )
 
+    def descriptor_for(self, action: str | ActionSchema) -> ActionSchema | None:
+        action_key = action_name(action)
+        for schema in self.action_schemas:
+            if schema.name == action_key:
+                return schema
+        return None
+
+    def supports(self, action: str | ActionSchema) -> bool:
+        return self.descriptor_for(action) is not None
+
     def to_dict(self) -> dict[str, object]:
         return {
+            "action_schemas": [schema.to_dict() for schema in self.action_schemas],
             "available_actions": list(self.available_actions),
             "api_limits": dict(self.api_limits),
         }
@@ -182,8 +245,18 @@ class CapabilityModel:
         api_limits = payload.get("api_limits")
         if not isinstance(api_limits, dict):
             api_limits = {}
+        action_schemas_payload = payload.get("action_schemas", [])
+        if isinstance(action_schemas_payload, list) and action_schemas_payload:
+            action_schemas = tuple(
+                ActionSchema.from_dict(item) for item in action_schemas_payload
+            )
+        else:
+            action_schemas = tuple(
+                ActionSchema(name=str(action))
+                for action in payload.get("available_actions", [])
+            )
         return cls(
-            available_actions=tuple(str(action) for action in payload.get("available_actions", [])),
+            action_schemas=action_schemas,
             api_limits={str(key): float(value) for key, value in api_limits.items()},
         )
 
@@ -330,6 +403,19 @@ class ErrorClassifier:
         )
 
     def classify(self, event: object) -> str:
+        if isinstance(event, RuntimeFailureEvent):
+            origin_hint = str(event.origin_hint).strip().casefold()
+            if origin_hint in {"self", SELF_ERROR}:
+                return SELF_ERROR
+            if origin_hint in {"world", WORLD_ERROR}:
+                return WORLD_ERROR
+            if origin_hint in {"existential", EXISTENTIAL_THREAT}:
+                return EXISTENTIAL_THREAT
+            category = str(event.category).strip().casefold()
+            if category in {"resource_exhaustion", "memory_budget", "context_budget"}:
+                return SELF_ERROR
+            if category in {"external_failure", "environment_shift", "timeout", "tool_failure"}:
+                return WORLD_ERROR
         normalized = _normalize_event_name(event)
         if normalized in self.existential_events:
             return EXISTENTIAL_THREAT
@@ -340,6 +426,14 @@ class ErrorClassifier:
         return WORLD_ERROR
 
     @staticmethod
+    def attribution(classification: str) -> str:
+        if classification == SELF_ERROR:
+            return "self"
+        if classification == WORLD_ERROR:
+            return "world"
+        return "existential"
+
+    @staticmethod
     def surprise_source(classification: str) -> str:
         if classification == SELF_ERROR:
             return "interoceptive"
@@ -347,20 +441,58 @@ class ErrorClassifier:
             return "exteroceptive"
         return "existential"
 
+    def evidence(
+        self,
+        event: object,
+        *,
+        resource_state: Mapping[str, float | int],
+        body_schema: BodySchema,
+    ) -> dict[str, object]:
+        predicted = ResourceState(
+            tokens_remaining=int(resource_state.get("tokens_remaining", 0)),
+            cpu_budget=float(resource_state.get("cpu_budget", 0.0)),
+            memory_free=float(resource_state.get("memory_free", 0.0)),
+        ).predict(body_schema, None)
+        evidence = {
+            "event_name": _event_name(event),
+            "normalized_event": _normalize_event_name(event),
+            "resource_state": dict(resource_state),
+            "resource_flags": predicted,
+        }
+        if isinstance(event, RuntimeFailureEvent):
+            evidence.update(
+                {
+                    "stage": event.stage,
+                    "category": event.category,
+                    "origin_hint": event.origin_hint,
+                    "details": dict(event.details),
+                }
+            )
+            if event.resource_state is not None:
+                evidence["resource_state"] = dict(event.resource_state)
+        return evidence
+
 
 @dataclass(frozen=True, slots=True)
 class ClassificationResult:
     event: str
     classification: str
+    attribution: str
     resource_state: Mapping[str, float | int]
     surprise_source: str
     detected_threats: tuple[str, ...]
+    evidence: Mapping[str, object] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         object.__setattr__(
             self,
             "resource_state",
             MappingProxyType(dict(self.resource_state)),
+        )
+        object.__setattr__(
+            self,
+            "evidence",
+            MappingProxyType(dict(self.evidence)),
         )
 
     def to_log_string(self) -> str:
@@ -369,9 +501,11 @@ class ClassificationResult:
                 "[SelfModel]",
                 f"event={self.event}",
                 f"classification={self.classification}",
+                f"attribution={self.attribution}",
                 f"resource_state={dict(self.resource_state)}",
                 f"surprise_source={self.surprise_source}",
                 f"detected_threats={list(self.detected_threats)}",
+                f"evidence={dict(self.evidence)}",
             ]
         )
 
@@ -612,16 +746,32 @@ class SelfModel:
 
     def inspect_event(self, event: object) -> ClassificationResult:
         event_name = _event_name(event)
-        classification = self.error_classifier.classify(event_name)
+        classification = self.error_classifier.classify(event)
+        resource_state = (
+            dict(event.resource_state)
+            if isinstance(event, RuntimeFailureEvent) and event.resource_state is not None
+            else self.resource_state.snapshot()
+        )
+        threat_resource_state = ResourceState(
+            tokens_remaining=int(resource_state.get("tokens_remaining", self.resource_state.tokens_remaining)),
+            cpu_budget=float(resource_state.get("cpu_budget", self.resource_state.cpu_budget)),
+            memory_free=float(resource_state.get("memory_free", self.resource_state.memory_free)),
+        )
         result = ClassificationResult(
             event=event_name,
             classification=classification,
-            resource_state=self.resource_state.snapshot(),
+            attribution=self.error_classifier.attribution(classification),
+            resource_state=resource_state,
             surprise_source=self.error_classifier.surprise_source(classification),
             detected_threats=self.threat_model.detect(
                 event_name,
-                self.resource_state,
+                threat_resource_state,
                 self.body_schema,
+            ),
+            evidence=self.error_classifier.evidence(
+                event,
+                resource_state=resource_state,
+                body_schema=self.body_schema,
             ),
         )
         self.last_result = result
@@ -1588,7 +1738,7 @@ def build_default_self_model(
             compute_load=0.25,
         ),
         capability_model=CapabilityModel(
-            available_actions=CORE_ACTIONS,
+            action_schemas=tuple(ActionSchema(name=name) for name in CORE_ACTIONS),
             api_limits=CORE_API_LIMITS,
         ),
         resource_state=ResourceState(

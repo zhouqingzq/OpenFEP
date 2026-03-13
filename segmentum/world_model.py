@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from math import log
 
-from .action_schema import action_name
+from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .constants import ACTION_IMAGINED_EFFECTS
 from .environment import clamp
 from .predictive_coding import LayerBeliefUpdate, SensorimotorLayer, default_beliefs
@@ -25,6 +25,7 @@ class GenerativeWorldModel:
     threat_priors: dict[str, float] = field(default_factory=dict)
     preference_penalties: dict[str, dict[str, float]] = field(default_factory=dict)
     kl_divergence_threshold: float = 0.25
+    last_prediction_details: dict[str, object] = field(default_factory=dict)
 
     @property
     def beliefs(self) -> dict[str, float]:
@@ -33,18 +34,145 @@ class GenerativeWorldModel:
     def predict(
         self,
         priors: dict[str, float],
-        memory_context: dict[str, float] | None = None,
+        memory_context: dict[str, object] | None = None,
     ) -> dict[str, float]:
         """Generate predictions, optionally modulated by retrieved memory."""
-        prediction = self.sensorimotor_layer.predict(priors)
-        if memory_context:
-            prediction = {
-                key: clamp((prediction[key] * 0.80) + (memory_context[key] * 0.20))
-                if key in memory_context
-                else prediction[key]
-                for key in prediction
+        baseline = self.sensorimotor_layer.predict(priors)
+        if not memory_context:
+            self.last_prediction_details = {
+                "memory_hit": False,
+                "prediction_before_memory": dict(baseline),
+                "prediction_after_memory": dict(baseline),
+                "prediction_delta": {key: 0.0 for key in baseline},
+                "memory_context_summary": "",
             }
-        return prediction
+            return baseline
+
+        state_projection = memory_context.get("state_projection", {})
+        state_delta = memory_context.get("state_delta", {})
+        blend = float(memory_context.get("prediction_blend", 0.20))
+        delta_gain = float(memory_context.get("delta_gain", 0.35))
+        if not isinstance(state_projection, dict):
+            state_projection = {}
+        if not isinstance(state_delta, dict):
+            state_delta = {}
+
+        adjusted = {}
+        for key, value in baseline.items():
+            projection = float(state_projection.get(key, value))
+            delta = float(state_delta.get(key, 0.0))
+            adjusted[key] = clamp(
+                (value * (1.0 - blend))
+                + (projection * blend)
+                + (delta * delta_gain)
+            )
+
+        delta = {
+            key: adjusted[key] - baseline[key]
+            for key in baseline
+        }
+        self.last_prediction_details = {
+            "memory_hit": bool(memory_context.get("memory_hit")),
+            "prediction_before_memory": dict(baseline),
+            "prediction_after_memory": dict(adjusted),
+            "prediction_delta": delta,
+            "memory_context_summary": str(memory_context.get("summary", "")),
+        }
+        return adjusted
+
+    def refine_action_prediction(
+        self,
+        *,
+        action: str | ActionSchema,
+        projected_snapshot: dict[str, object],
+        predicted_effects: dict[str, float],
+        predicted_outcome: str,
+        preferred_probability: float,
+        risk: float,
+        predicted_error: float,
+        memory_context: dict[str, object] | None,
+    ) -> dict[str, object]:
+        action_key = action_name(action)
+        if not memory_context:
+            return {
+                "projected_snapshot": projected_snapshot,
+                "predicted_effects": predicted_effects,
+                "predicted_outcome": predicted_outcome,
+                "preferred_probability": preferred_probability,
+                "risk": risk,
+                "expected_surprise": predicted_error,
+                "applied_memory": False,
+                "action_descriptor": ensure_action_schema(action).to_dict(),
+            }
+
+        action_memory = memory_context.get("actions", {})
+        if not isinstance(action_memory, dict):
+            action_memory = {}
+        action_context = action_memory.get(action_key, {})
+        if not isinstance(action_context, dict):
+            action_context = {}
+        if not action_context:
+            aggregate = memory_context.get("aggregate", {})
+            action_context = aggregate if isinstance(aggregate, dict) else {}
+
+        predicted_effects = dict(predicted_effects)
+        projected_snapshot = {
+            "observation": dict(projected_snapshot.get("observation", {})),
+            "prediction": dict(projected_snapshot.get("prediction", {})),
+            "errors": dict(projected_snapshot.get("errors", {})),
+            "body_state": dict(projected_snapshot.get("body_state", {})),
+        }
+        blended_observation = action_context.get("observation_projection", {})
+        if isinstance(blended_observation, dict):
+            for key, value in blended_observation.items():
+                if key in projected_snapshot["observation"]:
+                    projected_snapshot["observation"][key] = clamp(
+                        (projected_snapshot["observation"][key] * 0.75)
+                        + (float(value) * 0.25)
+                    )
+
+        blended_effects = action_context.get("predicted_effects", {})
+        if isinstance(blended_effects, dict):
+            for key, value in blended_effects.items():
+                predicted_effects[key] = (
+                    predicted_effects.get(key, 0.0) * 0.70
+                    + float(value) * 0.30
+                )
+
+        outcome_distribution = action_context.get("outcome_distribution", {})
+        if isinstance(outcome_distribution, dict) and outcome_distribution:
+            predicted_outcome = sorted(
+                outcome_distribution.items(),
+                key=lambda item: (-float(item[1]), item[0]),
+            )[0][0]
+
+        preferred_probability = max(
+            1e-12,
+            min(
+                1.0,
+                (preferred_probability * 0.70)
+                + (float(action_context.get("preferred_probability", preferred_probability)) * 0.30),
+            ),
+        )
+        risk = max(
+            0.0,
+            (risk * 0.65) + (float(action_context.get("risk", risk)) * 0.35),
+        )
+        expected_surprise = max(
+            0.0,
+            (predicted_error * 0.60)
+            + (float(action_context.get("expected_surprise", predicted_error)) * 0.40),
+        )
+        return {
+            "projected_snapshot": projected_snapshot,
+            "predicted_effects": predicted_effects,
+            "predicted_outcome": predicted_outcome,
+            "preferred_probability": preferred_probability,
+            "risk": risk,
+            "expected_surprise": expected_surprise,
+            "applied_memory": bool(action_context),
+            "action_descriptor": ensure_action_schema(action).to_dict(),
+        }
 
     def update_from_error(self, errors: dict[str, float]) -> None:
         self.sensorimotor_layer.absorb_error_signal(
@@ -212,6 +340,7 @@ class GenerativeWorldModel:
                 key: dict(value) for key, value in self.preference_penalties.items()
             },
             "kl_divergence_threshold": self.kl_divergence_threshold,
+            "last_prediction_details": dict(self.last_prediction_details),
         }
 
     @classmethod
@@ -278,6 +407,7 @@ class GenerativeWorldModel:
                 if isinstance(value, dict)
             },
             kl_divergence_threshold=float(payload.get("kl_divergence_threshold", 0.25)),
+            last_prediction_details=dict(payload.get("last_prediction_details", {})),
         )
         if not sensorimotor_payload:
             model.sensorimotor_layer.belief_state.beliefs = (

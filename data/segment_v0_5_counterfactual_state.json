@@ -2,6 +2,156 @@
   "agent": {
     "action_history": [],
     "action_history_limit": 32,
+    "action_registry": {
+      "exploit_shelter": {
+        "action": {
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "cost_estimate": 0.08,
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
+          "name": "exploit_shelter",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.1,
+            "energy": 0.08
+          },
+          "reversible": true
+        },
+        "cost": 0.08
+      },
+      "forage": {
+        "action": {
+          "constraints": {
+            "requires_min_energy": 0.1
+          },
+          "cost_estimate": 0.12,
+          "failure_modes": [
+            "resource_exhaustion",
+            "threat_exposure",
+            "environment_shift"
+          ],
+          "name": "forage",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.18,
+            "energy": 0.12
+          },
+          "reversible": true
+        },
+        "cost": 0.12
+      },
+      "hide": {
+        "action": {
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
+          "reversible": true
+        },
+        "cost": 0.05
+      },
+      "rest": {
+        "action": {
+          "constraints": {
+            "preferred_when_fatigue_above": 0.4
+          },
+          "cost_estimate": 0.03,
+          "failure_modes": [
+            "opportunity_loss",
+            "environment_shift"
+          ],
+          "name": "rest",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.03,
+            "energy": 0.03
+          },
+          "reversible": true
+        },
+        "cost": 0.03
+      },
+      "scan": {
+        "action": {
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "cost_estimate": 0.06,
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
+          "name": "scan",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.2,
+            "energy": 0.06
+          },
+          "reversible": true
+        },
+        "cost": 0.06
+      },
+      "seek_contact": {
+        "action": {
+          "constraints": {
+            "preferred_when_social_below": 0.35
+          },
+          "cost_estimate": 0.07,
+          "failure_modes": [
+            "external_rejection",
+            "threat_exposure"
+          ],
+          "name": "seek_contact",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.14,
+            "energy": 0.07
+          },
+          "reversible": true
+        },
+        "cost": 0.07
+      },
+      "thermoregulate": {
+        "action": {
+          "constraints": {
+            "preferred_when_temperature_offset_above": 0.12
+          },
+          "cost_estimate": 0.09,
+          "failure_modes": [
+            "resource_exhaustion",
+            "temperature_rebound"
+          ],
+          "name": "thermoregulate",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.12,
+            "energy": 0.09
+          },
+          "reversible": true
+        },
+        "cost": 0.09
+      }
+    },
     "base_metabolic_rate": 0.015,
     "counterfactual_insights": [
       {
@@ -9,18 +159,34 @@
         "cluster_id": 0,
         "confidence": 0.30159689947177626,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
           "name": "hide",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
           "reversible": true
         },
         "counterfactual_action_name": "hide",
         "counterfactual_efe": 15.133035803994135,
         "efe_delta": -989.8736798483499,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -65,18 +231,34 @@
         "cluster_id": 0,
         "confidence": 0.31401076050271104,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "cost_estimate": 0.06,
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
           "name": "scan",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.2,
+            "energy": 0.06
+          },
           "reversible": true
         },
         "counterfactual_action_name": "scan",
         "counterfactual_efe": 1004.643215652344,
         "efe_delta": -0.3634999999999997,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -121,18 +303,34 @@
         "cluster_id": 0,
         "confidence": 0.293317636764069,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "cost_estimate": 0.08,
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
           "name": "exploit_shelter",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.1,
+            "energy": 0.08
+          },
           "reversible": true
         },
         "counterfactual_action_name": "exploit_shelter",
         "counterfactual_efe": 15.136486926029159,
         "efe_delta": -989.8702287263148,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -177,18 +375,34 @@
         "cluster_id": 0,
         "confidence": 0.30159689947177626,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
           "name": "hide",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
           "reversible": true
         },
         "counterfactual_action_name": "hide",
         "counterfactual_efe": 15.133035803994135,
         "efe_delta": -989.8736798483499,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -233,18 +447,34 @@
         "cluster_id": 0,
         "confidence": 0.31401076050271104,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "cost_estimate": 0.06,
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
           "name": "scan",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.2,
+            "energy": 0.06
+          },
           "reversible": true
         },
         "counterfactual_action_name": "scan",
         "counterfactual_efe": 1004.643215652344,
         "efe_delta": -0.3634999999999997,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -289,18 +519,34 @@
         "cluster_id": 0,
         "confidence": 0.293317636764069,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "cost_estimate": 0.08,
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
           "name": "exploit_shelter",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.1,
+            "energy": 0.08
+          },
           "reversible": true
         },
         "counterfactual_action_name": "exploit_shelter",
         "counterfactual_efe": 15.136486926029159,
         "efe_delta": -989.8702287263148,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -345,18 +591,34 @@
         "cluster_id": 0,
         "confidence": 1.0,
         "counterfactual_action": {
-          "cost_estimate": 0.0,
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
           "name": "hide",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
           "reversible": true
         },
         "counterfactual_action_name": "hide",
         "counterfactual_efe": 15.133035803994135,
         "efe_delta": -989.8736798483499,
         "original_action": {
+          "constraints": {},
           "cost_estimate": 0.0,
+          "failure_modes": [],
           "name": "forage",
           "params": {},
+          "params_schema": {},
+          "resource_cost": {},
           "reversible": true
         },
         "original_action_name": "forage",
@@ -506,9 +768,13 @@
         {
           "action": "forage",
           "action_taken": {
+            "constraints": {},
             "cost_estimate": 0.0,
+            "failure_modes": [],
             "name": "forage",
             "params": {},
+            "params_schema": {},
+            "resource_cost": {},
             "reversible": true
           },
           "body_state": {
@@ -763,6 +1029,135 @@
         "token_budget": 256
       },
       "capability_model": {
+        "action_schemas": [
+          {
+            "constraints": {
+              "requires_min_energy": 0.1
+            },
+            "cost_estimate": 0.12,
+            "failure_modes": [
+              "resource_exhaustion",
+              "threat_exposure",
+              "environment_shift"
+            ],
+            "name": "forage",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.18,
+              "energy": 0.12
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_danger_above": 0.45
+            },
+            "cost_estimate": 0.05,
+            "failure_modes": [
+              "resource_starvation",
+              "shelter_unavailable"
+            ],
+            "name": "hide",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.08,
+              "energy": 0.05
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_uncertainty_above": 0.35
+            },
+            "cost_estimate": 0.06,
+            "failure_modes": [
+              "context_budget_exceeded",
+              "false_alarm"
+            ],
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.2,
+              "energy": 0.06
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_shelter_available": 0.2
+            },
+            "cost_estimate": 0.08,
+            "failure_modes": [
+              "shelter_contested",
+              "resource_exhaustion"
+            ],
+            "name": "exploit_shelter",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.1,
+              "energy": 0.08
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_fatigue_above": 0.4
+            },
+            "cost_estimate": 0.03,
+            "failure_modes": [
+              "opportunity_loss",
+              "environment_shift"
+            ],
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.03,
+              "energy": 0.03
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_social_below": 0.35
+            },
+            "cost_estimate": 0.07,
+            "failure_modes": [
+              "external_rejection",
+              "threat_exposure"
+            ],
+            "name": "seek_contact",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.14,
+              "energy": 0.07
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_temperature_offset_above": 0.12
+            },
+            "cost_estimate": 0.09,
+            "failure_modes": [
+              "resource_exhaustion",
+              "temperature_rebound"
+            ],
+            "name": "thermoregulate",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.12,
+              "energy": 0.09
+            },
+            "reversible": true
+          }
+        ],
         "api_limits": {
           "context_window_tokens": 256.0,
           "requests_per_minute": 60.0
@@ -796,7 +1191,7 @@
       },
       "identity_narrative": {
         "behavioral_patterns": [
-          "I tend to {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} during survival_crisis phases"
+          "I tend to {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} during survival_crisis phases"
         ],
         "chapters": [],
         "claims": [
@@ -825,16 +1220,16 @@
           "total_claims": 1
         },
         "core_identity": "I am a survival-focused agent.",
-        "core_summary": "I am a survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.30).",
+        "core_summary": "I am a survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 3 after {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.30).",
         "current_chapter": {
           "behavioral_shift": null,
           "chapter_id": 1,
           "dominant_theme": "survival_crisis",
           "key_events": [
-            "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.30)"
+            "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.30)"
           ],
           "state_summary": {
-            "dominant_action": "{'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True}",
+            "dominant_action": "{'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True}",
             "dominant_strategy": "expected_free_energy",
             "energy_avg": 0.5,
             "free_energy_avg": -0.45,
@@ -860,7 +1255,7 @@
         },
         "last_updated_tick": 20,
         "significant_events": [
-          "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.30)"
+          "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.30)"
         ],
         "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_neutral. I usually favor expected_free_energy.",
         "version": 1
@@ -951,17 +1346,33 @@
             "confidence": 0.30159689947177626,
             "counterfactual_action": "hide",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "cost_estimate": 0.05,
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
               "name": "hide",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.08,
+                "energy": 0.05
+              },
               "reversible": true
             },
             "efe_delta": -989.8736798483499,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "reason": "confidence_below_threshold",
@@ -972,17 +1383,33 @@
             "confidence": 0.31401076050271104,
             "counterfactual_action": "scan",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_uncertainty_above": 0.35
+              },
+              "cost_estimate": 0.06,
+              "failure_modes": [
+                "context_budget_exceeded",
+                "false_alarm"
+              ],
               "name": "scan",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.2,
+                "energy": 0.06
+              },
               "reversible": true
             },
             "efe_delta": -0.3634999999999997,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "reason": "confidence_below_threshold",
@@ -993,17 +1420,33 @@
             "confidence": 0.293317636764069,
             "counterfactual_action": "exploit_shelter",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_shelter_available": 0.2
+              },
+              "cost_estimate": 0.08,
+              "failure_modes": [
+                "shelter_contested",
+                "resource_exhaustion"
+              ],
               "name": "exploit_shelter",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.1,
+                "energy": 0.08
+              },
               "reversible": true
             },
             "efe_delta": -989.8702287263148,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "reason": "confidence_below_threshold",
@@ -1014,17 +1457,33 @@
             "confidence": 0.30159689947177626,
             "counterfactual_action": "hide",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "cost_estimate": 0.05,
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
               "name": "hide",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.08,
+                "energy": 0.05
+              },
               "reversible": true
             },
             "efe_delta": -989.8736798483499,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "reason": "confidence_below_threshold",
@@ -1035,17 +1494,33 @@
             "confidence": 0.31401076050271104,
             "counterfactual_action": "scan",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_uncertainty_above": 0.35
+              },
+              "cost_estimate": 0.06,
+              "failure_modes": [
+                "context_budget_exceeded",
+                "false_alarm"
+              ],
               "name": "scan",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.2,
+                "energy": 0.06
+              },
               "reversible": true
             },
             "efe_delta": -0.3634999999999997,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "reason": "confidence_below_threshold",
@@ -1056,17 +1531,33 @@
             "confidence": 0.293317636764069,
             "counterfactual_action": "exploit_shelter",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_shelter_available": 0.2
+              },
+              "cost_estimate": 0.08,
+              "failure_modes": [
+                "shelter_contested",
+                "resource_exhaustion"
+              ],
               "name": "exploit_shelter",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.1,
+                "energy": 0.08
+              },
               "reversible": true
             },
             "efe_delta": -989.8702287263148,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "reason": "confidence_below_threshold",
@@ -1079,16 +1570,32 @@
             "confirmations": 1.0,
             "counterfactual_action": "hide",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "cost_estimate": 0.05,
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
               "name": "hide",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.08,
+                "energy": 0.05
+              },
               "reversible": true
             },
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "pass_rate": 1.0,
@@ -1103,9 +1610,21 @@
             "confirmations": 1.0,
             "counterfactual_action": "hide",
             "counterfactual_action_schema": {
-              "cost_estimate": 0.0,
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "cost_estimate": 0.05,
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
               "name": "hide",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.08,
+                "energy": 0.05
+              },
               "reversible": true
             },
             "efe_delta": -989.8736798483499,
@@ -1115,9 +1634,13 @@
             "new_orig_preference_penalty": -1.335,
             "original_action": "forage",
             "original_action_schema": {
+              "constraints": {},
               "cost_estimate": 0.0,
+              "failure_modes": [],
               "name": "forage",
               "params": {},
+              "params_schema": {},
+              "resource_cost": {},
               "reversible": true
             },
             "policy_delta": 0.15,
@@ -1213,6 +1736,34 @@
       "counterfactual_candidate_buffer": {},
       "epistemic_uncertainty_bonuses": {},
       "kl_divergence_threshold": 0.25,
+      "last_prediction_details": {
+        "memory_context_summary": "",
+        "memory_hit": false,
+        "prediction_after_memory": {
+          "danger": 0.3242123978199743,
+          "food": 0.603533934352424,
+          "novelty": 0.4461939065776931,
+          "shelter": 0.5016160332103321,
+          "social": 0.39120072162649966,
+          "temperature": 0.5046433002236501
+        },
+        "prediction_before_memory": {
+          "danger": 0.3242123978199743,
+          "food": 0.603533934352424,
+          "novelty": 0.4461939065776931,
+          "shelter": 0.5016160332103321,
+          "social": 0.39120072162649966,
+          "temperature": 0.5046433002236501
+        },
+        "prediction_delta": {
+          "danger": 0.0,
+          "food": 0.0,
+          "novelty": 0.0,
+          "shelter": 0.0,
+          "social": 0.0,
+          "temperature": 0.0
+        }
+      },
       "learning_rate": 0.4,
       "outcome_model": {
         "0:forage": {

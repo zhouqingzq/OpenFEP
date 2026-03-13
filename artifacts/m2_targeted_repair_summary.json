@@ -1,0 +1,28 @@
+{
+  "memory_prediction": {
+    "action_changed_cycles": 0,
+    "cycles": 8,
+    "prediction_changed_cycles": 8,
+    "trace_path": "E:\\workspace\\segments\\artifacts\\m2_memory_prediction_trace.jsonl"
+  },
+  "runtime_failures": {
+    "cases": [
+      {
+        "attribution": "self",
+        "case": "self_context_budget",
+        "classification": "self_error"
+      },
+      {
+        "attribution": "world",
+        "case": "world_timeout",
+        "classification": "world_error"
+      }
+    ],
+    "trace_path": "E:\\workspace\\segments\\artifacts\\m2_runtime_failure_trace.jsonl"
+  },
+  "sleep_counterfactual_closure": {
+    "artifact_path": "E:\\workspace\\segments\\artifacts\\m2_sleep_counterfactual_closure.json",
+    "counterfactual_action": "hide",
+    "wake_action": "hide"
+  }
+}

@@ -134,6 +134,7 @@ class SleepRule:
     average_prediction_error: float
     timestamp: int
     narrative_insight: str = ""
+    action_descriptor: dict[str, object] | None = None
     sequence_condition: SequenceCondition | None = None
 
     @property
@@ -142,6 +143,8 @@ class SleepRule:
 
     @property
     def action_schema(self) -> ActionSchema:
+        if self.action_descriptor is not None:
+            return ActionSchema.from_dict(self.action_descriptor)
         if isinstance(self.action, ActionSchema):
             return self.action
         return ActionSchema(name=action_name(self.action))
@@ -161,6 +164,8 @@ class SleepRule:
         }
         if self.narrative_insight:
             payload["narrative_insight"] = self.narrative_insight
+        if self.action_descriptor is not None:
+            payload["action_descriptor"] = dict(self.action_descriptor)
         if self.sequence_condition is not None:
             payload["sequence_condition"] = self.sequence_condition.to_dict()
         return payload
@@ -180,6 +185,11 @@ class SleepRule:
             average_prediction_error=float(payload.get("average_prediction_error", 0.0)),
             timestamp=int(payload.get("timestamp", 0)),
             narrative_insight=str(payload.get("narrative_insight", "")),
+            action_descriptor=(
+                dict(payload.get("action_descriptor"))
+                if isinstance(payload.get("action_descriptor"), dict)
+                else None
+            ),
             sequence_condition=(
                 SequenceCondition.from_dict(sequence_payload)
                 if isinstance(sequence_payload, dict)
@@ -232,6 +242,7 @@ class DreamReplay:
 @dataclass
 class InterventionScore:
     choice: str
+    action_descriptor: dict[str, object]
     policy_score: float
     expected_free_energy: float
     predicted_error: float
@@ -275,3 +286,7 @@ class DecisionDiagnostics:
     structured_explanation: dict[str, object] = field(default_factory=dict)
     memory_hit: bool = False
     retrieved_episode_ids: list[str] = field(default_factory=list)
+    memory_context_summary: str = ""
+    prediction_before_memory: dict[str, float] = field(default_factory=dict)
+    prediction_after_memory: dict[str, float] = field(default_factory=dict)
+    prediction_delta: dict[str, float] = field(default_factory=dict)

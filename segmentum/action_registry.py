@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 from .action_schema import ActionSchema
-from .constants import ACTION_COSTS
+from .constants import (
+    ACTION_CONSTRAINTS,
+    ACTION_COSTS,
+    ACTION_FAILURE_MODES,
+    ACTION_PARAM_SCHEMAS,
+    ACTION_RESOURCE_COSTS,
+)
 
 
 class ActionRegistry:
@@ -16,7 +22,11 @@ class ActionRegistry:
         stored = ActionSchema(
             name=action.name,
             params=dict(action.params),
+            params_schema=dict(action.params_schema),
             cost_estimate=cost_estimate,
+            resource_cost=dict(action.resource_cost),
+            failure_modes=tuple(action.failure_modes),
+            constraints=dict(action.constraints),
             reversible=action.reversible,
         )
         self._actions[stored.name] = stored
@@ -33,7 +43,11 @@ class ActionRegistry:
         return ActionSchema(
             name=action.name,
             params=dict(action.params),
+            params_schema=dict(action.params_schema),
             cost_estimate=self.get_cost(name),
+            resource_cost=dict(action.resource_cost),
+            failure_modes=tuple(action.failure_modes),
+            constraints=dict(action.constraints),
             reversible=action.reversible,
         )
 
@@ -85,5 +99,15 @@ class ActionRegistry:
 def build_default_action_registry() -> ActionRegistry:
     registry = ActionRegistry()
     for name, cost in ACTION_COSTS.items():
-        registry.register(ActionSchema(name=name, cost_estimate=float(cost)), float(cost))
+        registry.register(
+            ActionSchema(
+                name=name,
+                params_schema=dict(ACTION_PARAM_SCHEMAS.get(name, {})),
+                cost_estimate=float(cost),
+                resource_cost=dict(ACTION_RESOURCE_COSTS.get(name, {})),
+                failure_modes=tuple(ACTION_FAILURE_MODES.get(name, ())),
+                constraints=dict(ACTION_CONSTRAINTS.get(name, {})),
+            ),
+            float(cost),
+        )
     return registry

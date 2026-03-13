@@ -17,7 +17,12 @@ from .logging_utils import ConsciousnessLogger
 from .memory import MemoryDecision
 from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, quarantine_snapshot
 from .predictive_coding import PredictiveCodingHyperparameters
-from .self_model import ClassificationResult, SelfModel, build_default_self_model
+from .self_model import (
+    ClassificationResult,
+    RuntimeFailureEvent,
+    SelfModel,
+    build_default_self_model,
+)
 from .state import AgentState, PolicyTendency, TickInput
 from .sleep_consolidator import build_sleep_llm_extractor
 from .tracing import JsonlTraceWriter, derive_trace_path
@@ -81,6 +86,7 @@ class SegmentRuntime:
         self.inner_speech_engine = inner_speech_engine or build_inner_speech_engine()
         self.consciousness_logger = consciousness_logger or ConsciousnessLogger()
         self.self_model = self_model or build_default_self_model()
+        self.last_error_attribution: ClassificationResult | None = None
         self.state_path = Path(state_path) if state_path else None
         resolved_trace_path = Path(trace_path) if trace_path else derive_trace_path(self.state_path)
         self.trace_writer = (
@@ -263,6 +269,7 @@ class SegmentRuntime:
         verbose: bool = True,
         host_telemetry: bool = False,
     ) -> dict[str, object]:
+        self.last_error_attribution = None
         self.agent.cycle += 1
         observation = self.world.observe()
         decision = self.agent.decision_cycle(observation)
@@ -274,7 +281,7 @@ class SegmentRuntime:
         diagnostics = decision["diagnostics"]
         assert isinstance(diagnostics, DecisionDiagnostics)
         memory_hits = len(diagnostics.retrieved_memories)
-        choice = ActionSchema(name=diagnostics.chosen.choice, cost_estimate=diagnostics.chosen.cost)
+        choice = ActionSchema.from_dict(diagnostics.chosen.action_descriptor)
         expected_fe = diagnostics.chosen.expected_free_energy
         choice_cost = diagnostics.chosen.cost
 
@@ -477,7 +484,22 @@ class SegmentRuntime:
         cycle: int,
     ) -> ClassificationResult:
         self._sync_self_model_resource_state()
-        result = self.self_model.inspect_event(exc)
+        if stage in {"runtime_step", "host_telemetry", "snapshot_persistence", "trace_persistence"}:
+            error_event = RuntimeFailureEvent(
+                name=type(exc).__name__,
+                stage=stage,
+                category=self._runtime_failure_category(exc, stage=stage),
+                origin_hint=self._runtime_failure_origin(exc, stage=stage),
+                details={
+                    "message": str(exc),
+                    "exception_type": type(exc).__name__,
+                },
+                resource_state=self.self_model.resource_state.snapshot(),
+            )
+            result = self.self_model.inspect_event(error_event)
+        else:
+            result = self.self_model.inspect_event(exc)
+        self.last_error_attribution = result
         self._emit_self_model_warning(result, stage=stage, verbose=verbose)
         if self.trace_writer and stage != "trace_persistence":
             try:
@@ -490,15 +512,50 @@ class SegmentRuntime:
                         "error_message": str(exc),
                         "self_model": {
                             "classification": result.classification,
+                            "attribution": result.attribution,
                             "surprise_source": result.surprise_source,
                             "detected_threats": list(result.detected_threats),
                             "resource_state": dict(result.resource_state),
+                            "evidence": dict(result.evidence),
+                        },
+                        "error_attribution": {
+                            "classification": result.classification,
+                            "attribution": result.attribution,
+                            "surprise_source": result.surprise_source,
+                            "detected_threats": list(result.detected_threats),
+                            "evidence": dict(result.evidence),
                         },
                     }
                 )
             except Exception:
                 pass
         return result
+
+    def _runtime_failure_origin(self, exc: Exception, *, stage: str) -> str:
+        name = type(exc).__name__.casefold()
+        message = str(exc).casefold()
+        if any(token in name or token in message for token in ("token", "memory", "context", "budget", "oom")):
+            return "self"
+        if any(token in name or token in message for token in ("http", "timeout", "network", "external", "readonly", "dom")):
+            return "world"
+        if stage in {"snapshot_persistence", "trace_persistence"}:
+            return "world"
+        return "world"
+
+    def _runtime_failure_category(self, exc: Exception, *, stage: str) -> str:
+        name = type(exc).__name__.casefold()
+        message = str(exc).casefold()
+        if any(token in name or token in message for token in ("token", "context")):
+            return "context_budget"
+        if any(token in name or token in message for token in ("memory", "oom")):
+            return "memory_budget"
+        if "timeout" in name or "timeout" in message:
+            return "timeout"
+        if any(token in name or token in message for token in ("http", "network", "external")):
+            return "external_failure"
+        if stage in {"snapshot_persistence", "trace_persistence"}:
+            return "tool_failure"
+        return "environment_shift"
 
     def _emit_self_model_warning(
         self,
@@ -554,6 +611,10 @@ class SegmentRuntime:
             "memory_hits": memory_hits,
             "memory_hit": diagnostics.memory_hit,
             "retrieved_episode_ids": list(diagnostics.retrieved_episode_ids),
+            "memory_context_summary": diagnostics.memory_context_summary,
+            "prediction_before_memory": diagnostics.prediction_before_memory,
+            "prediction_after_memory": diagnostics.prediction_after_memory,
+            "prediction_delta": diagnostics.prediction_delta,
             "sleep_triggered": sleep_summary is not None,
             "body_state": {
                 "energy": self.agent.energy,
@@ -580,10 +641,7 @@ class SegmentRuntime:
             "decision_ranking": [
                 {
                     "choice": option.choice,
-                    "action": ActionSchema(
-                        name=option.choice,
-                        cost_estimate=option.cost,
-                    ).to_dict(),
+                    "action": dict(option.action_descriptor),
                     "policy_score": option.policy_score,
                     "expected_free_energy": option.expected_free_energy,
                     "predicted_error": option.predicted_error,
@@ -635,6 +693,14 @@ class SegmentRuntime:
             "running_metrics": self.metrics.summary(),
             "recent_action_history": list(self.agent.action_history),
         }
+        if self.last_error_attribution is not None:
+            trace_record["last_error_attribution"] = {
+                "classification": self.last_error_attribution.classification,
+                "attribution": self.last_error_attribution.attribution,
+                "surprise_source": self.last_error_attribution.surprise_source,
+                "detected_threats": list(self.last_error_attribution.detected_threats),
+                "evidence": dict(self.last_error_attribution.evidence),
+            }
         if sleep_summary:
             trace_record["sleep_summary"] = asdict(sleep_summary)
         if host_tick:

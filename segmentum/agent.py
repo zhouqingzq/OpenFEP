@@ -401,7 +401,7 @@ class SegmentAgent:
         self.identity_traits = IdentityTraits()
         self.self_model = build_default_self_model()
         self.self_model.capability_model = CapabilityModel(
-            available_actions=tuple(self.action_registry.names()),
+            action_schemas=tuple(self.action_registry.get_all()),
             api_limits=self.self_model.capability_model.api_limits,
         )
         self.goal_stack = GoalStack()
@@ -433,6 +433,7 @@ class SegmentAgent:
             "temperature": self.temperature,
         }
         self.last_decision_diagnostics: DecisionDiagnostics | None = None
+        self.last_memory_context: dict[str, object] = {}
         self._sleeping = False
         self.counterfactual_insights: list[CounterfactualInsight] = []
 
@@ -496,6 +497,177 @@ class SegmentAgent:
             },
             "free_energy_history": list(self.free_energy_history),
         }
+
+    def _current_body_state(self) -> dict[str, float]:
+        return {
+            "cycle": float(self.cycle),
+            "energy": self.energy,
+            "stress": self.stress,
+            "fatigue": self.fatigue,
+            "temperature": self.temperature,
+            "dopamine": self.dopamine,
+        }
+
+    def _build_memory_context(
+        self,
+        *,
+        observed: dict[str, float],
+        baseline_prediction: dict[str, float],
+        errors: dict[str, float],
+        similar_memories: list[dict[str, object]],
+    ) -> dict[str, object]:
+        if not similar_memories:
+            return {
+                "memory_hit": False,
+                "retrieved_episode_ids": [],
+                "summary": "no episodic memory influence",
+                "state_projection": {},
+                "state_delta": {},
+                "aggregate": {},
+                "actions": {},
+                "prediction_blend": 0.0,
+                "delta_gain": 0.0,
+            }
+
+        weighted_total = sum(
+            max(1e-9, float(payload.get("similarity", payload.get("vector_similarity", 0.0))))
+            for payload in similar_memories
+        )
+        aggregate_projection: dict[str, float] = {}
+        aggregate_delta: dict[str, float] = {}
+        action_rollups: dict[str, dict[str, object]] = {}
+        outcome_totals: dict[str, float] = {}
+        retrieved_episode_ids: list[str] = []
+
+        for payload in similar_memories:
+            weight = max(
+                1e-9,
+                float(payload.get("similarity", payload.get("vector_similarity", 0.0))),
+            )
+            observation = {
+                str(key): float(value)
+                for key, value in dict(payload.get("observation", {})).items()
+                if isinstance(value, (int, float))
+            }
+            action_key = action_name(
+                payload.get("action_taken", payload.get("action", "unknown"))
+            )
+            predicted_effects = {
+                str(key): float(value)
+                for key, value in dict(payload.get("outcome_state", payload.get("outcome", {}))).items()
+                if isinstance(value, (int, float))
+            }
+            predicted_outcome = str(payload.get("predicted_outcome", "neutral"))
+            outcome_totals[predicted_outcome] = outcome_totals.get(predicted_outcome, 0.0) + weight
+            episode_id = str(payload.get("episode_id", ""))
+            if episode_id:
+                retrieved_episode_ids.append(episode_id)
+
+            rollup = action_rollups.setdefault(
+                action_key,
+                {
+                    "weight": 0.0,
+                    "risk": 0.0,
+                    "preferred_probability": 0.0,
+                    "expected_surprise": 0.0,
+                    "observation_projection": {},
+                    "predicted_effects": {},
+                    "outcome_distribution": {},
+                    "action_descriptor": self._action_schema_for_name(action_key).to_dict(),
+                },
+            )
+            rollup["weight"] = float(rollup["weight"]) + weight
+            rollup["risk"] = float(rollup["risk"]) + float(payload.get("risk", 0.0)) * weight
+            rollup["preferred_probability"] = float(rollup["preferred_probability"]) + float(
+                payload.get("preferred_probability", 0.0)
+            ) * weight
+            rollup["expected_surprise"] = float(rollup["expected_surprise"]) + float(
+                payload.get("total_surprise", payload.get("weighted_surprise", 0.0))
+            ) * weight
+
+            obs_projection = dict(rollup["observation_projection"])
+            for key, value in observation.items():
+                aggregate_projection[key] = aggregate_projection.get(key, 0.0) + (value * weight)
+                aggregate_delta[key] = aggregate_delta.get(key, 0.0) + (
+                    (value - baseline_prediction.get(key, 0.0)) * weight
+                )
+                obs_projection[key] = obs_projection.get(key, 0.0) + (value * weight)
+            rollup["observation_projection"] = obs_projection
+
+            effect_projection = dict(rollup["predicted_effects"])
+            for key, value in predicted_effects.items():
+                effect_projection[key] = effect_projection.get(key, 0.0) + (value * weight)
+            rollup["predicted_effects"] = effect_projection
+
+            outcome_distribution = dict(rollup["outcome_distribution"])
+            outcome_distribution[predicted_outcome] = outcome_distribution.get(predicted_outcome, 0.0) + weight
+            rollup["outcome_distribution"] = outcome_distribution
+
+        aggregate_risk = 0.0
+        aggregate_probability = 0.0
+        aggregate_surprise = 0.0
+        for action_key, rollup in action_rollups.items():
+            weight = max(1e-9, float(rollup["weight"]))
+            rollup["risk"] = float(rollup["risk"]) / weight
+            rollup["preferred_probability"] = float(rollup["preferred_probability"]) / weight
+            rollup["expected_surprise"] = float(rollup["expected_surprise"]) / weight
+            rollup["observation_projection"] = {
+                key: float(value) / weight
+                for key, value in dict(rollup["observation_projection"]).items()
+            }
+            total_outcomes = sum(
+                float(value) for value in dict(rollup["outcome_distribution"]).values()
+            ) or 1.0
+            rollup["outcome_distribution"] = {
+                key: float(value) / total_outcomes
+                for key, value in dict(rollup["outcome_distribution"]).items()
+            }
+            rollup["predicted_effects"] = {
+                key: float(value) / weight
+                for key, value in dict(rollup["predicted_effects"]).items()
+            }
+            aggregate_risk += float(rollup["risk"]) * (weight / weighted_total)
+            aggregate_probability += float(rollup["preferred_probability"]) * (weight / weighted_total)
+            aggregate_surprise += float(rollup["expected_surprise"]) * (weight / weighted_total)
+            action_rollups[action_key] = rollup
+
+        state_projection = {
+            key: value / weighted_total for key, value in aggregate_projection.items()
+        }
+        state_delta = {
+            key: value / weighted_total for key, value in aggregate_delta.items()
+        }
+        dominant_outcome = sorted(
+            outcome_totals.items(),
+            key=lambda item: (-item[1], item[0]),
+        )[0][0]
+        memory_context = {
+            "memory_hit": True,
+            "retrieved_episode_ids": retrieved_episode_ids,
+            "summary": (
+                f"{len(similar_memories)} episodic match(es), dominant outcome={dominant_outcome}, "
+                f"risk={aggregate_risk:.3f}, expected_surprise={aggregate_surprise:.3f}"
+            ),
+            "state_projection": state_projection,
+            "state_delta": state_delta,
+            "aggregate": {
+                "dominant_outcome": dominant_outcome,
+                "risk": aggregate_risk,
+                "preferred_probability": aggregate_probability,
+                "expected_surprise": aggregate_surprise,
+                "outcome_distribution": {
+                    key: value / weighted_total for key, value in outcome_totals.items()
+                },
+            },
+            "actions": action_rollups,
+            "prediction_blend": min(0.35, 0.12 + (0.08 * len(similar_memories))),
+            "delta_gain": min(0.45, 0.18 + (0.05 * len(similar_memories))),
+            "body_state": self._current_body_state(),
+            "observation": dict(observed),
+            "prediction_error": compute_prediction_error(observed, baseline_prediction),
+            "errors": dict(errors),
+        }
+        return memory_context
 
     @property
     def current_tick(self) -> int:
@@ -638,7 +810,7 @@ class SegmentAgent:
             strategic_prediction,
             sensorimotor_prediction,
             interoceptive_prediction,
-        ) = self._top_down_pass()
+        ) = self._top_down_pass(observed)
         hierarchy = self._bottom_up_pass(
             observed,
             strategic_prior,
@@ -656,6 +828,7 @@ class SegmentAgent:
 
     def _top_down_pass(
         self,
+        observed: dict[str, float],
     ) -> tuple[
         dict[str, float],
         dict[str, float],
@@ -671,7 +844,50 @@ class SegmentAgent:
             self.drive_system,
         )
 
-        sensorimotor_prediction = self.world_model.predict(strategic_prediction)
+        baseline_prediction = self.world_model.predict(strategic_prediction)
+        baseline_errors = {
+            key: observed.get(key, 0.0) - baseline_prediction.get(key, 0.0)
+            for key in sorted(set(observed) | set(baseline_prediction))
+        }
+        current_state_snapshot = {
+            "observation": dict(observed),
+            "prediction": dict(baseline_prediction),
+            "errors": baseline_errors,
+            "body_state": self._current_body_state(),
+        }
+        similar_memories = self.long_term_memory.retrieve_similar_memories(
+            current_state_snapshot,
+            k=3,
+        )
+        memory_context = self._build_memory_context(
+            observed=observed,
+            baseline_prediction=baseline_prediction,
+            errors=baseline_errors,
+            similar_memories=similar_memories,
+        )
+        sensorimotor_prediction = self.world_model.predict(
+            strategic_prediction,
+            memory_context=memory_context,
+        )
+        self.last_memory_context = {
+            **memory_context,
+            "prediction_before_memory": dict(
+                self.world_model.last_prediction_details.get(
+                    "prediction_before_memory",
+                    baseline_prediction,
+                )
+            ),
+            "prediction_after_memory": dict(
+                self.world_model.last_prediction_details.get(
+                    "prediction_after_memory",
+                    sensorimotor_prediction,
+                )
+            ),
+            "prediction_delta": dict(
+                self.world_model.last_prediction_details.get("prediction_delta", {})
+            ),
+            "retrieved_memories": similar_memories,
+        }
         interoceptive_prediction = self.interoceptive_layer.predict(sensorimotor_prediction)
         return (
             strategic_prior,
@@ -941,6 +1157,7 @@ class SegmentAgent:
         free_energy_before: float,
         current_cluster_id: int | None,
         active_goal: Goal | None = None,
+        memory_context: dict[str, object] | None = None,
     ) -> dict[str, object]:
         action_key = action_name(action)
         action_schema = self._action_schema_for_name(action_key)
@@ -1000,6 +1217,22 @@ class SegmentAgent:
             projected_snapshot=projected_snapshot,
             predicted_effects=predicted_effects,
         )
+        memory_refinement = self.world_model.refine_action_prediction(
+            action=action_schema,
+            projected_snapshot=projected_snapshot,
+            predicted_effects=predicted_effects,
+            predicted_outcome=predicted_outcome,
+            preferred_probability=preferred_probability,
+            risk=risk,
+            predicted_error=predicted_error,
+            memory_context=memory_context,
+        )
+        projected_snapshot = dict(memory_refinement["projected_snapshot"])
+        predicted_effects = dict(memory_refinement["predicted_effects"])
+        predicted_outcome = str(memory_refinement["predicted_outcome"])
+        preferred_probability = float(memory_refinement["preferred_probability"])
+        risk = float(memory_refinement["risk"])
+        predicted_error = float(memory_refinement["expected_surprise"])
         expected_free_energy = self.long_term_memory.preference_model.expected_free_energy(
             outcome=predicted_outcome,
             predicted_error=predicted_error,
@@ -1019,7 +1252,11 @@ class SegmentAgent:
             "value_score": value_score,
             "cost": cost,
             "action_schema": action_schema,
-            "observation_distance": compute_prediction_error(observed, imagined),
+            "observation_distance": compute_prediction_error(
+                observed,
+                projected_snapshot["observation"],
+            ),
+            "applied_memory_context": bool(memory_refinement["applied_memory"]),
         }
 
     def evaluate_action_options(
@@ -1030,6 +1267,7 @@ class SegmentAgent:
         free_energy_before: float,
         current_cluster_id: int | None,
         active_goal: Goal | None = None,
+        memory_context: dict[str, object] | None = None,
     ) -> dict[str, dict[str, object]]:
         """Project candidate actions into explicit policy components."""
         allowed = self.self_model.capability_model.available_actions
@@ -1051,6 +1289,7 @@ class SegmentAgent:
                 free_energy_before=free_energy_before,
                 current_cluster_id=current_cluster_id,
                 active_goal=active_goal,
+                memory_context=memory_context,
             )
         return options
 
@@ -1084,10 +1323,7 @@ class SegmentAgent:
             self.dopamine,
             self.drive_system,
         )
-        similar_memories = self.long_term_memory.retrieve_similar_memories(
-            current_state_snapshot,
-            k=3,
-        )
+        similar_memories = list(self.last_memory_context.get("retrieved_memories", []))
         retrieved_episode_ids = [
             str(item.get("episode_id", ""))
             for item in similar_memories
@@ -1101,6 +1337,7 @@ class SegmentAgent:
             free_energy_before,
             current_cluster_id,
             active_goal=active_goal,
+            memory_context=self.last_memory_context,
         )
         ranked_options: list[InterventionScore] = []
         for action, option in action_options.items():
@@ -1130,6 +1367,7 @@ class SegmentAgent:
                 predicted_effects=predicted_effects,
                 current_state=current_state_snapshot,
             )
+            regression_penalty = self._action_regression_penalty(action)
             policy_score = (
                 -expected_fe
                 + memory_bias
@@ -1138,6 +1376,7 @@ class SegmentAgent:
                 + epistemic_bonus
                 + identity_bias
                 + goal_alignment
+                - regression_penalty
             )
             dominant_component = self.policy_evaluator.dominant_component(
                 expected_free_energy=expected_fe,
@@ -1151,6 +1390,11 @@ class SegmentAgent:
             ranked_options.append(
                 InterventionScore(
                     choice=action,
+                    action_descriptor=dict(
+                        option["action_schema"].to_dict()
+                        if isinstance(option.get("action_schema"), ActionSchema)
+                        else self._action_schema_for_name(action).to_dict()
+                    ),
                     policy_score=policy_score,
                     expected_free_energy=expected_fe,
                     predicted_error=float(option["predicted_error"]),
@@ -1207,6 +1451,28 @@ class SegmentAgent:
             goal_context=goal_context,
             memory_hit=bool(similar_memories),
             retrieved_episode_ids=retrieved_episode_ids,
+            memory_context_summary=str(self.last_memory_context.get("summary", "")),
+            prediction_before_memory={
+                str(key): float(value)
+                for key, value in dict(
+                    self.last_memory_context.get("prediction_before_memory", {})
+                ).items()
+                if isinstance(value, (int, float))
+            },
+            prediction_after_memory={
+                str(key): float(value)
+                for key, value in dict(
+                    self.last_memory_context.get("prediction_after_memory", prediction)
+                ).items()
+                if isinstance(value, (int, float))
+            },
+            prediction_delta={
+                str(key): float(value)
+                for key, value in dict(
+                    self.last_memory_context.get("prediction_delta", {})
+                ).items()
+                if isinstance(value, (int, float))
+            },
         )
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
         diagnostics.explanation = str(diagnostics.structured_explanation["text"])
@@ -1248,6 +1514,7 @@ class SegmentAgent:
         diagnostics = DecisionDiagnostics(
             chosen=InterventionScore(
                 choice="rest",
+                action_descriptor=self._action_schema_for_name("rest").to_dict(),
                 policy_score=-expected_free_energy,
                 expected_free_energy=expected_free_energy,
                 predicted_error=prediction_error,
@@ -1273,6 +1540,9 @@ class SegmentAgent:
             explanation="I chose rest because no richer decision context was available.",
             active_goal=self.goal_stack.active_goal.name,
             goal_context=self.goal_stack.get_goal_context_for_decision({"body_state": {"energy": self.energy}}),
+            prediction_before_memory=dict(prediction),
+            prediction_after_memory=dict(prediction),
+            prediction_delta={key: 0.0 for key in prediction},
         )
         self.last_decision_diagnostics = diagnostics
         return diagnostics
@@ -1291,9 +1561,13 @@ class SegmentAgent:
 
         penalty = 0.0
         if repeat_ratio > 0.50:
-            penalty += (repeat_ratio - 0.50) * 0.45
+            penalty += (repeat_ratio - 0.50) * 0.50
         if streak > 3:
-            penalty += (streak - 3) * 0.12
+            penalty += (streak - 3) * 0.14
+        if streak > 6:
+            penalty += 0.20 + ((streak - 6) * 0.12)
+        if action == "rest" and streak > 8:
+            penalty += 1.25 + ((streak - 8) * 0.15)
         if action == "internal_update" and repeat_ratio > 0.35:
             penalty += 0.08 + (repeat_ratio - 0.35) * 0.35
         return penalty
@@ -2038,12 +2312,12 @@ class SegmentAgent:
         agent.goal_stack.log_sink = agent.self_model.log_sink
         if not agent.self_model.capability_model.available_actions:
             agent.self_model.capability_model = CapabilityModel(
-                available_actions=tuple(agent.action_registry.names()),
+                action_schemas=tuple(agent.action_registry.get_all()),
                 api_limits=agent.self_model.capability_model.api_limits,
             )
         else:
             agent.self_model.capability_model = CapabilityModel(
-                available_actions=tuple(agent.action_registry.names()),
+                action_schemas=tuple(agent.action_registry.get_all()),
                 api_limits=agent.self_model.capability_model.api_limits,
             )
         agent.policy_evaluator = PolicyEvaluator(
@@ -2129,16 +2403,4 @@ class SegmentAgent:
             sensorimotor=self.world_model.sensorimotor_layer.belief_state.hyperparameters(),
             strategic=self.strategic_layer.belief_state.hyperparameters(),
         )
-
-
-
-
-
-
-
-
-
-
-
-
 

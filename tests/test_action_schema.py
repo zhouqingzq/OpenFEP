@@ -7,7 +7,11 @@ def test_action_schema_round_trip_and_str_compatibility() -> None:
     action = ActionSchema(
         name="web_fetch",
         params={"timeout": 30, "url": "https://example.com"},
+        params_schema={"timeout": {"type": "integer"}, "url": {"type": "string"}},
         cost_estimate=1.25,
+        resource_cost={"tokens": 32.0},
+        failure_modes=("timeout", "network_failure"),
+        constraints={"requires_network": True},
         reversible=False,
     )
     restored = ActionSchema.from_dict(action.to_dict())

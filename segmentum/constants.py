@@ -11,6 +11,40 @@ ACTION_COSTS = {
     "thermoregulate": 0.09,
 }
 
+ACTION_PARAM_SCHEMAS = {
+    name: {} for name in ACTION_COSTS
+}
+
+ACTION_RESOURCE_COSTS = {
+    "forage": {"energy": 0.12, "attention": 0.18},
+    "hide": {"energy": 0.05, "attention": 0.08},
+    "scan": {"energy": 0.06, "attention": 0.20},
+    "exploit_shelter": {"energy": 0.08, "attention": 0.10},
+    "rest": {"energy": 0.03, "attention": 0.03},
+    "seek_contact": {"energy": 0.07, "attention": 0.14},
+    "thermoregulate": {"energy": 0.09, "attention": 0.12},
+}
+
+ACTION_FAILURE_MODES = {
+    "forage": ("resource_exhaustion", "threat_exposure", "environment_shift"),
+    "hide": ("resource_starvation", "shelter_unavailable"),
+    "scan": ("context_budget_exceeded", "false_alarm"),
+    "exploit_shelter": ("shelter_contested", "resource_exhaustion"),
+    "rest": ("opportunity_loss", "environment_shift"),
+    "seek_contact": ("external_rejection", "threat_exposure"),
+    "thermoregulate": ("resource_exhaustion", "temperature_rebound"),
+}
+
+ACTION_CONSTRAINTS = {
+    "forage": {"requires_min_energy": 0.10},
+    "hide": {"preferred_when_danger_above": 0.45},
+    "scan": {"preferred_when_uncertainty_above": 0.35},
+    "exploit_shelter": {"preferred_when_shelter_available": 0.20},
+    "rest": {"preferred_when_fatigue_above": 0.40},
+    "seek_contact": {"preferred_when_social_below": 0.35},
+    "thermoregulate": {"preferred_when_temperature_offset_above": 0.12},
+}
+
 ACTION_BODY_EFFECTS = {
     "forage": {
         "energy_delta": 0.18,

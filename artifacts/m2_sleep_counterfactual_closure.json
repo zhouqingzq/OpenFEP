@@ -1,0 +1,90 @@
+{
+  "bias_comparison": {
+    "forage_bias_after": -0.75,
+    "forage_bias_before": 0.0,
+    "hide_bias_after": 0.3,
+    "hide_bias_before": 0.0
+  },
+  "counterfactual": {
+    "better_action": "hide",
+    "episodes_evaluated": 3,
+    "insights_absorbed": 1,
+    "insights_generated": 7,
+    "original_action": "forage",
+    "policy_delta": 0.15
+  },
+  "high_surprise_episode": {
+    "action": "forage",
+    "predicted_outcome": "survival_threat",
+    "risk": 1005.006715652344,
+    "total_surprise": 1005.296715652344
+  },
+  "seed": 42,
+  "sleep_rule_extraction": {
+    "policy_bias_updates": 1,
+    "preference_updates": 1,
+    "rule_ids": [
+      "sleep-1-0-forage-survival_threat"
+    ],
+    "rules_extracted": 1,
+    "threat_updates": 1
+  },
+  "slow_weight_update": {
+    "cluster": 0,
+    "preference_penalty_after": -1.335,
+    "preference_penalty_before": 0.0,
+    "threat_prior_after": 0.55,
+    "threat_prior_before": 0.0
+  },
+  "state_version": "0.4",
+  "wake_probe": {
+    "chosen_action_after_sleep": "hide",
+    "chosen_action_before_episode": "forage",
+    "memory_context_summary": "1 episodic match(es), dominant outcome=survival_threat, risk=1005.007, expected_surprise=1005.297",
+    "observation": {
+      "danger": 0.82,
+      "food": 0.12,
+      "novelty": 0.22,
+      "shelter": 0.1,
+      "social": 0.18,
+      "temperature": 0.46
+    },
+    "predicted_outcome_after_sleep": "survival_threat",
+    "prediction_after_memory": {
+      "danger": 0.522126286022928,
+      "food": 0.28070664051271305,
+      "novelty": 0.3594629082870481,
+      "shelter": 0.2861114305054995,
+      "social": 0.28060820401831654,
+      "temperature": 0.4837423399028757
+    },
+    "prediction_before_memory": {
+      "danger": 0.2974145368823297,
+      "food": 0.401941474583707,
+      "novelty": 0.4646717689246457,
+      "shelter": 0.4265112815885954,
+      "social": 0.3565056210847659,
+      "temperature": 0.5016532278997818
+    },
+    "top_scores_after_sleep": [
+      {
+        "choice": "hide",
+        "policy_bias": 0.3,
+        "policy_score": -948.4874516934613,
+        "risk": 353.15746565234406
+      },
+      {
+        "choice": "rest",
+        "policy_bias": 0.0,
+        "policy_score": -949.0280939791027,
+        "risk": 353.18671565234405
+      },
+      {
+        "choice": "exploit_shelter",
+        "policy_bias": 0.0,
+        "policy_score": -949.0694522379247,
+        "risk": 353.18671565234405
+      }
+    ]
+  }
+}

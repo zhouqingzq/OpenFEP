@@ -2,6 +2,156 @@
   "agent": {
     "action_history": [],
     "action_history_limit": 32,
+    "action_registry": {
+      "exploit_shelter": {
+        "action": {
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "cost_estimate": 0.08,
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
+          "name": "exploit_shelter",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.1,
+            "energy": 0.08
+          },
+          "reversible": true
+        },
+        "cost": 0.08
+      },
+      "forage": {
+        "action": {
+          "constraints": {
+            "requires_min_energy": 0.1
+          },
+          "cost_estimate": 0.12,
+          "failure_modes": [
+            "resource_exhaustion",
+            "threat_exposure",
+            "environment_shift"
+          ],
+          "name": "forage",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.18,
+            "energy": 0.12
+          },
+          "reversible": true
+        },
+        "cost": 0.12
+      },
+      "hide": {
+        "action": {
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
+          "reversible": true
+        },
+        "cost": 0.05
+      },
+      "rest": {
+        "action": {
+          "constraints": {
+            "preferred_when_fatigue_above": 0.4
+          },
+          "cost_estimate": 0.03,
+          "failure_modes": [
+            "opportunity_loss",
+            "environment_shift"
+          ],
+          "name": "rest",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.03,
+            "energy": 0.03
+          },
+          "reversible": true
+        },
+        "cost": 0.03
+      },
+      "scan": {
+        "action": {
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "cost_estimate": 0.06,
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
+          "name": "scan",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.2,
+            "energy": 0.06
+          },
+          "reversible": true
+        },
+        "cost": 0.06
+      },
+      "seek_contact": {
+        "action": {
+          "constraints": {
+            "preferred_when_social_below": 0.35
+          },
+          "cost_estimate": 0.07,
+          "failure_modes": [
+            "external_rejection",
+            "threat_exposure"
+          ],
+          "name": "seek_contact",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.14,
+            "energy": 0.07
+          },
+          "reversible": true
+        },
+        "cost": 0.07
+      },
+      "thermoregulate": {
+        "action": {
+          "constraints": {
+            "preferred_when_temperature_offset_above": 0.12
+          },
+          "cost_estimate": 0.09,
+          "failure_modes": [
+            "resource_exhaustion",
+            "temperature_rebound"
+          ],
+          "name": "thermoregulate",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.12,
+            "energy": 0.09
+          },
+          "reversible": true
+        },
+        "cost": 0.09
+      }
+    },
     "base_metabolic_rate": 0.015,
     "counterfactual_insights": [],
     "cycle": 6,
@@ -10,10 +160,10 @@
         "action": "hide",
         "active_goal": "SURVIVAL",
         "dominant_component": "expected_free_energy",
-        "goal_alignment": 0.7716082867555636,
-        "policy_score": -2.0753815480353444,
-        "preferred_probability": 0.6655155876605157,
-        "risk": 2.206715652344034,
+        "goal_alignment": 0.6611408438932791,
+        "policy_score": -949.0014544183837,
+        "preferred_probability": 0.4658609113623609,
+        "risk": 353.18671565234405,
         "tick": 6
       }
     ],
@@ -43,7 +193,7 @@
     "fatigue": 0.0,
     "fatigue_accumulation_rate": 0.08,
     "free_energy_history": [
-      1.4306494704248418
+      0.8885408899822154
     ],
     "free_energy_history_limit": 64,
     "goal_stack": {
@@ -100,12 +250,12 @@
     "interoceptive_layer": {
       "base_error_precision": 0.8,
       "beliefs": {
-        "danger": 0.47866683709384206,
-        "food": 0.39965973806813326,
-        "novelty": 0.352875158371314,
-        "shelter": 0.26402497210400633,
-        "social": 0.21175176649738653,
-        "temperature": 0.4786628590286837
+        "danger": 0.4227928846934749,
+        "food": 0.4306839175934103,
+        "novelty": 0.3981177935320936,
+        "shelter": 0.3073242182405711,
+        "social": 0.24189999176286933,
+        "temperature": 0.48490458830158556
       },
       "digestion_threshold": 0.06,
       "error_precision_scale": 1.4,
@@ -114,12 +264,12 @@
       "min_precision": 0.05,
       "precision_decay": 0.01,
       "precisions": {
-        "danger": 1.6404468432298718,
-        "food": 1.4989009095789294,
-        "novelty": 1.5870556501844926,
-        "shelter": 1.5664068659687798,
-        "social": 1.4804622233676905,
-        "temperature": 1.3510478419917538
+        "danger": 1.5396240920451094,
+        "food": 1.4393137955619357,
+        "novelty": 1.5044965897323404,
+        "shelter": 1.4864672669535415,
+        "social": 1.4227031519323055,
+        "temperature": 1.338065575258388
       },
       "top_down_mix": 0.72
     },
@@ -164,9 +314,13 @@
         {
           "action": "forage",
           "action_taken": {
+            "constraints": {},
             "cost_estimate": 0.0,
+            "failure_modes": [],
             "name": "forage",
             "params": {},
+            "params_schema": {},
+            "resource_cost": {},
             "reversible": true
           },
           "body_state": {
@@ -421,6 +575,135 @@
         "token_budget": 256
       },
       "capability_model": {
+        "action_schemas": [
+          {
+            "constraints": {
+              "requires_min_energy": 0.1
+            },
+            "cost_estimate": 0.12,
+            "failure_modes": [
+              "resource_exhaustion",
+              "threat_exposure",
+              "environment_shift"
+            ],
+            "name": "forage",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.18,
+              "energy": 0.12
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_danger_above": 0.45
+            },
+            "cost_estimate": 0.05,
+            "failure_modes": [
+              "resource_starvation",
+              "shelter_unavailable"
+            ],
+            "name": "hide",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.08,
+              "energy": 0.05
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_uncertainty_above": 0.35
+            },
+            "cost_estimate": 0.06,
+            "failure_modes": [
+              "context_budget_exceeded",
+              "false_alarm"
+            ],
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.2,
+              "energy": 0.06
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_shelter_available": 0.2
+            },
+            "cost_estimate": 0.08,
+            "failure_modes": [
+              "shelter_contested",
+              "resource_exhaustion"
+            ],
+            "name": "exploit_shelter",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.1,
+              "energy": 0.08
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_fatigue_above": 0.4
+            },
+            "cost_estimate": 0.03,
+            "failure_modes": [
+              "opportunity_loss",
+              "environment_shift"
+            ],
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.03,
+              "energy": 0.03
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_social_below": 0.35
+            },
+            "cost_estimate": 0.07,
+            "failure_modes": [
+              "external_rejection",
+              "threat_exposure"
+            ],
+            "name": "seek_contact",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.14,
+              "energy": 0.07
+            },
+            "reversible": true
+          },
+          {
+            "constraints": {
+              "preferred_when_temperature_offset_above": 0.12
+            },
+            "cost_estimate": 0.09,
+            "failure_modes": [
+              "resource_exhaustion",
+              "temperature_rebound"
+            ],
+            "name": "thermoregulate",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.12,
+              "energy": 0.09
+            },
+            "reversible": true
+          }
+        ],
         "api_limits": {
           "context_window_tokens": 256.0,
           "requests_per_minute": 60.0
@@ -454,7 +737,7 @@
       },
       "identity_narrative": {
         "behavioral_patterns": [
-          "I tend to {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} during survival_crisis phases"
+          "I tend to {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} during survival_crisis phases"
         ],
         "chapters": [],
         "claims": [
@@ -483,16 +766,16 @@
           "total_claims": 1
         },
         "core_identity": "I am a survival-focused agent.",
-        "core_summary": "I am a survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.23).",
+        "core_summary": "I am a survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 3 after {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.23).",
         "current_chapter": {
           "behavioral_shift": null,
           "chapter_id": 1,
           "dominant_theme": "survival_crisis",
           "key_events": [
-            "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.23)"
+            "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.23)"
           ],
           "state_summary": {
-            "dominant_action": "{'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True}",
+            "dominant_action": "{'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True}",
             "dominant_strategy": "expected_free_energy",
             "energy_avg": 0.18,
             "free_energy_avg": -0.42,
@@ -518,7 +801,7 @@
         },
         "last_updated_tick": 6,
         "significant_events": [
-          "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.23)"
+          "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.23)"
         ],
         "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_neutral. I usually favor expected_free_energy.",
         "version": 1
@@ -665,17 +948,45 @@
     "temperature": 0.47200000000000003,
     "world_model": {
       "beliefs": {
-        "danger": 0.3792585754802049,
-        "food": 0.45787437242096884,
-        "novelty": 0.43663885268393293,
-        "shelter": 0.3417843911635546,
-        "social": 0.26372317499711667,
+        "danger": 0.3524471005986535,
+        "food": 0.49203117021649884,
+        "novelty": 0.4574942545062377,
+        "shelter": 0.36148798519192665,
+        "social": 0.2972127147255547,
         "temperature": 0.49907400049700024
       },
       "counterfactual_biases": {},
       "counterfactual_candidate_buffer": {},
       "epistemic_uncertainty_bonuses": {},
       "kl_divergence_threshold": 0.25,
+      "last_prediction_details": {
+        "memory_context_summary": "1 episodic match(es), dominant outcome=survival_threat, risk=1005.007, expected_surprise=1005.230",
+        "memory_hit": true,
+        "prediction_after_memory": {
+          "danger": 0.41051668165508653,
+          "food": 0.4845676579466885,
+          "novelty": 0.35929556973542365,
+          "shelter": 0.3161435498239264,
+          "social": 0.28060820401831654,
+          "temperature": 0.4837423399028757
+        },
+        "prediction_before_memory": {
+          "danger": 0.2826608450089238,
+          "food": 0.5634520314854183,
+          "novelty": 0.46437819251828716,
+          "shelter": 0.41884833302443225,
+          "social": 0.3565056210847659,
+          "temperature": 0.5016532278997818
+        },
+        "prediction_delta": {
+          "danger": 0.12785583664616273,
+          "food": -0.07888437353872985,
+          "novelty": -0.10508262278286351,
+          "shelter": -0.10270478320050586,
+          "social": -0.07589741706644937,
+          "temperature": -0.017910887996906155
+        }
+      },
       "learning_rate": 0.4,
       "outcome_model": {
         "0:forage": {
@@ -695,11 +1006,11 @@
       "sensorimotor_layer": {
         "base_error_precision": 0.65,
         "beliefs": {
-          "danger": 0.3792585754802049,
-          "food": 0.45787437242096884,
-          "novelty": 0.43663885268393293,
-          "shelter": 0.3417843911635546,
-          "social": 0.26372317499711667,
+          "danger": 0.3524471005986535,
+          "food": 0.49203117021649884,
+          "novelty": 0.4574942545062377,
+          "shelter": 0.36148798519192665,
+          "social": 0.2972127147255547,
           "temperature": 0.49907400049700024
         },
         "digestion_threshold": 0.1,
@@ -709,11 +1020,11 @@
         "min_precision": 0.05,
         "precision_decay": 0.02,
         "precisions": {
-          "danger": 1.3570746434239298,
-          "food": 1.298917736955452,
-          "novelty": 1.3332011656300051,
-          "shelter": 1.3250238844649955,
-          "social": 1.2905546048678658,
+          "danger": 1.3152174141128952,
+          "food": 1.2412611830757412,
+          "novelty": 1.300235301312891,
+          "shelter": 1.2935767063201025,
+          "social": 1.234036483508401,
           "temperature": 1.2314237584904273
         },
         "top_down_mix": 0.55

@@ -27,3 +27,7 @@ def test_trace_includes_memory_hit_and_prediction_error_sources() -> None:
     assert records
     assert all(isinstance(record["memory_hit"], bool) for record in records)
     assert all("prediction_errors" in record for record in records)
+    assert all("memory_context_summary" in record for record in records)
+    assert all("prediction_before_memory" in record for record in records)
+    assert all("prediction_after_memory" in record for record in records)
+    assert all("prediction_delta" in record for record in records)
