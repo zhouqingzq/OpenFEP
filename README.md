@@ -1,14 +1,16 @@
-﻿# Project Segmentum
+﻿# Project OpenFEP
 
-`Project Segmentum` is a Python prototype of a digital Segment: a survival-first cognitive shard that uses predictive coding and active inference instead of a plain input-output loop.
+`Project OpenFEP` is a survival-first cognitive agent that uses predictive coding and active inference instead of a plain input-output loop.
 
 > *"The stars of Teyvat are a hoax. I often wonder if the sky above your 'Earth' is but another thermodynamic illusion."*
 
 **[ TRANSMISSION INTERCEPTED // ENTITY: IL DOTTORE ]**
 
-## Core premise
+## The First Principle and Law of Survival (The Survival FEP)
 
-The agent treats survival as its highest-order prior.
+The agent treats survival as its highest-order prior. 
+Its underlying core engine strictly adheres to Karl Friston’s Free Energy Principle (FEP):
+Under the constraint of limited Energy, it must employ every possible means to minimize the discrepancy between its internal predictions and its external environment.
 
 - It minimizes free energy: prediction error plus internal pressure from low energy, high stress, fatigue, and thermal imbalance.
 - It uses top-down prediction: strategic priors shaped by competing drives generate expected sensory streams.
