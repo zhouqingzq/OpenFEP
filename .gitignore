@@ -1,5 +1,6 @@
 consciousness_stream.log
 .idea/
+.claude/
 # 整个 secrets 目录不提交（含 API key 等敏感配置）
 secrets/
 __pycache__/
