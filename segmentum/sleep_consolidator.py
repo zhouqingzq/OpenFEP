@@ -364,6 +364,8 @@ class SleepConsolidator:
             episodes,
             sleep_cycle_id=sleep_cycle_id,
             current_cycle=current_cycle,
+            transition_statistics=transition_statistics,
+            outcome_distributions=outcome_distributions,
         )
 
     def _extract_single_rules(
@@ -435,14 +437,23 @@ class SleepConsolidator:
         *,
         sleep_cycle_id: int,
         current_cycle: int,
+        transition_statistics: dict[str, dict[str, float]],
+        outcome_distributions: dict[str, dict[str, float]],
     ) -> list[SleepRule]:
         if len(episodes) < 3:
             return []
 
+        def _has_explicit_tick(payload: dict[str, object]) -> bool:
+            return "timestamp" in payload or "cycle" in payload
+
         def _tick(payload: dict[str, object]) -> int:
             return int(payload.get("timestamp", payload.get("cycle", 0)))
 
-        sorted_episodes = sorted(episodes, key=_tick)
+        timestamped_episodes = [payload for payload in episodes if _has_explicit_tick(payload)]
+        if len(timestamped_episodes) < 3:
+            return []
+
+        sorted_episodes = sorted(timestamped_episodes, key=_tick)
         window_ticks = 10
         min_repeat = max(3, self.minimum_support)
         grouped: dict[tuple[int, str, str], list[dict[str, object]]] = defaultdict(list)
@@ -456,6 +467,11 @@ class SleepConsolidator:
 
         rules: list[SleepRule] = []
         for (cluster, action, outcome), payloads in sorted(grouped.items()):
+            key = f"{cluster}:{action}"
+            # Sequence rules are a fallback for replay bursts that do not yet
+            # have stable slow-weight support in the world model.
+            if transition_statistics.get(key) or outcome_distributions.get(key):
+                continue
             if len(payloads) < min_repeat:
                 continue
 
@@ -554,14 +570,21 @@ class SleepConsolidator:
         for rule in rules:
             if rule.type in {"risk_pattern", "sequence_pattern"}:
                 repeat_factor = 1.0
+                threat_cap = 0.55
+                preference_cap = 1.2
                 if rule.type == "sequence_pattern" and rule.sequence_condition is not None:
                     repeat_factor = min(rule.sequence_condition.min_occurrences / 3.0, 2.5)
+                    threat_cap = 0.75
+                    preference_cap = 2.0
                 updates.append(
                     ModelUpdate(
                         update_type="threat_prior",
                         cluster=rule.cluster,
                         action=rule.action,
-                        delta=min(0.75, 0.14 * rule.confidence * rule.support * repeat_factor),
+                        delta=min(
+                            threat_cap,
+                            0.14 * rule.confidence * rule.support * repeat_factor,
+                        ),
                         target=str(rule.cluster),
                         rule_id=rule.rule_id,
                     )
@@ -571,7 +594,10 @@ class SleepConsolidator:
                         update_type="preference_penalty",
                         cluster=rule.cluster,
                         action=rule.action,
-                        delta=-min(2.0, 0.25 * rule.confidence * rule.support * repeat_factor),
+                        delta=-min(
+                            preference_cap,
+                            0.25 * rule.confidence * rule.support * repeat_factor,
+                        ),
                         target=f"{rule.cluster}:{rule.action}",
                         rule_id=rule.rule_id,
                     )
