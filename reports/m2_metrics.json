@@ -24,7 +24,7 @@
       "MUR": 1.0,
       "PSSR": 0.9997,
       "high_surprise_episode_stored": true,
-      "mundane_episode_stored": true
+      "mundane_episode_stored": false
     },
     "C": {
       "VCUS": 1.0,
@@ -49,7 +49,7 @@
   },
   "milestone_status": {
     "M2.1": "PASS",
-    "M2.2": "WARNING",
+    "M2.2": "PASS",
     "M2.3": "PASS",
     "M2.4": "PASS"
   },

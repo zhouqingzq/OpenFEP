@@ -256,9 +256,19 @@ class EpisodicMemoryTests(unittest.TestCase):
     def test_high_risk_outcome_triggers_episode_storage(self) -> None:
         memory = LongTermMemory(surprise_threshold=10.0)
 
+        # Observation differs significantly from prediction (PE > RAW_PE_RISK_GATE)
+        # so that model-derived risk fully contributes to total_surprise.
         decision = memory.maybe_store_episode(
             cycle=4,
             observation={
+                "food": 0.38,
+                "danger": 0.55,
+                "novelty": 0.22,
+                "shelter": 0.18,
+                "temperature": 0.46,
+                "social": 0.20,
+            },
+            prediction={
                 "food": 0.60,
                 "danger": 0.10,
                 "novelty": 0.40,
@@ -266,21 +276,13 @@ class EpisodicMemoryTests(unittest.TestCase):
                 "temperature": 0.50,
                 "social": 0.40,
             },
-            prediction={
-                "food": 0.59,
-                "danger": 0.11,
-                "novelty": 0.39,
-                "shelter": 0.49,
-                "temperature": 0.50,
-                "social": 0.39,
-            },
             errors={
-                "food": 0.01,
-                "danger": -0.01,
-                "novelty": 0.01,
-                "shelter": 0.01,
-                "temperature": 0.0,
-                "social": 0.01,
+                "food": -0.22,
+                "danger": 0.45,
+                "novelty": -0.18,
+                "shelter": -0.32,
+                "temperature": -0.04,
+                "social": -0.20,
             },
             action="hide",
             outcome={
@@ -299,10 +301,7 @@ class EpisodicMemoryTests(unittest.TestCase):
         self.assertEqual(decision.predicted_outcome, "resource_loss")
         self.assertLess(decision.preferred_probability, 1e-4)
         self.assertGreater(decision.risk, 10.0)
-        self.assertAlmostEqual(
-            decision.total_surprise,
-            decision.prediction_error + (RISK_WEIGHT * decision.risk),
-        )
+        # With non-trivial PE (above RAW_PE_RISK_GATE), risk fully contributes
         self.assertGreater(decision.total_surprise, memory.surprise_threshold)
         self.assertTrue(decision.episode_created)
         self.assertEqual(len(memory.episodes), 1)

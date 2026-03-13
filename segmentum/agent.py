@@ -10,6 +10,7 @@ from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
 from .memory import (
     AutobiographicalMemory,
+    LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
     LongTermMemory,
     MemoryDecision,
     compute_prediction_error,
@@ -1547,6 +1548,14 @@ class SegmentAgent:
             payload["dream_total_surprise"] = total_surprise
 
             if total_surprise < self.long_term_memory.surprise_threshold:
+                # Never delete identity-critical or protected episodes — they
+                # represent core learned dangers even when fully predicted.
+                lifecycle = str(payload.get("lifecycle_stage", ""))
+                if lifecycle in (
+                    "protected_identity_critical_episode",
+                    LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
+                ):
+                    continue
                 if self.long_term_memory.delete_episode(payload):
                     episodes_deleted += 1
                 continue

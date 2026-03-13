@@ -1,0 +1,417 @@
+{
+  "generated_at": "2026-03-13",
+  "generator_path": "evals/m3_readiness_evaluation.py",
+  "strict_metrics": {
+    "ICI": {
+      "name": "ICI",
+      "value": 1.0,
+      "threshold": 0.8,
+      "passes_threshold": true,
+      "verification_status": "INHERITED_STRICT_BASELINE",
+      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": true,
+      "claimed_not_replayed": false,
+      "strict_metric": true,
+      "gating_metric": true,
+      "legacy_metric": false,
+      "non_gating": false
+    },
+    "EAA": {
+      "name": "EAA",
+      "value": 0.9725,
+      "threshold": 0.8,
+      "passes_threshold": true,
+      "verification_status": "INHERITED_STRICT_BASELINE",
+      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": true,
+      "claimed_not_replayed": false,
+      "strict_metric": true,
+      "gating_metric": true,
+      "legacy_metric": false,
+      "non_gating": false
+    },
+    "MUR": {
+      "name": "MUR",
+      "value": 1.0,
+      "threshold": 0.55,
+      "passes_threshold": true,
+      "verification_status": "INHERITED_STRICT_BASELINE",
+      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": true,
+      "claimed_not_replayed": false,
+      "strict_metric": true,
+      "gating_metric": true,
+      "legacy_metric": false,
+      "non_gating": false
+    },
+    "PSSR": {
+      "name": "PSSR",
+      "value": 0.9997,
+      "threshold": 0.3,
+      "passes_threshold": true,
+      "verification_status": "INHERITED_STRICT_BASELINE",
+      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": true,
+      "claimed_not_replayed": false,
+      "strict_metric": true,
+      "gating_metric": true,
+      "legacy_metric": false,
+      "non_gating": false
+    },
+    "CAQ": {
+      "name": "CAQ",
+      "value": 1.0,
+      "threshold": 0.55,
+      "passes_threshold": true,
+      "verification_status": "INHERITED_STRICT_BASELINE",
+      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": true,
+      "claimed_not_replayed": false,
+      "strict_metric": true,
+      "gating_metric": true,
+      "legacy_metric": false,
+      "non_gating": false
+    },
+    "VCUS": {
+      "name": "VCUS",
+      "value": 1.0,
+      "threshold": 0.8,
+      "passes_threshold": true,
+      "verification_status": "INHERITED_STRICT_BASELINE",
+      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": true,
+      "claimed_not_replayed": false,
+      "strict_metric": true,
+      "gating_metric": true,
+      "legacy_metric": false,
+      "non_gating": false
+    }
+  },
+  "legacy_metrics": {
+    "ICI": {
+      "name": "ICI",
+      "value": 1.0,
+      "threshold": 0.8,
+      "passes_threshold": true,
+      "verification_status": "LEGACY_FOR_COMPARISON_ONLY",
+      "evidence_origin": "reports/m2_metrics.json:metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": false,
+      "claimed_not_replayed": true,
+      "strict_metric": false,
+      "gating_metric": false,
+      "legacy_metric": true,
+      "non_gating": true
+    },
+    "EAA": {
+      "name": "EAA",
+      "value": 1.0,
+      "threshold": 0.85,
+      "passes_threshold": true,
+      "verification_status": "LEGACY_FOR_COMPARISON_ONLY",
+      "evidence_origin": "reports/m2_metrics.json:metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": false,
+      "claimed_not_replayed": true,
+      "strict_metric": false,
+      "gating_metric": false,
+      "legacy_metric": true,
+      "non_gating": true
+    },
+    "MUR": {
+      "name": "MUR",
+      "value": 1.0,
+      "threshold": 0.6,
+      "passes_threshold": true,
+      "verification_status": "LEGACY_FOR_COMPARISON_ONLY",
+      "evidence_origin": "reports/m2_metrics.json:metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": false,
+      "claimed_not_replayed": true,
+      "strict_metric": false,
+      "gating_metric": false,
+      "legacy_metric": true,
+      "non_gating": true
+    },
+    "PSSR": {
+      "name": "PSSR",
+      "value": 0.9997,
+      "threshold": 0.3,
+      "passes_threshold": true,
+      "verification_status": "LEGACY_FOR_COMPARISON_ONLY",
+      "evidence_origin": "reports/m2_metrics.json:metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": false,
+      "claimed_not_replayed": true,
+      "strict_metric": false,
+      "gating_metric": false,
+      "legacy_metric": true,
+      "non_gating": true
+    },
+    "CAQ": {
+      "name": "CAQ",
+      "value": 1.0,
+      "threshold": 0.65,
+      "passes_threshold": true,
+      "verification_status": "LEGACY_FOR_COMPARISON_ONLY",
+      "evidence_origin": "reports/m2_metrics.json:metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": false,
+      "claimed_not_replayed": true,
+      "strict_metric": false,
+      "gating_metric": false,
+      "legacy_metric": true,
+      "non_gating": true
+    },
+    "VCUS": {
+      "name": "VCUS",
+      "value": 1.0,
+      "threshold": 0.85,
+      "passes_threshold": true,
+      "verification_status": "LEGACY_FOR_COMPARISON_ONLY",
+      "evidence_origin": "reports/m2_metrics.json:metrics",
+      "revalidated_this_round": false,
+      "inherited_from_followup": false,
+      "claimed_not_replayed": true,
+      "strict_metric": false,
+      "gating_metric": false,
+      "legacy_metric": true,
+      "non_gating": true
+    }
+  },
+  "gating_metrics": [
+    "ICI",
+    "EAA",
+    "MUR",
+    "PSSR",
+    "CAQ",
+    "VCUS"
+  ],
+  "non_gating_metrics": [
+    "legacy::CAQ",
+    "legacy::EAA",
+    "legacy::ICI",
+    "legacy::MUR",
+    "legacy::PSSR",
+    "legacy::VCUS"
+  ],
+  "verification_status": {
+    "strict_baseline_source": "reports/m2_followup_metrics.json",
+    "legacy_comparison_source": "reports/m2_metrics.json",
+    "readiness_generator_rebuilt_this_round": true
+  },
+  "evidence_origin": {
+    "strict_metrics": "reports/m2_followup_metrics.json:new_metrics",
+    "legacy_metrics": "reports/m2_metrics.json:metrics",
+    "lifecycle": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe",
+    "family_coverage": "evals/m3_readiness_evaluation.py:runtime_family_probe",
+    "tests": "evals/m3_readiness_evaluation.py:pytest"
+  },
+  "revalidated_this_round": {
+    "strict_metrics": false,
+    "legacy_metrics": false,
+    "lifecycle": true,
+    "family_schema": true,
+    "tests": true
+  },
+  "inherited_from_followup": {
+    "ICI": true,
+    "EAA": true,
+    "MUR": true,
+    "PSSR": true,
+    "CAQ": true,
+    "VCUS": true
+  },
+  "claimed_not_revalidated": {
+    "tests": null,
+    "compressed_cluster_count": false
+  },
+  "current_round_test_evidence": {
+    "verification_status": "REVALIDATED_THIS_ROUND",
+    "evidence_origin": "evals/m3_readiness_evaluation.py:pytest",
+    "revalidated_this_round": true,
+    "command": [
+      "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "pytest",
+      "tests/test_m3_readiness.py",
+      "tests/test_memory.py",
+      "tests/test_counterfactual_artifact.py",
+      "tests/test_m23_ultimate_consolidation_loop.py",
+      "-q"
+    ],
+    "target_count": 4,
+    "passed_count": 34,
+    "failed_count": 0,
+    "output_summary": "34 passed in 0.31s"
+  },
+  "lifecycle_evidence": {
+    "verification_status": "REVALIDATED_THIS_ROUND",
+    "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe",
+    "revalidated_this_round": true,
+    "lifecycle_activity_observed": true,
+    "compression_specifically_verified": true,
+    "compression_removed_count": 4,
+    "archived_count": 1,
+    "pruned_count": 4,
+    "compressed_cluster_count": 1,
+    "compressed_cluster_count_status": "REVALIDATED_THIS_ROUND",
+    "probe_results": [
+      {
+        "scenario_label": "compression",
+        "compression_removed": 4,
+        "compressed_cluster_count": 1,
+        "episodes_archived": 0,
+        "episodes_deleted": 0
+      },
+      {
+        "scenario_label": "prune_predictable",
+        "compression_removed": 0,
+        "compressed_cluster_count": 0,
+        "episodes_archived": 0,
+        "episodes_deleted": 4
+      },
+      {
+        "scenario_label": "archive_old_unexplained",
+        "compression_removed": 0,
+        "compressed_cluster_count": 0,
+        "episodes_archived": 1,
+        "episodes_deleted": 0
+      }
+    ]
+  },
+  "family_coverage": {
+    "verification_status": "REVALIDATED_THIS_ROUND",
+    "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_family_probe",
+    "revalidated_this_round": true,
+    "family_schema_count": 4,
+    "runtime_validated_family_count": 4,
+    "family_coverage_status": "RUNTIME_DIVERSITY_VALIDATED",
+    "family_probe_results": [
+      {
+        "scenario_label": "danger_avoidance",
+        "review_family": "danger_avoidance",
+        "graduated": true,
+        "average_benefit": 20.532592970578186,
+        "pass_rate": 1.0,
+        "coverage": {
+          "total_families": 4,
+          "families_covered": 1,
+          "families_graduated": 1,
+          "caq_family_coverage": 0.25,
+          "graduation_family_count": 1,
+          "per_family_rates": {
+            "danger_avoidance": {
+              "reviewed": 2,
+              "graduated": 1
+            }
+          }
+        }
+      },
+      {
+        "scenario_label": "resource_risk",
+        "review_family": "resource_risk",
+        "graduated": true,
+        "average_benefit": 29.61757635433727,
+        "pass_rate": 0.6666666666666666,
+        "coverage": {
+          "total_families": 4,
+          "families_covered": 1,
+          "families_graduated": 1,
+          "caq_family_coverage": 0.25,
+          "graduation_family_count": 1,
+          "per_family_rates": {
+            "resource_risk": {
+              "reviewed": 2,
+              "graduated": 1
+            }
+          }
+        }
+      },
+      {
+        "scenario_label": "retreat_vs_explore",
+        "review_family": "retreat_vs_explore",
+        "graduated": true,
+        "average_benefit": 32.08980295214045,
+        "pass_rate": 1.0,
+        "coverage": {
+          "total_families": 4,
+          "families_covered": 1,
+          "families_graduated": 1,
+          "caq_family_coverage": 0.25,
+          "graduation_family_count": 1,
+          "per_family_rates": {
+            "retreat_vs_explore": {
+              "reviewed": 2,
+              "graduated": 1
+            }
+          }
+        }
+      },
+      {
+        "scenario_label": "integrity_preservation",
+        "review_family": "integrity_preservation",
+        "graduated": true,
+        "average_benefit": 0.05549999999999974,
+        "pass_rate": 1.0,
+        "coverage": {
+          "total_families": 4,
+          "families_covered": 1,
+          "families_graduated": 1,
+          "caq_family_coverage": 0.25,
+          "graduation_family_count": 1,
+          "per_family_rates": {
+            "integrity_preservation": {
+              "reviewed": 2,
+              "graduated": 1
+            }
+          }
+        }
+      }
+    ],
+    "coverage_summary": {
+      "total_families": 4,
+      "families_covered": 4,
+      "families_graduated": 4,
+      "caq_family_coverage": 1.0,
+      "graduation_family_count": 4,
+      "per_family_rates": {
+        "danger_avoidance": {
+          "reviewed": 2,
+          "graduated": 1
+        },
+        "integrity_preservation": {
+          "reviewed": 2,
+          "graduated": 1
+        },
+        "resource_risk": {
+          "reviewed": 2,
+          "graduated": 1
+        },
+        "retreat_vs_explore": {
+          "reviewed": 2,
+          "graduated": 1
+        }
+      }
+    }
+  },
+  "controlled_ready_status": {
+    "status": "CONTROLLED_READY_VERIFIED",
+    "reasons": []
+  },
+  "open_ready_status": {
+    "status": "OPEN_READY_VERIFIED",
+    "reasons": []
+  },
+  "final_recommendation": {
+    "status": "OPEN_READY_VERIFIED",
+    "rationale": "Controlled readiness is verified and lifecycle/compression runtime evidence is revalidated this round.",
+    "why_more_conservative": ""
+  }
+}

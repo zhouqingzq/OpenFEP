@@ -5,7 +5,7 @@ from .runtime import SegmentRuntime
 from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
 from .sleep_consolidator import SleepConsolidation
-from .counterfactual import CounterfactualLearning
+from .counterfactual import CounterfactualLearning, ReviewFamily
 from .self_model import (
     BodySchema,
     CapabilityModel,
@@ -28,6 +28,7 @@ __all__ = [
     "ValueHierarchy",
     "SleepConsolidation",
     "CounterfactualLearning",
+    "ReviewFamily",
     "run_daemon",
     "BodySchema",
     "CapabilityModel",

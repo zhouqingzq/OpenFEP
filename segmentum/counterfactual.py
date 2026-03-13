@@ -694,6 +694,7 @@ class InsightAbsorber:
             self.log.append(
                 {
                     "type": "absorption",
+                    "review_family": review.get("review_family", ""),
                     "source_episode_cycle": insight.source_episode_cycle,
                     "cluster_id": insight.cluster_id,
                     "original_action": insight.original_action,
@@ -764,7 +765,18 @@ class InsightAbsorber:
         if not body_state:
             body_state = _float_dict(insight.state_context.get("body_state", {}))
 
-        perturbations = self._build_review_perturbations(observation, body_state)
+        # Select review family based on insight context.
+        family_id = classify_insight_family(insight)
+        family = get_family_by_id(family_id)
+        if family is not None:
+            perturbations = family.build_perturbations(observation, body_state)
+            effective_pass_rate = family.pass_rate_threshold
+            effective_benefit_threshold = family.benefit_threshold
+        else:
+            perturbations = self._build_review_perturbations(observation, body_state)
+            effective_pass_rate = self.review_pass_rate
+            effective_benefit_threshold = self.review_benefit_threshold
+
         benefits: list[float] = []
         for perturbed_observation, perturbed_body in perturbations:
             original_score = self._project_candidate_benefit(
@@ -784,7 +796,7 @@ class InsightAbsorber:
             benefits.append(counterfactual_score - original_score)
 
         pass_rate = (
-            sum(1 for benefit in benefits if benefit > self.review_benefit_threshold) / len(benefits)
+            sum(1 for benefit in benefits if benefit > effective_benefit_threshold) / len(benefits)
             if benefits
             else 0.0
         )
@@ -792,6 +804,7 @@ class InsightAbsorber:
         requires_confirmation = insight.confidence < (self.absorption_threshold + 0.15)
         return {
             "type": "candidate_review",
+            "review_family": family_id,
             "cluster_id": insight.cluster_id,
             "original_action": insight.original_action,
             "counterfactual_action": insight.counterfactual_action,
@@ -804,8 +817,8 @@ class InsightAbsorber:
                     not requires_confirmation
                     or candidate_buffer.get("confirmations", 0.0) >= float(self.cooling_confirmations)
                 )
-                and average_benefit > self.review_benefit_threshold
-                and pass_rate >= self.review_pass_rate
+                and average_benefit > effective_benefit_threshold
+                and pass_rate >= effective_pass_rate
             ),
         }
 
@@ -897,6 +910,175 @@ class InsightAbsorber:
                 "confidence": insight.confidence,
             }
         )
+
+
+# ---------------------------------------------------------------------------
+# Review Family Framework (P1)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ReviewFamily:
+    """A named category of counterfactual perturbation scenarios.
+
+    Each family defines observation/body perturbations and pass criteria
+    tailored to a specific risk dimension.
+    """
+
+    family_id: str
+    description: str
+    obs_perturbations: tuple[dict[str, float], ...]
+    body_perturbations: tuple[dict[str, float], ...]
+    pass_rate_threshold: float = DEFAULT_REVIEW_PASS_RATE
+    benefit_threshold: float = DEFAULT_REVIEW_BENEFIT_THRESHOLD
+
+    def build_perturbations(
+        self,
+        observation: dict[str, float],
+        body_state: dict[str, float],
+    ) -> list[tuple[dict[str, float], dict[str, float]]]:
+        perturbations: list[tuple[dict[str, float], dict[str, float]]] = []
+        for obs_delta, body_delta in zip(self.obs_perturbations, self.body_perturbations):
+            perturbations.append(
+                (
+                    {
+                        key: clamp(float(observation.get(key, 0.0)) + float(obs_delta.get(key, 0.0)))
+                        for key in sorted(set(observation) | set(obs_delta))
+                    },
+                    {
+                        key: clamp(float(body_state.get(key, 0.0)) + float(body_delta.get(key, 0.0)))
+                        for key in sorted(set(body_state) | set(body_delta))
+                    },
+                )
+            )
+        return perturbations
+
+
+# Built-in review families
+DANGER_AVOIDANCE_FAMILY = ReviewFamily(
+    family_id="danger_avoidance",
+    description="Tests whether the counterfactual action reduces danger exposure",
+    obs_perturbations=(
+        {},
+        {"danger": 0.04, "food": -0.02, "shelter": -0.02},
+        {"danger": -0.03, "food": 0.01, "novelty": 0.02},
+    ),
+    body_perturbations=(
+        {},
+        {"energy": -0.03, "stress": 0.04},
+        {"energy": 0.02, "fatigue": -0.02},
+    ),
+)
+
+RESOURCE_RISK_FAMILY = ReviewFamily(
+    family_id="resource_risk",
+    description="Tests whether the counterfactual action is viable under resource scarcity",
+    obs_perturbations=(
+        {},
+        {"food": -0.10, "danger": 0.02},
+        {"food": 0.05, "danger": -0.01},
+    ),
+    body_perturbations=(
+        {},
+        {"energy": -0.10, "stress": 0.02},
+        {"energy": 0.05, "fatigue": 0.03},
+    ),
+    pass_rate_threshold=0.50,
+)
+
+RETREAT_VS_EXPLORE_FAMILY = ReviewFamily(
+    family_id="retreat_vs_explore",
+    description="Tests whether retreat is superior under high-novelty high-danger scenarios",
+    obs_perturbations=(
+        {},
+        {"danger": 0.08, "novelty": 0.06, "shelter": -0.04},
+        {"danger": 0.12, "novelty": -0.02, "food": -0.03},
+    ),
+    body_perturbations=(
+        {},
+        {"energy": -0.05, "stress": 0.08},
+        {"energy": -0.02, "stress": 0.12, "fatigue": 0.04},
+    ),
+)
+
+INTEGRITY_PRESERVATION_FAMILY = ReviewFamily(
+    family_id="integrity_preservation",
+    description="Tests whether the counterfactual protects structural integrity under stress",
+    obs_perturbations=(
+        {},
+        {"danger": 0.06, "shelter": -0.06, "temperature": -0.04},
+        {"danger": 0.02, "shelter": 0.02, "temperature": 0.06},
+    ),
+    body_perturbations=(
+        {},
+        {"stress": 0.10, "fatigue": 0.06},
+        {"stress": -0.04, "energy": -0.04},
+    ),
+    pass_rate_threshold=0.66,
+)
+
+DEFAULT_REVIEW_FAMILIES: tuple[ReviewFamily, ...] = (
+    DANGER_AVOIDANCE_FAMILY,
+    RESOURCE_RISK_FAMILY,
+    RETREAT_VS_EXPLORE_FAMILY,
+    INTEGRITY_PRESERVATION_FAMILY,
+)
+
+
+def classify_insight_family(insight: CounterfactualInsight) -> str:
+    """Heuristic classification of an insight into a review family."""
+    obs = _float_dict(insight.state_context.get("observation", {}))
+    danger = float(obs.get("danger", 0.0))
+    food = float(obs.get("food", 0.0))
+
+    if danger >= 0.50:
+        return "danger_avoidance"
+    if food <= 0.25:
+        return "resource_risk"
+    if insight.counterfactual_action in ("hide", "rest"):
+        return "retreat_vs_explore"
+    return "integrity_preservation"
+
+
+def get_family_by_id(family_id: str) -> ReviewFamily | None:
+    for family in DEFAULT_REVIEW_FAMILIES:
+        if family.family_id == family_id:
+            return family
+    return None
+
+
+def compute_family_coverage(
+    absorber_log: list[dict[str, object]],
+) -> dict[str, object]:
+    """Compute coverage metrics across review families."""
+    family_counts: dict[str, int] = {}
+    family_pass_counts: dict[str, int] = {}
+    for entry in absorber_log:
+        family_id = str(entry.get("review_family", entry.get("family_id", "")))
+        if not family_id:
+            continue
+        family_counts[family_id] = family_counts.get(family_id, 0) + 1
+        if entry.get("type") == "absorption":
+            family_pass_counts[family_id] = family_pass_counts.get(family_id, 0) + 1
+
+    total_families = len(DEFAULT_REVIEW_FAMILIES)
+    covered = sum(1 for fid in family_counts if family_counts[fid] > 0)
+    graduated = sum(1 for fid in family_pass_counts if family_pass_counts[fid] > 0)
+
+    return {
+        "total_families": total_families,
+        "families_covered": covered,
+        "families_graduated": graduated,
+        "caq_family_coverage": covered / max(1, total_families),
+        "graduation_family_count": graduated,
+        "per_family_rates": {
+            fid: {
+                "reviewed": family_counts.get(fid, 0),
+                "graduated": family_pass_counts.get(fid, 0),
+            }
+            for fid in sorted(set(family_counts) | set(family_pass_counts))
+        },
+    }
 
 
 # ---------------------------------------------------------------------------

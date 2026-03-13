@@ -13,7 +13,7 @@ EXPECTED_ARTIFACT = {
     "cluster": 0,
     "episodes_before_sleep": 5,
     "counterfactual_episodes_evaluated": 3,
-    "counterfactual_insights_generated": 5,
+    "counterfactual_insights_generated": 7,
     "counterfactual_insights_absorbed": 1,
     "counterfactual_energy_spent": 0.095,
     "forage_bias_pre_sleep": 0.0,

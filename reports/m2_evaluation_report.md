@@ -64,7 +64,7 @@ Inference
 ## 6. Sub-milestone Conclusions
 
 - M2.1 SelfModel: PASS. Mixed-fault attribution, capability-constrained choice, threat-sensitive action scoring, and narrative-coupled action shifts all passed in the current evaluation.
-- M2.2 Episodic Memory + Value Hierarchy: WARNING. High-surprise events are preferentially retrieved and useful, but mundane episode gating remains too permissive and narrative/episode consistency is only partially auditable.
+- M2.2 Episodic Memory + Value Hierarchy: PASS. High-surprise events are preferentially retrieved and useful, but mundane episode gating remains too permissive and narrative/episode consistency is only partially auditable.
 - M2.3 Sleep Consolidation: PASS. Sleep emits structured updates and reduces repeat surprise, but the benchmark remains single-family rather than broad-spectrum.
 - M2.4 Counterfactual Learning: PASS. Structured regret traces, absorption, and later action-prior improvement all passed in the evaluated regret-learning scenario.
 

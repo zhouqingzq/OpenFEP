@@ -161,12 +161,38 @@ def compute_surprise(prediction_error: float) -> float:
 
 RISK_WEIGHT = 1.0
 
+# Lifecycle stage constants
+LIFECYCLE_ATTENTION_TRACE = "attention_trace"
+LIFECYCLE_CANDIDATE_EPISODE = "candidate_episode"
+LIFECYCLE_VALIDATED_EPISODE = "validated_episode"
+LIFECYCLE_ARCHIVED_SUMMARY = "archived_summary"
+LIFECYCLE_PROTECTED_IDENTITY_CRITICAL = "protected_identity_critical_episode"
+
+# Minimum raw prediction error required before risk can amplify surprise.
+# When observation closely matches prediction (low PE), even a high model-risk
+# should not inflate total_surprise — the world is behaving as expected.
+RAW_PE_RISK_GATE = 0.04
+
 
 def compute_total_surprise(
     prediction_error: float,
     risk: float,
 ) -> float:
-    return compute_surprise(prediction_error) + (RISK_WEIGHT * max(0.0, risk))
+    raw_surprise = compute_surprise(prediction_error)
+    # When raw prediction error is below the gate, the observation closely
+    # matches the prediction — the world is behaving as expected.  Any risk
+    # score reflects learned priors, not an actual anomaly.  Cap the risk
+    # contribution so that model-inflated risk cannot dominate surprise.
+    if prediction_error < RAW_PE_RISK_GATE:
+        ratio = prediction_error / max(RAW_PE_RISK_GATE, 1e-12)
+        # Cap risk contribution to at most 2× the raw surprise.
+        risk_contribution = min(
+            RISK_WEIGHT * max(0.0, risk) * ratio * ratio,
+            raw_surprise * 2.0,
+        )
+    else:
+        risk_contribution = RISK_WEIGHT * max(0.0, risk)
+    return raw_surprise + risk_contribution
 
 
 def compute_weighted_surprise(
@@ -740,6 +766,7 @@ class LongTermMemory:
         archived = dict(payload)
         archived["archived_at_cycle"] = archive_cycle
         archived["archive_reason"] = reason
+        archived["lifecycle_stage"] = LIFECYCLE_ARCHIVED_SUMMARY
         self.archived_episodes.append(archived)
         return self.delete_episode(payload)
 
@@ -1021,16 +1048,21 @@ class LongTermMemory:
 
     def _score_episode_candidate(self, episode: Episode) -> dict[str, object]:
         value_relevance = abs(float(episode.value_score))
+        # When raw prediction error is very low, the preference model's risk
+        # scores may reflect learned priors rather than an actual anomaly.
+        # Dampen model-derived signals proportionally to raw PE.
+        raw_pe = abs(episode.prediction_error)
+        pe_dampening = min(1.0, raw_pe / RAW_PE_RISK_GATE) if raw_pe < RAW_PE_RISK_GATE else 1.0
         policy_delta = min(
             1.0,
             max(0.0, episode.risk / 8.0) + max(0.0, -episode.preference_log_value / 12.0),
-        )
+        ) * pe_dampening
         threat_significance = min(
             1.0,
             max(0.0, episode.risk / 4.0)
             + (0.30 if episode.predicted_outcome == "survival_threat" else 0.0)
             + (0.15 if episode.predicted_outcome == "integrity_loss" else 0.0),
-        )
+        ) * pe_dampening
         redundancy_penalty = self._redundancy_penalty(episode)
         identity_critical = self._is_identity_critical_episode(episode)
         episode_score = (
@@ -1077,6 +1109,7 @@ class LongTermMemory:
         payload.setdefault("first_seen_cycle", cycle)
         payload.setdefault("last_seen_cycle", cycle)
         identity_critical = bool(payload.get("identity_critical", False))
+        raw_pe = float(payload.get("prediction_error", 0.0))
         if gate is not None:
             payload["episode_score"] = float(gate.get("episode_score", 0.0))
             payload["value_relevance"] = float(gate.get("value_relevance", 0.0))
@@ -1085,11 +1118,20 @@ class LongTermMemory:
             payload["redundancy_penalty"] = float(gate.get("redundancy_penalty", 0.0))
             payload["gating_reasons"] = list(gate.get("reasons", []))
             identity_critical = bool(gate.get("identity_critical", False))
+        elif not identity_critical:
+            # No gate provided (direct store_episode path) — infer identity
+            # criticality from the episode payload itself.
+            episode = Episode.from_dict(payload)
+            identity_critical = self._is_identity_critical_episode(episode)
         payload["identity_critical"] = identity_critical
         if identity_critical:
-            payload["lifecycle_stage"] = "protected_identity_critical_episode"
+            payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+        elif raw_pe < RAW_PE_RISK_GATE:
+            # Low raw prediction error: the world matched expectations closely.
+            # Demote to candidate_episode regardless of model-derived risk.
+            payload["lifecycle_stage"] = LIFECYCLE_CANDIDATE_EPISODE
         else:
-            payload.setdefault("lifecycle_stage", "validated_episode")
+            payload.setdefault("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE)
 
     def _redundancy_penalty(self, episode: Episode) -> float:
         if not self.episodes:
@@ -1115,6 +1157,14 @@ class LongTermMemory:
         return max(similarities, default=0.0)
 
     def _is_identity_critical_episode(self, episode: Episode) -> bool:
+        # A genuinely identity-critical episode requires both model risk AND
+        # a non-trivial raw prediction error.  If the world matched our
+        # prediction almost perfectly, the preference model's risk score
+        # reflects learned priors, not an actual surprising threat.
+        raw_pe = abs(episode.prediction_error)
+        if raw_pe < RAW_PE_RISK_GATE:
+            # Low prediction error — only mark critical on extreme outcome.
+            return float(episode.outcome_state.get("free_energy_drop", 0.0)) <= -0.30
         if episode.predicted_outcome in {"survival_threat", "integrity_loss"}:
             return True
         if episode.risk >= 3.0:
@@ -1165,7 +1215,7 @@ class LongTermMemory:
         payload["gating_reasons"] = reasons
         if bool(gate.get("identity_critical", False)):
             payload["identity_critical"] = True
-            payload["lifecycle_stage"] = "protected_identity_critical_episode"
+            payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
     def _refresh_semantic_patterns(self) -> None:
         by_action: dict[str, list[dict[str, object]]] = {}
         for payload in self.episodes:

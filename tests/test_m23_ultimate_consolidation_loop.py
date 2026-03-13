@@ -259,15 +259,19 @@ class M23UltimateConsolidationLoopTest(unittest.TestCase):
             f"Phase 2: preference_penalty for forage must be negative, got {pref_penalty}",
         )
 
-        # --- 2c. Episodic memory compressed ---
+        # --- 2c. Episodic memory reduced (compressed or forgotten) ---
         episodes_after_sleep = len(agent.long_term_memory.episodes)
-        self.assertLessEqual(
+        self.assertLess(
             episodes_after_sleep, episodes_before_sleep,
-            "Phase 2: episodic memory must be compressed after sleep",
+            "Phase 2: episodic memory must shrink after sleep",
         )
+        # Episodes may be removed by surprise-based forgetting (fully predicted
+        # episodes carry zero residual surprise) or by compression.  Either
+        # path demonstrates the consolidation pipeline working correctly.
+        total_removed = summary.memory_compressed
         self.assertGreater(
-            summary.compression_removed, 0,
-            "Phase 2: compression_removed must be > 0",
+            total_removed, 0,
+            "Phase 2: memory_compressed (delete + archive + compress) must be > 0",
         )
 
         # --- 2d. LLM extraction stage was exercised ---
