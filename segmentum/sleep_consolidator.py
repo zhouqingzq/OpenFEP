@@ -7,9 +7,12 @@ from dataclasses import asdict, replace
 from statistics import mean
 from typing import Callable
 
+from .action_schema import ActionSchema, action_name
 from .types import (
     ModelUpdate,
     SemanticMemoryEntry,
+    SequenceCondition,
+    SequenceStep,
     SleepConsolidationResult,
     SleepRule,
 )
@@ -101,7 +104,7 @@ class SleepLLMExtractor:
             "episodes": [
                 {
                     "cluster_id": payload.get("cluster_id"),
-                    "action": payload.get("action_taken", payload.get("action")),
+                    "action": action_name(payload.get("action_taken", payload.get("action"))),
                     "predicted_outcome": payload.get("predicted_outcome"),
                     "prediction_error": payload.get("prediction_error"),
                     "total_surprise": payload.get("total_surprise"),
@@ -159,11 +162,11 @@ class LLMSleepRuleRefiner:
         rules: list[SleepRule],
         episodes: list[dict[str, object]],
     ) -> str:
-        rule_dicts = [asdict(r) for r in rules]
+        rule_dicts = [r.to_dict() for r in rules]
         episode_summaries = [
             {
                 "cluster_id": p.get("cluster_id"),
-                "action": p.get("action_taken", p.get("action")),
+                "action": action_name(p.get("action_taken", p.get("action"))),
                 "predicted_outcome": p.get("predicted_outcome"),
                 "prediction_error": round(float(p.get("prediction_error", 0)), 4),
                 "total_surprise": round(float(p.get("total_surprise", 0)), 4),
@@ -198,7 +201,7 @@ class LLMSleepRuleRefiner:
                         rule_id=str(item["rule_id"]),
                         type=str(item["type"]),
                         cluster=int(item["cluster"]),
-                        action=str(item["action"]),
+                        action=action_name(item["action"]),
                         observed_outcome=str(item["observed_outcome"]),
                         confidence=_clamp(float(item["confidence"]), 0.05, 0.99),
                         support=max(1, int(item["support"])),
@@ -351,11 +354,32 @@ class SleepConsolidator:
         transition_statistics: dict[str, dict[str, float]],
         outcome_distributions: dict[str, dict[str, float]],
     ) -> list[SleepRule]:
+        return self._extract_single_rules(
+            episodes,
+            sleep_cycle_id=sleep_cycle_id,
+            current_cycle=current_cycle,
+            transition_statistics=transition_statistics,
+            outcome_distributions=outcome_distributions,
+        ) + self._extract_sequence_rules(
+            episodes,
+            sleep_cycle_id=sleep_cycle_id,
+            current_cycle=current_cycle,
+        )
+
+    def _extract_single_rules(
+        self,
+        episodes: list[dict[str, object]],
+        *,
+        sleep_cycle_id: int,
+        current_cycle: int,
+        transition_statistics: dict[str, dict[str, float]],
+        outcome_distributions: dict[str, dict[str, float]],
+    ) -> list[SleepRule]:
         grouped: dict[tuple[int, str, str], list[dict[str, object]]] = defaultdict(list)
         action_totals: dict[tuple[int, str], int] = defaultdict(int)
         for payload in episodes:
             cluster = payload.get("cluster_id")
-            action = str(payload.get("action_taken", payload.get("action", "")))
+            action = action_name(payload.get("action_taken", payload.get("action", "")))
             outcome = str(payload.get("predicted_outcome", "neutral"))
             if not isinstance(cluster, int) or not action:
                 continue
@@ -401,6 +425,81 @@ class SleepConsolidator:
                     average_surprise=average_surprise,
                     average_prediction_error=average_prediction_error,
                     timestamp=current_cycle,
+                )
+            )
+        return rules
+
+    def _extract_sequence_rules(
+        self,
+        episodes: list[dict[str, object]],
+        *,
+        sleep_cycle_id: int,
+        current_cycle: int,
+    ) -> list[SleepRule]:
+        if len(episodes) < 3:
+            return []
+
+        def _tick(payload: dict[str, object]) -> int:
+            return int(payload.get("timestamp", payload.get("cycle", 0)))
+
+        sorted_episodes = sorted(episodes, key=_tick)
+        window_ticks = 10
+        min_repeat = max(3, self.minimum_support)
+        grouped: dict[tuple[int, str, str], list[dict[str, object]]] = defaultdict(list)
+        for payload in sorted_episodes:
+            cluster = payload.get("cluster_id")
+            action = action_name(payload.get("action_taken", payload.get("action", "")))
+            outcome = str(payload.get("predicted_outcome", "neutral"))
+            if not isinstance(cluster, int) or not action:
+                continue
+            grouped[(cluster, action, outcome)].append(payload)
+
+        rules: list[SleepRule] = []
+        for (cluster, action, outcome), payloads in sorted(grouped.items()):
+            if len(payloads) < min_repeat:
+                continue
+
+            best_window: list[dict[str, object]] = []
+            left = 0
+            for right in range(len(payloads)):
+                while _tick(payloads[right]) - _tick(payloads[left]) > window_ticks:
+                    left += 1
+                window = payloads[left : right + 1]
+                if len(window) > len(best_window):
+                    best_window = window
+
+            if len(best_window) < min_repeat:
+                continue
+
+            support = len(best_window)
+            average_surprise = mean(float(payload.get("total_surprise", 0.0)) for payload in best_window)
+            average_prediction_error = mean(
+                float(payload.get("prediction_error", 0.0)) for payload in best_window
+            )
+            confidence = _clamp(
+                0.50
+                + (0.08 * max(0, support - min_repeat))
+                + (0.12 * min(1.0, average_surprise / max(self.surprise_threshold, 1e-9))),
+                0.05,
+                0.99,
+            )
+            rules.append(
+                SleepRule(
+                    rule_id=f"sleep-seq-{sleep_cycle_id}-{cluster}-{action}-{outcome}-x{support}",
+                    type="sequence_pattern",
+                    cluster=cluster,
+                    action=action,
+                    observed_outcome=outcome,
+                    confidence=confidence,
+                    support=support,
+                    average_surprise=average_surprise,
+                    average_prediction_error=average_prediction_error,
+                    timestamp=current_cycle,
+                    sequence_condition=SequenceCondition(
+                        steps=[SequenceStep(action_name=action, outcome=outcome)],
+                        window_ticks=window_ticks,
+                        min_occurrences=support,
+                    ),
                 )
             )
         return rules
@@ -453,13 +552,16 @@ class SleepConsolidator:
     def _model_updates(self, rules: list[SleepRule]) -> list[ModelUpdate]:
         updates: list[ModelUpdate] = []
         for rule in rules:
-            if rule.type == "risk_pattern":
+            if rule.type in {"risk_pattern", "sequence_pattern"}:
+                repeat_factor = 1.0
+                if rule.type == "sequence_pattern" and rule.sequence_condition is not None:
+                    repeat_factor = min(rule.sequence_condition.min_occurrences / 3.0, 2.5)
                 updates.append(
                     ModelUpdate(
                         update_type="threat_prior",
                         cluster=rule.cluster,
                         action=rule.action,
-                        delta=min(0.55, 0.14 * rule.confidence * rule.support),
+                        delta=min(0.75, 0.14 * rule.confidence * rule.support * repeat_factor),
                         target=str(rule.cluster),
                         rule_id=rule.rule_id,
                     )
@@ -469,7 +571,7 @@ class SleepConsolidator:
                         update_type="preference_penalty",
                         cluster=rule.cluster,
                         action=rule.action,
-                        delta=-min(1.20, 0.25 * rule.confidence * rule.support),
+                        delta=-min(2.0, 0.25 * rule.confidence * rule.support * repeat_factor),
                         target=f"{rule.cluster}:{rule.action}",
                         rule_id=rule.rule_id,
                     )

@@ -6,6 +6,7 @@ from dataclasses import replace
 import json
 from pathlib import Path
 
+from .action_schema import ActionSchema
 from .agent import SegmentAgent
 from .environment import SimulatedWorld
 from .evaluation import RunMetrics
@@ -273,7 +274,7 @@ class SegmentRuntime:
         diagnostics = decision["diagnostics"]
         assert isinstance(diagnostics, DecisionDiagnostics)
         memory_hits = len(diagnostics.retrieved_memories)
-        choice = diagnostics.chosen.choice
+        choice = ActionSchema(name=diagnostics.chosen.choice, cost_estimate=diagnostics.chosen.cost)
         expected_fe = diagnostics.chosen.expected_free_energy
         choice_cost = diagnostics.chosen.cost
 
@@ -297,7 +298,7 @@ class SegmentRuntime:
 
         alive = self.agent.energy > 0.01
         self.metrics.record_cycle(
-            choice=choice,
+            choice=choice.name,
             free_energy_before=free_energy_before,
             free_energy_after=free_energy_after,
             energy=self.agent.energy,
@@ -351,7 +352,8 @@ class SegmentRuntime:
 
         return {
             "cycle": self.agent.cycle,
-            "choice": choice,
+            "choice": choice.name,
+            "choice_name": choice.name,
             "alive": alive,
             "free_energy_before": free_energy_before,
             "free_energy_after": free_energy_after,
@@ -526,7 +528,7 @@ class SegmentRuntime:
         errors: dict[str, float],
         hierarchy,
         diagnostics: DecisionDiagnostics,
-        choice: str,
+        choice: ActionSchema,
         expected_fe: float,
         choice_cost: float,
         free_energy_before: float,
@@ -543,12 +545,15 @@ class SegmentRuntime:
             "state_load_status": self.state_load_status,
             "cycle": self.agent.cycle,
             "alive": alive,
-            "choice": choice,
+            "choice": choice.name,
+            "action": choice.to_dict(),
             "expected_free_energy": expected_fe,
             "choice_cost": choice_cost,
             "free_energy_before": free_energy_before,
             "free_energy_after": free_energy_after,
             "memory_hits": memory_hits,
+            "memory_hit": diagnostics.memory_hit,
+            "retrieved_episode_ids": list(diagnostics.retrieved_episode_ids),
             "sleep_triggered": sleep_summary is not None,
             "body_state": {
                 "energy": self.agent.energy,
@@ -570,10 +575,15 @@ class SegmentRuntime:
             "observation": observed,
             "prediction": prediction,
             "errors": errors,
+            "prediction_errors": self.agent.prediction_error_trace(observed, prediction),
             "hierarchy": asdict(hierarchy),
             "decision_ranking": [
                 {
                     "choice": option.choice,
+                    "action": ActionSchema(
+                        name=option.choice,
+                        cost_estimate=option.cost,
+                    ).to_dict(),
                     "policy_score": option.policy_score,
                     "expected_free_energy": option.expected_free_energy,
                     "predicted_error": option.predicted_error,
@@ -614,7 +624,8 @@ class SegmentRuntime:
                 "goal_context": diagnostics.goal_context,
                 "policy_score": diagnostics.chosen.policy_score,
                 "policy_scores": diagnostics.policy_scores,
-                "chosen_action": choice,
+                "chosen_action": choice.to_dict(),
+                "chosen_action_name": choice.name,
                 "total_surprise": memory_decision.total_surprise,
                 "explanation": diagnostics.explanation,
                 "explanation_details": diagnostics.structured_explanation,
@@ -648,7 +659,7 @@ class SegmentRuntime:
         errors: dict[str, float],
         hierarchy,
         diagnostics: DecisionDiagnostics,
-        choice: str,
+        choice: ActionSchema,
         expected_fe: float,
         choice_cost: float,
         free_energy_before: float,
@@ -659,7 +670,7 @@ class SegmentRuntime:
         host_tick: dict[str, object] | None,
     ) -> None:
         print(
-            f"[cycle {self.agent.cycle:02d}] choice={choice:>15}  "
+            f"[cycle {self.agent.cycle:02d}] choice={choice.name:>15}  "
             f"score={diagnostics.chosen.policy_score:.3f}  "
             f"expected_fe={expected_fe:.3f}  cost={choice_cost:.2f}"
         )

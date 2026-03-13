@@ -52,7 +52,17 @@
         "digestion_threshold": 0.1,
         "precision_decay": 0.02
       },
-      "learning_rate": 0.4
+      "learning_rate": 0.4,
+      "transition_counts": {},
+      "transition_model": {},
+      "outcome_model": {},
+      "policy_biases": {},
+      "counterfactual_biases": {},
+      "counterfactual_candidate_buffer": {},
+      "epistemic_uncertainty_bonuses": {},
+      "threat_priors": {},
+      "preference_penalties": {},
+      "kl_divergence_threshold": 0.25
     },
     "interoceptive_layer": {
       "beliefs": {
@@ -175,7 +185,12 @@
               "temperature": 0.484
             }
           },
-          "action_taken": "hide",
+          "action_taken": {
+            "name": "hide",
+            "params": {},
+            "cost_estimate": 0.05,
+            "reversible": true
+          },
           "action": "hide",
           "outcome_state": {
             "energy_delta": -0.04500000000000004,
@@ -191,8 +206,8 @@
           "prediction_error": 0.08373443960068973,
           "risk": 15.006715652344035,
           "value_score": -0.34708067508455476,
-          "total_surprise": 10.588435396241513,
-          "weighted_surprise": 10.588435396241513,
+          "total_surprise": 15.090450091944724,
+          "weighted_surprise": 15.090450091944724,
           "embedding": [
             0.553517425553999,
             0.39907052433898865,
@@ -211,13 +226,7 @@
             0.21081214122874803,
             0.0005218177764465537,
             0.010785284535754225,
-            -0.08316726417020193,
-            0.0,
-            0.755,
-            0.10999999999999999,
-            0.30000000000000004,
-            0.484,
-            0.0
+            -0.08316726417020193
           ],
           "value_label": "resource_loss",
           "preferred_probability": 3.038548695455042e-07,
@@ -251,7 +260,25 @@
             "stress": 0.10999999999999999,
             "fatigue": 0.30000000000000004,
             "temperature": 0.484
-          }
+          },
+          "episode_id": "ep-000001-hide",
+          "occurrence_count": 1,
+          "support": 1,
+          "support_count": 1,
+          "first_seen_cycle": 1,
+          "last_seen_cycle": 1,
+          "episode_score": 0.8837117822728298,
+          "value_relevance": 0.34708067508455476,
+          "policy_delta": 1.0,
+          "threat_significance": 1.0,
+          "redundancy_penalty": 0.0,
+          "gating_reasons": [
+            "identity_critical_exception",
+            "policy_relevant",
+            "threat_significant"
+          ],
+          "identity_critical": true,
+          "lifecycle_stage": "protected_identity_critical_episode"
         },
         {
           "timestamp": 2,
@@ -312,7 +339,12 @@
               "temperature": 0.484
             }
           },
-          "action_taken": "rest",
+          "action_taken": {
+            "name": "rest",
+            "params": {},
+            "cost_estimate": 0.03,
+            "reversible": true
+          },
           "action": "rest",
           "outcome_state": {
             "energy_delta": -0.025000000000000022,
@@ -328,8 +360,8 @@
           "prediction_error": 0.06523098782800887,
           "risk": 15.006715652344035,
           "value_score": -0.34708067508455476,
-          "total_surprise": 10.569931944468832,
-          "weighted_surprise": 10.569931944468832,
+          "total_surprise": 15.071946640172044,
+          "weighted_surprise": 15.071946640172044,
           "embedding": [
             0.46286149117829795,
             0.15103364496237964,
@@ -348,13 +380,7 @@
             0.03950319864198637,
             0.017875375707819052,
             -0.08322314980170042,
-            -0.11622373108786133,
-            0.0,
-            0.73,
-            0.07999999999999999,
-            0.28,
-            0.484,
-            0.0
+            -0.11622373108786133
           ],
           "value_label": "resource_loss",
           "preferred_probability": 3.038548695455042e-07,
@@ -388,7 +414,25 @@
             "stress": 0.07999999999999999,
             "fatigue": 0.28,
             "temperature": 0.484
-          }
+          },
+          "episode_id": "ep-000002-rest",
+          "occurrence_count": 1,
+          "support": 1,
+          "support_count": 1,
+          "first_seen_cycle": 2,
+          "last_seen_cycle": 2,
+          "episode_score": 0.8837117822728298,
+          "value_relevance": 0.34708067508455476,
+          "policy_delta": 1.0,
+          "threat_significance": 1.0,
+          "redundancy_penalty": 0.0,
+          "gating_reasons": [
+            "identity_critical_exception",
+            "policy_relevant",
+            "threat_significant"
+          ],
+          "identity_critical": true,
+          "lifecycle_stage": "protected_identity_critical_episode"
         },
         {
           "timestamp": 3,
@@ -449,7 +493,12 @@
               "temperature": 0.5131701379015394
             }
           },
-          "action_taken": "exploit_shelter",
+          "action_taken": {
+            "name": "exploit_shelter",
+            "params": {},
+            "cost_estimate": 0.08,
+            "reversible": true
+          },
           "action": "exploit_shelter",
           "outcome_state": {
             "energy_delta": -0.06500000000000006,
@@ -465,8 +514,8 @@
           "prediction_error": 0.08611390264182146,
           "risk": 15.006715652344035,
           "value_score": -0.34708067508455476,
-          "total_surprise": 10.590814859282645,
-          "weighted_surprise": 10.590814859282645,
+          "total_surprise": 15.092829554985856,
+          "weighted_surprise": 15.092829554985856,
           "embedding": [
             0.5894661730386301,
             0.1292132094403658,
@@ -485,13 +534,7 @@
             -0.10880984472364424,
             0.04249107323378348,
             -0.1122328194934974,
-            -0.07360301565543831,
-            0.0,
-            0.6649999999999999,
-            0.0,
-            0.39,
-            0.5131701379015394,
-            0.0
+            -0.07360301565543831
           ],
           "value_label": "resource_loss",
           "preferred_probability": 3.038548695455042e-07,
@@ -525,7 +568,25 @@
             "stress": 0.0,
             "fatigue": 0.39,
             "temperature": 0.5131701379015394
-          }
+          },
+          "episode_id": "ep-000003-exploit_shelter",
+          "occurrence_count": 1,
+          "support": 1,
+          "support_count": 1,
+          "first_seen_cycle": 3,
+          "last_seen_cycle": 3,
+          "episode_score": 0.8837117822728298,
+          "value_relevance": 0.34708067508455476,
+          "policy_delta": 1.0,
+          "threat_significance": 1.0,
+          "redundancy_penalty": 0.0,
+          "gating_reasons": [
+            "identity_critical_exception",
+            "policy_relevant",
+            "threat_significant"
+          ],
+          "identity_critical": true,
+          "lifecycle_stage": "protected_identity_critical_episode"
         }
       ],
       "semantic_patterns": [
@@ -554,9 +615,23 @@
           "mean_value_score": -0.34708067508455476
         }
       ],
-      "max_episodes": 50,
+      "max_episodes": 1024,
       "surprise_threshold": 0.4,
       "duplicate_similarity_threshold": 0.999,
+      "suppression_similarity_threshold": 0.992,
+      "novelty_window": 8,
+      "episode_score_threshold": 0.58,
+      "sleep_interval": 200,
+      "memory_threshold": 512,
+      "sleep_batch_size": 128,
+      "minimum_support": 5,
+      "sleep_minimum_support": 3,
+      "compression_similarity_threshold": 0.95,
+      "cluster_distance_threshold": 0.15,
+      "max_active_age": 5000,
+      "cluster_centroids": [],
+      "cluster_counts": [],
+      "archived_episodes": [],
       "preference_model": {
         "outcomes": [
           "survival_threat",
@@ -710,12 +785,278 @@
       }
     ],
     "semantic_memory": [],
+    "sleep_history": [],
+    "counterfactual_insights": [],
     "action_history": [
       "hide",
       "rest",
       "exploit_shelter"
     ],
     "action_history_limit": 32,
+    "decision_history": [
+      {
+        "tick": 1,
+        "action": "hide",
+        "dominant_component": "goal_alignment",
+        "risk": 0.006715652344033707,
+        "active_goal": "SURVIVAL",
+        "goal_alignment": 1.0,
+        "preferred_probability": 0.993306847254501,
+        "policy_score": 0.9240586228800531
+      },
+      {
+        "tick": 2,
+        "action": "rest",
+        "dominant_component": "goal_alignment",
+        "risk": 0.006715652344033707,
+        "active_goal": "SURVIVAL",
+        "goal_alignment": 0.7973013529185258,
+        "preferred_probability": 0.993306847254501,
+        "policy_score": 0.7118059450626194
+      },
+      {
+        "tick": 3,
+        "action": "exploit_shelter",
+        "dominant_component": "goal_alignment",
+        "risk": 0.006715652344033707,
+        "active_goal": "SURVIVAL",
+        "goal_alignment": 0.9516339794411071,
+        "preferred_probability": 0.993306847254501,
+        "policy_score": 0.6978765376730769
+      }
+    ],
+    "decision_history_limit": 512,
+    "drive_history": [
+      {
+        "hunger": 0.19999999999999996,
+        "safety": 0.3,
+        "exploration": 0.32632083610817975,
+        "comfort": 0.26,
+        "thermal": 0.040000000000000036,
+        "social": 0.7432404239681858
+      },
+      {
+        "hunger": 0.245,
+        "safety": 0.13199999999999998,
+        "exploration": 0.43779441735623303,
+        "comfort": 0.16149999999999998,
+        "thermal": 0.03200000000000003,
+        "social": 0.7941610868998363
+      },
+      {
+        "hunger": 0.27,
+        "safety": 0.09599999999999999,
+        "exploration": 0.5817944990170196,
+        "comfort": 0.145,
+        "thermal": 0.03200000000000003,
+        "social": 0.7784754002098918
+      }
+    ],
+    "drive_history_limit": 128,
+    "free_energy_history": [
+      0.629145598696302,
+      0.47115402480982777,
+      0.5838004380127115
+    ],
+    "free_energy_history_limit": 64,
+    "goal_stack": {
+      "base_weights": {
+        "SURVIVAL": 0.9,
+        "INTEGRITY": 0.8,
+        "CONTROL": 0.65,
+        "RESOURCES": 0.55,
+        "SOCIAL": 0.2
+      },
+      "active_goal": "SURVIVAL",
+      "goal_history": [
+        [
+          1,
+          "SURVIVAL"
+        ],
+        [
+          2,
+          "SURVIVAL"
+        ],
+        [
+          3,
+          "SURVIVAL"
+        ]
+      ],
+      "free_energy_window": 5,
+      "conflict_history": [
+        {
+          "conflict_id": "vc_0001",
+          "tick": 1,
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "winner": "SURVIVAL",
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "context": {
+            "energy": 0.8,
+            "free_energy_trend": "stable",
+            "threat_level": "low"
+          },
+          "action_chosen": "hide",
+          "outcome_surprise": 15.090450091944724
+        },
+        {
+          "conflict_id": "vc_0002",
+          "tick": 2,
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "winner": "SURVIVAL",
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "context": {
+            "energy": 0.755,
+            "free_energy_trend": "stable",
+            "threat_level": "low"
+          },
+          "action_chosen": "rest",
+          "outcome_surprise": 15.071946640172044
+        },
+        {
+          "conflict_id": "vc_0003",
+          "tick": 3,
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "winner": "SURVIVAL",
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "context": {
+            "energy": 0.73,
+            "free_energy_trend": "rising(1 ticks)",
+            "threat_level": "low"
+          },
+          "action_chosen": "exploit_shelter",
+          "outcome_surprise": 15.092829554985856
+        }
+      ],
+      "weight_adjustments": [],
+      "conflict_threshold": 0.1,
+      "last_review_tick": 0,
+      "conflict_counter": 3,
+      "last_chapter_signal": null
+    },
+    "self_model": {
+      "body_schema": {
+        "energy": 0.6649999999999999,
+        "token_budget": 256,
+        "memory_usage": 3.0,
+        "compute_load": 0.25
+      },
+      "capability_model": {
+        "available_actions": [
+          "forage",
+          "hide",
+          "scan",
+          "exploit_shelter",
+          "rest",
+          "seek_contact",
+          "thermoregulate"
+        ],
+        "api_limits": {
+          "requests_per_minute": 60.0,
+          "context_window_tokens": 256.0
+        }
+      },
+      "resource_state": {
+        "tokens_remaining": 256,
+        "cpu_budget": 1.0,
+        "memory_free": 1024.0
+      },
+      "threat_model": {
+        "token_exhaustion_threshold": 32,
+        "memory_overflow_threshold": 96.0,
+        "fatal_exceptions": [
+          "fatal_exception"
+        ]
+      },
+      "threat_profile": {
+        "hard_limits": {
+          "energy": {
+            "critical_low": 0.05,
+            "source": "self"
+          },
+          "stress": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "fatigue": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "temperature": {
+            "critical_low": 0.05,
+            "critical_high": 0.95,
+            "source": "self"
+          }
+        },
+        "learned_threats": []
+      },
+      "error_classifier": {
+        "self_error_events": [
+          "token_exhaustion",
+          "out_of_memory",
+          "memory_index_corruption",
+          "tool_capability_downgrade"
+        ],
+        "world_error_events": [
+          "http_timeout",
+          "network_failure",
+          "read_only_filesystem",
+          "dom_structure_changed"
+        ],
+        "existential_events": [
+          "fatal_exception"
+        ]
+      },
+      "preferred_policies": {
+        "dominant_strategy": "expected_free_energy",
+        "action_distribution": {},
+        "risk_profile": "risk_neutral",
+        "learned_avoidances": [],
+        "learned_preferences": [],
+        "last_updated_tick": 0
+      },
+      "identity_narrative": {
+        "chapters": [],
+        "current_chapter": null,
+        "core_identity": "",
+        "core_summary": "",
+        "behavioral_patterns": [],
+        "significant_events": [],
+        "values_statement": "",
+        "claims": [],
+        "contradiction_summary": {},
+        "evidence_provenance": {},
+        "last_updated_tick": 0,
+        "version": 0
+      },
+      "belief_calibration": {}
+    },
     "identity_traits": {
       "risk_aversion": 0.65,
       "resource_conservatism": 0.55

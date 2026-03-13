@@ -29,6 +29,73 @@ MAX_CHAPTER_TICKS = 500
 MAX_CHAPTERS = 50
 
 
+@dataclass(slots=True)
+class ThreatProfile:
+    hard_limits: dict[str, dict[str, object]] = field(
+        default_factory=lambda: {
+            "energy": {"critical_low": 0.05, "source": "self"},
+            "stress": {"critical_high": 0.95, "source": "self"},
+            "fatigue": {"critical_high": 0.95, "source": "self"},
+            "temperature": {"critical_low": 0.05, "critical_high": 0.95, "source": "self"},
+        }
+    )
+    learned_threats: list[dict[str, object]] = field(default_factory=list)
+
+    def add_learned_threat(
+        self,
+        pattern: str,
+        risk_level: float,
+        tick: int,
+        source: str = "world",
+    ) -> None:
+        self.learned_threats.append(
+            {
+                "pattern": pattern,
+                "risk_level": float(risk_level),
+                "learned_at_tick": int(tick),
+                "source": source,
+            }
+        )
+        self.learned_threats.sort(
+            key=lambda item: (
+                int(item.get("learned_at_tick", 0)),
+                str(item.get("pattern", "")),
+            )
+        )
+
+    def get(self, modality: str, default=None):
+        return self.hard_limits.get(modality, default)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "hard_limits": {str(key): dict(value) for key, value in self.hard_limits.items()},
+            "learned_threats": [dict(item) for item in self.learned_threats],
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "ThreatProfile":
+        if not payload:
+            return cls()
+        if "hard_limits" in payload:
+            hard_limits = payload.get("hard_limits")
+            learned = payload.get("learned_threats", [])
+            return cls(
+                hard_limits={
+                    str(key): dict(value)
+                    for key, value in dict(hard_limits or {}).items()
+                    if isinstance(value, Mapping)
+                },
+                learned_threats=[dict(item) for item in learned if isinstance(item, Mapping)],
+            )
+        return cls(
+            hard_limits={
+                str(key): dict(value)
+                for key, value in dict(payload).items()
+                if isinstance(value, Mapping)
+            }
+        )
+
+
 def _event_name(event: object) -> str:
     if isinstance(event, BaseException):
         return type(event).__name__
@@ -532,6 +599,7 @@ class SelfModel:
     capability_model: CapabilityModel
     resource_state: ResourceState
     threat_model: ThreatModel
+    threat_profile: ThreatProfile = field(default_factory=ThreatProfile)
     error_classifier: ErrorClassifier = field(default_factory=ErrorClassifier)
     preferred_policies: PreferredPolicies | None = None
     identity_narrative: IdentityNarrative | None = None
@@ -577,6 +645,7 @@ class SelfModel:
             "capability_model": self.capability_model.to_dict(),
             "resource_state": self.resource_state.to_dict(),
             "threat_model": self.threat_model.to_dict(),
+            "threat_profile": self.threat_profile.to_dict(),
             "error_classifier": self.error_classifier.to_dict(),
             "preferred_policies": (
                 self.preferred_policies.to_dict() if self.preferred_policies else None
@@ -604,6 +673,7 @@ class SelfModel:
             capability_model=CapabilityModel.from_dict(payload.get("capability_model")),
             resource_state=ResourceState.from_dict(payload.get("resource_state")),
             threat_model=ThreatModel.from_dict(payload.get("threat_model")),
+            threat_profile=ThreatProfile.from_dict(payload.get("threat_profile")),
             error_classifier=ErrorClassifier.from_dict(payload.get("error_classifier")),
             preferred_policies=PreferredPolicies.from_dict(payload.get("preferred_policies")),
             identity_narrative=IdentityNarrative.from_dict(payload.get("identity_narrative")),
@@ -1531,6 +1601,7 @@ def build_default_self_model(
             memory_overflow_threshold=96.0,
             fatal_exceptions=("FatalException",),
         ),
+        threat_profile=ThreatProfile(),
         preferred_policies=PreferredPolicies(),
         identity_narrative=IdentityNarrative(),
         log_sink=log_sink,

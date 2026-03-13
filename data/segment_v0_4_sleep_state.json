@@ -3,8 +3,33 @@
     "action_history": [],
     "action_history_limit": 32,
     "base_metabolic_rate": 0.015,
+    "counterfactual_insights": [],
     "cycle": 6,
+    "decision_history": [
+      {
+        "action": "hide",
+        "active_goal": "SURVIVAL",
+        "dominant_component": "expected_free_energy",
+        "goal_alignment": 0.7716082867555636,
+        "policy_score": -2.0753815480353444,
+        "preferred_probability": 0.6655155876605157,
+        "risk": 2.206715652344034,
+        "tick": 6
+      }
+    ],
+    "decision_history_limit": 512,
     "dopamine": 0.12,
+    "drive_history": [
+      {
+        "comfort": 0.22999999999999998,
+        "exploration": 0.78,
+        "hunger": 0.5,
+        "safety": 0.11999999999999997,
+        "social": 0.8200000000000001,
+        "thermal": 0.05599999999999994
+      }
+    ],
+    "drive_history_limit": 128,
     "drive_urgencies": {
       "comfort": 0.22999999999999998,
       "exploration": 0.78,
@@ -17,6 +42,57 @@
     "episodes": [],
     "fatigue": 0.0,
     "fatigue_accumulation_rate": 0.08,
+    "free_energy_history": [
+      1.4306494704248418
+    ],
+    "free_energy_history_limit": 64,
+    "goal_stack": {
+      "active_goal": "SURVIVAL",
+      "base_weights": {
+        "CONTROL": 0.65,
+        "INTEGRITY": 0.8,
+        "RESOURCES": 0.55,
+        "SOCIAL": 0.2,
+        "SURVIVAL": 0.9
+      },
+      "conflict_counter": 1,
+      "conflict_history": [
+        {
+          "action_chosen": "hide",
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "conflict_id": "vc_0001",
+          "context": {
+            "energy": 0.5,
+            "free_energy_trend": "stable",
+            "threat_level": "medium"
+          },
+          "outcome_surprise": null,
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "tick": 6,
+          "winner": "SURVIVAL"
+        }
+      ],
+      "conflict_threshold": 0.1,
+      "free_energy_window": 5,
+      "goal_history": [
+        [
+          6,
+          "SURVIVAL"
+        ]
+      ],
+      "last_chapter_signal": null,
+      "last_review_tick": 6,
+      "weight_adjustments": []
+    },
     "identity_traits": {
       "resource_conservatism": 0.55,
       "risk_aversion": 0.65
@@ -83,10 +159,16 @@
       "cluster_distance_threshold": 0.15,
       "compression_similarity_threshold": 0.95,
       "duplicate_similarity_threshold": 0.999,
+      "episode_score_threshold": 0.58,
       "episodes": [
         {
           "action": "forage",
-          "action_taken": "forage",
+          "action_taken": {
+            "cost_estimate": 0.0,
+            "name": "forage",
+            "params": {},
+            "reversible": true
+          },
           "body_state": {
             "energy": 0.18,
             "fatigue": 0.32,
@@ -226,6 +308,7 @@
       "max_episodes": 1024,
       "memory_threshold": 512,
       "minimum_support": 1,
+      "novelty_window": 8,
       "preference_model": {
         "log_preferences": {
           "integrity_loss": -100.0,
@@ -269,6 +352,7 @@
       "sleep_batch_size": 128,
       "sleep_interval": 200,
       "sleep_minimum_support": 3,
+      "suppression_similarity_threshold": 0.992,
       "surprise_threshold": 0.4,
       "value_hierarchy": {
         "integrity": -100.0,
@@ -311,6 +395,184 @@
         "top_down_mix": 0.63
       }
     },
+    "self_model": {
+      "belief_calibration": {
+        "capability_profile": {
+          "confidence": 0.0,
+          "evidence_count": 7,
+          "last_verified_at": 6
+        },
+        "preferred_policies": {
+          "confidence": 0.0,
+          "evidence_count": 0,
+          "last_verified_at": 6,
+          "risk_profile": "risk_neutral"
+        },
+        "threat_profile": {
+          "confidence": 0.0,
+          "evidence_count": 1,
+          "last_verified_at": 6
+        }
+      },
+      "body_schema": {
+        "compute_load": 0.25,
+        "energy": 0.5,
+        "memory_usage": 1.0,
+        "token_budget": 256
+      },
+      "capability_model": {
+        "api_limits": {
+          "context_window_tokens": 256.0,
+          "requests_per_minute": 60.0
+        },
+        "available_actions": [
+          "forage",
+          "hide",
+          "scan",
+          "exploit_shelter",
+          "rest",
+          "seek_contact",
+          "thermoregulate"
+        ]
+      },
+      "error_classifier": {
+        "existential_events": [
+          "fatal_exception"
+        ],
+        "self_error_events": [
+          "token_exhaustion",
+          "out_of_memory",
+          "memory_index_corruption",
+          "tool_capability_downgrade"
+        ],
+        "world_error_events": [
+          "http_timeout",
+          "network_failure",
+          "read_only_filesystem",
+          "dom_structure_changed"
+        ]
+      },
+      "identity_narrative": {
+        "behavioral_patterns": [
+          "I tend to {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} during survival_crisis phases"
+        ],
+        "chapters": [],
+        "claims": [
+          {
+            "claim_id": "claim-01-value_survival_priority",
+            "claim_key": "survival_priority",
+            "claim_type": "value",
+            "confidence": 0.0,
+            "contradict_count": 0,
+            "contradicted_by": [],
+            "contradiction_score": 0.0,
+            "last_validated_at": 6,
+            "source_sleep_session_id": 1,
+            "stale_since": null,
+            "support_count": 0,
+            "support_score": 0.0,
+            "supported_by": [],
+            "text": "Survival is prioritized over resource gain."
+          }
+        ],
+        "contradiction_summary": {
+          "contradicted_claims": [],
+          "contradicting_evidence_count": 0,
+          "mixed_claims": [],
+          "supporting_evidence_count": 0,
+          "total_claims": 1
+        },
+        "core_identity": "I am a survival-focused agent.",
+        "core_summary": "I am a survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.23).",
+        "current_chapter": {
+          "behavioral_shift": null,
+          "chapter_id": 1,
+          "dominant_theme": "survival_crisis",
+          "key_events": [
+            "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.23)"
+          ],
+          "state_summary": {
+            "dominant_action": "{'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True}",
+            "dominant_strategy": "expected_free_energy",
+            "energy_avg": 0.18,
+            "free_energy_avg": -0.42,
+            "risk_avg": 1005.006715652344,
+            "risk_profile": "risk_neutral"
+          },
+          "tick_range": [
+            3,
+            3
+          ]
+        },
+        "evidence_provenance": {
+          "claim-01-value_survival_priority": {
+            "claim_text": "Survival is prioritized over resource gain.",
+            "confidence": 0.0,
+            "contradicted_by": [],
+            "contradiction_score": 0.0,
+            "last_validated_at": 6,
+            "source_sleep_session_id": 1,
+            "support_score": 0.0,
+            "supported_by": []
+          }
+        },
+        "last_updated_tick": 6,
+        "significant_events": [
+          "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.23)"
+        ],
+        "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_neutral. I usually favor expected_free_energy.",
+        "version": 1
+      },
+      "preferred_policies": {
+        "action_distribution": {},
+        "dominant_strategy": "expected_free_energy",
+        "last_updated_tick": 6,
+        "learned_avoidances": [],
+        "learned_preferences": [],
+        "risk_profile": "risk_neutral"
+      },
+      "resource_state": {
+        "cpu_budget": 1.0,
+        "memory_free": 1024.0,
+        "tokens_remaining": 256
+      },
+      "threat_model": {
+        "fatal_exceptions": [
+          "fatal_exception"
+        ],
+        "memory_overflow_threshold": 96.0,
+        "token_exhaustion_threshold": 32
+      },
+      "threat_profile": {
+        "hard_limits": {
+          "energy": {
+            "critical_low": 0.05,
+            "source": "self"
+          },
+          "fatigue": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "stress": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "temperature": {
+            "critical_high": 0.95,
+            "critical_low": 0.05,
+            "source": "self"
+          }
+        },
+        "learned_threats": [
+          {
+            "learned_at_tick": 6,
+            "pattern": "forage in cluster 0 -> survival_threat",
+            "risk_level": 0.55,
+            "source": "world"
+          }
+        ]
+      }
+    },
     "semantic_memory": [
       {
         "action": "forage",
@@ -328,6 +590,11 @@
         "average_free_energy_drop": 0.0,
         "clusters_created": 1,
         "compression_removed": 4,
+        "counterfactual_energy_spent": 0.0,
+        "counterfactual_episodes_evaluated": 0,
+        "counterfactual_insights_absorbed": 0,
+        "counterfactual_insights_generated": 0,
+        "counterfactual_log": [],
         "dream_replay_count": 0,
         "episodes_archived": 0,
         "episodes_deleted": 0,
@@ -405,6 +672,8 @@
         "social": 0.26372317499711667,
         "temperature": 0.49907400049700024
       },
+      "counterfactual_biases": {},
+      "counterfactual_candidate_buffer": {},
       "epistemic_uncertainty_bonuses": {},
       "kl_divergence_threshold": 0.25,
       "learning_rate": 0.4,

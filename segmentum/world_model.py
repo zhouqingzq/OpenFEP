@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from math import log
 
+from .action_schema import action_name
 from .constants import ACTION_IMAGINED_EFFECTS
 from .environment import clamp
 from .predictive_coding import LayerBeliefUpdate, SensorimotorLayer, default_beliefs
@@ -63,15 +64,16 @@ class GenerativeWorldModel:
             predicted_state=predicted_state,
         )
 
-    def imagine_action(self, action: str, prediction: dict[str, float]) -> dict[str, float]:
+    def imagine_action(self, action: object, prediction: dict[str, float]) -> dict[str, float]:
+        action_key = action_name(action)
         imagined = {}
         for key, value in prediction.items():
-            delta = ACTION_IMAGINED_EFFECTS.get(action, {}).get(key, 0.0)
+            delta = ACTION_IMAGINED_EFFECTS.get(action_key, {}).get(key, 0.0)
             imagined[key] = clamp(value + delta)
         return imagined
 
-    def state_action_key(self, cluster_id: int, action: str) -> str:
-        return f"{cluster_id}:{action}"
+    def state_action_key(self, cluster_id: int, action: object) -> str:
+        return f"{cluster_id}:{action_name(action)}"
 
     def transition_distribution(
         self,
@@ -126,18 +128,19 @@ class GenerativeWorldModel:
             for outcome, value in sorted(distribution.items())
         }
 
-    def get_policy_bias(self, cluster_id: int | None, action: str) -> float:
+    def get_policy_bias(self, cluster_id: int | None, action: object) -> float:
+        action_key = action_name(action)
         cluster_bias = 0.0
         if cluster_id is not None:
-            cluster_bias = float(self.policy_biases.get(str(cluster_id), {}).get(action, 0.0))
-        global_cf_bias = float(self.counterfactual_biases.get(action, 0.0))
+            cluster_bias = float(self.policy_biases.get(str(cluster_id), {}).get(action_key, 0.0))
+        global_cf_bias = float(self.counterfactual_biases.get(action_key, 0.0))
         return cluster_bias + global_cf_bias
 
-    def get_epistemic_bonus(self, cluster_id: int | None, action: str) -> float:
+    def get_epistemic_bonus(self, cluster_id: int | None, action: object) -> float:
         if cluster_id is None:
             return 0.0
         return float(
-            self.epistemic_uncertainty_bonuses.get(str(cluster_id), {}).get(action, 0.0)
+            self.epistemic_uncertainty_bonuses.get(str(cluster_id), {}).get(action_name(action), 0.0)
         )
 
     def get_threat_prior(self, cluster_id: int | None) -> float:
@@ -145,33 +148,25 @@ class GenerativeWorldModel:
             return 0.0
         return float(self.threat_priors.get(str(cluster_id), 0.0))
 
-    def get_preference_penalty(self, cluster_id: int | None, action: str) -> float:
+    def get_preference_penalty(self, cluster_id: int | None, action: object) -> float:
         if cluster_id is None:
             return 0.0
-        return float(self.preference_penalties.get(str(cluster_id), {}).get(action, 0.0))
+        return float(self.preference_penalties.get(str(cluster_id), {}).get(action_name(action), 0.0))
 
-    def adjust_policy_bias(
-        self,
-        cluster_id: int,
-        action: str,
-        delta: float,
-    ) -> float:
+    def adjust_policy_bias(self, cluster_id: int, action: object, delta: float) -> float:
         cluster_key = str(cluster_id)
         biases = self.policy_biases.setdefault(cluster_key, {})
-        updated = max(-1.0, min(1.0, float(biases.get(action, 0.0)) + delta))
-        biases[action] = updated
+        action_key = action_name(action)
+        updated = max(-1.0, min(1.0, float(biases.get(action_key, 0.0)) + delta))
+        biases[action_key] = updated
         return updated
 
-    def adjust_epistemic_bonus(
-        self,
-        cluster_id: int,
-        action: str,
-        delta: float,
-    ) -> float:
+    def adjust_epistemic_bonus(self, cluster_id: int, action: object, delta: float) -> float:
         cluster_key = str(cluster_id)
         bonuses = self.epistemic_uncertainty_bonuses.setdefault(cluster_key, {})
-        updated = max(0.0, min(1.0, float(bonuses.get(action, 0.0)) + delta))
-        bonuses[action] = updated
+        action_key = action_name(action)
+        updated = max(0.0, min(1.0, float(bonuses.get(action_key, 0.0)) + delta))
+        bonuses[action_key] = updated
         return updated
 
     def adjust_threat_prior(self, cluster_id: int, delta: float) -> float:
@@ -180,16 +175,12 @@ class GenerativeWorldModel:
         self.threat_priors[cluster_key] = updated
         return updated
 
-    def adjust_preference_penalty(
-        self,
-        cluster_id: int,
-        action: str,
-        delta: float,
-    ) -> float:
+    def adjust_preference_penalty(self, cluster_id: int, action: object, delta: float) -> float:
         cluster_key = str(cluster_id)
         penalties = self.preference_penalties.setdefault(cluster_key, {})
-        updated = max(-2.0, min(1.0, float(penalties.get(action, 0.0)) + delta))
-        penalties[action] = updated
+        action_key = action_name(action)
+        updated = max(-2.0, min(1.0, float(penalties.get(action_key, 0.0)) + delta))
+        penalties[action_key] = updated
         return updated
 
     def to_dict(self) -> dict:
@@ -261,6 +252,10 @@ class GenerativeWorldModel:
                     str(inner_key): (
                         float(inner_value)
                         if isinstance(inner_value, (int, float))
+                        else dict(inner_value)
+                        if isinstance(inner_value, dict)
+                        else list(inner_value)
+                        if isinstance(inner_value, list)
                         else str(inner_value)
                     )
                     for inner_key, inner_value in value.items()

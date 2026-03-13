@@ -8,10 +8,78 @@
         "absorbed": false,
         "cluster_id": 0,
         "confidence": 0.30159689947177626,
-        "counterfactual_action": "hide",
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "hide",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "hide",
         "counterfactual_efe": 15.133035803994135,
         "efe_delta": -989.8736798483499,
-        "original_action": "forage",
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 1,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      },
+      {
+        "absorbed": false,
+        "cluster_id": 0,
+        "confidence": 0.31401076050271104,
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "scan",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "scan",
+        "counterfactual_efe": 1004.643215652344,
+        "efe_delta": -0.3634999999999997,
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
         "original_efe": 1005.006715652344,
         "source_episode_cycle": 1,
         "state_context": {
@@ -52,10 +120,22 @@
         "absorbed": false,
         "cluster_id": 0,
         "confidence": 0.293317636764069,
-        "counterfactual_action": "exploit_shelter",
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "exploit_shelter",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "exploit_shelter",
         "counterfactual_efe": 15.136486926029159,
         "efe_delta": -989.8702287263148,
-        "original_action": "forage",
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
         "original_efe": 1005.006715652344,
         "source_episode_cycle": 1,
         "state_context": {
@@ -96,10 +176,78 @@
         "absorbed": false,
         "cluster_id": 0,
         "confidence": 0.30159689947177626,
-        "counterfactual_action": "hide",
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "hide",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "hide",
         "counterfactual_efe": 15.133035803994135,
         "efe_delta": -989.8736798483499,
-        "original_action": "forage",
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
+        "original_efe": 1005.006715652344,
+        "source_episode_cycle": 2,
+        "state_context": {
+          "body_state": {
+            "energy": 0.5,
+            "fatigue": 0.25,
+            "stress": 0.4,
+            "temperature": 0.46
+          },
+          "errors": {
+            "danger": 0.6199999999999999,
+            "food": -0.48,
+            "novelty": -0.18000000000000002,
+            "shelter": -0.30000000000000004,
+            "social": -0.12,
+            "temperature": -0.03999999999999998
+          },
+          "observation": {
+            "danger": 0.82,
+            "food": 0.12,
+            "novelty": 0.22,
+            "shelter": 0.1,
+            "social": 0.18,
+            "temperature": 0.46
+          },
+          "prediction": {
+            "danger": 0.2,
+            "food": 0.6,
+            "novelty": 0.4,
+            "shelter": 0.4,
+            "social": 0.3,
+            "temperature": 0.5
+          }
+        },
+        "timestamp": 20
+      },
+      {
+        "absorbed": false,
+        "cluster_id": 0,
+        "confidence": 0.31401076050271104,
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "scan",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "scan",
+        "counterfactual_efe": 1004.643215652344,
+        "efe_delta": -0.3634999999999997,
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
         "original_efe": 1005.006715652344,
         "source_episode_cycle": 2,
         "state_context": {
@@ -140,10 +288,22 @@
         "absorbed": false,
         "cluster_id": 0,
         "confidence": 0.293317636764069,
-        "counterfactual_action": "exploit_shelter",
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "exploit_shelter",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "exploit_shelter",
         "counterfactual_efe": 15.136486926029159,
         "efe_delta": -989.8702287263148,
-        "original_action": "forage",
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
         "original_efe": 1005.006715652344,
         "source_episode_cycle": 2,
         "state_context": {
@@ -184,10 +344,22 @@
         "absorbed": true,
         "cluster_id": 0,
         "confidence": 1.0,
-        "counterfactual_action": "hide",
+        "counterfactual_action": {
+          "cost_estimate": 0.0,
+          "name": "hide",
+          "params": {},
+          "reversible": true
+        },
+        "counterfactual_action_name": "hide",
         "counterfactual_efe": 15.133035803994135,
         "efe_delta": -989.8736798483499,
-        "original_action": "forage",
+        "original_action": {
+          "cost_estimate": 0.0,
+          "name": "forage",
+          "params": {},
+          "reversible": true
+        },
+        "original_action_name": "forage",
         "original_efe": 1005.006715652344,
         "source_episode_cycle": 3,
         "state_context": {
@@ -226,7 +398,11 @@
       }
     ],
     "cycle": 20,
+    "decision_history": [],
+    "decision_history_limit": 512,
     "dopamine": 0.12,
+    "drive_history": [],
+    "drive_history_limit": 128,
     "drive_urgencies": {
       "comfort": 0.0,
       "exploration": 0.0,
@@ -239,6 +415,26 @@
     "episodes": [],
     "fatigue": 0.0,
     "fatigue_accumulation_rate": 0.08,
+    "free_energy_history": [],
+    "free_energy_history_limit": 64,
+    "goal_stack": {
+      "active_goal": "CONTROL",
+      "base_weights": {
+        "CONTROL": 0.65,
+        "INTEGRITY": 0.8,
+        "RESOURCES": 0.55,
+        "SOCIAL": 0.2,
+        "SURVIVAL": 0.9
+      },
+      "conflict_counter": 0,
+      "conflict_history": [],
+      "conflict_threshold": 0.1,
+      "free_energy_window": 5,
+      "goal_history": [],
+      "last_chapter_signal": null,
+      "last_review_tick": 20,
+      "weight_adjustments": []
+    },
     "identity_traits": {
       "resource_conservatism": 0.55,
       "risk_aversion": 0.65
@@ -305,10 +501,16 @@
       "cluster_distance_threshold": 0.15,
       "compression_similarity_threshold": 0.95,
       "duplicate_similarity_threshold": 0.999,
+      "episode_score_threshold": 0.58,
       "episodes": [
         {
           "action": "forage",
-          "action_taken": "forage",
+          "action_taken": {
+            "cost_estimate": 0.0,
+            "name": "forage",
+            "params": {},
+            "reversible": true
+          },
           "body_state": {
             "energy": 0.5,
             "fatigue": 0.25,
@@ -448,6 +650,7 @@
       "max_episodes": 1024,
       "memory_threshold": 512,
       "minimum_support": 1,
+      "novelty_window": 8,
       "preference_model": {
         "log_preferences": {
           "integrity_loss": -100.0,
@@ -491,6 +694,7 @@
       "sleep_batch_size": 128,
       "sleep_interval": 200,
       "sleep_minimum_support": 1,
+      "suppression_similarity_threshold": 0.992,
       "surprise_threshold": 0.4,
       "value_hierarchy": {
         "integrity": -100.0,
@@ -533,6 +737,184 @@
         "top_down_mix": 0.63
       }
     },
+    "self_model": {
+      "belief_calibration": {
+        "capability_profile": {
+          "confidence": 0.0,
+          "evidence_count": 7,
+          "last_verified_at": 20
+        },
+        "preferred_policies": {
+          "confidence": 0.0,
+          "evidence_count": 0,
+          "last_verified_at": 20,
+          "risk_profile": "risk_neutral"
+        },
+        "threat_profile": {
+          "confidence": 0.0,
+          "evidence_count": 1,
+          "last_verified_at": 20
+        }
+      },
+      "body_schema": {
+        "compute_load": 0.25,
+        "energy": 0.885,
+        "memory_usage": 1.0,
+        "token_budget": 256
+      },
+      "capability_model": {
+        "api_limits": {
+          "context_window_tokens": 256.0,
+          "requests_per_minute": 60.0
+        },
+        "available_actions": [
+          "forage",
+          "hide",
+          "scan",
+          "exploit_shelter",
+          "rest",
+          "seek_contact",
+          "thermoregulate"
+        ]
+      },
+      "error_classifier": {
+        "existential_events": [
+          "fatal_exception"
+        ],
+        "self_error_events": [
+          "token_exhaustion",
+          "out_of_memory",
+          "memory_index_corruption",
+          "tool_capability_downgrade"
+        ],
+        "world_error_events": [
+          "http_timeout",
+          "network_failure",
+          "read_only_filesystem",
+          "dom_structure_changed"
+        ]
+      },
+      "identity_narrative": {
+        "behavioral_patterns": [
+          "I tend to {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} during survival_crisis phases"
+        ],
+        "chapters": [],
+        "claims": [
+          {
+            "claim_id": "claim-01-value_survival_priority",
+            "claim_key": "survival_priority",
+            "claim_type": "value",
+            "confidence": 0.0,
+            "contradict_count": 0,
+            "contradicted_by": [],
+            "contradiction_score": 0.0,
+            "last_validated_at": 20,
+            "source_sleep_session_id": 1,
+            "stale_since": null,
+            "support_count": 0,
+            "support_score": 0.0,
+            "supported_by": [],
+            "text": "Survival is prioritized over resource gain."
+          }
+        ],
+        "contradiction_summary": {
+          "contradicted_claims": [],
+          "contradicting_evidence_count": 0,
+          "mixed_claims": [],
+          "supporting_evidence_count": 0,
+          "total_claims": 1
+        },
+        "core_identity": "I am a survival-focused agent.",
+        "core_summary": "I am a survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.30).",
+        "current_chapter": {
+          "behavioral_shift": null,
+          "chapter_id": 1,
+          "dominant_theme": "survival_crisis",
+          "key_events": [
+            "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.30)"
+          ],
+          "state_summary": {
+            "dominant_action": "{'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True}",
+            "dominant_strategy": "expected_free_energy",
+            "energy_avg": 0.5,
+            "free_energy_avg": -0.45,
+            "risk_avg": 1005.006715652344,
+            "risk_profile": "risk_neutral"
+          },
+          "tick_range": [
+            3,
+            3
+          ]
+        },
+        "evidence_provenance": {
+          "claim-01-value_survival_priority": {
+            "claim_text": "Survival is prioritized over resource gain.",
+            "confidence": 0.0,
+            "contradicted_by": [],
+            "contradiction_score": 0.0,
+            "last_validated_at": 20,
+            "source_sleep_session_id": 1,
+            "support_score": 0.0,
+            "supported_by": []
+          }
+        },
+        "last_updated_tick": 20,
+        "significant_events": [
+          "near-death event at tick 3 after {'name': 'forage', 'params': {}, 'cost_estimate': 0.0, 'reversible': True} (surprise=1005.30)"
+        ],
+        "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_neutral. I usually favor expected_free_energy.",
+        "version": 1
+      },
+      "preferred_policies": {
+        "action_distribution": {},
+        "dominant_strategy": "expected_free_energy",
+        "last_updated_tick": 20,
+        "learned_avoidances": [],
+        "learned_preferences": [],
+        "risk_profile": "risk_neutral"
+      },
+      "resource_state": {
+        "cpu_budget": 1.0,
+        "memory_free": 1024.0,
+        "tokens_remaining": 256
+      },
+      "threat_model": {
+        "fatal_exceptions": [
+          "fatal_exception"
+        ],
+        "memory_overflow_threshold": 96.0,
+        "token_exhaustion_threshold": 32
+      },
+      "threat_profile": {
+        "hard_limits": {
+          "energy": {
+            "critical_low": 0.05,
+            "source": "self"
+          },
+          "fatigue": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "stress": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "temperature": {
+            "critical_high": 0.95,
+            "critical_low": 0.05,
+            "source": "self"
+          }
+        },
+        "learned_threats": [
+          {
+            "learned_at_tick": 20,
+            "pattern": "forage in cluster 0 -> survival_threat",
+            "risk_level": 0.55,
+            "source": "world"
+          }
+        ]
+      }
+    },
     "semantic_memory": [
       {
         "action": "forage",
@@ -553,14 +935,14 @@
         "counterfactual_energy_spent": 0.09500000000000001,
         "counterfactual_episodes_evaluated": 3,
         "counterfactual_insights_absorbed": 1,
-        "counterfactual_insights_generated": 5,
+        "counterfactual_insights_generated": 7,
         "counterfactual_log": [
           {
             "branches_explored": 7,
             "energy_spent": 0.09500000000000001,
             "episodes_evaluated": 3,
             "insights_absorbed": 1,
-            "insights_generated": 5,
+            "insights_generated": 7,
             "label": "\u865a\u62df\u6c99\u76d2\u63a8\u6f14",
             "skipped_reason": "",
             "type": "virtual_sandbox_reasoning"
@@ -568,8 +950,41 @@
           {
             "confidence": 0.30159689947177626,
             "counterfactual_action": "hide",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "hide",
+              "params": {},
+              "reversible": true
+            },
             "efe_delta": -989.8736798483499,
             "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 1,
+            "type": "rejection"
+          },
+          {
+            "confidence": 0.31401076050271104,
+            "counterfactual_action": "scan",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "scan",
+              "params": {},
+              "reversible": true
+            },
+            "efe_delta": -0.3634999999999997,
+            "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
             "reason": "confidence_below_threshold",
             "source_episode_cycle": 1,
             "type": "rejection"
@@ -577,8 +992,20 @@
           {
             "confidence": 0.293317636764069,
             "counterfactual_action": "exploit_shelter",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "exploit_shelter",
+              "params": {},
+              "reversible": true
+            },
             "efe_delta": -989.8702287263148,
             "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
             "reason": "confidence_below_threshold",
             "source_episode_cycle": 1,
             "type": "rejection"
@@ -586,8 +1013,41 @@
           {
             "confidence": 0.30159689947177626,
             "counterfactual_action": "hide",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "hide",
+              "params": {},
+              "reversible": true
+            },
             "efe_delta": -989.8736798483499,
             "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
+            "reason": "confidence_below_threshold",
+            "source_episode_cycle": 2,
+            "type": "rejection"
+          },
+          {
+            "confidence": 0.31401076050271104,
+            "counterfactual_action": "scan",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "scan",
+              "params": {},
+              "reversible": true
+            },
+            "efe_delta": -0.3634999999999997,
+            "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
             "reason": "confidence_below_threshold",
             "source_episode_cycle": 2,
             "type": "rejection"
@@ -595,21 +1055,75 @@
           {
             "confidence": 0.293317636764069,
             "counterfactual_action": "exploit_shelter",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "exploit_shelter",
+              "params": {},
+              "reversible": true
+            },
             "efe_delta": -989.8702287263148,
             "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
             "reason": "confidence_below_threshold",
             "source_episode_cycle": 2,
             "type": "rejection"
           },
           {
+            "average_benefit": 50.745919324915455,
+            "cluster_id": 0,
+            "confirmations": 1.0,
+            "counterfactual_action": "hide",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "hide",
+              "params": {},
+              "reversible": true
+            },
+            "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
+            "pass_rate": 1.0,
+            "passed": true,
+            "requires_confirmation": false,
+            "review_family": "danger_avoidance",
+            "type": "candidate_review"
+          },
+          {
             "cluster_id": 0,
             "confidence": 1.0,
+            "confirmations": 1.0,
             "counterfactual_action": "hide",
+            "counterfactual_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "hide",
+              "params": {},
+              "reversible": true
+            },
             "efe_delta": -989.8736798483499,
             "new_cf_bias": 0.15,
+            "new_cf_preference_penalty": 0.09,
             "new_orig_bias": -0.6,
+            "new_orig_preference_penalty": -1.335,
             "original_action": "forage",
+            "original_action_schema": {
+              "cost_estimate": 0.0,
+              "name": "forage",
+              "params": {},
+              "reversible": true
+            },
             "policy_delta": 0.15,
+            "review_average_benefit": 50.745919324915455,
+            "review_family": "danger_avoidance",
+            "review_pass_rate": 1.0,
             "source_episode_cycle": 3,
             "timestamp": 20,
             "type": "absorption"
@@ -692,6 +1206,11 @@
         "social": 0.2972127147255547,
         "temperature": 0.49907400049700024
       },
+      "counterfactual_biases": {
+        "forage": -0.15,
+        "hide": 0.15
+      },
+      "counterfactual_candidate_buffer": {},
       "epistemic_uncertainty_bonuses": {},
       "kl_divergence_threshold": 0.25,
       "learning_rate": 0.4,
@@ -708,7 +1227,8 @@
       },
       "preference_penalties": {
         "0": {
-          "forage": -1.2
+          "forage": -1.335,
+          "hide": 0.09
         }
       },
       "sensorimotor_layer": {
@@ -758,12 +1278,12 @@
     "counterfactual_energy_spent": 0.095,
     "counterfactual_episodes_evaluated": 3,
     "counterfactual_insights_absorbed": 1,
-    "counterfactual_insights_generated": 5,
+    "counterfactual_insights_generated": 7,
     "episodes_before_sleep": 5,
-    "forage_bias_after": -0.6,
+    "forage_bias_after": -0.75,
     "forage_bias_pre_counterfactual": -0.45,
     "forage_bias_pre_sleep": 0.0,
-    "hide_bias_after": 0.15,
+    "hide_bias_after": 0.3,
     "hide_bias_pre_counterfactual": 0.0,
     "hide_bias_pre_sleep": 0.0,
     "policy_delta": 0.15,

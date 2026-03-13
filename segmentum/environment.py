@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import random
 
+from .action_schema import action_name
+
 
 def clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
     return max(low, min(high, value))
@@ -53,8 +55,9 @@ class SimulatedWorld:
         self.temperature = clamp(0.50 + (phase - 0.5) * 0.40 + self.rng.uniform(-0.06, 0.06))
         self.social_density = clamp(self.social_density + self.rng.uniform(-0.05, 0.05))
 
-    def apply_action(self, action: str) -> dict[str, float]:
+    def apply_action(self, action: object) -> dict[str, float]:
         """Mutate the world and return direct physiological consequences."""
+        action_key = action_name(action)
         direct = {
             "energy_delta": 0.0,
             "stress_delta": 0.0,
@@ -63,7 +66,7 @@ class SimulatedWorld:
             "loneliness_delta": 0.0,
         }
 
-        if action == "forage":
+        if action_key == "forage":
             gain = 0.20 + self.rng.uniform(-0.05, 0.08)
             self.food_density = clamp(self.food_density - 0.18)
             self.novelty_density = clamp(self.novelty_density + 0.06)
@@ -71,7 +74,7 @@ class SimulatedWorld:
             direct["energy_delta"] += gain
             direct["stress_delta"] += 0.08
             direct["fatigue_delta"] += 0.08
-        elif action == "hide":
+        elif action_key == "hide":
             self.threat_density = clamp(self.threat_density - 0.20)
             self.shelter_density = clamp(self.shelter_density + 0.04)
             self.novelty_density = clamp(self.novelty_density - 0.05)
@@ -79,13 +82,13 @@ class SimulatedWorld:
             direct["stress_delta"] -= 0.14
             direct["fatigue_delta"] += 0.02
             direct["temperature_delta"] += (0.50 - self.temperature) * 0.20
-        elif action == "scan":
+        elif action_key == "scan":
             self.novelty_density = clamp(self.novelty_density + 0.16)
             self.threat_density = clamp(self.threat_density + 0.03)
             direct["energy_delta"] -= 0.04
             direct["stress_delta"] += 0.02
             direct["fatigue_delta"] += 0.05
-        elif action == "exploit_shelter":
+        elif action_key == "exploit_shelter":
             self.shelter_density = clamp(self.shelter_density + 0.18)
             self.threat_density = clamp(self.threat_density - 0.10)
             self.food_density = clamp(self.food_density - 0.04)
@@ -93,11 +96,11 @@ class SimulatedWorld:
             direct["stress_delta"] -= 0.08
             direct["fatigue_delta"] += 0.03
             direct["temperature_delta"] += (0.50 - self.temperature) * 0.25
-        elif action == "rest":
+        elif action_key == "rest":
             direct["energy_delta"] -= 0.01
             direct["stress_delta"] -= 0.03
             direct["fatigue_delta"] -= 0.10
-        elif action == "seek_contact":
+        elif action_key == "seek_contact":
             self.social_density = clamp(self.social_density + 0.20)
             self.threat_density = clamp(self.threat_density + 0.05)
             self.novelty_density = clamp(self.novelty_density + 0.04)
@@ -105,7 +108,7 @@ class SimulatedWorld:
             direct["stress_delta"] -= 0.06
             direct["loneliness_delta"] -= 0.24
             direct["fatigue_delta"] += 0.03
-        elif action == "thermoregulate":
+        elif action_key == "thermoregulate":
             midpoint_shift = 0.50 - self.temperature
             self.temperature = clamp(self.temperature + midpoint_shift * 0.65)
             self.shelter_density = clamp(self.shelter_density - 0.03)

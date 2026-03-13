@@ -19,6 +19,7 @@ from segmentum.counterfactual import (
     InsightAbsorber,
     compute_family_coverage,
 )
+from segmentum.action_schema import action_name
 from segmentum.agent import SegmentAgent
 from segmentum.preferences import PreferenceModel
 from segmentum.world_model import GenerativeWorldModel
@@ -390,7 +391,7 @@ def evaluate_runtime_lifecycle_evidence() -> dict[str, object]:
     archive_cluster = int(archive_payload["cluster_id"])
     archive_agent.world_model.set_outcome_distribution(
         archive_cluster,
-        str(archive_payload.get("action_taken", archive_payload.get("action", ""))),
+        action_name(archive_payload.get("action_taken", archive_payload.get("action", ""))),
         {
             str(archive_payload.get("predicted_outcome", "neutral")): 0.20,
             "neutral": 0.80,

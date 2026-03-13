@@ -5,6 +5,8 @@ import random
 from statistics import mean, pvariance
 from typing import Callable
 
+from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .action_registry import ActionRegistry, build_default_action_registry
 from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
@@ -379,6 +381,7 @@ class SegmentAgent:
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
         sleep_llm_extractor: Callable[[list[SleepRule], list[dict[str, object]]], list[SleepRule]]
         | None = None,
+        action_registry: ActionRegistry | None = None,
     ) -> None:
         self.rng = rng or random.Random()
         self.energy = 0.80
@@ -392,12 +395,13 @@ class SegmentAgent:
         self.strategic_layer = StrategicLayer()
         self.interoceptive_layer = InteroceptiveLayer()
         self.world_model = GenerativeWorldModel()
+        self.action_registry = action_registry or build_default_action_registry()
         self.long_term_memory = AutobiographicalMemory()
         self.autobiographical_memory = self.long_term_memory
         self.identity_traits = IdentityTraits()
         self.self_model = build_default_self_model()
         self.self_model.capability_model = CapabilityModel(
-            available_actions=tuple(ACTION_COSTS),
+            available_actions=tuple(self.action_registry.names()),
             api_limits=self.self_model.capability_model.api_limits,
         )
         self.goal_stack = GoalStack()
@@ -440,6 +444,30 @@ class SegmentAgent:
         )
         self._sync_self_model_body_schema()
 
+    def _available_action_schemas(self) -> list[ActionSchema]:
+        actions = self.action_registry.get_all()
+        if actions:
+            return actions
+        return [
+            ActionSchema(name=name, cost_estimate=float(cost))
+            for name, cost in ACTION_COSTS.items()
+        ]
+
+    def _action_schema_for_name(self, action: str) -> ActionSchema:
+        schema = self.action_registry.get(action)
+        if schema is not None:
+            return schema
+        return ActionSchema(
+            name=action,
+            cost_estimate=float(ACTION_COSTS.get(action, 0.05)),
+        )
+
+    def _action_cost(self, action: str) -> float:
+        schema = self._action_schema_for_name(action)
+        if schema.cost_estimate:
+            return float(schema.cost_estimate)
+        return float(ACTION_COSTS.get(action, 0.05))
+
     def _sync_self_model_body_schema(self) -> None:
         self.self_model.body_schema = self.self_model.body_schema.__class__(
             energy=self.energy,
@@ -468,6 +496,42 @@ class SegmentAgent:
             },
             "free_energy_history": list(self.free_energy_history),
         }
+
+    @property
+    def current_tick(self) -> int:
+        return self.cycle
+
+    def _classify_error_source(self, modality: str, error_value: float) -> str:
+        interoceptive_modalities = {"energy", "stress", "fatigue", "temperature"}
+        if modality in interoceptive_modalities:
+            body_val = {
+                "energy": self.energy,
+                "stress": self.stress,
+                "fatigue": self.fatigue,
+                "temperature": self.temperature,
+            }.get(modality, 0.5)
+            thresholds = self.self_model.threat_profile.get(modality, {}) or {}
+            critical_low = float(thresholds.get("critical_low", 0.1))
+            critical_high = float(thresholds.get("critical_high", 0.9))
+            if body_val < critical_low or body_val > critical_high:
+                return "self"
+            return "ambiguous"
+        return "world"
+
+    def prediction_error_trace(
+        self,
+        observation: dict[str, float],
+        prediction: dict[str, float],
+    ) -> dict[str, dict[str, float | str]]:
+        keys = sorted(set(observation) | set(prediction))
+        traced: dict[str, dict[str, float | str]] = {}
+        for modality in keys:
+            value = abs(float(observation.get(modality, 0.0)) - float(prediction.get(modality, 0.0)))
+            traced[modality] = {
+                "value": value,
+                "error_source": self._classify_error_source(modality, value),
+            }
+        return traced
 
     def _record_decision_history(
         self,
@@ -826,6 +890,36 @@ class SegmentAgent:
         for update in consolidation.model_updates:
             if update.update_type == "threat_prior":
                 self.world_model.adjust_threat_prior(update.cluster, update.delta)
+                action_label = action_name(update.action)
+                matched_rule = next(
+                    (
+                        rule
+                        for rule in consolidation.rules
+                        if rule.rule_id == update.rule_id
+                    ),
+                    None,
+                )
+                outcome_label = (
+                    matched_rule.observed_outcome
+                    if matched_rule is not None
+                    else "neutral"
+                )
+                self.self_model.threat_profile.add_learned_threat(
+                    pattern=(
+                        f"SEQUENCE: {action_label}->{outcome_label} "
+                        f"x{matched_rule.sequence_condition.min_occurrences} "
+                        f"in {matched_rule.sequence_condition.window_ticks}t"
+                        if (
+                            matched_rule is not None
+                            and matched_rule.rule_type == "sequence_pattern"
+                            and matched_rule.sequence_condition is not None
+                        )
+                        else f"{action_label} in cluster {update.cluster} -> {outcome_label}"
+                    ),
+                    risk_level=max(0.0, update.delta),
+                    tick=self.current_tick,
+                    source="world",
+                )
                 threat_updates += 1
                 continue
             if update.update_type == "preference_penalty":
@@ -848,19 +942,22 @@ class SegmentAgent:
         current_cluster_id: int | None,
         active_goal: Goal | None = None,
     ) -> dict[str, object]:
-        cost = ACTION_COSTS[action]
-        imagined = self.world_model.imagine_action(action, prediction)
+        action_key = action_name(action)
+        action_schema = self._action_schema_for_name(action_key)
+        cost = self._action_cost(action_key)
+        imagined = self.world_model.imagine_action(action_key, prediction)
+        body_effects = ACTION_BODY_EFFECTS.get(action_key, {})
         imagined_energy = clamp(
             self.energy - cost - self.base_metabolic_rate
-            + ACTION_BODY_EFFECTS[action]["energy_delta"]
+            + body_effects.get("energy_delta", 0.0)
         )
-        imagined_stress = clamp(self.stress + ACTION_BODY_EFFECTS[action]["stress_delta"])
+        imagined_stress = clamp(self.stress + body_effects.get("stress_delta", 0.0))
         imagined_fatigue = clamp(
             self.fatigue + self.fatigue_accumulation_rate
-            + ACTION_BODY_EFFECTS[action]["fatigue_delta"]
+            + body_effects.get("fatigue_delta", 0.0)
         )
         imagined_temp = clamp(
-            self.temperature + ACTION_BODY_EFFECTS[action]["temperature_delta"]
+            self.temperature + body_effects.get("temperature_delta", 0.0)
         )
         next_priors = self.strategic_layer.priors(
             imagined_energy,
@@ -899,7 +996,7 @@ class SegmentAgent:
             value_score,
         ) = self._predict_with_slow_weights(
             cluster_id=current_cluster_id,
-            action=action,
+            action=action_key,
             projected_snapshot=projected_snapshot,
             predicted_effects=predicted_effects,
         )
@@ -921,6 +1018,7 @@ class SegmentAgent:
             "predicted_effects": predicted_effects,
             "value_score": value_score,
             "cost": cost,
+            "action_schema": action_schema,
             "observation_distance": compute_prediction_error(observed, imagined),
         }
 
@@ -935,11 +1033,14 @@ class SegmentAgent:
     ) -> dict[str, dict[str, object]]:
         """Project candidate actions into explicit policy components."""
         allowed = self.self_model.capability_model.available_actions
+        available_actions = self._available_action_schemas()
         candidate_actions = (
-            [a for a in ACTION_COSTS if a in allowed] if allowed else list(ACTION_COSTS)
+            [action.name for action in available_actions if action.name in allowed]
+            if allowed
+            else [action.name for action in available_actions]
         )
         if not candidate_actions:
-            candidate_actions = list(ACTION_COSTS)
+            candidate_actions = [action.name for action in available_actions]
         options: dict[str, dict[str, object]] = {}
         for action in candidate_actions:
             options[action] = self._project_action(
@@ -987,6 +1088,11 @@ class SegmentAgent:
             current_state_snapshot,
             k=3,
         )
+        retrieved_episode_ids = [
+            str(item.get("episode_id", ""))
+            for item in similar_memories
+            if item.get("episode_id")
+        ]
         current_cluster_id = self.long_term_memory.infer_cluster_id(current_state_snapshot)
         action_options = self.evaluate_action_options(
             observed,
@@ -1099,6 +1205,8 @@ class SegmentAgent:
             explanation="",
             active_goal=str(goal_context["active_goal"]),
             goal_context=goal_context,
+            memory_hit=bool(similar_memories),
+            retrieved_episode_ids=retrieved_episode_ids,
         )
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
         diagnostics.explanation = str(diagnostics.structured_explanation["text"])
@@ -1229,7 +1337,7 @@ class SegmentAgent:
 
     def integrate_outcome(
         self,
-        choice: str,
+        choice: str | ActionSchema,
         observed: dict[str, float],
         prediction: dict[str, float],
         errors: dict[str, float],
@@ -1254,12 +1362,13 @@ class SegmentAgent:
             "stress_delta": body_state["stress"] - previous_body_state["stress"],
             "free_energy_drop": fe_delta,
         }
+        action = ensure_action_schema(choice)
         memory_decision = self.long_term_memory.maybe_store_episode(
             self.cycle,
             observed,
             prediction,
             errors,
-            choice,
+            action,
             outcome,
             body_state=body_state,
         )
@@ -1267,7 +1376,7 @@ class SegmentAgent:
             self.episodes.append(
                 MemoryEpisode(
                     cycle=self.cycle,
-                    choice=choice,
+                    choice=action.name,
                     free_energy_before=free_energy_before,
                     free_energy_after=free_energy_after,
                     dopamine_gain=reward_signal,
@@ -1277,7 +1386,7 @@ class SegmentAgent:
                     body_state=body_state,
                 )
             )
-        self.action_history.append(choice)
+        self.action_history.append(action.name)
         self.action_history = self.action_history[-self.action_history_limit :]
         self.last_body_state_snapshot = dict(body_state)
         self.goal_stack.backfill_conflict_outcome(self.cycle, memory_decision.total_surprise)
@@ -1387,7 +1496,7 @@ class SegmentAgent:
         try:
             for payload in episodes:
                 observation_payload = payload.get("observation")
-                action = str(payload.get("action_taken", payload.get("action", "")))
+                action = action_name(payload.get("action_taken", payload.get("action", "")))
                 if not isinstance(observation_payload, dict) or not action:
                     continue
                 body_state = payload.get("body_state")
@@ -1439,7 +1548,7 @@ class SegmentAgent:
         grouped: dict[tuple[int, str], list[dict[str, object]]] = {}
         for payload in replay_batch:
             cluster_id = payload.get("cluster_id")
-            action = str(payload.get("action_taken", payload.get("action", "")))
+            action = action_name(payload.get("action_taken", payload.get("action", "")))
             if not isinstance(cluster_id, int) or not action:
                 continue
             grouped.setdefault((cluster_id, action), []).append(payload)
@@ -1517,7 +1626,7 @@ class SegmentAgent:
 
     def _predicted_outcome_probability(self, payload: dict[str, object]) -> float:
         cluster_id = payload.get("cluster_id")
-        action = str(payload.get("action_taken", payload.get("action", "")))
+        action = action_name(payload.get("action_taken", payload.get("action", "")))
         outcome = str(payload.get("predicted_outcome", "neutral"))
         if not isinstance(cluster_id, int) or not action:
             return 0.0
@@ -1714,6 +1823,7 @@ class SegmentAgent:
             episodes=replay_batch,
             world_model=self.world_model,
             preference_model=self.long_term_memory.preference_model,
+            action_registry=self.action_registry,
             rng=self.rng,
             surprise_threshold=self.long_term_memory.surprise_threshold,
         )
@@ -1787,6 +1897,7 @@ class SegmentAgent:
                 drive.name: drive.urgency for drive in self.drive_system.drives
             },
             "world_model": self.world_model.to_dict(),
+            "action_registry": self.action_registry.to_dict(),
             "interoceptive_layer": self.interoceptive_layer.to_dict(),
             "strategic_layer": self.strategic_layer.to_dict(),
             "long_term_memory": self.long_term_memory.to_dict(),
@@ -1845,6 +1956,11 @@ class SegmentAgent:
             payload.get("interoceptive_layer")
         )
         agent.world_model = GenerativeWorldModel.from_dict(payload.get("world_model"))
+        action_registry_payload = payload.get("action_registry", {})
+        if isinstance(action_registry_payload, dict) and action_registry_payload:
+            agent.action_registry = ActionRegistry.from_dict(action_registry_payload)
+        else:
+            agent.action_registry = build_default_action_registry()
         agent.long_term_memory = AutobiographicalMemory.from_dict(
             payload.get("long_term_memory")
         )
@@ -1922,7 +2038,12 @@ class SegmentAgent:
         agent.goal_stack.log_sink = agent.self_model.log_sink
         if not agent.self_model.capability_model.available_actions:
             agent.self_model.capability_model = CapabilityModel(
-                available_actions=tuple(ACTION_COSTS),
+                available_actions=tuple(agent.action_registry.names()),
+                api_limits=agent.self_model.capability_model.api_limits,
+            )
+        else:
+            agent.self_model.capability_model = CapabilityModel(
+                available_actions=tuple(agent.action_registry.names()),
                 api_limits=agent.self_model.capability_model.api_limits,
             )
         agent.policy_evaluator = PolicyEvaluator(
@@ -2008,17 +2129,6 @@ class SegmentAgent:
             sensorimotor=self.world_model.sensorimotor_layer.belief_state.hyperparameters(),
             strategic=self.strategic_layer.belief_state.hyperparameters(),
         )
-
-
-
-
-
-
-
-
-
-
-
 
 
 

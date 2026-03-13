@@ -31,6 +31,56 @@ ACCEPTANCE_PROFILES: dict[str, dict[str, float | int]] = {
 }
 
 
+def _first_snapshot_difference(
+    first: object,
+    second: object,
+    *,
+    path: str = "snapshot",
+) -> str | None:
+    if type(first) is not type(second):
+        return (
+            f"{path} type mismatch: "
+            f"{type(first).__name__} != {type(second).__name__}"
+        )
+
+    if isinstance(first, dict):
+        first_keys = set(first)
+        second_keys = set(second)
+        missing_from_first = sorted(second_keys - first_keys)
+        if missing_from_first:
+            return f"{path} missing keys in original snapshot: {missing_from_first!r}"
+        missing_from_second = sorted(first_keys - second_keys)
+        if missing_from_second:
+            return f"{path} missing keys after reload: {missing_from_second!r}"
+        for key in sorted(first):
+            difference = _first_snapshot_difference(
+                first[key],
+                second[key],
+                path=f"{path}.{key}",
+            )
+            if difference is not None:
+                return difference
+        return None
+
+    if isinstance(first, list):
+        if len(first) != len(second):
+            return f"{path} length mismatch: {len(first)} != {len(second)}"
+        for index, (first_item, second_item) in enumerate(zip(first, second)):
+            difference = _first_snapshot_difference(
+                first_item,
+                second_item,
+                path=f"{path}[{index}]",
+            )
+            if difference is not None:
+                return difference
+        return None
+
+    if first != second:
+        return f"{path} value mismatch: {first!r} != {second!r}"
+
+    return None
+
+
 def _assert_close_summary(
     first: dict[str, object],
     second: dict[str, object],
@@ -119,7 +169,12 @@ def _run_once(cycles: int, seed: int) -> dict[str, object]:
         trace_records = [json.loads(line) for line in trace_lines]
 
     if snapshot != reloaded_snapshot:
-        raise AssertionError("snapshot reload mismatch after soak run")
+        difference = _first_snapshot_difference(snapshot, reloaded_snapshot)
+        if difference is None:
+            difference = "unknown snapshot difference"
+        raise AssertionError(
+            f"snapshot reload mismatch after soak run: {difference}"
+        )
     if summary["cycles_completed"] != snapshot["metrics"]["cycles_completed"]:
         raise AssertionError("metrics summary and persisted snapshot diverged")
     if snapshot["agent"]["cycle"] != snapshot["metrics"]["cycles_completed"]:

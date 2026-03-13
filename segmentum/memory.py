@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from math import log, sqrt
 from statistics import mean
 
+from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .preferences import PreferenceModel, ValueHierarchy
 
 
@@ -12,7 +13,7 @@ from .preferences import PreferenceModel, ValueHierarchy
 class Episode:
     timestamp: int
     state_vector: dict[str, float]
-    action_taken: str
+    action_taken: ActionSchema
     outcome_state: dict[str, float]
     predicted_outcome: str
     prediction_error: float
@@ -34,8 +35,8 @@ class Episode:
             "cycle": self.timestamp,
             "state_vector": dict(self.state_vector),
             "state_snapshot": state_snapshot,
-            "action_taken": self.action_taken,
-            "action": self.action_taken,
+            "action_taken": self.action_taken.to_dict(),
+            "action": self.action_taken.name,
             "outcome_state": dict(self.outcome_state),
             "outcome": dict(self.outcome_state),
             "predicted_outcome": self.predicted_outcome,
@@ -72,7 +73,9 @@ class Episode:
         return cls(
             timestamp=timestamp,
             state_vector=_coerce_float_dict(state_vector),
-            action_taken=str(payload.get("action_taken", payload.get("action", ""))),
+            action_taken=ActionSchema.from_dict(
+                payload.get("action_taken", payload.get("action", ""))
+            ),
             outcome_state=_coerce_float_dict(
                 payload.get("outcome_state", payload.get("outcome"))
             ),
@@ -320,7 +323,7 @@ class LongTermMemory:
         observation: dict[str, float],
         prediction: dict[str, float],
         errors: dict[str, float],
-        action: str,
+        action: str | ActionSchema,
         outcome: dict[str, float],
         body_state: dict[str, float] | None = None,
     ) -> dict[str, object]:
@@ -351,7 +354,7 @@ class LongTermMemory:
         observation: dict[str, float],
         prediction: dict[str, float],
         errors: dict[str, float],
-        action: str,
+        action: str | ActionSchema,
         outcome: dict[str, float],
         body_state: dict[str, float] | None = None,
     ) -> MemoryDecision:
@@ -519,12 +522,12 @@ class LongTermMemory:
 
     def memory_bias(
         self,
-        action: str,
+        action: str | ActionSchema,
         retrieved_memories: list[dict[str, object]],
     ) -> float:
         weighted_utilities: list[float] = []
         for payload in retrieved_memories:
-            if str(payload.get("action_taken", payload.get("action", ""))) != action:
+            if action_name(payload.get("action_taken", payload.get("action", ""))) != action:
                 continue
             similarity = float(payload.get("similarity", 0.0))
             if similarity <= 0.0:
@@ -612,7 +615,7 @@ class LongTermMemory:
         for entry in top:
             timeline.append({
                 "tick": int(self._episode_cycle(entry)),
-                "action": str(entry.get("action_taken", entry.get("action", "unknown"))),
+                "action": action_name(entry.get("action_taken", entry.get("action", "unknown"))),
                 "outcome": str(entry.get("predicted_outcome", "neutral")),
                 "surprise": float(
                     entry.get("total_surprise", entry.get("weighted_surprise", 0.0))
@@ -741,7 +744,7 @@ class LongTermMemory:
             transitions.append(
                 {
                     "state_cluster": cluster_id,
-                    "action": str(current.get("action_taken", current.get("action", ""))),
+                    "action": action_name(current.get("action_taken", current.get("action", ""))),
                     "next_cluster": next_cluster_id,
                     "timestamp": int(self._episode_cycle(current)),
                 }
@@ -777,7 +780,7 @@ class LongTermMemory:
         ordered_payloads = sorted(
             self.episodes,
             key=lambda payload: (
-                str(payload.get("action_taken", payload.get("action", ""))),
+                action_name(payload.get("action_taken", payload.get("action", ""))),
                 self._episode_cycle(payload),
             ),
         )
@@ -795,7 +798,7 @@ class LongTermMemory:
                 if other_index in used:
                     continue
                 candidate = ordered_payloads[other_index]
-                if str(candidate.get("action_taken", candidate.get("action", ""))) != base_episode.action_taken:
+                if action_name(candidate.get("action_taken", candidate.get("action", ""))) != base_episode.action_taken.name:
                     continue
                 candidate_episode = Episode.from_dict(candidate)
                 candidate_embedding = candidate_episode.embedding or self._build_embedding(candidate_episode.state_vector)
@@ -941,7 +944,7 @@ class LongTermMemory:
         return Episode(
             timestamp=timestamp,
             state_vector=state_vector,
-            action_taken=action,
+            action_taken=ensure_action_schema(action),
             outcome_state=dict(outcome),
             predicted_outcome=preference.outcome,
             prediction_error=prediction_error,
@@ -1101,7 +1104,7 @@ class LongTermMemory:
         gate: dict[str, object] | None = None,
     ) -> None:
         cycle = int(self._episode_cycle(payload))
-        action = str(payload.get("action_taken", payload.get("action", "unknown")))
+        action = action_name(payload.get("action_taken", payload.get("action", "unknown")))
         payload.setdefault("episode_id", f"ep-{cycle:06d}-{action}")
         payload.setdefault("occurrence_count", 1)
         payload.setdefault("support", int(payload.get("occurrence_count", 1)))
@@ -1140,7 +1143,7 @@ class LongTermMemory:
         same_action_recent = sum(
             1
             for payload in self.episodes[-self.novelty_window :]
-            if str(payload.get("action_taken", payload.get("action", ""))) == episode.action_taken
+            if action_name(payload.get("action_taken", payload.get("action", ""))) == episode.action_taken.name
         )
         density_penalty = min(0.35, same_action_recent * 0.05)
         if similarity < 0.90:
@@ -1219,7 +1222,7 @@ class LongTermMemory:
     def _refresh_semantic_patterns(self) -> None:
         by_action: dict[str, list[dict[str, object]]] = {}
         for payload in self.episodes:
-            action = str(payload.get("action_taken", payload.get("action", "")))
+            action = action_name(payload.get("action_taken", payload.get("action", "")))
             by_action.setdefault(action, []).append(payload)
 
         total = max(1, len(self.episodes))

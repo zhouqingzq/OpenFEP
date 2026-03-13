@@ -13,6 +13,8 @@ from dataclasses import asdict, dataclass, field
 from math import exp, sqrt
 from statistics import mean
 
+from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .action_registry import ActionRegistry, build_default_action_registry
 from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .environment import clamp
 from .preferences import PreferenceModel
@@ -41,8 +43,8 @@ class CounterfactualInsight:
     """A single counterfactual observation: an untaken action would have been better."""
 
     source_episode_cycle: int
-    original_action: str
-    counterfactual_action: str
+    original_action: ActionSchema
+    counterfactual_action: ActionSchema
     original_efe: float
     counterfactual_efe: float
     efe_delta: float
@@ -52,11 +54,17 @@ class CounterfactualInsight:
     timestamp: int
     absorbed: bool = False
 
+    def __post_init__(self) -> None:
+        self.original_action = ensure_action_schema(self.original_action)
+        self.counterfactual_action = ensure_action_schema(self.counterfactual_action)
+
     def to_dict(self) -> dict[str, object]:
         return {
             "source_episode_cycle": self.source_episode_cycle,
-            "original_action": self.original_action,
-            "counterfactual_action": self.counterfactual_action,
+            "original_action": self.original_action.to_dict(),
+            "counterfactual_action": self.counterfactual_action.to_dict(),
+            "original_action_name": self.original_action.name,
+            "counterfactual_action_name": self.counterfactual_action.name,
             "original_efe": self.original_efe,
             "counterfactual_efe": self.counterfactual_efe,
             "efe_delta": self.efe_delta,
@@ -72,8 +80,8 @@ class CounterfactualInsight:
         cluster_id = payload.get("cluster_id")
         return cls(
             source_episode_cycle=int(payload.get("source_episode_cycle", 0)),
-            original_action=str(payload.get("original_action", "")),
-            counterfactual_action=str(payload.get("counterfactual_action", "")),
+            original_action=ActionSchema.from_dict(payload.get("original_action", "")),
+            counterfactual_action=ActionSchema.from_dict(payload.get("counterfactual_action", "")),
             original_efe=float(payload.get("original_efe", 0.0)),
             counterfactual_efe=float(payload.get("counterfactual_efe", 0.0)),
             efe_delta=float(payload.get("efe_delta", 0.0)),
@@ -114,7 +122,7 @@ class CounterfactualSummary:
 class BranchResult:
     """Result of evaluating a single counterfactual branch."""
 
-    action: str
+    action: ActionSchema
     predicted_efe: float
     confidence: float
     steps_completed: int
@@ -139,11 +147,13 @@ class ForwardGenerativeModel:
         world_model: GenerativeWorldModel,
         preference_model: PreferenceModel,
         known_episodes: list[dict[str, object]],
+        action_registry: ActionRegistry | None = None,
         confidence_decay: float = DEFAULT_CONFIDENCE_DECAY,
         unknown_region_threshold: float = DEFAULT_CONFIDENCE_THRESHOLD,
     ) -> None:
         self.world_model = world_model
         self.preference_model = preference_model
+        self.action_registry = action_registry or build_default_action_registry()
         self.confidence_decay = confidence_decay
         self.unknown_region_threshold = unknown_region_threshold
 
@@ -159,12 +169,13 @@ class ForwardGenerativeModel:
     def predict_step(
         self,
         state: dict[str, object],
-        action: str,
+        action: ActionSchema,
     ) -> tuple[dict[str, object], float]:
         """Predict next state from ``(state, action)``.
 
         Returns ``(next_state, confidence)`` where confidence ∈ (0, 1].
         """
+        action = ensure_action_schema(action)
         obs = _float_dict(state.get("observation", {}))
         body = _float_dict(state.get("body_state", {}))
 
@@ -172,8 +183,8 @@ class ForwardGenerativeModel:
         imagined_obs = self.world_model.imagine_action(action, obs)
 
         # Body state projection
-        cost = ACTION_COSTS.get(action, 0.05)
-        effects = ACTION_BODY_EFFECTS.get(action, {})
+        cost = self._action_cost(action)
+        effects = self._body_effects(action)
         energy = clamp(
             float(body.get("energy", 0.5))
             - cost - 0.015
@@ -219,6 +230,27 @@ class ForwardGenerativeModel:
 
         confidence = self._compute_confidence(state)
         return next_state, confidence
+
+    def simulate(
+        self,
+        state: dict[str, object],
+        action: ActionSchema,
+    ) -> dict[str, object]:
+        state_payload = state
+        if "observation" not in state_payload and "body_state" not in state_payload:
+            state_payload = {
+                "observation": {},
+                "body_state": dict(state),
+            }
+        next_state, _ = self.predict_step(state_payload, action)
+        body_state = dict(next_state.get("body_state", {}))
+        predicted_outcome = dict(next_state.get("predicted_outcome", {}))
+        merged = dict(body_state)
+        merged.update(predicted_outcome)
+        return merged
+
+    def register_effects(self, action_name: str, effects: dict[str, float]) -> None:
+        ACTION_BODY_EFFECTS[action_name] = dict(effects)
 
     def predict_multistep(
         self,
@@ -287,6 +319,24 @@ class ForwardGenerativeModel:
             vec.extend(float(body.get(k, 0.0)) for k in sorted(body.keys()))
         return vec
 
+    def _action_cost(self, action: ActionSchema) -> float:
+        registry_cost = self.action_registry.get_cost(action.name)
+        if registry_cost:
+            return registry_cost
+        if action.cost_estimate:
+            return float(action.cost_estimate)
+        return float(ACTION_COSTS.get(action.name, 0.05))
+
+    def _body_effects(self, action: ActionSchema) -> dict[str, float]:
+        if action.name in ACTION_BODY_EFFECTS:
+            return dict(ACTION_BODY_EFFECTS[action.name])
+        return {
+            "energy_delta": 0.0,
+            "stress_delta": 0.10,
+            "fatigue_delta": 0.04,
+            "temperature_delta": 0.0,
+        }
+
 
 # ---------------------------------------------------------------------------
 # Counterfactual Engine
@@ -301,6 +351,7 @@ class CounterfactualEngine:
         *,
         forward_model: ForwardGenerativeModel,
         preference_model: PreferenceModel,
+        action_registry: ActionRegistry | None = None,
         max_depth: int = 3,
         max_branches: int = 3,
         confidence_threshold: float = DEFAULT_CONFIDENCE_THRESHOLD,
@@ -310,6 +361,7 @@ class CounterfactualEngine:
     ) -> None:
         self.forward_model = forward_model
         self.preference_model = preference_model
+        self.action_registry = action_registry or forward_model.action_registry
         self.max_depth = max_depth
         self.max_branches = max_branches
         self.confidence_threshold = confidence_threshold
@@ -379,7 +431,7 @@ class CounterfactualEngine:
         current_cycle: int,
         rng: random.Random,
     ) -> tuple[list[CounterfactualInsight], int]:
-        original_action = str(
+        original_action = ensure_action_schema(
             episode.get("action_taken", episode.get("action", ""))
         )
         episode_cycle = int(episode.get("timestamp", episode.get("cycle", 0)))
@@ -404,7 +456,7 @@ class CounterfactualEngine:
         cluster_id = episode.get("cluster_id")
 
         # Enumerate alternative actions, prioritised by policy bias.
-        alternative_actions = [a for a in ACTION_COSTS if a != original_action]
+        alternative_actions = self.action_registry.get_alternatives(original_action)
         if isinstance(cluster_id, int):
             alternative_actions.sort(
                 key=lambda a: -self.forward_model.world_model.get_policy_bias(
@@ -581,7 +633,7 @@ class InsightAbsorber:
                 continue
 
             buffer_key = (
-                f"{insight.cluster_id}:{insight.original_action}:{insight.counterfactual_action}"
+                f"{insight.cluster_id}:{insight.original_action.name}:{insight.counterfactual_action.name}"
             )
             candidate_buffer = world_model.counterfactual_candidate_buffer.setdefault(
                 buffer_key,
@@ -591,8 +643,10 @@ class InsightAbsorber:
                     "best_delta": 0.0,
                     "last_timestamp": float(insight.timestamp),
                     "cluster_id": float(insight.cluster_id),
-                    "original_action": insight.original_action,
-                    "counterfactual_action": insight.counterfactual_action,
+                    "original_action": insight.original_action.to_dict(),
+                    "counterfactual_action": insight.counterfactual_action.to_dict(),
+                    "original_action_name": insight.original_action.name,
+                    "counterfactual_action_name": insight.counterfactual_action.name,
                 },
             )
             candidate_buffer["confirmations"] = float(candidate_buffer.get("confirmations", 0.0)) + 1.0
@@ -616,8 +670,10 @@ class InsightAbsorber:
                         "reason": "cooling_gate",
                         "source_episode_cycle": insight.source_episode_cycle,
                         "cluster_id": insight.cluster_id,
-                        "original_action": insight.original_action,
-                        "counterfactual_action": insight.counterfactual_action,
+                        "original_action": insight.original_action.name,
+                        "counterfactual_action": insight.counterfactual_action.name,
+                        "original_action_schema": insight.original_action.to_dict(),
+                        "counterfactual_action_schema": insight.counterfactual_action.to_dict(),
                         "efe_delta": insight.efe_delta,
                         "confidence": insight.confidence,
                         "confirmations": candidate_buffer["confirmations"],
@@ -640,8 +696,10 @@ class InsightAbsorber:
                         "reason": "review_veto",
                         "source_episode_cycle": insight.source_episode_cycle,
                         "cluster_id": insight.cluster_id,
-                        "original_action": insight.original_action,
-                        "counterfactual_action": insight.counterfactual_action,
+                        "original_action": insight.original_action.name,
+                        "counterfactual_action": insight.counterfactual_action.name,
+                        "original_action_schema": insight.original_action.to_dict(),
+                        "counterfactual_action_schema": insight.counterfactual_action.to_dict(),
                         "efe_delta": insight.efe_delta,
                         "confidence": insight.confidence,
                         "confirmations": candidate_buffer["confirmations"],
@@ -678,13 +736,13 @@ class InsightAbsorber:
             )
 
             cf_biases = world_model.counterfactual_biases
-            cf_biases[insight.counterfactual_action] = max(
+            cf_biases[insight.counterfactual_action.name] = max(
                 -1.0,
-                min(1.0, cf_biases.get(insight.counterfactual_action, 0.0) + delta),
+                min(1.0, cf_biases.get(insight.counterfactual_action.name, 0.0) + delta),
             )
-            cf_biases[insight.original_action] = max(
+            cf_biases[insight.original_action.name] = max(
                 -1.0,
-                min(1.0, cf_biases.get(insight.original_action, 0.0) - delta),
+                min(1.0, cf_biases.get(insight.original_action.name, 0.0) - delta),
             )
 
             world_model.counterfactual_candidate_buffer.pop(buffer_key, None)
@@ -697,8 +755,10 @@ class InsightAbsorber:
                     "review_family": review.get("review_family", ""),
                     "source_episode_cycle": insight.source_episode_cycle,
                     "cluster_id": insight.cluster_id,
-                    "original_action": insight.original_action,
-                    "counterfactual_action": insight.counterfactual_action,
+                    "original_action": insight.original_action.name,
+                    "counterfactual_action": insight.counterfactual_action.name,
+                    "original_action_schema": insight.original_action.to_dict(),
+                    "counterfactual_action_schema": insight.counterfactual_action.to_dict(),
                     "efe_delta": insight.efe_delta,
                     "confidence": insight.confidence,
                     "policy_delta": delta,
@@ -806,8 +866,10 @@ class InsightAbsorber:
             "type": "candidate_review",
             "review_family": family_id,
             "cluster_id": insight.cluster_id,
-            "original_action": insight.original_action,
-            "counterfactual_action": insight.counterfactual_action,
+            "original_action": insight.original_action.name,
+            "counterfactual_action": insight.counterfactual_action.name,
+            "original_action_schema": insight.original_action.to_dict(),
+            "counterfactual_action_schema": insight.counterfactual_action.to_dict(),
             "confirmations": candidate_buffer.get("confirmations", 0.0),
             "average_benefit": average_benefit,
             "pass_rate": pass_rate,
@@ -858,13 +920,14 @@ class InsightAbsorber:
         *,
         observation: dict[str, float],
         body_state: dict[str, float],
-        action: str,
+        action: str | ActionSchema,
         world_model: GenerativeWorldModel,
         preference_model: PreferenceModel | None,
     ) -> float:
+        action_key = action_name(action)
         imagined = world_model.imagine_action(action, observation)
-        cost = ACTION_COSTS.get(action, 0.05)
-        effects = ACTION_BODY_EFFECTS.get(action, {})
+        cost = ACTION_COSTS.get(action_key, 0.05)
+        effects = ACTION_BODY_EFFECTS.get(action_key, {})
         next_body = {
             "energy": clamp(float(body_state.get("energy", 0.5)) - cost - 0.015 + effects.get("energy_delta", 0.0)),
             "stress": clamp(float(body_state.get("stress", 0.25)) + effects.get("stress_delta", 0.0)),
@@ -904,8 +967,10 @@ class InsightAbsorber:
                 "type": "rejection",
                 "reason": reason,
                 "source_episode_cycle": insight.source_episode_cycle,
-                "original_action": insight.original_action,
-                "counterfactual_action": insight.counterfactual_action,
+                "original_action": insight.original_action.name,
+                "counterfactual_action": insight.counterfactual_action.name,
+                "original_action_schema": insight.original_action.to_dict(),
+                "counterfactual_action_schema": insight.counterfactual_action.to_dict(),
                 "efe_delta": insight.efe_delta,
                 "confidence": insight.confidence,
             }
@@ -1094,6 +1159,7 @@ def run_counterfactual_phase(
     world_model: GenerativeWorldModel,
     preference_model: PreferenceModel,
     rng: random.Random,
+    action_registry: ActionRegistry | None = None,
     max_depth: int = 3,
     energy_budget: float = DEFAULT_ENERGY_BUDGET,
     surprise_threshold: float = 0.40,
@@ -1106,10 +1172,12 @@ def run_counterfactual_phase(
         world_model=world_model,
         preference_model=preference_model,
         known_episodes=episodes,
+        action_registry=action_registry,
     )
     engine = CounterfactualEngine(
         forward_model=forward_model,
         preference_model=preference_model,
+        action_registry=action_registry,
         max_depth=max_depth,
         energy_budget=energy_budget,
         surprise_threshold=surprise_threshold,
@@ -1162,6 +1230,7 @@ class CounterfactualLearning:
         world_model: GenerativeWorldModel,
         preference_model: PreferenceModel,
         rng: random.Random,
+        action_registry: ActionRegistry | None = None,
         max_depth: int = 3,
         energy_budget: float = DEFAULT_ENERGY_BUDGET,
         surprise_threshold: float = 0.40,
@@ -1172,6 +1241,7 @@ class CounterfactualLearning:
             episodes=episodes,
             world_model=world_model,
             preference_model=preference_model,
+            action_registry=action_registry,
             rng=rng,
             max_depth=max_depth,
             energy_budget=energy_budget,
