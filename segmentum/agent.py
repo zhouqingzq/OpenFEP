@@ -429,7 +429,7 @@ class SegmentAgent:
         self.semantic_memory: list[SemanticMemoryEntry] = []
         self.sleep_history: list[SleepSummary] = []
         self.action_history: list[str] = []
-        self.action_history_limit = 32
+        self.action_history_limit = 128
         self.decision_history: list[dict[str, object]] = []
         self.decision_history_limit = 512
         self.drive_history: list[dict[str, float]] = []
@@ -1558,26 +1558,30 @@ class SegmentAgent:
         return diagnostics
 
     def _action_regression_penalty(self, action: str) -> float:
-        recent = self.action_history[-12:]
+        recent = self.action_history[-24:]
         if len(recent) < 4:
             return 0.0
 
         repeat_ratio = recent.count(action) / len(recent)
         streak = 0
-        for previous in reversed(recent):
+        for previous in reversed(self.action_history):
             if previous != action:
                 break
             streak += 1
 
         penalty = 0.0
         if repeat_ratio > 0.50:
-            penalty += (repeat_ratio - 0.50) * 0.50
-        if streak > 3:
-            penalty += (streak - 3) * 0.14
-        if streak > 6:
-            penalty += 0.20 + ((streak - 6) * 0.12)
-        if action == "rest" and streak > 8:
-            penalty += 1.25 + ((streak - 8) * 0.15)
+            penalty += (repeat_ratio - 0.50) * 0.80
+        if streak > 2:
+            penalty += (streak - 2) * 0.18
+        if streak > 5:
+            penalty += 0.35 + ((streak - 5) * 0.22)
+        if streak > 8:
+            penalty += 1.50 + ((streak - 8) * 0.55)
+        if streak > 12:
+            penalty += 2.50 + ((streak - 12) * 0.80)
+        if action == "rest" and streak > 6:
+            penalty += 2.00 + ((streak - 6) * 0.50)
         if action == "internal_update" and repeat_ratio > 0.35:
             penalty += 0.08 + (repeat_ratio - 0.35) * 0.35
         return penalty
