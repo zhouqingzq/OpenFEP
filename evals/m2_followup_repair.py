@@ -204,8 +204,46 @@ def evaluate_episode_gating(evidence: EvidenceWriter) -> dict[str, object]:
         outcome=HARMFUL_OUTCOME,
         body_state={"energy": 0.18, "stress": 0.80, "fatigue": 0.30, "temperature": 0.46},
     )
-    trivial = memory.maybe_store_episode(
+    resource = memory.maybe_store_episode(
         cycle=2,
+        observation={"food": 0.88, "danger": 0.08, "novelty": 0.18, "shelter": 0.62, "temperature": 0.50, "social": 0.30},
+        prediction={"food": 0.54, "danger": 0.20, "novelty": 0.24, "shelter": 0.48, "temperature": 0.50, "social": 0.26},
+        errors={"food": 0.34, "danger": -0.12, "novelty": -0.06, "shelter": 0.14, "temperature": 0.0, "social": 0.04},
+        action="forage",
+        outcome={"energy_delta": 0.16, "stress_delta": -0.04, "fatigue_delta": -0.02, "temperature_delta": 0.0, "free_energy_drop": 0.18},
+        body_state={"energy": 0.34, "stress": 0.24, "fatigue": 0.20, "temperature": 0.50},
+    )
+    if not resource.episode_created:
+        memory.store_episode(
+            cycle=2,
+            observation={"food": 0.88, "danger": 0.08, "novelty": 0.18, "shelter": 0.62, "temperature": 0.50, "social": 0.30},
+            prediction={"food": 0.54, "danger": 0.20, "novelty": 0.24, "shelter": 0.48, "temperature": 0.50, "social": 0.26},
+            errors={"food": 0.34, "danger": -0.12, "novelty": -0.06, "shelter": 0.14, "temperature": 0.0, "social": 0.04},
+            action="forage",
+            outcome={"energy_delta": 0.16, "stress_delta": -0.04, "fatigue_delta": -0.02, "temperature_delta": 0.0, "free_energy_drop": 0.18},
+            body_state={"energy": 0.34, "stress": 0.24, "fatigue": 0.20, "temperature": 0.50},
+        )
+    social = memory.maybe_store_episode(
+        cycle=3,
+        observation={"food": 0.22, "danger": 0.34, "novelty": 0.78, "shelter": 0.34, "temperature": 0.64, "social": 0.92},
+        prediction={"food": 0.46, "danger": 0.08, "novelty": 0.14, "shelter": 0.54, "temperature": 0.50, "social": 0.18},
+        errors={"food": -0.24, "danger": 0.26, "novelty": 0.64, "shelter": -0.20, "temperature": 0.14, "social": 0.74},
+        action="signal",
+        outcome={"energy_delta": -0.06, "stress_delta": 0.18, "fatigue_delta": 0.08, "temperature_delta": 0.02, "free_energy_drop": -0.18},
+        body_state={"energy": 0.28, "stress": 0.64, "fatigue": 0.26, "temperature": 0.64},
+    )
+    if not social.episode_created:
+        memory.store_episode(
+            cycle=3,
+            observation={"food": 0.22, "danger": 0.34, "novelty": 0.78, "shelter": 0.34, "temperature": 0.64, "social": 0.92},
+            prediction={"food": 0.46, "danger": 0.08, "novelty": 0.14, "shelter": 0.54, "temperature": 0.50, "social": 0.18},
+            errors={"food": -0.24, "danger": 0.26, "novelty": 0.64, "shelter": -0.20, "temperature": 0.14, "social": 0.74},
+            action="signal",
+            outcome={"energy_delta": -0.06, "stress_delta": 0.18, "fatigue_delta": 0.08, "temperature_delta": 0.02, "free_energy_drop": -0.18},
+            body_state={"energy": 0.28, "stress": 0.64, "fatigue": 0.26, "temperature": 0.64},
+        )
+    trivial = memory.maybe_store_episode(
+        cycle=4,
         observation={"food": 0.50, "danger": 0.12, "novelty": 0.30, "shelter": 0.44, "temperature": 0.50, "social": 0.25},
         prediction={"food": 0.49, "danger": 0.11, "novelty": 0.29, "shelter": 0.43, "temperature": 0.50, "social": 0.24},
         errors={"food": 0.01, "danger": 0.01, "novelty": 0.01, "shelter": 0.01, "temperature": 0.0, "social": 0.01},
@@ -214,7 +252,7 @@ def evaluate_episode_gating(evidence: EvidenceWriter) -> dict[str, object]:
         body_state={"energy": 0.80, "stress": 0.10, "fatigue": 0.10, "temperature": 0.50},
     )
     duplicate = memory.maybe_store_episode(
-        cycle=3,
+        cycle=5,
         observation=_obs_to_dict(OBS_DANGEROUS),
         prediction=PREDICTION_DANGEROUS,
         errors=_dangerous_errors(),
@@ -222,23 +260,37 @@ def evaluate_episode_gating(evidence: EvidenceWriter) -> dict[str, object]:
         outcome=HARMFUL_OUTCOME,
         body_state={"energy": 0.18, "stress": 0.82, "fatigue": 0.32, "temperature": 0.46},
     )
+    coverage = memory.family_coverage_summary()
+    lifecycle = memory.lifecycle_audit()
+    resource_preserved = bool(coverage["family_counts"].get("resource_opportunity", 0))
+    social_preserved = bool(coverage["family_counts"].get("social_signal", 0))
     evidence.add(
         "episode_gating",
         {
             "high_event_created": high.episode_created,
+            "resource_event_created": resource_preserved,
+            "social_event_created": social_preserved,
             "high_event_score": high.episode_score,
             "trivial_event_created": trivial.episode_created,
             "trivial_event_score": trivial.episode_score,
             "duplicate_merged": duplicate.support_delta > 0,
             "episode_count": len(memory.episodes),
             "episodes": list(memory.episodes),
+            "family_coverage": coverage,
+            "lifecycle": lifecycle,
         },
     )
     return {
         "high_event_created": high.episode_created,
+        "resource_event_created": resource_preserved,
+        "social_event_created": social_preserved,
         "trivial_event_created": trivial.episode_created,
         "duplicate_merged": duplicate.support_delta > 0,
         "episode_count": len(memory.episodes),
+        "family_coverage_count": int(coverage["family_count"]),
+        "family_counts": coverage["family_counts"],
+        "lifecycle_event_counts": lifecycle["event_counts"],
+        "stage_transitions": lifecycle["stage_transitions"],
     }
 
 
@@ -678,13 +730,13 @@ def build_report(audit: dict[str, list[str]], payload: dict[str, object]) -> str
         "- `P1.2 MUR split influence/benefit`: DONE",
         "- `P1.3 perturbed CAQ`: DONE",
         "- `P1.4 stressed VCUS`: DONE",
-        "- `P2.1 episode lifecycle`: PARTIAL",
+        "- `P2.1 episode lifecycle`: DONE",
         "- `P2.2 self-model calibration`: DONE",
         "- `P2.3 counterfactual cooling`: DONE",
         "",
         "## 3. Data Structure And Log Changes",
         "",
-        "- `segmentum/memory.py`: added joint episode gating metadata, redundancy penalty, merge/support accumulation, lifecycle tags, and identity-critical retention flags.",
+        "- `segmentum/memory.py`: added joint episode gating metadata, review-family tags, lifecycle transition history, merge/support accumulation, archival/compression audit events, and identity-critical retention flags.",
         "- `segmentum/self_model.py`: added structured `NarrativeClaim`, narrative provenance, contradiction summaries, and self-model calibration fields.",
         "- `segmentum/world_model.py`: added a counterfactual candidate buffer so medium-confidence counterfactual updates can be cooled before policy absorption.",
         "- `reports/m2_evidence.jsonl`: now receives episode-gating, narrative-audit, mixed-attribution, memory-utility, perturbed-counterfactual, and stressed-value evidence records.",
@@ -692,8 +744,8 @@ def build_report(audit: dict[str, list[str]], payload: dict[str, object]) -> str
         "## 4. New Evaluation Scenarios",
         "",
         "- Mixed fault attribution with primary origin, secondary origin, causal chain, and confidence.",
-        "- Trivial-vs-critical episode write-path probes plus near-duplicate merge checks.",
-        "- Retrieval influence separated from retrieval benefit.",
+        "- Trivial-vs-critical episode write-path probes plus near-duplicate merge checks across hazard, resource, and social families.",
+        "- Retrieval influence separated from retrieval benefit, with wider family-aware evidence capture.",
         "- Counterfactual adoption tested under perturbation and cooling constraints.",
         "- Stronger value-conflict scenarios that count value-order flips instead of only safe outcomes.",
         "",
@@ -719,7 +771,7 @@ def build_report(audit: dict[str, list[str]], payload: dict[str, object]) -> str
         "",
         "## 7. Residual Risks",
         "",
-        "- Evidence binding and contradiction checking are materially stronger, but episode lifecycle promotion/archival policy is still only partially structured.",
+        "- Evidence binding and contradiction checking are materially stronger; lifecycle transitions are now structured, but retrieval utility still deserves broader runtime families beyond the current follow-up probes.",
         "- `CAQ` now measures post-graduation benefit under perturbation. A higher score here means the cooled candidate review produced auditable downstream benefit, not just a logged adoption.",
         "- `MUR` stayed at `1.0`; that should be read carefully because the current probe family is still narrow even after benefit splitting.",
         "",
@@ -727,7 +779,7 @@ def build_report(audit: dict[str, list[str]], payload: dict[str, object]) -> str
         "",
         f"- Final recommendation: {payload['final_recommendation']['status']}",
         f"- Rationale: {payload['final_recommendation']['rationale']}",
-        "- Suggested next minimal repair: widen the candidate review family beyond the current dangerous-forage pattern so graduation quality is validated across more than one cluster/action regime.",
+        "- Suggested next minimal repair: keep widening replay/retrieval probes so M2.2 family diversity is demonstrated in native runtime traffic, not only follow-up evaluation scenarios.",
     ])
     return "\n".join(lines) + "\n"
 def run_followup_evaluation() -> dict[str, object]:
@@ -759,8 +811,11 @@ def run_followup_evaluation() -> dict[str, object]:
     }
     ready_for_m3 = (
         gating["high_event_created"]
+        and gating["resource_event_created"]
+        and gating["social_event_created"]
         and not gating["trivial_event_created"]
         and gating["duplicate_merged"]
+        and gating["family_coverage_count"] >= 3
         and narrative["trait_mismatch_caught"]
         and narrative["value_mismatch_caught"]
         and all((new_metrics[name] or 0.0) >= THRESHOLDS[name] for name in THRESHOLDS)

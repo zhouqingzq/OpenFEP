@@ -27,13 +27,13 @@ Harness-only
 - `P1.2 MUR split influence/benefit`: DONE
 - `P1.3 perturbed CAQ`: DONE
 - `P1.4 stressed VCUS`: DONE
-- `P2.1 episode lifecycle`: PARTIAL
+- `P2.1 episode lifecycle`: DONE
 - `P2.2 self-model calibration`: DONE
 - `P2.3 counterfactual cooling`: DONE
 
 ## 3. Data Structure And Log Changes
 
-- `segmentum/memory.py`: added joint episode gating metadata, redundancy penalty, merge/support accumulation, lifecycle tags, and identity-critical retention flags.
+- `segmentum/memory.py`: added joint episode gating metadata, review-family tags, lifecycle transition history, merge/support accumulation, archival/compression audit events, and identity-critical retention flags.
 - `segmentum/self_model.py`: added structured `NarrativeClaim`, narrative provenance, contradiction summaries, and self-model calibration fields.
 - `segmentum/world_model.py`: added a counterfactual candidate buffer so medium-confidence counterfactual updates can be cooled before policy absorption.
 - `reports/m2_evidence.jsonl`: now receives episode-gating, narrative-audit, mixed-attribution, memory-utility, perturbed-counterfactual, and stressed-value evidence records.
@@ -41,8 +41,8 @@ Harness-only
 ## 4. New Evaluation Scenarios
 
 - Mixed fault attribution with primary origin, secondary origin, causal chain, and confidence.
-- Trivial-vs-critical episode write-path probes plus near-duplicate merge checks.
-- Retrieval influence separated from retrieval benefit.
+- Trivial-vs-critical episode write-path probes plus near-duplicate merge checks across hazard, resource, and social families.
+- Retrieval influence separated from retrieval benefit, with wider family-aware evidence capture.
 - Counterfactual adoption tested under perturbation and cooling constraints.
 - Stronger value-conflict scenarios that count value-order flips instead of only safe outcomes.
 
@@ -68,7 +68,7 @@ Harness-only
 
 ## 7. Residual Risks
 
-- Evidence binding and contradiction checking are materially stronger, but episode lifecycle promotion/archival policy is still only partially structured.
+- Evidence binding and contradiction checking are materially stronger; lifecycle transitions are now structured, but retrieval utility still deserves broader runtime families beyond the current follow-up probes.
 - `CAQ` now measures post-graduation benefit under perturbation. A higher score here means the cooled candidate review produced auditable downstream benefit, not just a logged adoption.
 - `MUR` stayed at `1.0`; that should be read carefully because the current probe family is still narrow even after benefit splitting.
 
@@ -76,4 +76,4 @@ Harness-only
 
 - Final recommendation: RECOMMEND_M3_WITH_CAUTION
 - Rationale: P0 evidence-loop repairs are in place and stricter metrics remain above threshold.
-- Suggested next minimal repair: widen the candidate review family beyond the current dangerous-forage pattern so graduation quality is validated across more than one cluster/action regime.
+- Suggested next minimal repair: keep widening replay/retrieval probes so M2.2 family diversity is demonstrated in native runtime traffic, not only follow-up evaluation scenarios.

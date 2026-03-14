@@ -171,6 +171,12 @@ LIFECYCLE_VALIDATED_EPISODE = "validated_episode"
 LIFECYCLE_ARCHIVED_SUMMARY = "archived_summary"
 LIFECYCLE_PROTECTED_IDENTITY_CRITICAL = "protected_identity_critical_episode"
 
+EPISODE_FAMILY_HAZARD = "hazard_response"
+EPISODE_FAMILY_RESOURCE = "resource_opportunity"
+EPISODE_FAMILY_SOCIAL = "social_signal"
+EPISODE_FAMILY_ENVIRONMENT = "environmental_shift"
+EPISODE_FAMILY_ROUTINE = "routine_monitoring"
+
 # Minimum raw prediction error required before risk can amplify surprise.
 # When observation closely matches prediction (low PE), even a high model-risk
 # should not inflate total_surprise — the world is behaving as expected.
@@ -307,6 +313,7 @@ class LongTermMemory:
     cluster_centroids: list[list[float]] = field(default_factory=list)
     cluster_counts: list[int] = field(default_factory=list)
     archived_episodes: list[dict] = field(default_factory=list)
+    lifecycle_events: list[dict[str, object]] = field(default_factory=list)
     preference_model: PreferenceModel = field(default_factory=PreferenceModel)
 
     @property
@@ -751,10 +758,22 @@ class LongTermMemory:
             )
         return transitions
 
-    def delete_episode(self, payload: dict[str, object]) -> bool:
+    def delete_episode(self, payload: dict[str, object], *, record_event: bool = True) -> bool:
+        if record_event:
+            event_cycle = int(payload.get("last_seen_cycle", self._episode_cycle(payload)))
+            self._record_memory_lifecycle_event(
+                payload,
+                event="deleted",
+                stage=str(payload.get("lifecycle_stage", "deleted")),
+                cycle=event_cycle,
+                previous_stage=payload.get("lifecycle_stage"),
+                details={"archive_reason": payload.get("archive_reason")},
+            )
         try:
             self.episodes.remove(payload)
         except ValueError:
+            if record_event and self.lifecycle_events:
+                self.lifecycle_events.pop()
             return False
         self._refresh_semantic_patterns()
         return True
@@ -769,9 +788,23 @@ class LongTermMemory:
         archived = dict(payload)
         archived["archived_at_cycle"] = archive_cycle
         archived["archive_reason"] = reason
-        archived["lifecycle_stage"] = LIFECYCLE_ARCHIVED_SUMMARY
+        self._set_lifecycle_stage(
+            archived,
+            LIFECYCLE_ARCHIVED_SUMMARY,
+            event="archived",
+            cycle=archive_cycle,
+            details={"reason": reason},
+        )
         self.archived_episodes.append(archived)
-        return self.delete_episode(payload)
+        self._record_memory_lifecycle_event(
+            archived,
+            event="archived",
+            stage=LIFECYCLE_ARCHIVED_SUMMARY,
+            cycle=archive_cycle,
+            previous_stage=payload.get("lifecycle_stage"),
+            details={"reason": reason},
+        )
+        return self.delete_episode(payload, record_event=False)
 
     def compress_episodes(self) -> int:
         if len(self.episodes) < 2:
@@ -814,6 +847,36 @@ class LongTermMemory:
                 continue
             merged_payload = self._merge_episode_group(group)
             merged_payload["consolidated"] = True
+            compression_cycle = int(max(self._episode_cycle(item) for item in group))
+            self._set_lifecycle_stage(
+                merged_payload,
+                str(merged_payload.get("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE)),
+                event="compressed",
+                cycle=compression_cycle,
+                details={
+                    "source_episode_ids": [
+                        str(item.get("episode_id", ""))
+                        for item in group
+                        if item.get("episode_id")
+                    ],
+                    "compressed_count": len(group),
+                },
+            )
+            self._record_memory_lifecycle_event(
+                merged_payload,
+                event="compressed",
+                stage=str(merged_payload.get("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE)),
+                cycle=compression_cycle,
+                previous_stage=None,
+                details={
+                    "source_episode_ids": [
+                        str(item.get("episode_id", ""))
+                        for item in group
+                        if item.get("episode_id")
+                    ],
+                    "compressed_count": len(group),
+                },
+            )
             compressed.append(merged_payload)
             removed += len(group) - 1
 
@@ -821,6 +884,49 @@ class LongTermMemory:
         self.episodes = compressed[-self.max_episodes :]
         self._refresh_semantic_patterns()
         return removed
+
+    def family_coverage_summary(self) -> dict[str, object]:
+        family_counts: dict[str, int] = {}
+        stage_counts: dict[str, int] = {}
+        family_stage_matrix: dict[str, dict[str, int]] = {}
+        combined = [(episode, "active") for episode in self.episodes]
+        combined.extend((episode, "archived") for episode in self.archived_episodes)
+        for payload, source in combined:
+            family = str(payload.get("episode_family", EPISODE_FAMILY_ROUTINE))
+            stage = str(payload.get("lifecycle_stage", "unknown"))
+            family_counts[family] = family_counts.get(family, 0) + 1
+            stage_counts[stage] = stage_counts.get(stage, 0) + 1
+            matrix_entry = family_stage_matrix.setdefault(family, {})
+            matrix_entry[stage] = matrix_entry.get(stage, 0) + 1
+            matrix_entry[source] = matrix_entry.get(source, 0) + 1
+        return {
+            "family_count": len(family_counts),
+            "family_counts": family_counts,
+            "stage_counts": stage_counts,
+            "source_counts": {
+                "active": len(self.episodes),
+                "archived": len(self.archived_episodes),
+            },
+            "family_stage_matrix": family_stage_matrix,
+        }
+
+    def lifecycle_audit(self) -> dict[str, object]:
+        event_counts: dict[str, int] = {}
+        stage_transitions: dict[str, int] = {}
+        for event in self.lifecycle_events:
+            event_type = str(event.get("event", "unknown"))
+            event_counts[event_type] = event_counts.get(event_type, 0) + 1
+            previous = event.get("previous_stage")
+            current = event.get("stage")
+            if previous and current and previous != current:
+                key = f"{previous}->{current}"
+                stage_transitions[key] = stage_transitions.get(key, 0) + 1
+        return {
+            "event_count": len(self.lifecycle_events),
+            "event_counts": event_counts,
+            "stage_transitions": stage_transitions,
+            "current_stage_counts": self.family_coverage_summary()["stage_counts"],
+        }
 
     def _resolve_reference_cycle(
         self,
@@ -871,6 +977,7 @@ class LongTermMemory:
             "cluster_centroids": [list(centroid) for centroid in self.cluster_centroids],
             "cluster_counts": list(self.cluster_counts),
             "archived_episodes": list(self.archived_episodes),
+            "lifecycle_events": list(self.lifecycle_events),
             "preference_model": self.preference_model.to_dict(),
             "value_hierarchy": self.preference_model.legacy_value_hierarchy_dict(),
         }
@@ -920,6 +1027,7 @@ class LongTermMemory:
                 int(value) for value in list(payload.get("cluster_counts", []))
             ],
             archived_episodes=list(payload.get("archived_episodes", [])),
+            lifecycle_events=list(payload.get("lifecycle_events", [])),
             preference_model=PreferenceModel.from_dict(preference_payload),
         )
 
@@ -1111,6 +1219,8 @@ class LongTermMemory:
         payload.setdefault("support_count", int(payload.get("occurrence_count", 1)))
         payload.setdefault("first_seen_cycle", cycle)
         payload.setdefault("last_seen_cycle", cycle)
+        payload.setdefault("episode_family", self._infer_episode_family(payload))
+        payload.setdefault("family_features", self._extract_family_features(payload))
         identity_critical = bool(payload.get("identity_critical", False))
         raw_pe = float(payload.get("prediction_error", 0.0))
         if gate is not None:
@@ -1128,13 +1238,31 @@ class LongTermMemory:
             identity_critical = self._is_identity_critical_episode(episode)
         payload["identity_critical"] = identity_critical
         if identity_critical:
-            payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+            initial_stage = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
         elif raw_pe < RAW_PE_RISK_GATE:
             # Low raw prediction error: the world matched expectations closely.
             # Demote to candidate_episode regardless of model-derived risk.
-            payload["lifecycle_stage"] = LIFECYCLE_CANDIDATE_EPISODE
+            initial_stage = LIFECYCLE_CANDIDATE_EPISODE
         else:
-            payload.setdefault("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE)
+            initial_stage = str(payload.get("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE))
+        self._set_lifecycle_stage(
+            payload,
+            initial_stage,
+            event="created",
+            cycle=cycle,
+            details={
+                "support_count": int(payload.get("support_count", 1)),
+                "episode_family": payload.get("episode_family"),
+            },
+        )
+        self._record_memory_lifecycle_event(
+            payload,
+            event="created",
+            stage=initial_stage,
+            cycle=cycle,
+            previous_stage=None,
+            details={"episode_family": payload.get("episode_family")},
+        )
 
     def _redundancy_penalty(self, episode: Episode) -> float:
         if not self.episodes:
@@ -1193,6 +1321,7 @@ class LongTermMemory:
         episode: Episode,
         gate: dict[str, object],
     ) -> None:
+        previous_stage = payload.get("lifecycle_stage")
         occurrences = int(payload.get("occurrence_count", 1)) + 1
         payload["occurrence_count"] = occurrences
         payload["support"] = occurrences
@@ -1216,9 +1345,159 @@ class LongTermMemory:
             if reason not in reasons:
                 reasons.append(reason)
         payload["gating_reasons"] = reasons
+        self._set_lifecycle_stage(
+            payload,
+            str(payload.get("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE)),
+            event="support_merged",
+            cycle=int(episode.timestamp),
+            details={"support_count": occurrences},
+        )
+        self._record_memory_lifecycle_event(
+            payload,
+            event="support_merged",
+            stage=str(payload.get("lifecycle_stage", LIFECYCLE_VALIDATED_EPISODE)),
+            cycle=int(episode.timestamp),
+            previous_stage=previous_stage,
+            details={"support_count": occurrences},
+        )
         if bool(gate.get("identity_critical", False)):
             payload["identity_critical"] = True
-            payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+            self._set_lifecycle_stage(
+                payload,
+                LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
+                event="promoted_identity_critical",
+                cycle=int(episode.timestamp),
+                details={"support_count": occurrences},
+            )
+            self._record_memory_lifecycle_event(
+                payload,
+                event="promoted_identity_critical",
+                stage=LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
+                cycle=int(episode.timestamp),
+                previous_stage=previous_stage,
+                details={"support_count": occurrences},
+            )
+            return
+        self._maybe_promote_episode_lifecycle(payload, cycle=int(episode.timestamp))
+
+    def _maybe_promote_episode_lifecycle(
+        self,
+        payload: dict[str, object],
+        *,
+        cycle: int,
+    ) -> None:
+        current_stage = str(payload.get("lifecycle_stage", ""))
+        if current_stage != LIFECYCLE_CANDIDATE_EPISODE:
+            return
+        support = int(payload.get("support_count", payload.get("support", 1)))
+        qualifies = (
+            support >= self.sleep_minimum_support
+            and (
+                float(payload.get("episode_score", 0.0)) >= self.episode_score_threshold
+                or float(payload.get("value_relevance", 0.0)) >= 0.75
+                or float(payload.get("threat_significance", 0.0)) >= 0.60
+            )
+        )
+        if not qualifies:
+            return
+        self._set_lifecycle_stage(
+            payload,
+            LIFECYCLE_VALIDATED_EPISODE,
+            event="promoted_by_support",
+            cycle=cycle,
+            details={"support_count": support},
+        )
+        self._record_memory_lifecycle_event(
+            payload,
+            event="promoted_by_support",
+            stage=LIFECYCLE_VALIDATED_EPISODE,
+            cycle=cycle,
+            previous_stage=current_stage,
+            details={"support_count": support},
+        )
+
+    def _record_memory_lifecycle_event(
+        self,
+        payload: dict[str, object],
+        *,
+        event: str,
+        stage: str,
+        cycle: int,
+        previous_stage: object,
+        details: dict[str, object] | None = None,
+    ) -> None:
+        self.lifecycle_events.append(
+            {
+                "episode_id": payload.get("episode_id"),
+                "event": event,
+                "stage": stage,
+                "previous_stage": previous_stage,
+                "cycle": int(cycle),
+                "episode_family": payload.get("episode_family", EPISODE_FAMILY_ROUTINE),
+                "details": dict(details or {}),
+            }
+        )
+
+    def _set_lifecycle_stage(
+        self,
+        payload: dict[str, object],
+        stage: str,
+        *,
+        event: str,
+        cycle: int,
+        details: dict[str, object] | None = None,
+    ) -> None:
+        previous_stage = payload.get("lifecycle_stage")
+        payload["lifecycle_stage"] = stage
+        history = list(payload.get("lifecycle_history", []))
+        history.append(
+            {
+                "event": event,
+                "stage": stage,
+                "previous_stage": previous_stage,
+                "cycle": int(cycle),
+                "details": dict(details or {}),
+            }
+        )
+        payload["lifecycle_history"] = history
+        payload["last_lifecycle_event"] = event
+
+    def _infer_episode_family(self, payload: dict[str, object]) -> str:
+        observation = self._episode_observation(payload)
+        outcome = _coerce_float_dict(payload.get("outcome_state", payload.get("outcome")))
+        predicted_outcome = str(payload.get("predicted_outcome", "neutral"))
+        if (
+            predicted_outcome in {"survival_threat", "integrity_loss"}
+            or float(observation.get("danger", 0.0)) >= 0.60
+        ):
+            return EPISODE_FAMILY_HAZARD
+        if (
+            predicted_outcome == "resource_gain"
+            or float(observation.get("food", 0.0)) >= 0.70
+            or float(outcome.get("energy_delta", 0.0)) > 0.08
+        ):
+            return EPISODE_FAMILY_RESOURCE
+        if float(observation.get("social", 0.0)) >= 0.60:
+            return EPISODE_FAMILY_SOCIAL
+        if (
+            float(observation.get("shelter", 0.0)) <= 0.20
+            or abs(float(observation.get("temperature", 0.0)) - 0.50) >= 0.12
+            or float(observation.get("novelty", 0.0)) >= 0.70
+        ):
+            return EPISODE_FAMILY_ENVIRONMENT
+        return EPISODE_FAMILY_ROUTINE
+
+    def _extract_family_features(self, payload: dict[str, object]) -> dict[str, float]:
+        observation = self._episode_observation(payload)
+        return {
+            "danger": float(observation.get("danger", 0.0)),
+            "food": float(observation.get("food", 0.0)),
+            "social": float(observation.get("social", 0.0)),
+            "novelty": float(observation.get("novelty", 0.0)),
+            "shelter": float(observation.get("shelter", 0.0)),
+            "temperature": float(observation.get("temperature", 0.0)),
+        }
+
     def _refresh_semantic_patterns(self) -> None:
         by_action: dict[str, list[dict[str, object]]] = {}
         for payload in self.episodes:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 
 from evals.m2_followup_repair import (
+    evaluate_episode_gating,
     evaluate_mixed_attribution,
     evaluate_value_stability,
     EvidenceWriter,
@@ -184,6 +185,18 @@ def test_mixed_attribution_keeps_secondary_origin_and_causal_chain() -> None:
     result = evaluate_mixed_attribution(EvidenceWriter())
     assert result["secondary_accuracy"] > 0.0
     assert all(len(case["causal_chain"]) >= 3 for case in result["cases"])
+
+
+def test_episode_gating_covers_multiple_memory_families_and_lifecycle_events() -> None:
+    result = evaluate_episode_gating(EvidenceWriter())
+    assert result["high_event_created"]
+    assert result["resource_event_created"]
+    assert result["social_event_created"]
+    assert not result["trivial_event_created"]
+    assert result["duplicate_merged"]
+    assert result["family_coverage_count"] >= 3
+    assert "created" in result["lifecycle_event_counts"]
+    assert "support_merged" in result["lifecycle_event_counts"]
 
 
 def test_retrieval_influence_and_benefit_are_distinguishable() -> None:

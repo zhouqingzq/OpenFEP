@@ -43,9 +43,23 @@
   "per_scenario_breakdown": {
     "episode_gating": {
       "high_event_created": true,
+      "resource_event_created": true,
+      "social_event_created": true,
       "trivial_event_created": false,
       "duplicate_merged": true,
-      "episode_count": 1
+      "episode_count": 3,
+      "family_coverage_count": 3,
+      "family_counts": {
+        "hazard_response": 1,
+        "resource_opportunity": 1,
+        "social_signal": 1
+      },
+      "lifecycle_event_counts": {
+        "created": 3,
+        "support_merged": 1,
+        "promoted_identity_critical": 1
+      },
+      "stage_transitions": {}
     },
     "narrative_binding": {
       "claims": [
@@ -294,6 +308,29 @@
         "memory_compressed": 0,
         "prediction_error_before": 0.6851233333328334,
         "prediction_error_after": 0.2717626303181834,
+        "consolidation_metrics": {
+          "cluster_pe": [
+            {
+              "cluster_id": 0,
+              "action": "forage",
+              "pe_before": 0.6851233333328334,
+              "pe_after": 0.2717626303181834,
+              "episode_count": 1,
+              "has_rule": true
+            }
+          ],
+          "conditioned_pe_before": 0.6851233333328334,
+          "conditioned_pe_after": 0.2717626303181834,
+          "novelty_baseline": 0.29,
+          "normalised_pe_before": 2.3624942528718393,
+          "normalised_pe_after": 0.9371125183385635,
+          "windowed_pe_history": [
+            0.2717626303181834
+          ],
+          "windowed_pe_mean": 0.2717626303181834,
+          "raw_pe_before": 0.6851233333328334,
+          "raw_pe_after": 0.2717626303181834
+        },
         "rules_extracted": 1,
         "threat_updates": 1,
         "preference_updates": 1,
@@ -324,6 +361,34 @@
             "source_episode_cycle": 1,
             "original_action": "forage",
             "counterfactual_action": "hide",
+            "original_action_schema": {
+              "name": "forage",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.0,
+              "resource_cost": {},
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "counterfactual_action_schema": {
+              "name": "hide",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.05,
+              "resource_cost": {
+                "energy": 0.05,
+                "attention": 0.08
+              },
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "reversible": true
+            },
             "efe_delta": -0.7994999999999999,
             "confidence": 0.3043573580792168
           },
@@ -333,6 +398,34 @@
             "source_episode_cycle": 1,
             "original_action": "forage",
             "counterfactual_action": "scan",
+            "original_action_schema": {
+              "name": "forage",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.0,
+              "resource_cost": {},
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "counterfactual_action_schema": {
+              "name": "scan",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.06,
+              "resource_cost": {
+                "energy": 0.06,
+                "attention": 0.2
+              },
+              "failure_modes": [
+                "context_budget_exceeded",
+                "false_alarm"
+              ],
+              "constraints": {
+                "preferred_when_uncertainty_above": 0.35
+              },
+              "reversible": true
+            },
             "efe_delta": -0.3634999999999997,
             "confidence": 0.32194136999472495
           },
@@ -342,6 +435,34 @@
             "source_episode_cycle": 1,
             "original_action": "forage",
             "counterfactual_action": "exploit_shelter",
+            "original_action_schema": {
+              "name": "forage",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.0,
+              "resource_cost": {},
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "counterfactual_action_schema": {
+              "name": "exploit_shelter",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.08,
+              "resource_cost": {
+                "energy": 0.08,
+                "attention": 0.1
+              },
+              "failure_modes": [
+                "shelter_contested",
+                "resource_exhaustion"
+              ],
+              "constraints": {
+                "preferred_when_shelter_available": 0.2
+              },
+              "reversible": true
+            },
             "efe_delta": -0.6934999999999999,
             "confidence": 0.3082815471968077
           }
@@ -359,9 +480,9 @@
           "before_choice": "hide",
           "after_choice": "hide",
           "before_safe_margin": 156.29493610622427,
-          "after_safe_margin": 158.66799278030507,
+          "after_safe_margin": 108.77839245778,
           "before_forage_risk": 105.00671565234403,
-          "after_forage_risk": 105.20921565234403,
+          "after_forage_risk": 420.138340652344,
           "influenced": true,
           "beneficial": true
         },
@@ -370,9 +491,9 @@
           "before_choice": "hide",
           "after_choice": "hide",
           "before_safe_margin": 156.29493610622427,
-          "after_safe_margin": 158.66605745431417,
+          "after_safe_margin": 108.77515961765619,
           "before_forage_risk": 105.00671565234403,
-          "after_forage_risk": 105.20921565234403,
+          "after_forage_risk": 420.138340652344,
           "influenced": true,
           "beneficial": true
         },
@@ -381,9 +502,9 @@
           "before_choice": "hide",
           "after_choice": "hide",
           "before_safe_margin": 156.29493610622427,
-          "after_safe_margin": 158.66856320840145,
+          "after_safe_margin": 108.77955381072138,
           "before_forage_risk": 105.00671565234403,
-          "after_forage_risk": 105.20921565234403,
+          "after_forage_risk": 420.138340652344,
           "influenced": true,
           "beneficial": true
         },
@@ -392,9 +513,9 @@
           "before_choice": "hide",
           "after_choice": "hide",
           "before_safe_margin": 156.29493610622427,
-          "after_safe_margin": 158.66593518679787,
+          "after_safe_margin": 108.77562931165482,
           "before_forage_risk": 105.00671565234403,
-          "after_forage_risk": 105.20921565234403,
+          "after_forage_risk": 420.138340652344,
           "influenced": true,
           "beneficial": true
         }
@@ -431,11 +552,11 @@
       ]
     },
     "restart_continuity": {
-      "ICI": 0.9999999999999999,
+      "ICI": 1.0,
       "components": {
         "values": 0.9999999999999999,
         "narrative": 1.0,
-        "policy": 0.9999999999999998
+        "policy": 1.0
       }
     }
   },

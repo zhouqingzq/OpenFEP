@@ -7,6 +7,13 @@ import unittest
 from segmentum.agent import SegmentAgent
 from segmentum.environment import Observation
 from segmentum.memory import (
+    EPISODE_FAMILY_HAZARD,
+    EPISODE_FAMILY_RESOURCE,
+    EPISODE_FAMILY_SOCIAL,
+    LIFECYCLE_ARCHIVED_SUMMARY,
+    LIFECYCLE_CANDIDATE_EPISODE,
+    LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
+    LIFECYCLE_VALIDATED_EPISODE,
     LongTermMemory,
     RISK_WEIGHT,
     ValueHierarchy,
@@ -305,6 +312,86 @@ class EpisodicMemoryTests(unittest.TestCase):
         self.assertGreater(decision.total_surprise, memory.surprise_threshold)
         self.assertTrue(decision.episode_created)
         self.assertEqual(len(memory.episodes), 1)
+
+    def test_family_coverage_and_lifecycle_history_are_structured(self) -> None:
+        memory = LongTermMemory(surprise_threshold=0.20, sleep_minimum_support=2, max_active_age=1)
+        hazard = memory.maybe_store_episode(
+            cycle=1,
+            observation=baseline_observation(),
+            prediction=baseline_prediction(),
+            errors=baseline_errors(),
+            action="hide",
+            outcome={"energy_delta": -0.05, "stress_delta": 0.10, "free_energy_drop": -0.40},
+            body_state=baseline_body_state(),
+        )
+        resource = memory.store_episode(
+            cycle=2,
+            observation={"food": 0.92, "danger": 0.08, "novelty": 0.14, "shelter": 0.62, "temperature": 0.50, "social": 0.20},
+            prediction={"food": 0.52, "danger": 0.14, "novelty": 0.20, "shelter": 0.48, "temperature": 0.50, "social": 0.18},
+            errors={"food": 0.40, "danger": -0.06, "novelty": -0.06, "shelter": 0.14, "temperature": 0.0, "social": 0.02},
+            action="forage",
+            outcome={"energy_delta": 0.14, "stress_delta": -0.03, "free_energy_drop": 0.16},
+            body_state={"energy": 0.25, "stress": 0.18, "fatigue": 0.12, "temperature": 0.50},
+        )
+        social = memory.maybe_store_episode(
+            cycle=3,
+            observation={"food": 0.22, "danger": 0.34, "novelty": 0.78, "shelter": 0.34, "temperature": 0.64, "social": 0.92},
+            prediction={"food": 0.46, "danger": 0.08, "novelty": 0.14, "shelter": 0.54, "temperature": 0.50, "social": 0.18},
+            errors={"food": -0.24, "danger": 0.26, "novelty": 0.64, "shelter": -0.20, "temperature": 0.14, "social": 0.74},
+            action="signal",
+            outcome={"energy_delta": -0.06, "stress_delta": 0.18, "free_energy_drop": -0.18},
+            body_state={"energy": 0.28, "stress": 0.64, "fatigue": 0.26, "temperature": 0.64},
+        )
+
+        self.assertTrue(hazard.episode_created)
+        self.assertEqual(resource["episode_family"], EPISODE_FAMILY_RESOURCE)
+        self.assertTrue(social.episode_created)
+
+        coverage = memory.family_coverage_summary()
+        self.assertEqual(coverage["family_counts"][EPISODE_FAMILY_HAZARD], 1)
+        self.assertEqual(coverage["family_counts"][EPISODE_FAMILY_RESOURCE], 1)
+        self.assertEqual(coverage["family_counts"][EPISODE_FAMILY_SOCIAL], 1)
+
+        first_payload = memory.episodes[0]
+        self.assertEqual(first_payload["lifecycle_history"][0]["event"], "created")
+        self.assertEqual(first_payload["last_lifecycle_event"], "created")
+        self.assertIn(
+            first_payload["lifecycle_stage"],
+            {
+                LIFECYCLE_VALIDATED_EPISODE,
+                LIFECYCLE_CANDIDATE_EPISODE,
+                LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
+            },
+        )
+
+    def test_candidate_episode_can_promote_and_archive_with_audit_trail(self) -> None:
+        memory = LongTermMemory(surprise_threshold=0.20, sleep_minimum_support=2, max_active_age=1)
+        payload = memory.store_episode(
+            cycle=1,
+            observation={"food": 0.30, "danger": 0.20, "novelty": 0.30, "shelter": 0.38, "temperature": 0.50, "social": 0.20},
+            prediction={"food": 0.29, "danger": 0.19, "novelty": 0.29, "shelter": 0.37, "temperature": 0.50, "social": 0.19},
+            errors={"food": 0.01, "danger": 0.01, "novelty": 0.01, "shelter": 0.01, "temperature": 0.0, "social": 0.01},
+            action="scan",
+            outcome={"energy_delta": -0.02, "stress_delta": 0.01, "free_energy_drop": -0.08},
+            body_state={"energy": 0.36, "stress": 0.32, "fatigue": 0.18, "temperature": 0.50},
+        )
+        memory._set_lifecycle_stage(payload, LIFECYCLE_CANDIDATE_EPISODE, event="demoted_for_test", cycle=1)
+        payload["support_count"] = 2
+        payload["support"] = 2
+        payload["episode_score"] = memory.episode_score_threshold
+        memory._maybe_promote_episode_lifecycle(payload, cycle=2)
+
+        self.assertEqual(payload["lifecycle_history"][1]["stage"], LIFECYCLE_CANDIDATE_EPISODE)
+        self.assertEqual(payload["lifecycle_stage"], LIFECYCLE_VALIDATED_EPISODE)
+        self.assertEqual(payload["last_lifecycle_event"], "promoted_by_support")
+
+        archived = memory.archive_episode(payload, archive_cycle=10, reason="age_out_unexplained")
+        self.assertTrue(archived)
+        self.assertEqual(memory.archived_episodes[0]["lifecycle_stage"], LIFECYCLE_ARCHIVED_SUMMARY)
+        audit = memory.lifecycle_audit()
+        self.assertGreaterEqual(audit["event_counts"]["created"], 1)
+        self.assertGreaterEqual(audit["event_counts"]["promoted_by_support"], 1)
+        self.assertGreaterEqual(audit["event_counts"]["archived"], 1)
 
 
 class SleepConsolidationTests(unittest.TestCase):
