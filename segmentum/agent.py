@@ -18,6 +18,7 @@ from .memory import (
     compute_prediction_error,
     compute_total_surprise,
 )
+from .narrative_types import EmbodiedNarrativeEpisode
 from .predictive_coding import (
     HierarchicalInference,
     InteroceptiveLayer,
@@ -27,7 +28,7 @@ from .predictive_coding import (
 )
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
 from .preferences import Goal, GoalStack
-from .self_model import CapabilityModel, SelfModel, build_default_self_model
+from .self_model import CapabilityModel, NarrativePriors, SelfModel, build_default_self_model
 from .sleep_consolidator import SleepConsolidation, SleepConsolidator
 from .types import (
     ClusterPE,
@@ -113,8 +114,30 @@ class PolicyEvaluator:
 
         threat_bias = self._threat_awareness_bias(action, cost)
         narrative_bias = self._narrative_bias(action)
+        narrative_priors = self.self_model.narrative_priors
+        prior_bias = 0.0
+        if action in ("hide", "rest", "exploit_shelter"):
+            prior_bias += max(0.0, narrative_priors.trauma_bias) * danger * 0.35
+        if action == "forage":
+            prior_bias -= max(0.0, narrative_priors.trauma_bias) * danger * 0.45
+            prior_bias -= max(0.0, narrative_priors.contamination_sensitivity) * 0.30
+        if action == "seek_contact":
+            prior_bias += narrative_priors.trust_prior * 0.35
+        if action == "scan":
+            prior_bias += max(0.0, -narrative_priors.controllability_prior) * 0.20
 
-        return max(-1.0, min(1.0, risk_bias + resource_bias + policy_memory_bias + threat_bias + narrative_bias))
+        return max(
+            -1.0,
+            min(
+                1.0,
+                risk_bias
+                + resource_bias
+                + policy_memory_bias
+                + threat_bias
+                + narrative_bias
+                + prior_bias,
+            ),
+        )
 
     def _threat_awareness_bias(self, action: str, cost: float) -> float:
         """Couple SelfModel.threat_model to action scoring."""
@@ -436,6 +459,7 @@ class SegmentAgent:
         self.drive_history_limit = 128
         self.free_energy_history: list[float] = []
         self.free_energy_history_limit = 64
+        self.narrative_trace: list[dict[str, object]] = []
         self.last_body_state_snapshot = {
             "energy": self.energy,
             "stress": self.stress,
@@ -1157,6 +1181,51 @@ class SegmentAgent:
                 preference_updates += 1
         return new_entries, threat_updates, preference_updates
 
+    def _apply_narrative_sleep_updates(
+        self,
+        replay_batch: list[dict[str, object]],
+    ) -> dict[str, float]:
+        appraisals = [
+            dict(payload.get("appraisal", {}))
+            for payload in replay_batch
+            if isinstance(payload.get("appraisal"), dict)
+        ]
+        if not appraisals:
+            return {}
+
+        def avg(name: str) -> float:
+            return mean(float(appraisal.get(name, 0.0)) for appraisal in appraisals)
+
+        priors = self.self_model.narrative_priors
+        priors.trust_prior = max(
+            -1.0,
+            min(1.0, priors.trust_prior * 0.75 + avg("trust_impact") * 0.25),
+        )
+        priors.controllability_prior = max(
+            -1.0,
+            min(1.0, priors.controllability_prior * 0.75 + avg("controllability") * 0.25),
+        )
+        priors.trauma_bias = max(
+            0.0,
+            min(
+                1.0,
+                priors.trauma_bias * 0.70
+                + (avg("physical_threat") + avg("loss")) * 0.20,
+            ),
+        )
+        priors.contamination_sensitivity = max(
+            0.0,
+            min(
+                1.0,
+                priors.contamination_sensitivity * 0.70 + avg("contamination") * 0.30,
+            ),
+        )
+        priors.meaning_stability = max(
+            -1.0,
+            min(1.0, priors.meaning_stability * 0.75 - avg("meaning_violation") * 0.25),
+        )
+        return priors.to_dict()
+
     def _project_action(
         self,
         *,
@@ -1679,6 +1748,108 @@ class SegmentAgent:
         self.last_body_state_snapshot = dict(body_state)
         self.goal_stack.backfill_conflict_outcome(self.cycle, memory_decision.total_surprise)
         return memory_decision
+
+    def ingest_narrative_episode(
+        self,
+        embodied_episode: EmbodiedNarrativeEpisode,
+    ) -> dict[str, object]:
+        observation = dict(embodied_episode.observation)
+        prediction = dict(self.world_model.beliefs)
+        errors = {
+            key: observation.get(key, 0.0) - prediction.get(key, 0.0)
+            for key in sorted(set(observation) | set(prediction))
+        }
+        body_state = {
+            "energy": float(embodied_episode.body_state.get("energy", self.energy)),
+            "stress": float(embodied_episode.body_state.get("stress", self.stress)),
+            "fatigue": float(embodied_episode.body_state.get("fatigue", self.fatigue)),
+            "temperature": float(embodied_episode.body_state.get("temperature", self.temperature)),
+        }
+        outcome = self._narrative_outcome_effects(embodied_episode)
+        memory_decision = self.long_term_memory.maybe_store_episode(
+            embodied_episode.timestamp,
+            observation,
+            prediction,
+            errors,
+            "observe_world",
+            outcome,
+            body_state=body_state,
+        )
+        target_payload = None
+        if memory_decision.episode_created and self.long_term_memory.episodes:
+            target_payload = self.long_term_memory.episodes[-1]
+        elif memory_decision.merged_into_episode_id is not None:
+            target_payload = next(
+                (
+                    payload
+                    for payload in self.long_term_memory.episodes
+                    if payload.get("episode_id") == memory_decision.merged_into_episode_id
+                ),
+                None,
+            )
+        if target_payload is not None:
+            target_payload["appraisal"] = dict(embodied_episode.appraisal)
+            target_payload["narrative_tags"] = list(embodied_episode.narrative_tags)
+            target_payload["compiler_confidence"] = float(embodied_episode.compiler_confidence)
+            target_payload["source_episode_id"] = str(
+                embodied_episode.provenance.get("source_episode_id", embodied_episode.episode_id)
+            )
+            target_payload["source_type"] = str(
+                embodied_episode.provenance.get("source_type", "narrative")
+            )
+            target_payload["narrative_provenance"] = dict(embodied_episode.provenance)
+        trace_payload = {
+            "source_episode_id": embodied_episode.provenance.get(
+                "source_episode_id",
+                embodied_episode.episode_id,
+            ),
+            "compiled_event": dict(
+                embodied_episode.provenance.get("compiled_event", {})
+            ),
+            "appraisal": dict(embodied_episode.appraisal),
+            "compatibility_observation": dict(observation),
+            "prediction_before_ingestion": dict(prediction),
+            "prediction_error": memory_decision.prediction_error,
+            "total_surprise": memory_decision.total_surprise,
+            "value_score": memory_decision.value_score,
+            "predicted_outcome": memory_decision.predicted_outcome,
+            "episode_created": memory_decision.episode_created,
+            "merged_into_episode_id": memory_decision.merged_into_episode_id,
+            "compiler_confidence": embodied_episode.compiler_confidence,
+            "narrative_tags": list(embodied_episode.narrative_tags),
+        }
+        self.narrative_trace.append(trace_payload)
+        self.narrative_trace = self.narrative_trace[-128:]
+        return trace_payload
+
+    def _narrative_outcome_effects(
+        self,
+        embodied_episode: EmbodiedNarrativeEpisode,
+    ) -> dict[str, float]:
+        appraisal = dict(embodied_episode.appraisal)
+        if embodied_episode.predicted_outcome == "resource_gain":
+            return {
+                "free_energy_drop": 0.16 + max(0.0, appraisal.get("self_efficacy_impact", 0.0)) * 0.08,
+                "energy_delta": 0.12,
+                "stress_delta": -0.06,
+                "fatigue_delta": 0.02,
+                "temperature_delta": 0.0,
+            }
+        if embodied_episode.predicted_outcome == "survival_threat":
+            return {
+                "free_energy_drop": -0.42 - appraisal.get("physical_threat", 0.0) * 0.10,
+                "energy_delta": -0.10,
+                "stress_delta": 0.28 + appraisal.get("uncertainty", 0.0) * 0.10,
+                "fatigue_delta": 0.12,
+                "temperature_delta": 0.0,
+            }
+        return {
+            "free_energy_drop": -0.10 - appraisal.get("loss", 0.0) * 0.06,
+            "energy_delta": -0.03,
+            "stress_delta": 0.16 + appraisal.get("uncertainty", 0.0) * 0.05,
+            "fatigue_delta": 0.05,
+            "temperature_delta": 0.0,
+        }
 
     def _replay_prediction_error(
         self,
@@ -2249,6 +2420,7 @@ class SegmentAgent:
         semantic_entries_written, threat_updates, preference_updates = self._apply_sleep_consolidation(
             consolidation
         )
+        narrative_prior_updates = self._apply_narrative_sleep_updates(replay_batch)
         prediction_error_after = self._replay_action_prediction_error(replay_batch)
         pe_after_grouped = self._grouped_replay_pe(replay_batch)
         consolidation_metrics = self._conditioned_consolidation_metrics(
@@ -2322,6 +2494,15 @@ class SegmentAgent:
             counterfactual_log=cf_summary.counterfactual_log,
         )
         self.sleep_history.append(summary)
+        if narrative_prior_updates:
+            self.narrative_trace.append(
+                {
+                    "sleep_cycle_id": sleep_cycle_id,
+                    "narrative_prior_updates": narrative_prior_updates,
+                    "rule_ids": [rule.rule_id for rule in consolidation.rules],
+                }
+            )
+            self.narrative_trace = self.narrative_trace[-128:]
         self._refresh_self_model_continuity(summary, weight_adjustments=conflict_adjustments)
         self._sync_self_model_body_schema()
         # Keep only last 3 episodes in working memory
@@ -2361,6 +2542,7 @@ class SegmentAgent:
             "drive_history_limit": self.drive_history_limit,
             "free_energy_history": list(self.free_energy_history),
             "free_energy_history_limit": self.free_energy_history_limit,
+            "narrative_trace": list(self.narrative_trace),
             "goal_stack": self.goal_stack.to_dict(),
             "self_model": self.self_model.to_dict(),
             "identity_traits": asdict(self.identity_traits),
@@ -2463,6 +2645,11 @@ class SegmentAgent:
         agent.free_energy_history_limit = int(
             payload.get("free_energy_history_limit", agent.free_energy_history_limit)
         )
+        agent.narrative_trace = [
+            dict(entry)
+            for entry in payload.get("narrative_trace", [])
+            if isinstance(entry, dict)
+        ]
         identity_traits = payload.get("identity_traits")
         if isinstance(identity_traits, dict):
             agent.identity_traits = IdentityTraits(

@@ -725,6 +725,36 @@ class IdentityNarrative:
             version=int(data.get("version", 0)),
         )
 
+
+@dataclass(slots=True)
+class NarrativePriors:
+    trust_prior: float = 0.0
+    controllability_prior: float = 0.0
+    trauma_bias: float = 0.0
+    contamination_sensitivity: float = 0.0
+    meaning_stability: float = 0.0
+
+    def to_dict(self) -> dict[str, float]:
+        return {
+            "trust_prior": float(self.trust_prior),
+            "controllability_prior": float(self.controllability_prior),
+            "trauma_bias": float(self.trauma_bias),
+            "contamination_sensitivity": float(self.contamination_sensitivity),
+            "meaning_stability": float(self.meaning_stability),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "NarrativePriors":
+        if not payload:
+            return cls()
+        return cls(
+            trust_prior=float(payload.get("trust_prior", 0.0)),
+            controllability_prior=float(payload.get("controllability_prior", 0.0)),
+            trauma_bias=float(payload.get("trauma_bias", 0.0)),
+            contamination_sensitivity=float(payload.get("contamination_sensitivity", 0.0)),
+            meaning_stability=float(payload.get("meaning_stability", 0.0)),
+        )
+
 @dataclass(slots=True)
 class SelfModel:
     """Self model for separating failures and persisting agent continuity."""
@@ -737,6 +767,7 @@ class SelfModel:
     error_classifier: ErrorClassifier = field(default_factory=ErrorClassifier)
     preferred_policies: PreferredPolicies | None = None
     identity_narrative: IdentityNarrative | None = None
+    narrative_priors: NarrativePriors = field(default_factory=NarrativePriors)
     belief_calibration: dict[str, dict[str, object]] = field(default_factory=dict)
     log_sink: Callable[[str], None] | None = None
     last_result: ClassificationResult | None = field(init=False, default=None)
@@ -803,6 +834,7 @@ class SelfModel:
             "identity_narrative": (
                 self.identity_narrative.to_dict() if self.identity_narrative else None
             ),
+            "narrative_priors": self.narrative_priors.to_dict(),
             "belief_calibration": {
                 str(key): dict(value) for key, value in self.belief_calibration.items()
             },
@@ -827,6 +859,7 @@ class SelfModel:
             error_classifier=ErrorClassifier.from_dict(payload.get("error_classifier")),
             preferred_policies=PreferredPolicies.from_dict(payload.get("preferred_policies")),
             identity_narrative=IdentityNarrative.from_dict(payload.get("identity_narrative")),
+            narrative_priors=NarrativePriors.from_dict(payload.get("narrative_priors")),
             belief_calibration={
                 str(key): dict(value)
                 for key, value in dict(payload.get("belief_calibration", {})).items()
@@ -1754,7 +1787,6 @@ def build_default_self_model(
         threat_profile=ThreatProfile(),
         preferred_policies=PreferredPolicies(),
         identity_narrative=IdentityNarrative(),
+        narrative_priors=NarrativePriors(),
         log_sink=log_sink,
     )
-
-

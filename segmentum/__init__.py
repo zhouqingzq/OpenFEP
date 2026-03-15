@@ -6,10 +6,19 @@ from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
 from .sleep_consolidator import SleepConsolidation
 from .counterfactual import CounterfactualLearning, ReviewFamily
+from .narrative_compiler import NarrativeCompiler
+from .narrative_ingestion import NarrativeIngestionService
+from .narrative_types import (
+    AppraisalVector,
+    CompiledNarrativeEvent,
+    EmbodiedNarrativeEpisode,
+    NarrativeEpisode,
+)
 from .self_model import (
     BodySchema,
     CapabilityModel,
     ErrorClassifier,
+    NarrativePriors,
     ResourceState,
     SelfModel,
     ThreatModel,
@@ -28,11 +37,18 @@ __all__ = [
     "ValueHierarchy",
     "SleepConsolidation",
     "CounterfactualLearning",
+    "NarrativeCompiler",
+    "NarrativeIngestionService",
+    "NarrativeEpisode",
+    "CompiledNarrativeEvent",
+    "AppraisalVector",
+    "EmbodiedNarrativeEpisode",
     "ReviewFamily",
     "run_daemon",
     "BodySchema",
     "CapabilityModel",
     "ErrorClassifier",
+    "NarrativePriors",
     "ResourceState",
     "SelfModel",
     "ThreatModel",
