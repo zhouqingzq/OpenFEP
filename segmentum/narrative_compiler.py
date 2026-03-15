@@ -8,6 +8,7 @@ from .narrative_types import (
     EmbodiedNarrativeEpisode,
     NarrativeEpisode,
 )
+from .self_model import PersonalitySignal
 
 
 def _clamp(value: float, low: float = -1.0, high: float = 1.0) -> float:
@@ -216,3 +217,56 @@ class NarrativeCompiler:
         if event.event_type != "unknown_event":
             confidence += 0.10
         return round(_clamp(confidence, 0.0, 0.99), 4)
+
+    def extract_personality_signal(self, appraisal: AppraisalVector) -> PersonalitySignal:
+        """Extract Big Five personality trait deltas from an appraisal vector.
+
+        Maps appraisal dimensions to personality trait signals following
+        the M2.6 mapping table. Returns deltas in [-0.5, 0.5] range.
+        """
+        # Openness: increased by controllability (agency) and novelty
+        openness = (
+            max(0.0, appraisal.controllability) * 0.25
+            + appraisal.novelty * 0.20
+            - appraisal.physical_threat * 0.10
+        )
+
+        # Conscientiousness: increased by self-efficacy and contamination caution
+        conscientiousness = (
+            max(0.0, appraisal.self_efficacy_impact) * 0.30
+            + appraisal.contamination * 0.15
+            - appraisal.uncertainty * 0.10
+        )
+
+        # Extraversion: increased by positive social signals
+        extraversion = (
+            max(0.0, appraisal.attachment_signal) * 0.30
+            + max(0.0, appraisal.trust_impact) * 0.20
+            - appraisal.social_threat * 0.20
+            - max(0.0, -appraisal.attachment_signal) * 0.15
+        )
+
+        # Agreeableness: increased by trust, decreased by betrayal
+        agreeableness = (
+            max(0.0, appraisal.trust_impact) * 0.30
+            + max(0.0, appraisal.attachment_signal) * 0.15
+            + max(0.0, -appraisal.trust_impact) * -0.35
+            - appraisal.social_threat * 0.10
+        )
+
+        # Neuroticism: increased by threats, loss, social threat
+        neuroticism = (
+            appraisal.physical_threat * 0.25
+            + appraisal.social_threat * 0.20
+            + appraisal.loss * 0.15
+            + appraisal.uncertainty * 0.10
+            - max(0.0, appraisal.self_efficacy_impact) * 0.15
+        )
+
+        return PersonalitySignal(
+            openness_delta=_clamp(openness, -0.5, 0.5),
+            conscientiousness_delta=_clamp(conscientiousness, -0.5, 0.5),
+            extraversion_delta=_clamp(extraversion, -0.5, 0.5),
+            agreeableness_delta=_clamp(agreeableness, -0.5, 0.5),
+            neuroticism_delta=_clamp(neuroticism, -0.5, 0.5),
+        )

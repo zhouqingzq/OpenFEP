@@ -726,6 +726,182 @@ class IdentityNarrative:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class PersonalitySignal:
+    """Personality trait deltas extracted from a single narrative appraisal."""
+
+    openness_delta: float = 0.0
+    conscientiousness_delta: float = 0.0
+    extraversion_delta: float = 0.0
+    agreeableness_delta: float = 0.0
+    neuroticism_delta: float = 0.0
+
+    def to_dict(self) -> dict[str, float]:
+        return {
+            "openness_delta": float(self.openness_delta),
+            "conscientiousness_delta": float(self.conscientiousness_delta),
+            "extraversion_delta": float(self.extraversion_delta),
+            "agreeableness_delta": float(self.agreeableness_delta),
+            "neuroticism_delta": float(self.neuroticism_delta),
+        }
+
+
+def _clamp_trait(value: float) -> float:
+    return max(0.05, min(0.95, value))
+
+
+@dataclass(slots=True)
+class PersonalityProfile:
+    """Big Five personality traits derived from accumulated narrative experience.
+
+    Each trait is on [0, 1] with 0.5 as neutral/population mean.
+    Traits drift slowly through narrative experience accumulation during sleep.
+    """
+
+    openness: float = 0.5
+    conscientiousness: float = 0.5
+    extraversion: float = 0.5
+    agreeableness: float = 0.5
+    neuroticism: float = 0.5
+    update_count: int = 0
+    last_updated_tick: int = 0
+
+    # Learning rate parameters
+    _base_learning_rate: float = 0.15
+    _learning_rate_decay: float = 0.02
+
+    @property
+    def learning_rate(self) -> float:
+        return self._base_learning_rate / (1.0 + self._learning_rate_decay * self.update_count)
+
+    def absorb_signal(self, signal: PersonalitySignal, tick: int) -> dict[str, float]:
+        """Apply a personality signal, returning the trait deltas actually applied."""
+        lr = self.learning_rate
+        deltas: dict[str, float] = {}
+
+        for trait_name, delta_name in (
+            ("openness", "openness_delta"),
+            ("conscientiousness", "conscientiousness_delta"),
+            ("extraversion", "extraversion_delta"),
+            ("agreeableness", "agreeableness_delta"),
+            ("neuroticism", "neuroticism_delta"),
+        ):
+            old_value = getattr(self, trait_name)
+            signal_value = getattr(signal, delta_name)
+            # Target is 0.5 + signal_value (signal in [-0.5, 0.5] maps to [0, 1])
+            target = max(0.0, min(1.0, 0.5 + signal_value))
+            new_value = _clamp_trait(old_value * (1.0 - lr) + target * lr)
+            deltas[trait_name] = new_value - old_value
+            setattr(self, trait_name, new_value)
+
+        self.update_count += 1
+        self.last_updated_tick = tick
+        return deltas
+
+    def deviation_from_neutral(self) -> float:
+        """How far this personality is from the default neutral profile."""
+        return sum(
+            abs(getattr(self, trait) - 0.5)
+            for trait in ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
+        )
+
+    def drive_modulation(self) -> dict[str, float]:
+        """Compute drive weight modulations from personality traits.
+
+        Returns a dict of drive_name -> weight_delta.
+        Positive values increase drive urgency, negative decrease it.
+        """
+        o = self.openness - 0.5
+        c = self.conscientiousness - 0.5
+        e = self.extraversion - 0.5
+        a = self.agreeableness - 0.5
+        n = self.neuroticism - 0.5
+
+        return {
+            "hunger": c * -0.10,  # conscientious agents manage resources better
+            "safety": n * 0.25 + a * -0.10,  # neurotic = more safety-seeking
+            "exploration": o * 0.20 + e * 0.10,  # open + extraverted = more exploring
+            "comfort": c * 0.15 + o * -0.10,  # conscientious = comfort-seeking
+            "thermal": n * 0.10,  # neurotic = more sensitive
+            "social": e * 0.25 + a * 0.15,  # extraverted + agreeable = social
+        }
+
+    def strategic_modulation(self) -> dict[str, float]:
+        """Compute strategic prior modulations from personality traits.
+
+        Returns a dict of prior_name -> delta to apply to the strategic layer.
+        """
+        o = self.openness - 0.5
+        c = self.conscientiousness - 0.5
+        e = self.extraversion - 0.5
+        n = self.neuroticism - 0.5
+
+        return {
+            "energy_floor": c * 0.10,  # conscientious = higher energy floor
+            "danger_ceiling": n * 0.12 + (-o) * 0.05,  # neurotic = higher danger ceiling
+            "novelty_floor": o * -0.10,  # open = lower novelty floor (seeks novelty)
+            "shelter_floor": n * 0.08 + c * 0.05,  # neurotic/conscientious = needs shelter
+            "temperature_ideal": 0.0,  # no personality effect on temperature ideal
+            "social_floor": e * 0.12 + (-n) * 0.05,  # extraverted = higher social floor
+        }
+
+    def policy_bias(self, action: str, danger: float) -> float:
+        """Compute personality-driven policy bias for an action.
+
+        Returns a bounded bias term to add to identity_bias in policy evaluation.
+        """
+        o = self.openness - 0.5
+        c = self.conscientiousness - 0.5
+        e = self.extraversion - 0.5
+        a = self.agreeableness - 0.5
+        n = self.neuroticism - 0.5
+
+        bias = 0.0
+        if action == "scan":
+            bias += o * 0.20 + e * 0.10
+        elif action == "hide":
+            bias += n * 0.20 + (-o) * 0.10 + (-e) * 0.15
+        elif action == "rest":
+            bias += c * 0.10 + (-e) * 0.10
+        elif action == "exploit_shelter":
+            bias += n * 0.15 + c * 0.10
+        elif action == "seek_contact":
+            bias += e * 0.25 + a * 0.20
+        elif action == "forage":
+            # Under danger, neurotic agents penalize forage more
+            bias += (-n) * 0.15 * max(0.0, danger - 0.3)
+            bias += (-c) * 0.10 * max(0.0, danger - 0.3)
+        elif action == "thermoregulate":
+            bias += n * 0.05
+
+        return max(-0.30, min(0.30, bias))
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "openness": float(self.openness),
+            "conscientiousness": float(self.conscientiousness),
+            "extraversion": float(self.extraversion),
+            "agreeableness": float(self.agreeableness),
+            "neuroticism": float(self.neuroticism),
+            "update_count": int(self.update_count),
+            "last_updated_tick": int(self.last_updated_tick),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "PersonalityProfile":
+        if not payload:
+            return cls()
+        return cls(
+            openness=float(payload.get("openness", 0.5)),
+            conscientiousness=float(payload.get("conscientiousness", 0.5)),
+            extraversion=float(payload.get("extraversion", 0.5)),
+            agreeableness=float(payload.get("agreeableness", 0.5)),
+            neuroticism=float(payload.get("neuroticism", 0.5)),
+            update_count=int(payload.get("update_count", 0)),
+            last_updated_tick=int(payload.get("last_updated_tick", 0)),
+        )
+
+
 @dataclass(slots=True)
 class NarrativePriors:
     trust_prior: float = 0.0
@@ -768,6 +944,7 @@ class SelfModel:
     preferred_policies: PreferredPolicies | None = None
     identity_narrative: IdentityNarrative | None = None
     narrative_priors: NarrativePriors = field(default_factory=NarrativePriors)
+    personality_profile: PersonalityProfile = field(default_factory=PersonalityProfile)
     belief_calibration: dict[str, dict[str, object]] = field(default_factory=dict)
     log_sink: Callable[[str], None] | None = None
     last_result: ClassificationResult | None = field(init=False, default=None)
@@ -835,6 +1012,7 @@ class SelfModel:
                 self.identity_narrative.to_dict() if self.identity_narrative else None
             ),
             "narrative_priors": self.narrative_priors.to_dict(),
+            "personality_profile": self.personality_profile.to_dict(),
             "belief_calibration": {
                 str(key): dict(value) for key, value in self.belief_calibration.items()
             },
@@ -860,6 +1038,7 @@ class SelfModel:
             preferred_policies=PreferredPolicies.from_dict(payload.get("preferred_policies")),
             identity_narrative=IdentityNarrative.from_dict(payload.get("identity_narrative")),
             narrative_priors=NarrativePriors.from_dict(payload.get("narrative_priors")),
+            personality_profile=PersonalityProfile.from_dict(payload.get("personality_profile")),
             belief_calibration={
                 str(key): dict(value)
                 for key, value in dict(payload.get("belief_calibration", {})).items()

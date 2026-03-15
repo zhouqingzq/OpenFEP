@@ -28,7 +28,8 @@ from .predictive_coding import (
 )
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
 from .preferences import Goal, GoalStack
-from .self_model import CapabilityModel, NarrativePriors, SelfModel, build_default_self_model
+from .narrative_compiler import NarrativeCompiler
+from .self_model import CapabilityModel, NarrativePriors, PersonalitySignal, SelfModel, build_default_self_model
 from .sleep_consolidator import SleepConsolidation, SleepConsolidator
 from .types import (
     ClusterPE,
@@ -126,6 +127,9 @@ class PolicyEvaluator:
         if action == "scan":
             prior_bias += max(0.0, -narrative_priors.controllability_prior) * 0.20
 
+        # M2.6: Personality-driven policy bias
+        personality_bias = self.self_model.personality_profile.policy_bias(action, danger)
+
         return max(
             -1.0,
             min(
@@ -135,7 +139,8 @@ class PolicyEvaluator:
                 + policy_memory_bias
                 + threat_bias
                 + narrative_bias
-                + prior_bias,
+                + prior_bias
+                + personality_bias,
             ),
         )
 
@@ -503,6 +508,14 @@ class SegmentAgent:
             return float(schema.cost_estimate)
         return float(ACTION_COSTS.get(action, 0.05))
 
+    @property
+    def _personality_drive_modulation(self) -> dict[str, float]:
+        return self.self_model.personality_profile.drive_modulation()
+
+    @property
+    def _personality_strategic_modulation(self) -> dict[str, float]:
+        return self.self_model.personality_profile.strategic_modulation()
+
     def _sync_self_model_body_schema(self) -> None:
         self.self_model.body_schema = self.self_model.body_schema.__class__(
             energy=self.energy,
@@ -836,6 +849,7 @@ class SegmentAgent:
             self.temperature,
             social_isolation,
             novelty_deficit,
+            personality_modulation=self._personality_drive_modulation,
         )
 
         observed = observation_dict(observation)
@@ -876,6 +890,7 @@ class SegmentAgent:
             self.temperature,
             self.dopamine,
             self.drive_system,
+            personality_modulation=self._personality_strategic_modulation,
         )
 
         baseline_prediction = self.world_model.predict(strategic_prediction)
@@ -1224,7 +1239,35 @@ class SegmentAgent:
             -1.0,
             min(1.0, priors.meaning_stability * 0.75 - avg("meaning_violation") * 0.25),
         )
-        return priors.to_dict()
+
+        # M2.6: Update personality profile from accumulated appraisals
+        compiler = NarrativeCompiler()
+        from .narrative_types import AppraisalVector
+        aggregate_signal = compiler.extract_personality_signal(
+            AppraisalVector(
+                physical_threat=avg("physical_threat"),
+                social_threat=avg("social_threat"),
+                uncertainty=avg("uncertainty"),
+                controllability=avg("controllability"),
+                novelty=avg("novelty"),
+                loss=avg("loss"),
+                moral_salience=avg("moral_salience"),
+                contamination=avg("contamination"),
+                attachment_signal=avg("attachment_signal"),
+                trust_impact=avg("trust_impact"),
+                self_efficacy_impact=avg("self_efficacy_impact"),
+                meaning_violation=avg("meaning_violation"),
+            )
+        )
+        personality_deltas = self.self_model.personality_profile.absorb_signal(
+            aggregate_signal,
+            tick=self.cycle,
+        )
+
+        result = priors.to_dict()
+        result["personality_deltas"] = personality_deltas
+        result["personality_signal"] = aggregate_signal.to_dict()
+        return result
 
     def _project_action(
         self,
@@ -1262,6 +1305,7 @@ class SegmentAgent:
             imagined_temp,
             self.dopamine,
             self.drive_system,
+            personality_modulation=self._personality_strategic_modulation,
         )
         residual_errors = {key: next_priors[key] - imagined[key] for key in priors}
         predicted_error = compute_prediction_error(next_priors, imagined)
@@ -1401,6 +1445,7 @@ class SegmentAgent:
             self.temperature,
             self.dopamine,
             self.drive_system,
+            personality_modulation=self._personality_strategic_modulation,
         )
         similar_memories = list(self.last_memory_context.get("retrieved_memories", []))
         retrieved_episode_ids = [
@@ -1886,6 +1931,7 @@ class SegmentAgent:
                 self.temperature,
                 social_isolation,
                 novelty_deficit,
+                personality_modulation=self._personality_drive_modulation,
             )
             priors = self.strategic_layer.priors(
                 self.energy,
@@ -1894,6 +1940,7 @@ class SegmentAgent:
                 self.temperature,
                 self.dopamine,
                 self.drive_system,
+                personality_modulation=self._personality_strategic_modulation,
             )
             prediction = self.world_model.predict(priors)
             errors = {

@@ -30,14 +30,22 @@ class DriveSystem:
         temperature: float,
         social_isolation: float,
         novelty_deficit: float,
+        personality_modulation: dict[str, float] | None = None,
     ) -> None:
-        """Update drive urgencies based on body state and deficits."""
+        """Update drive urgencies based on body state, deficits, and personality."""
         self.drives[0].urgency = clamp(1.0 - energy)
         self.drives[1].urgency = clamp(stress * 1.2)
         self.drives[2].urgency = clamp(novelty_deficit)
         self.drives[3].urgency = clamp(stress * 0.8 + (1.0 - energy) * 0.3)
         self.drives[4].urgency = clamp(abs(temperature - 0.5) * 2.0)
         self.drives[5].urgency = clamp(social_isolation)
+
+        # M2.6: Apply personality-driven modulation to drive weights
+        if personality_modulation:
+            for drive in self.drives:
+                delta = personality_modulation.get(drive.name, 0.0)
+                if delta != 0.0:
+                    drive.urgency = clamp(drive.urgency + delta)
 
     def compute_prior_modulation(self, base_prior: float, modality: str) -> float:
         """Modulate a prior based on competing drives."""
@@ -72,16 +80,32 @@ class StrategicLayer:
         temperature: float,
         dopamine: float,
         drive_system: DriveSystem,
+        personality_modulation: dict[str, float] | None = None,
     ) -> dict[str, float]:
+        # M2.6: Apply personality modulation to strategic layer parameters
+        energy_floor = self.energy_floor
+        danger_ceiling = self.danger_ceiling
+        novelty_floor = self.novelty_floor
+        shelter_floor = self.shelter_floor
+        temperature_ideal = self.temperature_ideal
+        social_floor = self.social_floor
+        if personality_modulation:
+            energy_floor = clamp(energy_floor + personality_modulation.get("energy_floor", 0.0))
+            danger_ceiling = clamp(danger_ceiling + personality_modulation.get("danger_ceiling", 0.0))
+            novelty_floor = clamp(novelty_floor + personality_modulation.get("novelty_floor", 0.0))
+            shelter_floor = clamp(shelter_floor + personality_modulation.get("shelter_floor", 0.0))
+            temperature_ideal = clamp(temperature_ideal + personality_modulation.get("temperature_ideal", 0.0))
+            social_floor = clamp(social_floor + personality_modulation.get("social_floor", 0.0))
+
         base = {
             "food": clamp(1.10 - energy),
-            "danger": clamp(self.danger_ceiling + stress * 0.60),
-            "novelty": clamp(self.novelty_floor + dopamine * 0.10),
-            "shelter": clamp(self.shelter_floor + stress * 0.30),
+            "danger": clamp(danger_ceiling + stress * 0.60),
+            "novelty": clamp(novelty_floor + dopamine * 0.10),
+            "shelter": clamp(shelter_floor + stress * 0.30),
             "temperature": clamp(
-                self.temperature_ideal + abs(temperature - self.temperature_ideal) * 0.5
+                temperature_ideal + abs(temperature - temperature_ideal) * 0.5
             ),
-            "social": clamp(self.social_floor + (1.0 - dopamine) * 0.15),
+            "social": clamp(social_floor + (1.0 - dopamine) * 0.15),
         }
 
         return {
@@ -97,6 +121,7 @@ class StrategicLayer:
         temperature: float,
         dopamine: float,
         drive_system: DriveSystem,
+        personality_modulation: dict[str, float] | None = None,
     ) -> tuple[dict[str, float], dict[str, float]]:
         base_priors = self.priors(
             energy,
@@ -105,6 +130,7 @@ class StrategicLayer:
             temperature,
             dopamine,
             drive_system,
+            personality_modulation=personality_modulation,
         )
         prediction = self.belief_state.predict(base_priors)
         return base_priors, prediction
