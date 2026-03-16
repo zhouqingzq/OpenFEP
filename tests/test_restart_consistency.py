@@ -7,12 +7,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import pytest
-
 from segmentum.agent import SegmentAgent
 from segmentum.environment import Observation
 from segmentum.runtime import SegmentRuntime
 from tests.test_counterfactual import OBS_DANGEROUS, _populate_dangerous_episodes
+from tests._pytest_compat import pytest
 
 
 FIXED_OBSERVATION = Observation(

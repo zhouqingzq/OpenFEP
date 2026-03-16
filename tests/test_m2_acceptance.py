@@ -16,8 +16,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import pytest
-
 from segmentum.agent import DecisionLoop, SegmentAgent
 from segmentum.counterfactual import CounterfactualLearning
 from segmentum.environment import Observation
@@ -26,6 +24,7 @@ from segmentum.preferences import Goal, GoalStack, ValueHierarchy
 from segmentum.runtime import SegmentRuntime
 from segmentum.self_model import IdentityNarrative, PreferredPolicies, SelfModel
 from segmentum.sleep_consolidator import SleepConsolidation
+from tests._pytest_compat import pytest
 
 
 # ── helpers ──────────────────────────────────────────────────────────────

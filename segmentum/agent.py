@@ -90,7 +90,9 @@ class PolicyEvaluator:
         cost: float,
     ) -> float:
         danger = projected_state.get("danger", 0.0)
+        food = projected_state.get("food", 0.0)
         shelter = projected_state.get("shelter", 0.0)
+        social = projected_state.get("social", 0.0)
         energy_delta = predicted_outcome.get("energy_delta", 0.0) - cost
         stress_delta = predicted_outcome.get("stress_delta", 0.0)
         fatigue_delta = predicted_outcome.get("fatigue_delta", 0.0)
@@ -123,13 +125,35 @@ class PolicyEvaluator:
         prior_bias = 0.0
         if action in ("hide", "rest", "exploit_shelter"):
             prior_bias += max(0.0, narrative_priors.trauma_bias) * danger * 0.35
+            if narrative_priors.controllability_prior > 0.0 and danger < 0.45:
+                prior_bias -= narrative_priors.controllability_prior * (
+                    0.20 + max(0.0, food - 0.50) * 0.30
+                )
+            if narrative_priors.trust_prior > 0.0 and social > 0.55:
+                prior_bias -= narrative_priors.trust_prior * (
+                    0.12 + max(0.0, social - 0.55) * 0.35
+                )
         if action == "forage":
             prior_bias -= max(0.0, narrative_priors.trauma_bias) * danger * 0.45
             prior_bias -= max(0.0, narrative_priors.contamination_sensitivity) * 0.30
+            if narrative_priors.controllability_prior > 0.0 and danger < 0.45:
+                prior_bias += narrative_priors.controllability_prior * (
+                    0.18
+                    + max(0.0, food - 0.55) * 0.35
+                    + max(0.0, shelter - 0.50) * 0.10
+                )
         if action == "seek_contact":
-            prior_bias += narrative_priors.trust_prior * 0.35
+            prior_bias += narrative_priors.trust_prior * (
+                0.40
+                + max(0.0, social - 0.50) * 0.70
+                + max(0.0, 0.45 - danger) * 0.25
+            )
         if action == "scan":
             prior_bias += max(0.0, -narrative_priors.controllability_prior) * 0.20
+            if narrative_priors.controllability_prior > 0.0 and danger < 0.50:
+                prior_bias += narrative_priors.controllability_prior * (
+                    0.12 + max(0.0, 0.50 - danger) * 0.30
+                )
 
         # M2.6: Personality-driven policy bias
         personality_bias = self.self_model.personality_profile.policy_bias(action, danger)

@@ -1,0 +1,11 @@
+{
+  "world_id": "foraging_valley",
+  "ticks": 60,
+  "event_count": 4,
+  "action_distribution": {
+    "exploit_shelter": 0.03333333333333333,
+    "hide": 0.38333333333333336,
+    "rest": 0.5833333333333334
+  },
+  "mean_conditioned_prediction_error": 0.04243475661603451
+}

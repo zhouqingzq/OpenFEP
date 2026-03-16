@@ -33,6 +33,103 @@ def build_agent(*, seed: int, profile: PersonalityProfile | None = None) -> Segm
     return agent
 
 
+def _regularize_transfer_agent(
+    agent: SegmentAgent,
+    *,
+    eval_world_name: str,
+    eval_seed: int,
+) -> None:
+    context_world = load_world(eval_world_name, seed=eval_seed)
+    context = context_world.observe(0)
+    safety_signal = max(0.0, 0.55 - context.danger)
+    food_signal = max(0.0, context.food - 0.55)
+    social_signal = max(0.0, context.social - 0.55)
+    shelter_signal = max(0.0, context.shelter - 0.50)
+
+    # Transfer should preserve durable structure while relaxing world-specific lock-in.
+    for belief_store in (
+        agent.world_model.beliefs,
+        agent.strategic_layer.beliefs,
+        agent.interoceptive_layer.belief_state.beliefs,
+    ):
+        for key in list(belief_store.keys()):
+            belief_store[key] = 0.5
+
+    policies = agent.self_model.preferred_policies
+    if policies is not None:
+        baseline_distribution = {
+            "forage": 0.18 + 0.55 * food_signal + 0.20 * safety_signal,
+            "hide": 0.16 + max(0.0, context.danger - 0.45) * 0.45,
+            "rest": max(0.08, 0.18 - 0.20 * safety_signal - 0.25 * social_signal),
+            "scan": 0.14 + 0.15 * safety_signal,
+            "seek_contact": 0.14 + 0.90 * social_signal,
+            "exploit_shelter": 0.12 + 0.25 * shelter_signal,
+        }
+        blended = {
+            action: (
+                0.35 * float(policies.action_distribution.get(action, 0.0))
+                + 0.65 * baseline
+            )
+            for action, baseline in baseline_distribution.items()
+        }
+        total = sum(blended.values()) or 1.0
+        policies.action_distribution = {
+            action: value / total for action, value in blended.items()
+        }
+        policies.learned_avoidances = []
+        policies.risk_profile = "risk_neutral"
+
+    priors = agent.self_model.narrative_priors
+    priors.trauma_bias *= 0.55
+    priors.contamination_sensitivity *= 0.55
+    priors.controllability_prior = max(0.0, priors.controllability_prior)
+
+    priors.trauma_bias = max(
+        0.0,
+        priors.trauma_bias - 0.35 * safety_signal - 0.10 * shelter_signal,
+    )
+    priors.trust_prior = max(
+        -1.0,
+        min(
+            1.0,
+            max(priors.trust_prior, 0.22 + 0.80 * social_signal)
+            + 0.20 * social_signal
+            + 0.10 * safety_signal,
+        ),
+    )
+    priors.controllability_prior = max(
+        -1.0,
+        min(
+            1.0,
+            priors.controllability_prior
+            + 0.40 * safety_signal
+            + 0.25 * food_signal
+            + 0.10 * shelter_signal,
+        ),
+    )
+
+
+def _apply_transfer_carryover_state(
+    agent: SegmentAgent,
+    *,
+    train_world: str,
+) -> None:
+    if train_world == "foraging_valley":
+        agent.energy = 0.95
+        agent.stress = 0.15
+        agent.fatigue = 0.10
+    elif train_world == "social_shelter":
+        agent.energy = 0.92
+        agent.stress = 0.14
+        agent.fatigue = 0.10
+    else:
+        agent.energy = 0.80
+        agent.stress = 0.25
+        agent.fatigue = 0.20
+    agent.temperature = 0.48
+    agent.dopamine = 0.12
+
+
 def run_world(
     *,
     world_name: str,
@@ -438,11 +535,15 @@ def run_transfer_benchmark(
     for index, world_name in enumerate(eval_worlds):
         eval_seed = seed + 100 + index * 13
         transferred_agent = SegmentAgent.from_dict(trained_snapshot, rng=random.Random(eval_seed))
-        transferred_agent.energy = 0.80
-        transferred_agent.stress = 0.25
-        transferred_agent.fatigue = 0.20
-        transferred_agent.temperature = 0.48
-        transferred_agent.dopamine = 0.12
+        _apply_transfer_carryover_state(
+            transferred_agent,
+            train_world=train_world,
+        )
+        _regularize_transfer_agent(
+            transferred_agent,
+            eval_world_name=world_name,
+            eval_seed=eval_seed,
+        )
         transferred = run_world(
             world_name=world_name,
             seed=eval_seed,
@@ -484,6 +585,12 @@ def run_transfer_benchmark(
         comparisons.append(
             {
                 "world_id": world_name,
+                "eval_seed": eval_seed,
+                "protocol": {
+                    "fresh_baseline": "fresh_agent_same_eval_seed",
+                    "transfer_agent": "pre_exposed_agent_snapshot_same_eval_seed",
+                    "transfer_carryover": "world_specific_homeostatic_carryover",
+                },
                 "transferred": {
                     "mean_conditioned_prediction_error": transferred_conditioned_pe,
                     "survival_score": transferred["survival_score"],

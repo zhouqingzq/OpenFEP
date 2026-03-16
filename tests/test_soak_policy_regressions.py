@@ -4,9 +4,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-import pytest
-
 from segmentum.runtime import SegmentRuntime
+from tests._pytest_compat import pytest
 
 
 @pytest.mark.stress
