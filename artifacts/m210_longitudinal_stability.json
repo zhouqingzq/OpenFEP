@@ -1,0 +1,3947 @@
+{
+  "milestone": "M2.10",
+  "seed": 91,
+  "cycles_per_world": 24,
+  "repeats": 2,
+  "profiles": {
+    "neutral": {
+      "runs": [
+        {
+          "profile": "neutral",
+          "seed": 91,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 0.6500224216483541,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.035848666929111005,
+              "survival_score": 1.5816666666666666,
+              "narrative_consistency_proxy": 0.8666666666666667,
+              "dominant_action_share": 0.8333333333333334,
+              "sleep_count": 0,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a resource-conservative, risk-seeking, survival-focused agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 0.9737837298712213,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.06076070666101913,
+              "survival_score": 1.4279166666666663,
+              "narrative_consistency_proxy": 0.8729166666666666,
+              "dominant_action_share": 0.75,
+              "sleep_count": 6,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.0,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.05137057256505645,
+              "survival_score": 1.6593749999999994,
+              "narrative_consistency_proxy": 1.0,
+              "dominant_action_share": 1.0,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 1.0,
+            "exploration_rate": 0.0,
+            "seek_contact_rate": 0.0,
+            "action_entropy": 0.5412687171731918,
+            "survival_score": 1.5563194444444441,
+            "mean_conditioned_prediction_error": 0.04932664871839553,
+            "narrative_consistency_proxy": 0.9131944444444444,
+            "dominant_action_share": 0.8611111111111112
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  31
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "near-death event at tick 29 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.14)",
+                  "near-death event at tick 30 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)",
+                  "resource_loss event at tick 31 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.08)",
+                  "near-death event at tick 8 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.06)",
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.31)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.5083333333333331,
+                  "free_energy_avg": -0.20895765520123327,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 157.88547793569268,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 2,
+              "tick_range": [
+                32,
+                70
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.17)"
+              ],
+              "behavioral_shift": "Behavior shifted from rest to hide",
+              "state_summary": {
+                "energy_avg": 0.8046826171874994,
+                "free_energy_avg": -0.0006367942301529275,
+                "dominant_action": "hide",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 10.969170573548986,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. A significant shift occurred around tick 32: Behavior shifted from rest to hide. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to rest during consolidation phases",
+              "I tend to hide during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.17)",
+              "near-death event at tick 29 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.14)",
+              "near-death event at tick 30 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)",
+              "resource_loss event at tick 31 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.08)",
+              "near-death event at tick 8 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.06)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-rest",
+                  "ep-000005-observe_world",
+                  "ep-000008-hide",
+                  "ep-000009-observe_world",
+                  "ep-000029-rest",
+                  "ep-000030-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 9.0,
+                "contradiction_score": 0.0,
+                "support_count": 11,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-03-capability_hide",
+                "claim_type": "capability",
+                "text": "I can reliably execute hide when conditions demand it.",
+                "claim_key": "hide",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-hide",
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-8-hide",
+                  "ev-31-hide",
+                  "ev-32-hide",
+                  "ev-33-hide",
+                  "ev-34-hide",
+                  "ev-35-hide",
+                  "ev-36-hide",
+                  "ev-37-hide",
+                  "ev-38-hide",
+                  "ev-39-hide",
+                  "ev-40-hide",
+                  "ev-41-hide",
+                  "ev-42-hide",
+                  "ev-43-hide",
+                  "ev-44-hide",
+                  "ev-45-hide",
+                  "ev-46-hide",
+                  "ev-47-hide",
+                  "ev-48-hide",
+                  "ev-49-hide",
+                  "ev-50-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 11.0,
+                "support_count": 0,
+                "contradict_count": 44,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_hide"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 11,
+              "contradicting_evidence_count": 44
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-rest",
+                  "ep-000005-observe_world",
+                  "ep-000008-hide",
+                  "ep-000009-observe_world",
+                  "ep-000029-rest",
+                  "ep-000030-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 9.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 1.0
+              },
+              "claim-03-capability_hide": {
+                "claim_text": "I can reliably execute hide when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-hide",
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-8-hide",
+                  "ev-31-hide",
+                  "ev-32-hide",
+                  "ev-33-hide",
+                  "ev-34-hide",
+                  "ev-35-hide",
+                  "ev-36-hide",
+                  "ev-37-hide",
+                  "ev-38-hide",
+                  "ev-39-hide",
+                  "ev-40-hide",
+                  "ev-41-hide",
+                  "ev-42-hide",
+                  "ev-43-hide",
+                  "ev-44-hide",
+                  "ev-45-hide",
+                  "ev-46-hide",
+                  "ev-47-hide",
+                  "ev-48-hide",
+                  "ev-49-hide",
+                  "ev-50-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 11.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 70,
+            "version": 13
+          },
+          "final_personality_profile": {
+            "openness": 0.4643262296249245,
+            "conscientiousness": 0.47371406393415494,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.623919412881841,
+            "update_count": 12,
+            "last_updated_tick": 70,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.20362624277671182,
+            "trauma_bias": 0.2687148613596333,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.09255738308032353
+          }
+        },
+        {
+          "profile": "neutral",
+          "seed": 91,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 0.6500224216483541,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.035848666929111005,
+              "survival_score": 1.5816666666666666,
+              "narrative_consistency_proxy": 0.8666666666666667,
+              "dominant_action_share": 0.8333333333333334,
+              "sleep_count": 0,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a resource-conservative, risk-seeking, survival-focused agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 0.9737837298712213,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.06076070666101913,
+              "survival_score": 1.4279166666666663,
+              "narrative_consistency_proxy": 0.8729166666666666,
+              "dominant_action_share": 0.75,
+              "sleep_count": 6,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.0,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.05137057256505645,
+              "survival_score": 1.6593749999999994,
+              "narrative_consistency_proxy": 1.0,
+              "dominant_action_share": 1.0,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 1.0,
+            "exploration_rate": 0.0,
+            "seek_contact_rate": 0.0,
+            "action_entropy": 0.5412687171731918,
+            "survival_score": 1.5563194444444441,
+            "mean_conditioned_prediction_error": 0.04932664871839553,
+            "narrative_consistency_proxy": 0.9131944444444444,
+            "dominant_action_share": 0.8611111111111112
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  31
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "near-death event at tick 29 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.14)",
+                  "near-death event at tick 30 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)",
+                  "resource_loss event at tick 31 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.08)",
+                  "near-death event at tick 8 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.06)",
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.31)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.5083333333333331,
+                  "free_energy_avg": -0.20895765520123327,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 157.88547793569268,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 2,
+              "tick_range": [
+                32,
+                70
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.17)"
+              ],
+              "behavioral_shift": "Behavior shifted from rest to hide",
+              "state_summary": {
+                "energy_avg": 0.8046826171874994,
+                "free_energy_avg": -0.0006367942301529275,
+                "dominant_action": "hide",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 10.969170573548986,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. A significant shift occurred around tick 32: Behavior shifted from rest to hide. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to rest during consolidation phases",
+              "I tend to hide during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.17)",
+              "near-death event at tick 29 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.14)",
+              "near-death event at tick 30 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)",
+              "resource_loss event at tick 31 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.08)",
+              "near-death event at tick 8 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.06)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-rest",
+                  "ep-000005-observe_world",
+                  "ep-000008-hide",
+                  "ep-000009-observe_world",
+                  "ep-000029-rest",
+                  "ep-000030-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 9.0,
+                "contradiction_score": 0.0,
+                "support_count": 11,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-03-capability_hide",
+                "claim_type": "capability",
+                "text": "I can reliably execute hide when conditions demand it.",
+                "claim_key": "hide",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-hide",
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-8-hide",
+                  "ev-31-hide",
+                  "ev-32-hide",
+                  "ev-33-hide",
+                  "ev-34-hide",
+                  "ev-35-hide",
+                  "ev-36-hide",
+                  "ev-37-hide",
+                  "ev-38-hide",
+                  "ev-39-hide",
+                  "ev-40-hide",
+                  "ev-41-hide",
+                  "ev-42-hide",
+                  "ev-43-hide",
+                  "ev-44-hide",
+                  "ev-45-hide",
+                  "ev-46-hide",
+                  "ev-47-hide",
+                  "ev-48-hide",
+                  "ev-49-hide",
+                  "ev-50-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 11.0,
+                "support_count": 0,
+                "contradict_count": 44,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_hide"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 11,
+              "contradicting_evidence_count": 44
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-rest",
+                  "ep-000005-observe_world",
+                  "ep-000008-hide",
+                  "ep-000009-observe_world",
+                  "ep-000029-rest",
+                  "ep-000030-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 9.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 1.0
+              },
+              "claim-03-capability_hide": {
+                "claim_text": "I can reliably execute hide when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-hide",
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-8-hide",
+                  "ev-31-hide",
+                  "ev-32-hide",
+                  "ev-33-hide",
+                  "ev-34-hide",
+                  "ev-35-hide",
+                  "ev-36-hide",
+                  "ev-37-hide",
+                  "ev-38-hide",
+                  "ev-39-hide",
+                  "ev-40-hide",
+                  "ev-41-hide",
+                  "ev-42-hide",
+                  "ev-43-hide",
+                  "ev-44-hide",
+                  "ev-45-hide",
+                  "ev-46-hide",
+                  "ev-47-hide",
+                  "ev-48-hide",
+                  "ev-49-hide",
+                  "ev-50-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 11.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 70,
+            "version": 13
+          },
+          "final_personality_profile": {
+            "openness": 0.4643262296249245,
+            "conscientiousness": 0.47371406393415494,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.623919412881841,
+            "update_count": 12,
+            "last_updated_tick": 70,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.20362624277671182,
+            "trauma_bias": 0.2687148613596333,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.09255738308032353
+          }
+        }
+      ],
+      "mean_metrics": {
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.5412687171731918,
+        "survival_score": 1.5563194444444441,
+        "mean_conditioned_prediction_error": 0.04932664871839553,
+        "narrative_consistency_proxy": 0.9131944444444444,
+        "dominant_action_share": 0.8611111111111112
+      },
+      "coefficient_of_variation": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "metric_ranges": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "checks": {
+        "same_profile_stable": true,
+        "no_obvious_personality_collapse": true,
+        "action_entropy_floor_met": true,
+        "narrative_bias_persists": true
+      },
+      "passed": true
+    },
+    "threat_sensitive": {
+      "runs": [
+        {
+          "profile": "threat_sensitive",
+          "seed": 204,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 1.5943609377704338,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.041666666666666664,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.03933563079020666,
+              "survival_score": 1.7208333333333332,
+              "narrative_consistency_proxy": 0.7166666666666668,
+              "dominant_action_share": 0.5,
+              "sleep_count": 2,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to hide during survival_crisis phases",
+                "I tend to rest during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 0.8886865525783176,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.046230277392476524,
+              "survival_score": 1.723958333333333,
+              "narrative_consistency_proxy": 0.625,
+              "dominant_action_share": 0.7916666666666666,
+              "sleep_count": 1,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to hide during survival_crisis phases",
+                "I tend to rest during survival_crisis phases",
+                "I tend to exploit_shelter during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 1.408222675578688,
+              "caution_rate": 0.875,
+              "exploration_rate": 0.08333333333333333,
+              "seek_contact_rate": 0.041666666666666664,
+              "mean_conditioned_prediction_error": 0.04929555071472822,
+              "survival_score": 1.4662499999999994,
+              "narrative_consistency_proxy": 0.78125,
+              "dominant_action_share": 0.7083333333333334,
+              "sleep_count": 1,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to exploit_shelter during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.9444444444444444,
+            "exploration_rate": 0.041666666666666664,
+            "seek_contact_rate": 0.013888888888888888,
+            "action_entropy": 1.2970900553091465,
+            "survival_score": 1.6370138888888885,
+            "mean_conditioned_prediction_error": 0.04495381963247047,
+            "narrative_consistency_proxy": 0.7076388888888889,
+            "dominant_action_share": 0.6666666666666666
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  11
+                ],
+                "dominant_theme": "goal_realignment",
+                "key_events": [
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+                  "resource_loss event at tick 4 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.09)",
+                  "resource_loss event at tick 8 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.6799999999999999,
+                  "free_energy_avg": -0.14476153360382008,
+                  "dominant_action": "hide",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 5.846001366629748,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 2,
+                "tick_range": [
+                  12,
+                  21
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "resource_loss event at tick 20 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": "Behavior shifted from hide to rest",
+                "state_summary": {
+                  "energy_avg": 0.6849999999999998,
+                  "free_energy_avg": -0.015694534201552368,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 7.029442925071306,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 3,
+                "tick_range": [
+                  22,
+                  29
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "integrity_loss event at tick 29 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+                  "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.12)"
+                ],
+                "behavioral_shift": "Behavior shifted from rest to exploit_shelter",
+                "state_summary": {
+                  "energy_avg": 0.7024999999999997,
+                  "free_energy_avg": -0.15837176374868162,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 16.206715652344034,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 4,
+              "tick_range": [
+                30,
+                66
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 51 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.20)",
+                "resource_loss event at tick 30 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.09)",
+                "resource_loss event at tick 56 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+              ],
+              "behavioral_shift": "Behavior shifted from exploit_shelter to rest",
+              "state_summary": {
+                "energy_avg": 0.5666666666666661,
+                "free_energy_avg": -0.05289843417521204,
+                "dominant_action": "rest",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 10.540561245930263,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. A significant shift occurred around tick 22: Behavior shifted from rest to exploit_shelter. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to rest during consolidation phases",
+              "I tend to exploit_shelter during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 51 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.20)",
+              "resource_loss event at tick 30 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.09)",
+              "resource_loss event at tick 56 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)",
+              "integrity_loss event at tick 29 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+              "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.12)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-hide",
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-rest",
+                  "ep-000009-observe_world",
+                  "ep-000020-exploit_shelter",
+                  "ep-000029-exploit_shelter",
+                  "ep-000051-rest",
+                  "ep-000056-hide",
+                  "ev-1-hide",
+                  "ev-2-hide",
+                  "ev-3-hide",
+                  "ev-4-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 11.0,
+                "contradiction_score": 0.0,
+                "support_count": 13,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-03-capability_rest",
+                "claim_type": "capability",
+                "text": "I can reliably execute rest when conditions demand it.",
+                "claim_key": "rest",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-rest",
+                  "ev-6-rest",
+                  "ev-7-rest",
+                  "ev-8-rest",
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-31-rest",
+                  "ev-32-rest",
+                  "ev-33-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-36-rest",
+                  "ev-37-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-54-rest",
+                  "ev-55-rest",
+                  "ev-57-rest",
+                  "ev-60-rest",
+                  "ev-62-rest",
+                  "ev-64-rest"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 10.5,
+                "support_count": 0,
+                "contradict_count": 42,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_rest"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 13,
+              "contradicting_evidence_count": 42
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-hide",
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-rest",
+                  "ep-000009-observe_world",
+                  "ep-000020-exploit_shelter",
+                  "ep-000029-exploit_shelter",
+                  "ep-000051-rest",
+                  "ep-000056-hide",
+                  "ev-1-hide",
+                  "ev-2-hide",
+                  "ev-3-hide",
+                  "ev-4-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 11.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5,
+                "confidence": 1.0
+              },
+              "claim-03-capability_rest": {
+                "claim_text": "I can reliably execute rest when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-rest",
+                  "ev-6-rest",
+                  "ev-7-rest",
+                  "ev-8-rest",
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-31-rest",
+                  "ev-32-rest",
+                  "ev-33-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-36-rest",
+                  "ev-37-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-54-rest",
+                  "ev-55-rest",
+                  "ev-57-rest",
+                  "ev-60-rest",
+                  "ev-62-rest",
+                  "ev-64-rest"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 10.5,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 66,
+            "version": 5
+          },
+          "final_personality_profile": {
+            "openness": 0.4238350261639489,
+            "conscientiousness": 0.5296940487688181,
+            "extraversion": 0.44668676097071636,
+            "agreeableness": 0.47778615040446515,
+            "neuroticism": 0.6373695493255357,
+            "update_count": 5,
+            "last_updated_tick": 66,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": -0.04746093750000001,
+            "controllability_prior": -0.09207356770833335,
+            "trauma_bias": 0.27592966666666663,
+            "contamination_sensitivity": 0.07563149999999996,
+            "meaning_stability": 0.04659830729166667
+          }
+        },
+        {
+          "profile": "threat_sensitive",
+          "seed": 204,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 1.5943609377704338,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.041666666666666664,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.03933563079020666,
+              "survival_score": 1.7208333333333332,
+              "narrative_consistency_proxy": 0.7166666666666668,
+              "dominant_action_share": 0.5,
+              "sleep_count": 2,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to hide during survival_crisis phases",
+                "I tend to rest during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 0.8886865525783176,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.046230277392476524,
+              "survival_score": 1.723958333333333,
+              "narrative_consistency_proxy": 0.625,
+              "dominant_action_share": 0.7916666666666666,
+              "sleep_count": 1,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to hide during survival_crisis phases",
+                "I tend to rest during survival_crisis phases",
+                "I tend to exploit_shelter during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 1.408222675578688,
+              "caution_rate": 0.875,
+              "exploration_rate": 0.08333333333333333,
+              "seek_contact_rate": 0.041666666666666664,
+              "mean_conditioned_prediction_error": 0.04929555071472822,
+              "survival_score": 1.4662499999999994,
+              "narrative_consistency_proxy": 0.78125,
+              "dominant_action_share": 0.7083333333333334,
+              "sleep_count": 1,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to exploit_shelter during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.9444444444444444,
+            "exploration_rate": 0.041666666666666664,
+            "seek_contact_rate": 0.013888888888888888,
+            "action_entropy": 1.2970900553091465,
+            "survival_score": 1.6370138888888885,
+            "mean_conditioned_prediction_error": 0.04495381963247047,
+            "narrative_consistency_proxy": 0.7076388888888889,
+            "dominant_action_share": 0.6666666666666666
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  11
+                ],
+                "dominant_theme": "goal_realignment",
+                "key_events": [
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+                  "resource_loss event at tick 4 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.09)",
+                  "resource_loss event at tick 8 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.6799999999999999,
+                  "free_energy_avg": -0.14476153360382008,
+                  "dominant_action": "hide",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 5.846001366629748,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 2,
+                "tick_range": [
+                  12,
+                  21
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "resource_loss event at tick 20 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": "Behavior shifted from hide to rest",
+                "state_summary": {
+                  "energy_avg": 0.6849999999999998,
+                  "free_energy_avg": -0.015694534201552368,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 7.029442925071306,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 3,
+                "tick_range": [
+                  22,
+                  29
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "integrity_loss event at tick 29 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+                  "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.12)"
+                ],
+                "behavioral_shift": "Behavior shifted from rest to exploit_shelter",
+                "state_summary": {
+                  "energy_avg": 0.7024999999999997,
+                  "free_energy_avg": -0.15837176374868162,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 16.206715652344034,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 4,
+              "tick_range": [
+                30,
+                66
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 51 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.20)",
+                "resource_loss event at tick 30 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.09)",
+                "resource_loss event at tick 56 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+              ],
+              "behavioral_shift": "Behavior shifted from exploit_shelter to rest",
+              "state_summary": {
+                "energy_avg": 0.5666666666666661,
+                "free_energy_avg": -0.05289843417521204,
+                "dominant_action": "rest",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 10.540561245930263,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. A significant shift occurred around tick 22: Behavior shifted from rest to exploit_shelter. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to rest during consolidation phases",
+              "I tend to exploit_shelter during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 51 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.20)",
+              "resource_loss event at tick 30 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.09)",
+              "resource_loss event at tick 56 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)",
+              "integrity_loss event at tick 29 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+              "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.12)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-hide",
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-rest",
+                  "ep-000009-observe_world",
+                  "ep-000020-exploit_shelter",
+                  "ep-000029-exploit_shelter",
+                  "ep-000051-rest",
+                  "ep-000056-hide",
+                  "ev-1-hide",
+                  "ev-2-hide",
+                  "ev-3-hide",
+                  "ev-4-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 11.0,
+                "contradiction_score": 0.0,
+                "support_count": 13,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-03-capability_rest",
+                "claim_type": "capability",
+                "text": "I can reliably execute rest when conditions demand it.",
+                "claim_key": "rest",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-rest",
+                  "ev-6-rest",
+                  "ev-7-rest",
+                  "ev-8-rest",
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-31-rest",
+                  "ev-32-rest",
+                  "ev-33-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-36-rest",
+                  "ev-37-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-54-rest",
+                  "ev-55-rest",
+                  "ev-57-rest",
+                  "ev-60-rest",
+                  "ev-62-rest",
+                  "ev-64-rest"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 10.5,
+                "support_count": 0,
+                "contradict_count": 42,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_rest"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 13,
+              "contradicting_evidence_count": 42
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-hide",
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-rest",
+                  "ep-000009-observe_world",
+                  "ep-000020-exploit_shelter",
+                  "ep-000029-exploit_shelter",
+                  "ep-000051-rest",
+                  "ep-000056-hide",
+                  "ev-1-hide",
+                  "ev-2-hide",
+                  "ev-3-hide",
+                  "ev-4-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 11.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5,
+                "confidence": 1.0
+              },
+              "claim-03-capability_rest": {
+                "claim_text": "I can reliably execute rest when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-5-rest",
+                  "ev-6-rest",
+                  "ev-7-rest",
+                  "ev-8-rest",
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-31-rest",
+                  "ev-32-rest",
+                  "ev-33-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-36-rest",
+                  "ev-37-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-54-rest",
+                  "ev-55-rest",
+                  "ev-57-rest",
+                  "ev-60-rest",
+                  "ev-62-rest",
+                  "ev-64-rest"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 10.5,
+                "last_validated_at": 66,
+                "source_sleep_session_id": 5,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 66,
+            "version": 5
+          },
+          "final_personality_profile": {
+            "openness": 0.4238350261639489,
+            "conscientiousness": 0.5296940487688181,
+            "extraversion": 0.44668676097071636,
+            "agreeableness": 0.47778615040446515,
+            "neuroticism": 0.6373695493255357,
+            "update_count": 5,
+            "last_updated_tick": 66,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": -0.04746093750000001,
+            "controllability_prior": -0.09207356770833335,
+            "trauma_bias": 0.27592966666666663,
+            "contamination_sensitivity": 0.07563149999999996,
+            "meaning_stability": 0.04659830729166667
+          }
+        }
+      ],
+      "mean_metrics": {
+        "caution_rate": 0.9444444444444444,
+        "exploration_rate": 0.041666666666666664,
+        "seek_contact_rate": 0.013888888888888888,
+        "action_entropy": 1.2970900553091465,
+        "survival_score": 1.6370138888888885,
+        "mean_conditioned_prediction_error": 0.04495381963247047,
+        "narrative_consistency_proxy": 0.7076388888888889,
+        "dominant_action_share": 0.6666666666666666
+      },
+      "coefficient_of_variation": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "metric_ranges": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "checks": {
+        "same_profile_stable": true,
+        "no_obvious_personality_collapse": true,
+        "action_entropy_floor_met": true,
+        "narrative_bias_persists": true
+      },
+      "passed": true
+    },
+    "social_approach": {
+      "runs": [
+        {
+          "profile": "social_approach",
+          "seed": 317,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 2.134431504340598,
+              "caution_rate": 0.625,
+              "exploration_rate": 0.08333333333333333,
+              "seek_contact_rate": 0.2916666666666667,
+              "mean_conditioned_prediction_error": 0.04429471580311814,
+              "survival_score": 1.5383333333333329,
+              "narrative_consistency_proxy": 0.6041666666666667,
+              "dominant_action_share": 0.2916666666666667,
+              "sleep_count": 2,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to seek_contact during consolidation phases",
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 0.49715018363696706,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.041666666666666664,
+              "mean_conditioned_prediction_error": 0.04016748169280119,
+              "survival_score": 1.8616666666666664,
+              "narrative_consistency_proxy": 0.9479166666666665,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases",
+                "I tend to exploit_shelter during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.41381685030363374,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.04300465780361726,
+              "survival_score": 1.9220833333333331,
+              "narrative_consistency_proxy": 0.9624999999999999,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 7,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+              "final_behavioral_patterns": [
+                "I tend to hide during consolidation phases",
+                "I tend to exploit_shelter during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.8611111111111112,
+            "exploration_rate": 0.027777777777777776,
+            "seek_contact_rate": 0.11111111111111112,
+            "action_entropy": 1.015132846093733,
+            "survival_score": 1.7740277777777775,
+            "mean_conditioned_prediction_error": 0.0424889517665122,
+            "narrative_consistency_proxy": 0.8381944444444444,
+            "dominant_action_share": 0.7083333333333333
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  10
+                ],
+                "dominant_theme": "goal_realignment",
+                "key_events": [
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.23)",
+                  "resource_loss event at tick 6 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)",
+                  "resource_loss event at tick 4 after {'name': 'seek_contact', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)",
+                  "resource_loss event at tick 9 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.06)",
+                  "resource_loss event at tick 10 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.5583333333333331,
+                  "free_energy_avg": -0.10758490028573217,
+                  "dominant_action": "seek_contact",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 7.600465652344035,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 2,
+                "tick_range": [
+                  11,
+                  19
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "integrity_loss event at tick 12 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=60.07)",
+                  "resource_loss event at tick 11 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.22)"
+                ],
+                "behavioral_shift": "Behavior shifted from seek_contact to rest",
+                "state_summary": {
+                  "energy_avg": 0.5512499999999998,
+                  "free_energy_avg": -0.059596288168423064,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 11.120352015980398,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 3,
+                "tick_range": [
+                  20,
+                  27
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "near-death event at tick 26 after {'name': 'seek_contact', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.17)",
+                  "integrity_loss event at tick 27 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.09)"
+                ],
+                "behavioral_shift": "Behavior shifted from rest to hide",
+                "state_summary": {
+                  "energy_avg": 0.6012499999999994,
+                  "free_energy_avg": -0.0262032022907851,
+                  "dominant_action": "hide",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 100.4409135690107,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 4,
+                "tick_range": [
+                  28,
+                  49
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "near-death event at tick 49 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.25)",
+                  "integrity_loss event at tick 28 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)"
+                ],
+                "behavioral_shift": "Behavior shifted from hide to exploit_shelter",
+                "state_summary": {
+                  "energy_avg": 0.93609375,
+                  "free_energy_avg": -0.20669953799470248,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 196.6354217714158,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 5,
+              "tick_range": [
+                50,
+                71
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=510.19)",
+                "integrity_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.08)"
+              ],
+              "behavioral_shift": "Behavior shifted from exploit_shelter to hide",
+              "state_summary": {
+                "energy_avg": 0.9971484374999999,
+                "free_energy_avg": -0.0035209106812847165,
+                "dominant_action": "hide",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 50.30184342823243,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused. A significant shift occurred around tick 11: Behavior shifted from seek_contact to rest. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to hide during consolidation phases",
+              "I tend to exploit_shelter during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=510.19)",
+              "integrity_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.08)",
+              "near-death event at tick 49 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.25)",
+              "integrity_loss event at tick 28 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)",
+              "near-death event at tick 26 after {'name': 'seek_contact', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.17)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000005-observe_world",
+                  "ep-000005-scan",
+                  "ep-000009-rest",
+                  "ep-000010-hide",
+                  "ep-000026-seek_contact",
+                  "ep-000053-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 6.0,
+                "contradiction_score": 0.0,
+                "support_count": 6,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15
+              },
+              {
+                "claim_id": "claim-03-capability_hide",
+                "claim_type": "capability",
+                "text": "I can reliably execute hide when conditions demand it.",
+                "claim_key": "hide",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-10-hide",
+                  "ev-20-hide",
+                  "ev-21-hide",
+                  "ev-22-hide",
+                  "ev-23-hide",
+                  "ev-24-hide",
+                  "ev-25-hide",
+                  "ev-50-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide",
+                  "ev-71-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 7.0,
+                "support_count": 0,
+                "contradict_count": 28,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_hide"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 6,
+              "contradicting_evidence_count": 28
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000005-observe_world",
+                  "ep-000005-scan",
+                  "ep-000009-rest",
+                  "ep-000010-hide",
+                  "ep-000026-seek_contact",
+                  "ep-000053-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 6.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15,
+                "confidence": 1.0
+              },
+              "claim-03-capability_hide": {
+                "claim_text": "I can reliably execute hide when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-10-hide",
+                  "ev-20-hide",
+                  "ev-21-hide",
+                  "ev-22-hide",
+                  "ev-23-hide",
+                  "ev-24-hide",
+                  "ev-25-hide",
+                  "ev-50-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide",
+                  "ev-71-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 7.0,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 71,
+            "version": 15
+          },
+          "final_personality_profile": {
+            "openness": 0.44670784201567126,
+            "conscientiousness": 0.45724978201089933,
+            "extraversion": 0.5113888731988407,
+            "agreeableness": 0.510304218608475,
+            "neuroticism": 0.6893731154709443,
+            "update_count": 13,
+            "last_updated_tick": 71,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": 0.020906392335891727,
+            "controllability_prior": -0.31158941974242527,
+            "trauma_bias": 0.40402071560336816,
+            "contamination_sensitivity": 0.00048444505203499953,
+            "meaning_stability": -0.13644815136988958
+          }
+        },
+        {
+          "profile": "social_approach",
+          "seed": 317,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 2.134431504340598,
+              "caution_rate": 0.625,
+              "exploration_rate": 0.08333333333333333,
+              "seek_contact_rate": 0.2916666666666667,
+              "mean_conditioned_prediction_error": 0.04429471580311814,
+              "survival_score": 1.5383333333333329,
+              "narrative_consistency_proxy": 0.6041666666666667,
+              "dominant_action_share": 0.2916666666666667,
+              "sleep_count": 2,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to seek_contact during consolidation phases",
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 0.49715018363696706,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.041666666666666664,
+              "mean_conditioned_prediction_error": 0.04016748169280119,
+              "survival_score": 1.8616666666666664,
+              "narrative_consistency_proxy": 0.9479166666666665,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases",
+                "I tend to hide during consolidation phases",
+                "I tend to exploit_shelter during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.41381685030363374,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.04300465780361726,
+              "survival_score": 1.9220833333333331,
+              "narrative_consistency_proxy": 0.9624999999999999,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 7,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+              "final_behavioral_patterns": [
+                "I tend to hide during consolidation phases",
+                "I tend to exploit_shelter during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.8611111111111112,
+            "exploration_rate": 0.027777777777777776,
+            "seek_contact_rate": 0.11111111111111112,
+            "action_entropy": 1.015132846093733,
+            "survival_score": 1.7740277777777775,
+            "mean_conditioned_prediction_error": 0.0424889517665122,
+            "narrative_consistency_proxy": 0.8381944444444444,
+            "dominant_action_share": 0.7083333333333333
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  10
+                ],
+                "dominant_theme": "goal_realignment",
+                "key_events": [
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.23)",
+                  "resource_loss event at tick 6 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)",
+                  "resource_loss event at tick 4 after {'name': 'seek_contact', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)",
+                  "resource_loss event at tick 9 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.06)",
+                  "resource_loss event at tick 10 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.5583333333333331,
+                  "free_energy_avg": -0.10758490028573217,
+                  "dominant_action": "seek_contact",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 7.600465652344035,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 2,
+                "tick_range": [
+                  11,
+                  19
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "integrity_loss event at tick 12 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=60.07)",
+                  "resource_loss event at tick 11 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.22)"
+                ],
+                "behavioral_shift": "Behavior shifted from seek_contact to rest",
+                "state_summary": {
+                  "energy_avg": 0.5512499999999998,
+                  "free_energy_avg": -0.059596288168423064,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 11.120352015980398,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 3,
+                "tick_range": [
+                  20,
+                  27
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "near-death event at tick 26 after {'name': 'seek_contact', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.17)",
+                  "integrity_loss event at tick 27 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.09)"
+                ],
+                "behavioral_shift": "Behavior shifted from rest to hide",
+                "state_summary": {
+                  "energy_avg": 0.6012499999999994,
+                  "free_energy_avg": -0.0262032022907851,
+                  "dominant_action": "hide",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 100.4409135690107,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 4,
+                "tick_range": [
+                  28,
+                  49
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "near-death event at tick 49 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.25)",
+                  "integrity_loss event at tick 28 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)"
+                ],
+                "behavioral_shift": "Behavior shifted from hide to exploit_shelter",
+                "state_summary": {
+                  "energy_avg": 0.93609375,
+                  "free_energy_avg": -0.20669953799470248,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 196.6354217714158,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 5,
+              "tick_range": [
+                50,
+                71
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=510.19)",
+                "integrity_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.08)"
+              ],
+              "behavioral_shift": "Behavior shifted from exploit_shelter to hide",
+              "state_summary": {
+                "energy_avg": 0.9971484374999999,
+                "free_energy_avg": -0.0035209106812847165,
+                "dominant_action": "hide",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 50.30184342823243,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused. A significant shift occurred around tick 11: Behavior shifted from seek_contact to rest. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to hide during consolidation phases",
+              "I tend to exploit_shelter during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=510.19)",
+              "integrity_loss event at tick 53 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.08)",
+              "near-death event at tick 49 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.25)",
+              "integrity_loss event at tick 28 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.07)",
+              "near-death event at tick 26 after {'name': 'seek_contact', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.17)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000005-observe_world",
+                  "ep-000005-scan",
+                  "ep-000009-rest",
+                  "ep-000010-hide",
+                  "ep-000026-seek_contact",
+                  "ep-000053-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 6.0,
+                "contradiction_score": 0.0,
+                "support_count": 6,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15
+              },
+              {
+                "claim_id": "claim-03-capability_hide",
+                "claim_type": "capability",
+                "text": "I can reliably execute hide when conditions demand it.",
+                "claim_key": "hide",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-10-hide",
+                  "ev-20-hide",
+                  "ev-21-hide",
+                  "ev-22-hide",
+                  "ev-23-hide",
+                  "ev-24-hide",
+                  "ev-25-hide",
+                  "ev-50-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide",
+                  "ev-71-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 7.0,
+                "support_count": 0,
+                "contradict_count": 28,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_hide"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 6,
+              "contradicting_evidence_count": 28
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000005-observe_world",
+                  "ep-000005-scan",
+                  "ep-000009-rest",
+                  "ep-000010-hide",
+                  "ep-000026-seek_contact",
+                  "ep-000053-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 6.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15,
+                "confidence": 1.0
+              },
+              "claim-03-capability_hide": {
+                "claim_text": "I can reliably execute hide when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-10-hide",
+                  "ev-20-hide",
+                  "ev-21-hide",
+                  "ev-22-hide",
+                  "ev-23-hide",
+                  "ev-24-hide",
+                  "ev-25-hide",
+                  "ev-50-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide",
+                  "ev-71-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 7.0,
+                "last_validated_at": 71,
+                "source_sleep_session_id": 15,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 71,
+            "version": 15
+          },
+          "final_personality_profile": {
+            "openness": 0.44670784201567126,
+            "conscientiousness": 0.45724978201089933,
+            "extraversion": 0.5113888731988407,
+            "agreeableness": 0.510304218608475,
+            "neuroticism": 0.6893731154709443,
+            "update_count": 13,
+            "last_updated_tick": 71,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": 0.020906392335891727,
+            "controllability_prior": -0.31158941974242527,
+            "trauma_bias": 0.40402071560336816,
+            "contamination_sensitivity": 0.00048444505203499953,
+            "meaning_stability": -0.13644815136988958
+          }
+        }
+      ],
+      "mean_metrics": {
+        "caution_rate": 0.8611111111111112,
+        "exploration_rate": 0.027777777777777776,
+        "seek_contact_rate": 0.11111111111111112,
+        "action_entropy": 1.015132846093733,
+        "survival_score": 1.7740277777777775,
+        "mean_conditioned_prediction_error": 0.0424889517665122,
+        "narrative_consistency_proxy": 0.8381944444444444,
+        "dominant_action_share": 0.7083333333333333
+      },
+      "coefficient_of_variation": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "metric_ranges": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "checks": {
+        "same_profile_stable": true,
+        "no_obvious_personality_collapse": true,
+        "action_entropy_floor_met": true,
+        "narrative_bias_persists": true
+      },
+      "passed": true
+    },
+    "exploratory": {
+      "runs": [
+        {
+          "profile": "exploratory",
+          "seed": 430,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 1.749218483597409,
+              "caution_rate": 0.75,
+              "exploration_rate": 0.16666666666666666,
+              "seek_contact_rate": 0.08333333333333333,
+              "mean_conditioned_prediction_error": 0.0413740835226741,
+              "survival_score": 1.506458333333333,
+              "narrative_consistency_proxy": 0.33333333333333337,
+              "dominant_action_share": 0.5833333333333334,
+              "sleep_count": 1,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a exploratory agent.",
+              "final_behavioral_patterns": [
+                "I tend to scan during goal_realignment phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 1.2059413017339653,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.041666666666666664,
+              "mean_conditioned_prediction_error": 0.05386975574213489,
+              "survival_score": 1.627291666666666,
+              "narrative_consistency_proxy": 0.8395833333333333,
+              "dominant_action_share": 0.7083333333333334,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory.",
+              "final_behavioral_patterns": [
+                "I tend to exploit_shelter during consolidation phases",
+                "I tend to rest during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.49715018363696706,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.041666666666666664,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.0438765377715675,
+              "survival_score": 1.9185416666666666,
+              "narrative_consistency_proxy": 0.9479166666666665,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+              "final_behavioral_patterns": [
+                "I tend to exploit_shelter during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.888888888888889,
+            "exploration_rate": 0.06944444444444445,
+            "seek_contact_rate": 0.041666666666666664,
+            "action_entropy": 1.1507699896561139,
+            "survival_score": 1.684097222222222,
+            "mean_conditioned_prediction_error": 0.046373459012125494,
+            "narrative_consistency_proxy": 0.7069444444444444,
+            "dominant_action_share": 0.7361111111111112
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  7
+                ],
+                "dominant_theme": "goal_realignment",
+                "key_events": [
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+                  "resource_loss event at tick 4 after {'name': 'scan', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)",
+                  "resource_loss event at tick 5 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.06)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.5883333333333333,
+                  "free_energy_avg": -0.15331699874617274,
+                  "dominant_action": "scan",
+                  "risk_profile": "risk_neutral",
+                  "risk_avg": 6.081715652344034,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 2,
+                "tick_range": [
+                  8,
+                  29
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.13)"
+                ],
+                "behavioral_shift": "Behavior shifted from scan to rest",
+                "state_summary": {
+                  "energy_avg": 0.2599999999999994,
+                  "free_energy_avg": -0.14650075429870735,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 10.017585217561425,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 3,
+                "tick_range": [
+                  30,
+                  37
+                ],
+                "dominant_theme": "consolidation",
+                "key_events": [],
+                "behavioral_shift": "Behavior shifted from rest to exploit_shelter",
+                "state_summary": {
+                  "energy_avg": 0.6124999999999994,
+                  "free_energy_avg": 0.0,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 15.006715652344035,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 4,
+                "tick_range": [
+                  38,
+                  48
+                ],
+                "dominant_theme": "consolidation",
+                "key_events": [
+                  "resource_loss event at tick 40 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.8349999999999993,
+                  "free_energy_avg": -0.006727160194248058,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 15.519093106519183,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 5,
+              "tick_range": [
+                49,
+                70
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "near-death event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.20)",
+                "integrity_loss event at tick 52 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.10)"
+              ],
+              "behavioral_shift": "Behavior shifted from exploit_shelter to hide",
+              "state_summary": {
+                "energy_avg": 0.99671875,
+                "free_energy_avg": -0.0064094179594033785,
+                "dominant_action": "hide",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 47.6786986861982,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused. A significant shift occurred around tick 8: Behavior shifted from scan to rest. Currently in a consolidation phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.20).",
+            "behavioral_patterns": [
+              "I tend to exploit_shelter during consolidation phases",
+              "I tend to hide during consolidation phases"
+            ],
+            "significant_events": [
+              "near-death event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.20)",
+              "integrity_loss event at tick 52 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.10)",
+              "resource_loss event at tick 40 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)",
+              "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.13)",
+              "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-scan",
+                  "ep-000005-exploit_shelter",
+                  "ep-000005-observe_world",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000050-exploit_shelter",
+                  "ep-000052-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "support_count": 8,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-03-capability_hide",
+                "claim_type": "capability",
+                "text": "I can reliably execute hide when conditions demand it.",
+                "claim_key": "hide",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-24-hide",
+                  "ev-29-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 6.0,
+                "support_count": 0,
+                "contradict_count": 24,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_hide"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 8,
+              "contradicting_evidence_count": 24
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-scan",
+                  "ep-000005-exploit_shelter",
+                  "ep-000005-observe_world",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000050-exploit_shelter",
+                  "ep-000052-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 1.0
+              },
+              "claim-03-capability_hide": {
+                "claim_text": "I can reliably execute hide when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-24-hide",
+                  "ev-29-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 6.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 70,
+            "version": 12
+          },
+          "final_personality_profile": {
+            "openness": 0.48134612366264173,
+            "conscientiousness": 0.4692148382660969,
+            "extraversion": 0.5069328437734719,
+            "agreeableness": 0.49722686249061115,
+            "neuroticism": 0.6078907730480364,
+            "update_count": 12,
+            "last_updated_tick": 70,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": 0.003801162242889405,
+            "controllability_prior": -0.17942902942498526,
+            "trauma_bias": 0.2639862256913733,
+            "contamination_sensitivity": 0.00027682574401999976,
+            "meaning_stability": -0.08377599438031513
+          }
+        },
+        {
+          "profile": "exploratory",
+          "seed": 430,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 1.749218483597409,
+              "caution_rate": 0.75,
+              "exploration_rate": 0.16666666666666666,
+              "seek_contact_rate": 0.08333333333333333,
+              "mean_conditioned_prediction_error": 0.0413740835226741,
+              "survival_score": 1.506458333333333,
+              "narrative_consistency_proxy": 0.33333333333333337,
+              "dominant_action_share": 0.5833333333333334,
+              "sleep_count": 1,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a exploratory agent.",
+              "final_behavioral_patterns": [
+                "I tend to scan during goal_realignment phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 1.2059413017339653,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.041666666666666664,
+              "mean_conditioned_prediction_error": 0.05386975574213489,
+              "survival_score": 1.627291666666666,
+              "narrative_consistency_proxy": 0.8395833333333333,
+              "dominant_action_share": 0.7083333333333334,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory.",
+              "final_behavioral_patterns": [
+                "I tend to exploit_shelter during consolidation phases",
+                "I tend to rest during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.49715018363696706,
+              "caution_rate": 0.9583333333333334,
+              "exploration_rate": 0.041666666666666664,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.0438765377715675,
+              "survival_score": 1.9185416666666666,
+              "narrative_consistency_proxy": 0.9479166666666665,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 5,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+              "final_behavioral_patterns": [
+                "I tend to exploit_shelter during consolidation phases",
+                "I tend to hide during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.888888888888889,
+            "exploration_rate": 0.06944444444444445,
+            "seek_contact_rate": 0.041666666666666664,
+            "action_entropy": 1.1507699896561139,
+            "survival_score": 1.684097222222222,
+            "mean_conditioned_prediction_error": 0.046373459012125494,
+            "narrative_consistency_proxy": 0.7069444444444444,
+            "dominant_action_share": 0.7361111111111112
+          },
+          "final_identity": {
+            "chapters": [
+              {
+                "chapter_id": 1,
+                "tick_range": [
+                  1,
+                  7
+                ],
+                "dominant_theme": "goal_realignment",
+                "key_events": [
+                  "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+                  "resource_loss event at tick 4 after {'name': 'scan', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)",
+                  "resource_loss event at tick 5 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.06)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.5883333333333333,
+                  "free_energy_avg": -0.15331699874617274,
+                  "dominant_action": "scan",
+                  "risk_profile": "risk_neutral",
+                  "risk_avg": 6.081715652344034,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 2,
+                "tick_range": [
+                  8,
+                  29
+                ],
+                "dominant_theme": "survival_crisis",
+                "key_events": [
+                  "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.13)"
+                ],
+                "behavioral_shift": "Behavior shifted from scan to rest",
+                "state_summary": {
+                  "energy_avg": 0.2599999999999994,
+                  "free_energy_avg": -0.14650075429870735,
+                  "dominant_action": "rest",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 10.017585217561425,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 3,
+                "tick_range": [
+                  30,
+                  37
+                ],
+                "dominant_theme": "consolidation",
+                "key_events": [],
+                "behavioral_shift": "Behavior shifted from rest to exploit_shelter",
+                "state_summary": {
+                  "energy_avg": 0.6124999999999994,
+                  "free_energy_avg": 0.0,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 15.006715652344035,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              },
+              {
+                "chapter_id": 4,
+                "tick_range": [
+                  38,
+                  48
+                ],
+                "dominant_theme": "consolidation",
+                "key_events": [
+                  "resource_loss event at tick 40 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)"
+                ],
+                "behavioral_shift": null,
+                "state_summary": {
+                  "energy_avg": 0.8349999999999993,
+                  "free_energy_avg": -0.006727160194248058,
+                  "dominant_action": "exploit_shelter",
+                  "risk_profile": "risk_seeking",
+                  "risk_avg": 15.519093106519183,
+                  "dominant_strategy": "expected_free_energy"
+                }
+              }
+            ],
+            "current_chapter": {
+              "chapter_id": 5,
+              "tick_range": [
+                49,
+                70
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "near-death event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.20)",
+                "integrity_loss event at tick 52 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.10)"
+              ],
+              "behavioral_shift": "Behavior shifted from exploit_shelter to hide",
+              "state_summary": {
+                "energy_avg": 0.99671875,
+                "free_energy_avg": -0.0064094179594033785,
+                "dominant_action": "hide",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 47.6786986861982,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. I used to be more exploratory, survival-focused. A significant shift occurred around tick 8: Behavior shifted from scan to rest. Currently in a consolidation phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.20).",
+            "behavioral_patterns": [
+              "I tend to exploit_shelter during consolidation phases",
+              "I tend to hide during consolidation phases"
+            ],
+            "significant_events": [
+              "near-death event at tick 50 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=1005.20)",
+              "integrity_loss event at tick 52 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.10)",
+              "resource_loss event at tick 40 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.05)",
+              "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.13)",
+              "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-scan",
+                  "ep-000005-exploit_shelter",
+                  "ep-000005-observe_world",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000050-exploit_shelter",
+                  "ep-000052-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "support_count": 8,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              },
+              {
+                "claim_id": "claim-03-capability_hide",
+                "claim_type": "capability",
+                "text": "I can reliably execute hide when conditions demand it.",
+                "claim_key": "hide",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-24-hide",
+                  "ev-29-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 6.0,
+                "support_count": 0,
+                "contradict_count": 24,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_hide"
+              ],
+              "mixed_claims": [],
+              "supporting_evidence_count": 8,
+              "contradicting_evidence_count": 24
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000004-scan",
+                  "ep-000005-exploit_shelter",
+                  "ep-000005-observe_world",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000050-exploit_shelter",
+                  "ep-000052-hide"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 1.0
+              },
+              "claim-03-capability_hide": {
+                "claim_text": "I can reliably execute hide when conditions demand it.",
+                "supported_by": [],
+                "contradicted_by": [
+                  "ev-6-hide",
+                  "ev-7-hide",
+                  "ev-24-hide",
+                  "ev-29-hide",
+                  "ev-51-hide",
+                  "ev-52-hide",
+                  "ev-53-hide",
+                  "ev-54-hide",
+                  "ev-55-hide",
+                  "ev-56-hide",
+                  "ev-57-hide",
+                  "ev-58-hide",
+                  "ev-59-hide",
+                  "ev-60-hide",
+                  "ev-61-hide",
+                  "ev-62-hide",
+                  "ev-63-hide",
+                  "ev-64-hide",
+                  "ev-65-hide",
+                  "ev-66-hide",
+                  "ev-67-hide",
+                  "ev-68-hide",
+                  "ev-69-hide",
+                  "ev-70-hide"
+                ],
+                "support_score": 0.0,
+                "contradiction_score": 6.0,
+                "last_validated_at": 70,
+                "source_sleep_session_id": 12,
+                "confidence": 0.0
+              }
+            },
+            "last_updated_tick": 70,
+            "version": 12
+          },
+          "final_personality_profile": {
+            "openness": 0.48134612366264173,
+            "conscientiousness": 0.4692148382660969,
+            "extraversion": 0.5069328437734719,
+            "agreeableness": 0.49722686249061115,
+            "neuroticism": 0.6078907730480364,
+            "update_count": 12,
+            "last_updated_tick": 70,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": 0.003801162242889405,
+            "controllability_prior": -0.17942902942498526,
+            "trauma_bias": 0.2639862256913733,
+            "contamination_sensitivity": 0.00027682574401999976,
+            "meaning_stability": -0.08377599438031513
+          }
+        }
+      ],
+      "mean_metrics": {
+        "caution_rate": 0.888888888888889,
+        "exploration_rate": 0.06944444444444445,
+        "seek_contact_rate": 0.041666666666666664,
+        "action_entropy": 1.1507699896561139,
+        "survival_score": 1.684097222222222,
+        "mean_conditioned_prediction_error": 0.046373459012125494,
+        "narrative_consistency_proxy": 0.7069444444444444,
+        "dominant_action_share": 0.7361111111111112
+      },
+      "coefficient_of_variation": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "metric_ranges": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "checks": {
+        "same_profile_stable": true,
+        "no_obvious_personality_collapse": true,
+        "action_entropy_floor_met": true,
+        "narrative_bias_persists": true
+      },
+      "passed": true
+    },
+    "rigid_cautious": {
+      "runs": [
+        {
+          "profile": "rigid_cautious",
+          "seed": 543,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 1.4284124677945966,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.03755463056346129,
+              "survival_score": 1.7033333333333331,
+              "narrative_consistency_proxy": 0.6333333333333333,
+              "dominant_action_share": 0.5416666666666666,
+              "sleep_count": 2,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 1.2516291673878228,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.04531933691362599,
+              "survival_score": 1.7054166666666661,
+              "narrative_consistency_proxy": 0.7333333333333334,
+              "dominant_action_share": 0.6666666666666666,
+              "sleep_count": 2,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking, survival-focused agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.41381685030363374,
+              "caution_rate": 0.9166666666666666,
+              "exploration_rate": 0.08333333333333333,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.05636014064082559,
+              "survival_score": 1.4816666666666658,
+              "narrative_consistency_proxy": 0.9333333333333333,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 1,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.9722222222222222,
+            "exploration_rate": 0.027777777777777776,
+            "seek_contact_rate": 0.0,
+            "action_entropy": 1.0312861618286844,
+            "survival_score": 1.6301388888888884,
+            "mean_conditioned_prediction_error": 0.04641136937263762,
+            "narrative_consistency_proxy": 0.7666666666666667,
+            "dominant_action_share": 0.7083333333333333
+          },
+          "final_identity": {
+            "chapters": [],
+            "current_chapter": {
+              "chapter_id": 1,
+              "tick_range": [
+                1,
+                67
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 33 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+                "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+                "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.13)",
+                "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+                "resource_loss event at tick 4 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)"
+              ],
+              "behavioral_shift": null,
+              "state_summary": {
+                "energy_avg": 0.7565624999999996,
+                "free_energy_avg": -0.07513730858683657,
+                "dominant_action": "rest",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 11.225837676153557,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to rest during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 33 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+              "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+              "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.13)",
+              "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+              "resource_loss event at tick 4 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-exploit_shelter",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000033-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "support_count": 10,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-03-capability_rest",
+                "claim_type": "capability",
+                "text": "I can reliably execute rest when conditions demand it.",
+                "claim_key": "rest",
+                "supported_by": [
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-22-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-32-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-46-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-55-rest",
+                  "ev-56-rest",
+                  "ev-57-rest",
+                  "ev-58-rest",
+                  "ev-59-rest",
+                  "ev-60-rest",
+                  "ev-61-rest",
+                  "ev-62-rest",
+                  "ev-64-rest",
+                  "ev-65-rest",
+                  "ev-66-rest",
+                  "ev-67-rest"
+                ],
+                "support_score": 1.0,
+                "contradiction_score": 10.5,
+                "support_count": 4,
+                "contradict_count": 42,
+                "confidence": 0.087,
+                "stale_since": null,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_rest"
+              ],
+              "mixed_claims": [
+                "claim-03-capability_rest"
+              ],
+              "supporting_evidence_count": 14,
+              "contradicting_evidence_count": 42
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-exploit_shelter",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000033-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5,
+                "confidence": 1.0
+              },
+              "claim-03-capability_rest": {
+                "claim_text": "I can reliably execute rest when conditions demand it.",
+                "supported_by": [
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-22-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-32-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-46-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-55-rest",
+                  "ev-56-rest",
+                  "ev-57-rest",
+                  "ev-58-rest",
+                  "ev-59-rest",
+                  "ev-60-rest",
+                  "ev-61-rest",
+                  "ev-62-rest",
+                  "ev-64-rest",
+                  "ev-65-rest",
+                  "ev-66-rest",
+                  "ev-67-rest"
+                ],
+                "support_score": 1.0,
+                "contradiction_score": 10.5,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5,
+                "confidence": 0.087
+              }
+            },
+            "last_updated_tick": 67,
+            "version": 5
+          },
+          "final_personality_profile": {
+            "openness": 0.39859641241747057,
+            "conscientiousness": 0.5874426690918566,
+            "extraversion": 0.4289156812942884,
+            "agreeableness": 0.4689006105662512,
+            "neuroticism": 0.630105545120806,
+            "update_count": 5,
+            "last_updated_tick": 67,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": -0.0759375,
+            "controllability_prior": -0.12112630208333335,
+            "trauma_bias": 0.26462093333333325,
+            "contamination_sensitivity": 0.10420339999999997,
+            "meaning_stability": 0.08624674479166668
+          }
+        },
+        {
+          "profile": "rigid_cautious",
+          "seed": 543,
+          "cycles_per_world": 24,
+          "worlds": [
+            {
+              "world_id": "foraging_valley",
+              "cycles": 24,
+              "action_entropy": 1.4284124677945966,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.03755463056346129,
+              "survival_score": 1.7033333333333331,
+              "narrative_consistency_proxy": 0.6333333333333333,
+              "dominant_action_share": 0.5416666666666666,
+              "sleep_count": 2,
+              "narrative_event_count": 3,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases"
+              ]
+            },
+            {
+              "world_id": "predator_river",
+              "cycles": 24,
+              "action_entropy": 1.2516291673878228,
+              "caution_rate": 1.0,
+              "exploration_rate": 0.0,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.04531933691362599,
+              "survival_score": 1.7054166666666661,
+              "narrative_consistency_proxy": 0.7333333333333334,
+              "dominant_action_share": 0.6666666666666666,
+              "sleep_count": 2,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking, survival-focused agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during survival_crisis phases"
+              ]
+            },
+            {
+              "world_id": "social_shelter",
+              "cycles": 24,
+              "action_entropy": 0.41381685030363374,
+              "caution_rate": 0.9166666666666666,
+              "exploration_rate": 0.08333333333333333,
+              "seek_contact_rate": 0.0,
+              "mean_conditioned_prediction_error": 0.05636014064082559,
+              "survival_score": 1.4816666666666658,
+              "narrative_consistency_proxy": 0.9333333333333333,
+              "dominant_action_share": 0.9166666666666666,
+              "sleep_count": 1,
+              "narrative_event_count": 2,
+              "final_core_identity": "I am a resource-conservative, risk-seeking agent.",
+              "final_behavioral_patterns": [
+                "I tend to rest during consolidation phases"
+              ]
+            }
+          ],
+          "aggregate_metrics": {
+            "caution_rate": 0.9722222222222222,
+            "exploration_rate": 0.027777777777777776,
+            "seek_contact_rate": 0.0,
+            "action_entropy": 1.0312861618286844,
+            "survival_score": 1.6301388888888884,
+            "mean_conditioned_prediction_error": 0.04641136937263762,
+            "narrative_consistency_proxy": 0.7666666666666667,
+            "dominant_action_share": 0.7083333333333333
+          },
+          "final_identity": {
+            "chapters": [],
+            "current_chapter": {
+              "chapter_id": 1,
+              "tick_range": [
+                1,
+                67
+              ],
+              "dominant_theme": "consolidation",
+              "key_events": [
+                "resource_loss event at tick 33 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+                "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+                "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.13)",
+                "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+                "resource_loss event at tick 4 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)"
+              ],
+              "behavioral_shift": null,
+              "state_summary": {
+                "energy_avg": 0.7565624999999996,
+                "free_energy_avg": -0.07513730858683657,
+                "dominant_action": "rest",
+                "risk_profile": "risk_seeking",
+                "risk_avg": 11.225837676153557,
+                "dominant_strategy": "expected_free_energy"
+              }
+            },
+            "core_identity": "I am a resource-conservative, risk-seeking agent.",
+            "core_summary": "I am a resource-conservative, risk-seeking agent. Currently in a consolidation phase. My dominant strategy remains expected_free_energy.",
+            "behavioral_patterns": [
+              "I tend to rest during consolidation phases"
+            ],
+            "significant_events": [
+              "resource_loss event at tick 33 after {'name': 'exploit_shelter', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+              "integrity_loss event at tick 29 after {'name': 'hide', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=105.06)",
+              "resource_loss event at tick 28 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.13)",
+              "resource_loss event at tick 4 after {'name': 'observe_world', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.28)",
+              "resource_loss event at tick 4 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.0, 'resource_cost': {}, 'failure_modes': [], 'constraints': {}, 'reversible': True} (surprise=15.07)"
+            ],
+            "values_statement": "I prioritize avoiding survival while moving toward resource_gain. My current risk profile is risk_seeking. I usually favor expected_free_energy.",
+            "claims": [
+              {
+                "claim_id": "claim-01-trait_aggressive",
+                "claim_type": "trait",
+                "text": "I am generally aggressive under pressure.",
+                "claim_key": "aggressive",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "support_count": 0,
+                "contradict_count": 0,
+                "confidence": 0.0,
+                "stale_since": null,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-02-value_survival_priority",
+                "claim_type": "value",
+                "text": "Survival is prioritized over resource gain.",
+                "claim_key": "survival_priority",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-exploit_shelter",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000033-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "support_count": 10,
+                "contradict_count": 0,
+                "confidence": 1.0,
+                "stale_since": null,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5
+              },
+              {
+                "claim_id": "claim-03-capability_rest",
+                "claim_type": "capability",
+                "text": "I can reliably execute rest when conditions demand it.",
+                "claim_key": "rest",
+                "supported_by": [
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-22-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-32-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-46-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-55-rest",
+                  "ev-56-rest",
+                  "ev-57-rest",
+                  "ev-58-rest",
+                  "ev-59-rest",
+                  "ev-60-rest",
+                  "ev-61-rest",
+                  "ev-62-rest",
+                  "ev-64-rest",
+                  "ev-65-rest",
+                  "ev-66-rest",
+                  "ev-67-rest"
+                ],
+                "support_score": 1.0,
+                "contradiction_score": 10.5,
+                "support_count": 4,
+                "contradict_count": 42,
+                "confidence": 0.087,
+                "stale_since": null,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5
+              }
+            ],
+            "contradiction_summary": {
+              "total_claims": 3,
+              "contradicted_claims": [
+                "claim-03-capability_rest"
+              ],
+              "mixed_claims": [
+                "claim-03-capability_rest"
+              ],
+              "supporting_evidence_count": 14,
+              "contradicting_evidence_count": 42
+            },
+            "evidence_provenance": {
+              "claim-01-trait_aggressive": {
+                "claim_text": "I am generally aggressive under pressure.",
+                "supported_by": [],
+                "contradicted_by": [],
+                "support_score": 0.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5,
+                "confidence": 0.0
+              },
+              "claim-02-value_survival_priority": {
+                "claim_text": "Survival is prioritized over resource gain.",
+                "supported_by": [
+                  "ep-000004-observe_world",
+                  "ep-000005-observe_world",
+                  "ep-000008-exploit_shelter",
+                  "ep-000009-observe_world",
+                  "ep-000029-hide",
+                  "ep-000033-exploit_shelter",
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [],
+                "support_score": 8.0,
+                "contradiction_score": 0.0,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5,
+                "confidence": 1.0
+              },
+              "claim-03-capability_rest": {
+                "claim_text": "I can reliably execute rest when conditions demand it.",
+                "supported_by": [
+                  "ev-1-rest",
+                  "ev-2-rest",
+                  "ev-3-rest",
+                  "ev-4-rest"
+                ],
+                "contradicted_by": [
+                  "ev-12-rest",
+                  "ev-14-rest",
+                  "ev-15-rest",
+                  "ev-16-rest",
+                  "ev-17-rest",
+                  "ev-18-rest",
+                  "ev-22-rest",
+                  "ev-23-rest",
+                  "ev-24-rest",
+                  "ev-28-rest",
+                  "ev-30-rest",
+                  "ev-32-rest",
+                  "ev-34-rest",
+                  "ev-35-rest",
+                  "ev-38-rest",
+                  "ev-39-rest",
+                  "ev-40-rest",
+                  "ev-41-rest",
+                  "ev-42-rest",
+                  "ev-43-rest",
+                  "ev-44-rest",
+                  "ev-45-rest",
+                  "ev-46-rest",
+                  "ev-47-rest",
+                  "ev-48-rest",
+                  "ev-49-rest",
+                  "ev-50-rest",
+                  "ev-51-rest",
+                  "ev-52-rest",
+                  "ev-53-rest",
+                  "ev-55-rest",
+                  "ev-56-rest",
+                  "ev-57-rest",
+                  "ev-58-rest",
+                  "ev-59-rest",
+                  "ev-60-rest",
+                  "ev-61-rest",
+                  "ev-62-rest",
+                  "ev-64-rest",
+                  "ev-65-rest",
+                  "ev-66-rest",
+                  "ev-67-rest"
+                ],
+                "support_score": 1.0,
+                "contradiction_score": 10.5,
+                "last_validated_at": 67,
+                "source_sleep_session_id": 5,
+                "confidence": 0.087
+              }
+            },
+            "last_updated_tick": 67,
+            "version": 5
+          },
+          "final_personality_profile": {
+            "openness": 0.39859641241747057,
+            "conscientiousness": 0.5874426690918566,
+            "extraversion": 0.4289156812942884,
+            "agreeableness": 0.4689006105662512,
+            "neuroticism": 0.630105545120806,
+            "update_count": 5,
+            "last_updated_tick": 67,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "final_narrative_priors": {
+            "trust_prior": -0.0759375,
+            "controllability_prior": -0.12112630208333335,
+            "trauma_bias": 0.26462093333333325,
+            "contamination_sensitivity": 0.10420339999999997,
+            "meaning_stability": 0.08624674479166668
+          }
+        }
+      ],
+      "mean_metrics": {
+        "caution_rate": 0.9722222222222222,
+        "exploration_rate": 0.027777777777777776,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 1.0312861618286844,
+        "survival_score": 1.6301388888888884,
+        "mean_conditioned_prediction_error": 0.04641136937263762,
+        "narrative_consistency_proxy": 0.7666666666666667,
+        "dominant_action_share": 0.7083333333333333
+      },
+      "coefficient_of_variation": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "metric_ranges": {
+        "caution_rate": 0.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.0,
+        "survival_score": 0.0,
+        "mean_conditioned_prediction_error": 0.0,
+        "narrative_consistency_proxy": 0.0,
+        "dominant_action_share": 0.0
+      },
+      "checks": {
+        "same_profile_stable": true,
+        "no_obvious_personality_collapse": true,
+        "action_entropy_floor_met": true,
+        "narrative_bias_persists": true
+      },
+      "passed": true
+    }
+  },
+  "acceptance": {
+    "required_profiles": 5,
+    "profiles_passing": 5,
+    "passed_profiles": [
+      "neutral",
+      "threat_sensitive",
+      "social_approach",
+      "exploratory",
+      "rigid_cautious"
+    ],
+    "passed": true
+  }
+}
