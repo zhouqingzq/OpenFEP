@@ -44,6 +44,9 @@ from .types import (
     SleepSummary,
 )
 from .world_model import GenerativeWorldModel
+from .precision_manipulation import PrecisionManipulator
+from .defense_strategy import DefenseStrategySelector
+from .metacognitive import MetaCognitiveLayer
 
 
 def observation_dict(observation: Observation) -> dict[str, float]:
@@ -475,6 +478,11 @@ class SegmentAgent:
         self.last_memory_context: dict[str, object] = {}
         self._sleeping = False
         self.counterfactual_insights: list[CounterfactualInsight] = []
+
+        # M2.7: Precision manipulation, defense strategy, and metacognitive layer
+        self.precision_manipulator = PrecisionManipulator()
+        self.defense_strategy_selector = DefenseStrategySelector(self.precision_manipulator)
+        self.metacognitive_layer = MetaCognitiveLayer()
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -2468,6 +2476,32 @@ class SegmentAgent:
             consolidation
         )
         narrative_prior_updates = self._apply_narrative_sleep_updates(replay_batch)
+
+        # M2.7: Sync personality to precision/defense subsystems
+        pp = self.self_model.personality_profile
+        self.precision_manipulator.update_personality(
+            neuroticism=pp.neuroticism,
+            openness=pp.openness,
+            extraversion=pp.extraversion,
+            agreeableness=pp.agreeableness,
+            conscientiousness=pp.conscientiousness,
+            trust_prior=self.self_model.narrative_priors.trust_prior,
+        )
+        self.defense_strategy_selector.update_personality(
+            neuroticism=pp.neuroticism,
+            openness=pp.openness,
+            extraversion=pp.extraversion,
+            conscientiousness=pp.conscientiousness,
+            agreeableness=pp.agreeableness,
+        )
+        self.precision_manipulator.decay_precision_debt()
+
+        # M2.7: Run metacognitive observation on accumulated records
+        if self.metacognitive_layer.enabled:
+            manip_records = self.precision_manipulator.manipulation_history[-5:]
+            strat_records = self.defense_strategy_selector.strategy_history[-5:]
+            self.metacognitive_layer.observe_cycle(manip_records, strat_records)
+
         prediction_error_after = self._replay_action_prediction_error(replay_batch)
         pe_after_grouped = self._grouped_replay_pe(replay_batch)
         consolidation_metrics = self._conditioned_consolidation_metrics(
@@ -2595,6 +2629,10 @@ class SegmentAgent:
             "identity_traits": asdict(self.identity_traits),
             "last_body_state_snapshot": dict(self.last_body_state_snapshot),
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
+            # M2.7
+            "precision_manipulator": self.precision_manipulator.to_dict(),
+            "defense_strategy_selector": self.defense_strategy_selector.to_dict(),
+            "metacognitive_layer": self.metacognitive_layer.to_dict(),
         }
 
     @classmethod
@@ -2750,6 +2788,18 @@ class SegmentAgent:
                 "fatigue": agent.fatigue,
                 "temperature": agent.temperature,
             }
+
+        # M2.7: Restore precision manipulation, defense strategy, metacognitive layer
+        agent.precision_manipulator = PrecisionManipulator.from_dict(
+            payload.get("precision_manipulator")
+        )
+        agent.defense_strategy_selector = DefenseStrategySelector.from_dict(
+            payload.get("defense_strategy_selector"),
+            agent.precision_manipulator,
+        )
+        agent.metacognitive_layer = MetaCognitiveLayer.from_dict(
+            payload.get("metacognitive_layer")
+        )
 
         drive_urgencies = payload.get("drive_urgencies", {})
         if isinstance(drive_urgencies, dict):

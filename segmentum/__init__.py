@@ -27,6 +27,11 @@ from .self_model import (
     build_default_self_model,
 )
 from .state import AgentState, Strategy
+from .precision_manipulation import PrecisionManipulator, ManipulationType
+from .defense_strategy import DefenseStrategy, DefenseStrategySelector, IdentityPE
+from .metacognitive import MetaCognitiveLayer
+from .therapeutic import TherapeuticAgent, SimulatedPersonalityState
+from .via_projection import VIAProjection, VIAProfile
 
 __all__ = [
     "AgentState",
@@ -57,4 +62,15 @@ __all__ = [
     "SelfModel",
     "ThreatModel",
     "build_default_self_model",
+    # M2.7
+    "PrecisionManipulator",
+    "ManipulationType",
+    "DefenseStrategy",
+    "DefenseStrategySelector",
+    "IdentityPE",
+    "MetaCognitiveLayer",
+    "TherapeuticAgent",
+    "SimulatedPersonalityState",
+    "VIAProjection",
+    "VIAProfile",
 ]

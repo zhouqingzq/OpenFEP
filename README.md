@@ -278,6 +278,51 @@ py -3.11 E:\workspace\segments\scripts\generate_counterfactual_artifact.py
 
 5. `structured persistence`
    `data/segment_v0_5_counterfactual_state.json` stores the resulting `counterfactual_insights` on the agent and the `counterfactual_log` inside `sleep_history`, preserving the full causal trail for replay and audit.
+## M2.7 Acceptance Evidence
+
+The canonical acceptance artifacts for `M2.7: MetaCognitive Layer & Therapeutic Dynamics` live in:
+
+- `artifacts/segment_m27_vicious_cycle.json` - vicious cycle parameter drift trajectory
+- `artifacts/segment_m27_therapeutic_no_meta.json` - therapeutic intervention without metacognition (control)
+- `artifacts/segment_m27_therapeutic_with_meta.json` - therapeutic intervention with metacognition (experiment)
+- `artifacts/segment_m27_via_projection.json` - VIA 24-strength projection examples
+
+Regenerate all deterministically with:
+
+```powershell
+py scripts/generate_m27_therapeutic_artifact.py --seed 42
+```
+
+### New modules
+
+| Module | Purpose |
+|--------|---------|
+| `segmentum/precision_manipulation.py` | Precision manipulation engine — unified computational basis for defense mechanisms |
+| `segmentum/defense_strategy.py` | Four-pathway EFE-driven defense strategy selector (accommodate / assimilate / suppress / redirect) |
+| `segmentum/metacognitive.py` | MetaCognitiveLayer — observes internal precision patterns and generates cognitive dissociation signals |
+| `segmentum/therapeutic.py` | Therapeutic intervention simulator — high-precision sustained positive signals |
+| `segmentum/via_projection.py` | VIA 24 Character Strengths projection from personality parameter space |
+
+### Closed-loop evidence
+
+1. **Vicious cycle self-reinforcement**: `segment_m27_vicious_cycle.json` shows trust_prior dropping from 0.20 → -0.05 over 50 cycles with belief variance shrinking (rigidification). Suppress/assimilate dominate strategy selection.
+
+2. **Metacognitive dissociation breaks the cycle**: `segment_m27_therapeutic_with_meta.json` shows lovability_belief_mean rising from 0.25 → 0.47 with reversal detected at cycle 11, while the no-meta control (`segment_m27_therapeutic_no_meta.json`) remains stuck at 0.25. Metacognitive advantage = +0.22.
+
+3. **Defense mechanism unification**: All five classical defense mechanisms (denial, projection, rationalization, repression, sublimation) are expressed as precision manipulation variants, not hardcoded rules.
+
+4. **VIA projection**: `segment_m27_via_projection.json` demonstrates that the lovability-deficit personality correctly produces low bravery/hope/love scores and high prudence/self-regulation, while the resilient personality shows the inverse pattern.
+
+5. **Backward compatibility**: All M2.2–M2.6 tests pass unchanged. Snapshot round-trip preserves new M2.7 state (precision_manipulator, defense_strategy_selector, metacognitive_layer).
+
+### Test coverage
+
+- `tests/test_precision_manipulation.py` (17 tests)
+- `tests/test_defense_strategy.py` (12 tests)
+- `tests/test_metacognitive.py` (10 tests)
+- `tests/test_therapeutic.py` (9 tests)
+- `tests/test_via_projection.py` (11 tests)
+
 ## Segment v0.1 baseline
 
 `Segment v0.1` focuses on M0 engineering discipline rather than stronger cognition:

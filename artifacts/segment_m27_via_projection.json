@@ -1,0 +1,218 @@
+{
+  "lovability_deficit_personality": {
+    "via_strengths": {
+      "creativity": 0.355,
+      "curiosity": 0.3875,
+      "judgment": 0.41,
+      "love_of_learning": 0.425,
+      "perspective": 0.36,
+      "bravery": 0.325,
+      "perseverance": 0.455,
+      "honesty": 0.51,
+      "zest": 0.385,
+      "love": 0.395,
+      "kindness": 0.4375,
+      "social_intelligence": 0.4325,
+      "teamwork": 0.445,
+      "fairness": 0.5125,
+      "leadership": 0.4,
+      "forgiveness": 0.43,
+      "humility": 0.5375,
+      "prudence": 0.485,
+      "self_regulation": 0.4,
+      "appreciation_of_beauty": 0.3875,
+      "gratitude": 0.435,
+      "hope": 0.35,
+      "humor": 0.385,
+      "spirituality": 0.4025
+    },
+    "top_5": [
+      [
+        "humility",
+        0.5375
+      ],
+      [
+        "fairness",
+        0.5125
+      ],
+      [
+        "honesty",
+        0.51
+      ],
+      [
+        "prudence",
+        0.48500000000000004
+      ],
+      [
+        "perseverance",
+        0.455
+      ]
+    ],
+    "bottom_5": [
+      [
+        "bravery",
+        0.32499999999999996
+      ],
+      [
+        "hope",
+        0.35
+      ],
+      [
+        "creativity",
+        0.355
+      ],
+      [
+        "perspective",
+        0.36
+      ],
+      [
+        "zest",
+        0.385
+      ]
+    ]
+  },
+  "neutral_personality": {
+    "via_strengths": {
+      "creativity": 0.475,
+      "curiosity": 0.5,
+      "judgment": 0.5,
+      "love_of_learning": 0.5,
+      "perspective": 0.475,
+      "bravery": 0.45,
+      "perseverance": 0.5,
+      "honesty": 0.525,
+      "zest": 0.5,
+      "love": 0.475,
+      "kindness": 0.475,
+      "social_intelligence": 0.5,
+      "teamwork": 0.475,
+      "fairness": 0.525,
+      "leadership": 0.475,
+      "forgiveness": 0.5,
+      "humility": 0.5,
+      "prudence": 0.5,
+      "self_regulation": 0.475,
+      "appreciation_of_beauty": 0.475,
+      "gratitude": 0.525,
+      "hope": 0.5,
+      "humor": 0.5,
+      "spirituality": 0.5
+    },
+    "top_5": [
+      [
+        "honesty",
+        0.525
+      ],
+      [
+        "fairness",
+        0.525
+      ],
+      [
+        "gratitude",
+        0.5249999999999999
+      ],
+      [
+        "curiosity",
+        0.5
+      ],
+      [
+        "judgment",
+        0.5
+      ]
+    ],
+    "bottom_5": [
+      [
+        "bravery",
+        0.45000000000000007
+      ],
+      [
+        "creativity",
+        0.475
+      ],
+      [
+        "perspective",
+        0.475
+      ],
+      [
+        "love",
+        0.475
+      ],
+      [
+        "kindness",
+        0.475
+      ]
+    ]
+  },
+  "resilient_personality": {
+    "via_strengths": {
+      "creativity": 0.645,
+      "curiosity": 0.6575,
+      "judgment": 0.67,
+      "love_of_learning": 0.665,
+      "perspective": 0.63,
+      "bravery": 0.575,
+      "perseverance": 0.635,
+      "honesty": 0.65,
+      "zest": 0.625,
+      "love": 0.615,
+      "kindness": 0.6025,
+      "social_intelligence": 0.6225,
+      "teamwork": 0.605,
+      "fairness": 0.6475,
+      "leadership": 0.59,
+      "forgiveness": 0.65,
+      "humility": 0.5325,
+      "prudence": 0.585,
+      "self_regulation": 0.63,
+      "appreciation_of_beauty": 0.6275,
+      "gratitude": 0.675,
+      "hope": 0.65,
+      "humor": 0.625,
+      "spirituality": 0.6575
+    },
+    "top_5": [
+      [
+        "gratitude",
+        0.675
+      ],
+      [
+        "judgment",
+        0.67
+      ],
+      [
+        "love_of_learning",
+        0.665
+      ],
+      [
+        "curiosity",
+        0.6575000000000001
+      ],
+      [
+        "spirituality",
+        0.6575000000000001
+      ]
+    ],
+    "bottom_5": [
+      [
+        "humility",
+        0.5325
+      ],
+      [
+        "bravery",
+        0.575
+      ],
+      [
+        "prudence",
+        0.585
+      ],
+      [
+        "leadership",
+        0.59
+      ],
+      [
+        "kindness",
+        0.6025
+      ]
+    ]
+  }
+}

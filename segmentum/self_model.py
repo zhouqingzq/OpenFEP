@@ -766,6 +766,10 @@ class PersonalityProfile:
     update_count: int = 0
     last_updated_tick: int = 0
 
+    # M2.7: CognitiveStyle extensions
+    meaning_construction_tendency: float = 0.5  # VIA Spirituality / Transcendence
+    emotional_regulation_style: float = 0.5     # VIA Humor / Reframing
+
     # Learning rate parameters
     _base_learning_rate: float = 0.27
     _learning_rate_decay: float = 0.02
@@ -885,6 +889,8 @@ class PersonalityProfile:
             "neuroticism": float(self.neuroticism),
             "update_count": int(self.update_count),
             "last_updated_tick": int(self.last_updated_tick),
+            "meaning_construction_tendency": float(self.meaning_construction_tendency),
+            "emotional_regulation_style": float(self.emotional_regulation_style),
         }
 
     @classmethod
@@ -899,6 +905,8 @@ class PersonalityProfile:
             neuroticism=float(payload.get("neuroticism", 0.5)),
             update_count=int(payload.get("update_count", 0)),
             last_updated_tick=int(payload.get("last_updated_tick", 0)),
+            meaning_construction_tendency=float(payload.get("meaning_construction_tendency", 0.5)),
+            emotional_regulation_style=float(payload.get("emotional_regulation_style", 0.5)),
         )
 
 
