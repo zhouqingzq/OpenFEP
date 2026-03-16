@@ -1,0 +1,262 @@
+{
+  "schema_version": "pre_m3_v1",
+  "benchmark_id": "pre_m3_readiness",
+  "seed": null,
+  "world_id": null,
+  "world_pair": null,
+  "cycles": null,
+  "attention_enabled": null,
+  "profile": null,
+  "metrics": {
+    "attention_passed": true,
+    "transfer_passed": true,
+    "personality_passed": true,
+    "soak_passed": true,
+    "snapshot_passed": true
+  },
+  "summary": {
+    "attention_summary_path": "artifacts/pre_m3_attention_summary.json",
+    "transfer_summary_path": "artifacts/pre_m3_transfer_summary.json",
+    "personality_summary_path": "artifacts/pre_m3_personality_summary.json",
+    "soak_regression": {
+      "seed": 17,
+      "cycles": 256,
+      "summary": {
+        "cycles_completed": 256,
+        "survival_ticks": 256,
+        "sleep_count": 58,
+        "internal_update_count": 0,
+        "memory_retrieval_count": 255,
+        "telemetry_error_count": 0,
+        "persistence_error_count": 0,
+        "memory_hit_rate": 0.99609375,
+        "avg_free_energy_before": 0.4304932646718128,
+        "avg_free_energy_after": 0.4867208576765315,
+        "avg_free_energy_drop": 0.026330770127726708,
+        "min_energy": 0.30499999999999755,
+        "max_stress": 0.10999999999999999,
+        "action_counts": {
+          "exploit_shelter": 148,
+          "hide": 20,
+          "rest": 62,
+          "scan": 9,
+          "seek_contact": 17
+        },
+        "action_distribution": {
+          "exploit_shelter": 0.578125,
+          "hide": 0.078125,
+          "rest": 0.2421875,
+          "scan": 0.03515625,
+          "seek_contact": 0.06640625
+        },
+        "action_switch_count": 50,
+        "unique_actions": 5,
+        "action_entropy": 1.6694764665271302,
+        "dominant_action": "exploit_shelter",
+        "dominant_action_share": 0.578125,
+        "max_action_streak": 31,
+        "last_choice": "exploit_shelter",
+        "termination_reason": "cycles_exhausted"
+      },
+      "checks": {
+        "cycles_completed_match": true,
+        "survived_all_cycles": true,
+        "unique_actions_gte_3": true,
+        "action_entropy_gte_0_20": true,
+        "dominant_action_share_lte_0_92": true,
+        "max_action_streak_lte_48": true,
+        "action_switch_count_gte_24": true
+      },
+      "passed": true
+    },
+    "snapshot_compatibility": {
+      "checks": {
+        "restored_cycle_matches": true,
+        "attention_defaults_restored": true,
+        "personality_profile_defaulted": true,
+        "narrative_priors_defaulted": true,
+        "identity_narrative_defaulted": true
+      },
+      "passed": true
+    },
+    "runtime_lifecycle": {
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe",
+      "revalidated_this_round": true,
+      "lifecycle_activity_observed": true,
+      "compression_specifically_verified": true,
+      "compression_removed_count": 4,
+      "archived_count": 1,
+      "pruned_count": 4,
+      "compressed_cluster_count": 1,
+      "compressed_cluster_count_status": "REVALIDATED_THIS_ROUND",
+      "probe_results": [
+        {
+          "scenario_label": "compression",
+          "compression_removed": 4,
+          "compressed_cluster_count": 1,
+          "episodes_archived": 0,
+          "episodes_deleted": 0
+        },
+        {
+          "scenario_label": "prune_predictable",
+          "compression_removed": 0,
+          "compressed_cluster_count": 0,
+          "episodes_archived": 0,
+          "episodes_deleted": 4
+        },
+        {
+          "scenario_label": "archive_old_unexplained",
+          "compression_removed": 0,
+          "compressed_cluster_count": 0,
+          "episodes_archived": 1,
+          "episodes_deleted": 0
+        }
+      ]
+    },
+    "runtime_family_coverage": {
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_family_probe",
+      "revalidated_this_round": true,
+      "family_schema_count": 4,
+      "runtime_validated_family_count": 4,
+      "family_coverage_status": "RUNTIME_DIVERSITY_VALIDATED",
+      "family_probe_results": [
+        {
+          "scenario_label": "danger_avoidance",
+          "review_family": "danger_avoidance",
+          "graduated": true,
+          "average_benefit": 20.532592970578186,
+          "pass_rate": 1.0,
+          "coverage": {
+            "total_families": 4,
+            "families_covered": 1,
+            "families_graduated": 1,
+            "caq_family_coverage": 0.25,
+            "graduation_family_count": 1,
+            "per_family_rates": {
+              "danger_avoidance": {
+                "reviewed": 2,
+                "graduated": 1
+              }
+            }
+          }
+        },
+        {
+          "scenario_label": "resource_risk",
+          "review_family": "resource_risk",
+          "graduated": true,
+          "average_benefit": 29.61757635433727,
+          "pass_rate": 0.6666666666666666,
+          "coverage": {
+            "total_families": 4,
+            "families_covered": 1,
+            "families_graduated": 1,
+            "caq_family_coverage": 0.25,
+            "graduation_family_count": 1,
+            "per_family_rates": {
+              "resource_risk": {
+                "reviewed": 2,
+                "graduated": 1
+              }
+            }
+          }
+        },
+        {
+          "scenario_label": "retreat_vs_explore",
+          "review_family": "retreat_vs_explore",
+          "graduated": true,
+          "average_benefit": 32.08980295214045,
+          "pass_rate": 1.0,
+          "coverage": {
+            "total_families": 4,
+            "families_covered": 1,
+            "families_graduated": 1,
+            "caq_family_coverage": 0.25,
+            "graduation_family_count": 1,
+            "per_family_rates": {
+              "retreat_vs_explore": {
+                "reviewed": 2,
+                "graduated": 1
+              }
+            }
+          }
+        },
+        {
+          "scenario_label": "integrity_preservation",
+          "review_family": "integrity_preservation",
+          "graduated": true,
+          "average_benefit": 0.05549999999999974,
+          "pass_rate": 1.0,
+          "coverage": {
+            "total_families": 4,
+            "families_covered": 1,
+            "families_graduated": 1,
+            "caq_family_coverage": 0.25,
+            "graduation_family_count": 1,
+            "per_family_rates": {
+              "integrity_preservation": {
+                "reviewed": 2,
+                "graduated": 1
+              }
+            }
+          }
+        }
+      ],
+      "coverage_summary": {
+        "total_families": 4,
+        "families_covered": 4,
+        "families_graduated": 4,
+        "caq_family_coverage": 1.0,
+        "graduation_family_count": 4,
+        "per_family_rates": {
+          "danger_avoidance": {
+            "reviewed": 2,
+            "graduated": 1
+          },
+          "integrity_preservation": {
+            "reviewed": 2,
+            "graduated": 1
+          },
+          "resource_risk": {
+            "reviewed": 2,
+            "graduated": 1
+          },
+          "retreat_vs_explore": {
+            "reviewed": 2,
+            "graduated": 1
+          }
+        }
+      }
+    },
+    "gate_results": {
+      "attention_main_loop_established": true,
+      "multi_environment_established": true,
+      "transfer_benchmark_established": true,
+      "personality_narrative_evidence_established": true,
+      "long_run_soak_regression_passed": true,
+      "snapshot_compatibility_passed": true,
+      "runtime_lifecycle_revalidated": true,
+      "runtime_family_coverage_revalidated": true
+    }
+  },
+  "acceptance": {
+    "passed": true,
+    "gate_results": {
+      "attention_main_loop_established": true,
+      "multi_environment_established": true,
+      "transfer_benchmark_established": true,
+      "personality_narrative_evidence_established": true,
+      "long_run_soak_regression_passed": true,
+      "snapshot_compatibility_passed": true,
+      "runtime_lifecycle_revalidated": true,
+      "runtime_family_coverage_revalidated": true
+    }
+  },
+  "generated_at": "2026-03-16T15:57:55+00:00",
+  "codebase_version": "abd7a72768408e481d63e732a911e0ca2f69fb2d",
+  "final_recommendation": {
+    "status": "READY_FOR_M3",
+    "passed": true
+  }
+}

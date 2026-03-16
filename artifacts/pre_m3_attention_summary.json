@@ -1,0 +1,69 @@
+{
+  "schema_version": "pre_m3_v1",
+  "benchmark_id": "attention",
+  "seed": 44,
+  "world_id": "simulated_world",
+  "world_pair": null,
+  "cycles": 80,
+  "attention_enabled": true,
+  "profile": null,
+  "metrics": {
+    "conditioned_prediction_error_improvement": 0.166561,
+    "survival_ratio": 1.0,
+    "topk_hit_rate": 1.0
+  },
+  "summary": {
+    "conditions": {
+      "attention_off": {
+        "enabled": false,
+        "cycles": 80,
+        "mean_conditioned_prediction_error": 0.107486,
+        "mean_free_energy_before": 0.892591,
+        "survival_score": 1.321064,
+        "action_distribution": {
+          "forage": 0.0875,
+          "hide": 0.075,
+          "rest": 0.8375
+        },
+        "selected_channel_statistics": {},
+        "salient_topk_hit_rate": 0.0
+      },
+      "attention_on": {
+        "enabled": true,
+        "cycles": 80,
+        "mean_conditioned_prediction_error": 0.089583,
+        "mean_free_energy_before": 0.801526,
+        "survival_score": 1.321064,
+        "action_distribution": {
+          "forage": 0.0875,
+          "hide": 0.075,
+          "rest": 0.8375
+        },
+        "selected_channel_statistics": {
+          "novelty": 43,
+          "danger": 69,
+          "social": 14,
+          "temperature": 28,
+          "shelter": 16,
+          "food": 70
+        },
+        "salient_topk_hit_rate": 1.0
+      }
+    },
+    "acceptance_checks": {
+      "topk_hit_rate_gte_0_80": true,
+      "prediction_error_improvement_gte_0_10": true,
+      "survival_ratio_gte_0_95": true
+    }
+  },
+  "acceptance": {
+    "passed": true,
+    "checks": {
+      "topk_hit_rate_gte_0_80": true,
+      "prediction_error_improvement_gte_0_10": true,
+      "survival_ratio_gte_0_95": true
+    }
+  },
+  "generated_at": "2026-03-16T15:56:57+00:00",
+  "codebase_version": "abd7a72768408e481d63e732a911e0ca2f69fb2d"
+}

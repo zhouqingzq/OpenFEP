@@ -1,0 +1,106 @@
+{
+  "schema_version": "pre_m3_v1",
+  "benchmark_id": "transfer",
+  "seed": null,
+  "world_id": null,
+  "world_pair": "predator_river->foraging_valley,foraging_valley->social_shelter",
+  "cycles": null,
+  "attention_enabled": null,
+  "profile": null,
+  "metrics": {
+    "verified_world_count": 3,
+    "verified_transfer_paths": 2,
+    "transfer_paths_passing": 2
+  },
+  "summary": {
+    "world_rollouts": [
+      {
+        "world_id": "foraging_valley",
+        "ticks": 60,
+        "event_count": 4,
+        "action_distribution": {
+          "exploit_shelter": 0.03333333333333333,
+          "hide": 0.38333333333333336,
+          "rest": 0.5833333333333334
+        },
+        "mean_conditioned_prediction_error": 0.04243475661603451
+      },
+      {
+        "world_id": "predator_river",
+        "ticks": 60,
+        "event_count": 3,
+        "action_distribution": {
+          "forage": 0.05,
+          "hide": 0.3333333333333333,
+          "rest": 0.6166666666666667
+        },
+        "mean_conditioned_prediction_error": 0.057679751916883786
+      },
+      {
+        "world_id": "social_shelter",
+        "ticks": 60,
+        "event_count": 3,
+        "action_distribution": {
+          "hide": 0.3,
+          "rest": 0.7
+        },
+        "mean_conditioned_prediction_error": 0.038365479537088236
+      }
+    ],
+    "comparison_records": [
+      {
+        "train_world": "predator_river",
+        "world_id": "foraging_valley",
+        "passed_gate": true,
+        "improvements": {
+          "conditioned_prediction_error_reduction": -0.3120759659286383,
+          "survival_score_lift": -0.027697195745268632,
+          "first_50_cycle_regret_reduction": 0.22222222222222232
+        }
+      },
+      {
+        "train_world": "foraging_valley",
+        "world_id": "social_shelter",
+        "passed_gate": true,
+        "improvements": {
+          "conditioned_prediction_error_reduction": -0.012138092311896553,
+          "survival_score_lift": 0.12055073144019413,
+          "first_50_cycle_regret_reduction": -0.13283335164112153
+        }
+      }
+    ]
+  },
+  "acceptance": {
+    "required_world_count": 3,
+    "verified_world_count": 3,
+    "required_transfer_paths": 2,
+    "verified_transfer_paths": 2,
+    "transfer_paths_passing": 2,
+    "seed_reproducible": true,
+    "passed": true,
+    "comparison_records": [
+      {
+        "train_world": "predator_river",
+        "world_id": "foraging_valley",
+        "passed_gate": true,
+        "improvements": {
+          "conditioned_prediction_error_reduction": -0.3120759659286383,
+          "survival_score_lift": -0.027697195745268632,
+          "first_50_cycle_regret_reduction": 0.22222222222222232
+        }
+      },
+      {
+        "train_world": "foraging_valley",
+        "world_id": "social_shelter",
+        "passed_gate": true,
+        "improvements": {
+          "conditioned_prediction_error_reduction": -0.012138092311896553,
+          "survival_score_lift": 0.12055073144019413,
+          "first_50_cycle_regret_reduction": -0.13283335164112153
+        }
+      }
+    ]
+  },
+  "generated_at": "2026-03-16T15:56:58+00:00",
+  "codebase_version": "abd7a72768408e481d63e732a911e0ca2f69fb2d"
+}
