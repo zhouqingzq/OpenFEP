@@ -184,7 +184,7 @@ class TestScenarioA_ThreatHistory(unittest.TestCase):
         _ingest_and_sleep(agent, THREAT_NARRATIVES, sleep_cycles=3)
         after = agent.self_model.personality_profile.neuroticism
         self.assertGreater(after, before)
-        self.assertGreater(after, 0.55, f"Neuroticism should exceed 0.55, got {after:.3f}")
+        self.assertGreater(after, 0.65, f"Neuroticism should exceed 0.65, got {after:.3f}")
 
     def test_threat_history_agent_prefers_caution(self) -> None:
         agent = _make_agent(seed=102)
@@ -208,8 +208,8 @@ class TestScenarioB_SocialHistory(unittest.TestCase):
         agent = _make_agent(seed=201)
         _ingest_and_sleep(agent, SOCIAL_NARRATIVES, sleep_cycles=3)
         profile = agent.self_model.personality_profile
-        self.assertGreater(profile.extraversion, 0.52)
-        self.assertGreater(profile.agreeableness, 0.52)
+        self.assertGreater(profile.extraversion, 0.60)
+        self.assertGreater(profile.agreeableness, 0.60)
 
     def test_social_history_agent_values_contact(self) -> None:
         agent = _make_agent(seed=202)
@@ -269,11 +269,11 @@ class TestScenarioC_DivergentBehavior(unittest.TestCase):
             if ra["diagnostics"].chosen.choice != rb["diagnostics"].chosen.choice:
                 different_choices += 1
 
-        # At least 1 out of 5 observations should produce different choices
+        # At least 40% of identical decision cycles should produce different choices
         self.assertGreaterEqual(
             different_choices,
-            1,
-            "Agents with different personalities should sometimes make different choices",
+            2,
+            "Agents with different personalities should diverge on at least 40% of identical decision cycles",
         )
 
 

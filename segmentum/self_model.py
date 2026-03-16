@@ -767,7 +767,7 @@ class PersonalityProfile:
     last_updated_tick: int = 0
 
     # Learning rate parameters
-    _base_learning_rate: float = 0.15
+    _base_learning_rate: float = 0.27
     _learning_rate_decay: float = 0.02
 
     @property

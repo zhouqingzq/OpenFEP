@@ -248,8 +248,8 @@ class NarrativeCompiler:
 
         # Agreeableness: increased by trust, decreased by betrayal
         agreeableness = (
-            max(0.0, appraisal.trust_impact) * 0.30
-            + max(0.0, appraisal.attachment_signal) * 0.15
+            max(0.0, appraisal.trust_impact) * 0.38
+            + max(0.0, appraisal.attachment_signal) * 0.20
             + max(0.0, -appraisal.trust_impact) * -0.35
             - appraisal.social_threat * 0.10
         )
