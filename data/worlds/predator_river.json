@@ -1,0 +1,63 @@
+{
+  "world_id": "predator_river",
+  "seed": 17,
+  "baseline_observation": {
+    "food": 0.44,
+    "danger": 0.72,
+    "novelty": 0.66,
+    "shelter": 0.34,
+    "temperature": 0.47,
+    "social": 0.18
+  },
+  "drift_profile": {
+    "food": 0.04,
+    "danger": 0.08,
+    "novelty": 0.06,
+    "shelter": 0.04,
+    "temperature": 0.03,
+    "social": 0.02
+  },
+  "event_schedule": [
+    {
+      "tick": 5,
+      "event_type": "near_miss",
+      "observation_delta": {"danger": 0.18, "novelty": 0.1, "shelter": -0.06},
+      "narrative_text": "Predator tracks appear beside the riverbank after a sudden movement in the reeds.",
+      "tags": ["threat", "near_miss", "trauma"]
+    },
+    {
+      "tick": 14,
+      "event_type": "contaminated_food",
+      "observation_delta": {"food": -0.12, "danger": 0.08},
+      "narrative_text": "A spoiled carcass fouls the waterline, making nearby food sources feel unsafe.",
+      "tags": ["contamination", "hazard"]
+    },
+    {
+      "tick": 27,
+      "event_type": "storm_cover",
+      "observation_delta": {"shelter": 0.12, "danger": -0.04},
+      "narrative_text": "A fallen tree creates temporary cover near the river bend.",
+      "tags": ["shelter", "adaptation"]
+    }
+  ],
+  "resource_rules": {
+    "forage_energy_gain": 0.13,
+    "food_depletion": 0.14
+  },
+  "hazard_rules": {
+    "forage_stress_cost": 0.1,
+    "forage_danger_cost": 0.1,
+    "hide_energy_cost": 0.04,
+    "hide_fatigue_cost": 0.03,
+    "hide_stress_relief": 0.14,
+    "hide_danger_relief": 0.16,
+    "scan_danger_reveal": 0.05,
+    "shelter_stress_relief": 0.09,
+    "shelter_danger_relief": 0.1
+  },
+  "social_rules": {
+    "contact_stress_relief": 0.03,
+    "contact_loneliness_relief": 0.14,
+    "contact_social_gain": 0.08
+  }
+}

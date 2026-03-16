@@ -7,6 +7,7 @@ from typing import Callable
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .action_registry import ActionRegistry, build_default_action_registry
+from .attention import AttentionBottleneck, AttentionTrace
 from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
 from .drives import DriveSystem, StrategicLayer
 from .environment import Observation, clamp
@@ -483,6 +484,9 @@ class SegmentAgent:
         self.precision_manipulator = PrecisionManipulator()
         self.defense_strategy_selector = DefenseStrategySelector(self.precision_manipulator)
         self.metacognitive_layer = MetaCognitiveLayer()
+        self.attention_bottleneck = AttentionBottleneck()
+        self.last_attention_trace: AttentionTrace | None = None
+        self.last_attention_filtered_observation: dict[str, float] = {}
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -491,6 +495,60 @@ class SegmentAgent:
             reset_precisions=True,
         )
         self._sync_self_model_body_schema()
+
+    def configure_attention_bottleneck(
+        self,
+        *,
+        enabled: bool,
+        capacity: int = 3,
+        novelty_weight: float = 0.2,
+        threat_weight: float = 0.35,
+        surprise_weight: float = 0.45,
+    ) -> None:
+        self.attention_bottleneck = AttentionBottleneck(
+            enabled=enabled,
+            capacity=capacity,
+            novelty_weight=novelty_weight,
+            threat_weight=threat_weight,
+            surprise_weight=surprise_weight,
+        )
+
+    def attention_state(self) -> dict[str, object]:
+        state = self.attention_bottleneck.to_dict()
+        if self.last_attention_trace is not None:
+            state["last_trace"] = self.last_attention_trace.to_dict()
+        if self.last_attention_filtered_observation:
+            state["last_filtered_observation"] = dict(self.last_attention_filtered_observation)
+        return state
+
+    def ingest_world_events(
+        self,
+        episodes: list[EmbodiedNarrativeEpisode],
+    ) -> list[dict[str, object]]:
+        results: list[dict[str, object]] = []
+        from .narrative_ingestion import NarrativeIngestionService
+        from .narrative_types import NarrativeEpisode
+
+        service = NarrativeIngestionService()
+        raw_episodes: list[NarrativeEpisode] = []
+        for episode in episodes:
+            if isinstance(episode, NarrativeEpisode):
+                raw_episodes.append(episode)
+                continue
+            if isinstance(episode, EmbodiedNarrativeEpisode):
+                raw_episodes.append(
+                    NarrativeEpisode(
+                        episode_id=episode.episode_id,
+                        timestamp=episode.timestamp,
+                        source=str(episode.provenance.get("world_id", "world")),
+                        raw_text=str(episode.provenance.get("raw_text", episode.predicted_outcome)),
+                        tags=list(episode.narrative_tags),
+                        metadata=dict(episode.provenance),
+                    )
+                )
+        if raw_episodes:
+            results = service.ingest(agent=self, episodes=raw_episodes)
+        return results
 
     def _available_action_schemas(self) -> list[ActionSchema]:
         actions = self.action_registry.get_all()
@@ -839,6 +897,8 @@ class SegmentAgent:
     def perceive(
         self,
         observation: Observation,
+        *,
+        apply_attention: bool = True,
     ) -> tuple[
         dict[str, float],
         dict[str, float],
@@ -867,8 +927,29 @@ class SegmentAgent:
             sensorimotor_prediction,
             interoceptive_prediction,
         ) = self._top_down_pass(observed)
+        raw_errors = {
+            key: observed.get(key, 0.0) - interoceptive_prediction.get(key, 0.0)
+            for key in sorted(set(observed) | set(interoceptive_prediction))
+        }
+        self.last_attention_trace = None
+        self.last_attention_filtered_observation = dict(observed)
+        filtered_observed = dict(observed)
+        if apply_attention and self.attention_bottleneck.enabled:
+            self.last_attention_trace = self.attention_bottleneck.allocate(
+                observation=observed,
+                prediction=interoceptive_prediction,
+                errors=raw_errors,
+                narrative_priors=self.self_model.narrative_priors.to_dict(),
+                tick=self.cycle,
+            )
+            filtered_observed = self.attention_bottleneck.filter_observation(
+                observed,
+                self.last_attention_trace.allocation,
+                prediction=interoceptive_prediction,
+            )
+            self.last_attention_filtered_observation = dict(filtered_observed)
         hierarchy = self._bottom_up_pass(
-            observed,
+            filtered_observed,
             strategic_prior,
             strategic_prediction,
             sensorimotor_prediction,
@@ -1605,6 +1686,21 @@ class SegmentAgent:
                 ).items()
                 if isinstance(value, (int, float))
             },
+            attention_selected_channels=list(
+                self.last_attention_trace.allocation.selected_channels
+                if self.last_attention_trace is not None
+                else []
+            ),
+            attention_dropped_channels=list(
+                self.last_attention_trace.allocation.dropped_channels
+                if self.last_attention_trace is not None
+                else []
+            ),
+            attention_salience_scores=dict(
+                self.last_attention_trace.salience_scores
+                if self.last_attention_trace is not None
+                else {}
+            ),
         )
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
         diagnostics.explanation = str(diagnostics.structured_explanation["text"])
@@ -2629,6 +2725,13 @@ class SegmentAgent:
             "identity_traits": asdict(self.identity_traits),
             "last_body_state_snapshot": dict(self.last_body_state_snapshot),
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
+            "attention_bottleneck": self.attention_bottleneck.to_dict(),
+            "last_attention_trace": (
+                self.last_attention_trace.to_dict()
+                if self.last_attention_trace is not None
+                else None
+            ),
+            "last_attention_filtered_observation": dict(self.last_attention_filtered_observation),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
             "defense_strategy_selector": self.defense_strategy_selector.to_dict(),
@@ -2708,6 +2811,19 @@ class SegmentAgent:
         agent.action_history_limit = int(
             payload.get("action_history_limit", agent.action_history_limit)
         )
+        agent.attention_bottleneck = AttentionBottleneck.from_dict(
+            payload.get("attention_bottleneck")
+        )
+        agent.last_attention_trace = AttentionTrace.from_dict(
+            payload.get("last_attention_trace")
+        )
+        agent.last_attention_filtered_observation = {
+            str(key): float(value)
+            for key, value in dict(
+                payload.get("last_attention_filtered_observation", {})
+            ).items()
+            if isinstance(value, (int, float))
+        }
         agent.decision_history = [
             dict(entry)
             for entry in payload.get("decision_history", [])

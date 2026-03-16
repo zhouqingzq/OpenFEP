@@ -1,0 +1,95 @@
+{
+  "seed": 44,
+  "cycles": 48,
+  "repeats": 3,
+  "profiles": {
+    "neutral": {
+      "caution_rate": 0.9444444444444443,
+      "seek_contact_rate": 0.0,
+      "exploration_rate": 0.05555555555555555,
+      "mean_survival_score": 1.3919444444444438
+    },
+    "threat_sensitive": {
+      "caution_rate": 0.9444444444444443,
+      "seek_contact_rate": 0.0,
+      "exploration_rate": 0.05555555555555555,
+      "mean_survival_score": 1.3786111111111108
+    },
+    "social_approach": {
+      "caution_rate": 0.6666666666666666,
+      "seek_contact_rate": 0.2222222222222222,
+      "exploration_rate": 0.1111111111111111,
+      "mean_survival_score": 1.3663888888888884
+    },
+    "exploratory": {
+      "caution_rate": 0.9444444444444443,
+      "seek_contact_rate": 0.0,
+      "exploration_rate": 0.05555555555555555,
+      "mean_survival_score": 1.393055555555555
+    },
+    "rigid_cautious": {
+      "caution_rate": 0.9444444444444443,
+      "seek_contact_rate": 0.0,
+      "exploration_rate": 0.05555555555555555,
+      "mean_survival_score": 1.3786111111111108
+    }
+  },
+  "anova": {
+    "caution_rate": {
+      "f_statistic": 3.130001482045009e+30,
+      "p_value": 0.0,
+      "eta_squared": 1.0,
+      "group_means": {
+        "neutral": 0.9444444444444443,
+        "threat_sensitive": 0.9444444444444443,
+        "social_approach": 0.6666666666666666,
+        "exploratory": 0.9444444444444443,
+        "rigid_cautious": 0.9444444444444443
+      },
+      "df_between": 4,
+      "df_within": 10
+    },
+    "seek_contact_rate": {
+      "f_statistic": 29629629629.629623,
+      "p_value": 0.0,
+      "eta_squared": 1.0,
+      "group_means": {
+        "neutral": 0.0,
+        "threat_sensitive": 0.0,
+        "social_approach": 0.2222222222222222,
+        "exploratory": 0.0,
+        "rigid_cautious": 0.0
+      },
+      "df_between": 4,
+      "df_within": 10
+    },
+    "exploration_rate": {
+      "f_statistic": 1851851851.851852,
+      "p_value": 0.0,
+      "eta_squared": 1.0,
+      "group_means": {
+        "neutral": 0.05555555555555555,
+        "threat_sensitive": 0.05555555555555555,
+        "social_approach": 0.1111111111111111,
+        "exploratory": 0.05555555555555555,
+        "rigid_cautious": 0.05555555555555555
+      },
+      "df_between": 4,
+      "df_within": 10
+    },
+    "mean_survival_score": {
+      "f_statistic": 1.2357245851113516e+28,
+      "p_value": 0.0,
+      "eta_squared": 1.0,
+      "group_means": {
+        "neutral": 1.3919444444444438,
+        "threat_sensitive": 1.3786111111111108,
+        "social_approach": 1.3663888888888884,
+        "exploratory": 1.393055555555555,
+        "rigid_cautious": 1.3786111111111108
+      },
+      "df_between": 4,
+      "df_within": 10
+    }
+  }
+}

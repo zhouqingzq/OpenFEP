@@ -5,6 +5,7 @@ from dataclasses import asdict
 from dataclasses import replace
 import json
 from pathlib import Path
+from typing import cast
 
 from .action_schema import ActionSchema
 from .agent import SegmentAgent
@@ -15,6 +16,8 @@ from .interoception import ProcessInteroceptor
 from .llm import InnerSpeechEngine, build_inner_speech_engine
 from .logging_utils import ConsciousnessLogger
 from .memory import MemoryDecision
+from .narrative_ingestion import NarrativeIngestionService
+from .narrative_world import NarrativeWorld, NarrativeWorldConfig
 from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, quarantine_snapshot
 from .predictive_coding import PredictiveCodingHyperparameters
 from .self_model import (
@@ -93,6 +96,7 @@ class SegmentRuntime:
             JsonlTraceWriter(resolved_trace_path) if resolved_trace_path else None
         )
         self.state_load_status = state_load_status
+        self.narrative_ingestion_service = NarrativeIngestionService()
 
     @classmethod
     def load_or_create(
@@ -578,6 +582,74 @@ class SegmentRuntime:
             "host_state": self.host_state.to_dict(),
         }
 
+    @classmethod
+    def load_world(cls, world_path: str | Path, *, seed: int | None = None) -> NarrativeWorld:
+        path = Path(world_path)
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        config = NarrativeWorldConfig.from_dict(payload)
+        return NarrativeWorld(config, rng_seed=seed if seed is not None else config.seed)
+
+    def run_world_episode(
+        self,
+        *,
+        world: NarrativeWorld,
+        cycles: int,
+        ingest_events: bool = True,
+    ) -> dict[str, object]:
+        action_counts: dict[str, int] = {}
+        selected_channel_counts: dict[str, int] = {}
+        conditioned_prediction_errors: list[float] = []
+        ingestion_records: list[dict[str, object]] = []
+        event_count = 0
+
+        for tick in range(cycles):
+            self.agent.cycle += 1
+            observation = world.observe(tick)
+            decision = self.agent.decision_cycle(observation)
+            diagnostics = cast(DecisionDiagnostics, decision["diagnostics"])
+            action = diagnostics.chosen.choice
+            action_counts[action] = action_counts.get(action, 0) + 1
+            for channel in diagnostics.attention_selected_channels:
+                selected_channel_counts[channel] = selected_channel_counts.get(channel, 0) + 1
+            conditioned_prediction_errors.append(float(diagnostics.prediction_error))
+
+            direct_feedback = world.apply_action(action, tick)
+            self.agent.apply_action_feedback(direct_feedback)
+
+            if ingest_events:
+                episodes = world.narrative_episodes(tick)
+                if episodes:
+                    event_count += len(episodes)
+                    ingestion_records.extend(
+                        self.narrative_ingestion_service.ingest(
+                            agent=self.agent,
+                            episodes=episodes,
+                        )
+                    )
+
+        total_actions = sum(action_counts.values()) or 1
+        return {
+            "world_id": world.config.world_id,
+            "ticks": cycles,
+            "event_count": event_count,
+            "action_distribution": {
+                action: count / total_actions
+                for action, count in sorted(action_counts.items())
+            },
+            "mean_conditioned_prediction_error": (
+                sum(conditioned_prediction_errors) / max(1, len(conditioned_prediction_errors))
+            ),
+            "selected_channel_statistics": dict(sorted(selected_channel_counts.items())),
+            "narrative_ingestion_count": len(ingestion_records),
+            "agent_state": {
+                "energy": self.agent.energy,
+                "stress": self.agent.stress,
+                "fatigue": self.agent.fatigue,
+                "temperature": self.agent.temperature,
+                "narrative_priors": self.agent.self_model.narrative_priors.to_dict(),
+            },
+        }
+
     def _build_cycle_trace(
         self,
         observed: dict[str, float],
@@ -687,12 +759,20 @@ class SegmentRuntime:
                 "total_surprise": memory_decision.total_surprise,
                 "explanation": diagnostics.explanation,
                 "explanation_details": diagnostics.structured_explanation,
+                "attention_selected_channels": list(diagnostics.attention_selected_channels),
+                "attention_dropped_channels": list(diagnostics.attention_dropped_channels),
+                "attention_salience_scores": dict(diagnostics.attention_salience_scores),
             },
             "retrieved_memories": diagnostics.retrieved_memories,
             "episodic_memory": memory_decision.to_dict(),
             "running_metrics": self.metrics.summary(),
             "recent_action_history": list(self.agent.action_history),
         }
+        if self.agent.last_attention_trace is not None:
+            trace_record["attention"] = self.agent.last_attention_trace.to_dict()
+            trace_record["attention"]["filtered_observation"] = dict(
+                self.agent.last_attention_filtered_observation
+            )
         if self.last_error_attribution is not None:
             trace_record["last_error_attribution"] = {
                 "classification": self.last_error_attribution.classification,

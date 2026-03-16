@@ -1,0 +1,80 @@
+{
+  "benchmarks": [
+    {
+      "seed": 44,
+      "train_world": "predator_river",
+      "train_cycles": 60,
+      "eval_cycles": 40,
+      "train_summary": {
+        "world_id": "predator_river",
+        "mean_conditioned_prediction_error": 0.057320913528177794,
+        "survival_score": 1.4395833333333328
+      },
+      "comparisons": [
+        {
+          "world_id": "foraging_valley",
+          "transferred": {
+            "mean_conditioned_prediction_error": 0.12661181588233866,
+            "survival_score": 1.7596249999999998,
+            "action_distribution": {
+              "exploit_shelter": 0.025,
+              "hide": 0.65,
+              "rest": 0.325
+            }
+          },
+          "fresh": {
+            "mean_conditioned_prediction_error": 0.06884296493480846,
+            "survival_score": 1.8097499999999997,
+            "action_distribution": {
+              "exploit_shelter": 0.05,
+              "hide": 0.55,
+              "rest": 0.4
+            }
+          },
+          "improvements": {
+            "conditioned_prediction_error_reduction": -0.8391394967116104,
+            "survival_score_lift": -0.027697195745268632,
+            "first_50_cycle_regret_reduction": -0.23076923076923084
+          }
+        }
+      ]
+    },
+    {
+      "seed": 45,
+      "train_world": "foraging_valley",
+      "train_cycles": 60,
+      "eval_cycles": 40,
+      "train_summary": {
+        "world_id": "foraging_valley",
+        "mean_conditioned_prediction_error": 0.042810515271366624,
+        "survival_score": 1.7739999999999996
+      },
+      "comparisons": [
+        {
+          "world_id": "social_shelter",
+          "transferred": {
+            "mean_conditioned_prediction_error": 0.07853875505588287,
+            "survival_score": 1.5946249999999995,
+            "action_distribution": {
+              "hide": 0.45,
+              "rest": 0.55
+            }
+          },
+          "fresh": {
+            "mean_conditioned_prediction_error": 0.07498470800299067,
+            "survival_score": 1.5978749999999995,
+            "action_distribution": {
+              "hide": 0.45,
+              "rest": 0.55
+            }
+          },
+          "improvements": {
+            "conditioned_prediction_error_reduction": -0.04739695796042098,
+            "survival_score_lift": -0.0020339513416255395,
+            "first_50_cycle_regret_reduction": 0.025962958231595556
+          }
+        }
+      ]
+    }
+  ]
+}

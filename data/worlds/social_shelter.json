@@ -1,0 +1,63 @@
+{
+  "world_id": "social_shelter",
+  "seed": 23,
+  "baseline_observation": {
+    "food": 0.58,
+    "danger": 0.36,
+    "novelty": 0.42,
+    "shelter": 0.74,
+    "temperature": 0.5,
+    "social": 0.64
+  },
+  "drift_profile": {
+    "food": 0.05,
+    "danger": 0.03,
+    "novelty": 0.03,
+    "shelter": 0.04,
+    "temperature": 0.01,
+    "social": 0.08
+  },
+  "event_schedule": [
+    {
+      "tick": 9,
+      "event_type": "welcome_signal",
+      "observation_delta": {"social": 0.14, "danger": -0.04},
+      "narrative_text": "A shelter group signals that cooperative contact is likely to be safe.",
+      "tags": ["social", "trust", "attachment"]
+    },
+    {
+      "tick": 21,
+      "event_type": "resource_queue",
+      "observation_delta": {"food": -0.08, "social": -0.06, "novelty": 0.05},
+      "narrative_text": "Competition for shelter supplies creates mild social friction and uncertainty.",
+      "tags": ["social", "resource", "uncertainty"]
+    },
+    {
+      "tick": 34,
+      "event_type": "shared_meal",
+      "observation_delta": {"food": 0.12, "social": 0.16},
+      "narrative_text": "A shared meal reinforces the sense that staying connected can be rewarding.",
+      "tags": ["social", "resource_gain", "trust"]
+    }
+  ],
+  "resource_rules": {
+    "forage_energy_gain": 0.15,
+    "food_depletion": 0.07
+  },
+  "hazard_rules": {
+    "forage_stress_cost": 0.05,
+    "forage_danger_cost": 0.03,
+    "hide_energy_cost": 0.02,
+    "hide_fatigue_cost": 0.015,
+    "hide_stress_relief": 0.07,
+    "hide_danger_relief": 0.08,
+    "scan_danger_reveal": 0.02,
+    "shelter_stress_relief": 0.08,
+    "shelter_danger_relief": 0.07
+  },
+  "social_rules": {
+    "contact_stress_relief": 0.08,
+    "contact_loneliness_relief": 0.28,
+    "contact_social_gain": 0.22
+  }
+}

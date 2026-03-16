@@ -402,3 +402,6 @@ class DecisionDiagnostics:
     prediction_before_memory: dict[str, float] = field(default_factory=dict)
     prediction_after_memory: dict[str, float] = field(default_factory=dict)
     prediction_delta: dict[str, float] = field(default_factory=dict)
+    attention_selected_channels: list[str] = field(default_factory=list)
+    attention_dropped_channels: list[str] = field(default_factory=list)
+    attention_salience_scores: dict[str, float] = field(default_factory=dict)

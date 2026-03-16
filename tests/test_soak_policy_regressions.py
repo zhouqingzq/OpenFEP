@@ -4,9 +4,12 @@ from pathlib import Path
 import tempfile
 import unittest
 
+import pytest
+
 from segmentum.runtime import SegmentRuntime
 
 
+@pytest.mark.stress
 class SoakPolicyRegressionTests(unittest.TestCase):
     def test_m0_seed_17_maintains_switching_behavior_over_256_cycles(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -1,0 +1,10 @@
+{
+  "world_id": "social_shelter",
+  "ticks": 60,
+  "event_count": 3,
+  "action_distribution": {
+    "hide": 0.3,
+    "rest": 0.7
+  },
+  "mean_conditioned_prediction_error": 0.03807571869451043
+}

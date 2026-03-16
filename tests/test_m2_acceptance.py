@@ -16,6 +16,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import pytest
+
 from segmentum.agent import DecisionLoop, SegmentAgent
 from segmentum.counterfactual import CounterfactualLearning
 from segmentum.environment import Observation
@@ -216,6 +218,7 @@ class TestIdentityContinuity(unittest.TestCase):
     """Run N cycles → persist → reload → run N cycles.
     Behavior must remain consistent (not restart like a new agent)."""
 
+    @pytest.mark.stress
     def test_action_distribution_stability(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             state_path = Path(tmp) / "state.json"
@@ -246,6 +249,7 @@ class TestIdentityContinuity(unittest.TestCase):
             self.assertGreater(fresh_divergence, restart_divergence + 0.05,
                                "Fresh agent should differ more than the restored one")
 
+    @pytest.mark.stress
     def test_identity_narrative_persists(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             state_path = Path(tmp) / "state.json"

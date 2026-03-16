@@ -1,0 +1,11 @@
+{
+  "world_id": "predator_river",
+  "ticks": 60,
+  "event_count": 3,
+  "action_distribution": {
+    "forage": 0.05,
+    "hide": 0.3333333333333333,
+    "rest": 0.6166666666666667
+  },
+  "mean_conditioned_prediction_error": 0.05767351991287553
+}

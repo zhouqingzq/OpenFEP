@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import pytest
+
 from segmentum.agent import SegmentAgent
 from segmentum.environment import Observation
 from segmentum.runtime import SegmentRuntime
@@ -65,6 +67,7 @@ def _run_until_sleeps(runtime: SegmentRuntime, target_sleep_count: int, max_cycl
 class TestRestartConsistency(unittest.TestCase):
     """Validate M2 continuity across persistence and restart."""
 
+    @pytest.mark.stress
     def test_action_distribution_stability(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             state_path = Path(tmp_dir) / "segment_state.json"
@@ -101,6 +104,7 @@ class TestRestartConsistency(unittest.TestCase):
             # The restarted agent should remain noticeably closer to a continuous run than a fresh agent is.
             self.assertGreater(fresh_divergence, restart_divergence + 0.01)
 
+    @pytest.mark.stress
     def test_identity_narrative_persistence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             state_path = Path(tmp_dir) / "segment_state.json"
