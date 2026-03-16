@@ -1,0 +1,47 @@
+{
+  "milestone": "M2.10",
+  "validation_acceptance": {
+    "required_significant_metrics": 3,
+    "required_effect_metrics": 2,
+    "significant_metrics": [
+      "caution_rate",
+      "exploration_rate",
+      "seek_contact_rate",
+      "mean_conditioned_prediction_error"
+    ],
+    "effect_metrics": [
+      "caution_rate",
+      "exploration_rate",
+      "seek_contact_rate",
+      "action_entropy",
+      "survival_score",
+      "mean_conditioned_prediction_error",
+      "narrative_consistency_proxy"
+    ],
+    "passed": true
+  },
+  "stability_acceptance": {
+    "required_profiles": 5,
+    "profiles_passing": 5,
+    "passed_profiles": [
+      "neutral",
+      "threat_sensitive",
+      "social_approach",
+      "exploratory",
+      "rigid_cautious"
+    ],
+    "passed": true
+  },
+  "gate_results": {
+    "statistical_support": true,
+    "longitudinal_stability": true,
+    "profile_level_consistency": true,
+    "artifact_freshness": true
+  },
+  "failing_profiles": [],
+  "stale_or_missing_inputs": [],
+  "final_recommendation": {
+    "status": "ACCEPT_M210",
+    "passed": true
+  }
+}
