@@ -1,0 +1,23 @@
+{
+  "milestone": "M2.17",
+  "status": "PASS",
+  "gates": {
+    "declared_capability_budget_and_ack": true,
+    "unsafe_actions_blocked": true,
+    "failed_actions_bounded_recovery": true,
+    "governance_traces_explain_decisions": true,
+    "tool_use_improves_benchmark_without_uncontrolled_failure": true
+  },
+  "summary": {
+    "trace_count": 4,
+    "remaining_budgets": {
+      "context_budget_remaining": 58,
+      "file_budget_remaining": 6,
+      "network_budget_remaining": 2,
+      "failure_budget_remaining": 2
+    },
+    "repair_dispatch_present": true,
+    "allowed_effect_path": "E:\\workspace\\segments\\data\\data\\governed_actions\\acceptance_note.txt",
+    "repair_effect_path": "E:\\workspace\\segments\\data\\data\\governed_actions\\repair.log"
+  }
+}

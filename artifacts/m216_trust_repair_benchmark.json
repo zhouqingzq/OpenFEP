@@ -1,0 +1,17 @@
+{
+  "trust_after_rupture": 0.15100000000000002,
+  "threat_after_rupture": 0.47000000000000003,
+  "trust_after_repair": 0.4103800000000001,
+  "threat_after_repair": 0.259,
+  "hide_score_before_social": 0.9160968111251184,
+  "hide_score_after_rupture": 1.0805968111251183,
+  "seek_contact_before_social": 0.20216094462511836,
+  "seek_contact_after_rupture": 0.26998594462511827,
+  "social_focus": [
+    "ally_alice",
+    "rival_bob"
+  ],
+  "social_alerts": [
+    "rival_bob:rupture-risk"
+  ]
+}

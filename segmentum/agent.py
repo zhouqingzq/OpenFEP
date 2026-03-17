@@ -30,7 +30,14 @@ from .predictive_coding import (
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
 from .preferences import Goal, GoalStack
 from .narrative_compiler import NarrativeCompiler
-from .self_model import CapabilityModel, NarrativePriors, PersonalitySignal, SelfModel, build_default_self_model
+from .social_model import SocialMemory
+from .self_model import (
+    CapabilityModel,
+    NarrativePriors,
+    PersonalitySignal,
+    SelfModel,
+    build_default_self_model,
+)
 from .sleep_consolidator import SleepConsolidation, SleepConsolidator
 from .types import (
     ClusterPE,
@@ -48,6 +55,7 @@ from .world_model import GenerativeWorldModel
 from .precision_manipulation import PrecisionManipulator
 from .defense_strategy import DefenseStrategySelector
 from .metacognitive import MetaCognitiveLayer
+from .workspace import GlobalWorkspace, GlobalWorkspaceState
 
 
 def observation_dict(observation: Observation) -> dict[str, float]:
@@ -224,6 +232,70 @@ class PolicyEvaluator:
 
         return max(-0.6, min(0.6, bias))
 
+    def commitment_assessment(
+        self,
+        *,
+        action: str,
+        projected_state: dict[str, float],
+    ) -> dict[str, object]:
+        narrative = self.self_model.identity_narrative
+        if narrative is None:
+            return {
+                "bias": 0.0,
+                "focus": [],
+                "violations": [],
+                "active_commitments": [],
+                "tension": 0.0,
+                "repair_policy": "",
+            }
+
+        danger = float(projected_state.get("danger", 0.0))
+        novelty = float(projected_state.get("novelty", 0.0))
+        shelter = float(projected_state.get("shelter", 0.0))
+        active_commitments: list[str] = []
+        focus: list[str] = []
+        violations: list[str] = []
+        bias = 0.0
+        tension = 0.0
+
+        for commitment in narrative.commitments:
+            if not commitment.active:
+                continue
+            active_commitments.append(commitment.commitment_id)
+            gate = 0.35
+            if commitment.commitment_type == "value_guardrail":
+                gate = max(0.35, danger, 1.0 - shelter)
+            elif commitment.commitment_type == "behavioral_style":
+                gate = max(0.25, novelty * (1.0 - danger))
+            elif commitment.commitment_type == "capability":
+                gate = 0.30
+            strength = max(0.0, min(1.0, commitment.confidence)) * max(
+                0.15, min(1.0, commitment.priority)
+            ) * gate
+            if action in commitment.target_actions:
+                bias += 0.65 * strength
+                focus.append(commitment.commitment_id)
+            if action in commitment.discouraged_actions:
+                penalty = 0.85 * strength
+                bias -= penalty
+                tension += penalty
+                violations.append(commitment.commitment_id)
+
+        repair_policy = ""
+        if violations:
+            repair_policy = (
+                "Re-anchor action selection to active commitments and preserve the resulting "
+                "episode as identity-critical evidence."
+            )
+        return {
+            "bias": max(-0.9, min(0.9, bias)),
+            "focus": focus,
+            "violations": violations,
+            "active_commitments": active_commitments,
+            "tension": max(0.0, min(1.5, tension)),
+            "repair_policy": repair_policy,
+        }
+
     def dominant_component(
         self,
         *,
@@ -232,6 +304,9 @@ class PolicyEvaluator:
         pattern_bias: float,
         policy_bias: float,
         epistemic_bonus: float,
+        workspace_bias: float,
+        social_bias: float,
+        commitment_bias: float,
         identity_bias: float,
         goal_alignment: float,
     ) -> str:
@@ -241,6 +316,9 @@ class PolicyEvaluator:
             ("pattern_bias", abs(pattern_bias)),
             ("policy_bias", abs(policy_bias)),
             ("epistemic_bonus", abs(epistemic_bonus)),
+            ("workspace_bias", abs(workspace_bias)),
+            ("social_bias", abs(social_bias)),
+            ("commitment_bias", abs(commitment_bias)),
             ("identity_bias", abs(identity_bias)),
             ("goal_alignment", abs(goal_alignment)),
         ]
@@ -290,6 +368,21 @@ class PolicyEvaluator:
             reason = (
                 f"epistemic_bonus ({chosen.epistemic_bonus:.3f}) dominated, "
                 "so unresolved ambiguity in this state encouraged information-seeking exploration."
+            )
+        elif chosen.dominant_component == "workspace_bias":
+            reason = (
+                f"workspace_bias ({chosen.workspace_bias:.3f}) dominated, "
+                "so globally broadcast contents overruled weaker local preferences."
+            )
+        elif chosen.dominant_component == "social_bias":
+            reason = (
+                f"social_bias ({chosen.social_bias:.3f}) dominated, "
+                "so learned expectations about others constrained the local policy."
+            )
+        elif chosen.dominant_component == "commitment_bias":
+            reason = (
+                f"commitment_bias ({chosen.commitment_bias:.3f}) dominated, "
+                "so identity commitments constrained the policy beyond short-term convenience."
             )
         elif chosen.dominant_component == "identity_bias":
             reason = (
@@ -387,8 +480,41 @@ class PolicyEvaluator:
             f"memory_bias={chosen.memory_bias:.3f}",
             f"pattern_bias={chosen.pattern_bias:.3f}",
             f"policy_bias={chosen.policy_bias:.3f}",
+            f"workspace_bias={chosen.workspace_bias:.3f}",
+            f"social_bias={chosen.social_bias:.3f}",
+            f"commitment_bias={chosen.commitment_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
+        workspace_channels = ", ".join(diagnostics.workspace_broadcast_channels)
+        workspace_sentence = ""
+        if workspace_channels:
+            workspace_sentence = (
+                f" My globally accessible focus was constrained to: {workspace_channels}. "
+            )
+        commitment_sentence = ""
+        if diagnostics.commitment_focus:
+            commitment_sentence = (
+                " Active commitments shaping this choice: "
+                + ", ".join(diagnostics.commitment_focus)
+                + ". "
+            )
+        if diagnostics.violated_commitments:
+            commitment_sentence += (
+                "This action still carries identity tension against: "
+                + ", ".join(diagnostics.violated_commitments)
+                + ". "
+            )
+        social_sentence = ""
+        if diagnostics.social_focus:
+            social_sentence = (
+                " Social models currently in focus: "
+                + ", ".join(diagnostics.social_focus)
+                + ". "
+            )
+        if diagnostics.social_alerts:
+            social_sentence += (
+                "Active social alerts: " + ", ".join(diagnostics.social_alerts) + ". "
+            )
         explanation_text = (
             f"I chose {chosen.choice}. "
             f"This action predicted outcome '{chosen.predicted_outcome}'. "
@@ -396,7 +522,10 @@ class PolicyEvaluator:
             f"preferred probability ({chosen.preferred_probability:.2f}), "
             f"resulting in {risk_band} risk ({chosen.risk:.3f}). "
             f"My active goal is {diagnostics.active_goal}, so I favored actions aligned with it. "
-            f"{reason}{comparison} "
+            f"{reason}{comparison}"
+            f"{workspace_sentence}"
+            f"{commitment_sentence}"
+            f"{social_sentence}"
             f"{consistency_statement}{bias_sentence} "
             f"This aligns with my resource_conservatism="
             f"{self.identity_traits.resource_conservatism:.2f} and "
@@ -412,6 +541,16 @@ class PolicyEvaluator:
             "consistency": consistency_info,
             "reason": reason,
             "comparison": comparison.strip(),
+            "workspace_focus": list(diagnostics.workspace_broadcast_channels),
+            "workspace_intensity": diagnostics.workspace_broadcast_intensity,
+            "current_commitments": list(diagnostics.current_commitments),
+            "commitment_focus": list(diagnostics.commitment_focus),
+            "violated_commitments": list(diagnostics.violated_commitments),
+            "identity_tension": diagnostics.identity_tension,
+            "identity_repair_policy": diagnostics.identity_repair_policy,
+            "social_focus": list(diagnostics.social_focus),
+            "social_alerts": list(diagnostics.social_alerts),
+            "social_snapshot": dict(diagnostics.social_snapshot),
             "text": explanation_text,
         }
 
@@ -511,6 +650,10 @@ class SegmentAgent:
         self.attention_bottleneck = AttentionBottleneck()
         self.last_attention_trace: AttentionTrace | None = None
         self.last_attention_filtered_observation: dict[str, float] = {}
+        self.global_workspace = GlobalWorkspace()
+        self.last_workspace_state: GlobalWorkspaceState | None = None
+        self.social_memory = SocialMemory()
+        self.identity_tension_history: list[dict[str, object]] = []
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -544,6 +687,104 @@ class SegmentAgent:
         if self.last_attention_filtered_observation:
             state["last_filtered_observation"] = dict(self.last_attention_filtered_observation)
         return state
+
+    def configure_global_workspace(
+        self,
+        *,
+        enabled: bool,
+        capacity: int = 2,
+        action_bias_gain: float = 0.35,
+        memory_gate_gain: float = 0.08,
+    ) -> None:
+        self.global_workspace = GlobalWorkspace(
+            enabled=enabled,
+            capacity=capacity,
+            action_bias_gain=action_bias_gain,
+            memory_gate_gain=memory_gate_gain,
+        )
+
+    def workspace_state(self) -> dict[str, object]:
+        return self.global_workspace.to_dict()
+
+    def _record_identity_tension(
+        self,
+        *,
+        chosen_action: str,
+        commitment_focus: list[str],
+        violated_commitments: list[str],
+        identity_tension: float,
+        repair_policy: str,
+    ) -> None:
+        if not commitment_focus and not violated_commitments:
+            return
+        record = {
+            "tick": self.cycle,
+            "action": chosen_action,
+            "commitment_focus": list(commitment_focus),
+            "violated_commitments": list(violated_commitments),
+            "identity_tension": float(identity_tension),
+            "repair_policy": repair_policy,
+        }
+        self.identity_tension_history.append(record)
+        self.identity_tension_history = self.identity_tension_history[-64:]
+        self.metacognitive_layer.meta_beliefs["identity_commitment_state"] = {
+            "last_tick": self.cycle,
+            "focus_count": len(commitment_focus),
+            "violation_count": len(violated_commitments),
+            "identity_tension": float(identity_tension),
+            "repair_policy": repair_policy,
+        }
+
+    def _mark_last_episode_identity_critical(
+        self,
+        *,
+        reason: str,
+        commitment_ids: list[str],
+    ) -> None:
+        if not self.long_term_memory.episodes:
+            return
+        payload = self.long_term_memory.episodes[-1]
+        payload["identity_critical"] = True
+        payload["identity_commitment_reason"] = reason
+        payload["identity_commitment_ids"] = list(commitment_ids)
+        lifecycle_stage = str(
+            payload.get("lifecycle_stage", LIFECYCLE_PROTECTED_IDENTITY_CRITICAL)
+        )
+        if lifecycle_stage != LIFECYCLE_PROTECTED_IDENTITY_CRITICAL:
+            payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+
+    def _update_social_memory_from_embodied_episode(
+        self,
+        embodied_episode: EmbodiedNarrativeEpisode,
+    ) -> dict[str, object]:
+        provenance = dict(embodied_episode.provenance)
+        compiled_event = dict(provenance.get("compiled_event", {}))
+        metadata = dict(provenance.get("episode_metadata", {}))
+        counterpart_id = str(
+            metadata.get(
+                "counterpart_id",
+                compiled_event.get("annotations", {}).get("counterpart_id", ""),
+            )
+        )
+        if not counterpart_id:
+            raw_actor = metadata.get("counterpart_name", "")
+            counterpart_id = str(raw_actor).strip().lower().replace(" ", "_")
+        if not counterpart_id:
+            return {"updated": False, "snapshot": self.social_memory.snapshot()}
+        model = self.social_memory.observe_counterpart(
+            other_id=counterpart_id,
+            tick=embodied_episode.timestamp,
+            appraisal=embodied_episode.appraisal,
+            metadata=metadata,
+            tags=list(embodied_episode.narrative_tags),
+            event_type=str(compiled_event.get("event_type", metadata.get("event_type", ""))),
+        )
+        return {
+            "updated": True,
+            "counterpart_id": counterpart_id,
+            "model": model.to_dict(),
+            "snapshot": self.social_memory.snapshot(),
+        }
 
     def ingest_world_events(
         self,
@@ -855,6 +1096,11 @@ class SegmentAgent:
             "goal_alignment": diagnostics.chosen.goal_alignment,
             "preferred_probability": diagnostics.chosen.preferred_probability,
             "policy_score": diagnostics.chosen.policy_score,
+            "commitment_focus": list(diagnostics.commitment_focus),
+            "violated_commitments": list(diagnostics.violated_commitments),
+            "identity_tension": diagnostics.identity_tension,
+            "social_focus": list(diagnostics.social_focus),
+            "social_alerts": list(diagnostics.social_alerts),
         }
         self.decision_history.append(record)
         if len(self.decision_history) > self.decision_history_limit:
@@ -1567,6 +1813,13 @@ class SegmentAgent:
             if item.get("episode_id")
         ]
         current_cluster_id = self.long_term_memory.infer_cluster_id(current_state_snapshot)
+        self.last_workspace_state = self.global_workspace.broadcast(
+            tick=self.cycle,
+            observation=observed,
+            prediction=prediction,
+            errors=errors,
+            attention_trace=self.last_attention_trace,
+        )
         action_options = self.evaluate_action_options(
             observed,
             prediction,
@@ -1577,6 +1830,8 @@ class SegmentAgent:
             memory_context=self.last_memory_context,
         )
         ranked_options: list[InterventionScore] = []
+        commitment_assessments: dict[str, dict[str, object]] = {}
+        social_assessments: dict[str, dict[str, object]] = {}
         for action, option in action_options.items():
             predicted_state = dict(option["predicted_state"])
             predicted_effects = dict(option["predicted_effects"])
@@ -1591,6 +1846,22 @@ class SegmentAgent:
                 current_cluster_id,
                 action,
             )
+            workspace_bias = self.global_workspace.action_bias(
+                action,
+                self.last_workspace_state,
+            )
+            social_assessment = self.social_memory.policy_assessment(
+                action=action,
+                observation=observed,
+            )
+            social_bias = float(social_assessment["bias"])
+            social_assessments[action] = social_assessment
+            commitment_assessment = self.policy_evaluator.commitment_assessment(
+                action=action,
+                projected_state=predicted_state,
+            )
+            commitment_bias = float(commitment_assessment["bias"])
+            commitment_assessments[action] = commitment_assessment
             identity_bias = self.policy_evaluator.identity_bias(
                 action=action,
                 projected_state=predicted_state,
@@ -1611,6 +1882,9 @@ class SegmentAgent:
                 + pattern_bias
                 + policy_bias
                 + epistemic_bonus
+                + workspace_bias
+                + social_bias
+                + commitment_bias
                 + identity_bias
                 + goal_alignment
                 - regression_penalty
@@ -1621,6 +1895,9 @@ class SegmentAgent:
                 pattern_bias=pattern_bias,
                 policy_bias=policy_bias,
                 epistemic_bonus=epistemic_bonus,
+                workspace_bias=workspace_bias,
+                social_bias=social_bias,
+                commitment_bias=commitment_bias,
                 identity_bias=identity_bias,
                 goal_alignment=goal_alignment,
             )
@@ -1642,6 +1919,9 @@ class SegmentAgent:
                     pattern_bias=pattern_bias,
                     policy_bias=policy_bias,
                     epistemic_bonus=epistemic_bonus,
+                    workspace_bias=workspace_bias,
+                    social_bias=social_bias,
+                    commitment_bias=commitment_bias,
                     identity_bias=identity_bias,
                     goal_alignment=goal_alignment,
                     value_score=float(option["value_score"]),
@@ -1674,6 +1954,20 @@ class SegmentAgent:
                 option.choice,
             ),
             reverse=True,
+        )
+        chosen_assessment = commitment_assessments.get(
+            ranked_options[0].choice,
+            {
+                "active_commitments": [],
+                "focus": [],
+                "violations": [],
+                "tension": 0.0,
+                "repair_policy": "",
+            },
+        )
+        chosen_social = social_assessments.get(
+            ranked_options[0].choice,
+            {"focus": [], "alerts": [], "snapshot": self.social_memory.snapshot()},
         )
         diagnostics = DecisionDiagnostics(
             chosen=ranked_options[0],
@@ -1725,10 +2019,38 @@ class SegmentAgent:
                 if self.last_attention_trace is not None
                 else {}
             ),
+            workspace_broadcast_channels=self.global_workspace.report_focus(
+                self.last_workspace_state
+            ),
+            workspace_suppressed_channels=list(
+                self.last_workspace_state.suppressed_channels
+                if self.last_workspace_state is not None
+                else []
+            ),
+            workspace_broadcast_intensity=(
+                self.last_workspace_state.broadcast_intensity
+                if self.last_workspace_state is not None
+                else 0.0
+            ),
+            current_commitments=list(chosen_assessment["active_commitments"]),
+            commitment_focus=list(chosen_assessment["focus"]),
+            violated_commitments=list(chosen_assessment["violations"]),
+            identity_tension=float(chosen_assessment["tension"]),
+            identity_repair_policy=str(chosen_assessment["repair_policy"]),
+            social_focus=list(chosen_social["focus"]),
+            social_alerts=list(chosen_social["alerts"]),
+            social_snapshot=dict(chosen_social["snapshot"]),
         )
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
         diagnostics.explanation = str(diagnostics.structured_explanation["text"])
         self.last_decision_diagnostics = diagnostics
+        self._record_identity_tension(
+            chosen_action=diagnostics.chosen.choice,
+            commitment_focus=diagnostics.commitment_focus,
+            violated_commitments=diagnostics.violated_commitments,
+            identity_tension=diagnostics.identity_tension,
+            repair_policy=diagnostics.identity_repair_policy,
+        )
         self.goal_stack.note_action_choice(self.cycle, diagnostics.chosen.choice)
         self._record_decision_history(diagnostics)
         return {
@@ -1777,6 +2099,9 @@ class SegmentAgent:
                 pattern_bias=0.0,
                 policy_bias=0.0,
                 epistemic_bonus=0.0,
+                workspace_bias=0.0,
+                social_bias=0.0,
+                commitment_bias=0.0,
                 identity_bias=0.0,
                 goal_alignment=0.0,
                 value_score=neutral_preference.value_score,
@@ -1795,6 +2120,17 @@ class SegmentAgent:
             prediction_before_memory=dict(prediction),
             prediction_after_memory=dict(prediction),
             prediction_delta={key: 0.0 for key in prediction},
+            workspace_broadcast_channels=[],
+            workspace_suppressed_channels=[],
+            workspace_broadcast_intensity=0.0,
+            current_commitments=[],
+            commitment_focus=[],
+            violated_commitments=[],
+            identity_tension=0.0,
+            identity_repair_policy="",
+            social_focus=[],
+            social_alerts=[],
+            social_snapshot=self.social_memory.snapshot(),
         )
         self.last_decision_diagnostics = diagnostics
         return diagnostics
@@ -1893,15 +2229,24 @@ class SegmentAgent:
             "free_energy_drop": fe_delta,
         }
         action = ensure_action_schema(choice)
-        memory_decision = self.long_term_memory.maybe_store_episode(
-            self.cycle,
-            observed,
-            prediction,
-            errors,
-            action,
-            outcome,
-            body_state=body_state,
+        original_surprise_threshold = self.long_term_memory.surprise_threshold
+        self.long_term_memory.surprise_threshold = max(
+            0.05,
+            original_surprise_threshold
+            + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
         )
+        try:
+            memory_decision = self.long_term_memory.maybe_store_episode(
+                self.cycle,
+                observed,
+                prediction,
+                errors,
+                action,
+                outcome,
+                body_state=body_state,
+            )
+        finally:
+            self.long_term_memory.surprise_threshold = original_surprise_threshold
         if memory_decision.episode_created:
             self.episodes.append(
                 MemoryEpisode(
@@ -1916,6 +2261,21 @@ class SegmentAgent:
                     body_state=body_state,
                 )
             )
+            if self.last_decision_diagnostics is not None and (
+                self.last_decision_diagnostics.commitment_focus
+                or self.last_decision_diagnostics.violated_commitments
+            ):
+                self._mark_last_episode_identity_critical(
+                    reason=(
+                        "identity_commitment_violation"
+                        if self.last_decision_diagnostics.violated_commitments
+                        else "identity_commitment_reaffirmed"
+                    ),
+                    commitment_ids=(
+                        list(self.last_decision_diagnostics.violated_commitments)
+                        or list(self.last_decision_diagnostics.commitment_focus)
+                    ),
+                )
         self.action_history.append(action.name)
         self.action_history = self.action_history[-self.action_history_limit :]
         self.last_body_state_snapshot = dict(body_state)
@@ -1926,6 +2286,7 @@ class SegmentAgent:
         self,
         embodied_episode: EmbodiedNarrativeEpisode,
     ) -> dict[str, object]:
+        social_update = self._update_social_memory_from_embodied_episode(embodied_episode)
         observation = dict(embodied_episode.observation)
         prediction = dict(self.world_model.beliefs)
         errors = {
@@ -1939,15 +2300,24 @@ class SegmentAgent:
             "temperature": float(embodied_episode.body_state.get("temperature", self.temperature)),
         }
         outcome = self._narrative_outcome_effects(embodied_episode)
-        memory_decision = self.long_term_memory.maybe_store_episode(
-            embodied_episode.timestamp,
-            observation,
-            prediction,
-            errors,
-            "observe_world",
-            outcome,
-            body_state=body_state,
+        original_surprise_threshold = self.long_term_memory.surprise_threshold
+        self.long_term_memory.surprise_threshold = max(
+            0.05,
+            original_surprise_threshold
+            + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
         )
+        try:
+            memory_decision = self.long_term_memory.maybe_store_episode(
+                embodied_episode.timestamp,
+                observation,
+                prediction,
+                errors,
+                "observe_world",
+                outcome,
+                body_state=body_state,
+            )
+        finally:
+            self.long_term_memory.surprise_threshold = original_surprise_threshold
         target_payload = None
         if memory_decision.episode_created and self.long_term_memory.episodes:
             target_payload = self.long_term_memory.episodes[-1]
@@ -1971,6 +2341,9 @@ class SegmentAgent:
                 embodied_episode.provenance.get("source_type", "narrative")
             )
             target_payload["narrative_provenance"] = dict(embodied_episode.provenance)
+            if social_update.get("updated"):
+                target_payload["counterpart_id"] = str(social_update.get("counterpart_id", ""))
+                target_payload["social_snapshot"] = dict(social_update.get("snapshot", {}))
         trace_payload = {
             "source_episode_id": embodied_episode.provenance.get(
                 "source_episode_id",
@@ -1990,6 +2363,7 @@ class SegmentAgent:
             "merged_into_episode_id": memory_decision.merged_into_episode_id,
             "compiler_confidence": embodied_episode.compiler_confidence,
             "narrative_tags": list(embodied_episode.narrative_tags),
+            "social_update": social_update,
         }
         self.narrative_trace.append(trace_payload)
         self.narrative_trace = self.narrative_trace[-128:]
@@ -2756,6 +3130,14 @@ class SegmentAgent:
                 else None
             ),
             "last_attention_filtered_observation": dict(self.last_attention_filtered_observation),
+            "global_workspace": self.global_workspace.to_dict(),
+            "last_workspace_state": (
+                self.last_workspace_state.to_dict()
+                if self.last_workspace_state is not None
+                else None
+            ),
+            "social_memory": self.social_memory.to_dict(),
+            "identity_tension_history": list(self.identity_tension_history),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
             "defense_strategy_selector": self.defense_strategy_selector.to_dict(),
@@ -2848,6 +3230,26 @@ class SegmentAgent:
             ).items()
             if isinstance(value, (int, float))
         }
+        agent.global_workspace = GlobalWorkspace.from_dict(
+            payload.get("global_workspace")
+            if isinstance(payload.get("global_workspace"), dict)
+            else None
+        )
+        agent.last_workspace_state = GlobalWorkspaceState.from_dict(
+            payload.get("last_workspace_state")
+            if isinstance(payload.get("last_workspace_state"), dict)
+            else None
+        )
+        agent.social_memory = SocialMemory.from_dict(
+            payload.get("social_memory")
+            if isinstance(payload.get("social_memory"), dict)
+            else None
+        )
+        agent.identity_tension_history = [
+            dict(entry)
+            for entry in payload.get("identity_tension_history", [])
+            if isinstance(entry, dict)
+        ]
         agent.decision_history = [
             dict(entry)
             for entry in payload.get("decision_history", [])

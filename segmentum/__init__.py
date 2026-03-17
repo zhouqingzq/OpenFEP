@@ -1,7 +1,19 @@
 """Project Segmentum: predictive-coding survival primitives and daemon loop."""
 
 from .daemon import HeartbeatDaemon, run_daemon
+from .io_bus import (
+    ActionBus,
+    ActionDispatchRecord,
+    ActionEffectAck,
+    BusSignal,
+    PerceptionBus,
+    PerceptionPacket,
+)
 from .runtime import SegmentRuntime
+from .homeostasis import HomeostasisScheduler, MaintenanceAgenda
+from .workspace import GlobalWorkspace, GlobalWorkspaceState, WorkspaceContent
+from .social_model import OtherModel, SocialMemory
+from .governance import CapabilityDescriptor, GovernanceController, GovernanceState
 from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
 from .sleep_consolidator import SleepConsolidation
@@ -17,7 +29,10 @@ from .narrative_types import (
 from .self_model import (
     BodySchema,
     CapabilityModel,
+    ContinuityAudit,
+    DriftBudget,
     ErrorClassifier,
+    IdentityCommitment,
     NarrativePriors,
     PersonalityProfile,
     PersonalitySignal,
@@ -38,6 +53,22 @@ __all__ = [
     "Strategy",
     "HeartbeatDaemon",
     "SegmentRuntime",
+    "BusSignal",
+    "PerceptionPacket",
+    "PerceptionBus",
+    "ActionEffectAck",
+    "ActionDispatchRecord",
+    "ActionBus",
+    "MaintenanceAgenda",
+    "HomeostasisScheduler",
+    "WorkspaceContent",
+    "GlobalWorkspaceState",
+    "GlobalWorkspace",
+    "OtherModel",
+    "SocialMemory",
+    "CapabilityDescriptor",
+    "GovernanceController",
+    "GovernanceState",
     "AutobiographicalMemory",
     "Goal",
     "GoalStack",
@@ -54,7 +85,10 @@ __all__ = [
     "run_daemon",
     "BodySchema",
     "CapabilityModel",
+    "ContinuityAudit",
+    "DriftBudget",
     "ErrorClassifier",
+    "IdentityCommitment",
     "NarrativePriors",
     "PersonalityProfile",
     "PersonalitySignal",

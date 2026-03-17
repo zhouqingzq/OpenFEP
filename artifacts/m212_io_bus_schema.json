@@ -1,0 +1,17 @@
+{
+  "perception_sources": [
+    "host_telemetry",
+    "simulated_world"
+  ],
+  "action_sources": [
+    "simulated_world"
+  ],
+  "snapshot_keys": [
+    "action_bus",
+    "perception_bus"
+  ],
+  "trace_keys": [
+    "action",
+    "perception"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "violation_assessment": {
+    "bias": -0.7287687499999999,
+    "focus": [],
+    "violations": [
+      "commitment-survival-priority"
+    ],
+    "active_commitments": [
+      "commitment-survival-priority"
+    ],
+    "tension": 0.7287687499999999,
+    "repair_policy": "Re-anchor action selection to active commitments and preserve the resulting episode as identity-critical evidence."
+  },
+  "identity_tension_history": [
+    {
+      "tick": 0,
+      "action": "hide",
+      "commitment_focus": [
+        "commitment-survival-priority"
+      ],
+      "violated_commitments": [],
+      "identity_tension": 0.0,
+      "repair_policy": ""
+    }
+  ],
+  "compression_removed": 3,
+  "post_compression_episodes": [
+    {
+      "episode_id": null,
+      "identity_critical": true,
+      "identity_commitment_reason": "identity_commitment_reaffirmed",
+      "identity_commitment_ids": [
+        "commitment-survival-priority"
+      ],
+      "lifecycle_stage": "protected_identity_critical_episode",
+      "compressed_count": 4
+    }
+  ]
+}

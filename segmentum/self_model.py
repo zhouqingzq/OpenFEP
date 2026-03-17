@@ -25,6 +25,9 @@ CORE_ACTIONS = (
 CORE_API_LIMITS = {
     "requests_per_minute": 60.0,
     "context_window_tokens": 256.0,
+    "file_ops_per_window": 8.0,
+    "network_ops_per_window": 2.0,
+    "external_failures_before_lockout": 3.0,
 }
 HIGH_SURPRISE_THRESHOLD = 3.0
 MAX_CHAPTER_TICKS = 500
@@ -654,15 +657,81 @@ class NarrativeClaim:
 
 
 @dataclass(slots=True)
+class IdentityCommitment:
+    commitment_id: str
+    commitment_type: str
+    statement: str
+    target_actions: list[str] = field(default_factory=list)
+    discouraged_actions: list[str] = field(default_factory=list)
+    confidence: float = 0.0
+    priority: float = 0.0
+    source_claim_ids: list[str] = field(default_factory=list)
+    source_chapter_ids: list[int] = field(default_factory=list)
+    evidence_ids: list[str] = field(default_factory=list)
+    active: bool = True
+    last_reaffirmed_tick: int = 0
+    last_violated_tick: int | None = None
+    violation_count: int = 0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "commitment_id": self.commitment_id,
+            "commitment_type": self.commitment_type,
+            "statement": self.statement,
+            "target_actions": list(self.target_actions),
+            "discouraged_actions": list(self.discouraged_actions),
+            "confidence": self.confidence,
+            "priority": self.priority,
+            "source_claim_ids": list(self.source_claim_ids),
+            "source_chapter_ids": list(self.source_chapter_ids),
+            "evidence_ids": list(self.evidence_ids),
+            "active": self.active,
+            "last_reaffirmed_tick": self.last_reaffirmed_tick,
+            "last_violated_tick": self.last_violated_tick,
+            "violation_count": self.violation_count,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, object] | None) -> "IdentityCommitment":
+        if not data:
+            return cls(commitment_id="", commitment_type="identity", statement="")
+        last_violated_tick = data.get("last_violated_tick")
+        return cls(
+            commitment_id=str(data.get("commitment_id", "")),
+            commitment_type=str(data.get("commitment_type", "identity")),
+            statement=str(data.get("statement", "")),
+            target_actions=[str(item) for item in data.get("target_actions", [])],
+            discouraged_actions=[str(item) for item in data.get("discouraged_actions", [])],
+            confidence=float(data.get("confidence", 0.0)),
+            priority=float(data.get("priority", 0.0)),
+            source_claim_ids=[str(item) for item in data.get("source_claim_ids", [])],
+            source_chapter_ids=[int(item) for item in data.get("source_chapter_ids", [])],
+            evidence_ids=[str(item) for item in data.get("evidence_ids", [])],
+            active=bool(data.get("active", True)),
+            last_reaffirmed_tick=int(data.get("last_reaffirmed_tick", 0)),
+            last_violated_tick=(
+                int(last_violated_tick)
+                if isinstance(last_violated_tick, (int, float))
+                else None
+            ),
+            violation_count=int(data.get("violation_count", 0)),
+        )
+
+
+@dataclass(slots=True)
 class IdentityNarrative:
     chapters: list[NarrativeChapter] = field(default_factory=list)
     current_chapter: NarrativeChapter | None = None
     core_identity: str = ""
     core_summary: str = ""
+    autobiographical_summary: str = ""
+    trait_self_model: dict[str, object] = field(default_factory=dict)
     behavioral_patterns: list[str] = field(default_factory=list)
     significant_events: list[str] = field(default_factory=list)
     values_statement: str = ""
     claims: list[NarrativeClaim] = field(default_factory=list)
+    commitments: list[IdentityCommitment] = field(default_factory=list)
+    chapter_transition_evidence: list[dict[str, object]] = field(default_factory=list)
     contradiction_summary: dict[str, object] = field(default_factory=dict)
     evidence_provenance: dict[str, object] = field(default_factory=dict)
     last_updated_tick: int = 0
@@ -676,10 +745,14 @@ class IdentityNarrative:
             ),
             "core_identity": self.core_identity,
             "core_summary": self.core_summary,
+            "autobiographical_summary": self.autobiographical_summary,
+            "trait_self_model": dict(self.trait_self_model),
             "behavioral_patterns": list(self.behavioral_patterns),
             "significant_events": list(self.significant_events),
             "values_statement": self.values_statement,
             "claims": [claim.to_dict() for claim in self.claims],
+            "commitments": [commitment.to_dict() for commitment in self.commitments],
+            "chapter_transition_evidence": [dict(item) for item in self.chapter_transition_evidence],
             "contradiction_summary": dict(self.contradiction_summary),
             "evidence_provenance": dict(self.evidence_provenance),
             "last_updated_tick": self.last_updated_tick,
@@ -692,12 +765,18 @@ class IdentityNarrative:
             return cls()
         chapters_payload = data.get("chapters", [])
         current_chapter_payload = data.get("current_chapter")
+        trait_self_model = data.get("trait_self_model")
         contradiction_summary = data.get("contradiction_summary")
         evidence_provenance = data.get("evidence_provenance")
+        chapter_transition_evidence = data.get("chapter_transition_evidence")
+        if not isinstance(trait_self_model, dict):
+            trait_self_model = {}
         if not isinstance(contradiction_summary, dict):
             contradiction_summary = {}
         if not isinstance(evidence_provenance, dict):
             evidence_provenance = {}
+        if not isinstance(chapter_transition_evidence, list):
+            chapter_transition_evidence = []
         return cls(
             chapters=[
                 NarrativeChapter.from_dict(item)
@@ -711,6 +790,10 @@ class IdentityNarrative:
             ),
             core_identity=str(data.get("core_identity", "")),
             core_summary=str(data.get("core_summary", "")),
+            autobiographical_summary=str(
+                data.get("autobiographical_summary", data.get("core_summary", ""))
+            ),
+            trait_self_model=dict(trait_self_model),
             behavioral_patterns=[str(item) for item in data.get("behavioral_patterns", [])],
             significant_events=[str(item) for item in data.get("significant_events", [])],
             values_statement=str(data.get("values_statement", "")),
@@ -718,6 +801,14 @@ class IdentityNarrative:
                 NarrativeClaim.from_dict(item)
                 for item in data.get("claims", [])
                 if isinstance(item, Mapping)
+            ],
+            commitments=[
+                IdentityCommitment.from_dict(item)
+                for item in data.get("commitments", [])
+                if isinstance(item, Mapping)
+            ],
+            chapter_transition_evidence=[
+                dict(item) for item in chapter_transition_evidence if isinstance(item, Mapping)
             ],
             contradiction_summary=dict(contradiction_summary),
             evidence_provenance=dict(evidence_provenance),
@@ -939,6 +1030,110 @@ class NarrativePriors:
             meaning_stability=float(payload.get("meaning_stability", 0.0)),
         )
 
+
+@dataclass(slots=True)
+class DriftBudget:
+    personality_window: float = 0.45
+    narrative_window: float = 0.55
+    policy_window: float = 0.45
+    action_dominance_limit: float = 0.82
+    restart_tolerance: float = 0.18
+
+    def to_dict(self) -> dict[str, float]:
+        return {
+            "personality_window": self.personality_window,
+            "narrative_window": self.narrative_window,
+            "policy_window": self.policy_window,
+            "action_dominance_limit": self.action_dominance_limit,
+            "restart_tolerance": self.restart_tolerance,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "DriftBudget":
+        if not payload:
+            return cls()
+        return cls(
+            personality_window=float(payload.get("personality_window", 0.45)),
+            narrative_window=float(payload.get("narrative_window", 0.55)),
+            policy_window=float(payload.get("policy_window", 0.45)),
+            action_dominance_limit=float(payload.get("action_dominance_limit", 0.82)),
+            restart_tolerance=float(payload.get("restart_tolerance", 0.18)),
+        )
+
+
+@dataclass(slots=True)
+class ContinuityAudit:
+    continuity_score: float = 1.0
+    dominant_action: str = ""
+    dominant_action_ratio: float = 0.0
+    action_distribution: dict[str, float] = field(default_factory=dict)
+    personality_drift: float = 0.0
+    narrative_drift: float = 0.0
+    policy_drift: float = 0.0
+    restart_divergence: float = 0.0
+    chapter_shift_excused: bool = False
+    protected_anchor_ids: list[str] = field(default_factory=list)
+    rehearsal_queue: list[str] = field(default_factory=list)
+    interventions: list[str] = field(default_factory=list)
+    personality_snapshot: dict[str, float] = field(default_factory=dict)
+    policy_snapshot: dict[str, float] = field(default_factory=dict)
+    commitment_snapshot: list[str] = field(default_factory=list)
+    updated_tick: int = 0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "continuity_score": self.continuity_score,
+            "dominant_action": self.dominant_action,
+            "dominant_action_ratio": self.dominant_action_ratio,
+            "action_distribution": dict(self.action_distribution),
+            "personality_drift": self.personality_drift,
+            "narrative_drift": self.narrative_drift,
+            "policy_drift": self.policy_drift,
+            "restart_divergence": self.restart_divergence,
+            "chapter_shift_excused": self.chapter_shift_excused,
+            "protected_anchor_ids": list(self.protected_anchor_ids),
+            "rehearsal_queue": list(self.rehearsal_queue),
+            "interventions": list(self.interventions),
+            "personality_snapshot": dict(self.personality_snapshot),
+            "policy_snapshot": dict(self.policy_snapshot),
+            "commitment_snapshot": list(self.commitment_snapshot),
+            "updated_tick": self.updated_tick,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "ContinuityAudit":
+        if not payload:
+            return cls()
+        return cls(
+            continuity_score=float(payload.get("continuity_score", 1.0)),
+            dominant_action=str(payload.get("dominant_action", "")),
+            dominant_action_ratio=float(payload.get("dominant_action_ratio", 0.0)),
+            action_distribution={
+                str(key): float(value)
+                for key, value in dict(payload.get("action_distribution", {})).items()
+            },
+            personality_drift=float(payload.get("personality_drift", 0.0)),
+            narrative_drift=float(payload.get("narrative_drift", 0.0)),
+            policy_drift=float(payload.get("policy_drift", 0.0)),
+            restart_divergence=float(payload.get("restart_divergence", 0.0)),
+            chapter_shift_excused=bool(payload.get("chapter_shift_excused", False)),
+            protected_anchor_ids=[
+                str(item) for item in payload.get("protected_anchor_ids", [])
+            ],
+            rehearsal_queue=[str(item) for item in payload.get("rehearsal_queue", [])],
+            interventions=[str(item) for item in payload.get("interventions", [])],
+            personality_snapshot={
+                str(key): float(value)
+                for key, value in dict(payload.get("personality_snapshot", {})).items()
+            },
+            policy_snapshot={
+                str(key): float(value)
+                for key, value in dict(payload.get("policy_snapshot", {})).items()
+            },
+            commitment_snapshot=[str(item) for item in payload.get("commitment_snapshot", [])],
+            updated_tick=int(payload.get("updated_tick", 0)),
+        )
+
 @dataclass(slots=True)
 class SelfModel:
     """Self model for separating failures and persisting agent continuity."""
@@ -953,6 +1148,8 @@ class SelfModel:
     identity_narrative: IdentityNarrative | None = None
     narrative_priors: NarrativePriors = field(default_factory=NarrativePriors)
     personality_profile: PersonalityProfile = field(default_factory=PersonalityProfile)
+    drift_budget: DriftBudget = field(default_factory=DriftBudget)
+    continuity_audit: ContinuityAudit = field(default_factory=ContinuityAudit)
     belief_calibration: dict[str, dict[str, object]] = field(default_factory=dict)
     log_sink: Callable[[str], None] | None = None
     last_result: ClassificationResult | None = field(init=False, default=None)
@@ -1021,6 +1218,8 @@ class SelfModel:
             ),
             "narrative_priors": self.narrative_priors.to_dict(),
             "personality_profile": self.personality_profile.to_dict(),
+            "drift_budget": self.drift_budget.to_dict(),
+            "continuity_audit": self.continuity_audit.to_dict(),
             "belief_calibration": {
                 str(key): dict(value) for key, value in self.belief_calibration.items()
             },
@@ -1047,6 +1246,8 @@ class SelfModel:
             identity_narrative=IdentityNarrative.from_dict(payload.get("identity_narrative")),
             narrative_priors=NarrativePriors.from_dict(payload.get("narrative_priors")),
             personality_profile=PersonalityProfile.from_dict(payload.get("personality_profile")),
+            drift_budget=DriftBudget.from_dict(payload.get("drift_budget")),
+            continuity_audit=ContinuityAudit.from_dict(payload.get("continuity_audit")),
             belief_calibration={
                 str(key): dict(value)
                 for key, value in dict(payload.get("belief_calibration", {})).items()
@@ -1054,6 +1255,173 @@ class SelfModel:
             },
             log_sink=log_sink,
         )
+
+    def update_continuity_audit(
+        self,
+        *,
+        episodic_memory: list[dict[str, object]],
+        archived_memory: list[dict[str, object]] | None = None,
+        action_history: list[str],
+        rehearsal_queue: list[str] | None = None,
+        current_tick: int,
+    ) -> ContinuityAudit:
+        archived = archived_memory or []
+        previous = self.continuity_audit
+        current_personality = self._personality_anchor_snapshot()
+        current_policy = (
+            dict(self.preferred_policies.action_distribution)
+            if self.preferred_policies is not None
+            else {}
+        )
+        current_commitments = (
+            [commitment.commitment_id for commitment in self.identity_narrative.commitments]
+            if self.identity_narrative is not None
+            else []
+        )
+        action_distribution = _distribution(action_history[-48:])
+        dominant_action, dominant_ratio = _dominant_action(action_distribution)
+        protected_anchor_ids = [
+            str(payload.get("episode_id", ""))
+            for payload in sorted(
+                [
+                    payload
+                    for payload in [*episodic_memory, *archived]
+                    if bool(payload.get("identity_critical", False))
+                ],
+                key=lambda payload: (
+                    int(payload.get("last_seen_cycle", payload.get("cycle", 0))),
+                    str(payload.get("episode_id", "")),
+                ),
+                reverse=True,
+            )[:12]
+            if payload.get("episode_id")
+        ]
+
+        personality_drift = _mean_abs_delta(
+            previous.personality_snapshot,
+            current_personality,
+        )
+        policy_drift = _distribution_delta(previous.policy_snapshot, current_policy)
+        narrative_drift = _set_divergence(previous.commitment_snapshot, current_commitments)
+        chapter_shift_excused = bool(
+            self.identity_narrative is not None
+            and self.identity_narrative.chapter_transition_evidence
+            and narrative_drift > self.drift_budget.narrative_window
+        )
+
+        interventions: list[str] = []
+        if dominant_ratio >= self.drift_budget.action_dominance_limit and dominant_action:
+            interventions.append("action_collapse_guard")
+            if self.preferred_policies is not None:
+                avoidances = list(self.preferred_policies.learned_avoidances)
+                if dominant_action not in avoidances:
+                    avoidances.append(dominant_action)
+                    self.preferred_policies.learned_avoidances = avoidances
+        if (
+            previous.personality_snapshot
+            and personality_drift > self.drift_budget.personality_window
+        ):
+            interventions.append("personality_drift_guard")
+            self._stabilize_personality(previous.personality_snapshot)
+            current_personality = self._personality_anchor_snapshot()
+            personality_drift = _mean_abs_delta(
+                previous.personality_snapshot,
+                current_personality,
+            )
+        if previous.policy_snapshot and policy_drift > self.drift_budget.policy_window:
+            interventions.append("policy_prior_guard")
+        if (
+            previous.commitment_snapshot
+            and narrative_drift > self.drift_budget.narrative_window
+            and not chapter_shift_excused
+        ):
+            interventions.append("narrative_anchor_guard")
+
+        continuity_penalty = (
+            (dominant_ratio * 0.40)
+            + (personality_drift * 0.20)
+            + (policy_drift * 0.20)
+            + (0.0 if chapter_shift_excused else narrative_drift * 0.20)
+        )
+        self.continuity_audit = ContinuityAudit(
+            continuity_score=max(0.0, min(1.0, 1.0 - continuity_penalty)),
+            dominant_action=dominant_action,
+            dominant_action_ratio=dominant_ratio,
+            action_distribution=action_distribution,
+            personality_drift=personality_drift,
+            narrative_drift=narrative_drift,
+            policy_drift=policy_drift,
+            restart_divergence=previous.restart_divergence,
+            chapter_shift_excused=chapter_shift_excused,
+            protected_anchor_ids=protected_anchor_ids,
+            rehearsal_queue=list(rehearsal_queue or []),
+            interventions=interventions,
+            personality_snapshot=current_personality,
+            policy_snapshot=current_policy,
+            commitment_snapshot=current_commitments,
+            updated_tick=current_tick,
+        )
+        return self.continuity_audit
+
+    def record_restart_consistency(
+        self,
+        reference: Mapping[str, object] | None,
+        *,
+        current_tick: int,
+    ) -> float:
+        if not reference:
+            self.continuity_audit.restart_divergence = 0.0
+            self.continuity_audit.updated_tick = current_tick
+            return 0.0
+        reference_personality = {
+            str(key): float(value)
+            for key, value in dict(reference.get("personality_snapshot", {})).items()
+        }
+        reference_policy = {
+            str(key): float(value)
+            for key, value in dict(reference.get("policy_snapshot", {})).items()
+        }
+        reference_commitments = [
+            str(item) for item in reference.get("commitment_snapshot", [])
+        ]
+        divergence = (
+            _mean_abs_delta(reference_personality, self.continuity_audit.personality_snapshot)
+            + _distribution_delta(reference_policy, self.continuity_audit.policy_snapshot)
+            + _set_divergence(reference_commitments, self.continuity_audit.commitment_snapshot)
+        ) / 3.0
+        self.continuity_audit.restart_divergence = divergence
+        self.continuity_audit.updated_tick = current_tick
+        return divergence
+
+    def _stabilize_personality(self, reference: Mapping[str, float]) -> None:
+        if not reference:
+            return
+        for trait_name in (
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism",
+        ):
+            current = float(getattr(self.personality_profile, trait_name))
+            anchor = float(reference.get(trait_name, current))
+            setattr(
+                self.personality_profile,
+                trait_name,
+                max(0.0, min(1.0, (current * 0.65) + (anchor * 0.35))),
+            )
+
+    def _personality_anchor_snapshot(self) -> dict[str, float]:
+        profile = self.personality_profile
+        return {
+            "openness": float(profile.openness),
+            "conscientiousness": float(profile.conscientiousness),
+            "extraversion": float(profile.extraversion),
+            "agreeableness": float(profile.agreeableness),
+            "neuroticism": float(profile.neuroticism),
+            "meaning_construction_tendency": float(profile.meaning_construction_tendency),
+            "emotional_regulation_style": float(profile.emotional_regulation_style),
+        }
 
     def update_preferred_policies(
         self,
@@ -1362,7 +1730,21 @@ class SelfModel:
             }
             for claim in narrative.claims
         }
-        narrative.core_summary = self.generate_core_summary(narrative)
+        narrative.trait_self_model = self._derive_trait_self_model(
+            narrative=narrative,
+            policies=policies,
+        )
+        narrative.chapter_transition_evidence = self._derive_chapter_transition_evidence(
+            chapters=chapters,
+            current_chapter=current_chapter,
+        )
+        narrative.commitments = self._derive_identity_commitments(
+            narrative=narrative,
+            policies=policies,
+            current_tick=current_tick,
+        )
+        narrative.autobiographical_summary = self.generate_core_summary(narrative)
+        narrative.core_summary = narrative.autobiographical_summary
         self._update_belief_calibration(
             current_tick=current_tick,
             policies=policies,
@@ -1525,6 +1907,148 @@ class SelfModel:
             "supporting_evidence_count": sum(claim.support_count for claim in claims),
             "contradicting_evidence_count": sum(claim.contradict_count for claim in claims),
         }
+
+    def _derive_trait_self_model(
+        self,
+        *,
+        narrative: IdentityNarrative,
+        policies: PreferredPolicies,
+    ) -> dict[str, object]:
+        stable_traits = [
+            claim.claim_key
+            for claim in narrative.claims
+            if claim.claim_type == "trait" and claim.confidence >= 0.5
+        ]
+        uncertain_traits = [
+            claim.claim_key
+            for claim in narrative.claims
+            if claim.claim_type == "trait" and 0.0 < claim.confidence < 0.5
+        ]
+        return {
+            "risk_profile": policies.risk_profile,
+            "dominant_strategy": policies.dominant_strategy,
+            "stable_traits": stable_traits,
+            "uncertain_traits": uncertain_traits,
+            "dominant_patterns": list(narrative.behavioral_patterns[:3]),
+            "values_statement": narrative.values_statement,
+        }
+
+    def _derive_chapter_transition_evidence(
+        self,
+        *,
+        chapters: list[NarrativeChapter],
+        current_chapter: NarrativeChapter | None,
+    ) -> list[dict[str, object]]:
+        evidence: list[dict[str, object]] = []
+        for chapter in chapters:
+            if not chapter.behavioral_shift:
+                continue
+            evidence.append(
+                {
+                    "chapter_id": chapter.chapter_id,
+                    "tick_range": [int(chapter.tick_range[0]), int(chapter.tick_range[1])],
+                    "trigger": chapter.behavioral_shift,
+                    "dominant_theme": chapter.dominant_theme,
+                    "key_events": list(chapter.key_events[:3]),
+                }
+            )
+        if current_chapter is not None and current_chapter.behavioral_shift:
+            evidence.append(
+                {
+                    "chapter_id": current_chapter.chapter_id,
+                    "tick_range": [int(current_chapter.tick_range[0]), int(current_chapter.tick_range[1])],
+                    "trigger": current_chapter.behavioral_shift,
+                    "dominant_theme": current_chapter.dominant_theme,
+                    "key_events": list(current_chapter.key_events[:3]),
+                }
+            )
+        return evidence[-5:]
+
+    def _derive_identity_commitments(
+        self,
+        *,
+        narrative: IdentityNarrative,
+        policies: PreferredPolicies,
+        current_tick: int,
+    ) -> list[IdentityCommitment]:
+        claim_by_key = {claim.claim_key: claim for claim in narrative.claims}
+        commitments: list[IdentityCommitment] = []
+        chapter_ids = [
+            int(chapter.chapter_id)
+            for chapter in narrative.chapters[-2:]
+        ]
+        if narrative.current_chapter is not None:
+            chapter_ids.append(int(narrative.current_chapter.chapter_id))
+        chapter_ids = list(dict.fromkeys(chapter_ids))
+
+        survival_claim = claim_by_key.get("survival_priority")
+        if survival_claim is not None and survival_claim.confidence >= 0.35:
+            commitments.append(
+                IdentityCommitment(
+                    commitment_id="commitment-survival-priority",
+                    commitment_type="value_guardrail",
+                    statement="Protect survival and integrity before opportunistic gain.",
+                    target_actions=["hide", "rest", "exploit_shelter", "thermoregulate"],
+                    discouraged_actions=["forage"],
+                    confidence=round(survival_claim.confidence, 4),
+                    priority=0.95,
+                    source_claim_ids=[survival_claim.claim_id],
+                    source_chapter_ids=chapter_ids,
+                    evidence_ids=list(survival_claim.supported_by[:5]),
+                    last_reaffirmed_tick=current_tick,
+                )
+            )
+
+        if "exploratory" in narrative.core_identity.lower() or policies.risk_profile == "risk_seeking":
+            exploratory_claim = claim_by_key.get("aggressive")
+            exploratory_confidence = exploratory_claim.confidence if exploratory_claim is not None else 0.45
+            commitments.append(
+                IdentityCommitment(
+                    commitment_id="commitment-exploration-drive",
+                    commitment_type="behavioral_style",
+                    statement="When conditions are stable, reduce uncertainty through active exploration.",
+                    target_actions=["scan", "seek_contact"],
+                    discouraged_actions=["rest"],
+                    confidence=round(exploratory_confidence, 4),
+                    priority=0.55,
+                    source_claim_ids=(
+                        [exploratory_claim.claim_id] if exploratory_claim is not None else []
+                    ),
+                    source_chapter_ids=chapter_ids,
+                    evidence_ids=(
+                        list(exploratory_claim.supported_by[:5])
+                        if exploratory_claim is not None
+                        else []
+                    ),
+                    last_reaffirmed_tick=current_tick,
+                )
+            )
+
+        dominant_action = ""
+        if policies.action_distribution:
+            dominant_action = max(
+                policies.action_distribution.items(),
+                key=lambda item: (item[1], item[0]),
+            )[0]
+        capability_claim = claim_by_key.get(dominant_action) if dominant_action else None
+        if capability_claim is not None and capability_claim.confidence >= 0.40:
+            commitments.append(
+                IdentityCommitment(
+                    commitment_id=f"commitment-capability-{dominant_action}",
+                    commitment_type="capability",
+                    statement=f"Maintain competence for {dominant_action} when its context recurs.",
+                    target_actions=[dominant_action],
+                    discouraged_actions=[],
+                    confidence=round(capability_claim.confidence, 4),
+                    priority=0.45,
+                    source_claim_ids=[capability_claim.claim_id],
+                    source_chapter_ids=chapter_ids,
+                    evidence_ids=list(capability_claim.supported_by[:5]),
+                    last_reaffirmed_tick=current_tick,
+                )
+            )
+
+        return commitments
 
     def _update_belief_calibration(
         self,
@@ -1977,3 +2501,54 @@ def build_default_self_model(
         narrative_priors=NarrativePriors(),
         log_sink=log_sink,
     )
+
+
+def _mean_abs_delta(
+    previous: Mapping[str, float] | None,
+    current: Mapping[str, float] | None,
+) -> float:
+    previous = previous or {}
+    current = current or {}
+    keys = sorted(set(previous) | set(current))
+    if not keys:
+        return 0.0
+    return mean(abs(float(current.get(key, 0.0)) - float(previous.get(key, 0.0))) for key in keys)
+
+
+def _distribution(left: list[str]) -> dict[str, float]:
+    if not left:
+        return {}
+    counts = Counter(item for item in left if item)
+    total = sum(counts.values()) or 1
+    return {str(key): value / total for key, value in sorted(counts.items())}
+
+
+def _dominant_action(distribution: Mapping[str, float]) -> tuple[str, float]:
+    if not distribution:
+        return "", 0.0
+    action, ratio = max(
+        distribution.items(),
+        key=lambda item: (float(item[1]), str(item[0])),
+    )
+    return str(action), float(ratio)
+
+
+def _distribution_delta(
+    previous: Mapping[str, float] | None,
+    current: Mapping[str, float] | None,
+) -> float:
+    previous = previous or {}
+    current = current or {}
+    keys = sorted(set(previous) | set(current))
+    if not keys:
+        return 0.0
+    return mean(abs(float(current.get(key, 0.0)) - float(previous.get(key, 0.0))) for key in keys)
+
+
+def _set_divergence(previous: list[str] | tuple[str, ...], current: list[str] | tuple[str, ...]) -> float:
+    previous_set = {str(item) for item in previous}
+    current_set = {str(item) for item in current}
+    union = previous_set | current_set
+    if not union:
+        return 0.0
+    return 1.0 - (len(previous_set & current_set) / len(union))

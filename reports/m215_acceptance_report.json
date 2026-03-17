@@ -1,0 +1,17 @@
+{
+  "milestone": "M2.15",
+  "status": "PASS",
+  "gates": {
+    "identity_commitments_alter_action_ranking": true,
+    "self_inconsistency_events_traced": true,
+    "deterministic_chapter_progression": true,
+    "evidence_backed_narrative_commitments": true,
+    "identity_critical_memories_preserved_after_compaction": true
+  },
+  "summary": {
+    "commitment_focus": [],
+    "violated_commitments": [],
+    "chapter_transition_evidence_count": 1,
+    "commitment_count": 1
+  }
+}

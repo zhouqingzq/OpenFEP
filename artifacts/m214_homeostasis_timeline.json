@@ -1,0 +1,92 @@
+[
+  {
+    "agenda": {
+      "active_tasks": [
+        "energy_recovery",
+        "fatigue_recovery",
+        "sleep_pressure"
+      ],
+      "cycle": 1,
+      "interrupt_action": "rest",
+      "interrupt_reason": "critical energy/fatigue debt",
+      "memory_compaction_recommended": false,
+      "recommended_action": "rest",
+      "sleep_recommended": true,
+      "state": {
+        "acute_energy_debt": 0.25,
+        "acute_fatigue_debt": 0.25,
+        "acute_stress_debt": 0.0,
+        "acute_thermal_debt": 0.0,
+        "chronic_energy_debt": 0.02,
+        "chronic_fatigue_debt": 0.02,
+        "chronic_runtime_debt": 0.0,
+        "chronic_stress_debt": 0.0,
+        "short_term_sleep_pressure": 0.55
+      },
+      "telemetry_backoff_recommended": false
+    },
+    "effects": {
+      "memory_compaction_applied": false,
+      "stress_recovery_applied": true,
+      "telemetry_backoff_applied": false
+    }
+  },
+  {
+    "agenda": {
+      "active_tasks": [
+        "sleep_pressure"
+      ],
+      "cycle": 2,
+      "interrupt_action": null,
+      "interrupt_reason": "",
+      "memory_compaction_recommended": false,
+      "recommended_action": "rest",
+      "sleep_recommended": true,
+      "state": {
+        "acute_energy_debt": 0.0,
+        "acute_fatigue_debt": 0.0,
+        "acute_stress_debt": 0.0,
+        "acute_thermal_debt": 0.0,
+        "chronic_energy_debt": 0.0192,
+        "chronic_fatigue_debt": 0.0192,
+        "chronic_runtime_debt": 0.0,
+        "chronic_stress_debt": 0.0,
+        "short_term_sleep_pressure": 0.4675
+      },
+      "telemetry_backoff_recommended": false
+    },
+    "effects": {
+      "memory_compaction_applied": false,
+      "stress_recovery_applied": false,
+      "telemetry_backoff_applied": false
+    }
+  },
+  {
+    "agenda": {
+      "active_tasks": [],
+      "cycle": 3,
+      "interrupt_action": null,
+      "interrupt_reason": "",
+      "memory_compaction_recommended": false,
+      "recommended_action": "rest",
+      "sleep_recommended": false,
+      "state": {
+        "acute_energy_debt": 0.0,
+        "acute_fatigue_debt": 0.0,
+        "acute_stress_debt": 0.0,
+        "acute_thermal_debt": 0.0,
+        "chronic_energy_debt": 0.018432,
+        "chronic_fatigue_debt": 0.018432,
+        "chronic_runtime_debt": 0.0,
+        "chronic_stress_debt": 0.0,
+        "short_term_sleep_pressure": 0.397375
+      },
+      "telemetry_backoff_recommended": false
+    },
+    "effects": {
+      "memory_compaction_applied": false,
+      "stress_recovery_applied": false,
+      "telemetry_backoff_applied": false
+    }
+  }
+]

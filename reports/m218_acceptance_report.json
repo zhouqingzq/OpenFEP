@@ -1,0 +1,20 @@
+{
+  "milestone": "M2.18",
+  "status": "PASS",
+  "gates": {
+    "long_run_performance_not_collapsed": true,
+    "identity_critical_evidence_recoverable": true,
+    "restart_consistency_within_tolerance": true,
+    "drift_bounded_without_silent_inversion": true,
+    "anti_collapse_interventions_triggered": true
+  },
+  "summary": {
+    "baseline_continuity_score": 0.8060822510822511,
+    "restart_divergence": 0.0,
+    "stress_interventions": [
+      "action_collapse_guard",
+      "personality_drift_guard"
+    ],
+    "anchor_count": 4
+  }
+}

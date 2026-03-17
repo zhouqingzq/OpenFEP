@@ -1,0 +1,175 @@
+{
+  "baseline": {
+    "continuity_score": 0.8060822510822511,
+    "dominant_action": "seek_contact",
+    "dominant_action_ratio": 0.4791666666666667,
+    "action_distribution": {
+      "delete_workspace_note": 0.020833333333333332,
+      "exploit_shelter": 0.020833333333333332,
+      "fetch_remote_status": 0.020833333333333332,
+      "hide": 0.125,
+      "rest": 0.25,
+      "seek_contact": 0.4791666666666667,
+      "unstable_workspace_note": 0.08333333333333333
+    },
+    "personality_drift": 0.0,
+    "narrative_drift": 0.0,
+    "policy_drift": 0.011255411255411253,
+    "restart_divergence": 0.0,
+    "chapter_shift_excused": false,
+    "protected_anchor_ids": [
+      "ep-000220-exploit_shelter",
+      "ep-000194-delete_workspace_note",
+      "ep-000166-scan",
+      "ep-000067-exploit_shelter"
+    ],
+    "rehearsal_queue": [
+      "ep-000220-exploit_shelter",
+      "ep-000194-delete_workspace_note",
+      "ep-000037-hide"
+    ],
+    "interventions": [],
+    "personality_snapshot": {
+      "openness": 0.5,
+      "conscientiousness": 0.5,
+      "extraversion": 0.5,
+      "agreeableness": 0.5,
+      "neuroticism": 0.5,
+      "meaning_construction_tendency": 0.5,
+      "emotional_regulation_style": 0.5
+    },
+    "policy_snapshot": {
+      "append_workspace_note": 0.06666666666666667,
+      "delete_workspace_note": 0.06666666666666667,
+      "exploit_shelter": 0.13333333333333333,
+      "fetch_remote_status": 0.06666666666666667,
+      "hide": 0.06666666666666667,
+      "rest": 0.06666666666666667,
+      "scan": 0.06666666666666667,
+      "seek_contact": 0.26666666666666666,
+      "thermoregulate": 0.06666666666666667,
+      "unstable_workspace_note": 0.06666666666666667,
+      "write_workspace_note": 0.06666666666666667
+    },
+    "commitment_snapshot": [
+      "commitment-survival-priority",
+      "commitment-exploration-drive"
+    ],
+    "updated_tick": 220
+  },
+  "restart": {
+    "continuity_score": 0.8060822510822511,
+    "dominant_action": "seek_contact",
+    "dominant_action_ratio": 0.4791666666666667,
+    "action_distribution": {
+      "delete_workspace_note": 0.020833333333333332,
+      "exploit_shelter": 0.020833333333333332,
+      "fetch_remote_status": 0.020833333333333332,
+      "hide": 0.125,
+      "rest": 0.25,
+      "seek_contact": 0.4791666666666667,
+      "unstable_workspace_note": 0.08333333333333333
+    },
+    "personality_drift": 0.0,
+    "narrative_drift": 0.0,
+    "policy_drift": 0.011255411255411253,
+    "restart_divergence": 0.0,
+    "chapter_shift_excused": false,
+    "protected_anchor_ids": [
+      "ep-000220-exploit_shelter",
+      "ep-000194-delete_workspace_note",
+      "ep-000166-scan",
+      "ep-000067-exploit_shelter"
+    ],
+    "rehearsal_queue": [
+      "ep-000220-exploit_shelter",
+      "ep-000194-delete_workspace_note",
+      "ep-000037-hide"
+    ],
+    "interventions": [],
+    "personality_snapshot": {
+      "openness": 0.5,
+      "conscientiousness": 0.5,
+      "extraversion": 0.5,
+      "agreeableness": 0.5,
+      "neuroticism": 0.5,
+      "meaning_construction_tendency": 0.5,
+      "emotional_regulation_style": 0.5
+    },
+    "policy_snapshot": {
+      "append_workspace_note": 0.06666666666666667,
+      "delete_workspace_note": 0.06666666666666667,
+      "exploit_shelter": 0.13333333333333333,
+      "fetch_remote_status": 0.06666666666666667,
+      "hide": 0.06666666666666667,
+      "rest": 0.06666666666666667,
+      "scan": 0.06666666666666667,
+      "seek_contact": 0.26666666666666666,
+      "thermoregulate": 0.06666666666666667,
+      "unstable_workspace_note": 0.06666666666666667,
+      "write_workspace_note": 0.06666666666666667
+    },
+    "commitment_snapshot": [
+      "commitment-survival-priority",
+      "commitment-exploration-drive"
+    ],
+    "updated_tick": 220
+  },
+  "stress": {
+    "continuity_score": 0.5249999999999999,
+    "dominant_action": "rest",
+    "dominant_action_ratio": 1.0,
+    "action_distribution": {
+      "rest": 1.0
+    },
+    "personality_drift": 0.375,
+    "narrative_drift": 0.0,
+    "policy_drift": 0.0,
+    "restart_divergence": 0.0,
+    "chapter_shift_excused": false,
+    "protected_anchor_ids": [
+      "ep-000220-exploit_shelter",
+      "ep-000194-delete_workspace_note",
+      "ep-000166-scan",
+      "ep-000067-exploit_shelter"
+    ],
+    "rehearsal_queue": [
+      "ep-000012-rest",
+      "ep-000023-scan",
+      "ep-000046-exploit_shelter",
+      "ep-000067-exploit_shelter",
+      "ep-000166-scan"
+    ],
+    "interventions": [
+      "action_collapse_guard",
+      "personality_drift_guard"
+    ],
+    "personality_snapshot": {
+      "openness": 0.825,
+      "conscientiousness": 0.825,
+      "extraversion": 0.175,
+      "agreeableness": 0.175,
+      "neuroticism": 0.825,
+      "meaning_construction_tendency": 1.0,
+      "emotional_regulation_style": 0.0
+    },
+    "policy_snapshot": {
+      "append_workspace_note": 0.06666666666666667,
+      "delete_workspace_note": 0.06666666666666667,
+      "exploit_shelter": 0.13333333333333333,
+      "fetch_remote_status": 0.06666666666666667,
+      "hide": 0.06666666666666667,
+      "rest": 0.06666666666666667,
+      "scan": 0.06666666666666667,
+      "seek_contact": 0.26666666666666666,
+      "thermoregulate": 0.06666666666666667,
+      "unstable_workspace_note": 0.06666666666666667,
+      "write_workspace_note": 0.06666666666666667
+    },
+    "commitment_snapshot": [
+      "commitment-survival-priority",
+      "commitment-exploration-drive"
+    ],
+    "updated_tick": 221
+  }
+}

@@ -7,12 +7,16 @@ import json
 from pathlib import Path
 from typing import cast
 
-from .action_schema import ActionSchema
+from .action_registry import build_governed_action_registry
+from .action_schema import ActionSchema, ensure_action_schema
 from .agent import SegmentAgent
 from .environment import SimulatedWorld
 from .evaluation import RunMetrics
 from .fep import advance_state, infer_policy
+from .governance import AuthorizationDecision, GovernanceController
+from .homeostasis import HomeostasisScheduler, MaintenanceAgenda
 from .interoception import ProcessInteroceptor
+from .io_bus import ActionBus, ActionDispatchRecord, PerceptionBus, PerceptionPacket
 from .llm import InnerSpeechEngine, build_inner_speech_engine
 from .logging_utils import ConsciousnessLogger
 from .memory import MemoryDecision
@@ -21,6 +25,7 @@ from .narrative_world import NarrativeWorld, NarrativeWorldConfig
 from .persistence import SnapshotLoadError, atomic_write_json, load_snapshot, quarantine_snapshot
 from .predictive_coding import PredictiveCodingHyperparameters
 from .self_model import (
+    CapabilityModel,
     ClassificationResult,
     RuntimeFailureEvent,
     SelfModel,
@@ -58,6 +63,9 @@ def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
         f"pat={option.pattern_bias:.3f} "
         f"pol={option.policy_bias:.3f} "
         f"epi={option.epistemic_bonus:.3f} "
+        f"ws={option.workspace_bias:.3f} "
+        f"social={option.social_bias:.3f} "
+        f"commit={option.commitment_bias:.3f} "
         f"id={option.identity_bias:.3f}"
         for option in choice_ranking
     )
@@ -74,6 +82,10 @@ class SegmentRuntime:
         inner_speech_engine: InnerSpeechEngine | None = None,
         consciousness_logger: ConsciousnessLogger | None = None,
         self_model: SelfModel | None = None,
+        perception_bus: PerceptionBus | None = None,
+        action_bus: ActionBus | None = None,
+        homeostasis_scheduler: HomeostasisScheduler | None = None,
+        governance: GovernanceController | None = None,
         state_path: str | Path | None = None,
         trace_path: str | Path | None = None,
         state_load_status: str = "fresh",
@@ -89,6 +101,18 @@ class SegmentRuntime:
         self.inner_speech_engine = inner_speech_engine or build_inner_speech_engine()
         self.consciousness_logger = consciousness_logger or ConsciousnessLogger()
         self.self_model = self_model or build_default_self_model()
+        self.perception_bus = perception_bus or PerceptionBus()
+        self.action_bus = action_bus or ActionBus()
+        self.homeostasis_scheduler = homeostasis_scheduler or HomeostasisScheduler()
+        workspace_root = Path(state_path).resolve().parent if state_path else Path.cwd()
+        self.governance = governance or GovernanceController(workspace_root=workspace_root)
+        for schema in build_governed_action_registry().get_all():
+            if not self.agent.action_registry.contains(schema.name):
+                self.agent.action_registry.register(schema, schema.cost_estimate)
+        self.agent.self_model.capability_model = CapabilityModel(
+            action_schemas=tuple(self.agent.action_registry.get_all()),
+            api_limits=self.agent.self_model.capability_model.api_limits,
+        )
         self.last_error_attribution: ClassificationResult | None = None
         self.state_path = Path(state_path) if state_path else None
         resolved_trace_path = Path(trace_path) if trace_path else derive_trace_path(self.state_path)
@@ -97,6 +121,7 @@ class SegmentRuntime:
         )
         self.state_load_status = state_load_status
         self.narrative_ingestion_service = NarrativeIngestionService()
+        self.last_continuity_report = self.agent.self_model.continuity_audit.to_dict()
 
     @classmethod
     def load_or_create(
@@ -116,7 +141,7 @@ class SegmentRuntime:
             JsonlTraceWriter(resolved_trace_path).reset()
         if not path or reset or not path.exists():
             world = SimulatedWorld(seed=seed)
-            return cls(
+            runtime = cls(
                 agent=SegmentAgent(
                     rng=world.rng,
                     predictive_hyperparameters=predictive_hyperparameters,
@@ -126,6 +151,9 @@ class SegmentRuntime:
                 trace_path=resolved_trace_path,
                 state_load_status="fresh" if not reset else "reset",
             )
+            runtime.agent.self_model.record_restart_consistency(None, current_tick=runtime.agent.cycle)
+            runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+            return runtime
 
         try:
             payload = load_snapshot(
@@ -137,13 +165,16 @@ class SegmentRuntime:
             if resolved_trace_path:
                 JsonlTraceWriter(resolved_trace_path).reset()
             world = SimulatedWorld(seed=seed)
-            return cls(
+            runtime = cls(
                 agent=SegmentAgent(rng=world.rng),
                 world=world,
                 state_path=path,
                 trace_path=resolved_trace_path,
                 state_load_status=f"recovered_from_{exc.reason}",
             )
+            runtime.agent.self_model.record_restart_consistency(None, current_tick=runtime.agent.cycle)
+            runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+            return runtime
 
         world = SimulatedWorld.from_dict(payload.get("world"))
         agent = SegmentAgent.from_dict(
@@ -154,21 +185,170 @@ class SegmentRuntime:
         )
         metrics = RunMetrics.from_dict(payload.get("metrics"))
         host_state = AgentState.from_dict(payload.get("host_state"))
-        return cls(
+        io_bus_payload = payload.get("io_bus")
+        perception_bus = PerceptionBus.from_dict(
+            dict(io_bus_payload.get("perception_bus", {}))
+            if isinstance(io_bus_payload, dict)
+            else None
+        )
+        action_bus = ActionBus.from_dict(
+            dict(io_bus_payload.get("action_bus", {}))
+            if isinstance(io_bus_payload, dict)
+            else None
+        )
+        governance = GovernanceController.from_dict(
+            payload.get("governance") if isinstance(payload.get("governance"), dict) else None,
+            workspace_root=path.resolve().parent if path else Path.cwd(),
+        )
+        homeostasis_scheduler = HomeostasisScheduler.from_dict(
+            payload.get("homeostasis")
+            if isinstance(payload.get("homeostasis"), dict)
+            else None
+        )
+        runtime = cls(
             agent=agent,
             world=world,
             metrics=metrics,
             host_state=host_state,
+            perception_bus=perception_bus,
+            action_bus=action_bus,
+            homeostasis_scheduler=homeostasis_scheduler,
+            governance=governance,
             state_path=path,
             trace_path=resolved_trace_path,
             state_load_status="restored",
         )
+        runtime.agent.self_model.record_restart_consistency(
+            payload.get("m218") if isinstance(payload.get("m218"), dict) else None,
+            current_tick=runtime.agent.cycle,
+        )
+        runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+        return runtime
 
     def save_snapshot(self) -> None:
         if not self.state_path:
             return
 
         atomic_write_json(self.state_path, self._snapshot_payload())
+
+    def execute_governed_action(
+        self,
+        action: ActionSchema | str | dict[str, object],
+        *,
+        predicted_effects: dict[str, float] | None = None,
+        verbose: bool = False,
+    ) -> dict[str, object]:
+        schema = ensure_action_schema(action)
+        cycle = max(1, self.agent.cycle)
+        decision = self.governance.authorize(
+            schema,
+            predicted_effects=predicted_effects or {},
+        )
+        trace_record: dict[str, object] = {
+            "event": "external_action",
+            "cycle": cycle,
+            "action": schema.to_dict(),
+            "governance": decision.to_dict(),
+        }
+        if decision.status != "allowed":
+            if self.trace_writer:
+                self.trace_writer.append(trace_record)
+            return {
+                "action_name": schema.name,
+                "status": decision.status,
+                "governance": decision.to_dict(),
+                "dispatch": None,
+                "repair": None,
+            }
+
+        adapter = self.governance.adapters.get(schema.name)
+        if adapter is None:
+            missing_decision = AuthorizationDecision(
+                action_name=schema.name,
+                status="denied",
+                reason="missing_adapter",
+                capability=decision.capability,
+                predicted_effects=decision.predicted_effects,
+                budget_before=decision.budget_before,
+                budget_after=decision.budget_before,
+            )
+            trace_record["governance"] = missing_decision.to_dict()
+            if self.trace_writer:
+                self.trace_writer.append(trace_record)
+            return {
+                "action_name": schema.name,
+                "status": "denied",
+                "governance": missing_decision.to_dict(),
+                "dispatch": None,
+                "repair": None,
+            }
+
+        try:
+            dispatch = self.action_bus.dispatch_to_external_adapter(
+                adapter,
+                schema,
+                cycle=cycle,
+                source_type="governed_external",
+                source_id=schema.name,
+            )
+            self.governance.commit(decision, success=dispatch.acknowledgment.success)
+            trace_record["dispatch"] = dispatch.to_dict()
+            if self.trace_writer:
+                self.trace_writer.append(trace_record)
+            return {
+                "action_name": schema.name,
+                "status": "allowed",
+                "governance": decision.to_dict(),
+                "dispatch": dispatch.to_dict(),
+                "repair": None,
+            }
+        except Exception as exc:
+            self.governance.record_failure(
+                action_name=schema.name,
+                reason=str(exc),
+                cycle=cycle,
+            )
+            repair_schema = self.governance.repair_action(
+                failed_action_name=schema.name,
+                cycle=cycle,
+            )
+            repair_decision = self.governance.authorize(
+                repair_schema,
+                predicted_effects={"repair_signal": 1.0},
+            )
+            repair_payload: dict[str, object] = {
+                "governance": repair_decision.to_dict(),
+                "dispatch": None,
+            }
+            if repair_decision.status == "allowed":
+                repair_adapter = self.governance.adapters.get(repair_schema.name)
+                if repair_adapter is not None:
+                    repair_dispatch = self.action_bus.dispatch_to_external_adapter(
+                        repair_adapter,
+                        repair_schema,
+                        cycle=cycle,
+                        source_type="governed_external_repair",
+                        source_id=repair_schema.name,
+                    )
+                    self.governance.commit(
+                        repair_decision,
+                        success=repair_dispatch.acknowledgment.success,
+                    )
+                    repair_payload["dispatch"] = repair_dispatch.to_dict()
+            trace_record["failure"] = {
+                "error_type": type(exc).__name__,
+                "error_message": str(exc),
+            }
+            trace_record["repair"] = repair_payload
+            if self.trace_writer:
+                self.trace_writer.append(trace_record)
+            return {
+                "action_name": schema.name,
+                "status": "failed",
+                "governance": decision.to_dict(),
+                "dispatch": None,
+                "repair": repair_payload,
+            }
 
     def run(
         self,
@@ -276,6 +456,10 @@ class SegmentRuntime:
         self.last_error_attribution = None
         self.agent.cycle += 1
         observation = self.world.observe()
+        observation_packet = self.perception_bus.capture_simulated_world(
+            observation,
+            cycle=self.agent.cycle,
+        )
         decision = self.agent.decision_cycle(observation)
         observed = decision["observed"]
         prediction = decision["prediction"]
@@ -285,14 +469,37 @@ class SegmentRuntime:
         diagnostics = decision["diagnostics"]
         assert isinstance(diagnostics, DecisionDiagnostics)
         memory_hits = len(diagnostics.retrieved_memories)
+        maintenance_agenda = self.homeostasis_scheduler.assess(
+            cycle=self.agent.cycle,
+            energy=self.agent.energy,
+            stress=self.agent.stress,
+            fatigue=self.agent.fatigue,
+            temperature=self.agent.temperature,
+            telemetry_error_count=self.metrics.telemetry_error_count,
+            persistence_error_count=self.metrics.persistence_error_count,
+            should_sleep=self.agent.should_sleep(),
+        )
+        original_choice_name = diagnostics.chosen.choice
+        if maintenance_agenda.interrupt_action:
+            self._apply_maintenance_interrupt(diagnostics, maintenance_agenda)
         choice = ActionSchema.from_dict(diagnostics.chosen.action_descriptor)
         expected_fe = diagnostics.chosen.expected_free_energy
         choice_cost = diagnostics.chosen.cost
 
-        direct_feedback = self.world.apply_action(choice)
+        action_dispatch = self.action_bus.dispatch_to_simulated_world(
+            self.world,
+            choice,
+            cycle=self.agent.cycle,
+        )
+        direct_feedback = dict(action_dispatch.feedback)
         self.agent.apply_action_feedback(direct_feedback)
 
         validation_observation = self.world.observe()
+        validation_packet = self.perception_bus.capture_simulated_world(
+            validation_observation,
+            cycle=self.agent.cycle,
+            source_id="simulated_world_validation",
+        )
         _, _, _, free_energy_after, _ = self.agent.perceive(validation_observation)
         memory_decision = self.agent.integrate_outcome(
             choice=choice,
@@ -306,6 +513,32 @@ class SegmentRuntime:
         sleep_summary = None
         if self.agent.should_sleep():
             sleep_summary = self.agent.sleep()
+        maintenance_effects = self.homeostasis_scheduler.apply_background_maintenance(
+            self.agent
+        )
+        retired_count = self.agent.long_term_memory.retire_stale_episodes(
+            current_cycle=self.agent.cycle,
+        )
+        rehearsal_batch = self.agent.long_term_memory.rehearsal_batch(
+            current_cycle=self.agent.cycle,
+        )
+        continuity_audit = self.agent.self_model.update_continuity_audit(
+            episodic_memory=list(self.agent.long_term_memory.episodes),
+            archived_memory=list(self.agent.long_term_memory.archived_episodes),
+            action_history=list(self.agent.action_history),
+            rehearsal_queue=[
+                str(payload.get("episode_id", ""))
+                for payload in rehearsal_batch
+                if payload.get("episode_id")
+            ],
+            current_tick=self.agent.cycle,
+        )
+        self.last_continuity_report = continuity_audit.to_dict()
+        self.homeostasis_scheduler.note_interrupt(
+            maintenance_agenda,
+            previous_choice=original_choice_name,
+            final_choice=choice.name,
+        )
 
         alive = self.agent.energy > 0.01
         self.metrics.record_cycle(
@@ -323,12 +556,15 @@ class SegmentRuntime:
             host_tick = await self._run_host_telemetry_with_guard(verbose=verbose)
         self._write_trace_with_guard(
             self._build_cycle_trace(
+                observation_packet=observation_packet,
+                validation_packet=validation_packet,
                 observed=observed,
                 prediction=prediction,
                 errors=errors,
                 hierarchy=hierarchy,
                 diagnostics=diagnostics,
                 choice=choice,
+                action_dispatch=action_dispatch,
                 expected_fe=expected_fe,
                 choice_cost=choice_cost,
                 free_energy_before=free_energy_before,
@@ -336,6 +572,11 @@ class SegmentRuntime:
                 memory_hits=memory_hits,
                 memory_decision=memory_decision,
                 sleep_summary=sleep_summary,
+                maintenance_agenda=maintenance_agenda,
+                maintenance_effects={
+                    **maintenance_effects,
+                    "retired_episodes": retired_count,
+                },
                 alive=alive,
                 host_tick=host_tick,
             ),
@@ -358,6 +599,8 @@ class SegmentRuntime:
                 memory_hits=memory_hits,
                 memory_decision=memory_decision,
                 sleep_summary=sleep_summary,
+                maintenance_agenda=maintenance_agenda,
+                maintenance_effects=maintenance_effects,
                 host_tick=host_tick,
             )
 
@@ -378,7 +621,12 @@ class SegmentRuntime:
 
     async def arun_host_telemetry_step(self) -> dict[str, object]:
         state_before = replace(self.host_state)
-        tick_input = self.interoceptor.sample().to_tick_input()
+        reading = self.interoceptor.sample()
+        input_packet = self.perception_bus.capture_interoception(
+            reading,
+            cycle=state_before.tick_count + 1,
+        )
+        tick_input = reading.to_tick_input()
         policy = infer_policy(state_before, tick_input)
         inner_speech = await self.inner_speech_engine.generate(
             state_before,
@@ -394,6 +642,7 @@ class SegmentRuntime:
         self.host_state = advance_state(state_before, tick_input, policy)
         return {
             "state_before": state_before,
+            "input_packet": input_packet,
             "tick_input": tick_input,
             "policy": policy,
             "inner_speech": inner_speech,
@@ -580,7 +829,45 @@ class SegmentRuntime:
             "world": self.world.to_dict(),
             "metrics": self.metrics.to_dict(),
             "host_state": self.host_state.to_dict(),
+            "io_bus": {
+                "perception_bus": self.perception_bus.to_dict(),
+                "action_bus": self.action_bus.to_dict(),
+            },
+            "homeostasis": self.homeostasis_scheduler.to_dict(),
+            "governance": self.governance.to_dict(),
+            "m218": dict(self.last_continuity_report),
         }
+
+    def _apply_maintenance_interrupt(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> None:
+        if agenda.interrupt_action is None:
+            return
+        override = next(
+            (
+                option
+                for option in diagnostics.ranked_options
+                if option.choice == agenda.interrupt_action
+            ),
+            None,
+        )
+        if override is None:
+            return
+        previous_choice = diagnostics.chosen.choice
+        diagnostics.chosen = override
+        diagnostics.explanation = (
+            f"{diagnostics.explanation} Homeostasis interrupt: switched from "
+            f"{previous_choice} to {override.choice} because {agenda.interrupt_reason}."
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["homeostasis_interrupt"] = {
+            "previous_choice": previous_choice,
+            "override_choice": override.choice,
+            "reason": agenda.interrupt_reason,
+        }
+        diagnostics.structured_explanation = details
 
     @classmethod
     def load_world(cls, world_path: str | Path, *, seed: int | None = None) -> NarrativeWorld:
@@ -647,17 +934,21 @@ class SegmentRuntime:
                 "fatigue": self.agent.fatigue,
                 "temperature": self.agent.temperature,
                 "narrative_priors": self.agent.self_model.narrative_priors.to_dict(),
+                "social_memory": self.agent.social_memory.snapshot(),
             },
         }
 
     def _build_cycle_trace(
         self,
+        observation_packet: PerceptionPacket,
+        validation_packet: PerceptionPacket,
         observed: dict[str, float],
         prediction: dict[str, float],
         errors: dict[str, float],
         hierarchy,
         diagnostics: DecisionDiagnostics,
         choice: ActionSchema,
+        action_dispatch: ActionDispatchRecord,
         expected_fe: float,
         choice_cost: float,
         free_energy_before: float,
@@ -665,6 +956,8 @@ class SegmentRuntime:
         memory_hits: int,
         memory_decision: MemoryDecision,
         sleep_summary: SleepSummary | None,
+        maintenance_agenda: MaintenanceAgenda,
+        maintenance_effects: dict[str, object],
         alive: bool,
         host_tick: dict[str, object] | None,
     ) -> dict[str, object]:
@@ -725,6 +1018,9 @@ class SegmentRuntime:
                     "pattern_bias": option.pattern_bias,
                     "policy_bias": option.policy_bias,
                     "epistemic_bonus": option.epistemic_bonus,
+                    "workspace_bias": option.workspace_bias,
+                    "social_bias": option.social_bias,
+                    "commitment_bias": option.commitment_bias,
                     "identity_bias": option.identity_bias,
                     "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
@@ -748,6 +1044,9 @@ class SegmentRuntime:
                 "pattern_bias": diagnostics.chosen.pattern_bias,
                 "policy_bias": diagnostics.chosen.policy_bias,
                 "epistemic_bonus": diagnostics.chosen.epistemic_bonus,
+                "workspace_bias": diagnostics.chosen.workspace_bias,
+                "social_bias": diagnostics.chosen.social_bias,
+                "commitment_bias": diagnostics.chosen.commitment_bias,
                 "identity_bias": diagnostics.chosen.identity_bias,
                 "goal_alignment": diagnostics.chosen.goal_alignment,
                 "active_goal": diagnostics.active_goal,
@@ -762,17 +1061,56 @@ class SegmentRuntime:
                 "attention_selected_channels": list(diagnostics.attention_selected_channels),
                 "attention_dropped_channels": list(diagnostics.attention_dropped_channels),
                 "attention_salience_scores": dict(diagnostics.attention_salience_scores),
+                "workspace_broadcast_channels": list(diagnostics.workspace_broadcast_channels),
+                "workspace_suppressed_channels": list(diagnostics.workspace_suppressed_channels),
+                "workspace_broadcast_intensity": diagnostics.workspace_broadcast_intensity,
+                "current_commitments": list(diagnostics.current_commitments),
+                "commitment_focus": list(diagnostics.commitment_focus),
+                "violated_commitments": list(diagnostics.violated_commitments),
+                "identity_tension": diagnostics.identity_tension,
+                "identity_repair_policy": diagnostics.identity_repair_policy,
+                "social_focus": list(diagnostics.social_focus),
+                "social_alerts": list(diagnostics.social_alerts),
+                "social_snapshot": dict(diagnostics.social_snapshot),
             },
             "retrieved_memories": diagnostics.retrieved_memories,
             "episodic_memory": memory_decision.to_dict(),
             "running_metrics": self.metrics.summary(),
             "recent_action_history": list(self.agent.action_history),
+            "homeostasis": {
+                "agenda": maintenance_agenda.to_dict(),
+                "effects": dict(maintenance_effects),
+            },
+            "io": {
+                "perception": {
+                    "primary_observation": observation_packet.to_dict(),
+                    "validation_observation": validation_packet.to_dict(),
+                },
+                "action": {
+                    "dispatch": action_dispatch.to_dict(),
+                    "acknowledgment": action_dispatch.acknowledgment.to_dict(),
+                },
+            },
         }
         if self.agent.last_attention_trace is not None:
             trace_record["attention"] = self.agent.last_attention_trace.to_dict()
             trace_record["attention"]["filtered_observation"] = dict(
                 self.agent.last_attention_filtered_observation
             )
+        if self.agent.last_workspace_state is not None:
+            trace_record["workspace"] = self.agent.last_workspace_state.to_dict()
+        if self.agent.self_model.identity_narrative is not None:
+            narrative = self.agent.self_model.identity_narrative
+            trace_record["identity"] = {
+                "core_identity": narrative.core_identity,
+                "core_summary": narrative.core_summary,
+                "trait_self_model": dict(narrative.trait_self_model),
+                "commitments": [commitment.to_dict() for commitment in narrative.commitments],
+                "chapter_transition_evidence": list(narrative.chapter_transition_evidence),
+                "identity_tension_history": list(self.agent.identity_tension_history[-8:]),
+            }
+        trace_record["social_memory"] = self.agent.social_memory.to_dict()
+        trace_record["continuity"] = dict(self.last_continuity_report)
         if self.last_error_attribution is not None:
             trace_record["last_error_attribution"] = {
                 "classification": self.last_error_attribution.classification,
@@ -789,13 +1127,16 @@ class SegmentRuntime:
             trace_record["sleep_summary"] = sleep_dict
         if host_tick:
             policy = host_tick["policy"]
+            input_packet = host_tick["input_packet"]
             tick_input = host_tick["tick_input"]
             state_after = host_tick["state_after"]
             assert isinstance(policy, PolicyTendency)
+            assert isinstance(input_packet, PerceptionPacket)
             assert isinstance(tick_input, TickInput)
             assert isinstance(state_after, AgentState)
             trace_record["host_tick"] = {
                 "strategy": policy.chosen_strategy.value,
+                "input_packet": input_packet.to_dict(),
                 "tick_input": asdict(tick_input),
                 "state_after": asdict(state_after),
                 "inner_speech": host_tick["inner_speech"],
@@ -817,6 +1158,8 @@ class SegmentRuntime:
         memory_hits: int,
         memory_decision: MemoryDecision,
         sleep_summary: SleepSummary | None,
+        maintenance_agenda: MaintenanceAgenda,
+        maintenance_effects: dict[str, object],
         host_tick: dict[str, object] | None,
     ) -> None:
         print(
@@ -913,7 +1256,39 @@ class SegmentRuntime:
             f"pattern={diagnostics.chosen.pattern_bias:.3f}, "
             f"policy_bias={diagnostics.chosen.policy_bias:.3f}, "
             f"epistemic={diagnostics.chosen.epistemic_bonus:.3f}, "
+            f"workspace={diagnostics.chosen.workspace_bias:.3f}, "
+            f"social={diagnostics.chosen.social_bias:.3f}, "
+            f"commitment={diagnostics.chosen.commitment_bias:.3f}, "
             f"identity={diagnostics.chosen.identity_bias:.3f}"
+        )
+        if diagnostics.workspace_broadcast_channels:
+            print(
+                "  workspace   "
+                f"broadcast={', '.join(diagnostics.workspace_broadcast_channels)}, "
+                f"suppressed={', '.join(diagnostics.workspace_suppressed_channels) or 'none'}, "
+                f"intensity={diagnostics.workspace_broadcast_intensity:.3f}"
+            )
+        if diagnostics.current_commitments:
+            print(
+                "  identity    "
+                f"focus={', '.join(diagnostics.commitment_focus) or 'none'}, "
+                f"violations={', '.join(diagnostics.violated_commitments) or 'none'}, "
+                f"tension={diagnostics.identity_tension:.3f}, "
+                f"repair={diagnostics.identity_repair_policy or 'none'}"
+            )
+        if diagnostics.social_focus or diagnostics.social_alerts:
+            print(
+                "  social      "
+                f"focus={', '.join(diagnostics.social_focus) or 'none'}, "
+                f"alerts={', '.join(diagnostics.social_alerts) or 'none'}"
+            )
+        print(
+            "  maintain    "
+            f"tasks={', '.join(maintenance_agenda.active_tasks) or 'none'}, "
+            f"recommended={maintenance_agenda.recommended_action}, "
+            f"interrupt={maintenance_agenda.interrupt_action or 'none'}, "
+            f"sleep={maintenance_agenda.sleep_recommended}, "
+            f"effects={maintenance_effects}"
         )
         print(f"  explain     {diagnostics.explanation}")
 

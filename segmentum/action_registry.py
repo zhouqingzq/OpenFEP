@@ -75,6 +75,10 @@ class ActionRegistry:
     def names(self) -> list[str]:
         return list(self._actions)
 
+    def register_many(self, actions: list[ActionSchema]) -> None:
+        for action in actions:
+            self.register(action, float(action.cost_estimate))
+
     def to_dict(self) -> dict[str, object]:
         return {
             name: {
@@ -110,4 +114,48 @@ def build_default_action_registry() -> ActionRegistry:
             ),
             float(cost),
         )
+    return registry
+
+
+def build_governed_action_registry() -> ActionRegistry:
+    registry = ActionRegistry()
+    registry.register_many(
+        [
+            ActionSchema(
+                name="write_workspace_note",
+                params_schema={"path": "str", "text": "str"},
+                cost_estimate=0.05,
+                resource_cost={"attention": 0.05, "context": 0.08},
+                reversible=True,
+            ),
+            ActionSchema(
+                name="append_workspace_note",
+                params_schema={"path": "str", "text": "str"},
+                cost_estimate=0.03,
+                resource_cost={"attention": 0.04, "context": 0.04},
+                reversible=True,
+            ),
+            ActionSchema(
+                name="unstable_workspace_note",
+                params_schema={"path": "str", "text": "str"},
+                cost_estimate=0.03,
+                resource_cost={"attention": 0.04, "context": 0.04},
+                reversible=True,
+            ),
+            ActionSchema(
+                name="fetch_remote_status",
+                params_schema={"url": "str"},
+                cost_estimate=0.12,
+                resource_cost={"attention": 0.12, "network": 0.20},
+                reversible=False,
+            ),
+            ActionSchema(
+                name="delete_workspace_note",
+                params_schema={"path": "str"},
+                cost_estimate=0.20,
+                resource_cost={"attention": 0.10, "file": 0.15},
+                reversible=False,
+            ),
+        ]
+    )
     return registry

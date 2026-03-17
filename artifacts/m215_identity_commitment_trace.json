@@ -1,0 +1,77 @@
+{
+  "baseline_ranking": [
+    {
+      "choice": "hide",
+      "policy_score": 0.9141,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "exploit_shelter",
+      "policy_score": 0.715508,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "rest",
+      "policy_score": 0.681442,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "scan",
+      "policy_score": 0.236505,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "seek_contact",
+      "policy_score": 0.154115,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "thermoregulate",
+      "policy_score": -155.204503,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "forage",
+      "policy_score": -155.359417,
+      "commitment_bias": 0.0
+    }
+  ],
+  "committed_ranking": [
+    {
+      "choice": "hide",
+      "policy_score": 0.9141,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "exploit_shelter",
+      "policy_score": 0.715508,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "scan",
+      "policy_score": 0.487208,
+      "commitment_bias": 0.250703
+    },
+    {
+      "choice": "rest",
+      "policy_score": 0.454357,
+      "commitment_bias": -0.227085
+    },
+    {
+      "choice": "seek_contact",
+      "policy_score": 0.154115,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "thermoregulate",
+      "policy_score": -155.204503,
+      "commitment_bias": 0.0
+    },
+    {
+      "choice": "forage",
+      "policy_score": -155.359417,
+      "commitment_bias": 0.0
+    }
+  ],
+  "scan_overtook_rest": true
+}

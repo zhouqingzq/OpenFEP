@@ -314,6 +314,7 @@ class LongTermMemory:
     cluster_counts: list[int] = field(default_factory=list)
     archived_episodes: list[dict] = field(default_factory=list)
     lifecycle_events: list[dict[str, object]] = field(default_factory=list)
+    rehearsal_log: list[dict[str, object]] = field(default_factory=list)
     preference_model: PreferenceModel = field(default_factory=PreferenceModel)
 
     @property
@@ -928,6 +929,87 @@ class LongTermMemory:
             "current_stage_counts": self.family_coverage_summary()["stage_counts"],
         }
 
+    def protected_identity_anchors(self, *, limit: int = 12) -> list[dict[str, object]]:
+        anchors = [
+            payload
+            for payload in [*self.episodes, *self.archived_episodes]
+            if bool(payload.get("identity_critical", False))
+        ]
+        anchors.sort(
+            key=lambda payload: (
+                int(payload.get("last_seen_cycle", payload.get("cycle", 0))),
+                str(payload.get("episode_id", "")),
+            ),
+            reverse=True,
+        )
+        return [dict(payload) for payload in anchors[:limit]]
+
+    def rehearsal_batch(
+        self,
+        *,
+        current_cycle: int,
+        limit: int = 6,
+    ) -> list[dict[str, object]]:
+        anchors = self.protected_identity_anchors(limit=max(limit * 3, limit))
+        anchors.sort(
+            key=lambda payload: (
+                int(payload.get("last_rehearsed_cycle", -1)),
+                int(payload.get("last_seen_cycle", payload.get("cycle", 0))),
+                str(payload.get("episode_id", "")),
+            )
+        )
+        selected = anchors[:limit]
+        selected_ids = {str(payload.get("episode_id", "")) for payload in selected}
+        for bucket in (self.episodes, self.archived_episodes):
+            for payload in bucket:
+                episode_id = str(payload.get("episode_id", ""))
+                if episode_id in selected_ids:
+                    payload["last_rehearsed_cycle"] = int(current_cycle)
+        if selected:
+            self.rehearsal_log.append(
+                {
+                    "cycle": int(current_cycle),
+                    "episode_ids": sorted(selected_ids),
+                }
+            )
+            self.rehearsal_log = self.rehearsal_log[-128:]
+        return [dict(payload) for payload in selected]
+
+    def retire_stale_episodes(
+        self,
+        *,
+        current_cycle: int,
+        retain_recent: int = 128,
+    ) -> int:
+        if len(self.episodes) <= retain_recent:
+            return 0
+        retired = 0
+        candidates = sorted(
+            self.episodes,
+            key=lambda payload: (
+                int(payload.get("last_seen_cycle", payload.get("cycle", 0))),
+                str(payload.get("episode_id", "")),
+            ),
+        )
+        for payload in candidates:
+            if len(self.episodes) <= retain_recent:
+                break
+            if bool(payload.get("identity_critical", False)):
+                continue
+            lifecycle_stage = str(payload.get("lifecycle_stage", ""))
+            if lifecycle_stage == LIFECYCLE_PROTECTED_IDENTITY_CRITICAL:
+                continue
+            age = int(current_cycle - self._episode_cycle(payload))
+            if age < max(64, self.max_active_age // 8):
+                continue
+            if self.archive_episode(
+                payload,
+                archive_cycle=current_cycle,
+                reason="m218_continuity_retirement",
+            ):
+                retired += 1
+        return retired
+
     def _resolve_reference_cycle(
         self,
         current_observation: dict[str, float],
@@ -978,6 +1060,7 @@ class LongTermMemory:
             "cluster_counts": list(self.cluster_counts),
             "archived_episodes": list(self.archived_episodes),
             "lifecycle_events": list(self.lifecycle_events),
+            "rehearsal_log": list(self.rehearsal_log),
             "preference_model": self.preference_model.to_dict(),
             "value_hierarchy": self.preference_model.legacy_value_hierarchy_dict(),
         }
@@ -1028,6 +1111,7 @@ class LongTermMemory:
             ],
             archived_episodes=list(payload.get("archived_episodes", [])),
             lifecycle_events=list(payload.get("lifecycle_events", [])),
+            rehearsal_log=list(payload.get("rehearsal_log", [])),
             preference_model=PreferenceModel.from_dict(preference_payload),
         )
 
@@ -1552,6 +1636,9 @@ class LongTermMemory:
         payloads: list[dict[str, object]],
     ) -> dict[str, object]:
         episodes = [Episode.from_dict(payload) for payload in payloads]
+        protected_payloads = [
+            payload for payload in payloads if bool(payload.get("identity_critical", False))
+        ]
         average_state_vector = {
             key: mean(episode.state_vector.get(key, 0.0) for episode in episodes)
             for key in {
@@ -1590,6 +1677,26 @@ class LongTermMemory:
         )
         merged_payload = merged.to_dict()
         merged_payload["compressed_count"] = len(payloads)
+        if protected_payloads:
+            reference = max(
+                protected_payloads,
+                key=lambda payload: (
+                    int(payload.get("timestamp", payload.get("cycle", 0))),
+                    str(payload.get("episode_id", "")),
+                ),
+            )
+            merged_payload["identity_critical"] = True
+            merged_payload["identity_commitment_reason"] = str(
+                reference.get("identity_commitment_reason", "protected_identity_continuity")
+            )
+            merged_payload["identity_commitment_ids"] = list(
+                dict.fromkeys(
+                    str(commitment_id)
+                    for payload in protected_payloads
+                    for commitment_id in payload.get("identity_commitment_ids", [])
+                )
+            )
+            merged_payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
         return merged_payload
 
 

@@ -365,6 +365,9 @@ class InterventionScore:
     pattern_bias: float
     policy_bias: float
     epistemic_bonus: float
+    workspace_bias: float
+    social_bias: float
+    commitment_bias: float
     identity_bias: float
     goal_alignment: float
     value_score: float
@@ -380,6 +383,9 @@ class InterventionScore:
             "pattern_bias": self.pattern_bias,
             "policy_bias": self.policy_bias,
             "epistemic_bonus": self.epistemic_bonus,
+            "workspace_bias": self.workspace_bias,
+            "social_bias": self.social_bias,
+            "commitment_bias": self.commitment_bias,
             "identity_bias": self.identity_bias,
             "goal_alignment": self.goal_alignment,
         }
@@ -405,3 +411,14 @@ class DecisionDiagnostics:
     attention_selected_channels: list[str] = field(default_factory=list)
     attention_dropped_channels: list[str] = field(default_factory=list)
     attention_salience_scores: dict[str, float] = field(default_factory=dict)
+    workspace_broadcast_channels: list[str] = field(default_factory=list)
+    workspace_suppressed_channels: list[str] = field(default_factory=list)
+    workspace_broadcast_intensity: float = 0.0
+    current_commitments: list[str] = field(default_factory=list)
+    commitment_focus: list[str] = field(default_factory=list)
+    violated_commitments: list[str] = field(default_factory=list)
+    identity_tension: float = 0.0
+    identity_repair_policy: str = ""
+    social_focus: list[str] = field(default_factory=list)
+    social_alerts: list[str] = field(default_factory=list)
+    social_snapshot: dict[str, object] = field(default_factory=dict)

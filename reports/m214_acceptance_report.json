@@ -1,0 +1,22 @@
+{
+  "milestone_id": "M2.14",
+  "status": "PASS",
+  "cycles": 3,
+  "artifacts": [
+    "E:\\workspace\\segments\\artifacts\\m214_homeostasis_timeline.json",
+    "E:\\workspace\\segments\\artifacts\\m214_interrupt_recovery.json"
+  ],
+  "gates": {
+    "interrupt_action": "rest",
+    "maintenance_tasks": [
+      "energy_recovery",
+      "fatigue_recovery",
+      "sleep_pressure"
+    ],
+    "effects": {
+      "memory_compaction_applied": false,
+      "stress_recovery_applied": true,
+      "telemetry_backoff_applied": false
+    }
+  }
+}

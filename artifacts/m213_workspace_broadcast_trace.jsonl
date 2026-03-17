@@ -1,0 +1,25 @@
+{
+  "tick": 0,
+  "capacity": 1,
+  "broadcast_contents": [
+    {
+      "channel": "novelty",
+      "salience": 0.446106,
+      "observation_value": 1.0,
+      "prediction_value": 0.45309775999999996,
+      "error_value": 0.5469022400000001,
+      "source": "attention",
+      "action_hints": {
+        "scan": 0.22,
+        "forage": 0.06,
+        "hide": -0.04
+      }
+    }
+  ],
+  "suppressed_channels": [
+    "food",
+    "social",
+    "temperature"
+  ],
+  "broadcast_intensity": 0.446106
+}

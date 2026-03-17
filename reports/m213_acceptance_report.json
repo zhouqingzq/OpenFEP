@@ -1,0 +1,16 @@
+{
+  "milestone_id": "M2.13",
+  "status": "PASS",
+  "gates": {
+    "baseline_choice": "hide",
+    "workspace_choice": "scan",
+    "workspace_focus": [
+      "novelty"
+    ],
+    "workspace_intensity": 0.446106
+  },
+  "artifacts": [
+    "E:\\workspace\\segments\\artifacts\\m213_workspace_broadcast_trace.jsonl",
+    "E:\\workspace\\segments\\artifacts\\m213_access_ablation.json"
+  ]
+}

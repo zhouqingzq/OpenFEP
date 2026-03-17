@@ -39,6 +39,7 @@ class NarrativeCompiler:
             provenance={
                 "source_episode_id": episode.episode_id,
                 "source_type": episode.source,
+                "episode_metadata": dict(episode.metadata),
                 "compiler": "rule_based_m25_v1",
                 "compiled_event": compiled_event.to_dict(),
                 "appraisal_dimensions": sorted(asdict(appraisal).keys()),

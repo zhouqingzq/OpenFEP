@@ -1,0 +1,301 @@
+{
+  "action": {
+    "acknowledgment": {
+      "ack_id": "ack-000003",
+      "acknowledged_channels": [
+        "energy_delta",
+        "fatigue_delta",
+        "loneliness_delta",
+        "stress_delta",
+        "temperature_delta"
+      ],
+      "action": {
+        "constraints": {
+          "preferred_when_danger_above": 0.45
+        },
+        "cost_estimate": 0.05,
+        "failure_modes": [
+          "resource_starvation",
+          "shelter_unavailable"
+        ],
+        "name": "hide",
+        "params": {},
+        "params_schema": {},
+        "resource_cost": {
+          "attention": 0.08,
+          "energy": 0.05
+        },
+        "reversible": true
+      },
+      "action_name": "hide",
+      "confidence": 1.0,
+      "cycle": 3,
+      "feedback": {
+        "energy_delta": -0.03,
+        "fatigue_delta": 0.02,
+        "loneliness_delta": 0.0,
+        "stress_delta": -0.14,
+        "temperature_delta": 0.023336110321231552
+      },
+      "metadata": {
+        "non_zero_feedback_count": 4
+      },
+      "source_id": "simulated_world",
+      "source_type": "simulated_world",
+      "success": true
+    },
+    "dispatch": {
+      "acknowledgment": {
+        "ack_id": "ack-000003",
+        "acknowledged_channels": [
+          "energy_delta",
+          "fatigue_delta",
+          "loneliness_delta",
+          "stress_delta",
+          "temperature_delta"
+        ],
+        "action": {
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
+          "reversible": true
+        },
+        "action_name": "hide",
+        "confidence": 1.0,
+        "cycle": 3,
+        "feedback": {
+          "energy_delta": -0.03,
+          "fatigue_delta": 0.02,
+          "loneliness_delta": 0.0,
+          "stress_delta": -0.14,
+          "temperature_delta": 0.023336110321231552
+        },
+        "metadata": {
+          "non_zero_feedback_count": 4
+        },
+        "source_id": "simulated_world",
+        "source_type": "simulated_world",
+        "success": true
+      },
+      "action": {
+        "constraints": {
+          "preferred_when_danger_above": 0.45
+        },
+        "cost_estimate": 0.05,
+        "failure_modes": [
+          "resource_starvation",
+          "shelter_unavailable"
+        ],
+        "name": "hide",
+        "params": {},
+        "params_schema": {},
+        "resource_cost": {
+          "attention": 0.08,
+          "energy": 0.05
+        },
+        "reversible": true
+      },
+      "action_name": "hide",
+      "adapter_name": "SimulatedWorldActionAdapter",
+      "cycle": 3,
+      "dispatch_id": "dispatch-000003",
+      "feedback": {
+        "energy_delta": -0.03,
+        "fatigue_delta": 0.02,
+        "loneliness_delta": 0.0,
+        "stress_delta": -0.14,
+        "temperature_delta": 0.023336110321231552
+      },
+      "source_id": "simulated_world",
+      "source_type": "simulated_world"
+    }
+  },
+  "perception": {
+    "primary_observation": {
+      "adapter_name": "SimulatedWorldAdapter",
+      "confidence": 1.0,
+      "cycle": 3,
+      "metadata": {
+        "channel_count": 6
+      },
+      "observation": {
+        "danger": 0.06719600359962243,
+        "food": 0.5494661730386302,
+        "novelty": 0.4182055009829804,
+        "shelter": 0.6732169168369233,
+        "social": 0.2215245997901082,
+        "temperature": 0.3295197275970897
+      },
+      "packet_id": "perception-000007",
+      "signals": [
+        {
+          "channel": "food",
+          "confidence": 1.0,
+          "normalized_value": 0.5494661730386302,
+          "provenance": {},
+          "raw_value": 0.5494661730386302,
+          "role": "exteroceptive",
+          "source_id": "simulated_world",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "danger",
+          "confidence": 1.0,
+          "normalized_value": 0.06719600359962243,
+          "provenance": {},
+          "raw_value": 0.06719600359962243,
+          "role": "exteroceptive",
+          "source_id": "simulated_world",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "novelty",
+          "confidence": 1.0,
+          "normalized_value": 0.4182055009829804,
+          "provenance": {},
+          "raw_value": 0.4182055009829804,
+          "role": "exteroceptive",
+          "source_id": "simulated_world",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "shelter",
+          "confidence": 1.0,
+          "normalized_value": 0.6732169168369233,
+          "provenance": {},
+          "raw_value": 0.6732169168369233,
+          "role": "exteroceptive",
+          "source_id": "simulated_world",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "temperature",
+          "confidence": 1.0,
+          "normalized_value": 0.3295197275970897,
+          "provenance": {},
+          "raw_value": 0.3295197275970897,
+          "role": "exteroceptive",
+          "source_id": "simulated_world",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "social",
+          "confidence": 1.0,
+          "normalized_value": 0.2215245997901082,
+          "provenance": {},
+          "raw_value": 0.2215245997901082,
+          "role": "exteroceptive",
+          "source_id": "simulated_world",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        }
+      ],
+      "source_id": "simulated_world",
+      "source_type": "simulated_world"
+    },
+    "validation_observation": {
+      "adapter_name": "SimulatedWorldAdapter",
+      "confidence": 1.0,
+      "cycle": 3,
+      "metadata": {
+        "channel_count": 6
+      },
+      "observation": {
+        "danger": 0.10913327073674578,
+        "food": 0.46678767230635265,
+        "novelty": 0.42964517466259783,
+        "shelter": 0.7284309099463164,
+        "social": 0.2016175309437075,
+        "temperature": 0.4161986840990447
+      },
+      "packet_id": "perception-000008",
+      "signals": [
+        {
+          "channel": "food",
+          "confidence": 1.0,
+          "normalized_value": 0.46678767230635265,
+          "provenance": {},
+          "raw_value": 0.46678767230635265,
+          "role": "exteroceptive",
+          "source_id": "simulated_world_validation",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "danger",
+          "confidence": 1.0,
+          "normalized_value": 0.10913327073674578,
+          "provenance": {},
+          "raw_value": 0.10913327073674578,
+          "role": "exteroceptive",
+          "source_id": "simulated_world_validation",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "novelty",
+          "confidence": 1.0,
+          "normalized_value": 0.42964517466259783,
+          "provenance": {},
+          "raw_value": 0.42964517466259783,
+          "role": "exteroceptive",
+          "source_id": "simulated_world_validation",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "shelter",
+          "confidence": 1.0,
+          "normalized_value": 0.7284309099463164,
+          "provenance": {},
+          "raw_value": 0.7284309099463164,
+          "role": "exteroceptive",
+          "source_id": "simulated_world_validation",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "temperature",
+          "confidence": 1.0,
+          "normalized_value": 0.4161986840990447,
+          "provenance": {},
+          "raw_value": 0.4161986840990447,
+          "role": "exteroceptive",
+          "source_id": "simulated_world_validation",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        },
+        {
+          "channel": "social",
+          "confidence": 1.0,
+          "normalized_value": 0.2016175309437075,
+          "provenance": {},
+          "raw_value": 0.2016175309437075,
+          "role": "exteroceptive",
+          "source_id": "simulated_world_validation",
+          "source_type": "simulated_world",
+          "units": "normalized"
+        }
+      ],
+      "source_id": "simulated_world_validation",
+      "source_type": "simulated_world"
+    }
+  }
+}

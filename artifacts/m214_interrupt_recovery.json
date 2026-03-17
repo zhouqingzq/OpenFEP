@@ -1,0 +1,25 @@
+{
+  "final_choice": "exploit_shelter",
+  "first_interrupt_action": "rest",
+  "first_interrupt_tasks": [
+    "energy_recovery",
+    "fatigue_recovery",
+    "sleep_pressure"
+  ],
+  "maintenance_effects": {
+    "memory_compaction_applied": false,
+    "stress_recovery_applied": true,
+    "telemetry_backoff_applied": false
+  },
+  "final_scheduler_state": {
+    "acute_energy_debt": 0.0,
+    "acute_fatigue_debt": 0.0,
+    "acute_stress_debt": 0.0,
+    "acute_thermal_debt": 0.0,
+    "chronic_energy_debt": 0.018432,
+    "chronic_fatigue_debt": 0.018432,
+    "chronic_runtime_debt": 0.0,
+    "chronic_stress_debt": 0.0,
+    "short_term_sleep_pressure": 0.397375
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "program_id": "M2.12-M3.0",
+  "audit_statuses": [
+    "PASS",
+    "PASS_WITH_RESIDUAL_RISK",
+    "FAIL",
+    "BLOCKED"
+  ],
+  "required_evidence_categories": [
+    "schema",
+    "determinism",
+    "causality",
+    "ablation",
+    "stress",
+    "regression",
+    "artifact_freshness"
+  ],
+  "milestones": [
+    {
+      "milestone_id": "M2.12",
+      "title": "Embodied I/O Bus and World Adapters",
+      "objective": "Unify multi-source input and output channels behind causal, traced adapters.",
+      "acceptance_focus": [
+        "adapter causality",
+        "effect acknowledgment",
+        "snapshot/schema stability"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M2.13",
+      "title": "Global Access Workspace",
+      "objective": "Turn scarce attentional winners into a causal broadcast layer for action, report, and learning.",
+      "acceptance_focus": [
+        "workspace capacity",
+        "broadcast causality",
+        "no report leakage"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M2.14",
+      "title": "Autonomous Homeostasis and Survival Scheduler",
+      "objective": "Promote survival maintenance into an always-on scheduler across multiple debt timescales.",
+      "acceptance_focus": [
+        "maintenance autonomy",
+        "interrupt recovery",
+        "anti-collapse scheduling"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M2.15",
+      "title": "Unified Self-Narrative and Identity Commitments",
+      "objective": "Bind action policy and continuity preservation to explicit identity commitments.",
+      "acceptance_focus": [
+        "identity causality",
+        "coherent chapter transitions",
+        "evidence-grounded self-report"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M2.16",
+      "title": "Persistent Others and Social Continuity",
+      "objective": "Introduce stable models of other agents across repeated encounters.",
+      "acceptance_focus": [
+        "counterpart separation",
+        "social carryover",
+        "rupture and repair"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M2.17",
+      "title": "Open-World Action and Self-Maintenance Governance",
+      "objective": "Open constrained real-world action channels with explicit governance and rollback discipline.",
+      "acceptance_focus": [
+        "capability declaration",
+        "policy enforcement",
+        "effect acknowledgment"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M2.18",
+      "title": "Lifelong Learning, Anti-Collapse, and Continuity Preservation",
+      "objective": "Protect long-run continuity while allowing ongoing adaptation and consolidation.",
+      "acceptance_focus": [
+        "continuity preservation",
+        "anti-forgetting",
+        "restart consistency"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    },
+    {
+      "milestone_id": "M3.0",
+      "title": "Closed-Loop Life Trial",
+      "objective": "Validate the integrated organism under mixed long-horizon conditions.",
+      "acceptance_focus": [
+        "end-to-end survival",
+        "cross-context continuity",
+        "independent audit readiness"
+      ],
+      "required_evidence": [
+        "schema",
+        "determinism",
+        "causality",
+        "ablation",
+        "stress",
+        "regression",
+        "artifact_freshness"
+      ]
+    }
+  ]
+}

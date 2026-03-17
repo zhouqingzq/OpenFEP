@@ -1,0 +1,24 @@
+{
+  "milestone": "M2.16",
+  "status": "PASS",
+  "gates": {
+    "persistent_others_with_distinct_profiles": true,
+    "social_expectations_transfer": true,
+    "rupture_changes_action_policy": true,
+    "repair_partially_restores_trust": true,
+    "social_memory_survives_restart": true
+  },
+  "summary": {
+    "other_ids": [
+      "ally_alice",
+      "rival_bob"
+    ],
+    "restored_social_focus": [
+      "ally_alice",
+      "rival_bob"
+    ],
+    "restored_social_alerts": [
+      "rival_bob:rupture-risk"
+    ]
+  }
+}

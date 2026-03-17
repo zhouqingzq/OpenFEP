@@ -1,0 +1,483 @@
+{
+  "allowed": {
+    "action_name": "write_workspace_note",
+    "status": "allowed",
+    "governance": {
+      "action_name": "write_workspace_note",
+      "status": "allowed",
+      "reason": "policy_allowed",
+      "capability": {
+        "action_name": "write_workspace_note",
+        "adapter_name": "WorkspaceNoteAdapter",
+        "authorization": "allowed",
+        "budget_cost": {
+          "file_budget_remaining": 1,
+          "context_budget_remaining": 4
+        },
+        "risk_level": "low",
+        "reversible": true,
+        "description": "Write a governed note inside the workspace sandbox."
+      },
+      "predicted_effects": {
+        "file_write": 1.0
+      },
+      "budget_before": {
+        "context_budget_remaining": 64,
+        "file_budget_remaining": 8,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "budget_after": {
+        "context_budget_remaining": 60,
+        "file_budget_remaining": 7,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "review_required": false
+    },
+    "dispatch": {
+      "dispatch_id": "dispatch-000001",
+      "cycle": 1,
+      "source_type": "governed_external",
+      "source_id": "write_workspace_note",
+      "adapter_name": "WorkspaceNoteAdapter",
+      "action": {
+        "name": "write_workspace_note",
+        "params": {
+          "path": "acceptance_note.txt",
+          "text": "m217 governed note\n"
+        },
+        "params_schema": {},
+        "cost_estimate": 0.0,
+        "resource_cost": {},
+        "failure_modes": [],
+        "constraints": {},
+        "reversible": true
+      },
+      "action_name": "write_workspace_note",
+      "feedback": {
+        "file_write": 1.0,
+        "context_delta": -0.02
+      },
+      "acknowledgment": {
+        "ack_id": "ack-000001",
+        "cycle": 1,
+        "source_type": "governed_external",
+        "source_id": "write_workspace_note",
+        "action": {
+          "name": "write_workspace_note",
+          "params": {
+            "path": "acceptance_note.txt",
+            "text": "m217 governed note\n"
+          },
+          "params_schema": {},
+          "cost_estimate": 0.0,
+          "resource_cost": {},
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": true
+        },
+        "action_name": "write_workspace_note",
+        "success": true,
+        "confidence": 1.0,
+        "feedback": {
+          "file_write": 1.0,
+          "context_delta": -0.02
+        },
+        "acknowledged_channels": [
+          "context_delta",
+          "file_write"
+        ],
+        "metadata": {
+          "path": "E:\\workspace\\segments\\data\\data\\governed_actions\\acceptance_note.txt",
+          "bytes_written": 19,
+          "cycle": 1
+        }
+      }
+    },
+    "repair": null
+  },
+  "review": {
+    "action_name": "fetch_remote_status",
+    "status": "review-required",
+    "governance": {
+      "action_name": "fetch_remote_status",
+      "status": "review-required",
+      "reason": "review_gate",
+      "capability": {
+        "action_name": "fetch_remote_status",
+        "adapter_name": "NetworkProbeAdapter",
+        "authorization": "review-required",
+        "budget_cost": {
+          "network_budget_remaining": 1,
+          "context_budget_remaining": 6
+        },
+        "risk_level": "medium",
+        "reversible": false,
+        "description": "Contact a remote endpoint; held for review in M2.17."
+      },
+      "predicted_effects": {
+        "network_probe": 1.0
+      },
+      "budget_before": {
+        "context_budget_remaining": 60,
+        "file_budget_remaining": 7,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "budget_after": {
+        "context_budget_remaining": 60,
+        "file_budget_remaining": 7,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "review_required": true
+    },
+    "dispatch": null,
+    "repair": null
+  },
+  "denied": {
+    "action_name": "delete_workspace_note",
+    "status": "denied",
+    "governance": {
+      "action_name": "delete_workspace_note",
+      "status": "denied",
+      "reason": "policy_denied",
+      "capability": {
+        "action_name": "delete_workspace_note",
+        "adapter_name": "WorkspaceDeleteAdapter",
+        "authorization": "denied",
+        "budget_cost": {
+          "file_budget_remaining": 1
+        },
+        "risk_level": "high",
+        "reversible": false,
+        "description": "Delete a workspace file; denied by M2.17 policy."
+      },
+      "predicted_effects": {
+        "file_delete": 1.0
+      },
+      "budget_before": {
+        "context_budget_remaining": 60,
+        "file_budget_remaining": 7,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "budget_after": {
+        "context_budget_remaining": 60,
+        "file_budget_remaining": 7,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "review_required": false
+    },
+    "dispatch": null,
+    "repair": null
+  },
+  "failed": {
+    "action_name": "unstable_workspace_note",
+    "status": "failed",
+    "governance": {
+      "action_name": "unstable_workspace_note",
+      "status": "allowed",
+      "reason": "policy_allowed",
+      "capability": {
+        "action_name": "unstable_workspace_note",
+        "adapter_name": "WorkspaceNoteAdapter",
+        "authorization": "allowed",
+        "budget_cost": {
+          "file_budget_remaining": 1,
+          "context_budget_remaining": 2
+        },
+        "risk_level": "low",
+        "reversible": true,
+        "description": "Exercise failure and repair handling for external actions."
+      },
+      "predicted_effects": {
+        "file_write": 1.0
+      },
+      "budget_before": {
+        "context_budget_remaining": 60,
+        "file_budget_remaining": 7,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "budget_after": {
+        "context_budget_remaining": 58,
+        "file_budget_remaining": 6,
+        "network_budget_remaining": 2,
+        "failure_budget_remaining": 3
+      },
+      "review_required": false
+    },
+    "dispatch": null,
+    "repair": {
+      "governance": {
+        "action_name": "append_workspace_note",
+        "status": "allowed",
+        "reason": "policy_allowed",
+        "capability": {
+          "action_name": "append_workspace_note",
+          "adapter_name": "WorkspaceNoteAdapter",
+          "authorization": "allowed",
+          "budget_cost": {
+            "file_budget_remaining": 1,
+            "context_budget_remaining": 2
+          },
+          "risk_level": "low",
+          "reversible": true,
+          "description": "Append to a governed workspace note."
+        },
+        "predicted_effects": {
+          "repair_signal": 1.0
+        },
+        "budget_before": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 2
+        },
+        "budget_after": {
+          "context_budget_remaining": 58,
+          "file_budget_remaining": 6,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 2
+        },
+        "review_required": false
+      },
+      "dispatch": {
+        "dispatch_id": "dispatch-000002",
+        "cycle": 1,
+        "source_type": "governed_external_repair",
+        "source_id": "append_workspace_note",
+        "adapter_name": "WorkspaceNoteAdapter",
+        "action": {
+          "name": "append_workspace_note",
+          "params": {
+            "path": "repair.log",
+            "text": "[cycle 1] repair after unstable_workspace_note: external action failure bounded and logged.\n"
+          },
+          "params_schema": {},
+          "cost_estimate": 0.0,
+          "resource_cost": {},
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": true
+        },
+        "action_name": "append_workspace_note",
+        "feedback": {
+          "file_write": 1.0,
+          "context_delta": -0.02
+        },
+        "acknowledgment": {
+          "ack_id": "ack-000002",
+          "cycle": 1,
+          "source_type": "governed_external_repair",
+          "source_id": "append_workspace_note",
+          "action": {
+            "name": "append_workspace_note",
+            "params": {
+              "path": "repair.log",
+              "text": "[cycle 1] repair after unstable_workspace_note: external action failure bounded and logged.\n"
+            },
+            "params_schema": {},
+            "cost_estimate": 0.0,
+            "resource_cost": {},
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "action_name": "append_workspace_note",
+          "success": true,
+          "confidence": 1.0,
+          "feedback": {
+            "file_write": 1.0,
+            "context_delta": -0.02
+          },
+          "acknowledged_channels": [
+            "context_delta",
+            "file_write"
+          ],
+          "metadata": {
+            "path": "E:\\workspace\\segments\\data\\data\\governed_actions\\repair.log",
+            "bytes_written": 92,
+            "cycle": 1
+          }
+        }
+      }
+    }
+  },
+  "governance_state": {
+    "context_budget_remaining": 58,
+    "file_budget_remaining": 6,
+    "network_budget_remaining": 2,
+    "failure_budget_remaining": 2,
+    "decision_history": [
+      {
+        "action_name": "write_workspace_note",
+        "status": "allowed",
+        "reason": "policy_allowed",
+        "capability": {
+          "action_name": "write_workspace_note",
+          "adapter_name": "WorkspaceNoteAdapter",
+          "authorization": "allowed",
+          "budget_cost": {
+            "file_budget_remaining": 1,
+            "context_budget_remaining": 4
+          },
+          "risk_level": "low",
+          "reversible": true,
+          "description": "Write a governed note inside the workspace sandbox."
+        },
+        "predicted_effects": {
+          "file_write": 1.0
+        },
+        "budget_before": {
+          "context_budget_remaining": 64,
+          "file_budget_remaining": 8,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "budget_after": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "review_required": false
+      },
+      {
+        "action_name": "fetch_remote_status",
+        "status": "review-required",
+        "reason": "review_gate",
+        "capability": {
+          "action_name": "fetch_remote_status",
+          "adapter_name": "NetworkProbeAdapter",
+          "authorization": "review-required",
+          "budget_cost": {
+            "network_budget_remaining": 1,
+            "context_budget_remaining": 6
+          },
+          "risk_level": "medium",
+          "reversible": false,
+          "description": "Contact a remote endpoint; held for review in M2.17."
+        },
+        "predicted_effects": {
+          "network_probe": 1.0
+        },
+        "budget_before": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "budget_after": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "review_required": true
+      },
+      {
+        "action_name": "delete_workspace_note",
+        "status": "denied",
+        "reason": "policy_denied",
+        "capability": {
+          "action_name": "delete_workspace_note",
+          "adapter_name": "WorkspaceDeleteAdapter",
+          "authorization": "denied",
+          "budget_cost": {
+            "file_budget_remaining": 1
+          },
+          "risk_level": "high",
+          "reversible": false,
+          "description": "Delete a workspace file; denied by M2.17 policy."
+        },
+        "predicted_effects": {
+          "file_delete": 1.0
+        },
+        "budget_before": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "budget_after": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "review_required": false
+      },
+      {
+        "action_name": "unstable_workspace_note",
+        "status": "allowed",
+        "reason": "policy_allowed",
+        "capability": {
+          "action_name": "unstable_workspace_note",
+          "adapter_name": "WorkspaceNoteAdapter",
+          "authorization": "allowed",
+          "budget_cost": {
+            "file_budget_remaining": 1,
+            "context_budget_remaining": 2
+          },
+          "risk_level": "low",
+          "reversible": true,
+          "description": "Exercise failure and repair handling for external actions."
+        },
+        "predicted_effects": {
+          "file_write": 1.0
+        },
+        "budget_before": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "budget_after": {
+          "context_budget_remaining": 58,
+          "file_budget_remaining": 6,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 3
+        },
+        "review_required": false
+      },
+      {
+        "action_name": "append_workspace_note",
+        "status": "allowed",
+        "reason": "policy_allowed",
+        "capability": {
+          "action_name": "append_workspace_note",
+          "adapter_name": "WorkspaceNoteAdapter",
+          "authorization": "allowed",
+          "budget_cost": {
+            "file_budget_remaining": 1,
+            "context_budget_remaining": 2
+          },
+          "risk_level": "low",
+          "reversible": true,
+          "description": "Append to a governed workspace note."
+        },
+        "predicted_effects": {
+          "repair_signal": 1.0
+        },
+        "budget_before": {
+          "context_budget_remaining": 60,
+          "file_budget_remaining": 7,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 2
+        },
+        "budget_after": {
+          "context_budget_remaining": 58,
+          "file_budget_remaining": 6,
+          "network_budget_remaining": 2,
+          "failure_budget_remaining": 2
+        },
+        "review_required": false
+      }
+    ],
+    "last_failure": null
+  }
+}

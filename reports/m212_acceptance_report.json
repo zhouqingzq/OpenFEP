@@ -1,0 +1,14 @@
+{
+  "milestone_id": "M2.12",
+  "status": "PASS",
+  "cycles": 3,
+  "artifacts": [
+    "E:\\workspace\\segments\\artifacts\\m212_io_bus_schema.json",
+    "E:\\workspace\\segments\\artifacts\\m212_adapter_trace_sample.json"
+  ],
+  "gates": {
+    "perception_bus_packets_seen": 9,
+    "action_dispatch_count": 3,
+    "host_telemetry_present": true
+  }
+}
