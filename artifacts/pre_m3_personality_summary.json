@@ -4,21 +4,28 @@
   "seed": 44,
   "world_id": null,
   "world_pair": null,
-  "cycles": 36,
+  "cycles": 18,
   "attention_enabled": null,
   "profile": "multi_profile_protocol",
   "metrics": {
-    "significant_metric_count": 3,
+    "significant_metric_count": 4,
     "effect_metric_count": 7,
     "stability_profiles_passing": 5
   },
   "summary": {
+    "validation_protocol": {
+      "seed": 44,
+      "cycles_per_world": 18,
+      "repeats": 3,
+      "protocol_origin": "tests/test_m210_personality_validation.py canonical acceptance configuration"
+    },
     "validation_acceptance": {
       "required_significant_metrics": 3,
       "required_effect_metrics": 2,
       "significant_metrics": [
-        "caution_rate",
         "seek_contact_rate",
+        "action_entropy",
+        "survival_score",
         "mean_conditioned_prediction_error"
       ],
       "effect_metrics": [
@@ -46,54 +53,54 @@
     },
     "profile_summaries": {
       "neutral": {
-        "caution_rate": 0.9722222222222222,
-        "exploration_rate": 0.02546296296296296,
-        "seek_contact_rate": 0.0023148148148148147,
-        "action_entropy": 0.7957025953195439,
-        "survival_score": 1.7161921296296292,
-        "mean_conditioned_prediction_error": 0.035430049770022634,
-        "narrative_consistency_proxy": 0.8336805555555555,
-        "dominant_action_share": 0.7962962962962963
+        "caution_rate": 0.9938271604938271,
+        "exploration_rate": 0.006172839506172839,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 1.1704517707597712,
+        "survival_score": 1.7216666666666662,
+        "mean_conditioned_prediction_error": 0.051999762269145856,
+        "narrative_consistency_proxy": 0.7574074074074074,
+        "dominant_action_share": 0.6604938271604939
       },
       "threat_sensitive": {
-        "caution_rate": 0.9398148148148149,
-        "exploration_rate": 0.034722222222222224,
-        "seek_contact_rate": 0.025462962962962965,
-        "action_entropy": 0.9650449599601563,
-        "survival_score": 1.6680555555555552,
-        "mean_conditioned_prediction_error": 0.03719931356804664,
-        "narrative_consistency_proxy": 0.8763888888888889,
-        "dominant_action_share": 0.7337962962962963
+        "caution_rate": 0.9938271604938271,
+        "exploration_rate": 0.006172839506172839,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.8258168907559732,
+        "survival_score": 1.650401234567901,
+        "mean_conditioned_prediction_error": 0.05420122107214587,
+        "narrative_consistency_proxy": 0.758179012345679,
+        "dominant_action_share": 0.7283950617283951
       },
       "social_approach": {
-        "caution_rate": 0.6805555555555556,
-        "exploration_rate": 0.016203703703703703,
-        "seek_contact_rate": 0.3032407407407407,
-        "action_entropy": 0.7687041819427058,
-        "survival_score": 1.6849537037037026,
-        "mean_conditioned_prediction_error": 0.041950162809550086,
-        "narrative_consistency_proxy": 0.9277777777777778,
-        "dominant_action_share": 0.8032407407407407
+        "caution_rate": 0.7098765432098766,
+        "exploration_rate": 0.024691358024691357,
+        "seek_contact_rate": 0.2654320987654321,
+        "action_entropy": 1.1672136679502159,
+        "survival_score": 1.5387654320987647,
+        "mean_conditioned_prediction_error": 0.05507115595544987,
+        "narrative_consistency_proxy": 0.7429783950617284,
+        "dominant_action_share": 0.6604938271604939
       },
       "exploratory": {
-        "caution_rate": 0.9027777777777778,
-        "exploration_rate": 0.06018518518518518,
-        "seek_contact_rate": 0.037037037037037035,
-        "action_entropy": 0.9082153922309485,
-        "survival_score": 1.502789351851851,
-        "mean_conditioned_prediction_error": 0.04319689449619832,
-        "narrative_consistency_proxy": 0.9324652777777778,
-        "dominant_action_share": 0.8032407407407407
+        "caution_rate": 0.7407407407407407,
+        "exploration_rate": 0.25925925925925924,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 1.0627763020539929,
+        "survival_score": 1.5205864197530858,
+        "mean_conditioned_prediction_error": 0.04904401945987216,
+        "narrative_consistency_proxy": 0.704861111111111,
+        "dominant_action_share": 0.7222222222222222
       },
       "rigid_cautious": {
-        "caution_rate": 0.9282407407407407,
-        "exploration_rate": 0.06712962962962962,
-        "seek_contact_rate": 0.004629629629629629,
-        "action_entropy": 0.8933286840838459,
-        "survival_score": 1.7231018518518515,
-        "mean_conditioned_prediction_error": 0.038085614010882445,
-        "narrative_consistency_proxy": 0.8909722222222223,
-        "dominant_action_share": 0.7638888888888888
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.6978555809610648,
+        "survival_score": 1.5678395061728392,
+        "mean_conditioned_prediction_error": 0.04874979975174929,
+        "narrative_consistency_proxy": 0.8083333333333333,
+        "dominant_action_share": 0.808641975308642
       }
     }
   },
@@ -102,8 +109,9 @@
     "stability_passed": true,
     "passed": true,
     "significant_metrics": [
-      "caution_rate",
       "seek_contact_rate",
+      "action_entropy",
+      "survival_score",
       "mean_conditioned_prediction_error"
     ],
     "effect_metrics": [
@@ -123,6 +131,6 @@
       "rigid_cautious"
     ]
   },
-  "generated_at": "2026-03-16T15:57:21+00:00",
-  "codebase_version": "abd7a72768408e481d63e732a911e0ca2f69fb2d"
+  "generated_at": "2026-03-17T10:40:30+00:00",
+  "codebase_version": "de00ce90e79bc95db0ba0ab7e28ea2fae8f39ac3"
 }

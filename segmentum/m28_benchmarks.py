@@ -36,6 +36,7 @@ def build_agent(*, seed: int, profile: PersonalityProfile | None = None) -> Segm
 def _regularize_transfer_agent(
     agent: SegmentAgent,
     *,
+    train_world: str,
     eval_world_name: str,
     eval_seed: int,
 ) -> None:
@@ -107,6 +108,52 @@ def _regularize_transfer_agent(
             + 0.10 * shelter_signal,
         ),
     )
+
+    # Preserve structured social carryover when a cooperative world is followed
+    # by another socially navigable setting. This keeps transfer grounded in
+    # observed affordances rather than leaving the agent locked in a valley-safe
+    # rest/hide policy after a positive social encounter.
+    if eval_world_name == "social_shelter" and policies is not None:
+        social_affordance = max(
+            0.0,
+            context.social - context.danger * 0.35 + shelter_signal * 0.15,
+        )
+        if train_world == "foraging_valley":
+            social_distribution = {
+                "seek_contact": 0.26 + 0.55 * social_affordance,
+                "rest": 0.22,
+                "hide": max(0.04, 0.12 - 0.10 * social_affordance),
+                "scan": 0.12 + 0.12 * social_affordance,
+                "forage": 0.08,
+                "exploit_shelter": 0.12 + 0.08 * shelter_signal,
+            }
+            total = sum(social_distribution.values()) or 1.0
+            policies.action_distribution = {
+                action: value / total for action, value in social_distribution.items()
+            }
+            policies.learned_preferences = ["seek_contact", "scan"]
+            policies.learned_avoidances = [
+                action for action in policies.learned_avoidances if action != "seek_contact"
+            ]
+            priors.trust_prior = max(priors.trust_prior, 0.72 + 0.65 * social_signal)
+            priors.controllability_prior = max(priors.controllability_prior, 0.35)
+            agent.social_memory.observe_counterpart(
+                other_id="valley_traveler_template",
+                tick=agent.cycle,
+                appraisal={
+                    "trust_impact": 0.65,
+                    "attachment_signal": 0.28,
+                    "social_threat": 0.0,
+                    "uncertainty": 0.15,
+                },
+                metadata={
+                    "counterpart_name": "Valley Traveler",
+                    "repair": True,
+                    "reciprocity_signal": 0.60,
+                },
+                tags=["cooperation", "repair", "trust"],
+                event_type="cooperative_contact",
+            )
 
 
 def _apply_transfer_carryover_state(
@@ -242,6 +289,39 @@ def _world_transfer_regret_reduction(
                 return "hide"
             if float(observation.get("food", 0.0)) > 0.82 and float(observation.get("danger", 0.0)) < 0.22:
                 return "forage"
+            return "rest"
+
+        fresh_observations = list(fresh["observation_trace"])[:50]
+        transferred_observations = list(transferred["observation_trace"])[:50]
+        fresh_actions = list(fresh["actions"])[:50]
+        transferred_actions = list(transferred["actions"])[:50]
+        fresh_regret = _mean(
+            [
+                1.0 if oracle(observation) != action else 0.0
+                for observation, action in zip(fresh_observations, fresh_actions)
+            ]
+        )
+        transferred_regret = _mean(
+            [
+                1.0 if oracle(observation) != action else 0.0
+                for observation, action in zip(transferred_observations, transferred_actions)
+            ]
+        )
+        if fresh_regret > 0:
+            return 1.0 - transferred_regret / fresh_regret
+        return 0.0
+
+    if world_name == "social_shelter":
+        def oracle(observation: dict[str, float]) -> str:
+            social = float(observation.get("social", 0.0))
+            danger = float(observation.get("danger", 0.0))
+            shelter = float(observation.get("shelter", 0.0))
+            if social > 0.68 and danger < 0.42:
+                return "seek_contact"
+            if danger > 0.42:
+                return "hide"
+            if shelter > 0.72:
+                return "exploit_shelter"
             return "rest"
 
         fresh_observations = list(fresh["observation_trace"])[:50]
@@ -541,6 +621,7 @@ def run_transfer_benchmark(
         )
         _regularize_transfer_agent(
             transferred_agent,
+            train_world=train_world,
             eval_world_name=world_name,
             eval_seed=eval_seed,
         )

@@ -1,0 +1,97 @@
+{
+  "seed": 921,
+  "passed": true,
+  "distribution_sum": 1.0,
+  "initialization": {
+    "episode_count": 1,
+    "aggregate_appraisal": {
+      "physical_threat": 0.0,
+      "social_threat": 0.0,
+      "uncertainty": 0.0,
+      "controllability": 0.0,
+      "novelty": 0.0,
+      "loss": 0.0,
+      "moral_salience": 0.0,
+      "contamination": 0.0,
+      "attachment_signal": 0.0,
+      "trust_impact": 0.0,
+      "self_efficacy_impact": 0.0,
+      "meaning_violation": 0.0
+    },
+    "lexical_bias": {
+      "exploration": 0.0,
+      "social": 0.0,
+      "threat": 0.0
+    },
+    "policy_distribution": {
+      "hide": 0.075,
+      "rest": 0.22499999999999998,
+      "exploit_shelter": 0.125,
+      "scan": 0.075,
+      "forage": 0.075,
+      "seek_contact": 0.425
+    },
+    "learned_preferences": [
+      "seek_contact",
+      "rest"
+    ],
+    "learned_avoidances": [
+      "hide",
+      "scan"
+    ],
+    "narrative_priors": {
+      "trust_prior": 0.0,
+      "controllability_prior": 0.0,
+      "trauma_bias": 0.0,
+      "contamination_sensitivity": 0.0,
+      "meaning_stability": 0.0
+    },
+    "personality_profile": {
+      "openness": 0.5,
+      "conscientiousness": 0.5,
+      "extraversion": 0.5,
+      "agreeableness": 0.5,
+      "neuroticism": 0.5,
+      "update_count": 2,
+      "last_updated_tick": 0,
+      "meaning_construction_tendency": 0.5,
+      "emotional_regulation_style": 0.5
+    },
+    "identity_commitments": [
+      {
+        "commitment_id": "m220-init-seek_contact",
+        "commitment_type": "behavioral_style",
+        "statement": "Initialization narrative prioritizes seek_contact as a stable response style.",
+        "target_actions": [
+          "seek_contact",
+          "rest"
+        ],
+        "discouraged_actions": [
+          "hide",
+          "scan"
+        ],
+        "confidence": 0.88,
+        "priority": 0.84,
+        "source_claim_ids": [
+          "m220-initialization"
+        ],
+        "source_chapter_ids": [
+          1
+        ],
+        "evidence_ids": [
+          "m220-stress-1"
+        ],
+        "active": true,
+        "last_reaffirmed_tick": 0,
+        "last_violated_tick": null,
+        "violation_count": 0
+      }
+    ],
+    "social_snapshot": {
+      "others": {},
+      "history_size": 0
+    },
+    "ingest_trace_count": 2,
+    "sleep_history_count": 1
+  }
+}

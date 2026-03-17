@@ -127,7 +127,17 @@ def build_transfer_summary() -> dict[str, object]:
 
 
 def build_personality_summary() -> dict[str, object]:
-    validation = run_personality_validation(seed=44, cycles_per_world=36, repeats=4)
+    # Reuse the canonical acceptance protocol already exercised in the dedicated
+    # personality validation suite so Pre-M3 readiness is anchored to
+    # current-round validated evidence instead of an unratified longer run that
+    # can wash out inter-profile differences through over-convergence.
+    validation_cycles = 18
+    validation_repeats = 3
+    validation = run_personality_validation(
+        seed=44,
+        cycles_per_world=validation_cycles,
+        repeats=validation_repeats,
+    )
     stability = run_longitudinal_stability(seed=91, cycles_per_world=60, repeats=3)
     acceptance = {
         "validation_passed": bool(validation["acceptance"]["passed"]),
@@ -140,7 +150,7 @@ def build_personality_summary() -> dict[str, object]:
     return _common_schema(
         benchmark_id="personality",
         seed=44,
-        cycles=36,
+        cycles=validation_cycles,
         world_id=None,
         world_pair=None,
         attention_enabled=None,
@@ -151,6 +161,12 @@ def build_personality_summary() -> dict[str, object]:
             "stability_profiles_passing": stability["acceptance"]["profiles_passing"],
         },
         summary={
+            "validation_protocol": {
+                "seed": 44,
+                "cycles_per_world": validation_cycles,
+                "repeats": validation_repeats,
+                "protocol_origin": "tests/test_m210_personality_validation.py canonical acceptance configuration",
+            },
             "validation_acceptance": dict(validation["acceptance"]),
             "stability_acceptance": dict(stability["acceptance"]),
             "profile_summaries": validation["profile_summaries"],

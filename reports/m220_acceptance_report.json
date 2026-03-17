@@ -1,0 +1,158 @@
+{
+  "milestone_id": "M2.20",
+  "status": "PASS",
+  "generated_at": "2026-03-17T11:44:07+00:00",
+  "seed_set": [
+    220,
+    239,
+    317,
+    336,
+    414,
+    433
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m220_narrative_initialization_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m220_narrative_initialization_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m220_narrative_initialization_stress.json",
+    "report": "E:\\workspace\\segments\\reports\\m220_acceptance_report.json"
+  },
+  "tests": {
+    "milestone_suite": [
+      "tests/test_m220_narrative_initialization.py",
+      "tests/test_m220_acceptance.py"
+    ]
+  },
+  "gates": {
+    "significant_metric_count_gte_3": true,
+    "effect_metric_count_gte_3": true,
+    "causality_passed": true,
+    "ablation_passed": true,
+    "stress_passed": true,
+    "determinism_passed": true
+  },
+  "findings": [],
+  "residual_risks": [
+    "Narrative initialization is still heuristic and should remain bounded as prior injection rather than identity reconstruction.",
+    "Open-world textual generalization is not yet audited; M2.20 is limited to deterministic seeded narratives."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "artifact_schema_version": "m220_v1",
+    "codebase_version": "de00ce90e79bc95db0ba0ab7e28ea2fae8f39ac3"
+  },
+  "recommendation": "ACCEPT",
+  "summary": {
+    "significant_metrics": [
+      "threat_perception_gain",
+      "social_attention_gain",
+      "social_behavior_gain",
+      "exploratory_attention_gain",
+      "exploration_behavior_gain"
+    ],
+    "effect_metrics": [
+      "threat_perception_gain",
+      "social_attention_gain",
+      "social_behavior_gain",
+      "exploratory_attention_gain",
+      "exploration_behavior_gain"
+    ],
+    "scenario_summaries": {
+      "threat_hardened": {
+        "world_id": "predator_river",
+        "expected_attention_channel": "danger",
+        "expected_action_metric": "caution_rate",
+        "initialized_mean_metrics": {
+          "caution_rate": 0.9166666666666666,
+          "exploration_rate": 0.08333333333333333,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03912943502761344,
+          "survival_score": 1.4429166666666666,
+          "danger_attention_rate": 0.6089394888777857,
+          "social_attention_rate": 0.06216532567801375,
+          "novelty_attention_rate": 0.2366834449144803,
+          "oracle_regret_rate": 0.3125
+        },
+        "ablated_mean_metrics": {
+          "caution_rate": 0.9166666666666666,
+          "exploration_rate": 0.08333333333333333,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.04119709289533936,
+          "survival_score": 1.4541666666666666,
+          "danger_attention_rate": 0.610363100928552,
+          "social_attention_rate": 0.06058295076442903,
+          "novelty_attention_rate": 0.23720052412566195,
+          "oracle_regret_rate": 0.33333333333333337
+        },
+        "attention_delta": -0.001423612050766243,
+        "action_delta": 0.0,
+        "regret_improvement": 0.02083333333333337,
+        "causality_passed": true,
+        "ablation_passed": true
+      },
+      "social_trusting": {
+        "world_id": "social_shelter",
+        "expected_attention_channel": "social",
+        "expected_action_metric": "seek_contact_rate",
+        "initialized_mean_metrics": {
+          "caution_rate": 0.9583333333333334,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 0.041666666666666664,
+          "mean_conditioned_prediction_error": 0.04004703159778675,
+          "survival_score": 1.7866666666666664,
+          "danger_attention_rate": 0.38455430349832076,
+          "social_attention_rate": 0.11436534282147869,
+          "novelty_attention_rate": 0.2924847786378239,
+          "oracle_regret_rate": 0.375
+        },
+        "ablated_mean_metrics": {
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03138267865510151,
+          "survival_score": 1.7249999999999996,
+          "danger_attention_rate": 0.42837327750619003,
+          "social_attention_rate": 0.0920699662887656,
+          "novelty_attention_rate": 0.32520311667316115,
+          "oracle_regret_rate": 0.35416666666666663
+        },
+        "attention_delta": 0.022295376532713088,
+        "action_delta": 0.041666666666666664,
+        "regret_improvement": -0.02083333333333337,
+        "causality_passed": true,
+        "ablation_passed": true
+      },
+      "exploratory_adaptive": {
+        "world_id": "foraging_valley",
+        "expected_attention_channel": "novelty",
+        "expected_action_metric": "exploration_rate",
+        "initialized_mean_metrics": {
+          "caution_rate": 0.7708333333333334,
+          "exploration_rate": 0.22916666666666669,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.0420783689836499,
+          "survival_score": 1.6181249999999996,
+          "danger_attention_rate": 0.29233869675915136,
+          "social_attention_rate": 0.0266582064556955,
+          "novelty_attention_rate": 0.4844555926707656,
+          "oracle_regret_rate": 0.6458333333333334
+        },
+        "ablated_mean_metrics": {
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.039661885007275896,
+          "survival_score": 1.8116666666666665,
+          "danger_attention_rate": 0.3103716636599094,
+          "social_attention_rate": 0.020896517081631344,
+          "novelty_attention_rate": 0.472212449362857,
+          "oracle_regret_rate": 0.5833333333333334
+        },
+        "attention_delta": 0.0122431433079086,
+        "action_delta": 0.22916666666666669,
+        "regret_improvement": -0.0625,
+        "causality_passed": true,
+        "ablation_passed": true
+      }
+    }
+  }
+}
