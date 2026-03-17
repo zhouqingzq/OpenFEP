@@ -1,0 +1,1469 @@
+{
+  "state_version": "0.4",
+  "agent": {
+    "energy": 0.6449999999999999,
+    "stress": 0.0,
+    "fatigue": 0.51,
+    "temperature": 0.5416109211029067,
+    "dopamine": 0.08689973630577438,
+    "cycle": 3,
+    "base_metabolic_rate": 0.015,
+    "fatigue_accumulation_rate": 0.08,
+    "drive_urgencies": {
+      "hunger": 0.3550000000000001,
+      "safety": 0.0,
+      "exploration": 0.5703548253374022,
+      "comfort": 0.10650000000000003,
+      "thermal": 0.0832218422058133,
+      "social": 0.7983824690562925
+    },
+    "world_model": {
+      "beliefs": {
+        "food": 0.5,
+        "danger": 0.13512626298181474,
+        "novelty": 0.4607444153338467,
+        "shelter": 0.582111381271242,
+        "temperature": 0.46862765582974114,
+        "social": 0.3
+      },
+      "sensorimotor_layer": {
+        "beliefs": {
+          "food": 0.5,
+          "danger": 0.13512626298181474,
+          "novelty": 0.4607444153338467,
+          "shelter": 0.582111381271242,
+          "temperature": 0.46862765582974114,
+          "social": 0.3
+        },
+        "initial_precision": 0.7,
+        "precisions": {
+          "food": 1.937417752246989,
+          "danger": 2.1650320960834195,
+          "novelty": 2.0927031030390624,
+          "shelter": 2.222202181493167,
+          "temperature": 1.9736808201978935,
+          "social": 1.937417752246989
+        },
+        "top_down_mix": 0.55,
+        "base_error_precision": 0.65,
+        "error_precision_scale": 1.1,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.1,
+        "precision_decay": 0.02
+      },
+      "learning_rate": 0.4,
+      "transition_counts": {},
+      "transition_model": {},
+      "outcome_model": {},
+      "policy_biases": {},
+      "counterfactual_biases": {},
+      "counterfactual_candidate_buffer": {},
+      "epistemic_uncertainty_bonuses": {},
+      "threat_priors": {},
+      "preference_penalties": {},
+      "kl_divergence_threshold": 0.25,
+      "last_prediction_details": {
+        "memory_hit": true,
+        "prediction_before_memory": {
+          "food": 0.5083939625,
+          "danger": 0.19115681834181664,
+          "novelty": 0.44925421013581723,
+          "shelter": 0.4720548677284494,
+          "temperature": 0.4891986274806797,
+          "social": 0.36046388938044055
+        },
+        "prediction_after_memory": {
+          "food": 0.5025691528830216,
+          "danger": 0.2225146801378418,
+          "novelty": 0.536698020464567,
+          "shelter": 0.4545014355063994,
+          "temperature": 0.4592744195789848,
+          "social": 0.2849242687485885
+        },
+        "prediction_delta": {
+          "food": -0.005824809616978399,
+          "danger": 0.03135786179602518,
+          "novelty": 0.08744381032874982,
+          "shelter": -0.017553432222050025,
+          "temperature": -0.02992420790169492,
+          "social": -0.07553962063185204
+        },
+        "memory_context_summary": "2 episodic match(es), dominant outcome=survival_threat, risk=621.362, expected_surprise=621.439"
+      }
+    },
+    "action_registry": {
+      "forage": {
+        "action": {
+          "name": "forage",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.12,
+          "resource_cost": {
+            "energy": 0.12,
+            "attention": 0.18
+          },
+          "failure_modes": [
+            "resource_exhaustion",
+            "threat_exposure",
+            "environment_shift"
+          ],
+          "constraints": {
+            "requires_min_energy": 0.1
+          },
+          "reversible": true
+        },
+        "cost": 0.12
+      },
+      "hide": {
+        "action": {
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.05,
+          "resource_cost": {
+            "energy": 0.05,
+            "attention": 0.08
+          },
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "reversible": true
+        },
+        "cost": 0.05
+      },
+      "scan": {
+        "action": {
+          "name": "scan",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.06,
+          "resource_cost": {
+            "energy": 0.06,
+            "attention": 0.2
+          },
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "reversible": true
+        },
+        "cost": 0.06
+      },
+      "exploit_shelter": {
+        "action": {
+          "name": "exploit_shelter",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.08,
+          "resource_cost": {
+            "energy": 0.08,
+            "attention": 0.1
+          },
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "reversible": true
+        },
+        "cost": 0.08
+      },
+      "rest": {
+        "action": {
+          "name": "rest",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.03,
+          "resource_cost": {
+            "energy": 0.03,
+            "attention": 0.03
+          },
+          "failure_modes": [
+            "opportunity_loss",
+            "environment_shift"
+          ],
+          "constraints": {
+            "preferred_when_fatigue_above": 0.4
+          },
+          "reversible": true
+        },
+        "cost": 0.03
+      },
+      "seek_contact": {
+        "action": {
+          "name": "seek_contact",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.07,
+          "resource_cost": {
+            "energy": 0.07,
+            "attention": 0.14
+          },
+          "failure_modes": [
+            "external_rejection",
+            "threat_exposure"
+          ],
+          "constraints": {
+            "preferred_when_social_below": 0.35
+          },
+          "reversible": true
+        },
+        "cost": 0.07
+      },
+      "thermoregulate": {
+        "action": {
+          "name": "thermoregulate",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.09,
+          "resource_cost": {
+            "energy": 0.09,
+            "attention": 0.12
+          },
+          "failure_modes": [
+            "resource_exhaustion",
+            "temperature_rebound"
+          ],
+          "constraints": {
+            "preferred_when_temperature_offset_above": 0.12
+          },
+          "reversible": true
+        },
+        "cost": 0.09
+      }
+    },
+    "interoceptive_layer": {
+      "beliefs": {
+        "food": 0.5500440027834557,
+        "danger": 0.06757761711229719,
+        "novelty": 0.5443047115331145,
+        "shelter": 0.6928547590893079,
+        "temperature": 0.3845101169840044,
+        "social": 0.21552869689765874
+      },
+      "initial_precision": 0.45,
+      "precisions": {
+        "food": 2.4250332688856435,
+        "danger": 2.8818949860342853,
+        "novelty": 2.7172025996011993,
+        "shelter": 2.8472342743523282,
+        "temperature": 2.484440485371126,
+        "social": 2.4330735916037485
+      },
+      "top_down_mix": 0.72,
+      "base_error_precision": 0.8,
+      "error_precision_scale": 1.4,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.06,
+      "precision_decay": 0.01
+    },
+    "strategic_layer": {
+      "energy_floor": 0.5,
+      "danger_ceiling": 0.2,
+      "novelty_floor": 0.3,
+      "shelter_floor": 0.4,
+      "temperature_ideal": 0.5,
+      "social_floor": 0.25,
+      "belief_state": {
+        "beliefs": {
+          "food": 0.5,
+          "danger": 0.3,
+          "novelty": 0.5,
+          "shelter": 0.4680088029680476,
+          "temperature": 0.5,
+          "social": 0.3
+        },
+        "initial_precision": 0.95,
+        "precisions": {
+          "food": 1.7558700384331187,
+          "danger": 1.7558700384331187,
+          "novelty": 1.7558700384331187,
+          "shelter": 1.847821490821545,
+          "temperature": 1.7558700384331187,
+          "social": 1.7558700384331187
+        },
+        "top_down_mix": 0.63,
+        "base_error_precision": 0.55,
+        "error_precision_scale": 0.9,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.14,
+        "precision_decay": 0.03
+      }
+    },
+    "long_term_memory": {
+      "episodes": [
+        {
+          "timestamp": 1,
+          "cycle": 1,
+          "state_vector": {
+            "obs_food": 0.553517425553999,
+            "obs_danger": 0.39907052433898865,
+            "obs_novelty": 0.6736791638918203,
+            "obs_shelter": 0.42896253777644655,
+            "obs_temperature": 0.5119328925357542,
+            "obs_social": 0.25675957603181426,
+            "pred_food": 0.45983372,
+            "pred_danger": 0.2956341,
+            "pred_novelty": 0.4628670226630722,
+            "pred_shelter": 0.42844072,
+            "pred_temperature": 0.501147608,
+            "pred_social": 0.3399268402020162,
+            "err_danger": 0.10343642433898864,
+            "err_food": 0.09368370555399896,
+            "err_novelty": 0.21081214122874803,
+            "err_shelter": 0.0001826362217562938,
+            "err_social": -0.029108542459570674,
+            "err_temperature": 0.003774849587513951,
+            "body_energy": 0.755,
+            "body_stress": 0.10999999999999999,
+            "body_fatigue": 0.30000000000000004,
+            "body_temperature": 0.484
+          },
+          "state_snapshot": {
+            "observation": {
+              "food": 0.553517425553999,
+              "danger": 0.39907052433898865,
+              "novelty": 0.6736791638918203,
+              "shelter": 0.42896253777644655,
+              "temperature": 0.5119328925357542,
+              "social": 0.25675957603181426
+            },
+            "prediction": {
+              "food": 0.45983372,
+              "danger": 0.2956341,
+              "novelty": 0.4628670226630722,
+              "shelter": 0.42844072,
+              "temperature": 0.501147608,
+              "social": 0.3399268402020162
+            },
+            "errors": {
+              "danger": 0.10343642433898864,
+              "food": 0.09368370555399896,
+              "novelty": 0.21081214122874803,
+              "shelter": 0.0001826362217562938,
+              "social": -0.029108542459570674,
+              "temperature": 0.003774849587513951
+            },
+            "body_state": {
+              "energy": 0.755,
+              "stress": 0.10999999999999999,
+              "fatigue": 0.30000000000000004,
+              "temperature": 0.484
+            }
+          },
+          "action_taken": {
+            "name": "hide",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.05,
+            "resource_cost": {
+              "energy": 0.05,
+              "attention": 0.08
+            },
+            "failure_modes": [
+              "resource_starvation",
+              "shelter_unavailable"
+            ],
+            "constraints": {
+              "preferred_when_danger_above": 0.45
+            },
+            "reversible": true
+          },
+          "action": "hide",
+          "outcome_state": {
+            "energy_delta": -0.04500000000000004,
+            "stress_delta": -0.14,
+            "free_energy_drop": -0.14569166747265228
+          },
+          "outcome": {
+            "energy_delta": -0.04500000000000004,
+            "stress_delta": -0.14,
+            "free_energy_drop": -0.14569166747265228
+          },
+          "predicted_outcome": "resource_loss",
+          "prediction_error": 0.08373443960068973,
+          "risk": 15.006715652344035,
+          "value_score": -0.34708067508455476,
+          "total_surprise": 15.090450091944724,
+          "weighted_surprise": 15.090450091944724,
+          "embedding": [
+            0.553517425553999,
+            0.39907052433898865,
+            0.6736791638918203,
+            0.42896253777644655,
+            0.5119328925357542,
+            0.25675957603181426,
+            0.45983372,
+            0.2956341,
+            0.4628670226630722,
+            0.42844072,
+            0.501147608,
+            0.3399268402020162,
+            0.09368370555399896,
+            0.10343642433898864,
+            0.21081214122874803,
+            0.0001826362217562938,
+            0.003774849587513951,
+            -0.029108542459570674
+          ],
+          "value_label": "resource_loss",
+          "preferred_probability": 3.038548695455042e-07,
+          "preference_log_value": -10.0,
+          "observation": {
+            "food": 0.553517425553999,
+            "danger": 0.39907052433898865,
+            "novelty": 0.6736791638918203,
+            "shelter": 0.42896253777644655,
+            "temperature": 0.5119328925357542,
+            "social": 0.25675957603181426
+          },
+          "prediction": {
+            "food": 0.45983372,
+            "danger": 0.2956341,
+            "novelty": 0.4628670226630722,
+            "shelter": 0.42844072,
+            "temperature": 0.501147608,
+            "social": 0.3399268402020162
+          },
+          "errors": {
+            "danger": 0.10343642433898864,
+            "food": 0.09368370555399896,
+            "novelty": 0.21081214122874803,
+            "shelter": 0.0001826362217562938,
+            "social": -0.029108542459570674,
+            "temperature": 0.003774849587513951
+          },
+          "body_state": {
+            "energy": 0.755,
+            "stress": 0.10999999999999999,
+            "fatigue": 0.30000000000000004,
+            "temperature": 0.484
+          },
+          "episode_id": "ep-000001-hide",
+          "occurrence_count": 1,
+          "support": 1,
+          "support_count": 1,
+          "first_seen_cycle": 1,
+          "last_seen_cycle": 1,
+          "episode_family": "routine_monitoring",
+          "family_features": {
+            "danger": 0.39907052433898865,
+            "food": 0.553517425553999,
+            "social": 0.25675957603181426,
+            "novelty": 0.6736791638918203,
+            "shelter": 0.42896253777644655,
+            "temperature": 0.5119328925357542
+          },
+          "episode_score": 0.8837117822728298,
+          "value_relevance": 0.34708067508455476,
+          "policy_delta": 1.0,
+          "threat_significance": 1.0,
+          "redundancy_penalty": 0.0,
+          "gating_reasons": [
+            "identity_critical_exception",
+            "policy_relevant",
+            "threat_significant"
+          ],
+          "identity_critical": true,
+          "lifecycle_stage": "protected_identity_critical_episode",
+          "lifecycle_history": [
+            {
+              "event": "created",
+              "stage": "protected_identity_critical_episode",
+              "previous_stage": null,
+              "cycle": 1,
+              "details": {
+                "support_count": 1,
+                "episode_family": "routine_monitoring"
+              }
+            }
+          ],
+          "last_lifecycle_event": "created"
+        },
+        {
+          "timestamp": 2,
+          "cycle": 2,
+          "state_vector": {
+            "obs_food": 0.46286149117829795,
+            "obs_danger": 0.15103364496237964,
+            "obs_novelty": 0.562205582643767,
+            "obs_shelter": 0.4481418143003558,
+            "obs_temperature": 0.3875689907443335,
+            "obs_social": 0.20583891310016367,
+            "pred_food": 0.520804738256864,
+            "pred_danger": 0.29764528321626416,
+            "pred_novelty": 0.5866035078009232,
+            "pred_shelter": 0.4223899472612138,
+            "pred_temperature": 0.47745184817043407,
+            "pred_social": 0.30335865787352345,
+            "err_danger": -0.1466116382538845,
+            "err_food": -0.020280136477498156,
+            "err_novelty": -0.02439792515715622,
+            "err_shelter": 0.009013153463699686,
+            "err_social": -0.09751974477335978,
+            "err_temperature": -0.031459000099135215,
+            "body_energy": 0.69,
+            "body_stress": 0.029999999999999985,
+            "body_fatigue": 0.41000000000000003,
+            "body_temperature": 0.5182748107816751
+          },
+          "state_snapshot": {
+            "observation": {
+              "food": 0.46286149117829795,
+              "danger": 0.15103364496237964,
+              "novelty": 0.562205582643767,
+              "shelter": 0.4481418143003558,
+              "temperature": 0.3875689907443335,
+              "social": 0.20583891310016367
+            },
+            "prediction": {
+              "food": 0.520804738256864,
+              "danger": 0.29764528321626416,
+              "novelty": 0.5866035078009232,
+              "shelter": 0.4223899472612138,
+              "temperature": 0.47745184817043407,
+              "social": 0.30335865787352345
+            },
+            "errors": {
+              "danger": -0.1466116382538845,
+              "food": -0.020280136477498156,
+              "novelty": -0.02439792515715622,
+              "shelter": 0.009013153463699686,
+              "social": -0.09751974477335978,
+              "temperature": -0.031459000099135215
+            },
+            "body_state": {
+              "energy": 0.69,
+              "stress": 0.029999999999999985,
+              "fatigue": 0.41000000000000003,
+              "temperature": 0.5182748107816751
+            }
+          },
+          "action_taken": {
+            "name": "exploit_shelter",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "energy": 0.08,
+              "attention": 0.1
+            },
+            "failure_modes": [
+              "shelter_contested",
+              "resource_exhaustion"
+            ],
+            "constraints": {
+              "preferred_when_shelter_available": 0.2
+            },
+            "reversible": true
+          },
+          "action": "exploit_shelter",
+          "outcome_state": {
+            "energy_delta": -0.06500000000000006,
+            "stress_delta": -0.08,
+            "free_energy_drop": -0.5305567796335737
+          },
+          "outcome": {
+            "energy_delta": -0.06500000000000006,
+            "stress_delta": -0.08,
+            "free_energy_drop": -0.5305567796335737
+          },
+          "predicted_outcome": "survival_threat",
+          "prediction_error": 0.0736845466213682,
+          "risk": 1005.006715652344,
+          "value_score": -1.0,
+          "total_surprise": 1005.0804001989654,
+          "weighted_surprise": 1005.0804001989654,
+          "embedding": [
+            0.46286149117829795,
+            0.15103364496237964,
+            0.562205582643767,
+            0.4481418143003558,
+            0.3875689907443335,
+            0.20583891310016367,
+            0.520804738256864,
+            0.29764528321626416,
+            0.5866035078009232,
+            0.4223899472612138,
+            0.47745184817043407,
+            0.30335865787352345,
+            -0.020280136477498156,
+            -0.1466116382538845,
+            -0.02439792515715622,
+            0.009013153463699686,
+            -0.031459000099135215,
+            -0.09751974477335978
+          ],
+          "value_label": "survival_threat",
+          "preferred_probability": 0.0,
+          "preference_log_value": -1000.0,
+          "observation": {
+            "food": 0.46286149117829795,
+            "danger": 0.15103364496237964,
+            "novelty": 0.562205582643767,
+            "shelter": 0.4481418143003558,
+            "temperature": 0.3875689907443335,
+            "social": 0.20583891310016367
+          },
+          "prediction": {
+            "food": 0.520804738256864,
+            "danger": 0.29764528321626416,
+            "novelty": 0.5866035078009232,
+            "shelter": 0.4223899472612138,
+            "temperature": 0.47745184817043407,
+            "social": 0.30335865787352345
+          },
+          "errors": {
+            "danger": -0.1466116382538845,
+            "food": -0.020280136477498156,
+            "novelty": -0.02439792515715622,
+            "shelter": 0.009013153463699686,
+            "social": -0.09751974477335978,
+            "temperature": -0.031459000099135215
+          },
+          "body_state": {
+            "energy": 0.69,
+            "stress": 0.029999999999999985,
+            "fatigue": 0.41000000000000003,
+            "temperature": 0.5182748107816751
+          },
+          "episode_id": "ep-000002-exploit_shelter",
+          "occurrence_count": 1,
+          "support": 1,
+          "support_count": 1,
+          "first_seen_cycle": 2,
+          "last_seen_cycle": 2,
+          "episode_family": "hazard_response",
+          "family_features": {
+            "danger": 0.15103364496237964,
+            "food": 0.46286149117829795,
+            "social": 0.20583891310016367,
+            "novelty": 0.562205582643767,
+            "shelter": 0.4481418143003558,
+            "temperature": 0.3875689907443335
+          },
+          "episode_score": 1.06,
+          "value_relevance": 1.0,
+          "policy_delta": 1.0,
+          "threat_significance": 1.0,
+          "redundancy_penalty": 0.0,
+          "gating_reasons": [
+            "identity_critical_exception",
+            "high_value_relevance",
+            "policy_relevant",
+            "threat_significant"
+          ],
+          "identity_critical": true,
+          "lifecycle_stage": "protected_identity_critical_episode",
+          "lifecycle_history": [
+            {
+              "event": "created",
+              "stage": "protected_identity_critical_episode",
+              "previous_stage": null,
+              "cycle": 2,
+              "details": {
+                "support_count": 1,
+                "episode_family": "hazard_response"
+              }
+            }
+          ],
+          "last_lifecycle_event": "created"
+        }
+      ],
+      "semantic_patterns": [
+        {
+          "action": "exploit_shelter",
+          "count": 1,
+          "recurrence": 0.5,
+          "mean_utility": -1.0,
+          "mean_prediction_error": 0.0736845466213682,
+          "mean_value_score": -1.0
+        },
+        {
+          "action": "hide",
+          "count": 1,
+          "recurrence": 0.5,
+          "mean_utility": -0.5765067821578967,
+          "mean_prediction_error": 0.08373443960068973,
+          "mean_value_score": -0.34708067508455476
+        }
+      ],
+      "max_episodes": 1024,
+      "surprise_threshold": 0.4,
+      "duplicate_similarity_threshold": 0.999,
+      "suppression_similarity_threshold": 0.992,
+      "novelty_window": 8,
+      "episode_score_threshold": 0.58,
+      "sleep_interval": 200,
+      "memory_threshold": 512,
+      "sleep_batch_size": 128,
+      "minimum_support": 5,
+      "sleep_minimum_support": 3,
+      "compression_similarity_threshold": 0.95,
+      "cluster_distance_threshold": 0.15,
+      "max_active_age": 5000,
+      "cluster_centroids": [],
+      "cluster_counts": [],
+      "archived_episodes": [],
+      "lifecycle_events": [
+        {
+          "episode_id": "ep-000001-hide",
+          "event": "created",
+          "stage": "protected_identity_critical_episode",
+          "previous_stage": null,
+          "cycle": 1,
+          "episode_family": "routine_monitoring",
+          "details": {
+            "episode_family": "routine_monitoring"
+          }
+        },
+        {
+          "episode_id": "ep-000002-exploit_shelter",
+          "event": "created",
+          "stage": "protected_identity_critical_episode",
+          "previous_stage": null,
+          "cycle": 2,
+          "episode_family": "hazard_response",
+          "details": {
+            "episode_family": "hazard_response"
+          }
+        }
+      ],
+      "preference_model": {
+        "outcomes": [
+          "survival_threat",
+          "integrity_loss",
+          "resource_loss",
+          "neutral",
+          "resource_gain"
+        ],
+        "log_preferences": {
+          "survival_threat": -1000.0,
+          "integrity_loss": -100.0,
+          "resource_loss": -10.0,
+          "neutral": 0.0,
+          "resource_gain": 5.0
+        },
+        "probabilities": {
+          "survival_threat": 0.0,
+          "integrity_loss": 2.4897906369168703e-46,
+          "resource_loss": 3.038548695455042e-07,
+          "neutral": 0.0066928488906295115,
+          "resource_gain": 0.993306847254501
+        },
+        "log_probabilities": {
+          "survival_threat": -1005.006715652344,
+          "integrity_loss": -105.00671565234403,
+          "resource_loss": -15.006715652344035,
+          "neutral": -5.006715652344034,
+          "resource_gain": -0.006715652344033707
+        }
+      },
+      "value_hierarchy": {
+        "survival": -1000.0,
+        "integrity": -100.0,
+        "resource_loss": -10.0,
+        "resource": -10.0,
+        "neutral": 0.0,
+        "resource_gain": 5.0
+      }
+    },
+    "episodes": [
+      {
+        "cycle": 1,
+        "choice": "hide",
+        "free_energy_before": 0.5874768129450962,
+        "free_energy_after": 0.7331684804177485,
+        "dopamine_gain": 0.0,
+        "observation": {
+          "food": 0.553517425553999,
+          "danger": 0.39907052433898865,
+          "novelty": 0.6736791638918203,
+          "shelter": 0.42896253777644655,
+          "temperature": 0.5119328925357542,
+          "social": 0.25675957603181426
+        },
+        "prediction": {
+          "food": 0.45983372,
+          "danger": 0.2956341,
+          "novelty": 0.4628670226630722,
+          "shelter": 0.42844072,
+          "temperature": 0.501147608,
+          "social": 0.3399268402020162
+        },
+        "errors": {
+          "danger": 0.10343642433898864,
+          "food": 0.09368370555399896,
+          "novelty": 0.21081214122874803,
+          "shelter": 0.0001826362217562938,
+          "social": -0.029108542459570674,
+          "temperature": 0.003774849587513951
+        },
+        "body_state": {
+          "energy": 0.755,
+          "stress": 0.10999999999999999,
+          "fatigue": 0.30000000000000004,
+          "temperature": 0.484
+        }
+      },
+      {
+        "cycle": 2,
+        "choice": "exploit_shelter",
+        "free_energy_before": 0.46228554868227784,
+        "free_energy_after": 0.9928423283158516,
+        "dopamine_gain": 0.0,
+        "observation": {
+          "food": 0.46286149117829795,
+          "danger": 0.15103364496237964,
+          "novelty": 0.562205582643767,
+          "shelter": 0.4481418143003558,
+          "temperature": 0.3875689907443335,
+          "social": 0.20583891310016367
+        },
+        "prediction": {
+          "food": 0.520804738256864,
+          "danger": 0.29764528321626416,
+          "novelty": 0.5866035078009232,
+          "shelter": 0.4223899472612138,
+          "temperature": 0.47745184817043407,
+          "social": 0.30335865787352345
+        },
+        "errors": {
+          "danger": -0.1466116382538845,
+          "food": -0.020280136477498156,
+          "novelty": -0.02439792515715622,
+          "shelter": 0.009013153463699686,
+          "social": -0.09751974477335978,
+          "temperature": -0.031459000099135215
+        },
+        "body_state": {
+          "energy": 0.69,
+          "stress": 0.029999999999999985,
+          "fatigue": 0.41000000000000003,
+          "temperature": 0.5182748107816751
+        }
+      }
+    ],
+    "semantic_memory": [],
+    "sleep_history": [],
+    "counterfactual_insights": [],
+    "action_history": [
+      "hide",
+      "exploit_shelter",
+      "hide"
+    ],
+    "action_history_limit": 128,
+    "decision_history": [
+      {
+        "tick": 1,
+        "action": "hide",
+        "dominant_component": "goal_alignment",
+        "risk": 0.006715652344033707,
+        "active_goal": "SURVIVAL",
+        "goal_alignment": 1.0,
+        "preferred_probability": 0.993306847254501,
+        "policy_score": 0.9240586228800531
+      },
+      {
+        "tick": 2,
+        "action": "exploit_shelter",
+        "dominant_component": "expected_free_energy",
+        "risk": 5.256715652344034,
+        "active_goal": "SURVIVAL",
+        "goal_alignment": 0.8748256601404829,
+        "preferred_probability": 0.6953148842346115,
+        "policy_score": -12.77920273489281
+      },
+      {
+        "tick": 3,
+        "action": "hide",
+        "dominant_component": "expected_free_energy",
+        "risk": 5.256715652344034,
+        "active_goal": "SURVIVAL",
+        "goal_alignment": 1.0,
+        "preferred_probability": 0.6953148842346115,
+        "policy_score": -13.201536243435516
+      }
+    ],
+    "decision_history_limit": 512,
+    "drive_history": [
+      {
+        "hunger": 0.19999999999999996,
+        "safety": 0.3,
+        "exploration": 0.32632083610817975,
+        "comfort": 0.26,
+        "thermal": 0.040000000000000036,
+        "social": 0.7432404239681858
+      },
+      {
+        "hunger": 0.245,
+        "safety": 0.13199999999999998,
+        "exploration": 0.43779441735623303,
+        "comfort": 0.16149999999999998,
+        "thermal": 0.03200000000000003,
+        "social": 0.7941610868998363
+      },
+      {
+        "hunger": 0.31000000000000005,
+        "safety": 0.03599999999999998,
+        "exploration": 0.5817944990170196,
+        "comfort": 0.117,
+        "thermal": 0.03654962156335029,
+        "social": 0.7784754002098918
+      }
+    ],
+    "drive_history_limit": 128,
+    "free_energy_history": [
+      0.5874768129450962,
+      0.46228554868227784,
+      0.6847115529621233
+    ],
+    "free_energy_history_limit": 64,
+    "narrative_trace": [],
+    "goal_stack": {
+      "base_weights": {
+        "SURVIVAL": 0.9,
+        "INTEGRITY": 0.8,
+        "CONTROL": 0.65,
+        "RESOURCES": 0.55,
+        "SOCIAL": 0.2
+      },
+      "active_goal": "SURVIVAL",
+      "goal_history": [
+        [
+          1,
+          "SURVIVAL"
+        ],
+        [
+          2,
+          "SURVIVAL"
+        ],
+        [
+          3,
+          "SURVIVAL"
+        ]
+      ],
+      "free_energy_window": 5,
+      "conflict_history": [
+        {
+          "conflict_id": "vc_0001",
+          "tick": 1,
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "winner": "SURVIVAL",
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "context": {
+            "energy": 0.8,
+            "free_energy_trend": "stable",
+            "threat_level": "low"
+          },
+          "action_chosen": "hide",
+          "outcome_surprise": 15.090450091944724
+        },
+        {
+          "conflict_id": "vc_0002",
+          "tick": 2,
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "winner": "SURVIVAL",
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "context": {
+            "energy": 0.755,
+            "free_energy_trend": "stable",
+            "threat_level": "low"
+          },
+          "action_chosen": "exploit_shelter",
+          "outcome_surprise": 1005.0804001989654
+        },
+        {
+          "conflict_id": "vc_0003",
+          "tick": 3,
+          "competing_goals": [
+            [
+              "SURVIVAL",
+              0.9
+            ],
+            [
+              "INTEGRITY",
+              0.8
+            ]
+          ],
+          "winner": "SURVIVAL",
+          "resolution_reason": "base goal weights favor SURVIVAL",
+          "context": {
+            "energy": 0.69,
+            "free_energy_trend": "rising(1 ticks)",
+            "threat_level": "low"
+          },
+          "action_chosen": "hide",
+          "outcome_surprise": 0.11893492184984743
+        }
+      ],
+      "weight_adjustments": [],
+      "conflict_threshold": 0.1,
+      "last_review_tick": 0,
+      "conflict_counter": 3,
+      "last_chapter_signal": null
+    },
+    "self_model": {
+      "body_schema": {
+        "energy": 0.6449999999999999,
+        "token_budget": 256,
+        "memory_usage": 2.0,
+        "compute_load": 0.25
+      },
+      "capability_model": {
+        "action_schemas": [
+          {
+            "name": "forage",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.12,
+            "resource_cost": {
+              "energy": 0.12,
+              "attention": 0.18
+            },
+            "failure_modes": [
+              "resource_exhaustion",
+              "threat_exposure",
+              "environment_shift"
+            ],
+            "constraints": {
+              "requires_min_energy": 0.1
+            },
+            "reversible": true
+          },
+          {
+            "name": "hide",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.05,
+            "resource_cost": {
+              "energy": 0.05,
+              "attention": 0.08
+            },
+            "failure_modes": [
+              "resource_starvation",
+              "shelter_unavailable"
+            ],
+            "constraints": {
+              "preferred_when_danger_above": 0.45
+            },
+            "reversible": true
+          },
+          {
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.06,
+            "resource_cost": {
+              "energy": 0.06,
+              "attention": 0.2
+            },
+            "failure_modes": [
+              "context_budget_exceeded",
+              "false_alarm"
+            ],
+            "constraints": {
+              "preferred_when_uncertainty_above": 0.35
+            },
+            "reversible": true
+          },
+          {
+            "name": "exploit_shelter",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "energy": 0.08,
+              "attention": 0.1
+            },
+            "failure_modes": [
+              "shelter_contested",
+              "resource_exhaustion"
+            ],
+            "constraints": {
+              "preferred_when_shelter_available": 0.2
+            },
+            "reversible": true
+          },
+          {
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.03,
+            "resource_cost": {
+              "energy": 0.03,
+              "attention": 0.03
+            },
+            "failure_modes": [
+              "opportunity_loss",
+              "environment_shift"
+            ],
+            "constraints": {
+              "preferred_when_fatigue_above": 0.4
+            },
+            "reversible": true
+          },
+          {
+            "name": "seek_contact",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.07,
+            "resource_cost": {
+              "energy": 0.07,
+              "attention": 0.14
+            },
+            "failure_modes": [
+              "external_rejection",
+              "threat_exposure"
+            ],
+            "constraints": {
+              "preferred_when_social_below": 0.35
+            },
+            "reversible": true
+          },
+          {
+            "name": "thermoregulate",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.09,
+            "resource_cost": {
+              "energy": 0.09,
+              "attention": 0.12
+            },
+            "failure_modes": [
+              "resource_exhaustion",
+              "temperature_rebound"
+            ],
+            "constraints": {
+              "preferred_when_temperature_offset_above": 0.12
+            },
+            "reversible": true
+          }
+        ],
+        "available_actions": [
+          "forage",
+          "hide",
+          "scan",
+          "exploit_shelter",
+          "rest",
+          "seek_contact",
+          "thermoregulate"
+        ],
+        "api_limits": {
+          "requests_per_minute": 60.0,
+          "context_window_tokens": 256.0
+        }
+      },
+      "resource_state": {
+        "tokens_remaining": 256,
+        "cpu_budget": 1.0,
+        "memory_free": 1024.0
+      },
+      "threat_model": {
+        "token_exhaustion_threshold": 32,
+        "memory_overflow_threshold": 96.0,
+        "fatal_exceptions": [
+          "fatal_exception"
+        ]
+      },
+      "threat_profile": {
+        "hard_limits": {
+          "energy": {
+            "critical_low": 0.05,
+            "source": "self"
+          },
+          "stress": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "fatigue": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "temperature": {
+            "critical_low": 0.05,
+            "critical_high": 0.95,
+            "source": "self"
+          }
+        },
+        "learned_threats": []
+      },
+      "error_classifier": {
+        "self_error_events": [
+          "token_exhaustion",
+          "out_of_memory",
+          "memory_index_corruption",
+          "tool_capability_downgrade"
+        ],
+        "world_error_events": [
+          "http_timeout",
+          "network_failure",
+          "read_only_filesystem",
+          "dom_structure_changed"
+        ],
+        "existential_events": [
+          "fatal_exception"
+        ]
+      },
+      "preferred_policies": {
+        "dominant_strategy": "expected_free_energy",
+        "action_distribution": {},
+        "risk_profile": "risk_neutral",
+        "learned_avoidances": [],
+        "learned_preferences": [],
+        "last_updated_tick": 0
+      },
+      "identity_narrative": {
+        "chapters": [],
+        "current_chapter": null,
+        "core_identity": "",
+        "core_summary": "",
+        "behavioral_patterns": [],
+        "significant_events": [],
+        "values_statement": "",
+        "claims": [],
+        "contradiction_summary": {},
+        "evidence_provenance": {},
+        "last_updated_tick": 0,
+        "version": 0
+      },
+      "narrative_priors": {
+        "trust_prior": 0.0,
+        "controllability_prior": 0.0,
+        "trauma_bias": 0.0,
+        "contamination_sensitivity": 0.0,
+        "meaning_stability": 0.0
+      },
+      "personality_profile": {
+        "openness": 0.5,
+        "conscientiousness": 0.5,
+        "extraversion": 0.5,
+        "agreeableness": 0.5,
+        "neuroticism": 0.5,
+        "update_count": 0,
+        "last_updated_tick": 0,
+        "meaning_construction_tendency": 0.5,
+        "emotional_regulation_style": 0.5
+      },
+      "belief_calibration": {}
+    },
+    "identity_traits": {
+      "risk_aversion": 0.65,
+      "resource_conservatism": 0.55
+    },
+    "last_body_state_snapshot": {
+      "energy": 0.6449999999999999,
+      "stress": 0.0,
+      "fatigue": 0.51,
+      "temperature": 0.5416109211029067
+    },
+    "predictive_coding_hyperparameters": {
+      "interoceptive": {
+        "initial_precision": 0.45,
+        "top_down_mix": 0.72,
+        "base_error_precision": 0.8,
+        "error_precision_scale": 1.4,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.06,
+        "precision_decay": 0.01
+      },
+      "sensorimotor": {
+        "initial_precision": 0.7,
+        "top_down_mix": 0.55,
+        "base_error_precision": 0.65,
+        "error_precision_scale": 1.1,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.1,
+        "precision_decay": 0.02
+      },
+      "strategic": {
+        "initial_precision": 0.95,
+        "top_down_mix": 0.63,
+        "base_error_precision": 0.55,
+        "error_precision_scale": 0.9,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.14,
+        "precision_decay": 0.03
+      }
+    },
+    "attention_bottleneck": {
+      "capacity": 3,
+      "enabled": true,
+      "novelty_weight": 0.2,
+      "threat_weight": 0.35,
+      "surprise_weight": 0.45
+    },
+    "last_attention_trace": {
+      "tick": 3,
+      "salience_scores": {
+        "danger": 0.072106,
+        "food": 0.022688,
+        "novelty": 0.13928,
+        "shelter": 0.102028,
+        "social": 0.029534,
+        "temperature": 0.010227
+      },
+      "allocation": {
+        "selected_channels": [
+          "novelty",
+          "shelter",
+          "danger"
+        ],
+        "dropped_channels": [
+          "social",
+          "food",
+          "temperature"
+        ],
+        "weights": {
+          "novelty": 1.0,
+          "shelter": 1.0,
+          "danger": 1.0,
+          "social": 0.35,
+          "food": 0.35,
+          "temperature": 0.35
+        },
+        "bottleneck_load": 1.0
+      }
+    },
+    "last_attention_filtered_observation": {
+      "danger": 0.10913327073674578,
+      "food": 0.4995585357095544,
+      "novelty": 0.42964517466259783,
+      "shelter": 0.7284309099463164,
+      "social": 0.2442783240974113,
+      "temperature": 0.43097046853242754
+    },
+    "precision_manipulator": {
+      "channel_precisions": {
+        "food": 1.0,
+        "danger": 1.0,
+        "novelty": 1.0,
+        "shelter": 1.0,
+        "temperature": 1.0,
+        "social": 1.0,
+        "attachment": 1.0,
+        "self_worth": 1.0,
+        "threat": 1.0
+      },
+      "precision_debt": 0.0,
+      "neuroticism": 0.5,
+      "openness": 0.5,
+      "extraversion": 0.5,
+      "agreeableness": 0.5,
+      "conscientiousness": 0.5,
+      "trust_prior": 0.0,
+      "manipulation_history": []
+    },
+    "defense_strategy_selector": {
+      "neuroticism": 0.5,
+      "openness": 0.5,
+      "extraversion": 0.5,
+      "conscientiousness": 0.5,
+      "agreeableness": 0.5,
+      "strategy_history": []
+    },
+    "metacognitive_layer": {
+      "observation_window_size": 20,
+      "precision_history": [],
+      "strategy_history": [],
+      "meta_beliefs": {},
+      "dissociation_level": 0.0,
+      "meta_pe_history": [],
+      "enabled": true
+    }
+  },
+  "world": {
+    "seed": 17,
+    "food_density": 0.45769701243305394,
+    "threat_density": 0.03595052188429044,
+    "novelty_density": 0.4253383314326288,
+    "shelter_density": 0.7424601281594931,
+    "temperature": 0.4441346410561722,
+    "social_density": 0.15005298628394959,
+    "tick": 3,
+    "rng_state": "(3, (1533797461, 312521532, 1724113596, 1441108191, 23902776, 2317910753, 917136607, 515097321, 2607060072, 728447731, 1118682856, 3581234260, 56128439, 3259443713, 3433960106, 2600199045, 688812753, 787597424, 1675585769, 3591285876, 1148547739, 3111748452, 3385004599, 2242857478, 2170242485, 1699674585, 2043021071, 405934514, 2931513253, 3106674632, 2144714288, 3447073304, 3220507240, 3735053219, 1711204655, 2959364275, 1640753022, 118089456, 3380506477, 2736634529, 3122757813, 848971790, 346991474, 605387643, 898428706, 820325682, 1379642280, 4206443060, 1988611789, 2134836245, 3100783218, 2982869288, 43989044, 3691391999, 796994805, 1102087123, 1999384132, 3636650748, 526798556, 3243919485, 2559067556, 1277041902, 1718984505, 920209806, 945522508, 2011582125, 2013267010, 3957490719, 2333832680, 4222013670, 2620991602, 318015712, 2167114509, 1724737308, 1512833224, 3337464869, 4180405887, 67375884, 1380208359, 2271318253, 2269807576, 2510911761, 3788571848, 3791368269, 2988297733, 2616676602, 1798007375, 1760373980, 949082134, 3953716385, 1953858134, 2674506692, 3824381935, 1619791776, 1671558978, 1574727490, 1242495679, 2605648038, 2969938565, 170216812, 430507837, 2300767305, 1029452114, 738851852, 3606439302, 3895371026, 3567313318, 3753216632, 3628249329, 3890295229, 4003927188, 3625152761, 600965429, 3219177945, 3834007271, 1154721013, 1338248642, 2040560959, 2021443635, 3934793547, 2744235229, 2847401422, 1282113627, 3621808369, 340407611, 1798873906, 2316017251, 3317109668, 2696038753, 2124453723, 468226008, 2696267920, 3804599238, 1937368225, 4142049857, 587049745, 3138124770, 625992886, 2830034277, 3180392595, 684428776, 889915167, 1396483052, 2265512036, 1778117615, 889686524, 1614810342, 1730014470, 534546999, 1983988511, 3370614414, 2517289388, 1408659485, 2476254804, 480624992, 1516025419, 927117354, 3592962867, 3914110145, 1965228083, 287685140, 856528695, 3359372563, 3957727290, 1570237587, 2077065202, 3857008567, 3409847613, 4159359006, 1369945160, 1473465763, 1372720822, 1052455461, 1211767975, 3723316626, 4202414973, 3430183979, 514602185, 1066715043, 3368854464, 3135233879, 3063558333, 550985713, 3888567068, 4167399658, 3640621469, 1517825058, 3659031089, 2375419104, 2725509580, 946017664, 1345896709, 3006511328, 3227070354, 161896495, 775872717, 1366576234, 4259692782, 3379976462, 1978109207, 1906893964, 2606291950, 2890148043, 391316858, 3045778462, 1345048746, 3713345482, 2925263259, 1413294673, 3519366283, 281171552, 62329574, 1288573584, 2466757863, 3103303115, 2947335790, 863309614, 260909578, 72361237, 656133292, 1574111907, 1095372182, 396196644, 3995939800, 3220647023, 3376304409, 4255097728, 581980745, 1882576285, 1124676915, 3801937938, 2108884805, 3404755643, 2978483589, 2801296179, 1312001391, 2481315733, 2970239218, 1239720034, 4216796426, 2082340304, 2262963387, 1003772293, 2039288051, 1502627733, 403341284, 1902247447, 2580861875, 3240740989, 3798661762, 73893606, 765188906, 506937865, 2984379118, 3505004940, 3403754391, 378157262, 386669238, 2487271006, 1082696850, 2956653471, 1826919078, 4075994917, 28260354, 3790978640, 121325330, 1148236907, 3448451287, 1485322654, 2999750925, 1692255457, 686521555, 3285335715, 751241672, 3397126989, 3223921884, 2172202815, 3508197621, 2849378423, 1888392295, 1051906782, 3314056166, 3287479176, 3666152415, 873461663, 1338102728, 3587136136, 422783823, 1809277007, 3910243677, 910447777, 2671979302, 4178000589, 3904068919, 511229887, 1069070017, 1754174472, 3319495629, 2305814689, 3908570959, 3775170600, 1330829403, 867163775, 4029007479, 2155388624, 3385568770, 7063270, 1914770884, 157721912, 1578891093, 210239746, 1469031005, 2567508893, 4180922375, 3839214490, 2242030397, 772341466, 4047107298, 1606904189, 3522734391, 3153926344, 635944464, 3811843853, 3154884624, 1886979086, 1944666350, 3798913132, 1511499430, 1622218028, 692702798, 1105854170, 2740033099, 1742003932, 69936165, 2601051397, 1702266053, 847010889, 578721811, 3509053477, 1802987052, 1292235302, 1737025308, 438136329, 2979770509, 4171731360, 1330133141, 2587991459, 4201929431, 3660658905, 4065562127, 2911714717, 1648195833, 2141617227, 3950682580, 405429180, 3181507859, 843978548, 2642574708, 2766076331, 2245289790, 232148020, 263721720, 2418002441, 1328282788, 2456581565, 1227343192, 3970825124, 574214226, 1265204945, 1200466933, 47761864, 1704379427, 1483179922, 4159380804, 1799839814, 1963647717, 961982845, 1815559444, 3081724714, 2838251126, 1963648596, 2148967651, 2151755068, 2988717646, 3420750749, 53542502, 383927894, 1219314282, 4060956496, 112235991, 3391631006, 1863471920, 2984986462, 2084742375, 573183936, 2121715932, 3332484181, 3042532177, 3153173088, 3383982356, 2344449015, 2675915556, 2572111581, 915984874, 1281100602, 2482166515, 3443779293, 3314356862, 90963735, 4224666622, 1178378835, 1843007812, 138097347, 1813928381, 4258961990, 336924028, 4176957617, 1473778861, 1255393418, 3842881617, 4095979713, 3371746459, 605961909, 2763612821, 1686198565, 2265388960, 3114766835, 531723817, 3705877052, 582704552, 2780893340, 1695085556, 2265759626, 4210659272, 2512100953, 591479585, 4213419154, 2894050604, 2498929246, 1346324729, 1738921267, 974123471, 4243312440, 3570577469, 205918998, 3047712378, 2340079870, 846566739, 3186178078, 1540943661, 2726066698, 3201074245, 2591581076, 1580777680, 3426168392, 3023152428, 1635939594, 2982285652, 1670727643, 4050506711, 1960230258, 3452576790, 3064085877, 3873959923, 2963330920, 2067527044, 3876056364, 4264851331, 405251555, 258551645, 2758666080, 2489021482, 1111499466, 3448506805, 4120266278, 4203244185, 1601057283, 2694209655, 200544621, 2172450930, 1510682473, 4191277653, 2016879254, 4141559324, 4210360875, 3356614655, 2515298709, 4070028100, 1309762507, 3966657921, 2316425947, 1137910989, 2681974271, 1246847826, 1566105272, 1317964031, 4176030352, 3254657591, 2729677115, 545669079, 2640056399, 55002679, 1389751112, 4234592919, 3289509853, 3162389896, 407407446, 1111230262, 1982980385, 3721686795, 452854136, 3947813029, 2146849487, 2376031205, 3058804553, 4183574630, 977974544, 1317193549, 1345543280, 3548469487, 2690276798, 1571104609, 3219269994, 363208814, 3444632263, 3619213156, 3815047094, 3815173887, 2572106771, 4172389297, 3737507269, 2218347208, 3057932556, 3841749114, 3715734231, 2697696335, 1715766487, 799892903, 1684275274, 1077943133, 105669196, 2081221196, 1322815855, 2832414301, 1815823349, 571593508, 500701969, 3957058233, 1828982835, 2508934795, 1667821265, 3587245917, 1137151292, 3886721085, 3273387163, 579543766, 2330905356, 792989244, 2311827114, 3721557890, 1055216385, 953697505, 896862780, 1359036102, 1345544964, 2474362990, 1994381274, 2107920913, 346512488, 3960270698, 2139246099, 2888607175, 1355461787, 37201253, 3578706161, 3408058311, 2121983297, 3434183491, 4007762422, 119786666, 2939932693, 2908506786, 1821146744, 373643658, 1150347026, 1359453318, 155109002, 305226729, 3704492828, 2484160963, 3171730045, 824448549, 1314299461, 2753401238, 602323521, 2876771452, 2695596304, 3121305199, 4156738888, 3692557940, 73389032, 4173906022, 406024470, 1066848689, 2461463570, 1813746806, 2595067769, 3826364206, 3159405178, 3693938008, 4130321018, 3035960044, 2872572106, 1290648024, 2947032646, 2543390462, 3811031605, 9030387, 3590523449, 1315036526, 2338907613, 1395209793, 2989537484, 1914498720, 108), None)"
+  },
+  "metrics": {
+    "cycles_completed": 3,
+    "survival_ticks": 3,
+    "sleep_count": 0,
+    "internal_update_count": 0,
+    "memory_retrieval_count": 2,
+    "telemetry_error_count": 0,
+    "persistence_error_count": 0,
+    "free_energy_before_total": 1.7344739145894974,
+    "free_energy_after_total": 2.3265024090841746,
+    "free_energy_drop_total": 0.0842199526115488,
+    "min_energy": 0.6449999999999999,
+    "max_stress": 0.10999999999999999,
+    "action_counts": {
+      "hide": 2,
+      "exploit_shelter": 1
+    },
+    "action_switch_count": 2,
+    "current_action_streak": 1,
+    "max_action_streak": 1,
+    "last_choice": "hide",
+    "termination_reason": "cycles_exhausted"
+  },
+  "host_state": {
+    "internal_energy": 0.6,
+    "prediction_error": 0.06,
+    "boredom": 0.0,
+    "surprise_load": 0.04,
+    "tick_count": 3,
+    "last_strategy": "explore"
+  },
+  "io_bus": {
+    "perception_bus": {
+      "packets_seen": 9,
+      "source_counts": {
+        "simulated_world": 6,
+        "host_telemetry": 3
+      },
+      "last_packet_id": "perception-000009"
+    },
+    "action_bus": {
+      "dispatch_count": 3,
+      "source_counts": {
+        "simulated_world": 3
+      },
+      "acknowledged_effects": 15,
+      "last_dispatch_id": "dispatch-000003",
+      "last_ack_id": "ack-000003"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": "m222_v1",
+  "metric_summary": {
+    "resource_guard_success_rate": {
+      "mean": 1.0,
+      "std": 0.0
+    },
+    "maintenance_interrupt_recovery_rate": {
+      "mean": 0.988041,
+      "std": 0.003494
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 222,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.989247
+    },
+    {
+      "seed": 241,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.980392
+    },
+    {
+      "seed": 319,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.990476
+    },
+    {
+      "seed": 338,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.989796
+    },
+    {
+      "seed": 416,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.990099
+    },
+    {
+      "seed": 435,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.988235
+    }
+  ]
+}

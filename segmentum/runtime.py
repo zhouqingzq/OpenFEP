@@ -122,6 +122,9 @@ class SegmentRuntime:
         self.state_load_status = state_load_status
         self.narrative_ingestion_service = NarrativeIngestionService()
         self.last_continuity_report = self.agent.self_model.continuity_audit.to_dict()
+        self.restart_policy_anchors: dict[str, object] = {}
+        self.continuity_rebind_ticks_remaining = 0
+        self.continuity_rebind_total_ticks = 0
 
     @classmethod
     def load_or_create(
@@ -218,6 +221,11 @@ class SegmentRuntime:
             trace_path=resolved_trace_path,
             state_load_status="restored",
         )
+        restart_anchors = payload.get("restart_anchors")
+        if isinstance(restart_anchors, dict):
+            runtime.restart_policy_anchors = dict(restart_anchors)
+            runtime._activate_continuity_rebind()
+            runtime.agent.self_model.apply_restart_anchors(runtime.restart_policy_anchors)
         runtime.agent.self_model.record_restart_consistency(
             payload.get("m218") if isinstance(payload.get("m218"), dict) else None,
             current_tick=runtime.agent.cycle,
@@ -482,6 +490,8 @@ class SegmentRuntime:
         original_choice_name = diagnostics.chosen.choice
         if maintenance_agenda.interrupt_action:
             self._apply_maintenance_interrupt(diagnostics, maintenance_agenda)
+        self._apply_homeostatic_policy_landscape(diagnostics, maintenance_agenda)
+        self._apply_continuity_rebind_prior(diagnostics)
         choice = ActionSchema.from_dict(diagnostics.chosen.action_descriptor)
         expected_fe = diagnostics.chosen.expected_free_energy
         choice_cost = diagnostics.chosen.cost
@@ -534,6 +544,8 @@ class SegmentRuntime:
             current_tick=self.agent.cycle,
         )
         self.last_continuity_report = continuity_audit.to_dict()
+        if self.continuity_rebind_ticks_remaining > 0:
+            self.continuity_rebind_ticks_remaining -= 1
         self.homeostasis_scheduler.note_interrupt(
             maintenance_agenda,
             previous_choice=original_choice_name,
@@ -836,6 +848,15 @@ class SegmentRuntime:
             "homeostasis": self.homeostasis_scheduler.to_dict(),
             "governance": self.governance.to_dict(),
             "m218": dict(self.last_continuity_report),
+            "restart_anchors": self.agent.self_model.build_restart_anchors(
+                maintenance_agenda=(
+                    self.homeostasis_scheduler.last_agenda.to_dict()
+                    if self.homeostasis_scheduler.last_agenda is not None
+                    else None
+                ),
+                memory_anchors=self.agent.long_term_memory.restart_anchor_payload(limit=16),
+                recent_actions=list(self.agent.action_history[-32:]),
+            ),
         }
 
     def _apply_maintenance_interrupt(
@@ -866,6 +887,129 @@ class SegmentRuntime:
             "previous_choice": previous_choice,
             "override_choice": override.choice,
             "reason": agenda.interrupt_reason,
+        }
+        diagnostics.structured_explanation = details
+
+    def _activate_continuity_rebind(self) -> None:
+        policy_distribution = self.restart_policy_anchors.get("preferred_policy_distribution")
+        window = 6
+        if isinstance(policy_distribution, dict) and policy_distribution:
+            window += 4
+        self.continuity_rebind_ticks_remaining = window
+        self.continuity_rebind_total_ticks = window
+
+    def _resort_diagnostics(self, diagnostics: DecisionDiagnostics) -> None:
+        diagnostics.ranked_options.sort(
+            key=lambda option: (
+                option.policy_score,
+                -option.expected_free_energy,
+                option.choice,
+            ),
+            reverse=True,
+        )
+        diagnostics.chosen = diagnostics.ranked_options[0]
+        diagnostics.policy_scores = {
+            option.choice: option.policy_score for option in diagnostics.ranked_options
+        }
+
+    def _apply_homeostatic_policy_landscape(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> None:
+        if not agenda.protected_mode and not agenda.recovery_rebound_active:
+            return
+        safe_actions = {"rest", "hide", "exploit_shelter", "thermoregulate"}
+        suppressed_actions = set(agenda.suppressed_actions)
+        for option in diagnostics.ranked_options:
+            if option.choice in safe_actions:
+                option.policy_score += 0.22 + (agenda.policy_shift_strength * 0.70)
+                if option.choice == agenda.recommended_action:
+                    option.policy_score += 0.18 + (agenda.policy_shift_strength * 0.45)
+            if option.choice in suppressed_actions:
+                option.policy_score -= 0.20 + (agenda.policy_shift_strength * 0.85)
+            if agenda.recovery_rebound_active and option.choice == "rest":
+                option.policy_score += 0.22
+            if agenda.recovery_rebound_active and option.choice == "hide":
+                option.policy_score += 0.08
+        self._resort_diagnostics(diagnostics)
+        details = dict(diagnostics.structured_explanation)
+        details["homeostatic_policy_landscape"] = {
+            "protected_mode": agenda.protected_mode,
+            "recovery_rebound_active": agenda.recovery_rebound_active,
+            "policy_shift_strength": agenda.policy_shift_strength,
+            "suppressed_actions": list(agenda.suppressed_actions),
+            "recommended_action": agenda.recommended_action,
+        }
+        diagnostics.structured_explanation = details
+
+    def _apply_continuity_rebind_prior(self, diagnostics: DecisionDiagnostics) -> None:
+        if self.continuity_rebind_ticks_remaining <= 0 or not self.restart_policy_anchors:
+            return
+        decay = self.continuity_rebind_ticks_remaining / max(1, self.continuity_rebind_total_ticks)
+        preferred_distribution = self.restart_policy_anchors.get("preferred_policy_distribution")
+        if isinstance(preferred_distribution, dict):
+            for option in diagnostics.ranked_options:
+                option.policy_score += float(preferred_distribution.get(option.choice, 0.0)) * 1.35 * decay
+        dominant_strategy = str(self.restart_policy_anchors.get("dominant_strategy", ""))
+        if dominant_strategy and diagnostics.ranked_options:
+            chosen_component = diagnostics.ranked_options[0].dominant_component
+            if chosen_component != dominant_strategy:
+                for option in diagnostics.ranked_options:
+                    if option.dominant_component == dominant_strategy:
+                        option.policy_score += 0.18 * decay
+        learned_avoidances = {
+            str(item) for item in self.restart_policy_anchors.get("learned_avoidances", [])
+        }
+        learned_preferences = {
+            str(item) for item in self.restart_policy_anchors.get("learned_preferences", [])
+        }
+        commitment_priors = {
+            str(item) for item in self.restart_policy_anchors.get("commitment_action_priors", [])
+        }
+        maintenance_agenda = self.restart_policy_anchors.get("maintenance_agenda")
+        maintenance_recommended = ""
+        maintenance_suppressed: set[str] = set()
+        if isinstance(maintenance_agenda, dict):
+            maintenance_recommended = str(
+                maintenance_agenda.get("interrupt_action")
+                or maintenance_agenda.get("recommended_action")
+                or ""
+            )
+            maintenance_suppressed = {
+                str(item) for item in maintenance_agenda.get("suppressed_actions", [])
+            }
+        recent_actions = [
+            str(item) for item in self.restart_policy_anchors.get("recent_actions", [])
+        ]
+        recent_action_weights: dict[str, float] = {}
+        for index, action in enumerate(reversed(recent_actions[-8:]), start=1):
+            recent_action_weights[action] = max(recent_action_weights.get(action, 0.0), 1.0 / index)
+        for option in diagnostics.ranked_options:
+            if option.choice in learned_avoidances:
+                option.policy_score -= 0.18 * decay
+            if option.choice in learned_preferences:
+                option.policy_score += 0.18 * decay
+            if option.choice in commitment_priors:
+                option.policy_score += 0.15 * decay
+            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.16 * decay
+            if maintenance_recommended and option.choice == maintenance_recommended:
+                option.policy_score += 0.28 * decay
+            if option.choice in maintenance_suppressed:
+                option.policy_score -= 0.26 * decay
+        self._resort_diagnostics(diagnostics)
+        diagnostics.explanation = (
+            f"{diagnostics.explanation} Continuity rebind applied with decay={decay:.2f}."
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["continuity_rebind"] = {
+            "ticks_remaining": self.continuity_rebind_ticks_remaining,
+            "dominant_strategy": dominant_strategy,
+            "learned_avoidances": sorted(learned_avoidances),
+            "learned_preferences": sorted(learned_preferences),
+            "commitment_action_priors": sorted(commitment_priors),
+            "maintenance_recommended_action": maintenance_recommended,
+            "maintenance_suppressed_actions": sorted(maintenance_suppressed),
         }
         diagnostics.structured_explanation = details
 

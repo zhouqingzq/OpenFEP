@@ -170,6 +170,9 @@ LIFECYCLE_CANDIDATE_EPISODE = "candidate_episode"
 LIFECYCLE_VALIDATED_EPISODE = "validated_episode"
 LIFECYCLE_ARCHIVED_SUMMARY = "archived_summary"
 LIFECYCLE_PROTECTED_IDENTITY_CRITICAL = "protected_identity_critical_episode"
+CONTINUITY_ROLE_IDENTITY = "identity_critical_memory"
+CONTINUITY_ROLE_COMMITMENT = "commitment_supporting_memory"
+CONTINUITY_ROLE_MAINTENANCE = "restart_critical_maintenance_memory"
 
 EPISODE_FAMILY_HAZARD = "hazard_response"
 EPISODE_FAMILY_RESOURCE = "resource_opportunity"
@@ -824,6 +827,13 @@ class LongTermMemory:
         for index, payload in enumerate(ordered_payloads):
             if index in used:
                 continue
+            if self._is_restart_protected_payload(payload):
+                retained = dict(payload)
+                retained["consolidated"] = bool(retained.get("consolidated", False))
+                retained["compressed_count"] = int(retained.get("compressed_count", 1))
+                compressed.append(retained)
+                used.add(index)
+                continue
             base_episode = Episode.from_dict(payload)
             base_embedding = base_episode.embedding or self._build_embedding(base_episode.state_vector)
             group = [payload]
@@ -832,6 +842,8 @@ class LongTermMemory:
                 if other_index in used:
                     continue
                 candidate = ordered_payloads[other_index]
+                if self._is_restart_protected_payload(candidate):
+                    continue
                 if action_name(candidate.get("action_taken", candidate.get("action", ""))) != base_episode.action_taken.name:
                     continue
                 candidate_episode = Episode.from_dict(candidate)
@@ -944,6 +956,31 @@ class LongTermMemory:
         )
         return [dict(payload) for payload in anchors[:limit]]
 
+    def restart_anchor_payload(self, *, limit: int = 16) -> list[dict[str, object]]:
+        anchors = [
+            payload
+            for payload in [*self.episodes, *self.archived_episodes]
+            if self._is_restart_protected_payload(payload)
+        ]
+        anchors.sort(
+            key=lambda payload: (
+                int(payload.get("last_seen_cycle", payload.get("cycle", 0))),
+                str(payload.get("episode_id", "")),
+            ),
+            reverse=True,
+        )
+        return [
+            {
+                "episode_id": str(payload.get("episode_id", "")),
+                "continuity_role": str(payload.get("continuity_role", "")),
+                "continuity_tags": [str(item) for item in payload.get("continuity_tags", [])],
+                "identity_critical": bool(payload.get("identity_critical", False)),
+                "restart_protected": bool(payload.get("restart_protected", False)),
+                "action": action_name(payload.get("action_taken", payload.get("action", ""))),
+            }
+            for payload in anchors[:limit]
+        ]
+
     def rehearsal_batch(
         self,
         *,
@@ -994,7 +1031,7 @@ class LongTermMemory:
         for payload in candidates:
             if len(self.episodes) <= retain_recent:
                 break
-            if bool(payload.get("identity_critical", False)):
+            if bool(payload.get("identity_critical", False)) or self._is_restart_protected_payload(payload):
                 continue
             lifecycle_stage = str(payload.get("lifecycle_stage", ""))
             if lifecycle_stage == LIFECYCLE_PROTECTED_IDENTITY_CRITICAL:
@@ -1177,6 +1214,39 @@ class LongTermMemory:
         episode = Episode.from_dict(payload)
         return episode.embedding or self._build_embedding(episode.state_vector)
 
+    def _infer_continuity_role(self, payload: dict[str, object]) -> tuple[str, list[str]]:
+        tags: list[str] = []
+        action = action_name(payload.get("action_taken", payload.get("action", "")))
+        predicted_outcome = str(payload.get("predicted_outcome", "neutral"))
+        observation = self._episode_observation(payload)
+        if bool(payload.get("identity_critical", False)) or predicted_outcome in {
+            "survival_threat",
+            "integrity_loss",
+        }:
+            tags.extend(["identity", "threat"])
+            return CONTINUITY_ROLE_IDENTITY, tags
+        if action in {"hide", "exploit_shelter"} and float(observation.get("danger", 0.0)) >= 0.55:
+            tags.extend(["commitment", "guard"])
+            return CONTINUITY_ROLE_COMMITMENT, tags
+        if action in {"rest", "thermoregulate"} and (
+            float(payload.get("prediction_error", 0.0)) >= 0.10
+            or float(observation.get("temperature", 0.5)) >= 0.62
+            or float(observation.get("temperature", 0.5)) <= 0.38
+        ):
+            tags.extend(["maintenance", "recovery"])
+            return CONTINUITY_ROLE_MAINTENANCE, tags
+        return "", tags
+
+    def _is_restart_protected_payload(self, payload: dict[str, object]) -> bool:
+        if bool(payload.get("restart_protected", False)):
+            return True
+        role = str(payload.get("continuity_role", ""))
+        return role in {
+            CONTINUITY_ROLE_IDENTITY,
+            CONTINUITY_ROLE_COMMITMENT,
+            CONTINUITY_ROLE_MAINTENANCE,
+        }
+
     def _assign_embedding_to_cluster(
         self,
         embedding: list[float],
@@ -1321,6 +1391,14 @@ class LongTermMemory:
             episode = Episode.from_dict(payload)
             identity_critical = self._is_identity_critical_episode(episode)
         payload["identity_critical"] = identity_critical
+        continuity_role, continuity_tags = self._infer_continuity_role(payload)
+        payload["continuity_role"] = continuity_role
+        payload["continuity_tags"] = continuity_tags
+        payload["restart_protected"] = continuity_role in {
+            CONTINUITY_ROLE_IDENTITY,
+            CONTINUITY_ROLE_COMMITMENT,
+            CONTINUITY_ROLE_MAINTENANCE,
+        }
         if identity_critical:
             initial_stage = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
         elif raw_pe < RAW_PE_RISK_GATE:

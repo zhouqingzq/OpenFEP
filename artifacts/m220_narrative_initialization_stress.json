@@ -7,7 +7,7 @@
     "aggregate_appraisal": {
       "physical_threat": 0.0,
       "social_threat": 0.0,
-      "uncertainty": 0.0,
+      "uncertainty": 0.18,
       "controllability": 0.0,
       "novelty": 0.0,
       "loss": 0.0,
@@ -23,35 +23,40 @@
       "social": 0.0,
       "threat": 0.0
     },
+    "semantic_bias": {
+      "threat": 0.0,
+      "social": 0.0,
+      "exploration": 0.0
+    },
     "policy_distribution": {
-      "hide": 0.075,
-      "rest": 0.22499999999999998,
-      "exploit_shelter": 0.125,
-      "scan": 0.075,
-      "forage": 0.075,
-      "seek_contact": 0.425
+      "exploit_shelter": 0.1411846245665525,
+      "forage": 0.1668545563059257,
+      "hide": 0.1454629465231147,
+      "rest": 0.2101896794039442,
+      "scan": 0.18656692472078604,
+      "seek_contact": 0.14974126847967692
     },
     "learned_preferences": [
-      "seek_contact",
-      "rest"
+      "rest",
+      "scan"
     ],
     "learned_avoidances": [
       "hide",
-      "scan"
+      "exploit_shelter"
     ],
     "narrative_priors": {
       "trust_prior": 0.0,
       "controllability_prior": 0.0,
       "trauma_bias": 0.0,
       "contamination_sensitivity": 0.0,
-      "meaning_stability": 0.0
+      "meaning_stability": -0.03129
     },
     "personality_profile": {
       "openness": 0.5,
-      "conscientiousness": 0.5,
+      "conscientiousness": 0.4939309558823529,
       "extraversion": 0.5,
       "agreeableness": 0.5,
-      "neuroticism": 0.5,
+      "neuroticism": 0.5060690441176471,
       "update_count": 2,
       "last_updated_tick": 0,
       "meaning_construction_tendency": 0.5,
@@ -59,21 +64,21 @@
     },
     "identity_commitments": [
       {
-        "commitment_id": "m220-init-seek_contact",
+        "commitment_id": "m221-init-rest",
         "commitment_type": "behavioral_style",
-        "statement": "Initialization narrative prioritizes seek_contact as a stable response style.",
+        "statement": "Initialization narrative provisionally prioritizes rest as a bounded response style.",
         "target_actions": [
-          "seek_contact",
-          "rest"
+          "rest",
+          "scan"
         ],
         "discouraged_actions": [
           "hide",
-          "scan"
+          "exploit_shelter"
         ],
-        "confidence": 0.88,
-        "priority": 0.84,
+        "confidence": 0.45,
+        "priority": 0.6329999999999999,
         "source_claim_ids": [
-          "m220-initialization"
+          "m221-initialization"
         ],
         "source_chapter_ids": [
           1
@@ -91,6 +96,63 @@
       "others": {},
       "history_size": 0
     },
+    "evidence_trace": {
+      "appraisal_signals": [
+        {
+          "episode_id": "m220-stress-1",
+          "event_type": "unknown_event",
+          "appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.18,
+            "controllability": 0.0,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.0,
+            "meaning_violation": 0.0
+          },
+          "semantic_direction_scores": {
+            "threat": 0.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "lexical_surface_hits": {
+            "resource_gain": 0,
+            "predator_attack": 0,
+            "witnessed_death": 0,
+            "social_exclusion": 0,
+            "rescue": 0,
+            "exploration": 0,
+            "uncertainty": 1
+          },
+          "event_structure_signals": [
+            "weak_semantic_support"
+          ],
+          "surface_adversarial_risk": 0.0,
+          "conflict_cues": []
+        }
+      ],
+      "social_updates": [],
+      "identity_commitments": [
+        {
+          "direction": "threat",
+          "semantic_support": 0.0,
+          "lexical_support": 0.0
+        }
+      ],
+      "policy_seed_sources": {
+        "semantic": 0.0,
+        "lexical": 0.0,
+        "uncertainty_penalty": 0.18
+      }
+    },
+    "conflict_score": 0.35,
+    "uncertainty_score": 0.5215,
+    "malformed_text_degradation_ratio": 0.4,
     "ingest_trace_count": 2,
     "sleep_history_count": 1
   }

@@ -1393,6 +1393,65 @@ class SelfModel:
         self.continuity_audit.updated_tick = current_tick
         return divergence
 
+    def build_restart_anchors(
+        self,
+        *,
+        maintenance_agenda: Mapping[str, object] | None,
+        memory_anchors: list[dict[str, object]],
+        recent_actions: list[str],
+    ) -> dict[str, object]:
+        preferred = self.preferred_policies or PreferredPolicies()
+        commitments = self.identity_narrative.commitments if self.identity_narrative is not None else []
+        commitment_action_priors = [
+            action
+            for commitment in commitments
+            for action in commitment.target_actions
+            if action
+        ]
+        return {
+            "preferred_policy_distribution": dict(preferred.action_distribution),
+            "dominant_strategy": preferred.dominant_strategy,
+            "learned_avoidances": list(preferred.learned_avoidances),
+            "learned_preferences": list(preferred.learned_preferences),
+            "risk_profile": preferred.risk_profile,
+            "commitment_action_priors": list(dict.fromkeys(commitment_action_priors))[:8],
+            "maintenance_agenda": dict(maintenance_agenda or {}),
+            "continuity_audit": self.continuity_audit.to_dict(),
+            "memory_anchors": [dict(item) for item in memory_anchors],
+            "recent_actions": [str(action) for action in recent_actions[-32:]],
+        }
+
+    def apply_restart_anchors(self, anchors: Mapping[str, object] | None) -> None:
+        if not anchors:
+            return
+        preferred = self.preferred_policies or PreferredPolicies()
+        distribution = anchors.get("preferred_policy_distribution")
+        if isinstance(distribution, Mapping) and distribution:
+            preferred.action_distribution = {
+                str(key): float(value) for key, value in distribution.items()
+            }
+        dominant_strategy = anchors.get("dominant_strategy")
+        if dominant_strategy:
+            preferred.dominant_strategy = str(dominant_strategy)
+        risk_profile = anchors.get("risk_profile")
+        if risk_profile:
+            preferred.risk_profile = str(risk_profile)
+        preferred.learned_avoidances = [
+            str(item) for item in anchors.get("learned_avoidances", [])
+        ][:8]
+        preferred.learned_preferences = [
+            str(item) for item in anchors.get("learned_preferences", [])
+        ][:8]
+        self.preferred_policies = preferred
+        continuity_payload = anchors.get("continuity_audit")
+        if isinstance(continuity_payload, Mapping):
+            continuity = ContinuityAudit.from_dict(continuity_payload)
+            continuity.restart_divergence = min(
+                continuity.restart_divergence,
+                self.continuity_audit.restart_divergence,
+            )
+            self.continuity_audit = continuity
+
     def _stabilize_personality(self, reference: Mapping[str, float]) -> None:
         if not reference:
             return

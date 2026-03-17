@@ -263,8 +263,8 @@
       "runtime_family_coverage_revalidated": true
     }
   },
-  "generated_at": "2026-03-17T10:41:02+00:00",
-  "codebase_version": "de00ce90e79bc95db0ba0ab7e28ea2fae8f39ac3",
+  "generated_at": "2026-03-17T12:30:03+00:00",
+  "codebase_version": "549bf5dd38067267d91d6313d409f93131b9857d",
   "final_recommendation": {
     "status": "READY_FOR_M3",
     "passed": true

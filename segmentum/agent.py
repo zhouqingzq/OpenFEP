@@ -3026,9 +3026,9 @@ class SegmentAgent:
         compression_removed = self.long_term_memory.compress_episodes()
 
         # Body restoration
-        self.energy = clamp(self.energy + 0.28)
-        self.stress = clamp(self.stress - 0.20)
-        self.fatigue = clamp(self.fatigue - 0.35)
+        self.energy = clamp(self.energy + 0.31)
+        self.stress = clamp(self.stress - 0.23)
+        self.fatigue = clamp(self.fatigue - 0.39)
         self.temperature = clamp(self.temperature + (0.5 - self.temperature) * 0.3)
         self.dopamine = clamp(
             self.dopamine + max(0.0, mean(gains) if gains else 0.0) * 0.25

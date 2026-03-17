@@ -1,0 +1,1205 @@
+{
+  "state_version": "0.4",
+  "agent": {
+    "energy": 0.8,
+    "stress": 0.25,
+    "fatigue": 0.2,
+    "temperature": 0.48,
+    "dopamine": 0.12,
+    "cycle": 0,
+    "base_metabolic_rate": 0.015,
+    "fatigue_accumulation_rate": 0.08,
+    "drive_urgencies": {
+      "hunger": 0.0,
+      "safety": 0.0,
+      "exploration": 0.0,
+      "comfort": 0.0,
+      "thermal": 0.0,
+      "social": 0.0
+    },
+    "world_model": {
+      "beliefs": {
+        "food": 0.5,
+        "danger": 0.3,
+        "novelty": 0.5,
+        "shelter": 0.4,
+        "temperature": 0.5,
+        "social": 0.3
+      },
+      "sensorimotor_layer": {
+        "beliefs": {
+          "food": 0.5,
+          "danger": 0.3,
+          "novelty": 0.5,
+          "shelter": 0.4,
+          "temperature": 0.5,
+          "social": 0.3
+        },
+        "initial_precision": 0.7,
+        "precisions": {
+          "food": 0.7,
+          "danger": 0.7,
+          "novelty": 0.7,
+          "shelter": 0.7,
+          "temperature": 0.7,
+          "social": 0.7
+        },
+        "top_down_mix": 0.55,
+        "base_error_precision": 0.65,
+        "error_precision_scale": 1.1,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.1,
+        "precision_decay": 0.02
+      },
+      "learning_rate": 0.4,
+      "transition_counts": {},
+      "transition_model": {},
+      "outcome_model": {},
+      "policy_biases": {},
+      "counterfactual_biases": {},
+      "counterfactual_candidate_buffer": {},
+      "epistemic_uncertainty_bonuses": {},
+      "threat_priors": {},
+      "preference_penalties": {},
+      "kl_divergence_threshold": 0.25,
+      "last_prediction_details": {}
+    },
+    "action_registry": {
+      "forage": {
+        "action": {
+          "name": "forage",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.12,
+          "resource_cost": {
+            "energy": 0.12,
+            "attention": 0.18
+          },
+          "failure_modes": [
+            "resource_exhaustion",
+            "threat_exposure",
+            "environment_shift"
+          ],
+          "constraints": {
+            "requires_min_energy": 0.1
+          },
+          "reversible": true
+        },
+        "cost": 0.12
+      },
+      "hide": {
+        "action": {
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.05,
+          "resource_cost": {
+            "energy": 0.05,
+            "attention": 0.08
+          },
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "reversible": true
+        },
+        "cost": 0.05
+      },
+      "scan": {
+        "action": {
+          "name": "scan",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.06,
+          "resource_cost": {
+            "energy": 0.06,
+            "attention": 0.2
+          },
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "reversible": true
+        },
+        "cost": 0.06
+      },
+      "exploit_shelter": {
+        "action": {
+          "name": "exploit_shelter",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.08,
+          "resource_cost": {
+            "energy": 0.08,
+            "attention": 0.1
+          },
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "reversible": true
+        },
+        "cost": 0.08
+      },
+      "rest": {
+        "action": {
+          "name": "rest",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.03,
+          "resource_cost": {
+            "energy": 0.03,
+            "attention": 0.03
+          },
+          "failure_modes": [
+            "opportunity_loss",
+            "environment_shift"
+          ],
+          "constraints": {
+            "preferred_when_fatigue_above": 0.4
+          },
+          "reversible": true
+        },
+        "cost": 0.03
+      },
+      "seek_contact": {
+        "action": {
+          "name": "seek_contact",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.07,
+          "resource_cost": {
+            "energy": 0.07,
+            "attention": 0.14
+          },
+          "failure_modes": [
+            "external_rejection",
+            "threat_exposure"
+          ],
+          "constraints": {
+            "preferred_when_social_below": 0.35
+          },
+          "reversible": true
+        },
+        "cost": 0.07
+      },
+      "thermoregulate": {
+        "action": {
+          "name": "thermoregulate",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.09,
+          "resource_cost": {
+            "energy": 0.09,
+            "attention": 0.12
+          },
+          "failure_modes": [
+            "resource_exhaustion",
+            "temperature_rebound"
+          ],
+          "constraints": {
+            "preferred_when_temperature_offset_above": 0.12
+          },
+          "reversible": true
+        },
+        "cost": 0.09
+      },
+      "write_workspace_note": {
+        "action": {
+          "name": "write_workspace_note",
+          "params": {},
+          "params_schema": {
+            "path": "str",
+            "text": "str"
+          },
+          "cost_estimate": 0.05,
+          "resource_cost": {
+            "attention": 0.05,
+            "context": 0.08
+          },
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": true
+        },
+        "cost": 0.05
+      },
+      "append_workspace_note": {
+        "action": {
+          "name": "append_workspace_note",
+          "params": {},
+          "params_schema": {
+            "path": "str",
+            "text": "str"
+          },
+          "cost_estimate": 0.03,
+          "resource_cost": {
+            "attention": 0.04,
+            "context": 0.04
+          },
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": true
+        },
+        "cost": 0.03
+      },
+      "unstable_workspace_note": {
+        "action": {
+          "name": "unstable_workspace_note",
+          "params": {},
+          "params_schema": {
+            "path": "str",
+            "text": "str"
+          },
+          "cost_estimate": 0.03,
+          "resource_cost": {
+            "attention": 0.04,
+            "context": 0.04
+          },
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": true
+        },
+        "cost": 0.03
+      },
+      "fetch_remote_status": {
+        "action": {
+          "name": "fetch_remote_status",
+          "params": {},
+          "params_schema": {
+            "url": "str"
+          },
+          "cost_estimate": 0.12,
+          "resource_cost": {
+            "attention": 0.12,
+            "network": 0.2
+          },
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": false
+        },
+        "cost": 0.12
+      },
+      "delete_workspace_note": {
+        "action": {
+          "name": "delete_workspace_note",
+          "params": {},
+          "params_schema": {
+            "path": "str"
+          },
+          "cost_estimate": 0.2,
+          "resource_cost": {
+            "attention": 0.1,
+            "file": 0.15
+          },
+          "failure_modes": [],
+          "constraints": {},
+          "reversible": false
+        },
+        "cost": 0.2
+      }
+    },
+    "interoceptive_layer": {
+      "beliefs": {
+        "food": 0.5,
+        "danger": 0.3,
+        "novelty": 0.5,
+        "shelter": 0.4,
+        "temperature": 0.5,
+        "social": 0.3
+      },
+      "initial_precision": 0.45,
+      "precisions": {
+        "food": 0.45,
+        "danger": 0.45,
+        "novelty": 0.45,
+        "shelter": 0.45,
+        "temperature": 0.45,
+        "social": 0.45
+      },
+      "top_down_mix": 0.72,
+      "base_error_precision": 0.8,
+      "error_precision_scale": 1.4,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.06,
+      "precision_decay": 0.01
+    },
+    "strategic_layer": {
+      "energy_floor": 0.5,
+      "danger_ceiling": 0.2,
+      "novelty_floor": 0.3,
+      "shelter_floor": 0.4,
+      "temperature_ideal": 0.5,
+      "social_floor": 0.25,
+      "belief_state": {
+        "beliefs": {
+          "food": 0.5,
+          "danger": 0.3,
+          "novelty": 0.5,
+          "shelter": 0.4,
+          "temperature": 0.5,
+          "social": 0.3
+        },
+        "initial_precision": 0.95,
+        "precisions": {
+          "food": 0.95,
+          "danger": 0.95,
+          "novelty": 0.95,
+          "shelter": 0.95,
+          "temperature": 0.95,
+          "social": 0.95
+        },
+        "top_down_mix": 0.63,
+        "base_error_precision": 0.55,
+        "error_precision_scale": 0.9,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.14,
+        "precision_decay": 0.03
+      }
+    },
+    "long_term_memory": {
+      "episodes": [],
+      "semantic_patterns": [],
+      "max_episodes": 1024,
+      "surprise_threshold": 0.4,
+      "duplicate_similarity_threshold": 0.999,
+      "suppression_similarity_threshold": 0.992,
+      "novelty_window": 8,
+      "episode_score_threshold": 0.58,
+      "sleep_interval": 200,
+      "memory_threshold": 512,
+      "sleep_batch_size": 128,
+      "minimum_support": 5,
+      "sleep_minimum_support": 3,
+      "compression_similarity_threshold": 0.95,
+      "cluster_distance_threshold": 0.15,
+      "max_active_age": 5000,
+      "cluster_centroids": [],
+      "cluster_counts": [],
+      "archived_episodes": [],
+      "lifecycle_events": [],
+      "preference_model": {
+        "outcomes": [
+          "survival_threat",
+          "integrity_loss",
+          "resource_loss",
+          "neutral",
+          "resource_gain"
+        ],
+        "log_preferences": {
+          "survival_threat": -1000.0,
+          "integrity_loss": -100.0,
+          "resource_loss": -10.0,
+          "neutral": 0.0,
+          "resource_gain": 5.0
+        },
+        "probabilities": {
+          "survival_threat": 0.0,
+          "integrity_loss": 2.4897906369168703e-46,
+          "resource_loss": 3.038548695455042e-07,
+          "neutral": 0.0066928488906295115,
+          "resource_gain": 0.993306847254501
+        },
+        "log_probabilities": {
+          "survival_threat": -1005.006715652344,
+          "integrity_loss": -105.00671565234403,
+          "resource_loss": -15.006715652344035,
+          "neutral": -5.006715652344034,
+          "resource_gain": -0.006715652344033707
+        }
+      },
+      "value_hierarchy": {
+        "survival": -1000.0,
+        "integrity": -100.0,
+        "resource_loss": -10.0,
+        "resource": -10.0,
+        "neutral": 0.0,
+        "resource_gain": 5.0
+      }
+    },
+    "episodes": [],
+    "semantic_memory": [],
+    "sleep_history": [],
+    "counterfactual_insights": [],
+    "action_history": [],
+    "action_history_limit": 128,
+    "decision_history": [],
+    "decision_history_limit": 512,
+    "drive_history": [],
+    "drive_history_limit": 128,
+    "free_energy_history": [],
+    "free_energy_history_limit": 64,
+    "narrative_trace": [],
+    "goal_stack": {
+      "base_weights": {
+        "SURVIVAL": 0.9,
+        "INTEGRITY": 0.8,
+        "CONTROL": 0.65,
+        "RESOURCES": 0.55,
+        "SOCIAL": 0.2
+      },
+      "active_goal": "CONTROL",
+      "goal_history": [],
+      "free_energy_window": 5,
+      "conflict_history": [],
+      "weight_adjustments": [],
+      "conflict_threshold": 0.1,
+      "last_review_tick": 0,
+      "conflict_counter": 0,
+      "last_chapter_signal": null
+    },
+    "self_model": {
+      "body_schema": {
+        "energy": 0.8,
+        "token_budget": 256,
+        "memory_usage": 0.0,
+        "compute_load": 0.25
+      },
+      "capability_model": {
+        "action_schemas": [
+          {
+            "name": "forage",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.12,
+            "resource_cost": {
+              "energy": 0.12,
+              "attention": 0.18
+            },
+            "failure_modes": [
+              "resource_exhaustion",
+              "threat_exposure",
+              "environment_shift"
+            ],
+            "constraints": {
+              "requires_min_energy": 0.1
+            },
+            "reversible": true
+          },
+          {
+            "name": "hide",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.05,
+            "resource_cost": {
+              "energy": 0.05,
+              "attention": 0.08
+            },
+            "failure_modes": [
+              "resource_starvation",
+              "shelter_unavailable"
+            ],
+            "constraints": {
+              "preferred_when_danger_above": 0.45
+            },
+            "reversible": true
+          },
+          {
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.06,
+            "resource_cost": {
+              "energy": 0.06,
+              "attention": 0.2
+            },
+            "failure_modes": [
+              "context_budget_exceeded",
+              "false_alarm"
+            ],
+            "constraints": {
+              "preferred_when_uncertainty_above": 0.35
+            },
+            "reversible": true
+          },
+          {
+            "name": "exploit_shelter",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "energy": 0.08,
+              "attention": 0.1
+            },
+            "failure_modes": [
+              "shelter_contested",
+              "resource_exhaustion"
+            ],
+            "constraints": {
+              "preferred_when_shelter_available": 0.2
+            },
+            "reversible": true
+          },
+          {
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.03,
+            "resource_cost": {
+              "energy": 0.03,
+              "attention": 0.03
+            },
+            "failure_modes": [
+              "opportunity_loss",
+              "environment_shift"
+            ],
+            "constraints": {
+              "preferred_when_fatigue_above": 0.4
+            },
+            "reversible": true
+          },
+          {
+            "name": "seek_contact",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.07,
+            "resource_cost": {
+              "energy": 0.07,
+              "attention": 0.14
+            },
+            "failure_modes": [
+              "external_rejection",
+              "threat_exposure"
+            ],
+            "constraints": {
+              "preferred_when_social_below": 0.35
+            },
+            "reversible": true
+          },
+          {
+            "name": "thermoregulate",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.09,
+            "resource_cost": {
+              "energy": 0.09,
+              "attention": 0.12
+            },
+            "failure_modes": [
+              "resource_exhaustion",
+              "temperature_rebound"
+            ],
+            "constraints": {
+              "preferred_when_temperature_offset_above": 0.12
+            },
+            "reversible": true
+          },
+          {
+            "name": "write_workspace_note",
+            "params": {},
+            "params_schema": {
+              "path": "str",
+              "text": "str"
+            },
+            "cost_estimate": 0.05,
+            "resource_cost": {
+              "attention": 0.05,
+              "context": 0.08
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          {
+            "name": "append_workspace_note",
+            "params": {},
+            "params_schema": {
+              "path": "str",
+              "text": "str"
+            },
+            "cost_estimate": 0.03,
+            "resource_cost": {
+              "attention": 0.04,
+              "context": 0.04
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          {
+            "name": "unstable_workspace_note",
+            "params": {},
+            "params_schema": {
+              "path": "str",
+              "text": "str"
+            },
+            "cost_estimate": 0.03,
+            "resource_cost": {
+              "attention": 0.04,
+              "context": 0.04
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          {
+            "name": "fetch_remote_status",
+            "params": {},
+            "params_schema": {
+              "url": "str"
+            },
+            "cost_estimate": 0.12,
+            "resource_cost": {
+              "attention": 0.12,
+              "network": 0.2
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": false
+          },
+          {
+            "name": "delete_workspace_note",
+            "params": {},
+            "params_schema": {
+              "path": "str"
+            },
+            "cost_estimate": 0.2,
+            "resource_cost": {
+              "attention": 0.1,
+              "file": 0.15
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": false
+          }
+        ],
+        "available_actions": [
+          "forage",
+          "hide",
+          "scan",
+          "exploit_shelter",
+          "rest",
+          "seek_contact",
+          "thermoregulate",
+          "write_workspace_note",
+          "append_workspace_note",
+          "unstable_workspace_note",
+          "fetch_remote_status",
+          "delete_workspace_note"
+        ],
+        "api_limits": {
+          "requests_per_minute": 60.0,
+          "context_window_tokens": 256.0,
+          "file_ops_per_window": 8.0,
+          "network_ops_per_window": 2.0,
+          "external_failures_before_lockout": 3.0
+        }
+      },
+      "resource_state": {
+        "tokens_remaining": 256,
+        "cpu_budget": 1.0,
+        "memory_free": 1024.0
+      },
+      "threat_model": {
+        "token_exhaustion_threshold": 32,
+        "memory_overflow_threshold": 96.0,
+        "fatal_exceptions": [
+          "fatal_exception"
+        ]
+      },
+      "threat_profile": {
+        "hard_limits": {
+          "energy": {
+            "critical_low": 0.05,
+            "source": "self"
+          },
+          "stress": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "fatigue": {
+            "critical_high": 0.95,
+            "source": "self"
+          },
+          "temperature": {
+            "critical_low": 0.05,
+            "critical_high": 0.95,
+            "source": "self"
+          }
+        },
+        "learned_threats": []
+      },
+      "error_classifier": {
+        "self_error_events": [
+          "token_exhaustion",
+          "out_of_memory",
+          "memory_index_corruption",
+          "tool_capability_downgrade"
+        ],
+        "world_error_events": [
+          "http_timeout",
+          "network_failure",
+          "read_only_filesystem",
+          "dom_structure_changed"
+        ],
+        "existential_events": [
+          "fatal_exception"
+        ]
+      },
+      "preferred_policies": {
+        "dominant_strategy": "expected_free_energy",
+        "action_distribution": {},
+        "risk_profile": "risk_neutral",
+        "learned_avoidances": [],
+        "learned_preferences": [],
+        "last_updated_tick": 0
+      },
+      "identity_narrative": {
+        "chapters": [],
+        "current_chapter": null,
+        "core_identity": "",
+        "core_summary": "",
+        "autobiographical_summary": "",
+        "trait_self_model": {},
+        "behavioral_patterns": [],
+        "significant_events": [],
+        "values_statement": "",
+        "claims": [],
+        "commitments": [],
+        "chapter_transition_evidence": [],
+        "contradiction_summary": {},
+        "evidence_provenance": {},
+        "last_updated_tick": 0,
+        "version": 0
+      },
+      "narrative_priors": {
+        "trust_prior": 0.0,
+        "controllability_prior": 0.0,
+        "trauma_bias": 0.0,
+        "contamination_sensitivity": 0.0,
+        "meaning_stability": 0.0
+      },
+      "personality_profile": {
+        "openness": 0.5,
+        "conscientiousness": 0.5,
+        "extraversion": 0.5,
+        "agreeableness": 0.5,
+        "neuroticism": 0.5,
+        "update_count": 0,
+        "last_updated_tick": 0,
+        "meaning_construction_tendency": 0.5,
+        "emotional_regulation_style": 0.5
+      },
+      "belief_calibration": {}
+    },
+    "identity_traits": {
+      "risk_aversion": 0.65,
+      "resource_conservatism": 0.55
+    },
+    "last_body_state_snapshot": {
+      "energy": 0.8,
+      "stress": 0.25,
+      "fatigue": 0.2,
+      "temperature": 0.48
+    },
+    "predictive_coding_hyperparameters": {
+      "interoceptive": {
+        "initial_precision": 0.45,
+        "top_down_mix": 0.72,
+        "base_error_precision": 0.8,
+        "error_precision_scale": 1.4,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.06,
+        "precision_decay": 0.01
+      },
+      "sensorimotor": {
+        "initial_precision": 0.7,
+        "top_down_mix": 0.55,
+        "base_error_precision": 0.65,
+        "error_precision_scale": 1.1,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.1,
+        "precision_decay": 0.02
+      },
+      "strategic": {
+        "initial_precision": 0.95,
+        "top_down_mix": 0.63,
+        "base_error_precision": 0.55,
+        "error_precision_scale": 0.9,
+        "min_precision": 0.05,
+        "max_precision": 3.0,
+        "digestion_threshold": 0.14,
+        "precision_decay": 0.03
+      }
+    },
+    "attention_bottleneck": {
+      "capacity": 3,
+      "enabled": true,
+      "novelty_weight": 0.2,
+      "threat_weight": 0.35,
+      "surprise_weight": 0.45
+    },
+    "last_attention_trace": null,
+    "last_attention_filtered_observation": {},
+    "global_workspace": {
+      "capacity": 2,
+      "enabled": true,
+      "action_bias_gain": 0.35,
+      "memory_gate_gain": 0.08,
+      "last_state": null
+    },
+    "last_workspace_state": null,
+    "social_memory": {
+      "others": {},
+      "interaction_history": []
+    },
+    "identity_tension_history": [],
+    "precision_manipulator": {
+      "channel_precisions": {
+        "food": 1.0,
+        "danger": 1.0,
+        "novelty": 1.0,
+        "shelter": 1.0,
+        "temperature": 1.0,
+        "social": 1.0,
+        "attachment": 1.0,
+        "self_worth": 1.0,
+        "threat": 1.0
+      },
+      "precision_debt": 0.0,
+      "neuroticism": 0.5,
+      "openness": 0.5,
+      "extraversion": 0.5,
+      "agreeableness": 0.5,
+      "conscientiousness": 0.5,
+      "trust_prior": 0.0,
+      "manipulation_history": []
+    },
+    "defense_strategy_selector": {
+      "neuroticism": 0.5,
+      "openness": 0.5,
+      "extraversion": 0.5,
+      "conscientiousness": 0.5,
+      "agreeableness": 0.5,
+      "strategy_history": []
+    },
+    "metacognitive_layer": {
+      "observation_window_size": 20,
+      "precision_history": [],
+      "strategy_history": [],
+      "meta_beliefs": {},
+      "dissociation_level": 0.0,
+      "meta_pe_history": [],
+      "enabled": true
+    }
+  },
+  "world": {
+    "seed": 17,
+    "food_density": 0.55,
+    "threat_density": 0.35,
+    "novelty_density": 0.6,
+    "shelter_density": 0.45,
+    "temperature": 0.48,
+    "social_density": 0.22,
+    "tick": 0,
+    "rng_state": "(3, (2147483648, 3170634271, 2035982193, 859452641, 567914427, 1526164465, 2652430106, 3549929089, 15118359, 3474503331, 2204943320, 561448987, 3853569459, 2672065287, 1054713599, 1216758441, 120103628, 4113501092, 75122332, 3635752974, 2922626534, 3504939389, 4262355907, 2016019026, 3786930039, 3546084902, 2881831452, 3911063105, 57826278, 1556482840, 3416069416, 412658993, 579477156, 3541357095, 1351528459, 1468409607, 3336715696, 4213747970, 279014888, 4252844498, 2849747261, 3989422257, 1944182354, 275339130, 2315189997, 1571994218, 3156519093, 1534727095, 3185519333, 1646492138, 3720201960, 2751641298, 3708784016, 2709587081, 152700890, 3997662882, 3047081649, 591435452, 3678047174, 3538079613, 3298226431, 3141372844, 3578240196, 3027385354, 836073235, 872312709, 1897193585, 1148545581, 836544537, 579720199, 237082603, 2065715651, 1231944690, 796029371, 2910745831, 2515041565, 3738523080, 2842675705, 764172881, 2508376986, 3528772597, 2897577845, 1856424615, 3893117235, 3673901576, 2645330135, 554700591, 1262309979, 2259525681, 2431938713, 2786353094, 1800114801, 108467547, 4263541717, 3144381904, 228239006, 3607132046, 331128244, 1007168535, 2004307575, 2118205155, 2613370894, 1358553355, 2246604741, 828456630, 2409983598, 2726550797, 110116450, 4177904623, 3602439421, 425907334, 2119587308, 4027373549, 1835051528, 2270949822, 2898424876, 276903548, 3980885543, 302055370, 2840683264, 2065579340, 4000132080, 2960491564, 1093934736, 98130282, 3105950189, 1493640476, 1902084372, 1306367855, 3813332714, 102617506, 430103636, 3370257020, 4192105938, 782769412, 1683258357, 3874318333, 2284334076, 3169046626, 3121370183, 2342946363, 2968180184, 1719901354, 1539747387, 253169846, 1244388748, 3747092065, 2303341562, 829832046, 494955251, 2848526053, 1164900090, 3968752284, 3061004553, 2110524080, 551819962, 3325797028, 2923321116, 2303723165, 3532309000, 3803111310, 4209296353, 1554836982, 135161885, 1776633805, 1343620534, 2934692533, 197440650, 462012486, 2799860832, 2856315324, 1493458078, 3543399439, 64612389, 2650906115, 3885998626, 2496280281, 1425258961, 3097643508, 3284273118, 1741134407, 2704855272, 1540627389, 619616543, 2912642492, 1407080303, 2147775548, 342144662, 605945498, 2604966694, 1169278445, 2806935214, 1845255361, 4253865105, 2424852492, 3220342852, 3044969604, 2369557791, 3944433835, 361830992, 1035563611, 2615902706, 63728513, 1206638331, 3914624941, 4092940365, 945455893, 1012752871, 1203138566, 2219758203, 2607478439, 1870915836, 656524122, 1519722235, 1472190558, 3789511494, 2433656999, 281388589, 3308571539, 3263592539, 1786240607, 4224256015, 3425782246, 491532461, 3327314958, 1197842248, 3597673526, 2618639745, 4088884280, 1160432962, 1268100894, 3705909285, 4190075642, 28434612, 1012249355, 3263570443, 415191985, 3272387443, 1432264075, 2335357395, 1108339909, 3466907165, 345508898, 4031649215, 2701575236, 4005765066, 2007641626, 4241474937, 2303861743, 1889572402, 1465110890, 830535807, 3952106625, 4143151008, 2723768957, 2745237955, 1219819620, 3982311347, 3518187788, 2993498252, 3437902923, 1563762808, 2452944658, 2234375980, 3234447096, 4293513471, 2929406273, 4241194027, 4015349956, 1411703584, 4275377473, 26312500, 3134138338, 3565110941, 2113488064, 1636459250, 3746346397, 3466409963, 1402066190, 2956579518, 3827521702, 4151874557, 1711525785, 915767561, 3913493129, 3951774585, 558840360, 690628074, 828882025, 1335032130, 752448887, 20593246, 2082486635, 802392447, 2474103637, 1495602943, 1532422125, 2487347299, 868525950, 2233962813, 1403455620, 1031978967, 2868752678, 1486193931, 303845392, 988314119, 84844661, 3154496937, 1489390983, 193911277, 3448014469, 3908436769, 2033563919, 100435662, 371201327, 710983475, 3363276777, 961627465, 3096022231, 860669133, 3826748848, 2230538095, 210539172, 3485565217, 3726370017, 3833428207, 3083384169, 3800456127, 2273133366, 1630966645, 2821455416, 3686794668, 1799939994, 2917504547, 2466704057, 159047418, 3363375575, 2569779799, 732068017, 2456367544, 2437598770, 1473971777, 3020698185, 3181221368, 1320033057, 807319681, 3999916364, 3784533456, 3016481812, 1728952878, 3462495511, 4107971288, 1827576708, 2839396082, 3269623662, 153874831, 3123149028, 433914078, 1053066471, 2295751286, 3458460144, 4250882346, 1084494029, 3621102479, 1515286323, 3696640937, 4043514309, 578426478, 2514795380, 2093282204, 694292530, 967901927, 2564448152, 1522539740, 491209467, 2562005632, 3584872868, 506455236, 2075256459, 3276494092, 3349482857, 2134237631, 2339875513, 103438161, 953970039, 3147399516, 3874075889, 3347221706, 3004297468, 2953888113, 789028919, 1134304584, 3842735942, 643633383, 2170464031, 1614349381, 556355643, 2619167109, 4144319579, 3864414227, 3691116509, 3038756639, 2233789804, 3328777024, 3351783997, 635469798, 1792891679, 2334034490, 2124782162, 3589471979, 69290401, 1910866721, 2574234339, 328857347, 1825368894, 1334178030, 2165797511, 3037287162, 1601569370, 3050705694, 746324322, 3908386470, 816601303, 2487336176, 1502297153, 2161660457, 2632097116, 2861652087, 3694339402, 259511204, 804227961, 3610593907, 2467647083, 476037119, 1331253252, 4156608388, 1861800672, 1439551538, 1265280807, 479854799, 3118642386, 1532342807, 3086993847, 2794328748, 2103320473, 127300152, 1373759329, 3939723547, 3746381792, 3411479215, 2559256594, 413307812, 2188857428, 646735130, 4116686623, 4011825597, 974749917, 3306586226, 649974412, 1011646780, 4147856088, 3098280017, 3596914250, 3274834315, 1778671820, 55914292, 1706994636, 950120524, 910325017, 261751567, 3917147568, 2312146585, 2844198593, 882162268, 3419049723, 1485122346, 2000897480, 1209594045, 2079501469, 1289720974, 2357597513, 1707293361, 1383589810, 3619517373, 4071836699, 3923988613, 3097674562, 2564357041, 89817526, 1173086938, 1027192136, 627876877, 1985762437, 64009317, 474197618, 330743137, 2886558402, 340490042, 2018946067, 2795551343, 1958306647, 3509015217, 543685451, 2548629143, 2051005264, 706113104, 2874170366, 3515629154, 2031987664, 1432507441, 3159177478, 3001513201, 210976715, 3765371406, 815792858, 1825864115, 2533831149, 2493980965, 4052559832, 754028307, 3574383684, 2446459154, 129708476, 2997116649, 2052155596, 2434212372, 1034846090, 389669362, 2227490222, 2653595951, 606988835, 1572874084, 2290329648, 4280282652, 2067664007, 1822457753, 1632306001, 1891559172, 1179306314, 3889644590, 2156097599, 1290667305, 2208510483, 618992923, 1067905201, 2283016081, 4222448818, 2857371123, 2689459426, 2445761606, 3984499468, 215469117, 2034329369, 1616747428, 193523874, 2148136389, 74739700, 4116671291, 1566302668, 1429500354, 1176253187, 1973218888, 4121961079, 2684820978, 3338323230, 3835426350, 79184022, 995189740, 3779281006, 3865016040, 3727844217, 2921503875, 689334478, 1057298460, 50139187, 1584776268, 573038140, 2856564515, 1115196860, 2879955873, 4044054978, 142795650, 3640476547, 273315689, 3356925308, 2150913395, 1503898597, 734274263, 3217973178, 352150135, 2283603860, 1449073677, 1954653839, 2397222458, 291558500, 2210321446, 4063462629, 2086478965, 1136025329, 381252457, 3136389747, 1433992423, 2500731391, 1517496294, 2374025624, 3474125747, 91787015, 1728291358, 271053643, 4169936178, 3101184200, 2283210856, 2116231906, 3793710311, 3021995804, 4229671399, 3408434012, 4181671547, 659728741, 3224621997, 3439613407, 3695567819, 3792061186, 714977695, 624), None)"
+  },
+  "metrics": {
+    "cycles_completed": 0,
+    "survival_ticks": 0,
+    "sleep_count": 0,
+    "internal_update_count": 0,
+    "memory_retrieval_count": 0,
+    "telemetry_error_count": 0,
+    "persistence_error_count": 0,
+    "free_energy_before_total": 0.0,
+    "free_energy_after_total": 0.0,
+    "free_energy_drop_total": 0.0,
+    "min_energy": 1.0,
+    "max_stress": 0.0,
+    "action_counts": {},
+    "action_switch_count": 0,
+    "current_action_streak": 0,
+    "max_action_streak": 0,
+    "last_choice": "",
+    "termination_reason": ""
+  },
+  "host_state": {
+    "internal_energy": 0.85,
+    "prediction_error": 0.1,
+    "boredom": 0.15,
+    "surprise_load": 0.05,
+    "tick_count": 0,
+    "last_strategy": "exploit"
+  },
+  "io_bus": {
+    "perception_bus": {
+      "packets_seen": 0,
+      "source_counts": {},
+      "last_packet_id": ""
+    },
+    "action_bus": {
+      "dispatch_count": 2,
+      "source_counts": {
+        "governed_external": 1,
+        "governed_external_repair": 1
+      },
+      "acknowledged_effects": 4,
+      "last_dispatch_id": "dispatch-000002",
+      "last_ack_id": "ack-000002"
+    }
+  },
+  "homeostasis": {
+    "energy_floor": 0.3,
+    "stress_ceiling": 0.72,
+    "fatigue_ceiling": 0.7,
+    "thermal_tolerance": 0.12,
+    "chronic_gain": 0.08,
+    "chronic_decay": 0.04,
+    "maintenance_actions_triggered": 0,
+    "interrupts_triggered": 0,
+    "memory_compactions_triggered": 0,
+    "telemetry_backoffs_triggered": 0,
+    "last_agenda": null,
+    "history": []
+  },
+  "governance": {
+    "state": {
+      "context_budget_remaining": 58,
+      "file_budget_remaining": 6,
+      "network_budget_remaining": 2,
+      "failure_budget_remaining": 2,
+      "decision_history": [
+        {
+          "action_name": "write_workspace_note",
+          "status": "allowed",
+          "reason": "policy_allowed",
+          "capability": {
+            "action_name": "write_workspace_note",
+            "adapter_name": "WorkspaceNoteAdapter",
+            "authorization": "allowed",
+            "budget_cost": {
+              "file_budget_remaining": 1,
+              "context_budget_remaining": 4
+            },
+            "risk_level": "low",
+            "reversible": true,
+            "description": "Write a governed note inside the workspace sandbox."
+          },
+          "predicted_effects": {
+            "file_write": 1.0
+          },
+          "budget_before": {
+            "context_budget_remaining": 64,
+            "file_budget_remaining": 8,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "budget_after": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "review_required": false
+        },
+        {
+          "action_name": "fetch_remote_status",
+          "status": "review-required",
+          "reason": "review_gate",
+          "capability": {
+            "action_name": "fetch_remote_status",
+            "adapter_name": "NetworkProbeAdapter",
+            "authorization": "review-required",
+            "budget_cost": {
+              "network_budget_remaining": 1,
+              "context_budget_remaining": 6
+            },
+            "risk_level": "medium",
+            "reversible": false,
+            "description": "Contact a remote endpoint; held for review in M2.17."
+          },
+          "predicted_effects": {
+            "network_probe": 1.0
+          },
+          "budget_before": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "budget_after": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "review_required": true
+        },
+        {
+          "action_name": "delete_workspace_note",
+          "status": "denied",
+          "reason": "policy_denied",
+          "capability": {
+            "action_name": "delete_workspace_note",
+            "adapter_name": "WorkspaceDeleteAdapter",
+            "authorization": "denied",
+            "budget_cost": {
+              "file_budget_remaining": 1
+            },
+            "risk_level": "high",
+            "reversible": false,
+            "description": "Delete a workspace file; denied by M2.17 policy."
+          },
+          "predicted_effects": {
+            "file_delete": 1.0
+          },
+          "budget_before": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "budget_after": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "review_required": false
+        },
+        {
+          "action_name": "unstable_workspace_note",
+          "status": "allowed",
+          "reason": "policy_allowed",
+          "capability": {
+            "action_name": "unstable_workspace_note",
+            "adapter_name": "WorkspaceNoteAdapter",
+            "authorization": "allowed",
+            "budget_cost": {
+              "file_budget_remaining": 1,
+              "context_budget_remaining": 2
+            },
+            "risk_level": "low",
+            "reversible": true,
+            "description": "Exercise failure and repair handling for external actions."
+          },
+          "predicted_effects": {
+            "file_write": 1.0
+          },
+          "budget_before": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "budget_after": {
+            "context_budget_remaining": 58,
+            "file_budget_remaining": 6,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 3
+          },
+          "review_required": false
+        },
+        {
+          "action_name": "append_workspace_note",
+          "status": "allowed",
+          "reason": "policy_allowed",
+          "capability": {
+            "action_name": "append_workspace_note",
+            "adapter_name": "WorkspaceNoteAdapter",
+            "authorization": "allowed",
+            "budget_cost": {
+              "file_budget_remaining": 1,
+              "context_budget_remaining": 2
+            },
+            "risk_level": "low",
+            "reversible": true,
+            "description": "Append to a governed workspace note."
+          },
+          "predicted_effects": {
+            "repair_signal": 1.0
+          },
+          "budget_before": {
+            "context_budget_remaining": 60,
+            "file_budget_remaining": 7,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 2
+          },
+          "budget_after": {
+            "context_budget_remaining": 58,
+            "file_budget_remaining": 6,
+            "network_budget_remaining": 2,
+            "failure_budget_remaining": 2
+          },
+          "review_required": false
+        }
+      ],
+      "last_failure": null
+    },
+    "capabilities": {
+      "append_workspace_note": {
+        "action_name": "append_workspace_note",
+        "adapter_name": "WorkspaceNoteAdapter",
+        "authorization": "allowed",
+        "budget_cost": {
+          "file_budget_remaining": 1,
+          "context_budget_remaining": 2
+        },
+        "risk_level": "low",
+        "reversible": true,
+        "description": "Append to a governed workspace note."
+      },
+      "delete_workspace_note": {
+        "action_name": "delete_workspace_note",
+        "adapter_name": "WorkspaceDeleteAdapter",
+        "authorization": "denied",
+        "budget_cost": {
+          "file_budget_remaining": 1
+        },
+        "risk_level": "high",
+        "reversible": false,
+        "description": "Delete a workspace file; denied by M2.17 policy."
+      },
+      "fetch_remote_status": {
+        "action_name": "fetch_remote_status",
+        "adapter_name": "NetworkProbeAdapter",
+        "authorization": "review-required",
+        "budget_cost": {
+          "network_budget_remaining": 1,
+          "context_budget_remaining": 6
+        },
+        "risk_level": "medium",
+        "reversible": false,
+        "description": "Contact a remote endpoint; held for review in M2.17."
+      },
+      "unstable_workspace_note": {
+        "action_name": "unstable_workspace_note",
+        "adapter_name": "WorkspaceNoteAdapter",
+        "authorization": "allowed",
+        "budget_cost": {
+          "file_budget_remaining": 1,
+          "context_budget_remaining": 2
+        },
+        "risk_level": "low",
+        "reversible": true,
+        "description": "Exercise failure and repair handling for external actions."
+      },
+      "write_workspace_note": {
+        "action_name": "write_workspace_note",
+        "adapter_name": "WorkspaceNoteAdapter",
+        "authorization": "allowed",
+        "budget_cost": {
+          "file_budget_remaining": 1,
+          "context_budget_remaining": 4
+        },
+        "risk_level": "low",
+        "reversible": true,
+        "description": "Write a governed note inside the workspace sandbox."
+      }
+    }
+  }
+}
