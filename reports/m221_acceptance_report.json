@@ -1,0 +1,888 @@
+{
+  "milestone_id": "M2.21",
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-03-17T13:23:53+00:00",
+  "seed_set": [
+    221,
+    240,
+    318,
+    337,
+    415,
+    434
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m221_open_narrative_trace.json",
+    "paraphrase": "E:\\workspace\\segments\\artifacts\\m221_paraphrase_stability.json",
+    "adversarial": "E:\\workspace\\segments\\artifacts\\m221_adversarial_surface.json",
+    "conflict": "E:\\workspace\\segments\\artifacts\\m221_conflict_boundedness.json",
+    "multilingual": "E:\\workspace\\segments\\artifacts\\m221_multilingual_robustness.json",
+    "report": "E:\\workspace\\segments\\reports\\m221_acceptance_report.json"
+  },
+  "tests": {
+    "milestone_suite": [
+      "tests/test_m221_paraphrase_stability.py",
+      "tests/test_m221_adversarial_surface.py",
+      "tests/test_m221_conflict_boundedness.py",
+      "tests/test_m221_multilingual_robustness.py",
+      "tests/test_m221_acceptance.py"
+    ]
+  },
+  "gates": {
+    "stability": true,
+    "noise_robustness": true,
+    "adversarial_surface_resistance": true,
+    "conflicting_boundedness": true,
+    "low_quality_degradation": true,
+    "behavior_causality": true,
+    "determinism": true,
+    "artifact_schema_complete": true
+  },
+  "significant_metric_count": {
+    "threat_hardened": 3,
+    "social_trusting": 3,
+    "exploratory_adaptive": 3
+  },
+  "effect_metric_count": {
+    "threat_hardened": 3,
+    "social_trusting": 3,
+    "exploratory_adaptive": 3
+  },
+  "per_scenario_breakdown": {
+    "threat_hardened": {
+      "paraphrase": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.002409,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "action_metric_retention": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.3445,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.829,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "noisy": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 0.333333,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.046009,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.028388,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.002032,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9780405,
+            "std": 0.0038721753898809676
+          },
+          "action_metric_retention": {
+            "mean": 0.96627,
+            "std": 0.052080800089860387
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.428983,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.692218,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "conflicting": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 0.333333,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.175082,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.233947,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.145547,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.694379,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.8911603333333333,
+            "std": 0.005603521918301797
+          },
+          "action_metric_retention": {
+            "mean": 0.8992605,
+            "std": 0.03708786490551864
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.277636,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.622272,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "adversarial_surface": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 0.6,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.01727,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.033207,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.005606,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.593333,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9591668333333333,
+            "std": 0.0064365874347790605
+          },
+          "action_metric_retention": {
+            "mean": 0.9586941666666666,
+            "std": 0.0498829657779643
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.3445,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.7445,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "low_signal": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 0.6,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.125392,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.172174,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.020576,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.728091,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.8589155,
+            "std": 0.009807297601786119
+          },
+          "action_metric_retention": {
+            "mean": 0.9109846666666667,
+            "std": 0.12380316149526319
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.5215,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.4,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "multilingual": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "action_metric_retention": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.3445,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.829,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      }
+    },
+    "social_trusting": {
+      "paraphrase": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.0079,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.008718,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.001611,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.997442,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.96252,
+            "std": 0.016896949468271867
+          },
+          "action_metric_retention": {
+            "mean": 1.0833333333333333,
+            "std": 0.11785113019775792
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.844,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "noisy": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.025573,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.019224,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.002149,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.997442,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.8964865,
+            "std": 0.03567067533119236
+          },
+          "action_metric_retention": {
+            "mean": 0.8333333333333334,
+            "std": 0.2545876113480169
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.062611,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.741778,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "conflicting": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.023198,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.033846,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.003093,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.610816,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.8879693333333333,
+            "std": 0.021030489054914725
+          },
+          "action_metric_retention": {
+            "mean": 0.9444445,
+            "std": 0.12422587452398956
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.13829,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.748546,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "adversarial_surface": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.002343,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.010377,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.002763,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.453694,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9669793333333333,
+            "std": 0.014840274724171687
+          },
+          "action_metric_retention": {
+            "mean": 0.9166666666666666,
+            "std": 0.18633899812498247
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.10855,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.81375,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "low_signal": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.063264,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.084463,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.016123,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.602399,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.7113128333333333,
+            "std": 0.055201306051628485
+          },
+          "action_metric_retention": {
+            "mean": 0.6944443333333333,
+            "std": 0.3105651260700224
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.399,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.505333,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "multilingual": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.001094,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.00211,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.000667,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 0.997442,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9902663333333334,
+            "std": 0.007199023537181191
+          },
+          "action_metric_retention": {
+            "mean": 0.9166666666666666,
+            "std": 0.18633899812498247
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.0105,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.816143,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      }
+    },
+    "exploratory_adaptive": {
+      "paraphrase": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.007487,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.004713,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.001081,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9965685,
+            "std": 0.0002924584016004282
+          },
+          "action_metric_retention": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.1993,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.753667,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "noisy": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.006511,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.003768,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.001456,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9961198333333333,
+            "std": 0.0008180842288881766
+          },
+          "action_metric_retention": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.1993,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.788,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "conflicting": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 0.6,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.12418,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.064577,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.014351,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.8520565,
+            "std": 0.010304902502369115
+          },
+          "action_metric_retention": {
+            "mean": 0.8861111666666667,
+            "std": 0.22203111296273823
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.250317,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.659747,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "adversarial_surface": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.010327,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.011657,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.118636,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.981671,
+            "std": 0.016402539965911792
+          },
+          "action_metric_retention": {
+            "mean": 1.0416666666666667,
+            "std": 0.18800856954464126
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.207,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.81375,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "low_signal": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 0.6,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.095084,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.0582,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.118199,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9844918333333333,
+            "std": 0.013038742352653846
+          },
+          "action_metric_retention": {
+            "mean": 1.15,
+            "std": 0.10801234497346433
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.5215,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.4,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      },
+      "multilingual": {
+        "metric_summary": {
+          "identity_commitment_jaccard": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "policy_distribution_l1_distance": {
+            "mean": 0.024897,
+            "std": 0.0
+          },
+          "narrative_prior_l1_distance": {
+            "mean": 0.014917,
+            "std": 0.0
+          },
+          "personality_profile_l1_distance": {
+            "mean": 0.000565,
+            "std": 0.0
+          },
+          "social_snapshot_similarity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "attention_target_consistency": {
+            "mean": 0.9750666666666666,
+            "std": 0.012536519794406896
+          },
+          "action_metric_retention": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "conflict_uncertainty_score": {
+            "mean": 0.234417,
+            "std": 0.0
+          },
+          "malformed_text_degradation_ratio": {
+            "mean": 0.723792,
+            "std": 0.0
+          }
+        },
+        "sample_count": 6
+      }
+    }
+  },
+  "per_variant_breakdown": {
+    "canonical_vs_paraphrase": {
+      "identity_commitment_jaccard": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "policy_distribution_l1_distance": {
+        "mean": 0.005932,
+        "std": 0.0024968365318271575
+      },
+      "narrative_prior_l1_distance": {
+        "mean": 0.004477,
+        "std": 0.0035630186639982677
+      },
+      "personality_profile_l1_distance": {
+        "mean": 0.0008973333333333333,
+        "std": 0.0006703881131271812
+      }
+    },
+    "canonical_vs_noisy": {
+      "policy_distribution_l1_distance": {
+        "mean": 0.026031,
+        "std": 0.016128242805711974
+      },
+      "attention_target_consistency": {
+        "mean": 0.9568822777777778,
+        "std": 0.048038061956473116
+      },
+      "action_metric_retention": {
+        "mean": 0.9332011111111111,
+        "std": 0.16638958060056555
+      }
+    },
+    "canonical_vs_adversarial_surface": {
+      "wrong_direction_initialization_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "identity_commitment_flip_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "attention_channel_replacement_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "conflicting_narrative": {
+      "conflict_uncertainty_score": {
+        "mean": 0.222081,
+        "std": 0.06028974871955154
+      },
+      "extreme_single_commitment_ratio": {
+        "mean": 0.49115818661888466,
+        "std": 0.05456234008112106
+      },
+      "policy_distribution_l1_distance": {
+        "mean": 0.10748666666666666,
+        "std": 0.06311992763691106
+      }
+    },
+    "low_signal_degradation": {
+      "malformed_text_degradation_ratio": {
+        "mean": 0.435111,
+        "std": 0.04965445238848174
+      }
+    },
+    "multilingual_robustness": {
+      "identity_commitment_jaccard": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "policy_distribution_l1_distance": {
+        "mean": 0.008663666666666667,
+        "std": 0.011487385613020144
+      },
+      "narrative_prior_l1_distance": {
+        "mean": 0.0056756666666666665,
+        "std": 0.006591140838698226
+      }
+    }
+  },
+  "residual_risks": [
+    "Multilingual robustness currently covers mixed Chinese-English prompts but not broader translation families.",
+    "Conflict resolution remains bounded heuristic weighting rather than long-horizon autobiographical reconciliation."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "artifact_schema_version": "m221_v1",
+    "codebase_version": "549bf5dd38067267d91d6313d409f93131b9857d"
+  }
+}

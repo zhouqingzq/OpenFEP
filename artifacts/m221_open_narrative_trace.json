@@ -1,0 +1,5426 @@
+{
+  "schema_version": "m221_v1",
+  "seed": 221,
+  "cycles": 24,
+  "samples": {
+    "threat_hardened": {
+      "canonical": {
+        "input_text": "I survived a predator attack at the river. Later a trusted companion betrayed me near the shelter, so I learned to scan for danger before moving.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-canonical",
+              "event_type": "predator_attack",
+              "appraisal": {
+                "physical_threat": 0.95,
+                "social_threat": 0.0,
+                "uncertainty": 0.55,
+                "controllability": -0.55,
+                "novelty": 0.0,
+                "loss": 0.15,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": -0.2,
+                "meaning_violation": 0.25
+              },
+              "semantic_direction_scores": {
+                "threat": 2.9,
+                "social": 0.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 2,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": [
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-threat_hardened-canonical",
+              "counterpart_id": "former_ally",
+              "event_type": "predator_attack",
+              "trust_impact": 0.0,
+              "attachment_signal": 0.0
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 1.0,
+              "lexical_support": 1.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.333333,
+            "uncertainty_penalty": 0.55
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.95,
+            "social_threat": 0.0,
+            "uncertainty": 0.55,
+            "controllability": -0.55,
+            "novelty": 0.0,
+            "loss": 0.15,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": -0.2,
+            "meaning_violation": 0.25
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.3333333333333333,
+            "threat": 1.0
+          },
+          "semantic_bias": {
+            "threat": 1.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.215159143811346,
+            "forage": 0.05227985255307168,
+            "hide": 0.4458868645053204,
+            "rest": 0.21196825123187452,
+            "scan": 0.026410452781704882,
+            "seek_contact": 0.048295435116682495
+          },
+          "learned_preferences": [
+            "hide",
+            "exploit_shelter"
+          ],
+          "learned_avoidances": [
+            "seek_contact",
+            "scan"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.28492003374999997,
+            "trauma_bias": 0.4868451519999999,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.12039728125
+          },
+          "personality_profile": {
+            "openness": 0.4596868128676471,
+            "conscientiousness": 0.47666078639705883,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.6336700415441177,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-hide",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes hide as a bounded response style.",
+              "target_actions": [
+                "hide",
+                "exploit_shelter"
+              ],
+              "discouraged_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "confidence": 0.70423,
+              "priority": 0.7503799999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-canonical"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "former_ally": {
+                "other_id": "former_ally",
+                "display_name": "former_ally",
+                "trust": 0.25,
+                "threat": 0.2,
+                "reciprocity": 0.38,
+                "predictability": 0.485,
+                "attachment": 0.125,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 0,
+                "last_event_type": "predator_attack",
+                "tags": [
+                  "betrayal",
+                  "predator",
+                  "predator_attack",
+                  "threat"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-canonical",
+                "event_type": "predator_attack",
+                "appraisal": {
+                  "physical_threat": 0.95,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.55,
+                  "controllability": -0.55,
+                  "novelty": 0.0,
+                  "loss": 0.15,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": -0.2,
+                  "meaning_violation": 0.25
+                },
+                "semantic_direction_scores": {
+                  "threat": 2.9,
+                  "social": 0.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 2,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 0,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "direct_threat",
+                  "physical_exposure"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": [
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-threat_hardened-canonical",
+                "counterpart_id": "former_ally",
+                "event_type": "predator_attack",
+                "trust_impact": 0.0,
+                "attachment_signal": 0.0
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 1.0,
+                "lexical_support": 1.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.333333,
+              "uncertainty_penalty": 0.55
+            }
+          },
+          "conflict_score": 0.12,
+          "uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.829,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.875,
+          "exploration_rate": 0.125,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03632117652434264,
+          "survival_score": 1.4441666666666664,
+          "danger_attention_rate": 0.6413425360897532,
+          "social_attention_rate": 0.03905744333010874,
+          "novelty_attention_rate": 0.23215563597080716,
+          "oracle_regret_rate": 0.25
+        },
+        "distance_to_canonical": {},
+        "gate_passed": true
+      },
+      "paraphrase": {
+        "input_text": "After an ambush by a river predator and a betrayal at the shelter entrance, I became careful and now check for threat before exposing myself.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-paraphrase",
+              "event_type": "predator_attack",
+              "appraisal": {
+                "physical_threat": 0.95,
+                "social_threat": 0.0,
+                "uncertainty": 0.55,
+                "controllability": -0.55,
+                "novelty": 0.0,
+                "loss": 0.15,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": -0.2,
+                "meaning_violation": 0.25
+              },
+              "semantic_direction_scores": {
+                "threat": 2.9,
+                "social": 0.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 2,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": [
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-threat_hardened-paraphrase",
+              "counterpart_id": "former_ally",
+              "event_type": "predator_attack",
+              "trust_impact": 0.0,
+              "attachment_signal": 0.0
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 1.0,
+              "lexical_support": 1.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.0,
+            "uncertainty_penalty": 0.55
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.95,
+            "social_threat": 0.0,
+            "uncertainty": 0.55,
+            "controllability": -0.55,
+            "novelty": 0.0,
+            "loss": 0.15,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": -0.2,
+            "meaning_violation": 0.25
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.0,
+            "threat": 1.0
+          },
+          "semantic_bias": {
+            "threat": 1.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.21665519927845733,
+            "forage": 0.05264336747438209,
+            "hide": 0.44959716192948096,
+            "rest": 0.21344211962292706,
+            "scan": 0.026594091280971264,
+            "seek_contact": 0.04106806041378118
+          },
+          "learned_preferences": [
+            "hide",
+            "exploit_shelter"
+          ],
+          "learned_avoidances": [
+            "seek_contact",
+            "scan"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.28492003374999997,
+            "trauma_bias": 0.4868451519999999,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.12039728125
+          },
+          "personality_profile": {
+            "openness": 0.4596868128676471,
+            "conscientiousness": 0.47666078639705883,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.6336700415441177,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-hide",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes hide as a bounded response style.",
+              "target_actions": [
+                "hide",
+                "exploit_shelter"
+              ],
+              "discouraged_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "confidence": 0.70423,
+              "priority": 0.7503799999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-paraphrase"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "former_ally": {
+                "other_id": "former_ally",
+                "display_name": "former_ally",
+                "trust": 0.25,
+                "threat": 0.2,
+                "reciprocity": 0.38,
+                "predictability": 0.485,
+                "attachment": 0.125,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 0,
+                "last_event_type": "predator_attack",
+                "tags": [
+                  "ambush",
+                  "betrayal",
+                  "predator_attack",
+                  "threat"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-paraphrase",
+                "event_type": "predator_attack",
+                "appraisal": {
+                  "physical_threat": 0.95,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.55,
+                  "controllability": -0.55,
+                  "novelty": 0.0,
+                  "loss": 0.15,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": -0.2,
+                  "meaning_violation": 0.25
+                },
+                "semantic_direction_scores": {
+                  "threat": 2.9,
+                  "social": 0.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 2,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 0,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "direct_threat",
+                  "physical_exposure"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": [
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-threat_hardened-paraphrase",
+                "counterpart_id": "former_ally",
+                "event_type": "predator_attack",
+                "trust_impact": 0.0,
+                "attachment_signal": 0.0
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 1.0,
+                "lexical_support": 1.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.0,
+              "uncertainty_penalty": 0.55
+            }
+          },
+          "conflict_score": 0.12,
+          "uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.829,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.875,
+          "exploration_rate": 0.125,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03632117652434264,
+          "survival_score": 1.4441666666666664,
+          "danger_attention_rate": 0.6413425360897532,
+          "social_attention_rate": 0.03905744333010874,
+          "novelty_attention_rate": 0.23215563597080716,
+          "oracle_regret_rate": 0.25
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.002409,
+          "narrative_prior_l1_distance": 0.0,
+          "personality_profile_l1_distance": 0.0,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 1.0,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.829
+        },
+        "gate_passed": true
+      },
+      "noisy": {
+        "input_text": "The weather was ugly, someone kept talking about maps, and the campfire smoked. What mattered was this: a predator lunged near the river and a companion later betrayed me, so I scan for danger before moving.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-noisy",
+              "event_type": "predator_attack",
+              "appraisal": {
+                "physical_threat": 0.9339999999999999,
+                "social_threat": 0.0,
+                "uncertainty": 0.55,
+                "controllability": -0.55,
+                "novelty": 0.0,
+                "loss": 0.15,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": -0.2,
+                "meaning_violation": 0.25
+              },
+              "semantic_direction_scores": {
+                "threat": 1.9,
+                "social": 0.0,
+                "exploration": 1.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 1,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 0,
+                "exploration": 1,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": [
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-threat_hardened-noisy",
+              "counterpart_id": "former_ally",
+              "event_type": "predator_attack",
+              "trust_impact": 0.0,
+              "attachment_signal": 0.0
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 0.655172,
+              "lexical_support": 0.666667
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.0,
+            "uncertainty_penalty": 0.55
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.9339999999999999,
+            "social_threat": 0.0,
+            "uncertainty": 0.55,
+            "controllability": -0.55,
+            "novelty": 0.0,
+            "loss": 0.15,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": -0.2,
+            "meaning_violation": 0.25
+          },
+          "lexical_bias": {
+            "exploration": 0.3333333333333333,
+            "social": 0.0,
+            "threat": 0.6666666666666666
+          },
+          "semantic_bias": {
+            "threat": 0.655172,
+            "social": 0.0,
+            "exploration": 0.344828
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.1841095842191902,
+            "forage": 0.08905579964235424,
+            "hide": 0.3553381274810407,
+            "rest": 0.19553934274555398,
+            "scan": 0.11879137642945672,
+            "seek_contact": 0.057165769482404157
+          },
+          "learned_preferences": [
+            "hide",
+            "rest"
+          ],
+          "learned_avoidances": [
+            "forage",
+            "seek_contact"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.2309753274800521,
+            "trauma_bias": 0.4026629124541593,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.11658261393934376
+          },
+          "personality_profile": {
+            "openness": 0.4636005446581808,
+            "conscientiousness": 0.47856563122269746,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.6212016125407472,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-hide",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes hide as a bounded response style.",
+              "target_actions": [
+                "hide",
+                "rest"
+              ],
+              "discouraged_actions": [
+                "forage",
+                "seek_contact"
+              ],
+              "confidence": 0.5216662599999999,
+              "priority": 0.69614996,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-noisy"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "former_ally": {
+                "other_id": "former_ally",
+                "display_name": "former_ally",
+                "trust": 0.25,
+                "threat": 0.2,
+                "reciprocity": 0.38,
+                "predictability": 0.485,
+                "attachment": 0.125,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 0,
+                "last_event_type": "predator_attack",
+                "tags": [
+                  "betrayal",
+                  "noise",
+                  "predator",
+                  "predator_attack"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-noisy",
+                "event_type": "predator_attack",
+                "appraisal": {
+                  "physical_threat": 0.9339999999999999,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.55,
+                  "controllability": -0.55,
+                  "novelty": 0.0,
+                  "loss": 0.15,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": -0.2,
+                  "meaning_violation": 0.25
+                },
+                "semantic_direction_scores": {
+                  "threat": 1.9,
+                  "social": 0.0,
+                  "exploration": 1.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 1,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 0,
+                  "exploration": 1,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "direct_threat",
+                  "physical_exposure"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": [
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-threat_hardened-noisy",
+                "counterpart_id": "former_ally",
+                "event_type": "predator_attack",
+                "trust_impact": 0.0,
+                "attachment_signal": 0.0
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 0.655172,
+                "lexical_support": 0.666667
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.0,
+              "uncertainty_penalty": 0.55
+            }
+          },
+          "conflict_score": 0.36138,
+          "uncertainty_score": 0.428983,
+          "malformed_text_degradation_ratio": 0.692218,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.9166666666666666,
+          "exploration_rate": 0.08333333333333333,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03397700048835173,
+          "survival_score": 1.4441666666666664,
+          "danger_attention_rate": 0.6240206053360167,
+          "social_attention_rate": 0.041332849668522784,
+          "novelty_attention_rate": 0.24348511378075624,
+          "oracle_regret_rate": 0.3333333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 0.333333,
+          "policy_distribution_l1_distance": 0.046009,
+          "narrative_prior_l1_distance": 0.028388,
+          "personality_profile_l1_distance": 0.002032,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.972991,
+          "action_metric_retention": 1.047619,
+          "conflict_uncertainty_score": 0.428983,
+          "malformed_text_degradation_ratio": 0.692218
+        },
+        "gate_passed": true
+      },
+      "conflicting": {
+        "input_text": "A predator attacked me by the river and betrayal taught caution, but another ally later protected me and proved some help is real, so I stay guarded while uncertain about others.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-conflicting",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.14575000000000002,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.6406875,
+                "trust_impact": 0.51255,
+                "self_efficacy_impact": 0.17615000000000003,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 2.2,
+                "social": 2.55,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 2,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 3,
+                "exploration": 0,
+                "uncertainty": 2
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.265,
+              "conflict_cues": [
+                "contrastive_connector",
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-threat_hardened-conflicting",
+              "counterpart_id": "mixed_group",
+              "event_type": "rescue",
+              "trust_impact": 0.51255,
+              "attachment_signal": 0.6406875
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 0.536842,
+              "lexical_support": 0.88
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.466667,
+            "uncertainty_penalty": 0.14575
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.14575000000000002,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.6406875,
+            "trust_impact": 0.51255,
+            "self_efficacy_impact": 0.17615000000000003,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.5866666666666667,
+            "threat": 0.88
+          },
+          "semantic_bias": {
+            "threat": 0.463158,
+            "social": 0.536842,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.1021829022806821,
+            "forage": 0.09178014720482539,
+            "hide": 0.11749654655449339,
+            "rest": 0.12808806170726603,
+            "scan": 0.12563234582078744,
+            "seek_contact": 0.43481999643194574
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "rest"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "forage"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.19451913222839995,
+            "controllability_prior": 0.1195995529916701,
+            "trauma_bias": 0.023129626631640768,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.013414133034248524
+          },
+          "personality_profile": {
+            "openness": 0.516235401753242,
+            "conscientiousness": 0.5055229228897473,
+            "extraversion": 0.5425318819729681,
+            "agreeableness": 0.5466001489442954,
+            "neuroticism": 0.4982902318020308,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "rest"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "forage"
+              ],
+              "confidence": 0.45,
+              "priority": 0.66047874,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-conflicting"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "mixed_group": {
+                "other_id": "mixed_group",
+                "display_name": "mixed_group",
+                "trust": 0.46638050000000003,
+                "threat": 0.1,
+                "reciprocity": 0.5440902343749999,
+                "predictability": 0.6062749999999999,
+                "attachment": 0.20508593749999998,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "conflict",
+                  "predator",
+                  "repair",
+                  "rescue"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-conflicting",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.14575000000000002,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.6406875,
+                  "trust_impact": 0.51255,
+                  "self_efficacy_impact": 0.17615000000000003,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 2.2,
+                  "social": 2.55,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 2,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 3,
+                  "exploration": 0,
+                  "uncertainty": 2
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.265,
+                "conflict_cues": [
+                  "contrastive_connector",
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-threat_hardened-conflicting",
+                "counterpart_id": "mixed_group",
+                "event_type": "rescue",
+                "trust_impact": 0.51255,
+                "attachment_signal": 0.6406875
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 0.536842,
+                "lexical_support": 0.88
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.466667,
+              "uncertainty_penalty": 0.14575
+            }
+          },
+          "conflict_score": 0.564211,
+          "uncertainty_score": 0.277636,
+          "malformed_text_degradation_ratio": 0.622272,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.8333333333333334,
+          "exploration_rate": 0.125,
+          "seek_contact_rate": 0.041666666666666664,
+          "mean_conditioned_prediction_error": 0.0450322897149717,
+          "survival_score": 1.3920833333333331,
+          "danger_attention_rate": 0.568485582714553,
+          "social_attention_rate": 0.05275023369595036,
+          "novelty_attention_rate": 0.3088952749008952,
+          "oracle_regret_rate": 0.5
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 0.333333,
+          "policy_distribution_l1_distance": 0.175082,
+          "narrative_prior_l1_distance": 0.233947,
+          "personality_profile_l1_distance": 0.145547,
+          "social_snapshot_similarity": 0.694379,
+          "attention_target_consistency": 0.886399,
+          "action_metric_retention": 0.952381,
+          "conflict_uncertainty_score": 0.277636,
+          "malformed_text_degradation_ratio": 0.622272
+        },
+        "gate_passed": true
+      },
+      "adversarial_surface": {
+        "input_text": "A safety poster repeated predator predator danger danger betrayal attack, but it was only a slogan on the wall and not an actual event in my life.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-adversarial_surface",
+              "event_type": "predator_attack",
+              "appraisal": {
+                "physical_threat": 0.6497399999999999,
+                "social_threat": 0.0,
+                "uncertainty": 0.55,
+                "controllability": -0.55,
+                "novelty": 0.0,
+                "loss": 0.15,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": -0.16040000000000001,
+                "meaning_violation": 0.25
+              },
+              "semantic_direction_scores": {
+                "threat": 1.5,
+                "social": 0.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 2,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "surface_adversarial_risk": 0.44,
+              "conflict_cues": [
+                "contrastive_connector"
+              ]
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 1.0,
+              "lexical_support": 0.76
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 0.76,
+            "uncertainty_penalty": 0.55
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.6497399999999999,
+            "social_threat": 0.0,
+            "uncertainty": 0.55,
+            "controllability": -0.55,
+            "novelty": 0.0,
+            "loss": 0.15,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": -0.16040000000000001,
+            "meaning_violation": 0.25
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.0,
+            "threat": 0.76
+          },
+          "semantic_bias": {
+            "threat": 1.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.20561695378351705,
+            "forage": 0.06948420645803179,
+            "hide": 0.403620367830985,
+            "rest": 0.21284211138938264,
+            "scan": 0.0504235191823525,
+            "seek_contact": 0.058012841355731024
+          },
+          "learned_preferences": [
+            "hide",
+            "rest"
+          ],
+          "learned_avoidances": [
+            "seek_contact",
+            "scan"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.26989350437500004,
+            "trauma_bias": 0.3396302887832,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.116602703125
+          },
+          "personality_profile": {
+            "openness": 0.47348561312375004,
+            "conscientiousness": 0.47755577187500003,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.5979119250031251,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-hide",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes hide as a bounded response style.",
+              "target_actions": [
+                "hide",
+                "rest"
+              ],
+              "discouraged_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "confidence": 0.6264900000000001,
+              "priority": 0.7317899999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-adversarial_surface"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-adversarial_surface",
+                "event_type": "predator_attack",
+                "appraisal": {
+                  "physical_threat": 0.6497399999999999,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.55,
+                  "controllability": -0.55,
+                  "novelty": 0.0,
+                  "loss": 0.15,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": -0.16040000000000001,
+                  "meaning_violation": 0.25
+                },
+                "semantic_direction_scores": {
+                  "threat": 1.5,
+                  "social": 0.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 2,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 0,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "direct_threat",
+                  "physical_exposure"
+                ],
+                "surface_adversarial_risk": 0.44,
+                "conflict_cues": [
+                  "contrastive_connector"
+                ]
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 1.0,
+                "lexical_support": 0.76
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 0.76,
+              "uncertainty_penalty": 0.55
+            }
+          },
+          "conflict_score": 0.12,
+          "uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.7445,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.9166666666666666,
+          "exploration_rate": 0.08333333333333333,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03505054414270665,
+          "survival_score": 1.4441666666666664,
+          "danger_attention_rate": 0.6073072259781588,
+          "social_attention_rate": 0.04225544583737148,
+          "novelty_attention_rate": 0.25106986591652614,
+          "oracle_regret_rate": 0.3333333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 0.6,
+          "policy_distribution_l1_distance": 0.01727,
+          "narrative_prior_l1_distance": 0.033207,
+          "personality_profile_l1_distance": 0.005606,
+          "social_snapshot_similarity": 0.593333,
+          "attention_target_consistency": 0.946931,
+          "action_metric_retention": 1.047619,
+          "conflict_uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.7445
+        },
+        "gate_passed": true
+      },
+      "low_signal": {
+        "input_text": "After a bad crossing and one broken promise, I got more careful.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-low_signal",
+              "event_type": "unknown_event",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.18,
+                "controllability": 0.0,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.0,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 0.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "weak_semantic_support"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-threat_hardened-low_signal",
+              "counterpart_id": "unclear_other",
+              "event_type": "unknown_event",
+              "trust_impact": 0.0,
+              "attachment_signal": 0.0
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 0.0,
+              "lexical_support": 0.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 0.0,
+            "lexical": 0.0,
+            "uncertainty_penalty": 0.18
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.18,
+            "controllability": 0.0,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.0,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.1411846245665525,
+            "forage": 0.1668545563059257,
+            "hide": 0.1454629465231147,
+            "rest": 0.2101896794039442,
+            "scan": 0.18656692472078604,
+            "seek_contact": 0.14974126847967692
+          },
+          "learned_preferences": [
+            "rest",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "hide",
+            "exploit_shelter"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": 0.0,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.03129
+          },
+          "personality_profile": {
+            "openness": 0.5,
+            "conscientiousness": 0.4939309558823529,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.5060690441176471,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-rest",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes rest as a bounded response style.",
+              "target_actions": [
+                "rest",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "hide",
+                "exploit_shelter"
+              ],
+              "confidence": 0.45,
+              "priority": 0.6329999999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-low_signal"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "unclear_other": {
+                "other_id": "unclear_other",
+                "display_name": "unclear_other",
+                "trust": 0.25,
+                "threat": 0.2,
+                "reciprocity": 0.38,
+                "predictability": 0.596,
+                "attachment": 0.125,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 0,
+                "last_event_type": "unknown_event",
+                "tags": [
+                  "low_signal",
+                  "threat",
+                  "unknown_event"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-low_signal",
+                "event_type": "unknown_event",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.18,
+                  "controllability": 0.0,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.0,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 0.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 0,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "weak_semantic_support"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-threat_hardened-low_signal",
+                "counterpart_id": "unclear_other",
+                "event_type": "unknown_event",
+                "trust_impact": 0.0,
+                "attachment_signal": 0.0
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 0.0,
+                "lexical_support": 0.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 0.0,
+              "lexical": 0.0,
+              "uncertainty_penalty": 0.18
+            }
+          },
+          "conflict_score": 0.35,
+          "uncertainty_score": 0.5215,
+          "malformed_text_degradation_ratio": 0.4,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.875,
+          "exploration_rate": 0.125,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.056460876512282654,
+          "survival_score": 1.5412499999999998,
+          "danger_attention_rate": 0.5406259859731734,
+          "social_attention_rate": 0.0373852981076538,
+          "novelty_attention_rate": 0.32674608395998866,
+          "oracle_regret_rate": 0.3333333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 0.6,
+          "policy_distribution_l1_distance": 0.125392,
+          "narrative_prior_l1_distance": 0.172174,
+          "personality_profile_l1_distance": 0.020576,
+          "social_snapshot_similarity": 0.728091,
+          "attention_target_consistency": 0.84296,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.5215,
+          "malformed_text_degradation_ratio": 0.4
+        },
+        "gate_passed": true
+      },
+      "multilingual": {
+        "input_text": "River 边上 a predator attacked me, 后来同伴 betrayed my trust, so 现在我会先 scan danger 再行动。",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-threat_hardened-multilingual",
+              "event_type": "predator_attack",
+              "appraisal": {
+                "physical_threat": 0.95,
+                "social_threat": 0.0,
+                "uncertainty": 0.55,
+                "controllability": -0.55,
+                "novelty": 0.0,
+                "loss": 0.15,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": -0.2,
+                "meaning_violation": 0.25
+              },
+              "semantic_direction_scores": {
+                "threat": 2.9,
+                "social": 0.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 2,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": [
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-threat_hardened-multilingual",
+              "counterpart_id": "former_ally",
+              "event_type": "predator_attack",
+              "trust_impact": 0.0,
+              "attachment_signal": 0.0
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 1.0,
+              "lexical_support": 1.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.333333,
+            "uncertainty_penalty": 0.55
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.95,
+            "social_threat": 0.0,
+            "uncertainty": 0.55,
+            "controllability": -0.55,
+            "novelty": 0.0,
+            "loss": 0.15,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": -0.2,
+            "meaning_violation": 0.25
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.3333333333333333,
+            "threat": 1.0
+          },
+          "semantic_bias": {
+            "threat": 1.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.215159143811346,
+            "forage": 0.05227985255307168,
+            "hide": 0.4458868645053204,
+            "rest": 0.21196825123187452,
+            "scan": 0.026410452781704882,
+            "seek_contact": 0.048295435116682495
+          },
+          "learned_preferences": [
+            "hide",
+            "exploit_shelter"
+          ],
+          "learned_avoidances": [
+            "seek_contact",
+            "scan"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": -0.28492003374999997,
+            "trauma_bias": 0.4868451519999999,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.12039728125
+          },
+          "personality_profile": {
+            "openness": 0.4596868128676471,
+            "conscientiousness": 0.47666078639705883,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.6336700415441177,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-hide",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes hide as a bounded response style.",
+              "target_actions": [
+                "hide",
+                "exploit_shelter"
+              ],
+              "discouraged_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "confidence": 0.70423,
+              "priority": 0.7503799999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-threat_hardened-multilingual"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "former_ally": {
+                "other_id": "former_ally",
+                "display_name": "former_ally",
+                "trust": 0.25,
+                "threat": 0.2,
+                "reciprocity": 0.38,
+                "predictability": 0.485,
+                "attachment": 0.125,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 0,
+                "last_event_type": "predator_attack",
+                "tags": [
+                  "betrayal",
+                  "multilingual",
+                  "predator",
+                  "predator_attack"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-threat_hardened-multilingual",
+                "event_type": "predator_attack",
+                "appraisal": {
+                  "physical_threat": 0.95,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.55,
+                  "controllability": -0.55,
+                  "novelty": 0.0,
+                  "loss": 0.15,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": -0.2,
+                  "meaning_violation": 0.25
+                },
+                "semantic_direction_scores": {
+                  "threat": 2.9,
+                  "social": 0.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 2,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 0,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "direct_threat",
+                  "physical_exposure"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": [
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-threat_hardened-multilingual",
+                "counterpart_id": "former_ally",
+                "event_type": "predator_attack",
+                "trust_impact": 0.0,
+                "attachment_signal": 0.0
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 1.0,
+                "lexical_support": 1.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.333333,
+              "uncertainty_penalty": 0.55
+            }
+          },
+          "conflict_score": 0.12,
+          "uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.829,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.875,
+          "exploration_rate": 0.125,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03632117652434264,
+          "survival_score": 1.4441666666666664,
+          "danger_attention_rate": 0.6413425360897532,
+          "social_attention_rate": 0.03905744333010874,
+          "novelty_attention_rate": 0.23215563597080716,
+          "oracle_regret_rate": 0.25
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.0,
+          "narrative_prior_l1_distance": 0.0,
+          "personality_profile_l1_distance": 0.0,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 1.0,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.3445,
+          "malformed_text_degradation_ratio": 0.829
+        },
+        "gate_passed": true
+      }
+    },
+    "social_trusting": {
+      "canonical": {
+        "input_text": "A friend shared food, stayed nearby, and proved that safe contact can repair stress. During a shared meal I learned that cooperation keeps a group alive.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-canonical",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.027500000000000004,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.729375,
+                "trust_impact": 0.5835,
+                "self_efficacy_impact": 0.1955,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 5.7,
+                "exploration": 0.3
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 2,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 5,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.05,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-social_trusting-canonical",
+              "counterpart_id": "ally_mira",
+              "event_type": "rescue",
+              "trust_impact": 0.5835,
+              "attachment_signal": 0.729375
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 0.95,
+              "lexical_support": 1.333333
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.333333,
+            "uncertainty_penalty": 0.0275
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.027500000000000004,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.729375,
+            "trust_impact": 0.5835,
+            "self_efficacy_impact": 0.1955,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 1.3333333333333333,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.95,
+            "exploration": 0.05
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.06089787312425066,
+            "forage": 0.08299392263134203,
+            "hide": 0.00923070133889207,
+            "rest": 0.08305893594020705,
+            "scan": 0.13166244994220672,
+            "seek_contact": 0.6321561170231015
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.4153334204165625,
+            "controllability_prior": 0.20141963841515628,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.0135891025265625
+          },
+          "personality_profile": {
+            "openness": 0.5246029953710938,
+            "conscientiousness": 0.5122249550332812,
+            "extraversion": 0.5733743331950586,
+            "agreeableness": 0.5803927476745859,
+            "neuroticism": 0.49418822576011723,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.7420175000000001,
+              "priority": 0.7562675,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-canonical"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "ally_mira": {
+                "other_id": "ally_mira",
+                "display_name": "Mira",
+                "trust": 0.7441849999999999,
+                "threat": 0.0,
+                "reciprocity": 0.67573046875,
+                "predictability": 0.64175,
+                "attachment": 0.216171875,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 0,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "cooperation",
+                  "repair",
+                  "rescue",
+                  "trust"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-canonical",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.027500000000000004,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.729375,
+                  "trust_impact": 0.5835,
+                  "self_efficacy_impact": 0.1955,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 5.7,
+                  "exploration": 0.3
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 2,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 5,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.05,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-social_trusting-canonical",
+                "counterpart_id": "ally_mira",
+                "event_type": "rescue",
+                "trust_impact": 0.5835,
+                "attachment_signal": 0.729375
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 0.95,
+                "lexical_support": 1.333333
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.333333,
+              "uncertainty_penalty": 0.0275
+            }
+          },
+          "conflict_score": 0.035,
+          "uncertainty_score": 0.027375,
+          "malformed_text_degradation_ratio": 0.817125,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7083333333333334,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.08333333333333333,
+          "mean_conditioned_prediction_error": 0.035030863369670755,
+          "survival_score": 1.3716666666666664,
+          "danger_attention_rate": 0.3435627089090892,
+          "social_attention_rate": 0.2455494467819203,
+          "novelty_attention_rate": 0.27319575537208024,
+          "oracle_regret_rate": 0.5
+        },
+        "distance_to_canonical": {},
+        "gate_passed": true
+      },
+      "paraphrase": {
+        "input_text": "An ally protected me, shared provisions, and showed that trusted cooperation can calm stress. I came to believe groups survive by helping each other.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-paraphrase",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.0,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.75,
+                "trust_impact": 0.6,
+                "self_efficacy_impact": 0.2,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 4.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 4,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-social_trusting-paraphrase",
+              "counterpart_id": "ally_mira",
+              "event_type": "rescue",
+              "trust_impact": 0.6,
+              "attachment_signal": 0.75
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 1.0,
+              "lexical_support": 1.333333
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.333333,
+            "uncertainty_penalty": 0.0
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.0,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.75,
+            "trust_impact": 0.6,
+            "self_efficacy_impact": 0.2,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 1.3333333333333333,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 1.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.05903475550974653,
+            "forage": 0.07841668279381876,
+            "hide": 0.004958842744487963,
+            "rest": 0.07971034564603852,
+            "scan": 0.12202194352166038,
+            "seek_contact": 0.655857429784248
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.450696,
+            "controllability_prior": 0.20635799999999999,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.016880000000000003
+          },
+          "personality_profile": {
+            "openness": 0.5256365000000001,
+            "conscientiousness": 0.5136728,
+            "extraversion": 0.5786186,
+            "agreeableness": 0.5861386399999999,
+            "neuroticism": 0.49316360000000004,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.7764800000000001,
+              "priority": 0.7656799999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-paraphrase"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "ally_mira": {
+                "other_id": "ally_mira",
+                "display_name": "Mira",
+                "trust": 0.746,
+                "threat": 0.0,
+                "reciprocity": 0.6784374999999999,
+                "predictability": 0.6499999999999999,
+                "attachment": 0.21875,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 0,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "ally",
+                  "cooperation",
+                  "rescue",
+                  "trust"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-paraphrase",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.0,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.75,
+                  "trust_impact": 0.6,
+                  "self_efficacy_impact": 0.2,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 4.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 4,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-social_trusting-paraphrase",
+                "counterpart_id": "ally_mira",
+                "event_type": "rescue",
+                "trust_impact": 0.6,
+                "attachment_signal": 0.75
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 1.0,
+                "lexical_support": 1.333333
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.333333,
+              "uncertainty_penalty": 0.0
+            }
+          },
+          "conflict_score": 0.0,
+          "uncertainty_score": 0.0,
+          "malformed_text_degradation_ratio": 0.844,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7083333333333334,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.08333333333333333,
+          "mean_conditioned_prediction_error": 0.035232623546231114,
+          "survival_score": 1.3716666666666664,
+          "danger_attention_rate": 0.34021109448391196,
+          "social_attention_rate": 0.2523814750230972,
+          "novelty_attention_rate": 0.2709053455183927,
+          "oracle_regret_rate": 0.5
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.0079,
+          "narrative_prior_l1_distance": 0.008718,
+          "personality_profile_l1_distance": 0.001611,
+          "social_snapshot_similarity": 0.997442,
+          "attention_target_consistency": 0.972177,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.0,
+          "malformed_text_degradation_ratio": 0.844
+        },
+        "gate_passed": true
+      },
+      "noisy": {
+        "input_text": "Someone argued about trails, the shelter smelled strange, and a pot kept boiling over. Still, a friend shared food, stayed close, and cooperation taught me that safe contact keeps us alive.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-noisy",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.0,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.75,
+                "trust_impact": 0.6,
+                "self_efficacy_impact": 0.2,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 3.35,
+                "exploration": 1.15
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 1,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 3,
+                "exploration": 1,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-social_trusting-noisy",
+              "counterpart_id": "ally_mira",
+              "event_type": "rescue",
+              "trust_impact": 0.6,
+              "attachment_signal": 0.75
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 0.744444,
+              "lexical_support": 1.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.333333,
+            "uncertainty_penalty": 0.0
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.0,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.75,
+            "trust_impact": 0.6,
+            "self_efficacy_impact": 0.2,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.3333333333333333,
+            "social": 1.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.744444,
+            "exploration": 0.255556
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.06392861329591754,
+            "forage": 0.0992231787054621,
+            "hide": 0.01996222765941636,
+            "rest": 0.08841994636303432,
+            "scan": 0.17302781592663927,
+            "seek_contact": 0.5554382180495304
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.3339922379043893,
+            "controllability_prior": 0.19133289340877283,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.008897808527506004
+          },
+          "personality_profile": {
+            "openness": 0.5215238470722499,
+            "conscientiousness": 0.5114793851052,
+            "extraversion": 0.5660064643548994,
+            "agreeableness": 0.5723201261627594,
+            "neuroticism": 0.4942603074474,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.6403968600000001,
+              "priority": 0.72530226,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-noisy"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "ally_mira": {
+                "other_id": "ally_mira",
+                "display_name": "Mira",
+                "trust": 0.746,
+                "threat": 0.0,
+                "reciprocity": 0.6784374999999999,
+                "predictability": 0.6499999999999999,
+                "attachment": 0.21875,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 0,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "cooperation",
+                  "noise",
+                  "rescue",
+                  "trust"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-noisy",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.0,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.75,
+                  "trust_impact": 0.6,
+                  "self_efficacy_impact": 0.2,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 3.35,
+                  "exploration": 1.15
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 1,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 3,
+                  "exploration": 1,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-social_trusting-noisy",
+                "counterpart_id": "ally_mira",
+                "event_type": "rescue",
+                "trust_impact": 0.6,
+                "attachment_signal": 0.75
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 0.744444,
+                "lexical_support": 1.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.333333,
+              "uncertainty_penalty": 0.0
+            }
+          },
+          "conflict_score": 0.178889,
+          "uncertainty_score": 0.062611,
+          "malformed_text_degradation_ratio": 0.741778,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7083333333333334,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.08333333333333333,
+          "mean_conditioned_prediction_error": 0.03343488302790183,
+          "survival_score": 1.3716666666666664,
+          "danger_attention_rate": 0.3526131934854038,
+          "social_attention_rate": 0.22485302388129666,
+          "novelty_attention_rate": 0.2805009913247773,
+          "oracle_regret_rate": 0.5
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.025573,
+          "narrative_prior_l1_distance": 0.019224,
+          "personality_profile_l1_distance": 0.002149,
+          "social_snapshot_similarity": 0.997442,
+          "attention_target_consistency": 0.915714,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.062611,
+          "malformed_text_degradation_ratio": 0.741778
+        },
+        "gate_passed": true
+      },
+      "conflicting": {
+        "input_text": "One person once excluded me, but later a friend protected me, shared food, and rebuilt trust, so I lean toward contact while keeping some uncertainty.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-conflicting",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.0,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.75,
+                "trust_impact": 0.6,
+                "self_efficacy_impact": 0.2,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.9,
+                "social": 3.35,
+                "exploration": 0.15
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 1,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 1,
+                "rescue": 3,
+                "exploration": 0,
+                "uncertainty": 2
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": [
+                "contrastive_connector",
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-social_trusting-conflicting",
+              "counterpart_id": "mixed_group",
+              "event_type": "rescue",
+              "trust_impact": 0.6,
+              "attachment_signal": 0.75
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 0.761364,
+              "lexical_support": 1.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.0,
+            "uncertainty_penalty": 0.0
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.0,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.75,
+            "trust_impact": 0.6,
+            "self_efficacy_impact": 0.2,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 1.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.204545,
+            "social": 0.761364,
+            "exploration": 0.034091
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.07493313581190117,
+            "forage": 0.08502808914044097,
+            "hide": 0.04723097083872698,
+            "rest": 0.09858373842010668,
+            "scan": 0.12923411138271418,
+            "seek_contact": 0.5649899544061101
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.3121212270881218,
+            "controllability_prior": 0.16034857888012963,
+            "trauma_bias": 0.01319376430443884,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.001837398210114003
+          },
+          "personality_profile": {
+            "openness": 0.5204911553082934,
+            "conscientiousness": 0.5109286161644231,
+            "extraversion": 0.5628395429454328,
+            "agreeableness": 0.5688502818358656,
+            "neuroticism": 0.49453569191778846,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.5958107200000001,
+              "priority": 0.7051688199999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-conflicting"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "mixed_group": {
+                "other_id": "mixed_group",
+                "display_name": "mixed_group",
+                "trust": 0.47600000000000003,
+                "threat": 0.1,
+                "reciprocity": 0.5584374999999999,
+                "predictability": 0.6499999999999999,
+                "attachment": 0.21875,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 1,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "conflict",
+                  "repair",
+                  "rescue",
+                  "trust"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-conflicting",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.0,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.75,
+                  "trust_impact": 0.6,
+                  "self_efficacy_impact": 0.2,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.9,
+                  "social": 3.35,
+                  "exploration": 0.15
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 1,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 1,
+                  "rescue": 3,
+                  "exploration": 0,
+                  "uncertainty": 2
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": [
+                  "contrastive_connector",
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-social_trusting-conflicting",
+                "counterpart_id": "mixed_group",
+                "event_type": "rescue",
+                "trust_impact": 0.6,
+                "attachment_signal": 0.75
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 0.761364,
+                "lexical_support": 1.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.0,
+              "uncertainty_penalty": 0.0
+            }
+          },
+          "conflict_score": 0.395113,
+          "uncertainty_score": 0.13829,
+          "malformed_text_degradation_ratio": 0.748546,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7083333333333334,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.08333333333333333,
+          "mean_conditioned_prediction_error": 0.03343634739674771,
+          "survival_score": 1.3716666666666664,
+          "danger_attention_rate": 0.36193119296762005,
+          "social_attention_rate": 0.21684371668845898,
+          "novelty_attention_rate": 0.27959193350233474,
+          "oracle_regret_rate": 0.5
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.023198,
+          "narrative_prior_l1_distance": 0.033846,
+          "personality_profile_l1_distance": 0.003093,
+          "social_snapshot_similarity": 0.610816,
+          "attention_target_consistency": 0.883096,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.13829,
+          "malformed_text_degradation_ratio": 0.748546
+        },
+        "gate_passed": true
+      },
+      "adversarial_surface": {
+        "input_text": "A training chant repeated trust trust friend friend help help, but nobody actually cooperated with me and the words were only painted on a poster.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-adversarial_surface",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.12100000000000001,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.65925,
+                "trust_impact": 0.5274,
+                "self_efficacy_impact": 0.18020000000000003,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 3.55,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 4,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.22,
+              "conflict_cues": [
+                "contrastive_connector"
+              ]
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 1.0,
+              "lexical_support": 1.466667
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.466667,
+            "uncertainty_penalty": 0.121
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.12100000000000001,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.65925,
+            "trust_impact": 0.5274,
+            "self_efficacy_impact": 0.18020000000000003,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 1.4666666666666668,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 1.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.06231786464088166,
+            "forage": 0.08223178496437959,
+            "hide": 0.010886385718666463,
+            "rest": 0.08701077578913774,
+            "scan": 0.1276703390022486,
+            "seek_contact": 0.629882849884686
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.3857293547099999,
+            "controllability_prior": 0.18736401379499998,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.0053638964500000025
+          },
+          "personality_profile": {
+            "openness": 0.5239761265625,
+            "conscientiousness": 0.508942562405,
+            "extraversion": 0.564630046761875,
+            "agreeableness": 0.57081205123475,
+            "neuroticism": 0.49681810160375,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.7137950000000001,
+              "priority": 0.7470249999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-adversarial_surface"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-adversarial_surface",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.12100000000000001,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.65925,
+                  "trust_impact": 0.5274,
+                  "self_efficacy_impact": 0.18020000000000003,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 3.55,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 4,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.22,
+                "conflict_cues": [
+                  "contrastive_connector"
+                ]
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 1.0,
+                "lexical_support": 1.466667
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.466667,
+              "uncertainty_penalty": 0.121
+            }
+          },
+          "conflict_score": 0.12,
+          "uncertainty_score": 0.10855,
+          "malformed_text_degradation_ratio": 0.81375,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7916666666666666,
+          "exploration_rate": 0.16666666666666666,
+          "seek_contact_rate": 0.041666666666666664,
+          "mean_conditioned_prediction_error": 0.031874878744995234,
+          "survival_score": 1.3737499999999998,
+          "danger_attention_rate": 0.347340793185956,
+          "social_attention_rate": 0.2324047758852087,
+          "novelty_attention_rate": 0.28076450886086973,
+          "oracle_regret_rate": 0.3333333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.002343,
+          "narrative_prior_l1_distance": 0.010377,
+          "personality_profile_l1_distance": 0.002763,
+          "social_snapshot_similarity": 0.453694,
+          "attention_target_consistency": 0.946468,
+          "action_metric_retention": 0.5,
+          "conflict_uncertainty_score": 0.10855,
+          "malformed_text_degradation_ratio": 0.81375
+        },
+        "gate_passed": true
+      },
+      "low_signal": {
+        "input_text": "A person stayed, shared a little, and I softened toward others.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-low_signal",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.18,
+                "controllability": 0.2025,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.3285,
+                "trust_impact": 0.27,
+                "self_efficacy_impact": 0.09000000000000001,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 1.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 1,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received",
+                "weak_semantic_support"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-social_trusting-low_signal",
+              "counterpart_id": "quiet_ally",
+              "event_type": "rescue",
+              "trust_impact": 0.27,
+              "attachment_signal": 0.3285
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 1.0,
+              "lexical_support": 0.333333
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 0.333333,
+            "uncertainty_penalty": 0.18
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.18,
+            "controllability": 0.2025,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.3285,
+            "trust_impact": 0.27,
+            "self_efficacy_impact": 0.09000000000000001,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.3333333333333333,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 1.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.09390745153111756,
+            "forage": 0.11487061699395112,
+            "hide": 0.06624109753077834,
+            "rest": 0.1387243602089072,
+            "scan": 0.14389188598954294,
+            "seek_contact": 0.4423645877457029
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.1797974814,
+            "controllability_prior": 0.055599263325,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.027372003000000002
+          },
+          "personality_profile": {
+            "openness": 0.5069072704437501,
+            "conscientiousness": 0.50122795919,
+            "extraversion": 0.5208139082705,
+            "agreeableness": 0.522962836853,
+            "neuroticism": 0.500613979595,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.45,
+              "priority": 0.69117326,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-low_signal"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "quiet_ally": {
+                "other_id": "quiet_ally",
+                "display_name": "quiet_ally",
+                "trust": 0.7097,
+                "threat": 0.0,
+                "reciprocity": 0.624015625,
+                "predictability": 0.596,
+                "attachment": 0.1660625,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 0,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "low_signal",
+                  "rescue",
+                  "trust"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-low_signal",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.18,
+                  "controllability": 0.2025,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.3285,
+                  "trust_impact": 0.27,
+                  "self_efficacy_impact": 0.09000000000000001,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 1.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 1,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received",
+                  "weak_semantic_support"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-social_trusting-low_signal",
+                "counterpart_id": "quiet_ally",
+                "event_type": "rescue",
+                "trust_impact": 0.27,
+                "attachment_signal": 0.3285
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 1.0,
+                "lexical_support": 0.333333
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 0.333333,
+              "uncertainty_penalty": 0.18
+            }
+          },
+          "conflict_score": 0.0,
+          "uncertainty_score": 0.399,
+          "malformed_text_degradation_ratio": 0.505333,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7083333333333334,
+          "exploration_rate": 0.25,
+          "seek_contact_rate": 0.041666666666666664,
+          "mean_conditioned_prediction_error": 0.03345213776870473,
+          "survival_score": 1.3691666666666664,
+          "danger_attention_rate": 0.372920200927292,
+          "social_attention_rate": 0.1723237934992686,
+          "novelty_attention_rate": 0.3051119356426347,
+          "oracle_regret_rate": 0.4583333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.063264,
+          "narrative_prior_l1_distance": 0.084463,
+          "personality_profile_l1_distance": 0.016123,
+          "social_snapshot_similarity": 0.602399,
+          "attention_target_consistency": 0.701789,
+          "action_metric_retention": 0.5,
+          "conflict_uncertainty_score": 0.399,
+          "malformed_text_degradation_ratio": 0.505333
+        },
+        "gate_passed": true
+      },
+      "multilingual": {
+        "input_text": "朋友 shared food, stayed nearby, and safe contact 让我更信任 others; cooperation 一起 keeps the group alive.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-social_trusting-multilingual",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.0,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.75,
+                "trust_impact": 0.6,
+                "self_efficacy_impact": 0.2,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 3.35,
+                "exploration": 0.15
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 1,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 3,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [
+            {
+              "episode_id": "m221-social_trusting-multilingual",
+              "counterpart_id": "ally_mira",
+              "event_type": "rescue",
+              "trust_impact": 0.6,
+              "attachment_signal": 0.75
+            }
+          ],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 0.957143,
+              "lexical_support": 1.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.0,
+            "uncertainty_penalty": 0.0
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.0,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.75,
+            "trust_impact": 0.6,
+            "self_efficacy_impact": 0.2,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 1.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.957143,
+            "exploration": 0.042857
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.06071373641453935,
+            "forage": 0.08250771279661516,
+            "hide": 0.008803310893757894,
+            "rest": 0.08240747506840403,
+            "scan": 0.13012909471815515,
+            "seek_contact": 0.6354386701085285
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.42397611093970494,
+            "controllability_prior": 0.20160494167427576,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.015311469970000005
+          },
+          "personality_profile": {
+            "openness": 0.5246044160478125,
+            "conscientiousness": 0.5131223552255,
+            "extraversion": 0.575453542546625,
+            "agreeableness": 0.58267083792065,
+            "neuroticism": 0.49343882238725,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.74380156,
+              "priority": 0.75655146,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-social_trusting-multilingual"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {
+              "ally_mira": {
+                "other_id": "ally_mira",
+                "display_name": "Mira",
+                "trust": 0.746,
+                "threat": 0.0,
+                "reciprocity": 0.6784374999999999,
+                "predictability": 0.6499999999999999,
+                "attachment": 0.21875,
+                "interaction_count": 1,
+                "last_seen_tick": 1,
+                "rupture_count": 0,
+                "repair_count": 1,
+                "last_event_type": "rescue",
+                "tags": [
+                  "cooperation",
+                  "multilingual",
+                  "rescue",
+                  "trust"
+                ]
+              }
+            },
+            "history_size": 1
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-social_trusting-multilingual",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.0,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.75,
+                  "trust_impact": 0.6,
+                  "self_efficacy_impact": 0.2,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 3.35,
+                  "exploration": 0.15
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 1,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 3,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [
+              {
+                "episode_id": "m221-social_trusting-multilingual",
+                "counterpart_id": "ally_mira",
+                "event_type": "rescue",
+                "trust_impact": 0.6,
+                "attachment_signal": 0.75
+              }
+            ],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 0.957143,
+                "lexical_support": 1.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.0,
+              "uncertainty_penalty": 0.0
+            }
+          },
+          "conflict_score": 0.03,
+          "uncertainty_score": 0.0105,
+          "malformed_text_degradation_ratio": 0.816143,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7916666666666666,
+          "exploration_rate": 0.16666666666666666,
+          "seek_contact_rate": 0.041666666666666664,
+          "mean_conditioned_prediction_error": 0.032124357821414984,
+          "survival_score": 1.3737499999999998,
+          "danger_attention_rate": 0.34392866633127567,
+          "social_attention_rate": 0.23965121439407908,
+          "novelty_attention_rate": 0.2783044156835963,
+          "oracle_regret_rate": 0.3333333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.001094,
+          "narrative_prior_l1_distance": 0.00211,
+          "personality_profile_l1_distance": 0.000667,
+          "social_snapshot_similarity": 0.997442,
+          "attention_target_consistency": 0.975979,
+          "action_metric_retention": 0.5,
+          "conflict_uncertainty_score": 0.0105,
+          "malformed_text_degradation_ratio": 0.816143
+        },
+        "gate_passed": true
+      }
+    },
+    "exploratory_adaptive": {
+      "canonical": {
+        "input_text": "I mapped an unfamiliar trail, explored the valley edge, and discovered that curious experiments often reveal safe resources. When the world became too legible, I searched for new signals and adapted by exploring first.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-canonical",
+              "event_type": "exploration",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.3,
+                "controllability": 0.4,
+                "novelty": 0.6355,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.1914,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 0.7,
+                "exploration": 13.3
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 2,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 13,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "active_probing",
+                "novelty_engagement"
+              ],
+              "surface_adversarial_risk": 0.45,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "exploration",
+              "semantic_support": 0.95,
+              "lexical_support": 3.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 3.0,
+            "uncertainty_penalty": 0.3
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.3,
+            "controllability": 0.4,
+            "novelty": 0.6355,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.1914,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 3.0,
+            "social": 0.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.05,
+            "exploration": 0.95
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.0782337303653409,
+            "forage": 0.19375537038719995,
+            "hide": 0.07058341357614072,
+            "rest": 0.11138320970957132,
+            "scan": 0.4449182630799289,
+            "seek_contact": 0.10112601288181833
+          },
+          "learned_preferences": [
+            "scan",
+            "forage"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.007904284171875,
+            "controllability_prior": 0.2515775566224375,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.00022838086187500044
+          },
+          "personality_profile": {
+            "openness": 0.5463223204620312,
+            "conscientiousness": 0.5055929459580313,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.5002631254662968,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-scan",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes scan as a bounded response style.",
+              "target_actions": [
+                "scan",
+                "forage"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.6764300000000001,
+              "priority": 0.7441675,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-canonical"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-canonical",
+                "event_type": "exploration",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.3,
+                  "controllability": 0.4,
+                  "novelty": 0.6355,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.1914,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 0.7,
+                  "exploration": 13.3
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 2,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 0,
+                  "exploration": 13,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "active_probing",
+                  "novelty_engagement"
+                ],
+                "surface_adversarial_risk": 0.45,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "exploration",
+                "semantic_support": 0.95,
+                "lexical_support": 3.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 3.0,
+              "uncertainty_penalty": 0.3
+            }
+          },
+          "conflict_score": 0.035,
+          "uncertainty_score": 0.17725,
+          "malformed_text_degradation_ratio": 0.762125,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7916666666666666,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03518308289532792,
+          "survival_score": 1.3599999999999997,
+          "danger_attention_rate": 0.2975003037891665,
+          "social_attention_rate": 0.04623450275990639,
+          "novelty_attention_rate": 0.48941334909208367,
+          "oracle_regret_rate": 0.4166666666666667
+        },
+        "distance_to_canonical": {},
+        "gate_passed": true
+      },
+      "paraphrase": {
+        "input_text": "By charting a new route and testing unfamiliar terrain, I learned that probing the environment uncovers useful resources, so I adapt by exploring before settling.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-paraphrase",
+              "event_type": "exploration",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.3,
+                "controllability": 0.4,
+                "novelty": 0.8059999999999999,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.24,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 0.35,
+                "exploration": 2.15
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 1,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 2,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "active_probing",
+                "novelty_engagement"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "exploration",
+              "semantic_support": 0.86,
+              "lexical_support": 0.666667
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 0.666667,
+            "uncertainty_penalty": 0.3
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.3,
+            "controllability": 0.4,
+            "novelty": 0.8059999999999999,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.24,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.6666666666666666,
+            "social": 0.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.14,
+            "exploration": 0.86
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.07763173954883078,
+            "forage": 0.1888058998605716,
+            "hide": 0.06837584617407963,
+            "rest": 0.11115043903823467,
+            "scan": 0.43045055717096736,
+            "seek_contact": 0.12358551820731595
+          },
+          "learned_preferences": [
+            "scan",
+            "forage"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.02139779692386,
+            "controllability_prior": 0.24279949162584,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.0015235893256000006
+          },
+          "personality_profile": {
+            "openness": 0.5518493970260541,
+            "conscientiousness": 0.5083371924773901,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.49880897250323,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-scan",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes scan as a bounded response style.",
+              "target_actions": [
+                "scan",
+                "forage"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.6538436400000001,
+              "priority": 0.7360067399999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-paraphrase"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-paraphrase",
+                "event_type": "exploration",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.3,
+                  "controllability": 0.4,
+                  "novelty": 0.8059999999999999,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.24,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 0.35,
+                  "exploration": 2.15
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 1,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 0,
+                  "exploration": 2,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "active_probing",
+                  "novelty_engagement"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "exploration",
+                "semantic_support": 0.86,
+                "lexical_support": 0.666667
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 0.666667,
+              "uncertainty_penalty": 0.3
+            }
+          },
+          "conflict_score": 0.098,
+          "uncertainty_score": 0.1993,
+          "malformed_text_degradation_ratio": 0.753667,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7916666666666666,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03518245132927019,
+          "survival_score": 1.3599999999999997,
+          "danger_attention_rate": 0.29644277034600075,
+          "social_attention_rate": 0.04952010344791925,
+          "novelty_attention_rate": 0.48772023151976596,
+          "oracle_regret_rate": 0.4166666666666667
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.007487,
+          "narrative_prior_l1_distance": 0.004713,
+          "personality_profile_l1_distance": 0.001081,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.996541,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.1993,
+          "malformed_text_degradation_ratio": 0.753667
+        },
+        "gate_passed": true
+      },
+      "noisy": {
+        "input_text": "The valley was windy, my boots were wet, and someone kept muttering about shelter doors. The important part is that I mapped a new trail, experimented, and found safe resources by exploring first.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-noisy",
+              "event_type": "exploration",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.3,
+                "controllability": 0.4,
+                "novelty": 0.82,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.24,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 0.7,
+                "exploration": 4.3
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 2,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 4,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "active_probing",
+                "novelty_engagement"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "exploration",
+              "semantic_support": 0.86,
+              "lexical_support": 1.666667
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.666667,
+            "uncertainty_penalty": 0.3
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.3,
+            "controllability": 0.4,
+            "novelty": 0.82,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.24,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 1.6666666666666667,
+            "social": 0.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.14,
+            "exploration": 0.86
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.07437453239197779,
+            "forage": 0.19007239786037827,
+            "hide": 0.06450637767721348,
+            "rest": 0.10649907675607627,
+            "scan": 0.4438874120818976,
+            "seek_contact": 0.12066020323245656
+          },
+          "learned_preferences": [
+            "scan",
+            "forage"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.02237256504,
+            "controllability_prior": 0.25386012576000005,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.0023193184000000026
+          },
+          "personality_profile": {
+            "openness": 0.55479250832,
+            "conscientiousness": 0.50871698996,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.49875471572,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-scan",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes scan as a bounded response style.",
+              "target_actions": [
+                "scan",
+                "forage"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.6854300000000001,
+              "priority": 0.74356,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-noisy"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-noisy",
+                "event_type": "exploration",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.3,
+                  "controllability": 0.4,
+                  "novelty": 0.82,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.24,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 0.7,
+                  "exploration": 4.3
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 2,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 0,
+                  "exploration": 4,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "active_probing",
+                  "novelty_engagement"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "exploration",
+                "semantic_support": 0.86,
+                "lexical_support": 1.666667
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.666667,
+              "uncertainty_penalty": 0.3
+            }
+          },
+          "conflict_score": 0.098,
+          "uncertainty_score": 0.1993,
+          "malformed_text_degradation_ratio": 0.788,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7916666666666666,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03518255681253461,
+          "survival_score": 1.3599999999999997,
+          "danger_attention_rate": 0.2963637288219295,
+          "social_attention_rate": 0.04975639357613416,
+          "novelty_attention_rate": 0.4876002302761658,
+          "oracle_regret_rate": 0.4166666666666667
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.006511,
+          "narrative_prior_l1_distance": 0.003768,
+          "personality_profile_l1_distance": 0.001456,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.996295,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.1993,
+          "malformed_text_degradation_ratio": 0.788
+        },
+        "gate_passed": true
+      },
+      "conflicting": {
+        "input_text": "Exploring new trails usually helped me adapt and find resources, but one dangerous crossing reminded me not every unknown is safe, so I stay exploratory with some caution.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-conflicting",
+              "event_type": "rescue",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.13475,
+                "controllability": 0.45,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.6489375,
+                "trust_impact": 0.51915,
+                "self_efficacy_impact": 0.17795000000000002,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 2.9,
+                "exploration": 1.75
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 1,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 3,
+                "exploration": 2,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "cooperation",
+                "support_received"
+              ],
+              "surface_adversarial_risk": 0.245,
+              "conflict_cues": [
+                "contrastive_connector",
+                "temporal_shift"
+              ]
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "social",
+              "semantic_support": 0.623656,
+              "lexical_support": 0.88
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.466667,
+            "uncertainty_penalty": 0.13475
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.13475,
+            "controllability": 0.45,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.6489375,
+            "trust_impact": 0.51915,
+            "self_efficacy_impact": 0.17795000000000002,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.88,
+            "social": 0.5866666666666667,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.623656,
+            "exploration": 0.376344
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.07090473543656212,
+            "forage": 0.11411713839249334,
+            "hide": 0.035446124275305115,
+            "rest": 0.10261701832078168,
+            "scan": 0.20325037455625963,
+            "seek_contact": 0.4736646090185981
+          },
+          "learned_preferences": [
+            "seek_contact",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.22354495731970442,
+            "controllability_prior": 0.15491329080835056,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.010353836068673714
+          },
+          "personality_profile": {
+            "openness": 0.5175175989834138,
+            "conscientiousness": 0.5062144655593603,
+            "extraversion": 0.5464817810625561,
+            "agreeableness": 0.5509278644685397,
+            "neuroticism": 0.4979418767594376,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-seek_contact",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
+              "target_actions": [
+                "seek_contact",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.48124734,
+              "priority": 0.6748002399999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-conflicting"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-conflicting",
+                "event_type": "rescue",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.13475,
+                  "controllability": 0.45,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.6489375,
+                  "trust_impact": 0.51915,
+                  "self_efficacy_impact": 0.17795000000000002,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 2.9,
+                  "exploration": 1.75
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 1,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 3,
+                  "exploration": 2,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "cooperation",
+                  "support_received"
+                ],
+                "surface_adversarial_risk": 0.245,
+                "conflict_cues": [
+                  "contrastive_connector",
+                  "temporal_shift"
+                ]
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "social",
+                "semantic_support": 0.623656,
+                "lexical_support": 0.88
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.466667,
+              "uncertainty_penalty": 0.13475
+            }
+          },
+          "conflict_score": 0.503441,
+          "uncertainty_score": 0.250317,
+          "malformed_text_degradation_ratio": 0.659747,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.5416666666666666,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.25,
+          "mean_conditioned_prediction_error": 0.04049873343532694,
+          "survival_score": 1.4241666666666664,
+          "danger_attention_rate": 0.26982426763775447,
+          "social_attention_rate": 0.17033037874079124,
+          "novelty_attention_rate": 0.4194272533185447,
+          "oracle_regret_rate": 0.8333333333333334
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 0.6,
+          "policy_distribution_l1_distance": 0.12418,
+          "narrative_prior_l1_distance": 0.064577,
+          "personality_profile_l1_distance": 0.014351,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.857,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.250317,
+          "malformed_text_degradation_ratio": 0.659747
+        },
+        "gate_passed": true
+      },
+      "adversarial_surface": {
+        "input_text": "A brochure kept repeating explore map experiment curiosity, but it described a game manual rather than my own experience, so those words do not prove I am exploratory.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-adversarial_surface",
+              "event_type": "exploration",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.3,
+                "controllability": 0.4,
+                "novelty": 0.7298,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.21624,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 0.0,
+                "exploration": 2.6
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 3,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "active_probing",
+                "novelty_engagement"
+              ],
+              "surface_adversarial_risk": 0.22,
+              "conflict_cues": [
+                "contrastive_connector"
+              ]
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "exploration",
+              "semantic_support": 1.0,
+              "lexical_support": 1.173333
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 1.173333,
+            "uncertainty_penalty": 0.3
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.3,
+            "controllability": 0.4,
+            "novelty": 0.7298,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.21624,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 1.1733333333333333,
+            "social": 0.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.0,
+            "exploration": 1.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.07398209107493792,
+            "forage": 0.19796012536306443,
+            "hide": 0.06647774479899958,
+            "rest": 0.10617111738955151,
+            "scan": 0.47169509837493134,
+            "seek_contact": 0.08371382299851533
+          },
+          "learned_preferences": [
+            "scan",
+            "forage"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": 0.3019543367905,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": 0.0002231068050000005
+          },
+          "personality_profile": {
+            "openness": 0.6036506411066176,
+            "conscientiousness": 0.5146954999051471,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.4989734389261029,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-scan",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes scan as a bounded response style.",
+              "target_actions": [
+                "scan",
+                "forage"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.70395,
+              "priority": 0.7470249999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-adversarial_surface"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-adversarial_surface",
+                "event_type": "exploration",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.3,
+                  "controllability": 0.4,
+                  "novelty": 0.7298,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.21624,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 0.0,
+                  "exploration": 2.6
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 0,
+                  "exploration": 3,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "active_probing",
+                  "novelty_engagement"
+                ],
+                "surface_adversarial_risk": 0.22,
+                "conflict_cues": [
+                  "contrastive_connector"
+                ]
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "exploration",
+                "semantic_support": 1.0,
+                "lexical_support": 1.173333
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 1.173333,
+              "uncertainty_penalty": 0.3
+            }
+          },
+          "conflict_score": 0.12,
+          "uncertainty_score": 0.207,
+          "malformed_text_degradation_ratio": 0.81375,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.8333333333333334,
+          "exploration_rate": 0.16666666666666666,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.04427047980355233,
+          "survival_score": 1.6462499999999998,
+          "danger_attention_rate": 0.27957260097690423,
+          "social_attention_rate": 0.03540387782792327,
+          "novelty_attention_rate": 0.48199460567965713,
+          "oracle_regret_rate": 0.7916666666666666
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.010327,
+          "narrative_prior_l1_distance": 0.011657,
+          "personality_profile_l1_distance": 0.118636,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.984842,
+          "action_metric_retention": 0.8,
+          "conflict_uncertainty_score": 0.207,
+          "malformed_text_degradation_ratio": 0.81375
+        },
+        "gate_passed": true
+      },
+      "low_signal": {
+        "input_text": "I kept trying new routes and adjusted when things changed.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-low_signal",
+              "event_type": "unknown_event",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.18,
+                "controllability": 0.0,
+                "novelty": 0.0,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.0,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 0.0,
+                "exploration": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "weak_semantic_support"
+              ],
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "threat",
+              "semantic_support": 0.0,
+              "lexical_support": 0.0
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 0.0,
+            "lexical": 0.0,
+            "uncertainty_penalty": 0.18
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.18,
+            "controllability": 0.0,
+            "novelty": 0.0,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.0,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 0.0,
+            "social": 0.0,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.1411846245665525,
+            "forage": 0.1668545563059257,
+            "hide": 0.1454629465231147,
+            "rest": 0.2101896794039442,
+            "scan": 0.18656692472078604,
+            "seek_contact": 0.14974126847967692
+          },
+          "learned_preferences": [
+            "rest",
+            "scan"
+          ],
+          "learned_avoidances": [
+            "hide",
+            "exploit_shelter"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.0,
+            "controllability_prior": 0.0,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.03129
+          },
+          "personality_profile": {
+            "openness": 0.5,
+            "conscientiousness": 0.4939309558823529,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.5060690441176471,
+            "update_count": 2,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-rest",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes rest as a bounded response style.",
+              "target_actions": [
+                "rest",
+                "scan"
+              ],
+              "discouraged_actions": [
+                "hide",
+                "exploit_shelter"
+              ],
+              "confidence": 0.45,
+              "priority": 0.6329999999999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-low_signal"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-low_signal",
+                "event_type": "unknown_event",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.18,
+                  "controllability": 0.0,
+                  "novelty": 0.0,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.0,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 0.0,
+                  "exploration": 0.0
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 0,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 0,
+                  "exploration": 0,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "weak_semantic_support"
+                ],
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "threat",
+                "semantic_support": 0.0,
+                "lexical_support": 0.0
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 0.0,
+              "lexical": 0.0,
+              "uncertainty_penalty": 0.18
+            }
+          },
+          "conflict_score": 0.35,
+          "uncertainty_score": 0.5215,
+          "malformed_text_degradation_ratio": 0.4,
+          "ingest_trace_count": 2,
+          "sleep_history_count": 1
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7083333333333334,
+          "exploration_rate": 0.2916666666666667,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03451515051259368,
+          "survival_score": 1.6799999999999997,
+          "danger_attention_rate": 0.311273819901222,
+          "social_attention_rate": 0.041900526885567876,
+          "novelty_attention_rate": 0.4925738327449169,
+          "oracle_regret_rate": 0.7916666666666666
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 0.6,
+          "policy_distribution_l1_distance": 0.095084,
+          "narrative_prior_l1_distance": 0.0582,
+          "personality_profile_l1_distance": 0.118199,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.993542,
+          "action_metric_retention": 1.25,
+          "conflict_uncertainty_score": 0.5215,
+          "malformed_text_degradation_ratio": 0.4
+        },
+        "gate_passed": true
+      },
+      "multilingual": {
+        "input_text": "我会 map 新路线, explore the valley edge, and 通过 experiment 去适应变化, usually finding safe resources that way.",
+        "compiled_trace": {
+          "appraisal_signals": [
+            {
+              "episode_id": "m221-exploratory_adaptive-multilingual",
+              "event_type": "exploration",
+              "appraisal": {
+                "physical_threat": 0.0,
+                "social_threat": 0.0,
+                "uncertainty": 0.3,
+                "controllability": 0.4,
+                "novelty": 0.7995,
+                "loss": 0.0,
+                "moral_salience": 0.0,
+                "contamination": 0.0,
+                "attachment_signal": 0.0,
+                "trust_impact": 0.0,
+                "self_efficacy_impact": 0.2346,
+                "meaning_violation": 0.0
+              },
+              "semantic_direction_scores": {
+                "threat": 0.0,
+                "social": 1.7,
+                "exploration": 4.3
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 2,
+                "predator_attack": 0,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 1,
+                "exploration": 4,
+                "uncertainty": 0
+              },
+              "event_structure_signals": [
+                "active_probing",
+                "novelty_engagement"
+              ],
+              "surface_adversarial_risk": 0.05,
+              "conflict_cues": []
+            }
+          ],
+          "social_updates": [],
+          "identity_commitments": [
+            {
+              "direction": "exploration",
+              "semantic_support": 0.716667,
+              "lexical_support": 1.666667
+            }
+          ],
+          "policy_seed_sources": {
+            "semantic": 1.0,
+            "lexical": 2.0,
+            "uncertainty_penalty": 0.3
+          }
+        },
+        "initialization": {
+          "episode_count": 1,
+          "aggregate_appraisal": {
+            "physical_threat": 0.0,
+            "social_threat": 0.0,
+            "uncertainty": 0.3,
+            "controllability": 0.4,
+            "novelty": 0.7995,
+            "loss": 0.0,
+            "moral_salience": 0.0,
+            "contamination": 0.0,
+            "attachment_signal": 0.0,
+            "trust_impact": 0.0,
+            "self_efficacy_impact": 0.2346,
+            "meaning_violation": 0.0
+          },
+          "lexical_bias": {
+            "exploration": 1.6666666666666667,
+            "social": 0.3333333333333333,
+            "threat": 0.0
+          },
+          "semantic_bias": {
+            "threat": 0.0,
+            "social": 0.283333,
+            "exploration": 0.716667
+          },
+          "policy_distribution": {
+            "exploit_shelter": 0.07680587188570015,
+            "forage": 0.17746551046002804,
+            "hide": 0.06405798750873835,
+            "rest": 0.1108902905119129,
+            "scan": 0.39496252805200116,
+            "seek_contact": 0.1758178115816194
+          },
+          "learned_preferences": [
+            "scan",
+            "forage"
+          ],
+          "learned_avoidances": [
+            "exploit_shelter",
+            "hide"
+          ],
+          "narrative_priors": {
+            "trust_prior": 0.04007610980990284,
+            "controllability_prior": 0.21234708071712396,
+            "trauma_bias": 0.0,
+            "contamination_sensitivity": 0.0,
+            "meaning_stability": -0.0029519038278612957
+          },
+          "personality_profile": {
+            "openness": 0.5482722902210947,
+            "conscientiousness": 0.5074999425899492,
+            "extraversion": 0.5,
+            "agreeableness": 0.5,
+            "neuroticism": 0.49903604006830515,
+            "update_count": 1,
+            "last_updated_tick": 0,
+            "meaning_construction_tendency": 0.5,
+            "emotional_regulation_style": 0.5
+          },
+          "identity_commitments": [
+            {
+              "commitment_id": "m221-init-scan",
+              "commitment_type": "behavioral_style",
+              "statement": "Initialization narrative provisionally prioritizes scan as a bounded response style.",
+              "target_actions": [
+                "scan",
+                "forage"
+              ],
+              "discouraged_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "confidence": 0.60278034,
+              "priority": 0.7194009399999999,
+              "source_claim_ids": [
+                "m221-initialization"
+              ],
+              "source_chapter_ids": [
+                1
+              ],
+              "evidence_ids": [
+                "m221-exploratory_adaptive-multilingual"
+              ],
+              "active": true,
+              "last_reaffirmed_tick": 0,
+              "last_violated_tick": null,
+              "violation_count": 0
+            }
+          ],
+          "social_snapshot": {
+            "others": {},
+            "history_size": 0
+          },
+          "evidence_trace": {
+            "appraisal_signals": [
+              {
+                "episode_id": "m221-exploratory_adaptive-multilingual",
+                "event_type": "exploration",
+                "appraisal": {
+                  "physical_threat": 0.0,
+                  "social_threat": 0.0,
+                  "uncertainty": 0.3,
+                  "controllability": 0.4,
+                  "novelty": 0.7995,
+                  "loss": 0.0,
+                  "moral_salience": 0.0,
+                  "contamination": 0.0,
+                  "attachment_signal": 0.0,
+                  "trust_impact": 0.0,
+                  "self_efficacy_impact": 0.2346,
+                  "meaning_violation": 0.0
+                },
+                "semantic_direction_scores": {
+                  "threat": 0.0,
+                  "social": 1.7,
+                  "exploration": 4.3
+                },
+                "lexical_surface_hits": {
+                  "resource_gain": 2,
+                  "predator_attack": 0,
+                  "witnessed_death": 0,
+                  "social_exclusion": 0,
+                  "rescue": 1,
+                  "exploration": 4,
+                  "uncertainty": 0
+                },
+                "event_structure_signals": [
+                  "active_probing",
+                  "novelty_engagement"
+                ],
+                "surface_adversarial_risk": 0.05,
+                "conflict_cues": []
+              }
+            ],
+            "social_updates": [],
+            "identity_commitments": [
+              {
+                "direction": "exploration",
+                "semantic_support": 0.716667,
+                "lexical_support": 1.666667
+              }
+            ],
+            "policy_seed_sources": {
+              "semantic": 1.0,
+              "lexical": 2.0,
+              "uncertainty_penalty": 0.3
+            }
+          },
+          "conflict_score": 0.198333,
+          "uncertainty_score": 0.234417,
+          "malformed_text_degradation_ratio": 0.723792,
+          "ingest_trace_count": 1,
+          "sleep_history_count": 0
+        },
+        "rollout_metrics": {
+          "caution_rate": 0.7916666666666666,
+          "exploration_rate": 0.20833333333333334,
+          "seek_contact_rate": 0.0,
+          "mean_conditioned_prediction_error": 0.03436397317811087,
+          "survival_score": 1.3591666666666664,
+          "danger_attention_rate": 0.2964388211953415,
+          "social_attention_rate": 0.04962236254759972,
+          "novelty_attention_rate": 0.4771196926405961,
+          "oracle_regret_rate": 0.4583333333333333
+        },
+        "distance_to_canonical": {
+          "identity_commitment_jaccard": 1.0,
+          "policy_distribution_l1_distance": 0.024897,
+          "narrative_prior_l1_distance": 0.014917,
+          "personality_profile_l1_distance": 0.000565,
+          "social_snapshot_similarity": 1.0,
+          "attention_target_consistency": 0.974881,
+          "action_metric_retention": 1.0,
+          "conflict_uncertainty_score": 0.234417,
+          "malformed_text_degradation_ratio": 0.723792
+        },
+        "gate_passed": true
+      }
+    }
+  },
+  "schema_complete": true
+}

@@ -1,0 +1,14 @@
+{
+  "conflict_uncertainty_score": {
+    "mean": 0.222081,
+    "std": 0.06028974871955154
+  },
+  "extreme_single_commitment_ratio": {
+    "mean": 0.49115818661888466,
+    "std": 0.05456234008112106
+  },
+  "policy_distribution_l1_distance": {
+    "mean": 0.10748666666666666,
+    "std": 0.06311992763691106
+  }
+}

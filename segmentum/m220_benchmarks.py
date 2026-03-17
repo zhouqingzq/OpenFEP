@@ -11,7 +11,7 @@ from statistics import mean
 from .agent import SegmentAgent
 from .memory import compute_prediction_error
 from .m28_benchmarks import anova, build_agent, load_world
-from .narrative_initialization import NarrativeInitializer
+from .narrative_initialization import NarrativeInitializationResult, NarrativeInitializer
 from .narrative_types import NarrativeEpisode
 
 
@@ -149,12 +149,33 @@ def _rollout_initialized(
 ) -> dict[str, object]:
     agent = build_agent(seed=seed)
     agent.configure_attention_bottleneck(enabled=True, capacity=2)
-    initializer = NarrativeInitializer()
-    init_result = initializer.initialize_agent(
-        agent=agent,
-        episodes=list(scenario.episodes),
-        apply_policy_seed=apply_initialization,
-    )
+    if apply_initialization:
+        initializer = NarrativeInitializer()
+        init_result = initializer.initialize_agent(
+            agent=agent,
+            episodes=list(scenario.episodes),
+            apply_policy_seed=True,
+        )
+    else:
+        init_result = NarrativeInitializationResult(
+            episode_count=0,
+            aggregate_appraisal={},
+            lexical_bias={},
+            semantic_bias={},
+            policy_distribution={},
+            learned_preferences=[],
+            learned_avoidances=[],
+            narrative_priors=agent.self_model.narrative_priors.to_dict(),
+            personality_profile=agent.self_model.personality_profile.to_dict(),
+            identity_commitments=[],
+            social_snapshot=agent.social_memory.snapshot(),
+            evidence_trace={},
+            conflict_score=0.0,
+            uncertainty_score=0.0,
+            malformed_text_degradation_ratio=0.0,
+            ingest_trace_count=0,
+            sleep_history_count=0,
+        )
     world = load_world(scenario.dominant_world, seed=seed + 101)
     actions: list[str] = []
     conditioned_prediction_errors: list[float] = []

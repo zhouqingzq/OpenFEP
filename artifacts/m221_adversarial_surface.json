@@ -1,0 +1,14 @@
+{
+  "wrong_direction_initialization_rate": {
+    "mean": 0.0,
+    "std": 0.0
+  },
+  "identity_commitment_flip_rate": {
+    "mean": 0.0,
+    "std": 0.0
+  },
+  "attention_channel_replacement_rate": {
+    "mean": 0.0,
+    "std": 0.0
+  }
+}
