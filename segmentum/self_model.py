@@ -11,6 +11,7 @@ from .action_schema import ActionSchema, action_name, ensure_action_schema
 
 SELF_ERROR = "self_error"
 WORLD_ERROR = "world_error"
+ADAPTER_ERROR = "adapter_error"
 EXISTENTIAL_THREAT = "existential_threat"
 
 CORE_ACTIONS = (
@@ -126,6 +127,9 @@ def _normalize_event_name(event: object) -> str:
         "toolcapabilitydowngrade": "tool_capability_downgrade",
         "readonlyfilesystem": "read_only_filesystem",
         "domstructurechanged": "dom_structure_changed",
+        "missingadapter": "missing_adapter",
+        "adaptertimeout": "adapter_timeout",
+        "adaptermismatch": "adapter_mismatch",
     }
     key = _event_name(event).strip().casefold()
     return aliases.get(key, key)
@@ -369,6 +373,11 @@ class ErrorClassifier:
         "read_only_filesystem",
         "dom_structure_changed",
     )
+    adapter_error_events: tuple[str, ...] = (
+        "missing_adapter",
+        "adapter_timeout",
+        "adapter_mismatch",
+    )
     existential_events: tuple[str, ...] = ("fatal_exception",)
 
     def __post_init__(self) -> None:
@@ -384,6 +393,11 @@ class ErrorClassifier:
         )
         object.__setattr__(
             self,
+            "adapter_error_events",
+            tuple(_normalize_event_name(name) for name in self.adapter_error_events),
+        )
+        object.__setattr__(
+            self,
             "existential_events",
             tuple(_normalize_event_name(name) for name in self.existential_events),
         )
@@ -392,6 +406,7 @@ class ErrorClassifier:
         return {
             "self_error_events": list(self.self_error_events),
             "world_error_events": list(self.world_error_events),
+            "adapter_error_events": list(self.adapter_error_events),
             "existential_events": list(self.existential_events),
         }
 
@@ -402,6 +417,7 @@ class ErrorClassifier:
         return cls(
             self_error_events=tuple(str(name) for name in payload.get("self_error_events", cls().self_error_events)),
             world_error_events=tuple(str(name) for name in payload.get("world_error_events", cls().world_error_events)),
+            adapter_error_events=tuple(str(name) for name in payload.get("adapter_error_events", cls().adapter_error_events)),
             existential_events=tuple(str(name) for name in payload.get("existential_events", cls().existential_events)),
         )
 
@@ -412,11 +428,15 @@ class ErrorClassifier:
                 return SELF_ERROR
             if origin_hint in {"world", WORLD_ERROR}:
                 return WORLD_ERROR
+            if origin_hint in {"adapter", ADAPTER_ERROR}:
+                return ADAPTER_ERROR
             if origin_hint in {"existential", EXISTENTIAL_THREAT}:
                 return EXISTENTIAL_THREAT
             category = str(event.category).strip().casefold()
             if category in {"resource_exhaustion", "memory_budget", "context_budget"}:
                 return SELF_ERROR
+            if category in {"adapter_failure", "adapter_timeout", "adapter_mismatch"}:
+                return ADAPTER_ERROR
             if category in {"external_failure", "environment_shift", "timeout", "tool_failure"}:
                 return WORLD_ERROR
         normalized = _normalize_event_name(event)
@@ -424,6 +444,8 @@ class ErrorClassifier:
             return EXISTENTIAL_THREAT
         if normalized in self.self_error_events:
             return SELF_ERROR
+        if normalized in self.adapter_error_events:
+            return ADAPTER_ERROR
         if normalized in self.world_error_events:
             return WORLD_ERROR
         return WORLD_ERROR
@@ -432,6 +454,8 @@ class ErrorClassifier:
     def attribution(classification: str) -> str:
         if classification == SELF_ERROR:
             return "self"
+        if classification == ADAPTER_ERROR:
+            return "adapter"
         if classification == WORLD_ERROR:
             return "world"
         return "existential"
@@ -440,6 +464,8 @@ class ErrorClassifier:
     def surprise_source(classification: str) -> str:
         if classification == SELF_ERROR:
             return "interoceptive"
+        if classification == ADAPTER_ERROR:
+            return "adapter"
         if classification == WORLD_ERROR:
             return "exteroceptive"
         return "existential"

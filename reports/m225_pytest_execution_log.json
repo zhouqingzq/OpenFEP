@@ -1,0 +1,154 @@
+[
+  {
+    "name": "tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
+    "nodeid": "tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
+    "suite": "tests/test_m225_freshness_guards.py"
+  },
+  {
+    "name": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
+    "nodeid": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
+    "suite": "tests/test_m225_freshness_guards.py"
+  },
+  {
+    "name": "tests/test_self_model.py::SelfModelTests::test_core_beliefs_are_immutable",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_self_model.py::SelfModelTests::test_core_beliefs_are_immutable",
+    "nodeid": "tests/test_self_model.py::SelfModelTests::test_core_beliefs_are_immutable",
+    "suite": "tests/test_self_model.py"
+  },
+  {
+    "name": "tests/test_self_model.py::SelfModelTests::test_error_classification",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_self_model.py::SelfModelTests::test_error_classification",
+    "nodeid": "tests/test_self_model.py::SelfModelTests::test_error_classification",
+    "suite": "tests/test_self_model.py"
+  },
+  {
+    "name": "tests/test_self_model.py::SelfModelTests::test_resource_prediction",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_self_model.py::SelfModelTests::test_resource_prediction",
+    "nodeid": "tests/test_self_model.py::SelfModelTests::test_resource_prediction",
+    "suite": "tests/test_self_model.py"
+  },
+  {
+    "name": "tests/test_self_model.py::SelfModelTests::test_threat_detection",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_self_model.py::SelfModelTests::test_threat_detection",
+    "nodeid": "tests/test_self_model.py::SelfModelTests::test_threat_detection",
+    "suite": "tests/test_self_model.py"
+  },
+  {
+    "name": "tests/test_m2_targeted_repair.py::test_memory_context_changes_prediction_surface",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_m2_targeted_repair.py::test_memory_context_changes_prediction_surface",
+    "nodeid": "tests/test_m2_targeted_repair.py::test_memory_context_changes_prediction_surface",
+    "suite": "tests/test_m2_targeted_repair.py"
+  },
+  {
+    "name": "tests/test_m2_targeted_repair.py::test_runtime_failure_event_preserves_self_vs_world_evidence",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_m2_targeted_repair.py::test_runtime_failure_event_preserves_self_vs_world_evidence",
+    "nodeid": "tests/test_m2_targeted_repair.py::test_runtime_failure_event_preserves_self_vs_world_evidence",
+    "suite": "tests/test_m2_targeted_repair.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::FepPolicyTests::test_infer_policy_prefers_escape_under_high_pressure_and_surprise",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::FepPolicyTests::test_infer_policy_prefers_escape_under_high_pressure_and_surprise",
+    "nodeid": "tests/test_baseline_regressions.py::FepPolicyTests::test_infer_policy_prefers_escape_under_high_pressure_and_surprise",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::MemoryRetrievalTests::test_retrieve_similar_prefers_recent_matching_episodes",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::MemoryRetrievalTests::test_retrieve_similar_prefers_recent_matching_episodes",
+    "nodeid": "tests/test_baseline_regressions.py::MemoryRetrievalTests::test_retrieve_similar_prefers_recent_matching_episodes",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::WorldModelUpdateTests::test_update_from_error_moves_beliefs_toward_observation",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::WorldModelUpdateTests::test_update_from_error_moves_beliefs_toward_observation",
+    "nodeid": "tests/test_baseline_regressions.py::WorldModelUpdateTests::test_update_from_error_moves_beliefs_toward_observation",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_large_prediction_error_propagates_weighted_residual",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_large_prediction_error_propagates_weighted_residual",
+    "nodeid": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_large_prediction_error_propagates_weighted_residual",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_perceive_exposes_explicit_hierarchical_signals",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_perceive_exposes_explicit_hierarchical_signals",
+    "nodeid": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_perceive_exposes_explicit_hierarchical_signals",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_runtime_accepts_predictive_profile_override",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_runtime_accepts_predictive_profile_override",
+    "nodeid": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_runtime_accepts_predictive_profile_override",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_small_prediction_error_is_locally_absorbed",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_small_prediction_error_is_locally_absorbed",
+    "nodeid": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_small_prediction_error_is_locally_absorbed",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_strategic_dispatch_uses_belief_state_fast_weights",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_strategic_dispatch_uses_belief_state_fast_weights",
+    "nodeid": "tests/test_baseline_regressions.py::HierarchicalBeliefStateTests::test_strategic_dispatch_uses_belief_state_fast_weights",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::SummaryMetricsTests::test_summary_exposes_baseline_report_fields",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::SummaryMetricsTests::test_summary_exposes_baseline_report_fields",
+    "nodeid": "tests/test_baseline_regressions.py::SummaryMetricsTests::test_summary_exposes_baseline_report_fields",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::DeterminismSmokeTests::test_same_seed_produces_consistent_summary_for_longer_run",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::DeterminismSmokeTests::test_same_seed_produces_consistent_summary_for_longer_run",
+    "nodeid": "tests/test_baseline_regressions.py::DeterminismSmokeTests::test_same_seed_produces_consistent_summary_for_longer_run",
+    "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_baseline_regressions.py::BehaviorRegressionTests::test_long_run_does_not_collapse_to_single_action",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_baseline_regressions.py::BehaviorRegressionTests::test_long_run_does_not_collapse_to_single_action",
+    "nodeid": "tests/test_baseline_regressions.py::BehaviorRegressionTests::test_long_run_does_not_collapse_to_single_action",
+    "suite": "tests/test_baseline_regressions.py"
+  }
+]
