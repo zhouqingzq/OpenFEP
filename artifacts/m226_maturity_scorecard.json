@@ -1,0 +1,73 @@
+{
+  "milestone_id": "M2.26",
+  "schema_version": "m226_v1",
+  "generated_at": "2026-03-18T14:19:58+00:00",
+  "dimension_scores": [
+    {
+      "dimension": "narrative_grounding_robustness",
+      "score": 1.0,
+      "threshold": 0.8,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "long_horizon_autonomy",
+      "score": 1.0,
+      "threshold": 0.85,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "self_consistency_and_repair",
+      "score": 1.0,
+      "threshold": 0.8,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "functional_conscious_access",
+      "score": 1.0,
+      "threshold": 0.8,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "open_world_transfer",
+      "score": 1.0,
+      "threshold": 0.8,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "fault_tolerance_and_attribution",
+      "score": 1.0,
+      "threshold": 0.8,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "replay_freshness_and_audit_integrity",
+      "score": 1.0,
+      "threshold": 0.95,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    },
+    {
+      "dimension": "residual_risk_burden",
+      "score": 1.0,
+      "threshold": 0.8,
+      "pass": true,
+      "evidence_origin": "current_round_replay",
+      "current_round_replay_status": true
+    }
+  ],
+  "critical_dimension_pass_count": "5 / 5",
+  "weighted_total_score": 1.0
+}

@@ -1,0 +1,86 @@
+{
+  "milestone_id": "M2.26",
+  "schema_version": "m226_v1",
+  "generated_at": "2026-03-18T14:19:58+00:00",
+  "checks": [
+    {
+      "check_id": "cross_001_narrative_vs_transfer",
+      "pair": [
+        "M2.21",
+        "M2.25"
+      ],
+      "question": "narrative grounding 与 open-world transfer 是否冲突",
+      "pass": true,
+      "severity": "none",
+      "evidence": {
+        "m221_score": 1.0,
+        "m225_score": 1.0,
+        "spurious_transfer": false
+      },
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "cross_002_identity_vs_autonomy",
+      "pair": [
+        "M2.22",
+        "M2.23"
+      ],
+      "question": "identity commitments 与 long-horizon autonomy 是否冲突",
+      "pass": true,
+      "severity": "none",
+      "evidence": {
+        "m222_status": true,
+        "m223_status": true
+      },
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "cross_003_workspace_vs_self_report",
+      "pair": [
+        "M2.24",
+        "M2.23"
+      ],
+      "question": "workspace access 与 self-report fidelity 是否冲突",
+      "pass": true,
+      "severity": "none",
+      "evidence": {
+        "report_leakage": false,
+        "false_consistency": false
+      },
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "cross_004_repair_vs_identity_stability",
+      "pair": [
+        "M2.23",
+        "M2.25"
+      ],
+      "question": "repair mechanism 与 identity stability 是否冲突",
+      "pass": true,
+      "severity": "none",
+      "evidence": {
+        "repair_status": true,
+        "adapter_collapse_risk": false
+      },
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "cross_005_governance_vs_action",
+      "pair": [
+        "M2.22",
+        "M2.24"
+      ],
+      "question": "governance constraints 与 adaptive action 是否冲突",
+      "pass": true,
+      "severity": "none",
+      "evidence": {
+        "m222_score": 1.0,
+        "m224_score": 1.0
+      },
+      "maturity_impact": "none"
+    }
+  ],
+  "high_severity_conflict_count": 0,
+  "medium_severity_unexplained_conflict_count": 0,
+  "repair_caused_other_capability_degradation_count": 0
+}

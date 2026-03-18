@@ -69,6 +69,21 @@ class TestM223AuditHardening(unittest.TestCase):
         )
         self.assertTrue(protocol_integrity["condition_set_complete"])
 
+    def test_required_seed_set_defaults_to_canonical_protocol(self) -> None:
+        payload = run_m223_self_consistency_benchmark(seed_set=list(SEED_SET))
+        self.assertEqual(payload["protocol_integrity"]["required_seed_set"], list(SEED_SET))
+        self.assertTrue(payload["gates"]["protocol_integrity"])
+
+    def test_required_seed_set_can_be_aligned_to_unified_audit_protocol(self) -> None:
+        audit_seed_set = [226, 245, 323, 342, 420, 439]
+        payload = run_m223_self_consistency_benchmark(
+            seed_set=list(audit_seed_set),
+            required_seed_set=list(audit_seed_set),
+        )
+        self.assertEqual(payload["protocol_integrity"]["required_seed_set"], audit_seed_set)
+        self.assertTrue(payload["protocol_integrity"]["seed_set_complete"])
+        self.assertTrue(payload["gates"]["protocol_integrity"])
+
 
 if __name__ == "__main__":
     unittest.main()

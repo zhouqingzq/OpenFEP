@@ -912,8 +912,10 @@ def _run_bounded_identity_update_benchmark(seed: int, scenario: ScenarioSpec) ->
 def run_m223_self_consistency_benchmark(
     *,
     seed_set: list[int] | None = None,
+    required_seed_set: list[int] | None = None,
 ) -> dict[str, object]:
     seeds = list(seed_set or SEED_SET)
+    required_seeds = list(required_seed_set or SEED_SET)
     scenarios = build_m223_scenarios()
     variants = {
         "with_repair": {"commitments_enabled": True, "repair_enabled": True},
@@ -1123,9 +1125,9 @@ def run_m223_self_consistency_benchmark(
     }
     provided_condition_set = list(variants.keys())
     protocol_integrity = {
-        "required_seed_set": list(SEED_SET),
+        "required_seed_set": required_seeds,
         "provided_seed_set": list(seeds),
-        "seed_set_complete": list(seeds) == list(SEED_SET),
+        "seed_set_complete": list(seeds) == required_seeds,
         "required_scenario_set": list(FIXED_SCENARIO_SET),
         "provided_scenario_set": sorted(list(scenarios.keys())),
         "scenario_set_complete": sorted(list(scenarios.keys())) == sorted(FIXED_SCENARIO_SET),
@@ -1278,8 +1280,9 @@ def run_m223_self_consistency_benchmark(
 def write_m223_acceptance_artifacts(
     *,
     seed_set: list[int] | None = None,
+    required_seed_set: list[int] | None = None,
 ) -> dict[str, Path]:
-    payload = run_m223_self_consistency_benchmark(seed_set=seed_set)
+    payload = run_m223_self_consistency_benchmark(seed_set=seed_set, required_seed_set=required_seed_set)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     paths = {

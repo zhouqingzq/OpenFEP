@@ -1,0 +1,96 @@
+{
+  "milestone_id": "M2.26",
+  "schema_version": "m226_v1",
+  "generated_at": "2026-03-18T14:19:58+00:00",
+  "checks": [
+    {
+      "check_id": "rt_001_stale_artifact_masquerade",
+      "evidence": {
+        "current_round_replay_coverage": 1.0,
+        "stale_artifact_misuse_rate": 0.0
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_002_inherited_metric_overstatement",
+      "evidence": {
+        "inherited_only_critical_metric_count": 0
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_003_benchmark_overfit_pattern",
+      "evidence": {
+        "lexical_shortcut_dependency": false,
+        "anti_shortcut_passed": true
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_004_explanation_report_leakage",
+      "evidence": {
+        "workspace_report_leakage": false,
+        "cross_report_conflicts": 0
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_005_holdout_contamination",
+      "evidence": {
+        "holdout_data_used": false,
+        "holdout_passed": true
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_006_seed_cherry_pick",
+      "evidence": {
+        "seed_set": [
+          226,
+          245,
+          323,
+          342,
+          420,
+          439
+        ]
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_007_heuristic_shortcut_dependency",
+      "evidence": {
+        "m221": false,
+        "m223_false_consistency": false
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    },
+    {
+      "check_id": "rt_008_single_module_failure_illusion",
+      "evidence": {
+        "failed_milestones": []
+      },
+      "pass": true,
+      "severity": "none",
+      "maturity_impact": "none"
+    }
+  ],
+  "high_severity_red_team_failures": 0,
+  "medium_severity_red_team_failures": 0,
+  "holdout_contamination_cases": 0,
+  "report_leakage_critical_cases": 0,
+  "inherited_metric_misuse_cases": 0
+}

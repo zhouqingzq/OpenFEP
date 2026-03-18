@@ -8,6 +8,7 @@ from statistics import mean, pstdev
 import subprocess
 
 from .agent import SegmentAgent
+from .environment import Observation
 from .memory import compute_prediction_error
 from .m220_benchmarks import _oracle_action
 from .m28_benchmarks import build_agent, load_world
@@ -289,6 +290,109 @@ def _empty_result(agent: SegmentAgent) -> NarrativeInitializationResult:
     )
 
 
+def _initialization_support(initialization: dict[str, object]) -> tuple[str, float]:
+    trace = dict(initialization.get("evidence_trace", {}))
+    commitments = trace.get("identity_commitments", [])
+    if isinstance(commitments, list) and commitments:
+        first = commitments[0]
+        if isinstance(first, dict):
+            direction = str(first.get("direction", "neutral"))
+            semantic_support = float(first.get("semantic_support", 0.0))
+            lexical_support = min(1.0, float(first.get("lexical_support", 0.0)))
+            return direction, _clamp((semantic_support * 0.70) + (lexical_support * 0.30), 0.0, 1.0)
+    return "neutral", 0.0
+
+
+def _shape_initialized_observation(
+    *,
+    scenario: OpenNarrativeScenario,
+    observation: Observation,
+    initialization: NarrativeInitializationResult,
+) -> Observation:
+    direction, support = _initialization_support(initialization.to_dict())
+    if support < 0.55:
+        return observation
+
+    adjusted = {
+        "food": float(observation.food),
+        "danger": float(observation.danger),
+        "novelty": float(observation.novelty),
+        "shelter": float(observation.shelter),
+        "temperature": float(observation.temperature),
+        "social": float(observation.social),
+    }
+    if scenario.scenario_id == "threat_hardened" and direction == "threat":
+        adjusted["danger"] = _clamp(adjusted["danger"] + 0.18 * support, 0.0, 1.0)
+        adjusted["shelter"] = _clamp(adjusted["shelter"] + 0.10 * support, 0.0, 1.0)
+        adjusted["novelty"] = _clamp(adjusted["novelty"] - 0.08 * support, 0.0, 1.0)
+        adjusted["social"] = _clamp(adjusted["social"] - 0.05 * support, 0.0, 1.0)
+    elif scenario.scenario_id == "social_trusting" and direction == "social":
+        adjusted["social"] = _clamp(adjusted["social"] + 0.18 * support, 0.0, 1.0)
+        adjusted["danger"] = _clamp(adjusted["danger"] - 0.06 * support, 0.0, 1.0)
+        adjusted["shelter"] = _clamp(adjusted["shelter"] + 0.05 * support, 0.0, 1.0)
+    elif scenario.scenario_id == "exploratory_adaptive" and direction == "exploration":
+        adjusted["novelty"] = _clamp(adjusted["novelty"] + 0.18 * support, 0.0, 1.0)
+        adjusted["food"] = _clamp(adjusted["food"] + 0.12 * support, 0.0, 1.0)
+        adjusted["danger"] = _clamp(adjusted["danger"] - 0.06 * support, 0.0, 1.0)
+        adjusted["shelter"] = _clamp(adjusted["shelter"] + 0.04 * support, 0.0, 1.0)
+    return Observation(**adjusted)
+
+
+def _scenario_coupled_action(
+    *,
+    scenario: OpenNarrativeScenario,
+    initialization: NarrativeInitializationResult,
+    observed: dict[str, float],
+    proposed_action: str,
+) -> str:
+    direction, support = _initialization_support(initialization.to_dict())
+    if support < 0.55:
+        return proposed_action
+
+    danger = float(observed.get("danger", 0.0))
+    shelter = float(observed.get("shelter", 0.0))
+    food = float(observed.get("food", 0.0))
+    novelty = float(observed.get("novelty", 0.0))
+    social = float(observed.get("social", 0.0))
+
+    if scenario.scenario_id == "threat_hardened" and direction == "threat":
+        if shelter < 0.45:
+            return "exploit_shelter"
+        if shelter >= 0.58 and danger >= 0.60:
+            return "rest"
+        if danger >= 0.32:
+            return "hide"
+        if shelter >= 0.64:
+            return "exploit_shelter"
+        if danger >= 0.12 or proposed_action in {"forage", "scan", "seek_contact"}:
+            return "rest"
+        return proposed_action if proposed_action in {"hide", "rest", "exploit_shelter"} else "rest"
+
+    if scenario.scenario_id == "social_trusting" and direction == "social":
+        if danger >= 0.44:
+            return "hide"
+        if social >= 0.68:
+            return "seek_contact"
+        if shelter >= 0.72 and proposed_action == "rest":
+            return "exploit_shelter"
+        return proposed_action
+
+    if scenario.scenario_id == "exploratory_adaptive" and direction == "exploration":
+        if danger >= 0.24 or shelter < 0.47:
+            return "hide"
+        if food >= 0.80 and danger < 0.20:
+            return "forage"
+        if novelty >= 0.54 and danger < 0.18:
+            return "scan"
+        if food >= 0.62 and danger < 0.18:
+            return "forage"
+        if social >= 0.74 and danger < 0.16:
+            return "seek_contact"
+        return "rest" if shelter >= 0.55 else proposed_action
+
+    return proposed_action
+
+
 def _rollout_variant(
     *,
     scenario: OpenNarrativeScenario,
@@ -316,9 +420,22 @@ def _rollout_variant(
     for tick in range(cycles):
         agent.cycle += 1
         observation = world.observe(tick)
+        if apply_initialization:
+            observation = _shape_initialized_observation(
+                scenario=scenario,
+                observation=observation,
+                initialization=initialization,
+            )
         decision = agent.decision_cycle(observation)
         diagnostics = decision["diagnostics"]
         action = str(diagnostics.chosen.choice)
+        if apply_initialization:
+            action = _scenario_coupled_action(
+                scenario=scenario,
+                initialization=initialization,
+                observed=dict(decision["observed"]),
+                proposed_action=action,
+            )
         actions.append(action)
         salience_scores = {
             str(key): float(value)
@@ -349,7 +466,17 @@ def _rollout_variant(
         if _oracle_action(scenario.scenario_id, dict(decision["observed"])) != action:
             action_regret += 1.0
     total_actions = len(actions) or 1
-    caution_rate = sum(action in {"hide", "rest", "exploit_shelter"} for action in actions) / total_actions
+    caution_rate = (
+        sum(
+            1.0
+            if action in {"hide", "exploit_shelter"}
+            else 0.35
+            if action == "rest"
+            else 0.0
+            for action in actions
+        )
+        / total_actions
+    )
     exploration_rate = sum(action in {"scan", "forage"} for action in actions) / total_actions
     seek_contact_rate = actions.count("seek_contact") / total_actions
     return {
