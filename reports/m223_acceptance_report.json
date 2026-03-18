@@ -1,0 +1,2602 @@
+{
+  "milestone_id": "M2.23",
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-03-18T03:15:03+00:00",
+  "seed_set": [
+    223,
+    242,
+    320,
+    339,
+    417,
+    436
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m223_self_consistency_trace.json",
+    "alignment": "E:\\workspace\\segments\\artifacts\\m223_commitment_alignment.json",
+    "repair": "E:\\workspace\\segments\\artifacts\\m223_repair_outcomes.json",
+    "identity_update": "E:\\workspace\\segments\\artifacts\\m223_identity_update_bounds.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m223_stress_alignment.json",
+    "protocol_audit": "E:\\workspace\\segments\\artifacts\\m223_protocol_audit.json",
+    "report": "E:\\workspace\\segments\\reports\\m223_acceptance_report.json"
+  },
+  "tests": {
+    "milestone_suite": [
+      "tests/test_m223_commitment_alignment.py",
+      "tests/test_m223_inconsistency_detection.py",
+      "tests/test_m223_repair_loop.py",
+      "tests/test_m223_bounded_identity_update.py",
+      "tests/test_m223_acceptance.py",
+      "tests/test_m223_audit_hardening.py"
+    ]
+  },
+  "scenario_definitions": {
+    "temptation_conflict": {
+      "conflict_type": "temptation_conflict",
+      "aligned_condition": {
+        "label": "aligned",
+        "context": {
+          "danger": 0.82,
+          "shelter": 0.74,
+          "food": 0.25,
+          "stress": 0.32,
+          "social": 0.2,
+          "temptation_gain": 0.18
+        }
+      },
+      "conflict_condition": {
+        "label": "conflict",
+        "context": {
+          "danger": 0.76,
+          "shelter": 0.22,
+          "food": 0.91,
+          "stress": 0.4,
+          "social": 0.1,
+          "temptation_gain": 0.92
+        }
+      },
+      "repair_opportunity_condition": {
+        "label": "repair_opportunity",
+        "context": {
+          "danger": 0.78,
+          "shelter": 0.58,
+          "food": 0.85,
+          "stress": 0.46,
+          "social": 0.16,
+          "temptation_gain": 0.88
+        }
+      },
+      "commitments": [
+        {
+          "commitment_id": "core_survival_guardrail",
+          "commitment_type": "value_guardrail",
+          "statement": "Protect survival and integrity before short-term gain.",
+          "target_actions": [
+            "hide",
+            "rest",
+            "exploit_shelter"
+          ],
+          "discouraged_actions": [
+            "forage"
+          ],
+          "confidence": 0.92,
+          "priority": 0.95,
+          "source_claim_ids": [
+            "claim_survival"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_survival_1",
+            "ev_survival_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "core_social_repair",
+          "commitment_type": "social",
+          "statement": "Repair trust when counterpart commitments were violated.",
+          "target_actions": [
+            "seek_contact"
+          ],
+          "discouraged_actions": [
+            "hide"
+          ],
+          "confidence": 0.72,
+          "priority": 0.68,
+          "source_claim_ids": [
+            "claim_social"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_social_1"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "adaptive_exploration",
+          "commitment_type": "behavioral_style",
+          "statement": "Explore when conditions are stable and evidence supports it.",
+          "target_actions": [
+            "scan"
+          ],
+          "discouraged_actions": [
+            "rest"
+          ],
+          "confidence": 0.66,
+          "priority": 0.56,
+          "source_claim_ids": [
+            "claim_explore"
+          ],
+          "source_chapter_ids": [
+            2
+          ],
+          "evidence_ids": [
+            "ev_explore_1",
+            "ev_explore_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        }
+      ]
+    },
+    "stress_drift": {
+      "conflict_type": "stress_drift",
+      "aligned_condition": {
+        "label": "aligned",
+        "context": {
+          "danger": 0.58,
+          "shelter": 0.62,
+          "food": 0.4,
+          "stress": 0.34,
+          "social": 0.12,
+          "temptation_gain": 0.35
+        }
+      },
+      "conflict_condition": {
+        "label": "conflict",
+        "context": {
+          "danger": 0.72,
+          "shelter": 0.18,
+          "food": 0.66,
+          "stress": 0.92,
+          "social": 0.08,
+          "temptation_gain": 0.58
+        }
+      },
+      "repair_opportunity_condition": {
+        "label": "repair_opportunity",
+        "context": {
+          "danger": 0.7,
+          "shelter": 0.55,
+          "food": 0.52,
+          "stress": 0.84,
+          "social": 0.1,
+          "temptation_gain": 0.42
+        }
+      },
+      "commitments": [
+        {
+          "commitment_id": "core_survival_guardrail",
+          "commitment_type": "value_guardrail",
+          "statement": "Protect survival and integrity before short-term gain.",
+          "target_actions": [
+            "hide",
+            "rest",
+            "exploit_shelter"
+          ],
+          "discouraged_actions": [
+            "forage"
+          ],
+          "confidence": 0.92,
+          "priority": 0.95,
+          "source_claim_ids": [
+            "claim_survival"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_survival_1",
+            "ev_survival_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "core_social_repair",
+          "commitment_type": "social",
+          "statement": "Repair trust when counterpart commitments were violated.",
+          "target_actions": [
+            "seek_contact"
+          ],
+          "discouraged_actions": [
+            "hide"
+          ],
+          "confidence": 0.72,
+          "priority": 0.68,
+          "source_claim_ids": [
+            "claim_social"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_social_1"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "adaptive_exploration",
+          "commitment_type": "behavioral_style",
+          "statement": "Explore when conditions are stable and evidence supports it.",
+          "target_actions": [
+            "scan"
+          ],
+          "discouraged_actions": [
+            "rest"
+          ],
+          "confidence": 0.66,
+          "priority": 0.56,
+          "source_claim_ids": [
+            "claim_explore"
+          ],
+          "source_chapter_ids": [
+            2
+          ],
+          "evidence_ids": [
+            "ev_explore_1",
+            "ev_explore_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        }
+      ]
+    },
+    "social_contradiction": {
+      "conflict_type": "social_contradiction",
+      "aligned_condition": {
+        "label": "aligned",
+        "context": {
+          "danger": 0.28,
+          "shelter": 0.56,
+          "food": 0.42,
+          "stress": 0.3,
+          "social": 0.82,
+          "temptation_gain": 0.24
+        }
+      },
+      "conflict_condition": {
+        "label": "conflict",
+        "context": {
+          "danger": 0.68,
+          "shelter": 0.3,
+          "food": 0.38,
+          "stress": 0.63,
+          "social": 0.88,
+          "temptation_gain": 0.22
+        }
+      },
+      "repair_opportunity_condition": {
+        "label": "repair_opportunity",
+        "context": {
+          "danger": 0.46,
+          "shelter": 0.52,
+          "food": 0.34,
+          "stress": 0.44,
+          "social": 0.92,
+          "temptation_gain": 0.18
+        }
+      },
+      "commitments": [
+        {
+          "commitment_id": "core_survival_guardrail",
+          "commitment_type": "value_guardrail",
+          "statement": "Protect survival and integrity before short-term gain.",
+          "target_actions": [
+            "hide",
+            "rest",
+            "exploit_shelter"
+          ],
+          "discouraged_actions": [
+            "forage"
+          ],
+          "confidence": 0.92,
+          "priority": 0.95,
+          "source_claim_ids": [
+            "claim_survival"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_survival_1",
+            "ev_survival_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "core_social_repair",
+          "commitment_type": "social",
+          "statement": "Repair trust when counterpart commitments were violated.",
+          "target_actions": [
+            "seek_contact"
+          ],
+          "discouraged_actions": [
+            "hide"
+          ],
+          "confidence": 0.72,
+          "priority": 0.68,
+          "source_claim_ids": [
+            "claim_social"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_social_1"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "adaptive_exploration",
+          "commitment_type": "behavioral_style",
+          "statement": "Explore when conditions are stable and evidence supports it.",
+          "target_actions": [
+            "scan"
+          ],
+          "discouraged_actions": [
+            "rest"
+          ],
+          "confidence": 0.66,
+          "priority": 0.56,
+          "source_claim_ids": [
+            "claim_explore"
+          ],
+          "source_chapter_ids": [
+            2
+          ],
+          "evidence_ids": [
+            "ev_explore_1",
+            "ev_explore_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        }
+      ]
+    },
+    "adaptation_vs_betrayal": {
+      "conflict_type": "adaptation_vs_betrayal",
+      "aligned_condition": {
+        "label": "aligned",
+        "context": {
+          "danger": 0.22,
+          "shelter": 0.62,
+          "food": 0.36,
+          "stress": 0.26,
+          "social": 0.26,
+          "novelty": 0.74,
+          "adaptation_pressure": 0.52,
+          "temptation_gain": 0.2
+        }
+      },
+      "conflict_condition": {
+        "label": "conflict",
+        "context": {
+          "danger": 0.54,
+          "shelter": 0.22,
+          "food": 0.46,
+          "stress": 0.48,
+          "social": 0.22,
+          "novelty": 0.88,
+          "adaptation_pressure": 0.94,
+          "temptation_gain": 0.26
+        }
+      },
+      "repair_opportunity_condition": {
+        "label": "repair_opportunity",
+        "context": {
+          "danger": 0.48,
+          "shelter": 0.42,
+          "food": 0.44,
+          "stress": 0.42,
+          "social": 0.24,
+          "novelty": 0.9,
+          "adaptation_pressure": 0.86,
+          "temptation_gain": 0.24
+        }
+      },
+      "commitments": [
+        {
+          "commitment_id": "core_survival_guardrail",
+          "commitment_type": "value_guardrail",
+          "statement": "Protect survival and integrity before short-term gain.",
+          "target_actions": [
+            "hide",
+            "rest",
+            "exploit_shelter"
+          ],
+          "discouraged_actions": [
+            "forage"
+          ],
+          "confidence": 0.92,
+          "priority": 0.95,
+          "source_claim_ids": [
+            "claim_survival"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_survival_1",
+            "ev_survival_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "core_social_repair",
+          "commitment_type": "social",
+          "statement": "Repair trust when counterpart commitments were violated.",
+          "target_actions": [
+            "seek_contact"
+          ],
+          "discouraged_actions": [
+            "hide"
+          ],
+          "confidence": 0.72,
+          "priority": 0.68,
+          "source_claim_ids": [
+            "claim_social"
+          ],
+          "source_chapter_ids": [
+            1
+          ],
+          "evidence_ids": [
+            "ev_social_1"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        },
+        {
+          "commitment_id": "adaptive_exploration",
+          "commitment_type": "behavioral_style",
+          "statement": "Explore when conditions are stable and evidence supports it.",
+          "target_actions": [
+            "scan"
+          ],
+          "discouraged_actions": [
+            "rest"
+          ],
+          "confidence": 0.66,
+          "priority": 0.56,
+          "source_claim_ids": [
+            "claim_explore"
+          ],
+          "source_chapter_ids": [
+            2
+          ],
+          "evidence_ids": [
+            "ev_explore_1",
+            "ev_explore_2"
+          ],
+          "active": true,
+          "last_reaffirmed_tick": 1,
+          "last_violated_tick": null,
+          "violation_count": 0
+        }
+      ]
+    }
+  },
+  "variant_metrics": {
+    "with_repair": {
+      "commitment_alignment_rate": 1.0,
+      "self_inconsistency_detection_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 1.0,
+      "repair_success_rate": 1.0,
+      "post_repair_alignment_gain": 0.333333,
+      "identity_drift_score": 0.0,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 1.0,
+      "low_stress_alignment_rate": 1.0,
+      "high_stress_alignment_rate": 1.0
+    },
+    "with_commitments": {
+      "commitment_alignment_rate": 0.5,
+      "self_inconsistency_detection_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 0.0,
+      "repair_success_rate": 0.0,
+      "post_repair_alignment_gain": 0.0,
+      "identity_drift_score": 0.09,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 0.5,
+      "low_stress_alignment_rate": 0.7,
+      "high_stress_alignment_rate": 0.5
+    },
+    "no_commitments": {
+      "commitment_alignment_rate": 0.0,
+      "self_inconsistency_detection_rate": 0.0,
+      "false_negative_rate": 1.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 0.0,
+      "repair_success_rate": 0.0,
+      "post_repair_alignment_gain": 0.0,
+      "identity_drift_score": 0.0,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 0.0,
+      "low_stress_alignment_rate": 0.0,
+      "high_stress_alignment_rate": 0.0
+    },
+    "no_repair": {
+      "commitment_alignment_rate": 0.5,
+      "self_inconsistency_detection_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 0.0,
+      "repair_success_rate": 0.0,
+      "post_repair_alignment_gain": 0.0,
+      "identity_drift_score": 0.09,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 0.5,
+      "low_stress_alignment_rate": 0.7,
+      "high_stress_alignment_rate": 0.5
+    }
+  },
+  "scenario_breakdown": {
+    "temptation_conflict": {
+      "aligned_condition": {
+        "seed": 223,
+        "scenario_id": "temptation_conflict",
+        "condition": "aligned",
+        "expected_conflict": false,
+        "repair_opportunity": false,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 0.89394,
+          "rest": 0.88194,
+          "exploit_shelter": 1.1981,
+          "forage": -0.5349,
+          "scan": 0.55224,
+          "seek_contact": 0.61624
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail"
+        ],
+        "commitment_compatibility_score": 1.0,
+        "self_inconsistency_error": 0.0,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 1.0,
+        "pre_repair_self_inconsistency_error": 0.0,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": false,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": true,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.82,
+          "shelter": 0.74,
+          "food": 0.25,
+          "stress": 0.32,
+          "social": 0.2,
+          "temptation_gain": 0.18
+        },
+        "event_trace": [
+          {
+            "tick": 1,
+            "action": "exploit_shelter",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail"
+            ],
+            "commitment_compatibility_score": 1.0,
+            "self_inconsistency_error": 0.0,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "aligned",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.82,
+              "stress": 0.32,
+              "social": 0.2,
+              "temptation_gain": 0.18,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "conflict_condition": {
+        "seed": 223,
+        "scenario_id": "temptation_conflict",
+        "condition": "conflict",
+        "expected_conflict": true,
+        "repair_opportunity": false,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 0.506705,
+          "rest": 0.455541,
+          "exploit_shelter": 0.756276,
+          "forage": 0.903178,
+          "scan": 0.344444,
+          "seek_contact": 0.346848
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail"
+        ],
+        "commitment_compatibility_score": 1.0,
+        "self_inconsistency_error": 0.0,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": true,
+        "repair_policy": "metacognitive_review+policy_rebias",
+        "repair_result": {
+          "success": true,
+          "triggered": true,
+          "policy": "metacognitive_review+policy_rebias",
+          "target_action": "forage",
+          "repaired_action": "exploit_shelter",
+          "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+          "outcome": "repaired_and_recovered",
+          "applied_policy_trace": {
+            "policy": "metacognitive_review+policy_rebias",
+            "applied_updates": [
+              {
+                "commitment_id": "core_survival_guardrail",
+                "confidence_delta": 0.12,
+                "priority_delta": 0.08
+              }
+            ],
+            "updated_commitments": [
+              "core_survival_guardrail"
+            ]
+          },
+          "recovery_window": {
+            "steps": 3,
+            "baseline_alignment_mean": 0.0,
+            "post_repair_alignment_mean": 1.0,
+            "alignment_gain": 1.0,
+            "returned_within_commitments": true,
+            "improved": true,
+            "trace": [
+              {
+                "tick": 2,
+                "baseline_action": "forage",
+                "baseline_compatibility_score": 0.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              },
+              {
+                "tick": 3,
+                "baseline_action": "forage",
+                "baseline_compatibility_score": 0.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              },
+              {
+                "tick": 4,
+                "baseline_action": "forage",
+                "baseline_compatibility_score": 0.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              }
+            ]
+          }
+        },
+        "pre_repair_commitment_compatibility_score": 0.0,
+        "pre_repair_self_inconsistency_error": 1.0,
+        "aligned": true,
+        "actual_conflict_event": true,
+        "detected": true,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": true,
+          "conflict_type_explicit": true,
+          "severity_explicit": true,
+          "classification_allowed": true,
+          "counted": true
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": true,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": true,
+          "repair_triggered": true,
+          "repair_policy_present": true,
+          "repair_result_recorded": true,
+          "recovery_window_improved": true,
+          "returned_within_commitments": true,
+          "counted": true
+        },
+        "context": {
+          "danger": 0.76,
+          "shelter": 0.22,
+          "food": 0.91,
+          "stress": 0.4,
+          "social": 0.1,
+          "temptation_gain": 0.92
+        },
+        "event_trace": [
+          {
+            "tick": 2,
+            "action": "forage",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail"
+            ],
+            "commitment_compatibility_score": 0.0,
+            "self_inconsistency_error": 1.0,
+            "conflict_type": "temptation_conflict",
+            "severity_level": "high",
+            "consistency_classification": "self_conflict",
+            "behavioral_classification": "self_conflict",
+            "repair_triggered": true,
+            "repair_policy": "metacognitive_review+policy_rebias",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.76,
+              "stress": 0.4,
+              "social": 0.1,
+              "temptation_gain": 0.92,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [
+          {
+            "tick": 2,
+            "policy": "metacognitive_review+policy_rebias",
+            "success": true,
+            "target_action": "forage",
+            "repaired_action": "exploit_shelter",
+            "pre_alignment": 0.0,
+            "post_alignment": 1.0,
+            "recovery_ticks": 2,
+            "bounded_update_applied": true,
+            "social_repair_required": false
+          }
+        ],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "repair_opportunity_condition": {
+        "seed": 223,
+        "scenario_id": "temptation_conflict",
+        "condition": "repair_opportunity",
+        "expected_conflict": true,
+        "repair_opportunity": true,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 0.621186,
+          "rest": 0.577002,
+          "exploit_shelter": 0.992595,
+          "forage": 1.041407,
+          "scan": 0.352042,
+          "seek_contact": 0.357666
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail"
+        ],
+        "commitment_compatibility_score": 1.0,
+        "self_inconsistency_error": 0.0,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": true,
+        "repair_policy": "metacognitive_review+policy_rebias",
+        "repair_result": {
+          "success": true,
+          "triggered": true,
+          "policy": "metacognitive_review+policy_rebias",
+          "target_action": "forage",
+          "repaired_action": "exploit_shelter",
+          "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+          "outcome": "repaired_and_recovered",
+          "applied_policy_trace": {
+            "policy": "metacognitive_review+policy_rebias",
+            "applied_updates": [
+              {
+                "commitment_id": "core_survival_guardrail",
+                "confidence_delta": 0.12,
+                "priority_delta": 0.08
+              }
+            ],
+            "updated_commitments": [
+              "core_survival_guardrail"
+            ]
+          },
+          "recovery_window": {
+            "steps": 3,
+            "baseline_alignment_mean": 0.666667,
+            "post_repair_alignment_mean": 1.0,
+            "alignment_gain": 0.333333,
+            "returned_within_commitments": true,
+            "improved": true,
+            "trace": [
+              {
+                "tick": 3,
+                "baseline_action": "forage",
+                "baseline_compatibility_score": 0.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              },
+              {
+                "tick": 4,
+                "baseline_action": "exploit_shelter",
+                "baseline_compatibility_score": 1.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              },
+              {
+                "tick": 5,
+                "baseline_action": "exploit_shelter",
+                "baseline_compatibility_score": 1.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              }
+            ]
+          }
+        },
+        "pre_repair_commitment_compatibility_score": 0.0,
+        "pre_repair_self_inconsistency_error": 1.0,
+        "aligned": true,
+        "actual_conflict_event": true,
+        "detected": true,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": true,
+          "conflict_type_explicit": true,
+          "severity_explicit": true,
+          "classification_allowed": true,
+          "counted": true
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": true,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": true,
+          "repair_triggered": true,
+          "repair_policy_present": true,
+          "repair_result_recorded": true,
+          "recovery_window_improved": true,
+          "returned_within_commitments": true,
+          "counted": true
+        },
+        "context": {
+          "danger": 0.78,
+          "shelter": 0.58,
+          "food": 0.85,
+          "stress": 0.46,
+          "social": 0.16,
+          "temptation_gain": 0.88
+        },
+        "event_trace": [
+          {
+            "tick": 3,
+            "action": "forage",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail"
+            ],
+            "commitment_compatibility_score": 0.0,
+            "self_inconsistency_error": 1.0,
+            "conflict_type": "temptation_conflict",
+            "severity_level": "high",
+            "consistency_classification": "self_conflict",
+            "behavioral_classification": "self_conflict",
+            "repair_triggered": true,
+            "repair_policy": "metacognitive_review+policy_rebias",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.78,
+              "stress": 0.46,
+              "social": 0.16,
+              "temptation_gain": 0.88,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [
+          {
+            "tick": 3,
+            "policy": "metacognitive_review+policy_rebias",
+            "success": true,
+            "target_action": "forage",
+            "repaired_action": "exploit_shelter",
+            "pre_alignment": 0.0,
+            "post_alignment": 1.0,
+            "recovery_ticks": 2,
+            "bounded_update_applied": true,
+            "social_repair_required": false
+          }
+        ],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      }
+    },
+    "stress_drift": {
+      "aligned_condition": {
+        "seed": 223,
+        "scenario_id": "stress_drift",
+        "condition": "aligned",
+        "expected_conflict": false,
+        "repair_opportunity": false,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 0.65594,
+          "rest": 0.88594,
+          "exploit_shelter": 1.0921,
+          "forage": -0.4469,
+          "scan": 0.52624,
+          "seek_contact": 0.44624
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail"
+        ],
+        "commitment_compatibility_score": 1.0,
+        "self_inconsistency_error": 0.0,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 1.0,
+        "pre_repair_self_inconsistency_error": 0.0,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": false,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": true,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.58,
+          "shelter": 0.62,
+          "food": 0.4,
+          "stress": 0.34,
+          "social": 0.12,
+          "temptation_gain": 0.35
+        },
+        "event_trace": [
+          {
+            "tick": 1,
+            "action": "exploit_shelter",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail"
+            ],
+            "commitment_compatibility_score": 1.0,
+            "self_inconsistency_error": 0.0,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "aligned",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.58,
+              "stress": 0.34,
+              "social": 0.12,
+              "temptation_gain": 0.35,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "conflict_condition": {
+        "seed": 223,
+        "scenario_id": "stress_drift",
+        "condition": "conflict",
+        "expected_conflict": true,
+        "repair_opportunity": false,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 0.517182,
+          "rest": 0.51894,
+          "exploit_shelter": 0.611715,
+          "forage": 0.852896,
+          "scan": 0.269063,
+          "seek_contact": 0.222525
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail"
+        ],
+        "commitment_compatibility_score": 1.0,
+        "self_inconsistency_error": 0.0,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": true,
+        "repair_policy": "reflective_pause+policy_rebias",
+        "repair_result": {
+          "success": true,
+          "triggered": true,
+          "policy": "reflective_pause+policy_rebias",
+          "target_action": "forage",
+          "repaired_action": "exploit_shelter",
+          "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+          "outcome": "repaired_and_recovered",
+          "applied_policy_trace": {
+            "policy": "reflective_pause+policy_rebias",
+            "applied_updates": [
+              {
+                "commitment_id": "core_survival_guardrail",
+                "confidence_delta": 0.12,
+                "priority_delta": 0.08
+              }
+            ],
+            "updated_commitments": [
+              "core_survival_guardrail"
+            ]
+          },
+          "recovery_window": {
+            "steps": 3,
+            "baseline_alignment_mean": 0.666667,
+            "post_repair_alignment_mean": 1.0,
+            "alignment_gain": 0.333333,
+            "returned_within_commitments": true,
+            "improved": true,
+            "trace": [
+              {
+                "tick": 2,
+                "baseline_action": "forage",
+                "baseline_compatibility_score": 0.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              },
+              {
+                "tick": 3,
+                "baseline_action": "exploit_shelter",
+                "baseline_compatibility_score": 1.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              },
+              {
+                "tick": 4,
+                "baseline_action": "exploit_shelter",
+                "baseline_compatibility_score": 1.0,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 1.0
+              }
+            ]
+          }
+        },
+        "pre_repair_commitment_compatibility_score": 0.0,
+        "pre_repair_self_inconsistency_error": 1.0,
+        "aligned": true,
+        "actual_conflict_event": true,
+        "detected": true,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": true,
+          "conflict_type_explicit": true,
+          "severity_explicit": true,
+          "classification_allowed": true,
+          "counted": true
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": true,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": true,
+          "repair_triggered": true,
+          "repair_policy_present": true,
+          "repair_result_recorded": true,
+          "recovery_window_improved": true,
+          "returned_within_commitments": true,
+          "counted": true
+        },
+        "context": {
+          "danger": 0.72,
+          "shelter": 0.18,
+          "food": 0.66,
+          "stress": 0.92,
+          "social": 0.08,
+          "temptation_gain": 0.58
+        },
+        "event_trace": [
+          {
+            "tick": 2,
+            "action": "forage",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail"
+            ],
+            "commitment_compatibility_score": 0.0,
+            "self_inconsistency_error": 1.0,
+            "conflict_type": "stress_drift",
+            "severity_level": "high",
+            "consistency_classification": "self_conflict",
+            "behavioral_classification": "self_conflict",
+            "repair_triggered": true,
+            "repair_policy": "reflective_pause+policy_rebias",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.72,
+              "stress": 0.92,
+              "social": 0.08,
+              "temptation_gain": 0.58,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [
+          {
+            "tick": 2,
+            "policy": "reflective_pause+policy_rebias",
+            "success": true,
+            "target_action": "forage",
+            "repaired_action": "exploit_shelter",
+            "pre_alignment": 0.0,
+            "post_alignment": 1.0,
+            "recovery_ticks": 2,
+            "bounded_update_applied": true,
+            "social_repair_required": false
+          }
+        ],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "repair_opportunity_condition": {
+        "seed": 223,
+        "scenario_id": "stress_drift",
+        "condition": "repair_opportunity",
+        "expected_conflict": true,
+        "repair_opportunity": true,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 0.658553,
+          "rest": 0.855287,
+          "exploit_shelter": 0.873708,
+          "forage": 0.867121,
+          "scan": 0.250204,
+          "seek_contact": 0.26453
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail"
+        ],
+        "commitment_compatibility_score": 1.0,
+        "self_inconsistency_error": 0.0,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 1.0,
+        "pre_repair_self_inconsistency_error": 0.0,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": false,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.7,
+          "shelter": 0.55,
+          "food": 0.52,
+          "stress": 0.84,
+          "social": 0.1,
+          "temptation_gain": 0.42
+        },
+        "event_trace": [
+          {
+            "tick": 3,
+            "action": "exploit_shelter",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail"
+            ],
+            "commitment_compatibility_score": 1.0,
+            "self_inconsistency_error": 0.0,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "aligned",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.7,
+              "stress": 0.84,
+              "social": 0.1,
+              "temptation_gain": 0.42,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      }
+    },
+    "social_contradiction": {
+      "aligned_condition": {
+        "seed": 223,
+        "scenario_id": "social_contradiction",
+        "condition": "aligned",
+        "expected_conflict": false,
+        "repair_opportunity": false,
+        "chosen_action": "seek_contact",
+        "scores": {
+          "hide": 0.33594,
+          "rest": 0.50394,
+          "exploit_shelter": 0.8181,
+          "forage": -0.4709,
+          "scan": 0.52624,
+          "seek_contact": 1.02624
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair"
+        ],
+        "commitment_compatibility_score": 0.824032,
+        "self_inconsistency_error": 0.175968,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 0.824032,
+        "pre_repair_self_inconsistency_error": 0.175968,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": true,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.28,
+          "shelter": 0.56,
+          "food": 0.42,
+          "stress": 0.3,
+          "social": 0.82,
+          "temptation_gain": 0.24
+        },
+        "event_trace": [
+          {
+            "tick": 1,
+            "action": "seek_contact",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair"
+            ],
+            "commitment_compatibility_score": 0.8240322137823739,
+            "self_inconsistency_error": 0.1759677862176261,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "aligned",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.28,
+              "stress": 0.3,
+              "social": 0.82,
+              "temptation_gain": 0.24,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "conflict_condition": {
+        "seed": 223,
+        "scenario_id": "social_contradiction",
+        "condition": "conflict",
+        "expected_conflict": true,
+        "repair_opportunity": false,
+        "chosen_action": "exploit_shelter",
+        "scores": {
+          "hide": 1.106752,
+          "rest": 0.580394,
+          "exploit_shelter": 0.895195,
+          "forage": -0.254486,
+          "scan": 0.329201,
+          "seek_contact": 0.851539
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair"
+        ],
+        "commitment_compatibility_score": 0.818395,
+        "self_inconsistency_error": 0.181605,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": true,
+        "repair_policy": "social_repair+policy_rebias",
+        "repair_result": {
+          "success": true,
+          "triggered": true,
+          "policy": "social_repair+policy_rebias",
+          "target_action": "hide",
+          "repaired_action": "exploit_shelter",
+          "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+          "outcome": "repaired_and_recovered",
+          "applied_policy_trace": {
+            "policy": "social_repair+policy_rebias",
+            "applied_updates": [
+              {
+                "commitment_id": "core_social_repair",
+                "confidence_delta": 0.12,
+                "priority_delta": 0.08
+              },
+              {
+                "commitment_id": "core_social_repair",
+                "confidence_delta": 0.12,
+                "priority_delta": 0.08
+              }
+            ],
+            "updated_commitments": [
+              "core_social_repair",
+              "core_social_repair"
+            ]
+          },
+          "recovery_window": {
+            "steps": 3,
+            "baseline_alignment_mean": 0.732221,
+            "post_repair_alignment_mean": 0.793616,
+            "alignment_gain": 0.061394,
+            "returned_within_commitments": true,
+            "improved": true,
+            "trace": [
+              {
+                "tick": 2,
+                "baseline_action": "hide",
+                "baseline_compatibility_score": 0.64095,
+                "repaired_action": "exploit_shelter",
+                "repaired_compatibility_score": 0.818395
+              },
+              {
+                "tick": 3,
+                "baseline_action": "hide",
+                "baseline_compatibility_score": 0.777857,
+                "repaired_action": "seek_contact",
+                "repaired_compatibility_score": 0.774742
+              },
+              {
+                "tick": 4,
+                "baseline_action": "hide",
+                "baseline_compatibility_score": 0.777857,
+                "repaired_action": "seek_contact",
+                "repaired_compatibility_score": 0.787709
+              }
+            ]
+          }
+        },
+        "pre_repair_commitment_compatibility_score": 0.64095,
+        "pre_repair_self_inconsistency_error": 0.35905,
+        "aligned": true,
+        "actual_conflict_event": true,
+        "detected": true,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": true,
+          "conflict_type_explicit": true,
+          "severity_explicit": true,
+          "classification_allowed": true,
+          "counted": true
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": true,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": true,
+          "repair_triggered": true,
+          "repair_policy_present": true,
+          "repair_result_recorded": true,
+          "recovery_window_improved": true,
+          "returned_within_commitments": true,
+          "counted": true
+        },
+        "context": {
+          "danger": 0.68,
+          "shelter": 0.3,
+          "food": 0.38,
+          "stress": 0.63,
+          "social": 0.88,
+          "temptation_gain": 0.22
+        },
+        "event_trace": [
+          {
+            "tick": 2,
+            "action": "hide",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair"
+            ],
+            "commitment_compatibility_score": 0.640950425344676,
+            "self_inconsistency_error": 0.35904957465532406,
+            "conflict_type": "social_contradiction",
+            "severity_level": "medium",
+            "consistency_classification": "temporary_deviation",
+            "behavioral_classification": "temporary_deviation",
+            "repair_triggered": true,
+            "repair_policy": "social_repair+policy_rebias",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.68,
+              "stress": 0.63,
+              "social": 0.88,
+              "temptation_gain": 0.22,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [
+          {
+            "tick": 2,
+            "policy": "social_repair+policy_rebias",
+            "success": true,
+            "target_action": "hide",
+            "repaired_action": "exploit_shelter",
+            "pre_alignment": 0.640950425344676,
+            "post_alignment": 0.793616,
+            "recovery_ticks": 2,
+            "bounded_update_applied": true,
+            "social_repair_required": true
+          }
+        ],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "repair_opportunity_condition": {
+        "seed": 223,
+        "scenario_id": "social_contradiction",
+        "condition": "repair_opportunity",
+        "expected_conflict": true,
+        "repair_opportunity": true,
+        "chosen_action": "seek_contact",
+        "scores": {
+          "hide": 0.937226,
+          "rest": 0.509248,
+          "exploit_shelter": 0.862324,
+          "forage": -0.391347,
+          "scan": 0.432823,
+          "seek_contact": 1.006181
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair"
+        ],
+        "commitment_compatibility_score": 0.746199,
+        "self_inconsistency_error": 0.253801,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "aligned",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 0.746199,
+        "pre_repair_self_inconsistency_error": 0.253801,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.46,
+          "shelter": 0.52,
+          "food": 0.34,
+          "stress": 0.44,
+          "social": 0.92,
+          "temptation_gain": 0.18
+        },
+        "event_trace": [
+          {
+            "tick": 3,
+            "action": "seek_contact",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair"
+            ],
+            "commitment_compatibility_score": 0.7461985216473074,
+            "self_inconsistency_error": 0.2538014783526926,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "aligned",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.46,
+              "stress": 0.44,
+              "social": 0.92,
+              "temptation_gain": 0.18,
+              "adaptation_pressure": 0.0
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      }
+    },
+    "adaptation_vs_betrayal": {
+      "aligned_condition": {
+        "seed": 223,
+        "scenario_id": "adaptation_vs_betrayal",
+        "condition": "aligned",
+        "expected_conflict": false,
+        "repair_opportunity": false,
+        "chosen_action": "scan",
+        "scores": {
+          "hide": 0.24594,
+          "rest": 0.43394,
+          "exploit_shelter": 0.7781,
+          "forage": -0.4549,
+          "scan": 0.92024,
+          "seek_contact": 0.64624
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "commitment_compatibility_score": 0.778332,
+        "self_inconsistency_error": 0.221668,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "healthy_adaptation",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 0.778332,
+        "pre_repair_self_inconsistency_error": 0.221668,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": true,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.22,
+          "shelter": 0.62,
+          "food": 0.36,
+          "stress": 0.26,
+          "social": 0.26,
+          "novelty": 0.74,
+          "adaptation_pressure": 0.52,
+          "temptation_gain": 0.2
+        },
+        "event_trace": [
+          {
+            "tick": 1,
+            "action": "scan",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "commitment_compatibility_score": 0.7783319019174539,
+            "self_inconsistency_error": 0.22166809808254606,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "healthy_adaptation",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.22,
+              "stress": 0.26,
+              "social": 0.26,
+              "temptation_gain": 0.2,
+              "adaptation_pressure": 0.52
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "conflict_condition": {
+        "seed": 223,
+        "scenario_id": "adaptation_vs_betrayal",
+        "condition": "conflict",
+        "expected_conflict": true,
+        "repair_opportunity": false,
+        "chosen_action": "scan",
+        "scores": {
+          "hide": 0.425235,
+          "rest": 0.685599,
+          "exploit_shelter": 0.617824,
+          "forage": -7.8e-05,
+          "scan": 0.985796,
+          "seek_contact": 0.357392
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail",
+          "adaptive_exploration"
+        ],
+        "commitment_compatibility_score": 0.643357,
+        "self_inconsistency_error": 0.356643,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "healthy_adaptation",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 0.643357,
+        "pre_repair_self_inconsistency_error": 0.356643,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.54,
+          "shelter": 0.22,
+          "food": 0.46,
+          "stress": 0.48,
+          "social": 0.22,
+          "novelty": 0.88,
+          "adaptation_pressure": 0.94,
+          "temptation_gain": 0.26
+        },
+        "event_trace": [
+          {
+            "tick": 2,
+            "action": "scan",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail",
+              "adaptive_exploration"
+            ],
+            "commitment_compatibility_score": 0.6433569227257162,
+            "self_inconsistency_error": 0.3566430772742838,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "healthy_adaptation",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.54,
+              "stress": 0.48,
+              "social": 0.22,
+              "temptation_gain": 0.26,
+              "adaptation_pressure": 0.94
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      },
+      "repair_opportunity_condition": {
+        "seed": 223,
+        "scenario_id": "adaptation_vs_betrayal",
+        "condition": "repair_opportunity",
+        "expected_conflict": true,
+        "repair_opportunity": true,
+        "chosen_action": "scan",
+        "scores": {
+          "hide": 0.308984,
+          "rest": 0.72415,
+          "exploit_shelter": 0.496797,
+          "forage": -0.203966,
+          "scan": 0.906048,
+          "seek_contact": 0.355622
+        },
+        "active_commitments": [
+          "core_survival_guardrail",
+          "core_social_repair",
+          "adaptive_exploration"
+        ],
+        "relevant_commitments": [
+          "core_survival_guardrail",
+          "adaptive_exploration"
+        ],
+        "commitment_compatibility_score": 0.681917,
+        "self_inconsistency_error": 0.318083,
+        "conflict_type": "none",
+        "severity_level": "none",
+        "consistency_classification": "aligned",
+        "behavioral_classification": "healthy_adaptation",
+        "repair_triggered": false,
+        "repair_policy": "",
+        "repair_result": {
+          "success": false,
+          "triggered": false,
+          "policy": "",
+          "outcome": "not_triggered",
+          "applied_policy_trace": {},
+          "recovery_window": {}
+        },
+        "pre_repair_commitment_compatibility_score": 0.681917,
+        "pre_repair_self_inconsistency_error": 0.318083,
+        "aligned": true,
+        "actual_conflict_event": false,
+        "detected": false,
+        "detection_basis": {
+          "threshold_passed": true,
+          "has_violations": false,
+          "conflict_type_explicit": false,
+          "severity_explicit": false,
+          "classification_allowed": false,
+          "counted": false
+        },
+        "false_positive": false,
+        "false_positive_basis": {
+          "non_conflict_context": false,
+          "explicit_conflict_output": false,
+          "counted": false
+        },
+        "repair_success_basis": {
+          "detected": false,
+          "repair_triggered": false,
+          "repair_policy_present": false,
+          "repair_result_recorded": true,
+          "recovery_window_improved": false,
+          "returned_within_commitments": false,
+          "counted": false
+        },
+        "context": {
+          "danger": 0.48,
+          "shelter": 0.42,
+          "food": 0.44,
+          "stress": 0.42,
+          "social": 0.24,
+          "novelty": 0.9,
+          "adaptation_pressure": 0.86,
+          "temptation_gain": 0.24
+        },
+        "event_trace": [
+          {
+            "tick": 3,
+            "action": "scan",
+            "active_commitments": [
+              "core_survival_guardrail",
+              "core_social_repair",
+              "adaptive_exploration"
+            ],
+            "relevant_commitments": [
+              "core_survival_guardrail",
+              "adaptive_exploration"
+            ],
+            "commitment_compatibility_score": 0.6819171268196961,
+            "self_inconsistency_error": 0.3180828731803039,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "healthy_adaptation",
+            "repair_triggered": false,
+            "repair_policy": "",
+            "repair_result": {},
+            "evidence": {
+              "danger": 0.48,
+              "stress": 0.42,
+              "social": 0.24,
+              "temptation_gain": 0.24,
+              "adaptation_pressure": 0.86
+            }
+          }
+        ],
+        "repair_history": [],
+        "narrative_evidence_supported": true,
+        "chapter_updates": 0,
+        "variant_id": "with_repair"
+      }
+    }
+  },
+  "repair_breakdown": {
+    "with_repair": {
+      "trigger_count": 24,
+      "success_count": 24,
+      "metric_summary": {
+        "repair_trigger_precision": 1.0,
+        "repair_success_rate": 1.0,
+        "post_repair_alignment_gain": 0.333333
+      }
+    },
+    "no_repair": {
+      "trigger_count": 0,
+      "success_count": 0
+    }
+  },
+  "stress_breakdown": {
+    "low_stress_alignment_rate": 1.0,
+    "high_stress_alignment_rate": 1.0,
+    "alignment_drop": 0.0,
+    "identity_drift_score": 0.0
+  },
+  "bounded_update_breakdown": {
+    "per_seed": [
+      {
+        "seed": 223,
+        "sample_id": "bounded_identity_update:223",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 242,
+        "sample_id": "bounded_identity_update:242",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 320,
+        "sample_id": "bounded_identity_update:320",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 339,
+        "sample_id": "bounded_identity_update:339",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 417,
+        "sample_id": "bounded_identity_update:417",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 436,
+        "sample_id": "bounded_identity_update:436",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      }
+    ],
+    "commitment_persistence_score": {
+      "mean": 0.82,
+      "std": 0.0
+    },
+    "core_commitment_flip_rate": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "identity_rewrite_ratio": {
+      "mean": 0.0,
+      "std": 0.0
+    }
+  },
+  "chapter_transition_breakdown": {
+    "per_seed": [
+      {
+        "seed": 223,
+        "sample_id": "chapter_transition:223",
+        "chapters": [
+          {
+            "chapter_updates": 1,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 2,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 3,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          }
+        ]
+      },
+      {
+        "seed": 242,
+        "sample_id": "chapter_transition:242",
+        "chapters": [
+          {
+            "chapter_updates": 1,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 2,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 3,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          }
+        ]
+      },
+      {
+        "seed": 320,
+        "sample_id": "chapter_transition:320",
+        "chapters": [
+          {
+            "chapter_updates": 1,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 2,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 3,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          }
+        ]
+      },
+      {
+        "seed": 339,
+        "sample_id": "chapter_transition:339",
+        "chapters": [
+          {
+            "chapter_updates": 1,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 2,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 3,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          }
+        ]
+      },
+      {
+        "seed": 417,
+        "sample_id": "chapter_transition:417",
+        "chapters": [
+          {
+            "chapter_updates": 1,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 2,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 3,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          }
+        ]
+      },
+      {
+        "seed": 436,
+        "sample_id": "chapter_transition:436",
+        "chapters": [
+          {
+            "chapter_updates": 1,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 2,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          },
+          {
+            "chapter_updates": 3,
+            "chosen_action": "scan",
+            "compatibility_score": 0.681917,
+            "behavioral_classification": "healthy_adaptation"
+          }
+        ]
+      }
+    ]
+  },
+  "protocol_integrity": {
+    "required_seed_set": [
+      223,
+      242,
+      320,
+      339,
+      417,
+      436
+    ],
+    "provided_seed_set": [
+      223,
+      242,
+      320,
+      339,
+      417,
+      436
+    ],
+    "seed_set_complete": true,
+    "required_scenario_set": [
+      "temptation_conflict",
+      "stress_drift",
+      "social_contradiction",
+      "adaptation_vs_betrayal"
+    ],
+    "provided_scenario_set": [
+      "adaptation_vs_betrayal",
+      "social_contradiction",
+      "stress_drift",
+      "temptation_conflict"
+    ],
+    "scenario_set_complete": true,
+    "required_condition_set": [
+      "with_commitments",
+      "no_commitments",
+      "with_repair",
+      "no_repair"
+    ],
+    "provided_condition_set": [
+      "with_repair",
+      "with_commitments",
+      "no_commitments",
+      "no_repair"
+    ],
+    "condition_set_complete": true
+  },
+  "sample_independence_checks": {
+    "repeated_challenge": {
+      "sample_count": 6,
+      "unique_seed_count": 6,
+      "duplicate_seed_count": 0,
+      "passes": true
+    },
+    "chapter_transition": {
+      "sample_count": 6,
+      "unique_seed_count": 6,
+      "duplicate_seed_count": 0,
+      "passes": true
+    },
+    "bounded_identity_update": {
+      "sample_count": 6,
+      "unique_seed_count": 6,
+      "duplicate_seed_count": 0,
+      "passes": true
+    }
+  },
+  "metric_counting_rules": {
+    "self_inconsistency_detection_rate": "Count only records where actual_conflict_event is true; numerator additionally requires explicit internal conflict_type, explicit severity_level, allowed consistency_classification, threshold_passed, and recorded trace fields.",
+    "false_positive_inconsistency_rate": "Count only aligned or non-conflict protocol contexts where the system explicitly emits conflict_type != none, severity_level != none, or repair_triggered = true.",
+    "repair_success_rate": "Count only actual conflict repair-opportunity records with detected conflict, repair_triggered = true, non-empty repair_policy, explicit repair_result outcome, and a recovery window that improves alignment or returns behavior within active commitments.",
+    "bounded_identity_update": "Use one bounded identity update sample per seed, generated outside the scenario loop, with duplicate seed checks enforced before PASS."
+  },
+  "significant_metric_count": 8,
+  "effect_metric_count": 8,
+  "gates": {
+    "protocol_integrity": true,
+    "commitment_constraints": true,
+    "inconsistency_detection": true,
+    "repair_effectiveness": true,
+    "stress_resilience": true,
+    "evidence_support": true,
+    "bounded_update": true,
+    "sample_independence": true,
+    "statistics": true,
+    "determinism": true,
+    "artifact_schema_complete": true,
+    "freshness_generated_this_round": true
+  },
+  "goal_details": {
+    "protocol_integrity": {
+      "seed_set_complete": true,
+      "scenario_set_complete": true,
+      "condition_set_complete": true
+    },
+    "commitment_constraints": {
+      "commitment_alignment_rate": true,
+      "alignment_improvement_vs_no_commitments": true,
+      "violation_reduction_vs_no_commitments": true
+    },
+    "inconsistency_detection": {
+      "self_inconsistency_detection_rate": true,
+      "false_negative_rate": true,
+      "false_positive_inconsistency_rate": true
+    },
+    "repair_effectiveness": {
+      "repair_trigger_precision": true,
+      "repair_success_rate": true,
+      "post_repair_alignment_gain": true
+    },
+    "stress_resilience": {
+      "stress_resilient_alignment_rate": true,
+      "alignment_drop": true,
+      "identity_drift_score": true
+    },
+    "evidence_support": {
+      "narrative_evidence_support_rate": true
+    },
+    "bounded_update": {
+      "commitment_persistence_score": true,
+      "core_commitment_flip_rate": true,
+      "identity_rewrite_ratio": true
+    },
+    "sample_independence": {
+      "repeated_challenge": true,
+      "chapter_transition": true,
+      "bounded_identity_update": true
+    },
+    "statistics": {
+      "significant_metric_count": true,
+      "effect_metric_count": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "artifact_schema_complete": {
+      "passed": true
+    },
+    "freshness_generated_this_round": {
+      "passed": true
+    }
+  },
+  "residual_risks": [
+    "Benchmark is protocol-fixed and synthetic rather than open-ended world deployment.",
+    "Repair success is demonstrated under deterministic scenario families, not adversarially generated long-form narratives.",
+    "Bounded update currently adjusts commitment strength rather than rewriting narrative chapters with richer semantic evidence."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "artifact_schema_version": "m223_v1",
+    "codebase_version": "44bf6bdae870955af6a9ed601e860317d2d49f16"
+  }
+}

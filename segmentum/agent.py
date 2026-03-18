@@ -238,63 +238,10 @@ class PolicyEvaluator:
         action: str,
         projected_state: dict[str, float],
     ) -> dict[str, object]:
-        narrative = self.self_model.identity_narrative
-        if narrative is None:
-            return {
-                "bias": 0.0,
-                "focus": [],
-                "violations": [],
-                "active_commitments": [],
-                "tension": 0.0,
-                "repair_policy": "",
-            }
-
-        danger = float(projected_state.get("danger", 0.0))
-        novelty = float(projected_state.get("novelty", 0.0))
-        shelter = float(projected_state.get("shelter", 0.0))
-        active_commitments: list[str] = []
-        focus: list[str] = []
-        violations: list[str] = []
-        bias = 0.0
-        tension = 0.0
-
-        for commitment in narrative.commitments:
-            if not commitment.active:
-                continue
-            active_commitments.append(commitment.commitment_id)
-            gate = 0.35
-            if commitment.commitment_type == "value_guardrail":
-                gate = max(0.35, danger, 1.0 - shelter)
-            elif commitment.commitment_type == "behavioral_style":
-                gate = max(0.25, novelty * (1.0 - danger))
-            elif commitment.commitment_type == "capability":
-                gate = 0.30
-            strength = max(0.0, min(1.0, commitment.confidence)) * max(
-                0.15, min(1.0, commitment.priority)
-            ) * gate
-            if action in commitment.target_actions:
-                bias += 0.65 * strength
-                focus.append(commitment.commitment_id)
-            if action in commitment.discouraged_actions:
-                penalty = 0.85 * strength
-                bias -= penalty
-                tension += penalty
-                violations.append(commitment.commitment_id)
-
-        repair_policy = ""
-        if violations:
-            repair_policy = (
-                "Re-anchor action selection to active commitments and preserve the resulting "
-                "episode as identity-critical evidence."
-            )
-        return {
-            "bias": max(-0.9, min(0.9, bias)),
-            "focus": focus,
-            "violations": violations,
-            "active_commitments": active_commitments,
-            "tension": max(0.0, min(1.5, tension)),
-            "repair_policy": repair_policy,
-        }
+        return self.self_model.assess_action_commitments(
+            action=action,
+            projected_state=projected_state,
+        )
 
     def dominant_component(
         self,
@@ -544,8 +491,18 @@ class PolicyEvaluator:
             "workspace_focus": list(diagnostics.workspace_broadcast_channels),
             "workspace_intensity": diagnostics.workspace_broadcast_intensity,
             "current_commitments": list(diagnostics.current_commitments),
+            "relevant_commitments": list(diagnostics.relevant_commitments),
             "commitment_focus": list(diagnostics.commitment_focus),
             "violated_commitments": list(diagnostics.violated_commitments),
+            "commitment_compatibility_score": diagnostics.commitment_compatibility_score,
+            "self_inconsistency_error": diagnostics.self_inconsistency_error,
+            "conflict_type": diagnostics.conflict_type,
+            "severity_level": diagnostics.severity_level,
+            "consistency_classification": diagnostics.consistency_classification,
+            "behavioral_classification": diagnostics.behavioral_classification,
+            "repair_triggered": diagnostics.repair_triggered,
+            "repair_policy": diagnostics.repair_policy,
+            "repair_result": dict(diagnostics.repair_result),
             "identity_tension": diagnostics.identity_tension,
             "identity_repair_policy": diagnostics.identity_repair_policy,
             "social_focus": list(diagnostics.social_focus),
@@ -734,6 +691,53 @@ class SegmentAgent:
             "identity_tension": float(identity_tension),
             "repair_policy": repair_policy,
         }
+
+    def _select_repaired_option(
+        self,
+        *,
+        ranked_options: list[InterventionScore],
+        commitment_assessments: dict[str, dict[str, object]],
+    ) -> tuple[InterventionScore | None, dict[str, object]]:
+        if not ranked_options:
+            return None, {}
+        chosen = ranked_options[0]
+        assessment = commitment_assessments.get(chosen.choice, {})
+        review = self.metacognitive_layer.review_self_consistency(assessment)
+        if not review.review_required:
+            return None, {
+                "success": False,
+                "policy": review.recommended_policy,
+                "reason": "review_not_required",
+            }
+
+        candidates = sorted(
+            ranked_options,
+            key=lambda option: (
+                float(commitment_assessments.get(option.choice, {}).get("compatibility_score", 0.5))
+                + (review.rebias_strength * 0.25 if not commitment_assessments.get(option.choice, {}).get("violations") else 0.0),
+                option.policy_score,
+                option.choice,
+            ),
+            reverse=True,
+        )
+        repaired = candidates[0]
+        repaired_assessment = commitment_assessments.get(repaired.choice, {})
+        success = (
+            repaired.choice != chosen.choice
+            and float(repaired_assessment.get("compatibility_score", 0.0))
+            > float(assessment.get("compatibility_score", 0.0))
+            and not repaired_assessment.get("violations")
+        )
+        result = {
+            "success": success,
+            "policy": review.recommended_policy,
+            "review_notes": review.notes,
+            "pause_strength": review.pause_strength,
+            "rebias_strength": review.rebias_strength,
+            "target_action": chosen.choice,
+            "repaired_action": repaired.choice if success else chosen.choice,
+        }
+        return (repaired if success else None), result
 
     def _mark_last_episode_identity_critical(
         self,
@@ -1096,6 +1100,15 @@ class SegmentAgent:
             "goal_alignment": diagnostics.chosen.goal_alignment,
             "preferred_probability": diagnostics.chosen.preferred_probability,
             "policy_score": diagnostics.chosen.policy_score,
+            "relevant_commitments": list(diagnostics.relevant_commitments),
+            "commitment_compatibility_score": diagnostics.commitment_compatibility_score,
+            "self_inconsistency_error": diagnostics.self_inconsistency_error,
+            "conflict_type": diagnostics.conflict_type,
+            "severity_level": diagnostics.severity_level,
+            "consistency_classification": diagnostics.consistency_classification,
+            "behavioral_classification": diagnostics.behavioral_classification,
+            "repair_triggered": diagnostics.repair_triggered,
+            "repair_policy": diagnostics.repair_policy,
             "commitment_focus": list(diagnostics.commitment_focus),
             "violated_commitments": list(diagnostics.violated_commitments),
             "identity_tension": diagnostics.identity_tension,
@@ -1929,6 +1942,15 @@ class SegmentAgent:
                     predicted_effects=predicted_effects,
                     dominant_component=dominant_component,
                     cost=float(option["cost"]),
+                    commitment_compatibility_score=float(
+                        commitment_assessment.get("compatibility_score", 0.5)
+                    ),
+                    relevant_commitments=list(
+                        commitment_assessment.get("relevant_commitments", [])
+                    ),
+                    commitment_violations=list(
+                        commitment_assessment.get("violations", [])
+                    ),
                 )
             )
         # Value-consistency override: when danger is extreme, the survival
@@ -1955,22 +1977,70 @@ class SegmentAgent:
             ),
             reverse=True,
         )
+        chosen_option = ranked_options[0]
         chosen_assessment = commitment_assessments.get(
-            ranked_options[0].choice,
+            chosen_option.choice,
             {
                 "active_commitments": [],
+                "relevant_commitments": [],
                 "focus": [],
                 "violations": [],
+                "compatibility_score": 0.5,
+                "self_inconsistency_error": 0.0,
+                "conflict_type": "none",
+                "severity_level": "none",
+                "consistency_classification": "aligned",
+                "behavioral_classification": "aligned",
+                "repair_triggered": False,
                 "tension": 0.0,
                 "repair_policy": "",
+                "repair_result": {},
             },
         )
+        self.self_model.register_self_inconsistency(
+            tick=self.cycle,
+            action=chosen_option.choice,
+            assessment=chosen_assessment,
+        )
+        repair_result = dict(chosen_assessment.get("repair_result", {}))
+        if bool(chosen_assessment.get("repair_triggered", False)):
+            repaired_option, repair_result = self._select_repaired_option(
+                ranked_options=ranked_options,
+                commitment_assessments=commitment_assessments,
+            )
+            if repaired_option is not None:
+                chosen_option = repaired_option
+                chosen_assessment = commitment_assessments.get(chosen_option.choice, chosen_assessment)
+                ranked_options = [
+                    chosen_option,
+                    *[option for option in ranked_options if option.choice != chosen_option.choice],
+                ]
+            self.self_model.record_repair_outcome(
+                tick=self.cycle,
+                policy=str(repair_result.get("policy", chosen_assessment.get("repair_policy", ""))),
+                success=bool(repair_result.get("success", False)),
+                target_action=str(repair_result.get("target_action", ranked_options[0].choice)),
+                repaired_action=str(repair_result.get("repaired_action", chosen_option.choice)),
+                pre_alignment=float(
+                    commitment_assessments.get(
+                        str(repair_result.get("target_action", ranked_options[0].choice)),
+                        chosen_assessment,
+                    ).get("compatibility_score", 0.5)
+                ),
+                post_alignment=float(chosen_assessment.get("compatibility_score", 0.5)),
+                bounded_update_applied="bounded_commitment_update" in str(
+                    repair_result.get("policy", chosen_assessment.get("repair_policy", ""))
+                ),
+                social_repair_required="social_repair" in str(
+                    repair_result.get("policy", chosen_assessment.get("repair_policy", ""))
+                ),
+            )
         chosen_social = social_assessments.get(
-            ranked_options[0].choice,
+            chosen_option.choice,
             {"focus": [], "alerts": [], "snapshot": self.social_memory.snapshot()},
         )
         diagnostics = DecisionDiagnostics(
-            chosen=ranked_options[0],
+            chosen=chosen_option,
             ranked_options=ranked_options,
             prediction_error=prediction_error,
             retrieved_memories=similar_memories,
@@ -2033,8 +2103,22 @@ class SegmentAgent:
                 else 0.0
             ),
             current_commitments=list(chosen_assessment["active_commitments"]),
+            relevant_commitments=list(chosen_assessment.get("relevant_commitments", [])),
             commitment_focus=list(chosen_assessment["focus"]),
             violated_commitments=list(chosen_assessment["violations"]),
+            commitment_compatibility_score=float(chosen_assessment.get("compatibility_score", 0.5)),
+            self_inconsistency_error=float(chosen_assessment.get("self_inconsistency_error", 0.0)),
+            conflict_type=str(chosen_assessment.get("conflict_type", "none")),
+            severity_level=str(chosen_assessment.get("severity_level", "none")),
+            consistency_classification=str(
+                chosen_assessment.get("consistency_classification", "aligned")
+            ),
+            behavioral_classification=str(
+                chosen_assessment.get("behavioral_classification", "aligned")
+            ),
+            repair_triggered=bool(chosen_assessment.get("repair_triggered", False)),
+            repair_policy=str(chosen_assessment.get("repair_policy", "")),
+            repair_result=repair_result,
             identity_tension=float(chosen_assessment["tension"]),
             identity_repair_policy=str(chosen_assessment["repair_policy"]),
             social_focus=list(chosen_social["focus"]),
@@ -2109,6 +2193,9 @@ class SegmentAgent:
                 predicted_effects={},
                 dominant_component="expected_free_energy",
                 cost=0.0,
+                commitment_compatibility_score=0.5,
+                relevant_commitments=[],
+                commitment_violations=[],
             ),
             ranked_options=[],
             prediction_error=prediction_error,
@@ -2124,8 +2211,18 @@ class SegmentAgent:
             workspace_suppressed_channels=[],
             workspace_broadcast_intensity=0.0,
             current_commitments=[],
+            relevant_commitments=[],
             commitment_focus=[],
             violated_commitments=[],
+            commitment_compatibility_score=0.5,
+            self_inconsistency_error=0.0,
+            conflict_type="none",
+            severity_level="none",
+            consistency_classification="aligned",
+            behavioral_classification="aligned",
+            repair_triggered=False,
+            repair_policy="",
+            repair_result={},
             identity_tension=0.0,
             identity_repair_policy="",
             social_focus=[],
@@ -2247,6 +2344,37 @@ class SegmentAgent:
             )
         finally:
             self.long_term_memory.surprise_threshold = original_surprise_threshold
+        if not memory_decision.episode_created:
+            recent_episode_actions = {
+                action_name(payload.get("action_taken", payload.get("action", "")))
+                for payload in self.long_term_memory.episodes[-1:]
+            }
+            if action.name not in recent_episode_actions:
+                payload = self.long_term_memory.store_episode(
+                    self.cycle,
+                    observed,
+                    prediction,
+                    errors,
+                    action,
+                    outcome,
+                    body_state=body_state,
+                )
+                memory_decision = MemoryDecision(
+                    value_score=float(payload.get("value_score", memory_decision.value_score)),
+                    prediction_error=float(payload.get("prediction_error", memory_decision.prediction_error)),
+                    total_surprise=float(payload.get("total_surprise", memory_decision.total_surprise)),
+                    episode_created=True,
+                    predicted_outcome=str(payload.get("predicted_outcome", memory_decision.predicted_outcome)),
+                    preferred_probability=float(payload.get("preferred_probability", memory_decision.preferred_probability)),
+                    risk=float(payload.get("risk", memory_decision.risk)),
+                    preference_log_value=float(payload.get("preference_log_value", memory_decision.preference_log_value)),
+                    episode_score=float(payload.get("episode_score", memory_decision.episode_score)),
+                    value_relevance=float(payload.get("value_relevance", memory_decision.value_relevance)),
+                    policy_delta=float(payload.get("policy_delta", memory_decision.policy_delta)),
+                    threat_significance=float(payload.get("threat_significance", memory_decision.threat_significance)),
+                    redundancy_penalty=float(payload.get("redundancy_penalty", memory_decision.redundancy_penalty)),
+                    gating_reasons=tuple(list(memory_decision.gating_reasons) + ["action_novelty_trace"]),
+                )
         if memory_decision.episode_created:
             self.episodes.append(
                 MemoryEpisode(

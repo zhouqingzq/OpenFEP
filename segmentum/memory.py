@@ -1238,14 +1238,16 @@ class LongTermMemory:
         return "", tags
 
     def _is_restart_protected_payload(self, payload: dict[str, object]) -> bool:
-        if bool(payload.get("restart_protected", False)):
-            return True
         role = str(payload.get("continuity_role", ""))
-        return role in {
-            CONTINUITY_ROLE_IDENTITY,
-            CONTINUITY_ROLE_COMMITMENT,
-            CONTINUITY_ROLE_MAINTENANCE,
-        }
+        identity_critical = bool(payload.get("identity_critical", False))
+        commitment_ids = [str(item) for item in payload.get("identity_commitment_ids", [])]
+        if role == CONTINUITY_ROLE_IDENTITY:
+            return identity_critical
+        if role == CONTINUITY_ROLE_COMMITMENT:
+            return identity_critical or bool(commitment_ids)
+        if role == CONTINUITY_ROLE_MAINTENANCE:
+            return bool(payload.get("restart_protected", False))
+        return bool(payload.get("restart_protected", False)) and (identity_critical or bool(commitment_ids))
 
     def _assign_embedding_to_cluster(
         self,

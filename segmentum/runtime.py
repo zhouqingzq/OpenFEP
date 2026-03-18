@@ -1209,8 +1209,18 @@ class SegmentRuntime:
                 "workspace_suppressed_channels": list(diagnostics.workspace_suppressed_channels),
                 "workspace_broadcast_intensity": diagnostics.workspace_broadcast_intensity,
                 "current_commitments": list(diagnostics.current_commitments),
+                "relevant_commitments": list(diagnostics.relevant_commitments),
                 "commitment_focus": list(diagnostics.commitment_focus),
                 "violated_commitments": list(diagnostics.violated_commitments),
+                "commitment_compatibility_score": diagnostics.commitment_compatibility_score,
+                "self_inconsistency_error": diagnostics.self_inconsistency_error,
+                "conflict_type": diagnostics.conflict_type,
+                "severity_level": diagnostics.severity_level,
+                "consistency_classification": diagnostics.consistency_classification,
+                "behavioral_classification": diagnostics.behavioral_classification,
+                "repair_triggered": diagnostics.repair_triggered,
+                "repair_policy": diagnostics.repair_policy,
+                "repair_result": dict(diagnostics.repair_result),
                 "identity_tension": diagnostics.identity_tension,
                 "identity_repair_policy": diagnostics.identity_repair_policy,
                 "social_focus": list(diagnostics.social_focus),
@@ -1252,6 +1262,14 @@ class SegmentRuntime:
                 "commitments": [commitment.to_dict() for commitment in narrative.commitments],
                 "chapter_transition_evidence": list(narrative.chapter_transition_evidence),
                 "identity_tension_history": list(self.agent.identity_tension_history[-8:]),
+                "self_inconsistency_events": [
+                    event.to_dict()
+                    for event in self.agent.self_model.self_inconsistency_events[-8:]
+                ],
+                "repair_history": [
+                    record.to_dict()
+                    for record in self.agent.self_model.repair_history[-8:]
+                ],
             }
         trace_record["social_memory"] = self.agent.social_memory.to_dict()
         trace_record["continuity"] = dict(self.last_continuity_report)

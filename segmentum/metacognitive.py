@@ -71,6 +71,15 @@ class DissociationSignal:
     description: str
 
 
+@dataclass(frozen=True)
+class SelfConsistencyReview:
+    pause_strength: float
+    review_required: bool
+    rebias_strength: float
+    recommended_policy: str
+    notes: str
+
+
 # ---------------------------------------------------------------------------
 # Main class
 # ---------------------------------------------------------------------------
@@ -342,6 +351,55 @@ class MetaCognitiveLayer:
 
         self.meta_beliefs["dissociation_level"] = self.dissociation_level
         return dict(self.meta_beliefs)
+
+    def review_self_consistency(
+        self,
+        assessment: Mapping[str, object],
+    ) -> SelfConsistencyReview:
+        severity = str(assessment.get("severity_level", "none"))
+        error = float(assessment.get("self_inconsistency_error", 0.0))
+        conflict_type = str(assessment.get("conflict_type", "none"))
+        behavioral_classification = str(assessment.get("behavioral_classification", "aligned"))
+        if severity == "high":
+            pause_strength = 0.85
+            rebias_strength = 0.55
+            review_required = True
+        elif severity == "medium":
+            pause_strength = 0.55
+            rebias_strength = 0.35
+            review_required = True
+        elif severity == "low":
+            pause_strength = 0.20
+            rebias_strength = 0.15
+            review_required = bool(assessment.get("repair_triggered", False))
+        else:
+            pause_strength = 0.0
+            rebias_strength = 0.0
+            review_required = False
+        recommended_policy = str(assessment.get("repair_policy", ""))
+        if not recommended_policy and review_required:
+            recommended_policy = "metacognitive_review+policy_rebias"
+        notes = (
+            f"conflict_type={conflict_type}; "
+            f"severity={severity}; "
+            f"behavior={behavioral_classification}; "
+            f"error={error:.3f}"
+        )
+        self.meta_beliefs["last_self_consistency_review"] = {
+            "severity": severity,
+            "conflict_type": conflict_type,
+            "behavioral_classification": behavioral_classification,
+            "error": round(error, 6),
+            "review_required": review_required,
+            "recommended_policy": recommended_policy,
+        }
+        return SelfConsistencyReview(
+            pause_strength=round(pause_strength, 4),
+            review_required=review_required,
+            rebias_strength=round(rebias_strength, 4),
+            recommended_policy=recommended_policy,
+            notes=notes,
+        )
 
     # ------------------------------------------------------------------
     # Full observation cycle

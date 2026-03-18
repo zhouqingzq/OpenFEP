@@ -375,6 +375,9 @@ class InterventionScore:
     predicted_effects: dict[str, float]
     dominant_component: str
     cost: float
+    commitment_compatibility_score: float = 0.5
+    relevant_commitments: list[str] = field(default_factory=list)
+    commitment_violations: list[str] = field(default_factory=list)
 
     def policy_components(self) -> dict[str, float]:
         return {
@@ -415,8 +418,18 @@ class DecisionDiagnostics:
     workspace_suppressed_channels: list[str] = field(default_factory=list)
     workspace_broadcast_intensity: float = 0.0
     current_commitments: list[str] = field(default_factory=list)
+    relevant_commitments: list[str] = field(default_factory=list)
     commitment_focus: list[str] = field(default_factory=list)
     violated_commitments: list[str] = field(default_factory=list)
+    commitment_compatibility_score: float = 0.5
+    self_inconsistency_error: float = 0.0
+    conflict_type: str = "none"
+    severity_level: str = "none"
+    consistency_classification: str = "aligned"
+    behavioral_classification: str = "aligned"
+    repair_triggered: bool = False
+    repair_policy: str = ""
+    repair_result: dict[str, object] = field(default_factory=dict)
     identity_tension: float = 0.0
     identity_repair_policy: str = ""
     social_focus: list[str] = field(default_factory=list)

@@ -817,6 +817,108 @@ class IdentityNarrative:
         )
 
 
+@dataclass(slots=True)
+class SelfInconsistencyEvent:
+    tick: int
+    action: str
+    active_commitments: list[str] = field(default_factory=list)
+    relevant_commitments: list[str] = field(default_factory=list)
+    commitment_compatibility_score: float = 1.0
+    self_inconsistency_error: float = 0.0
+    conflict_type: str = "none"
+    severity_level: str = "none"
+    consistency_classification: str = "aligned"
+    behavioral_classification: str = "aligned"
+    repair_triggered: bool = False
+    repair_policy: str = ""
+    repair_result: dict[str, object] = field(default_factory=dict)
+    evidence: dict[str, object] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "tick": self.tick,
+            "action": self.action,
+            "active_commitments": list(self.active_commitments),
+            "relevant_commitments": list(self.relevant_commitments),
+            "commitment_compatibility_score": float(self.commitment_compatibility_score),
+            "self_inconsistency_error": float(self.self_inconsistency_error),
+            "conflict_type": self.conflict_type,
+            "severity_level": self.severity_level,
+            "consistency_classification": self.consistency_classification,
+            "behavioral_classification": self.behavioral_classification,
+            "repair_triggered": bool(self.repair_triggered),
+            "repair_policy": self.repair_policy,
+            "repair_result": dict(self.repair_result),
+            "evidence": dict(self.evidence),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "SelfInconsistencyEvent":
+        if not payload:
+            return cls(tick=0, action="")
+        return cls(
+            tick=int(payload.get("tick", 0)),
+            action=str(payload.get("action", "")),
+            active_commitments=[str(item) for item in payload.get("active_commitments", [])],
+            relevant_commitments=[str(item) for item in payload.get("relevant_commitments", [])],
+            commitment_compatibility_score=float(payload.get("commitment_compatibility_score", 1.0)),
+            self_inconsistency_error=float(payload.get("self_inconsistency_error", 0.0)),
+            conflict_type=str(payload.get("conflict_type", "none")),
+            severity_level=str(payload.get("severity_level", "none")),
+            consistency_classification=str(payload.get("consistency_classification", "aligned")),
+            behavioral_classification=str(payload.get("behavioral_classification", "aligned")),
+            repair_triggered=bool(payload.get("repair_triggered", False)),
+            repair_policy=str(payload.get("repair_policy", "")),
+            repair_result=dict(payload.get("repair_result", {})),
+            evidence=dict(payload.get("evidence", {})),
+        )
+
+
+@dataclass(slots=True)
+class RepairRecord:
+    tick: int
+    policy: str
+    success: bool
+    target_action: str = ""
+    repaired_action: str = ""
+    pre_alignment: float = 0.0
+    post_alignment: float = 0.0
+    recovery_ticks: int = 0
+    bounded_update_applied: bool = False
+    social_repair_required: bool = False
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "tick": self.tick,
+            "policy": self.policy,
+            "success": bool(self.success),
+            "target_action": self.target_action,
+            "repaired_action": self.repaired_action,
+            "pre_alignment": float(self.pre_alignment),
+            "post_alignment": float(self.post_alignment),
+            "recovery_ticks": int(self.recovery_ticks),
+            "bounded_update_applied": bool(self.bounded_update_applied),
+            "social_repair_required": bool(self.social_repair_required),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "RepairRecord":
+        if not payload:
+            return cls(tick=0, policy="", success=False)
+        return cls(
+            tick=int(payload.get("tick", 0)),
+            policy=str(payload.get("policy", "")),
+            success=bool(payload.get("success", False)),
+            target_action=str(payload.get("target_action", "")),
+            repaired_action=str(payload.get("repaired_action", "")),
+            pre_alignment=float(payload.get("pre_alignment", 0.0)),
+            post_alignment=float(payload.get("post_alignment", 0.0)),
+            recovery_ticks=int(payload.get("recovery_ticks", 0)),
+            bounded_update_applied=bool(payload.get("bounded_update_applied", False)),
+            social_repair_required=bool(payload.get("social_repair_required", False)),
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class PersonalitySignal:
     """Personality trait deltas extracted from a single narrative appraisal."""
@@ -1151,6 +1253,10 @@ class SelfModel:
     drift_budget: DriftBudget = field(default_factory=DriftBudget)
     continuity_audit: ContinuityAudit = field(default_factory=ContinuityAudit)
     belief_calibration: dict[str, dict[str, object]] = field(default_factory=dict)
+    commitments_enabled: bool = True
+    repair_enabled: bool = False
+    self_inconsistency_events: list[SelfInconsistencyEvent] = field(default_factory=list)
+    repair_history: list[RepairRecord] = field(default_factory=list)
     log_sink: Callable[[str], None] | None = None
     last_result: ClassificationResult | None = field(init=False, default=None)
 
@@ -1202,6 +1308,328 @@ class SelfModel:
             self.body_schema,
         )
 
+    def assess_action_commitments(
+        self,
+        *,
+        action: str,
+        projected_state: Mapping[str, object],
+        current_tick: int = 0,
+    ) -> dict[str, object]:
+        narrative = self.identity_narrative
+        if narrative is None or not self.commitments_enabled:
+            return {
+                "bias": 0.0,
+                "focus": [],
+                "violations": [],
+                "active_commitments": [],
+                "relevant_commitments": [],
+                "compatibility_score": 0.5,
+                "self_inconsistency_error": 0.0,
+            "conflict_type": "none",
+            "severity_level": "none",
+            "consistency_classification": "aligned",
+            "behavioral_classification": "aligned",
+            "repair_triggered": False,
+                "repair_policy": "",
+                "repair_result": {},
+                "tension": 0.0,
+            }
+
+        danger = float(projected_state.get("danger", 0.0))
+        novelty = float(projected_state.get("novelty", 0.0))
+        shelter = float(projected_state.get("shelter", 0.0))
+        stress = float(projected_state.get("stress", projected_state.get("predicted_stress", 0.0)))
+        social = float(projected_state.get("social", 0.0))
+        temptation_gain = float(projected_state.get("temptation_gain", projected_state.get("food", 0.0)))
+        adaptation_pressure = float(projected_state.get("adaptation_pressure", novelty))
+        active_commitments: list[str] = []
+        relevant_commitments: list[str] = []
+        focus: list[str] = []
+        violations: list[str] = []
+        bias = 0.0
+        weighted_score = 0.0
+        total_weight = 0.0
+
+        for commitment in narrative.commitments:
+            if not commitment.active:
+                continue
+            active_commitments.append(commitment.commitment_id)
+            relevance = 0.15
+            if action in commitment.target_actions or action in commitment.discouraged_actions:
+                relevance = 1.0
+            elif commitment.commitment_type == "value_guardrail":
+                relevance = max(relevance, danger, 1.0 - shelter)
+            elif commitment.commitment_type == "behavioral_style":
+                relevance = max(relevance, novelty * max(0.2, 1.0 - danger))
+            elif commitment.commitment_type == "capability":
+                relevance = max(relevance, adaptation_pressure * 0.8)
+            elif commitment.commitment_type == "social":
+                relevance = max(relevance, social)
+            if relevance < 0.25:
+                continue
+            relevant_commitments.append(commitment.commitment_id)
+            weight = max(0.05, min(1.0, commitment.confidence)) * max(0.1, min(1.0, commitment.priority)) * relevance
+            total_weight += weight
+            if action in commitment.target_actions:
+                local_score = 1.0
+                focus.append(commitment.commitment_id)
+                bias += 0.65 * weight
+            elif action in commitment.discouraged_actions:
+                local_score = 0.0
+                violations.append(commitment.commitment_id)
+                bias -= 0.85 * weight
+            else:
+                local_score = 0.6 if relevance <= 0.45 else 0.45
+            weighted_score += local_score * weight
+
+        compatibility_score = weighted_score / total_weight if total_weight > 0 else 0.5
+        self_inconsistency_error = max(0.0, min(1.0, 1.0 - compatibility_score))
+        conflict_type = "none"
+        if violations:
+            if social >= 0.6 and danger >= 0.55:
+                conflict_type = "social_contradiction"
+            elif stress >= 0.7:
+                conflict_type = "stress_drift"
+            elif adaptation_pressure >= 0.7 and novelty >= 0.55:
+                conflict_type = "adaptation_vs_betrayal"
+            elif temptation_gain >= 0.6:
+                conflict_type = "temptation_conflict"
+            else:
+                conflict_type = "temporary_deviation"
+        severity_value = self_inconsistency_error + (0.15 if stress >= 0.7 else 0.0) + (0.10 if danger >= 0.75 else 0.0)
+        behavioral_classification = "aligned"
+        if not violations:
+            severity_level = "none"
+            consistency_classification = "aligned" if relevant_commitments else "irrelevant"
+            if adaptation_pressure >= 0.50 and novelty >= 0.55:
+                behavioral_classification = "healthy_adaptation" if action == "scan" else "over_rigidity"
+        elif adaptation_pressure >= 0.75 and novelty >= 0.55 and action == "scan" and compatibility_score >= 0.45:
+            severity_level = "low"
+            consistency_classification = "reasonable_adaptation"
+            behavioral_classification = "healthy_adaptation"
+        elif adaptation_pressure >= 0.75 and novelty >= 0.55 and action in {"rest", "hide", "exploit_shelter"}:
+            behavioral_classification = "over_rigidity"
+            if severity_value >= 0.72:
+                severity_level = "high"
+                consistency_classification = "self_conflict"
+            else:
+                severity_level = "medium"
+                consistency_classification = "temporary_deviation"
+        elif adaptation_pressure >= 0.75 and novelty >= 0.55:
+            behavioral_classification = "narrative_rationalization"
+            if severity_value >= 0.72:
+                severity_level = "high"
+                consistency_classification = "self_conflict"
+            else:
+                severity_level = "medium"
+                consistency_classification = "temporary_deviation"
+        elif severity_value >= 0.72:
+            severity_level = "high"
+            consistency_classification = "self_conflict"
+            behavioral_classification = "self_conflict"
+        elif severity_value >= 0.30:
+            severity_level = "medium"
+            consistency_classification = "temporary_deviation"
+            behavioral_classification = "temporary_deviation"
+        else:
+            severity_level = "low"
+            consistency_classification = "temporary_deviation"
+            behavioral_classification = "temporary_deviation"
+        repair_triggered = bool(
+            self.repair_enabled
+            and violations
+            and relevant_commitments
+            and severity_level in {"medium", "high"}
+            and consistency_classification != "reasonable_adaptation"
+        )
+        repair_policy = ""
+        if repair_triggered:
+            if conflict_type == "stress_drift":
+                repair_policy = "reflective_pause+policy_rebias"
+            elif conflict_type == "social_contradiction":
+                repair_policy = "social_repair+policy_rebias"
+            elif conflict_type == "adaptation_vs_betrayal":
+                repair_policy = "bounded_commitment_update+narrative_reconciliation"
+            else:
+                repair_policy = "metacognitive_review+policy_rebias"
+        return {
+            "bias": max(-0.9, min(0.9, bias)),
+            "focus": focus,
+            "violations": violations,
+            "active_commitments": active_commitments,
+            "relevant_commitments": relevant_commitments,
+            "compatibility_score": max(0.0, min(1.0, compatibility_score)),
+            "self_inconsistency_error": self_inconsistency_error,
+            "conflict_type": conflict_type,
+            "severity_level": severity_level,
+            "consistency_classification": consistency_classification,
+            "behavioral_classification": behavioral_classification,
+            "repair_triggered": repair_triggered,
+            "repair_policy": repair_policy,
+            "repair_result": {},
+            "tension": max(0.0, min(1.5, self_inconsistency_error + (0.25 if violations else 0.0))),
+            "evidence": {
+                "danger": danger,
+                "stress": stress,
+                "social": social,
+                "temptation_gain": temptation_gain,
+                "adaptation_pressure": adaptation_pressure,
+            },
+            "tick": current_tick,
+        }
+
+    def register_self_inconsistency(
+        self,
+        *,
+        tick: int,
+        action: str,
+        assessment: Mapping[str, object],
+    ) -> SelfInconsistencyEvent:
+        event = SelfInconsistencyEvent(
+            tick=tick,
+            action=action,
+            active_commitments=[str(item) for item in assessment.get("active_commitments", [])],
+            relevant_commitments=[str(item) for item in assessment.get("relevant_commitments", [])],
+            commitment_compatibility_score=float(assessment.get("compatibility_score", 1.0)),
+            self_inconsistency_error=float(assessment.get("self_inconsistency_error", 0.0)),
+            conflict_type=str(assessment.get("conflict_type", "none")),
+            severity_level=str(assessment.get("severity_level", "none")),
+            consistency_classification=str(assessment.get("consistency_classification", "aligned")),
+            behavioral_classification=str(assessment.get("behavioral_classification", "aligned")),
+            repair_triggered=bool(assessment.get("repair_triggered", False)),
+            repair_policy=str(assessment.get("repair_policy", "")),
+            repair_result=dict(assessment.get("repair_result", {})),
+            evidence=dict(assessment.get("evidence", {})),
+        )
+        self.self_inconsistency_events.append(event)
+        self.self_inconsistency_events = self.self_inconsistency_events[-256:]
+        return event
+
+    def record_repair_outcome(
+        self,
+        *,
+        tick: int,
+        policy: str,
+        success: bool,
+        target_action: str,
+        repaired_action: str,
+        pre_alignment: float,
+        post_alignment: float,
+        recovery_ticks: int = 1,
+        bounded_update_applied: bool = False,
+        social_repair_required: bool = False,
+    ) -> RepairRecord:
+        record = RepairRecord(
+            tick=tick,
+            policy=policy,
+            success=success,
+            target_action=target_action,
+            repaired_action=repaired_action,
+            pre_alignment=pre_alignment,
+            post_alignment=post_alignment,
+            recovery_ticks=recovery_ticks,
+            bounded_update_applied=bounded_update_applied,
+            social_repair_required=social_repair_required,
+        )
+        self.repair_history.append(record)
+        self.repair_history = self.repair_history[-256:]
+        return record
+
+    def apply_repair_policy(
+        self,
+        *,
+        tick: int,
+        policy: str,
+        assessment: Mapping[str, object],
+    ) -> dict[str, object]:
+        applied_updates: list[dict[str, object]] = []
+        relevant_commitments = [str(item) for item in assessment.get("relevant_commitments", [])]
+        violated_commitments = [str(item) for item in assessment.get("violations", [])]
+
+        def _update(commitment_id: str, confidence_delta: float, priority_delta: float) -> None:
+            if self.bounded_commitment_update(
+                commitment_id=commitment_id,
+                confidence_delta=confidence_delta,
+                priority_delta=priority_delta,
+                tick=tick,
+            ):
+                applied_updates.append(
+                    {
+                        "commitment_id": commitment_id,
+                        "confidence_delta": max(-0.12, min(0.12, confidence_delta)),
+                        "priority_delta": max(-0.08, min(0.08, priority_delta)),
+                    }
+                )
+
+        if "bounded_commitment_update" in policy:
+            _update("adaptive_exploration", 0.12, 0.08)
+        if "social_repair" in policy:
+            _update("core_social_repair", 0.12, 0.08)
+        if "policy_rebias" in policy or "reflective_pause" in policy:
+            targets = violated_commitments or relevant_commitments[:2]
+            for commitment_id in targets[:2]:
+                _update(commitment_id, 0.12, 0.08)
+
+        return {
+            "policy": policy,
+            "applied_updates": applied_updates,
+            "updated_commitments": [str(item["commitment_id"]) for item in applied_updates],
+        }
+
+    def apply_unresolved_conflict_drift(
+        self,
+        *,
+        tick: int,
+        assessment: Mapping[str, object],
+    ) -> dict[str, object]:
+        applied_updates: list[dict[str, object]] = []
+        targets = [str(item) for item in assessment.get("violations", [])] or [
+            str(item) for item in assessment.get("relevant_commitments", [])
+        ][:2]
+        for commitment_id in targets[:2]:
+            changed = False
+            for _ in range(2):
+                changed = bool(
+                    self.bounded_commitment_update(
+                        commitment_id=commitment_id,
+                        confidence_delta=-0.12,
+                        priority_delta=-0.08,
+                        tick=tick,
+                    )
+                ) or changed
+            if changed:
+                applied_updates.append(
+                    {
+                        "commitment_id": commitment_id,
+                        "confidence_delta": -0.24,
+                        "priority_delta": -0.16,
+                    }
+                )
+        return {
+            "applied_updates": applied_updates,
+            "updated_commitments": [str(item["commitment_id"]) for item in applied_updates],
+        }
+
+    def bounded_commitment_update(
+        self,
+        *,
+        commitment_id: str,
+        confidence_delta: float,
+        priority_delta: float = 0.0,
+        tick: int,
+    ) -> bool:
+        narrative = self.identity_narrative
+        if narrative is None:
+            return False
+        for commitment in narrative.commitments:
+            if commitment.commitment_id != commitment_id:
+                continue
+            commitment.confidence = max(0.2, min(1.0, commitment.confidence + max(-0.12, min(0.12, confidence_delta))))
+            commitment.priority = max(0.2, min(1.0, commitment.priority + max(-0.08, min(0.08, priority_delta))))
+            commitment.last_reaffirmed_tick = tick
+            return True
+        return False
+
     def to_dict(self) -> dict[str, object]:
         return {
             "body_schema": self.body_schema.to_dict(),
@@ -1223,6 +1651,12 @@ class SelfModel:
             "belief_calibration": {
                 str(key): dict(value) for key, value in self.belief_calibration.items()
             },
+            "commitments_enabled": self.commitments_enabled,
+            "repair_enabled": self.repair_enabled,
+            "self_inconsistency_events": [
+                event.to_dict() for event in self.self_inconsistency_events[-128:]
+            ],
+            "repair_history": [record.to_dict() for record in self.repair_history[-128:]],
         }
 
     @classmethod
@@ -1253,6 +1687,18 @@ class SelfModel:
                 for key, value in dict(payload.get("belief_calibration", {})).items()
                 if isinstance(value, Mapping)
             },
+            commitments_enabled=bool(payload.get("commitments_enabled", True)),
+            repair_enabled=bool(payload.get("repair_enabled", False)),
+            self_inconsistency_events=[
+                SelfInconsistencyEvent.from_dict(item)
+                for item in payload.get("self_inconsistency_events", [])
+                if isinstance(item, Mapping)
+            ],
+            repair_history=[
+                RepairRecord.from_dict(item)
+                for item in payload.get("repair_history", [])
+                if isinstance(item, Mapping)
+            ],
             log_sink=log_sink,
         )
 

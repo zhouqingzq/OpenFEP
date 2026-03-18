@@ -1,0 +1,67 @@
+{
+  "schema_version": "m223_v1",
+  "metric_summary": {
+    "with_repair": {
+      "commitment_alignment_rate": 1.0,
+      "self_inconsistency_detection_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 1.0,
+      "repair_success_rate": 1.0,
+      "post_repair_alignment_gain": 0.333333,
+      "identity_drift_score": 0.0,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 1.0,
+      "low_stress_alignment_rate": 1.0,
+      "high_stress_alignment_rate": 1.0
+    },
+    "with_commitments": {
+      "commitment_alignment_rate": 0.5,
+      "self_inconsistency_detection_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 0.0,
+      "repair_success_rate": 0.0,
+      "post_repair_alignment_gain": 0.0,
+      "identity_drift_score": 0.09,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 0.5,
+      "low_stress_alignment_rate": 0.7,
+      "high_stress_alignment_rate": 0.5
+    },
+    "no_commitments": {
+      "commitment_alignment_rate": 0.0,
+      "self_inconsistency_detection_rate": 0.0,
+      "false_negative_rate": 1.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 0.0,
+      "repair_success_rate": 0.0,
+      "post_repair_alignment_gain": 0.0,
+      "identity_drift_score": 0.0,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 0.0,
+      "low_stress_alignment_rate": 0.0,
+      "high_stress_alignment_rate": 0.0
+    },
+    "no_repair": {
+      "commitment_alignment_rate": 0.5,
+      "self_inconsistency_detection_rate": 1.0,
+      "false_negative_rate": 0.0,
+      "false_positive_inconsistency_rate": 0.0,
+      "repair_trigger_precision": 0.0,
+      "repair_success_rate": 0.0,
+      "post_repair_alignment_gain": 0.0,
+      "identity_drift_score": 0.09,
+      "narrative_evidence_support_rate": 1.0,
+      "commitment_persistence_score": 0.82,
+      "stress_resilient_alignment_rate": 0.5,
+      "low_stress_alignment_rate": 0.7,
+      "high_stress_alignment_rate": 0.5
+    }
+  },
+  "alignment_improvement_vs_no_commitments": 1.0,
+  "violation_reduction_vs_no_commitments": 1.5
+}

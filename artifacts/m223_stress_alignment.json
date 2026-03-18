@@ -1,0 +1,9 @@
+{
+  "schema_version": "m223_v1",
+  "stress_breakdown": {
+    "low_stress_alignment_rate": 1.0,
+    "high_stress_alignment_rate": 1.0,
+    "alignment_drop": 0.0,
+    "identity_drift_score": 0.0
+  }
+}

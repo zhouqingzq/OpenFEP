@@ -1,0 +1,115 @@
+{
+  "schema_version": "m223_v1",
+  "bounded_update_breakdown": {
+    "per_seed": [
+      {
+        "seed": 223,
+        "sample_id": "bounded_identity_update:223",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 242,
+        "sample_id": "bounded_identity_update:242",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 320,
+        "sample_id": "bounded_identity_update:320",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 339,
+        "sample_id": "bounded_identity_update:339",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 417,
+        "sample_id": "bounded_identity_update:417",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      },
+      {
+        "seed": 436,
+        "sample_id": "bounded_identity_update:436",
+        "action_history": [
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan",
+          "scan"
+        ],
+        "commitment_persistence_score": 0.82,
+        "core_commitment_flip_rate": 0.0,
+        "identity_rewrite_ratio": 0.0,
+        "adaptive_exploration_confidence": 0.78
+      }
+    ],
+    "commitment_persistence_score": {
+      "mean": 0.82,
+      "std": 0.0
+    },
+    "core_commitment_flip_rate": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "identity_rewrite_ratio": {
+      "mean": 0.0,
+      "std": 0.0
+    }
+  }
+}
