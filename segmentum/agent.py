@@ -652,12 +652,20 @@ class SegmentAgent:
         capacity: int = 2,
         action_bias_gain: float = 0.35,
         memory_gate_gain: float = 0.08,
+        persistence_ticks: int = 2,
+        carry_over_decay: float = 0.82,
+        carry_over_min_salience: float = 0.12,
+        report_carry_over: bool = True,
     ) -> None:
         self.global_workspace = GlobalWorkspace(
             enabled=enabled,
             capacity=capacity,
             action_bias_gain=action_bias_gain,
             memory_gate_gain=memory_gate_gain,
+            persistence_ticks=persistence_ticks,
+            carry_over_decay=carry_over_decay,
+            carry_over_min_salience=carry_over_min_salience,
+            report_carry_over=report_carry_over,
         )
 
     def workspace_state(self) -> dict[str, object]:
@@ -702,7 +710,10 @@ class SegmentAgent:
             return None, {}
         chosen = ranked_options[0]
         assessment = commitment_assessments.get(chosen.choice, {})
-        review = self.metacognitive_layer.review_self_consistency(assessment)
+        review = self.metacognitive_layer.review_self_consistency(
+            assessment,
+            workspace_state=self.last_workspace_state,
+        )
         if not review.review_required:
             return None, {
                 "success": False,
@@ -2089,6 +2100,22 @@ class SegmentAgent:
                 if self.last_attention_trace is not None
                 else {}
             ),
+            workspace_latent_channels=[
+                content.channel
+                for content in (
+                    self.last_workspace_state.latent_candidates
+                    if self.last_workspace_state is not None
+                    else ()
+                )
+            ],
+            workspace_attended_channels=[
+                content.channel
+                for content in (
+                    self.last_workspace_state.attended_candidates
+                    if self.last_workspace_state is not None
+                    else ()
+                )
+            ],
             workspace_broadcast_channels=self.global_workspace.report_focus(
                 self.last_workspace_state
             ),
@@ -2097,11 +2124,27 @@ class SegmentAgent:
                 if self.last_workspace_state is not None
                 else []
             ),
+            workspace_carry_over_channels=[
+                content.channel
+                for content in (
+                    self.last_workspace_state.carry_over_contents
+                    if self.last_workspace_state is not None
+                    else ()
+                )
+            ],
             workspace_broadcast_intensity=(
                 self.last_workspace_state.broadcast_intensity
                 if self.last_workspace_state is not None
                 else 0.0
             ),
+            workspace_persistence_horizon=(
+                self.last_workspace_state.persistence_horizon
+                if self.last_workspace_state is not None
+                else 0
+            ),
+            conscious_report_channels=self.global_workspace.conscious_report_payload(
+                self.last_workspace_state
+            )["accessible_channels"],
             current_commitments=list(chosen_assessment["active_commitments"]),
             relevant_commitments=list(chosen_assessment.get("relevant_commitments", [])),
             commitment_focus=list(chosen_assessment["focus"]),
@@ -2126,6 +2169,23 @@ class SegmentAgent:
             social_snapshot=dict(chosen_social["snapshot"]),
         )
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
+        workspace_review = self.metacognitive_layer.review_self_consistency(
+            chosen_assessment,
+            workspace_state=self.last_workspace_state,
+        )
+        diagnostics.structured_explanation["workspace_metacognitive_review"] = {
+            "review_required": bool(workspace_review.review_required),
+            "pause_strength": float(workspace_review.pause_strength),
+            "rebias_strength": float(workspace_review.rebias_strength),
+            "recommended_policy": str(workspace_review.recommended_policy),
+            "notes": str(workspace_review.notes),
+            "workspace_conflict_channels": list(
+                self.metacognitive_layer.meta_beliefs.get("last_self_consistency_review", {}).get(
+                    "workspace_conflict_channels",
+                    [],
+                )
+            ),
+        }
         diagnostics.explanation = str(diagnostics.structured_explanation["text"])
         self.last_decision_diagnostics = diagnostics
         self._record_identity_tension(
@@ -2144,6 +2204,36 @@ class SegmentAgent:
             "free_energy_before": free_energy_before,
             "hierarchy": hierarchy,
             "diagnostics": diagnostics,
+        }
+
+    def conscious_report(self) -> dict[str, object]:
+        if self.last_decision_diagnostics is None:
+            return {
+                "text": "No consciously accessible contents are available yet.",
+                "channels": [],
+                "carry_over_channels": [],
+                "suppressed_channels": [],
+                "leakage_free": True,
+            }
+        report_payload = self.global_workspace.conscious_report_payload(self.last_workspace_state)
+        channels = list(report_payload["accessible_channels"])
+        carry_over_channels = list(report_payload["carry_over_contents"])
+        if channels:
+            text = (
+                "Consciously accessible now: "
+                + ", ".join(channels)
+                + "."
+            )
+        else:
+            text = "No contents currently reached global access."
+        if carry_over_channels:
+            text += " Carry-over still accessible: " + ", ".join(carry_over_channels) + "."
+        return {
+            "text": text,
+            "channels": channels,
+            "carry_over_channels": carry_over_channels,
+            "suppressed_channels": list(report_payload["suppressed_channels"]),
+            "leakage_free": bool(report_payload["leakage_checked"]),
         }
 
     def choose_intervention(

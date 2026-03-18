@@ -1,0 +1,4789 @@
+{
+  "milestone_id": "M2.24",
+  "schema_version": "m224_v2",
+  "generated_at": "2026-03-18T04:33:29+00:00",
+  "codebase_version": "d67e367b88b6f2516db1cbe2f84a688a9939562d",
+  "seed_set": [
+    224,
+    243,
+    321,
+    340,
+    418,
+    437
+  ],
+  "protocol": "downstream_alignment_protocol",
+  "trace": [
+    {
+      "seed": 224,
+      "variant": "full_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 224,
+      "variant": "no_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.0,
+        "metacognitive_review_trigger": false,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 224,
+      "variant": "no_persistence_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 243,
+      "variant": "full_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 243,
+      "variant": "no_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.0,
+        "metacognitive_review_trigger": false,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 243,
+      "variant": "no_persistence_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 321,
+      "variant": "full_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 321,
+      "variant": "no_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.0,
+        "metacognitive_review_trigger": false,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 321,
+      "variant": "no_persistence_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 340,
+      "variant": "full_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 340,
+      "variant": "no_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.0,
+        "metacognitive_review_trigger": false,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 340,
+      "variant": "no_persistence_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 418,
+      "variant": "full_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 418,
+      "variant": "no_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.0,
+        "metacognitive_review_trigger": false,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 418,
+      "variant": "no_persistence_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 437,
+      "variant": "full_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 437,
+      "variant": "no_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.0,
+        "metacognitive_review_trigger": false,
+        "chosen_action_shift": "hide"
+      }
+    },
+    {
+      "seed": 437,
+      "variant": "no_persistence_workspace",
+      "alignment": {
+        "attended_channels": [
+          "danger",
+          "novelty",
+          "conflict",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_contents": [
+          "danger",
+          "novelty"
+        ],
+        "memory_write_decision": true,
+        "maintenance_priority_change": 0.35,
+        "metacognitive_review_trigger": true,
+        "chosen_action_shift": "hide"
+      }
+    }
+  ],
+  "runtime_integration": {
+    "seed": 224,
+    "full_workspace": {
+      "workspace_enabled": true,
+      "choice": "seek_contact",
+      "workspace_bias": 0.828173,
+      "workspace_broadcast_channels": [
+        "social",
+        "danger"
+      ],
+      "workspace_suppressed_channels": [
+        "novelty",
+        "food",
+        "shelter",
+        "temperature"
+      ],
+      "conscious_report": {
+        "text": "Consciously accessible now: social, danger.",
+        "channels": [
+          "social",
+          "danger"
+        ],
+        "carry_over_channels": [],
+        "suppressed_channels": [
+          "novelty",
+          "food",
+          "shelter",
+          "temperature"
+        ],
+        "leakage_free": true
+      },
+      "semantic_report": {
+        "semantic_leakage_free": true,
+        "matched_aliases": {}
+      },
+      "agenda": {
+        "active_tasks": [
+          "resource_guard"
+        ],
+        "chronic_debt_pressure": 0.0,
+        "cycle": 1,
+        "interrupt_action": null,
+        "interrupt_reason": "",
+        "memory_compaction_recommended": false,
+        "policy_shift_strength": 0.292233,
+        "protected_mode": false,
+        "protected_mode_ticks_remaining": 0,
+        "recommended_action": "hide",
+        "recovery_focus": [],
+        "recovery_rebound_active": false,
+        "recovery_rebound_ticks_remaining": 0,
+        "sleep_recommended": false,
+        "state": {
+          "acute_energy_debt": 0.0,
+          "acute_fatigue_debt": 0.0,
+          "acute_stress_debt": 0.0,
+          "acute_thermal_debt": 0.0,
+          "chronic_energy_debt": 0.0,
+          "chronic_fatigue_debt": 0.0,
+          "chronic_runtime_debt": 0.0,
+          "chronic_stress_debt": 0.0,
+          "short_term_sleep_pressure": 0.0
+        },
+        "suppressed_actions": [],
+        "telemetry_backoff_recommended": false
+      },
+      "explanation_details": {
+        "action": "seek_contact",
+        "active_goal": "SURVIVAL",
+        "behavioral_classification": "over_rigidity",
+        "commitment_compatibility_score": 0.5,
+        "commitment_focus": [],
+        "comparison": "Even though hide had lower expected free energy (0.134 vs 0.206), seek_contact still achieved the strongest final policy score (0.982 vs 0.954) after memory, pattern, identity, and goal terms were included.",
+        "conflict_type": "none",
+        "consistency": {
+          "consistency_statement": "This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias.",
+          "dominant_strategy": "expected_free_energy",
+          "historical_action_frequency": 0.0,
+          "identity_consistency": false,
+          "matches_dominant_strategy": false
+        },
+        "consistency_classification": "irrelevant",
+        "current_commitments": [],
+        "dominant_component": "workspace_bias",
+        "goal_alignment": 0.4800000000000001,
+        "historical_action_frequency": 0.0,
+        "identity_consistency": false,
+        "identity_repair_policy": "",
+        "identity_tension": 0.5,
+        "reason": "workspace_bias (0.828) dominated, so globally broadcast contents overruled weaker local preferences.",
+        "relevant_commitments": [],
+        "repair_policy": "",
+        "repair_result": {},
+        "repair_triggered": false,
+        "self_inconsistency_error": 0.5,
+        "severity_level": "none",
+        "social_alerts": [],
+        "social_focus": [],
+        "social_snapshot": {
+          "history_size": 0,
+          "others": {}
+        },
+        "text": "I chose seek_contact. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (0.828) dominated, so globally broadcast contents overruled weaker local preferences. Even though hide had lower expected free energy (0.134 vs 0.206), seek_contact still achieved the strongest final policy score (0.982 vs 0.954) after memory, pattern, identity, and goal terms were included. My globally accessible focus was constrained to: social, danger. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.828, social_bias=0.000, commitment_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+        "violated_commitments": [],
+        "workspace_focus": [
+          "social",
+          "danger"
+        ],
+        "workspace_intensity": 0.20329,
+        "workspace_maintenance_priority": {
+          "active_tasks": [
+            "resource_guard"
+          ],
+          "priority_gain": 0.292233,
+          "recommended_action": "hide"
+        },
+        "workspace_metacognitive_review": {
+          "notes": "conflict_type=none; severity=none; behavior=over_rigidity; error=0.500; workspace_conflicts=social",
+          "pause_strength": 0.38,
+          "rebias_strength": 0.226,
+          "recommended_policy": "metacognitive_review+policy_rebias",
+          "review_required": true,
+          "workspace_conflict_channels": [
+            "social"
+          ]
+        }
+      },
+      "metacognitive_review": {
+        "notes": "conflict_type=none; severity=none; behavior=over_rigidity; error=0.500; workspace_conflicts=social",
+        "pause_strength": 0.38,
+        "rebias_strength": 0.226,
+        "recommended_policy": "metacognitive_review+policy_rebias",
+        "review_required": true,
+        "workspace_conflict_channels": [
+          "social"
+        ]
+      },
+      "trace_record": {
+        "action": {
+          "constraints": {
+            "preferred_when_social_below": 0.35
+          },
+          "cost_estimate": 0.07,
+          "failure_modes": [
+            "external_rejection",
+            "threat_exposure"
+          ],
+          "name": "seek_contact",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.14,
+            "energy": 0.07
+          },
+          "reversible": true
+        },
+        "alive": true,
+        "attention": {
+          "allocation": {
+            "bottleneck_load": 1.0,
+            "dropped_channels": [
+              "food",
+              "shelter",
+              "temperature"
+            ],
+            "selected_channels": [
+              "danger",
+              "social",
+              "novelty"
+            ],
+            "weights": {
+              "danger": 1.0,
+              "food": 0.35,
+              "novelty": 1.0,
+              "shelter": 0.35,
+              "social": 1.0,
+              "temperature": 0.35
+            }
+          },
+          "filtered_observation": {
+            "danger": 0.38,
+            "food": 0.3478414621454453,
+            "novelty": 0.28,
+            "shelter": 0.34427122184268333,
+            "social": 0.84,
+            "temperature": 0.5006991476833764
+          },
+          "salience_scores": {
+            "danger": 0.16718,
+            "food": 0.116198,
+            "novelty": 0.12827,
+            "shelter": 0.086034,
+            "social": 0.158699,
+            "temperature": 0.000484
+          },
+          "tick": 1
+        },
+        "body_state": {
+          "dopamine": 0.24195288243542307,
+          "energy": 0.8700000000000001,
+          "fatigue": 0.29000000000000004,
+          "stress": 0.23,
+          "temperature": 0.48
+        },
+        "choice": "seek_contact",
+        "choice_cost": 0.07,
+        "continuity": {
+          "action_distribution": {
+            "seek_contact": 1.0
+          },
+          "chapter_shift_excused": false,
+          "commitment_snapshot": [],
+          "continuity_score": 0.5,
+          "dominant_action": "seek_contact",
+          "dominant_action_ratio": 1.0,
+          "interventions": [
+            "action_collapse_guard"
+          ],
+          "narrative_drift": 0.0,
+          "personality_drift": 0.5,
+          "personality_snapshot": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.5,
+            "emotional_regulation_style": 0.5,
+            "extraversion": 0.5,
+            "meaning_construction_tendency": 0.5,
+            "neuroticism": 0.5,
+            "openness": 0.5
+          },
+          "policy_drift": 0.0,
+          "policy_snapshot": {},
+          "protected_anchor_ids": [],
+          "rehearsal_queue": [],
+          "restart_divergence": 0.0,
+          "updated_tick": 1
+        },
+        "cycle": 1,
+        "decision_loop": {
+          "active_goal": "SURVIVAL",
+          "ambiguity": 0.10307723113333335,
+          "attention_dropped_channels": [
+            "food",
+            "shelter",
+            "temperature"
+          ],
+          "attention_salience_scores": {
+            "danger": 0.146965,
+            "food": 0.116925,
+            "novelty": 0.138324,
+            "shelter": 0.102798,
+            "social": 0.259615,
+            "temperature": 0.000516
+          },
+          "attention_selected_channels": [
+            "social",
+            "danger",
+            "novelty"
+          ],
+          "behavioral_classification": "over_rigidity",
+          "chosen_action": {
+            "constraints": {
+              "preferred_when_social_below": 0.35
+            },
+            "cost_estimate": 0.07,
+            "failure_modes": [
+              "external_rejection",
+              "threat_exposure"
+            ],
+            "name": "seek_contact",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.14,
+              "energy": 0.07
+            },
+            "reversible": true
+          },
+          "chosen_action_name": "seek_contact",
+          "commitment_bias": 0.0,
+          "commitment_compatibility_score": 0.5,
+          "commitment_focus": [],
+          "conflict_type": "none",
+          "conscious_report_channels": [
+            "social",
+            "danger"
+          ],
+          "consistency_classification": "irrelevant",
+          "current_commitments": [],
+          "current_prediction_error": 0.215794188,
+          "epistemic_bonus": 0.0,
+          "expected_free_energy": 0.20587743644488166,
+          "explanation": "I chose seek_contact. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (0.828) dominated, so globally broadcast contents overruled weaker local preferences. Even though hide had lower expected free energy (0.134 vs 0.206), seek_contact still achieved the strongest final policy score (0.982 vs 0.954) after memory, pattern, identity, and goal terms were included. My globally accessible focus was constrained to: social, danger. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.828, social_bias=0.000, commitment_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+          "explanation_details": {
+            "action": "seek_contact",
+            "active_goal": "SURVIVAL",
+            "behavioral_classification": "over_rigidity",
+            "commitment_compatibility_score": 0.5,
+            "commitment_focus": [],
+            "comparison": "Even though hide had lower expected free energy (0.134 vs 0.206), seek_contact still achieved the strongest final policy score (0.982 vs 0.954) after memory, pattern, identity, and goal terms were included.",
+            "conflict_type": "none",
+            "consistency": {
+              "consistency_statement": "This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias.",
+              "dominant_strategy": "expected_free_energy",
+              "historical_action_frequency": 0.0,
+              "identity_consistency": false,
+              "matches_dominant_strategy": false
+            },
+            "consistency_classification": "irrelevant",
+            "current_commitments": [],
+            "dominant_component": "workspace_bias",
+            "goal_alignment": 0.4800000000000001,
+            "historical_action_frequency": 0.0,
+            "identity_consistency": false,
+            "identity_repair_policy": "",
+            "identity_tension": 0.5,
+            "reason": "workspace_bias (0.828) dominated, so globally broadcast contents overruled weaker local preferences.",
+            "relevant_commitments": [],
+            "repair_policy": "",
+            "repair_result": {},
+            "repair_triggered": false,
+            "self_inconsistency_error": 0.5,
+            "severity_level": "none",
+            "social_alerts": [],
+            "social_focus": [],
+            "social_snapshot": {
+              "history_size": 0,
+              "others": {}
+            },
+            "text": "I chose seek_contact. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (0.828) dominated, so globally broadcast contents overruled weaker local preferences. Even though hide had lower expected free energy (0.134 vs 0.206), seek_contact still achieved the strongest final policy score (0.982 vs 0.954) after memory, pattern, identity, and goal terms were included. My globally accessible focus was constrained to: social, danger. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.828, social_bias=0.000, commitment_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+            "violated_commitments": [],
+            "workspace_focus": [
+              "social",
+              "danger"
+            ],
+            "workspace_intensity": 0.20329,
+            "workspace_maintenance_priority": {
+              "active_tasks": [
+                "resource_guard"
+              ],
+              "priority_gain": 0.292233,
+              "recommended_action": "hide"
+            },
+            "workspace_metacognitive_review": {
+              "notes": "conflict_type=none; severity=none; behavior=over_rigidity; error=0.500; workspace_conflicts=social",
+              "pause_strength": 0.38,
+              "rebias_strength": 0.226,
+              "recommended_policy": "metacognitive_review+policy_rebias",
+              "review_required": true,
+              "workspace_conflict_channels": [
+                "social"
+              ]
+            }
+          },
+          "goal_alignment": 0.4800000000000001,
+          "goal_context": {
+            "active_goal": "SURVIVAL",
+            "conflict_id": "vc_0001",
+            "goal_weight": 0.9,
+            "preferred_action_types": [
+              "hide",
+              "rest",
+              "exploit_shelter"
+            ],
+            "resolution_reason": "base goal weights favor SURVIVAL",
+            "urgency_scores": {
+              "CONTROL": 0.65,
+              "INTEGRITY": 0.8,
+              "RESOURCES": 0.55,
+              "SOCIAL": 0.2,
+              "SURVIVAL": 0.9
+            }
+          },
+          "identity_bias": -0.12000799868000009,
+          "identity_repair_policy": "",
+          "identity_tension": 0.5,
+          "memory_bias": 0.0,
+          "pattern_bias": 0.0,
+          "policy_bias": 0.0,
+          "policy_score": 0.9822875648751184,
+          "policy_scores": {
+            "append_workspace_note": 0.43513449947511845,
+            "delete_workspace_note": 0.036609673475118565,
+            "exploit_shelter": 0.8407121682351184,
+            "fetch_remote_status": 0.24020967347511846,
+            "forage": -155.44249891534915,
+            "hide": 0.9541331908751184,
+            "rest": 0.7098119732351186,
+            "scan": 0.11593407587511839,
+            "seek_contact": 0.9822875648751184,
+            "thermoregulate": -155.1761331875892,
+            "unstable_workspace_note": 0.43513449947511845,
+            "write_workspace_note": 0.3932344994751184
+          },
+          "predicted_outcome": "resource_gain",
+          "prediction_error": 0.0945063746666667,
+          "preferred_probability": 0.993306847254501,
+          "relevant_commitments": [],
+          "repair_policy": "",
+          "repair_result": {},
+          "repair_triggered": false,
+          "risk": 0.006715652344033707,
+          "self_inconsistency_error": 0.5,
+          "severity_level": "none",
+          "social_alerts": [],
+          "social_bias": 0.0,
+          "social_focus": [],
+          "social_snapshot": {
+            "history_size": 0,
+            "others": {}
+          },
+          "total_surprise": 0.2225098403440337,
+          "value_score": 0.25934622467605517,
+          "violated_commitments": [],
+          "workspace_attended_channels": [
+            "social",
+            "danger",
+            "novelty"
+          ],
+          "workspace_bias": 0.828173,
+          "workspace_broadcast_channels": [
+            "social",
+            "danger"
+          ],
+          "workspace_broadcast_intensity": 0.20329,
+          "workspace_carry_over_channels": [],
+          "workspace_latent_channels": [
+            "social",
+            "danger",
+            "novelty",
+            "food",
+            "shelter",
+            "temperature"
+          ],
+          "workspace_persistence_horizon": 2,
+          "workspace_suppressed_channels": [
+            "novelty",
+            "food",
+            "shelter",
+            "temperature"
+          ]
+        },
+        "decision_ranking": [
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_social_below": 0.35
+              },
+              "cost_estimate": 0.07,
+              "failure_modes": [
+                "external_rejection",
+                "threat_exposure"
+              ],
+              "name": "seek_contact",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.14,
+                "energy": 0.07
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.10307723113333335,
+            "ambiguity": 0.10307723113333335,
+            "choice": "seek_contact",
+            "commitment_bias": 0.0,
+            "cost": 0.07,
+            "dominant_component": "workspace_bias",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.20587743644488166,
+            "goal_alignment": 0.4800000000000001,
+            "identity_bias": -0.12000799868000009,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.9822875648751184,
+            "predicted_effects": {
+              "energy_delta": -0.1250000000000001,
+              "fatigue_delta": 0.13,
+              "free_energy_drop": 0.9690447915816867,
+              "stress_delta": -0.08000000000000002,
+              "temperature_delta": 0.030000000000000027
+            },
+            "predicted_error": 0.0945063746666667,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.828173
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "cost_estimate": 0.05,
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
+              "name": "hide",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.08,
+                "energy": 0.05
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.06951236513333334,
+            "ambiguity": 0.06951236513333334,
+            "choice": "hide",
+            "commitment_bias": 0.0,
+            "cost": 0.05,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.13355581044488163,
+            "goal_alignment": 1.0,
+            "identity_bias": 0.07659200131999999,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.9541331908751184,
+            "predicted_effects": {
+              "energy_delta": -0.1050000000000001,
+              "fatigue_delta": 0.030000000000000027,
+              "free_energy_drop": 1.0413664175816866,
+              "stress_delta": -0.15,
+              "temperature_delta": 0.020000000000000018
+            },
+            "predicted_error": 0.05574961466666668,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.011097
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_shelter_available": 0.2
+              },
+              "cost_estimate": 0.08,
+              "failure_modes": [
+                "shelter_contested",
+                "resource_exhaustion"
+              ],
+              "name": "exploit_shelter",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.1,
+                "energy": 0.08
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.10720681086666667,
+            "ambiguity": 0.10720681086666667,
+            "choice": "exploit_shelter",
+            "commitment_bias": 0.0,
+            "cost": 0.08,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.19323438684488164,
+            "goal_alignment": 0.9132390800000001,
+            "identity_bias": -0.006130524920000019,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.8407121682351184,
+            "predicted_effects": {
+              "energy_delta": -0.15500000000000003,
+              "fatigue_delta": 0.0,
+              "free_energy_drop": 0.9816878411816866,
+              "stress_delta": -0.1,
+              "temperature_delta": -0.03999999999999998
+            },
+            "predicted_error": 0.07773374533333335,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.126838
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_fatigue_above": 0.4
+              },
+              "cost_estimate": 0.03,
+              "failure_modes": [
+                "opportunity_loss",
+                "environment_shift"
+              ],
+              "name": "rest",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.03,
+                "energy": 0.03
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.042684972533333324,
+            "ambiguity": 0.042684972533333324,
+            "choice": "rest",
+            "commitment_bias": 0.0,
+            "cost": 0.03,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.0872215818448816,
+            "goal_alignment": 0.7812390800000002,
+            "identity_bias": 0.015794475079999967,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.7098119732351186,
+            "predicted_effects": {
+              "energy_delta": -0.06500000000000006,
+              "fatigue_delta": -0.03999999999999998,
+              "free_energy_drop": 1.0877006461816867,
+              "stress_delta": -0.04000000000000001,
+              "temperature_delta": -0.020000000000000018
+            },
+            "predicted_error": 0.03624277866666665,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.03,
+              "failure_modes": [],
+              "name": "unstable_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str",
+                "text": "str"
+              },
+              "resource_cost": {
+                "attention": 0.04,
+                "context": 0.04
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.04898497253333333,
+            "ambiguity": 0.04898497253333333,
+            "choice": "unstable_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.03,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.11152158184488162,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": 0.001417001319999972,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.43513449947511845,
+            "predicted_effects": {
+              "energy_delta": -0.04500000000000004,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 1.0634006461816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.054242778666666665,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.03,
+              "failure_modes": [],
+              "name": "append_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str",
+                "text": "str"
+              },
+              "resource_cost": {
+                "attention": 0.04,
+                "context": 0.04
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.04898497253333333,
+            "ambiguity": 0.04898497253333333,
+            "choice": "append_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.03,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.11152158184488162,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": 0.001417001319999972,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.43513449947511845,
+            "predicted_effects": {
+              "energy_delta": -0.04500000000000004,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 1.0634006461816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.054242778666666665,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.05,
+              "failure_modes": [],
+              "name": "write_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str",
+                "text": "str"
+              },
+              "resource_cost": {
+                "attention": 0.05,
+                "context": 0.08
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.06781830586666666,
+            "ambiguity": 0.06781830586666666,
+            "choice": "write_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.05,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.12702158184488163,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": -0.02498299868000005,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.3932344994751184,
+            "predicted_effects": {
+              "energy_delta": -0.06500000000000006,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 1.0479006461816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.05090944533333333,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.12,
+              "failure_modes": [],
+              "name": "fetch_remote_status",
+              "params": {},
+              "params_schema": {
+                "url": "str"
+              },
+              "resource_cost": {
+                "attention": 0.12,
+                "network": 0.2
+              },
+              "reversible": false
+            },
+            "action_ambiguity": 0.13538770519999999,
+            "ambiguity": 0.13538770519999999,
+            "choice": "fetch_remote_status",
+            "commitment_bias": 0.0,
+            "cost": 0.12,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.18764640784488162,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": -0.11738299868000003,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.24020967347511846,
+            "predicted_effects": {
+              "energy_delta": -0.135,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 0.9872758201816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.043964872000000016,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_uncertainty_above": 0.35
+              },
+              "cost_estimate": 0.06,
+              "failure_modes": [
+                "context_budget_exceeded",
+                "false_alarm"
+              ],
+              "name": "scan",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.2,
+                "energy": 0.06
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.08943219346666666,
+            "ambiguity": 0.08943219346666666,
+            "choice": "scan",
+            "commitment_bias": 0.0,
+            "cost": 0.06,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.1818180054448816,
+            "goal_alignment": 0.48523908000000004,
+            "identity_bias": -0.11500799868000007,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.11593407587511839,
+            "predicted_effects": {
+              "energy_delta": -0.1250000000000001,
+              "fatigue_delta": 0.16000000000000003,
+              "free_energy_drop": 0.9931042225816866,
+              "stress_delta": 0.030000000000000027,
+              "temperature_delta": 0.010000000000000009
+            },
+            "predicted_error": 0.08409198133333333,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": -0.072479
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.2,
+              "failure_modes": [],
+              "name": "delete_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str"
+              },
+              "resource_cost": {
+                "attention": 0.1,
+                "file": 0.15
+              },
+              "reversible": false
+            },
+            "action_ambiguity": 0.22005437186666668,
+            "ambiguity": 0.22005437186666668,
+            "choice": "delete_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.2,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.28564640784488166,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": -0.22298299867999993,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.036609673475118565,
+            "predicted_effects": {
+              "energy_delta": -0.21499999999999997,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 0.8892758201816866,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.05729820533333335,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_temperature_offset_above": 0.12
+              },
+              "cost_estimate": 0.09,
+              "failure_modes": [
+                "resource_exhaustion",
+                "temperature_rebound"
+              ],
+              "name": "thermoregulate",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.12,
+                "energy": 0.09
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.12452103853333332,
+            "ambiguity": 0.12452103853333332,
+            "choice": "thermoregulate",
+            "commitment_bias": 0.0,
+            "cost": 0.09,
+            "dominant_component": "expected_free_energy",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 155.63309174266917,
+            "goal_alignment": 0.59323908,
+            "identity_bias": -0.13628052491999998,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": -155.1761331875892,
+            "predicted_effects": {
+              "energy_delta": -0.18499999999999994,
+              "fatigue_delta": 0.11000000000000004,
+              "free_energy_drop": 0.9434758201816866,
+              "stress_delta": -0.06,
+              "temperature_delta": -0.2
+            },
+            "predicted_error": 0.09863153866666667,
+            "predicted_outcome": "integrity_loss",
+            "preferred_probability": 1e-12,
+            "risk": 105.00671565234403,
+            "social_bias": 0.0,
+            "value_score": -0.6680104684941067,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "requires_min_energy": 0.1
+              },
+              "cost_estimate": 0.12,
+              "failure_modes": [
+                "resource_exhaustion",
+                "threat_exposure",
+                "environment_shift"
+              ],
+              "name": "forage",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.18,
+                "energy": 0.12
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.1699016392,
+            "ambiguity": 0.1699016392,
+            "choice": "forage",
+            "commitment_bias": 0.0,
+            "cost": 0.12,
+            "dominant_component": "expected_free_energy",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 155.72241691666915,
+            "goal_alignment": 0.4800000000000001,
+            "identity_bias": -0.10948299868000005,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": -155.44249891534915,
+            "predicted_effects": {
+              "energy_delta": 0.04499999999999993,
+              "fatigue_delta": 0.23000000000000004,
+              "free_energy_drop": 0.8541506461816867,
+              "stress_delta": 0.09999999999999998,
+              "temperature_delta": 0.07999999999999996
+            },
+            "predicted_error": 0.142576112,
+            "predicted_outcome": "integrity_loss",
+            "preferred_probability": 1e-12,
+            "risk": 105.00671565234403,
+            "social_bias": 0.0,
+            "value_score": -0.6680104684941067,
+            "workspace_bias": -0.090599
+          }
+        ],
+        "episodic_memory": {
+          "episode_created": true,
+          "episode_score": 0.15512286674622044,
+          "gating_reasons": [
+            "action_novelty_trace"
+          ],
+          "merged_into_episode_id": null,
+          "policy_delta": 0.0008394565430042134,
+          "predicted_outcome": "resource_gain",
+          "prediction_error": 0.215794188,
+          "preference_log_value": 5.0,
+          "preferred_probability": 0.993306847254501,
+          "redundancy_penalty": 0.0,
+          "risk": 0.006715652344033707,
+          "support_delta": 0,
+          "threat_significance": 0.0016789130860084267,
+          "total_surprise": 0.2225098403440337,
+          "value_label": "resource_gain",
+          "value_relevance": 0.25934622467605517,
+          "value_score": 0.25934622467605517,
+          "weighted_surprise": 0.2225098403440337
+        },
+        "errors": {
+          "danger": 0.05436589999999997,
+          "food": -0.09094180200000002,
+          "novelty": -0.17405408,
+          "shelter": -0.079954252,
+          "social": 0.5769231,
+          "temperature": -0.00040166279999998
+        },
+        "event": "cycle",
+        "expected_free_energy": 0.20587743644488166,
+        "free_energy_after": 0.8555226325108405,
+        "free_energy_before": 1.1666283973816867,
+        "hierarchy": {
+          "interoceptive_prediction": {
+            "danger": 0.2956341,
+            "food": 0.45983372,
+            "novelty": 0.47405408,
+            "shelter": 0.42844072,
+            "social": 0.3230769,
+            "temperature": 0.501147608
+          },
+          "interoceptive_update": {
+            "belief_after": {
+              "danger": 0.3359174957902387,
+              "food": 0.43877086810684246,
+              "novelty": 0.37838322976593664,
+              "shelter": 0.34646359336639193,
+              "social": 0.7507548726351647,
+              "temperature": 0.49974287078778257
+            },
+            "belief_before": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "digestion_exceeded": true,
+            "digestion_threshold": 0.06,
+            "error_precision": {
+              "danger": 0.87611226,
+              "food": 0.9273185228,
+              "novelty": 1.043675712,
+              "shelter": 0.9119359528000001,
+              "social": 1.60769234,
+              "temperature": 0.80056232792
+            },
+            "incoming_observation": {
+              "danger": 0.35,
+              "food": 0.368891918,
+              "novelty": 0.3,
+              "shelter": 0.348486468,
+              "social": 0.9,
+              "temperature": 0.5007459452
+            },
+            "kalman_gain": {
+              "danger": 0.6606622127149326,
+              "food": 0.6732781905196636,
+              "novelty": 0.698729786937849,
+              "shelter": 0.6695879868103589,
+              "social": 0.7813084146486156,
+              "temperature": 0.6401618776183166
+            },
+            "layer_name": "interoceptive",
+            "prediction": {
+              "danger": 0.2956341,
+              "food": 0.45983372,
+              "novelty": 0.47405408,
+              "shelter": 0.42844072,
+              "social": 0.3230769,
+              "temperature": 0.501147608
+            },
+            "propagated_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.2028396926858241,
+              "temperature": 0.0
+            },
+            "raw_error": {
+              "danger": 0.05436589999999997,
+              "food": -0.09094180200000002,
+              "novelty": -0.17405408,
+              "shelter": -0.079954252,
+              "social": 0.5769231,
+              "temperature": -0.00040166279999998
+            },
+            "residual_error": {
+              "danger": 0.01844840420976123,
+              "food": -0.029712670106842476,
+              "novelty": -0.05243730976593667,
+              "shelter": -0.026417845366391888,
+              "social": 0.1261682273648353,
+              "temperature": -0.00014453358778256244
+            },
+            "top_down_prediction": {
+              "danger": 0.29393625,
+              "food": 0.4442135,
+              "novelty": 0.463964,
+              "shelter": 0.43950100000000003,
+              "social": 0.33205125,
+              "temperature": 0.5015939
+            },
+            "weighted_error": {
+              "danger": 0.04763063151593397,
+              "food": -0.0843320174914101,
+              "novelty": -0.18165601587050495,
+              "shelter": -0.07291315697803132,
+              "social": 0.9275148486390541,
+              "temperature": -0.0003215561062068494
+            }
+          },
+          "observation": {
+            "danger": 0.35,
+            "food": 0.368891918,
+            "novelty": 0.3,
+            "shelter": 0.348486468,
+            "social": 0.9,
+            "temperature": 0.5007459452
+          },
+          "sensorimotor_observation": {
+            "danger": 0.29393625,
+            "food": 0.4442135,
+            "novelty": 0.463964,
+            "shelter": 0.43950100000000003,
+            "social": 0.5348909426858242,
+            "temperature": 0.5015939
+          },
+          "sensorimotor_prediction": {
+            "danger": 0.29393625,
+            "food": 0.4442135,
+            "novelty": 0.463964,
+            "shelter": 0.43950100000000003,
+            "social": 0.33205125,
+            "temperature": 0.5015939
+          },
+          "sensorimotor_update": {
+            "belief_after": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.4125811908820466,
+              "temperature": 0.5
+            },
+            "belief_before": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "digestion_exceeded": false,
+            "digestion_threshold": 0.1,
+            "error_precision": {
+              "danger": 0.65,
+              "food": 0.65,
+              "novelty": 0.65,
+              "shelter": 0.65,
+              "social": 0.8731236619544066,
+              "temperature": 0.65
+            },
+            "incoming_observation": {
+              "danger": 0.29393625,
+              "food": 0.4442135,
+              "novelty": 0.463964,
+              "shelter": 0.43950100000000003,
+              "social": 0.5348909426858242,
+              "temperature": 0.5015939
+            },
+            "kalman_gain": {
+              "danger": 0.48148148148148145,
+              "food": 0.48148148148148145,
+              "novelty": 0.48148148148148145,
+              "shelter": 0.48148148148148145,
+              "social": 0.5550254459141891,
+              "temperature": 0.48148148148148145
+            },
+            "layer_name": "sensorimotor",
+            "prediction": {
+              "danger": 0.29393625,
+              "food": 0.4442135,
+              "novelty": 0.463964,
+              "shelter": 0.43950100000000003,
+              "social": 0.33205125,
+              "temperature": 0.5015939
+            },
+            "propagated_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "raw_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.20283969268582414,
+              "temperature": 0.0
+            },
+            "residual_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.09025850180377751,
+              "temperature": 0.0
+            },
+            "top_down_prediction": {
+              "danger": 0.288975,
+              "food": 0.39857,
+              "novelty": 0.43448,
+              "shelter": 0.47182,
+              "social": 0.358275,
+              "temperature": 0.5028980000000001
+            },
+            "weighted_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.17710413526755323,
+              "temperature": 0.0
+            }
+          },
+          "strategic_observation": {
+            "danger": 0.288975,
+            "food": 0.39857,
+            "novelty": 0.43448,
+            "shelter": 0.47182,
+            "social": 0.358275,
+            "temperature": 0.5028980000000001
+          },
+          "strategic_prediction": {
+            "danger": 0.288975,
+            "food": 0.39857,
+            "novelty": 0.43448,
+            "shelter": 0.47182,
+            "social": 0.358275,
+            "temperature": 0.5028980000000001
+          },
+          "strategic_prior": {
+            "danger": 0.2825,
+            "food": 0.339,
+            "novelty": 0.396,
+            "shelter": 0.514,
+            "social": 0.3925,
+            "temperature": 0.5046
+          },
+          "strategic_update": {
+            "belief_after": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "belief_before": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "digestion_exceeded": false,
+            "digestion_threshold": 0.14,
+            "error_precision": {
+              "danger": 0.55,
+              "food": 0.55,
+              "novelty": 0.55,
+              "shelter": 0.55,
+              "social": 0.55,
+              "temperature": 0.55
+            },
+            "incoming_observation": {
+              "danger": 0.288975,
+              "food": 0.39857,
+              "novelty": 0.43448,
+              "shelter": 0.47182,
+              "social": 0.358275,
+              "temperature": 0.5028980000000001
+            },
+            "kalman_gain": {
+              "danger": 0.3666666666666667,
+              "food": 0.3666666666666667,
+              "novelty": 0.3666666666666667,
+              "shelter": 0.3666666666666667,
+              "social": 0.3666666666666667,
+              "temperature": 0.3666666666666667
+            },
+            "layer_name": "strategic",
+            "prediction": {
+              "danger": 0.288975,
+              "food": 0.39857,
+              "novelty": 0.43448,
+              "shelter": 0.47182,
+              "social": 0.358275,
+              "temperature": 0.5028980000000001
+            },
+            "propagated_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "raw_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "residual_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "top_down_prediction": {
+              "danger": 0.2825,
+              "food": 0.339,
+              "novelty": 0.396,
+              "shelter": 0.514,
+              "social": 0.3925,
+              "temperature": 0.5046
+            },
+            "weighted_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            }
+          }
+        },
+        "homeostasis": {
+          "agenda": {
+            "active_tasks": [
+              "resource_guard"
+            ],
+            "chronic_debt_pressure": 0.0,
+            "cycle": 1,
+            "interrupt_action": null,
+            "interrupt_reason": "",
+            "memory_compaction_recommended": false,
+            "policy_shift_strength": 0.292233,
+            "protected_mode": false,
+            "protected_mode_ticks_remaining": 0,
+            "recommended_action": "hide",
+            "recovery_focus": [],
+            "recovery_rebound_active": false,
+            "recovery_rebound_ticks_remaining": 0,
+            "sleep_recommended": false,
+            "state": {
+              "acute_energy_debt": 0.0,
+              "acute_fatigue_debt": 0.0,
+              "acute_stress_debt": 0.0,
+              "acute_thermal_debt": 0.0,
+              "chronic_energy_debt": 0.0,
+              "chronic_fatigue_debt": 0.0,
+              "chronic_runtime_debt": 0.0,
+              "chronic_stress_debt": 0.0,
+              "short_term_sleep_pressure": 0.0
+            },
+            "suppressed_actions": [],
+            "telemetry_backoff_recommended": false
+          },
+          "effects": {
+            "debt_reversal_applied": true,
+            "energy_recovery_applied": true,
+            "guard_activated_tick": null,
+            "memory_compaction_applied": false,
+            "protected_mode_duration": 0,
+            "recovery_rebound_activated": false,
+            "recovery_result": "success",
+            "retired_episodes": 0,
+            "stress_recovery_applied": false,
+            "suppressed_actions": [],
+            "telemetry_backoff_applied": false
+          }
+        },
+        "identity": {
+          "chapter_transition_evidence": [],
+          "commitments": [],
+          "core_identity": "",
+          "core_summary": "",
+          "identity_tension_history": [],
+          "repair_history": [],
+          "self_inconsistency_events": [
+            {
+              "action": "seek_contact",
+              "active_commitments": [],
+              "behavioral_classification": "over_rigidity",
+              "commitment_compatibility_score": 0.5,
+              "conflict_type": "none",
+              "consistency_classification": "irrelevant",
+              "evidence": {
+                "adaptation_pressure": 0.55405408,
+                "danger": 0.3556341,
+                "social": 0.5630769,
+                "stress": 0.0,
+                "temptation_gain": 0.44983372
+              },
+              "relevant_commitments": [],
+              "repair_policy": "",
+              "repair_result": {},
+              "repair_triggered": false,
+              "self_inconsistency_error": 0.5,
+              "severity_level": "none",
+              "tick": 1
+            }
+          ],
+          "trait_self_model": {}
+        },
+        "io": {
+          "action": {
+            "acknowledgment": {
+              "ack_id": "ack-000001",
+              "acknowledged_channels": [
+                "energy_delta",
+                "fatigue_delta",
+                "loneliness_delta",
+                "stress_delta",
+                "temperature_delta"
+              ],
+              "action": {
+                "constraints": {
+                  "preferred_when_social_below": 0.35
+                },
+                "cost_estimate": 0.07,
+                "failure_modes": [
+                  "external_rejection",
+                  "threat_exposure"
+                ],
+                "name": "seek_contact",
+                "params": {},
+                "params_schema": {},
+                "resource_cost": {
+                  "attention": 0.14,
+                  "energy": 0.07
+                },
+                "reversible": true
+              },
+              "action_name": "seek_contact",
+              "confidence": 1.0,
+              "cycle": 1,
+              "feedback": {
+                "energy_delta": 0.03,
+                "fatigue_delta": 0.01,
+                "loneliness_delta": -0.01,
+                "stress_delta": -0.02,
+                "temperature_delta": 0.0
+              },
+              "metadata": {
+                "non_zero_feedback_count": 4
+              },
+              "source_id": "simulated_world",
+              "source_type": "simulated_world",
+              "success": true
+            },
+            "dispatch": {
+              "acknowledgment": {
+                "ack_id": "ack-000001",
+                "acknowledged_channels": [
+                  "energy_delta",
+                  "fatigue_delta",
+                  "loneliness_delta",
+                  "stress_delta",
+                  "temperature_delta"
+                ],
+                "action": {
+                  "constraints": {
+                    "preferred_when_social_below": 0.35
+                  },
+                  "cost_estimate": 0.07,
+                  "failure_modes": [
+                    "external_rejection",
+                    "threat_exposure"
+                  ],
+                  "name": "seek_contact",
+                  "params": {},
+                  "params_schema": {},
+                  "resource_cost": {
+                    "attention": 0.14,
+                    "energy": 0.07
+                  },
+                  "reversible": true
+                },
+                "action_name": "seek_contact",
+                "confidence": 1.0,
+                "cycle": 1,
+                "feedback": {
+                  "energy_delta": 0.03,
+                  "fatigue_delta": 0.01,
+                  "loneliness_delta": -0.01,
+                  "stress_delta": -0.02,
+                  "temperature_delta": 0.0
+                },
+                "metadata": {
+                  "non_zero_feedback_count": 4
+                },
+                "source_id": "simulated_world",
+                "source_type": "simulated_world",
+                "success": true
+              },
+              "action": {
+                "constraints": {
+                  "preferred_when_social_below": 0.35
+                },
+                "cost_estimate": 0.07,
+                "failure_modes": [
+                  "external_rejection",
+                  "threat_exposure"
+                ],
+                "name": "seek_contact",
+                "params": {},
+                "params_schema": {},
+                "resource_cost": {
+                  "attention": 0.14,
+                  "energy": 0.07
+                },
+                "reversible": true
+              },
+              "action_name": "seek_contact",
+              "adapter_name": "SimulatedWorldActionAdapter",
+              "cycle": 1,
+              "dispatch_id": "dispatch-000001",
+              "feedback": {
+                "energy_delta": 0.03,
+                "fatigue_delta": 0.01,
+                "loneliness_delta": -0.01,
+                "stress_delta": -0.02,
+                "temperature_delta": 0.0
+              },
+              "source_id": "simulated_world",
+              "source_type": "simulated_world"
+            }
+          },
+          "perception": {
+            "primary_observation": {
+              "adapter_name": "SimulatedWorldAdapter",
+              "confidence": 1.0,
+              "cycle": 1,
+              "metadata": {
+                "channel_count": 6
+              },
+              "observation": {
+                "danger": 0.35,
+                "food": 0.2,
+                "novelty": 0.3,
+                "shelter": 0.2,
+                "social": 0.9,
+                "temperature": 0.5
+              },
+              "packet_id": "perception-000001",
+              "signals": [
+                {
+                  "channel": "food",
+                  "confidence": 1.0,
+                  "normalized_value": 0.2,
+                  "provenance": {},
+                  "raw_value": 0.2,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "danger",
+                  "confidence": 1.0,
+                  "normalized_value": 0.35,
+                  "provenance": {},
+                  "raw_value": 0.35,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "novelty",
+                  "confidence": 1.0,
+                  "normalized_value": 0.3,
+                  "provenance": {},
+                  "raw_value": 0.3,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "shelter",
+                  "confidence": 1.0,
+                  "normalized_value": 0.2,
+                  "provenance": {},
+                  "raw_value": 0.2,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "temperature",
+                  "confidence": 1.0,
+                  "normalized_value": 0.5,
+                  "provenance": {},
+                  "raw_value": 0.5,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "social",
+                  "confidence": 1.0,
+                  "normalized_value": 0.9,
+                  "provenance": {},
+                  "raw_value": 0.9,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                }
+              ],
+              "source_id": "simulated_world",
+              "source_type": "simulated_world"
+            },
+            "validation_observation": {
+              "adapter_name": "SimulatedWorldAdapter",
+              "confidence": 1.0,
+              "cycle": 1,
+              "metadata": {
+                "channel_count": 6
+              },
+              "observation": {
+                "danger": 0.38,
+                "food": 0.18,
+                "novelty": 0.28,
+                "shelter": 0.22,
+                "social": 0.84,
+                "temperature": 0.5
+              },
+              "packet_id": "perception-000002",
+              "signals": [
+                {
+                  "channel": "food",
+                  "confidence": 1.0,
+                  "normalized_value": 0.18,
+                  "provenance": {},
+                  "raw_value": 0.18,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "danger",
+                  "confidence": 1.0,
+                  "normalized_value": 0.38,
+                  "provenance": {},
+                  "raw_value": 0.38,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "novelty",
+                  "confidence": 1.0,
+                  "normalized_value": 0.28,
+                  "provenance": {},
+                  "raw_value": 0.28,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "shelter",
+                  "confidence": 1.0,
+                  "normalized_value": 0.22,
+                  "provenance": {},
+                  "raw_value": 0.22,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "temperature",
+                  "confidence": 1.0,
+                  "normalized_value": 0.5,
+                  "provenance": {},
+                  "raw_value": 0.5,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "social",
+                  "confidence": 1.0,
+                  "normalized_value": 0.84,
+                  "provenance": {},
+                  "raw_value": 0.84,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                }
+              ],
+              "source_id": "simulated_world_validation",
+              "source_type": "simulated_world"
+            }
+          }
+        },
+        "memory_context_summary": "no episodic memory influence",
+        "memory_hit": false,
+        "memory_hits": 0,
+        "observation": {
+          "danger": 0.35,
+          "food": 0.2,
+          "novelty": 0.3,
+          "shelter": 0.2,
+          "social": 0.9,
+          "temperature": 0.5
+        },
+        "prediction": {
+          "danger": 0.2956341,
+          "food": 0.45983372,
+          "novelty": 0.47405408,
+          "shelter": 0.42844072,
+          "social": 0.3230769,
+          "temperature": 0.501147608
+        },
+        "prediction_after_memory": {
+          "danger": 0.29393625,
+          "food": 0.4442135,
+          "novelty": 0.463964,
+          "shelter": 0.43950100000000003,
+          "social": 0.33205125,
+          "temperature": 0.5015939
+        },
+        "prediction_before_memory": {
+          "danger": 0.29393625,
+          "food": 0.4442135,
+          "novelty": 0.463964,
+          "shelter": 0.43950100000000003,
+          "social": 0.33205125,
+          "temperature": 0.5015939
+        },
+        "prediction_delta": {
+          "danger": 0.0,
+          "food": 0.0,
+          "novelty": 0.0,
+          "shelter": 0.0,
+          "social": 0.0,
+          "temperature": 0.0
+        },
+        "prediction_errors": {
+          "danger": {
+            "error_source": "world",
+            "value": 0.05436589999999997
+          },
+          "food": {
+            "error_source": "world",
+            "value": 0.25983372
+          },
+          "novelty": {
+            "error_source": "world",
+            "value": 0.17405408
+          },
+          "shelter": {
+            "error_source": "world",
+            "value": 0.22844071999999999
+          },
+          "social": {
+            "error_source": "world",
+            "value": 0.5769231
+          },
+          "temperature": {
+            "error_source": "ambiguous",
+            "value": 0.0011476080000000222
+          }
+        },
+        "recent_action_history": [
+          "seek_contact"
+        ],
+        "retrieved_episode_ids": [],
+        "retrieved_memories": [],
+        "running_metrics": {
+          "action_counts": {
+            "seek_contact": 1
+          },
+          "action_distribution": {
+            "seek_contact": 1.0
+          },
+          "action_entropy": 0.0,
+          "action_switch_count": 0,
+          "avg_free_energy_after": 0.8555226325108405,
+          "avg_free_energy_before": 1.1666283973816867,
+          "avg_free_energy_drop": 0.3111057648708462,
+          "cycles_completed": 1,
+          "dominant_action": "seek_contact",
+          "dominant_action_share": 1.0,
+          "internal_update_count": 0,
+          "last_choice": "seek_contact",
+          "max_action_streak": 1,
+          "max_stress": 0.23,
+          "memory_hit_rate": 0.0,
+          "memory_retrieval_count": 0,
+          "min_energy": 0.8700000000000001,
+          "persistence_error_count": 0,
+          "sleep_count": 0,
+          "survival_ticks": 1,
+          "telemetry_error_count": 0,
+          "termination_reason": "",
+          "unique_actions": 1
+        },
+        "sleep_triggered": false,
+        "social_memory": {
+          "interaction_history": [],
+          "others": {}
+        },
+        "state_load_status": "fresh",
+        "state_version": "0.4",
+        "workspace": {
+          "attended_candidates": [
+            {
+              "action_hints": {
+                "hide": -0.05,
+                "seek_contact": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "social",
+              "error_value": 0.576923,
+              "observation_value": 0.9,
+              "prediction_value": 0.323077,
+              "report_accessible": true,
+              "salience": 0.259615,
+              "source": "attention"
+            },
+            {
+              "action_hints": {
+                "exploit_shelter": 0.14,
+                "forage": -0.1,
+                "hide": 0.22,
+                "scan": -0.08
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "danger",
+              "error_value": 0.054366,
+              "observation_value": 0.35,
+              "prediction_value": 0.295634,
+              "report_accessible": true,
+              "salience": 0.146965,
+              "source": "attention"
+            },
+            {
+              "action_hints": {
+                "forage": 0.06,
+                "hide": -0.04,
+                "scan": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "novelty",
+              "error_value": -0.174054,
+              "observation_value": 0.3,
+              "prediction_value": 0.474054,
+              "report_accessible": true,
+              "salience": 0.138324,
+              "source": "attention"
+            }
+          ],
+          "broadcast_contents": [
+            {
+              "action_hints": {
+                "hide": -0.05,
+                "seek_contact": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "social",
+              "error_value": 0.576923,
+              "observation_value": 0.9,
+              "prediction_value": 0.323077,
+              "report_accessible": true,
+              "salience": 0.259615,
+              "source": "attention"
+            },
+            {
+              "action_hints": {
+                "exploit_shelter": 0.14,
+                "forage": -0.1,
+                "hide": 0.22,
+                "scan": -0.08
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "danger",
+              "error_value": 0.054366,
+              "observation_value": 0.35,
+              "prediction_value": 0.295634,
+              "report_accessible": true,
+              "salience": 0.146965,
+              "source": "attention"
+            }
+          ],
+          "broadcast_intensity": 0.20329,
+          "capacity": 2,
+          "carry_over_contents": [],
+          "latent_candidates": [
+            {
+              "action_hints": {
+                "hide": -0.05,
+                "seek_contact": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "social",
+              "error_value": 0.576923,
+              "observation_value": 0.9,
+              "prediction_value": 0.323077,
+              "report_accessible": true,
+              "salience": 0.259615,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "exploit_shelter": 0.14,
+                "forage": -0.1,
+                "hide": 0.22,
+                "scan": -0.08
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "danger",
+              "error_value": 0.054366,
+              "observation_value": 0.35,
+              "prediction_value": 0.295634,
+              "report_accessible": true,
+              "salience": 0.146965,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "forage": 0.06,
+                "hide": -0.04,
+                "scan": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "novelty",
+              "error_value": -0.174054,
+              "observation_value": 0.3,
+              "prediction_value": 0.474054,
+              "report_accessible": true,
+              "salience": 0.138324,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "forage": 0.2,
+                "rest": -0.03
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "food",
+              "error_value": -0.090942,
+              "observation_value": 0.2,
+              "prediction_value": 0.459834,
+              "report_accessible": true,
+              "salience": 0.116925,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "exploit_shelter": 0.18,
+                "hide": 0.08
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "shelter",
+              "error_value": -0.079954,
+              "observation_value": 0.2,
+              "prediction_value": 0.428441,
+              "report_accessible": true,
+              "salience": 0.102798,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "rest": 0.04,
+                "thermoregulate": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "temperature",
+              "error_value": -0.000402,
+              "observation_value": 0.5,
+              "prediction_value": 0.501148,
+              "report_accessible": true,
+              "salience": 0.000516,
+              "source": "latent"
+            }
+          ],
+          "persistence_horizon": 2,
+          "replacement_pressure": 0.138324,
+          "suppressed_candidates": [
+            {
+              "action_hints": {
+                "forage": 0.06,
+                "hide": -0.04,
+                "scan": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "novelty",
+              "error_value": -0.174054,
+              "observation_value": 0.3,
+              "prediction_value": 0.474054,
+              "report_accessible": true,
+              "salience": 0.138324,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "forage": 0.2,
+                "rest": -0.03
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "food",
+              "error_value": -0.090942,
+              "observation_value": 0.2,
+              "prediction_value": 0.459834,
+              "report_accessible": true,
+              "salience": 0.116925,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "exploit_shelter": 0.18,
+                "hide": 0.08
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "shelter",
+              "error_value": -0.079954,
+              "observation_value": 0.2,
+              "prediction_value": 0.428441,
+              "report_accessible": true,
+              "salience": 0.102798,
+              "source": "latent"
+            },
+            {
+              "action_hints": {
+                "rest": 0.04,
+                "thermoregulate": 0.22
+              },
+              "age": 0,
+              "carry_over_strength": 0.0,
+              "channel": "temperature",
+              "error_value": -0.000402,
+              "observation_value": 0.5,
+              "prediction_value": 0.501148,
+              "report_accessible": true,
+              "salience": 0.000516,
+              "source": "latent"
+            }
+          ],
+          "suppressed_channels": [
+            "novelty",
+            "food",
+            "shelter",
+            "temperature"
+          ],
+          "tick": 1
+        },
+        "world_state": {
+          "food_density": 0.2,
+          "novelty_density": 0.3,
+          "seed": 224,
+          "shelter_density": 0.2,
+          "social_density": 0.9,
+          "temperature": 0.5,
+          "threat_density": 0.35,
+          "tick": 1
+        }
+      }
+    },
+    "no_workspace": {
+      "workspace_enabled": false,
+      "choice": "hide",
+      "workspace_bias": 0.0,
+      "workspace_broadcast_channels": [],
+      "workspace_suppressed_channels": [],
+      "conscious_report": {
+        "text": "No contents currently reached global access.",
+        "channels": [],
+        "carry_over_channels": [],
+        "suppressed_channels": [],
+        "leakage_free": true
+      },
+      "semantic_report": {
+        "semantic_leakage_free": true,
+        "matched_aliases": {}
+      },
+      "agenda": {
+        "active_tasks": [],
+        "chronic_debt_pressure": 0.0,
+        "cycle": 1,
+        "interrupt_action": null,
+        "interrupt_reason": "",
+        "memory_compaction_recommended": false,
+        "policy_shift_strength": 0.0,
+        "protected_mode": false,
+        "protected_mode_ticks_remaining": 0,
+        "recommended_action": "rest",
+        "recovery_focus": [],
+        "recovery_rebound_active": false,
+        "recovery_rebound_ticks_remaining": 0,
+        "sleep_recommended": false,
+        "state": {
+          "acute_energy_debt": 0.0,
+          "acute_fatigue_debt": 0.0,
+          "acute_stress_debt": 0.0,
+          "acute_thermal_debt": 0.0,
+          "chronic_energy_debt": 0.0,
+          "chronic_fatigue_debt": 0.0,
+          "chronic_runtime_debt": 0.0,
+          "chronic_stress_debt": 0.0,
+          "short_term_sleep_pressure": 0.0
+        },
+        "suppressed_actions": [],
+        "telemetry_backoff_recommended": false
+      },
+      "explanation_details": {
+        "action": "hide",
+        "active_goal": "SURVIVAL",
+        "behavioral_classification": "aligned",
+        "commitment_compatibility_score": 0.5,
+        "commitment_focus": [],
+        "comparison": "The overall expected free energy was lower than exploit_shelter (0.134 vs 0.193), and hide scored 0.943 versus exploit_shelter at 0.714.",
+        "conflict_type": "none",
+        "consistency": {
+          "consistency_statement": "This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment.",
+          "dominant_strategy": "expected_free_energy",
+          "historical_action_frequency": 0.0,
+          "identity_consistency": false,
+          "matches_dominant_strategy": false
+        },
+        "consistency_classification": "irrelevant",
+        "current_commitments": [],
+        "dominant_component": "goal_alignment",
+        "goal_alignment": 1.0,
+        "historical_action_frequency": 0.0,
+        "identity_consistency": false,
+        "identity_repair_policy": "",
+        "identity_tension": 0.5,
+        "reason": "goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL.",
+        "relevant_commitments": [],
+        "repair_policy": "",
+        "repair_result": {},
+        "repair_triggered": false,
+        "self_inconsistency_error": 0.5,
+        "severity_level": "none",
+        "social_alerts": [],
+        "social_focus": [],
+        "social_snapshot": {
+          "history_size": 0,
+          "others": {}
+        },
+        "text": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.134 vs 0.193), and hide scored 0.943 versus exploit_shelter at 0.714.This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+        "violated_commitments": [],
+        "workspace_focus": [],
+        "workspace_intensity": 0.0,
+        "workspace_maintenance_priority": {
+          "active_tasks": [],
+          "priority_gain": 0.0,
+          "recommended_action": "rest"
+        },
+        "workspace_metacognitive_review": {
+          "notes": "conflict_type=none; severity=none; behavior=aligned; error=0.500; workspace_conflicts=none",
+          "pause_strength": 0.0,
+          "rebias_strength": 0.0,
+          "recommended_policy": "",
+          "review_required": false,
+          "workspace_conflict_channels": []
+        }
+      },
+      "metacognitive_review": {
+        "notes": "conflict_type=none; severity=none; behavior=aligned; error=0.500; workspace_conflicts=none",
+        "pause_strength": 0.0,
+        "rebias_strength": 0.0,
+        "recommended_policy": "",
+        "review_required": false,
+        "workspace_conflict_channels": []
+      },
+      "trace_record": {
+        "action": {
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "cost_estimate": 0.05,
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "resource_cost": {
+            "attention": 0.08,
+            "energy": 0.05
+          },
+          "reversible": true
+        },
+        "alive": true,
+        "attention": {
+          "allocation": {
+            "bottleneck_load": 1.0,
+            "dropped_channels": [
+              "food",
+              "shelter",
+              "temperature"
+            ],
+            "selected_channels": [
+              "danger",
+              "social",
+              "novelty"
+            ],
+            "weights": {
+              "danger": 1.0,
+              "food": 0.35,
+              "novelty": 1.0,
+              "shelter": 0.35,
+              "social": 1.0,
+              "temperature": 0.35
+            }
+          },
+          "filtered_observation": {
+            "danger": 0.38,
+            "food": 0.3478414621454453,
+            "novelty": 0.28,
+            "shelter": 0.34427122184268333,
+            "social": 0.84,
+            "temperature": 0.5006991476833764
+          },
+          "salience_scores": {
+            "danger": 0.16718,
+            "food": 0.116198,
+            "novelty": 0.12827,
+            "shelter": 0.086034,
+            "social": 0.158699,
+            "temperature": 0.000484
+          },
+          "tick": 1
+        },
+        "body_state": {
+          "dopamine": 0.24195288243542307,
+          "energy": 0.8700000000000001,
+          "fatigue": 0.29000000000000004,
+          "stress": 0.23,
+          "temperature": 0.48
+        },
+        "choice": "hide",
+        "choice_cost": 0.05,
+        "continuity": {
+          "action_distribution": {
+            "hide": 1.0
+          },
+          "chapter_shift_excused": false,
+          "commitment_snapshot": [],
+          "continuity_score": 0.5,
+          "dominant_action": "hide",
+          "dominant_action_ratio": 1.0,
+          "interventions": [
+            "action_collapse_guard"
+          ],
+          "narrative_drift": 0.0,
+          "personality_drift": 0.5,
+          "personality_snapshot": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.5,
+            "emotional_regulation_style": 0.5,
+            "extraversion": 0.5,
+            "meaning_construction_tendency": 0.5,
+            "neuroticism": 0.5,
+            "openness": 0.5
+          },
+          "policy_drift": 0.0,
+          "policy_snapshot": {},
+          "protected_anchor_ids": [],
+          "rehearsal_queue": [],
+          "restart_divergence": 0.0,
+          "updated_tick": 1
+        },
+        "cycle": 1,
+        "decision_loop": {
+          "active_goal": "SURVIVAL",
+          "ambiguity": 0.06951236513333334,
+          "attention_dropped_channels": [
+            "food",
+            "shelter",
+            "temperature"
+          ],
+          "attention_salience_scores": {
+            "danger": 0.146965,
+            "food": 0.116925,
+            "novelty": 0.138324,
+            "shelter": 0.102798,
+            "social": 0.259615,
+            "temperature": 0.000516
+          },
+          "attention_selected_channels": [
+            "social",
+            "danger",
+            "novelty"
+          ],
+          "behavioral_classification": "aligned",
+          "chosen_action": {
+            "constraints": {
+              "preferred_when_danger_above": 0.45
+            },
+            "cost_estimate": 0.05,
+            "failure_modes": [
+              "resource_starvation",
+              "shelter_unavailable"
+            ],
+            "name": "hide",
+            "params": {},
+            "params_schema": {},
+            "resource_cost": {
+              "attention": 0.08,
+              "energy": 0.05
+            },
+            "reversible": true
+          },
+          "chosen_action_name": "hide",
+          "commitment_bias": 0.0,
+          "commitment_compatibility_score": 0.5,
+          "commitment_focus": [],
+          "conflict_type": "none",
+          "conscious_report_channels": [],
+          "consistency_classification": "irrelevant",
+          "current_commitments": [],
+          "current_prediction_error": 0.215794188,
+          "epistemic_bonus": 0.0,
+          "expected_free_energy": 0.13355581044488163,
+          "explanation": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.134 vs 0.193), and hide scored 0.943 versus exploit_shelter at 0.714.This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+          "explanation_details": {
+            "action": "hide",
+            "active_goal": "SURVIVAL",
+            "behavioral_classification": "aligned",
+            "commitment_compatibility_score": 0.5,
+            "commitment_focus": [],
+            "comparison": "The overall expected free energy was lower than exploit_shelter (0.134 vs 0.193), and hide scored 0.943 versus exploit_shelter at 0.714.",
+            "conflict_type": "none",
+            "consistency": {
+              "consistency_statement": "This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment.",
+              "dominant_strategy": "expected_free_energy",
+              "historical_action_frequency": 0.0,
+              "identity_consistency": false,
+              "matches_dominant_strategy": false
+            },
+            "consistency_classification": "irrelevant",
+            "current_commitments": [],
+            "dominant_component": "goal_alignment",
+            "goal_alignment": 1.0,
+            "historical_action_frequency": 0.0,
+            "identity_consistency": false,
+            "identity_repair_policy": "",
+            "identity_tension": 0.5,
+            "reason": "goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL.",
+            "relevant_commitments": [],
+            "repair_policy": "",
+            "repair_result": {},
+            "repair_triggered": false,
+            "self_inconsistency_error": 0.5,
+            "severity_level": "none",
+            "social_alerts": [],
+            "social_focus": [],
+            "social_snapshot": {
+              "history_size": 0,
+              "others": {}
+            },
+            "text": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.134 vs 0.193), and hide scored 0.943 versus exploit_shelter at 0.714.This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+            "violated_commitments": [],
+            "workspace_focus": [],
+            "workspace_intensity": 0.0,
+            "workspace_maintenance_priority": {
+              "active_tasks": [],
+              "priority_gain": 0.0,
+              "recommended_action": "rest"
+            },
+            "workspace_metacognitive_review": {
+              "notes": "conflict_type=none; severity=none; behavior=aligned; error=0.500; workspace_conflicts=none",
+              "pause_strength": 0.0,
+              "rebias_strength": 0.0,
+              "recommended_policy": "",
+              "review_required": false,
+              "workspace_conflict_channels": []
+            }
+          },
+          "goal_alignment": 1.0,
+          "goal_context": {
+            "active_goal": "SURVIVAL",
+            "conflict_id": "vc_0001",
+            "goal_weight": 0.9,
+            "preferred_action_types": [
+              "hide",
+              "rest",
+              "exploit_shelter"
+            ],
+            "resolution_reason": "base goal weights favor SURVIVAL",
+            "urgency_scores": {
+              "CONTROL": 0.65,
+              "INTEGRITY": 0.8,
+              "RESOURCES": 0.55,
+              "SOCIAL": 0.2,
+              "SURVIVAL": 0.9
+            }
+          },
+          "identity_bias": 0.07659200131999999,
+          "identity_repair_policy": "",
+          "identity_tension": 0.5,
+          "memory_bias": 0.0,
+          "pattern_bias": 0.0,
+          "policy_bias": 0.0,
+          "policy_score": 0.9430361908751184,
+          "policy_scores": {
+            "append_workspace_note": 0.43513449947511845,
+            "delete_workspace_note": 0.036609673475118565,
+            "exploit_shelter": 0.7138741682351184,
+            "fetch_remote_status": 0.24020967347511846,
+            "forage": -155.35189991534915,
+            "hide": 0.9430361908751184,
+            "rest": 0.7098119732351186,
+            "scan": 0.18841307587511835,
+            "seek_contact": 0.15411456487511832,
+            "thermoregulate": -155.1761331875892,
+            "unstable_workspace_note": 0.43513449947511845,
+            "write_workspace_note": 0.3932344994751184
+          },
+          "predicted_outcome": "resource_gain",
+          "prediction_error": 0.05574961466666668,
+          "preferred_probability": 0.993306847254501,
+          "relevant_commitments": [],
+          "repair_policy": "",
+          "repair_result": {},
+          "repair_triggered": false,
+          "risk": 0.006715652344033707,
+          "self_inconsistency_error": 0.5,
+          "severity_level": "none",
+          "social_alerts": [],
+          "social_bias": 0.0,
+          "social_focus": [],
+          "social_snapshot": {
+            "history_size": 0,
+            "others": {}
+          },
+          "total_surprise": 0.2225098403440337,
+          "value_score": 0.25934622467605517,
+          "violated_commitments": [],
+          "workspace_attended_channels": [],
+          "workspace_bias": 0.0,
+          "workspace_broadcast_channels": [],
+          "workspace_broadcast_intensity": 0.0,
+          "workspace_carry_over_channels": [],
+          "workspace_latent_channels": [],
+          "workspace_persistence_horizon": 0,
+          "workspace_suppressed_channels": []
+        },
+        "decision_ranking": [
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_danger_above": 0.45
+              },
+              "cost_estimate": 0.05,
+              "failure_modes": [
+                "resource_starvation",
+                "shelter_unavailable"
+              ],
+              "name": "hide",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.08,
+                "energy": 0.05
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.06951236513333334,
+            "ambiguity": 0.06951236513333334,
+            "choice": "hide",
+            "commitment_bias": 0.0,
+            "cost": 0.05,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.13355581044488163,
+            "goal_alignment": 1.0,
+            "identity_bias": 0.07659200131999999,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.9430361908751184,
+            "predicted_effects": {
+              "energy_delta": -0.1050000000000001,
+              "fatigue_delta": 0.030000000000000027,
+              "free_energy_drop": 1.0413664175816866,
+              "stress_delta": -0.15,
+              "temperature_delta": 0.020000000000000018
+            },
+            "predicted_error": 0.05574961466666668,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_shelter_available": 0.2
+              },
+              "cost_estimate": 0.08,
+              "failure_modes": [
+                "shelter_contested",
+                "resource_exhaustion"
+              ],
+              "name": "exploit_shelter",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.1,
+                "energy": 0.08
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.10720681086666667,
+            "ambiguity": 0.10720681086666667,
+            "choice": "exploit_shelter",
+            "commitment_bias": 0.0,
+            "cost": 0.08,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.19323438684488164,
+            "goal_alignment": 0.9132390800000001,
+            "identity_bias": -0.006130524920000019,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.7138741682351184,
+            "predicted_effects": {
+              "energy_delta": -0.15500000000000003,
+              "fatigue_delta": 0.0,
+              "free_energy_drop": 0.9816878411816866,
+              "stress_delta": -0.1,
+              "temperature_delta": -0.03999999999999998
+            },
+            "predicted_error": 0.07773374533333335,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_fatigue_above": 0.4
+              },
+              "cost_estimate": 0.03,
+              "failure_modes": [
+                "opportunity_loss",
+                "environment_shift"
+              ],
+              "name": "rest",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.03,
+                "energy": 0.03
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.042684972533333324,
+            "ambiguity": 0.042684972533333324,
+            "choice": "rest",
+            "commitment_bias": 0.0,
+            "cost": 0.03,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.0872215818448816,
+            "goal_alignment": 0.7812390800000002,
+            "identity_bias": 0.015794475079999967,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.7098119732351186,
+            "predicted_effects": {
+              "energy_delta": -0.06500000000000006,
+              "fatigue_delta": -0.03999999999999998,
+              "free_energy_drop": 1.0877006461816867,
+              "stress_delta": -0.04000000000000001,
+              "temperature_delta": -0.020000000000000018
+            },
+            "predicted_error": 0.03624277866666665,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.03,
+              "failure_modes": [],
+              "name": "unstable_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str",
+                "text": "str"
+              },
+              "resource_cost": {
+                "attention": 0.04,
+                "context": 0.04
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.04898497253333333,
+            "ambiguity": 0.04898497253333333,
+            "choice": "unstable_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.03,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.11152158184488162,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": 0.001417001319999972,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.43513449947511845,
+            "predicted_effects": {
+              "energy_delta": -0.04500000000000004,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 1.0634006461816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.054242778666666665,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.03,
+              "failure_modes": [],
+              "name": "append_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str",
+                "text": "str"
+              },
+              "resource_cost": {
+                "attention": 0.04,
+                "context": 0.04
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.04898497253333333,
+            "ambiguity": 0.04898497253333333,
+            "choice": "append_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.03,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.11152158184488162,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": 0.001417001319999972,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.43513449947511845,
+            "predicted_effects": {
+              "energy_delta": -0.04500000000000004,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 1.0634006461816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.054242778666666665,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.05,
+              "failure_modes": [],
+              "name": "write_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str",
+                "text": "str"
+              },
+              "resource_cost": {
+                "attention": 0.05,
+                "context": 0.08
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.06781830586666666,
+            "ambiguity": 0.06781830586666666,
+            "choice": "write_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.05,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.12702158184488163,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": -0.02498299868000005,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.3932344994751184,
+            "predicted_effects": {
+              "energy_delta": -0.06500000000000006,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 1.0479006461816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.05090944533333333,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.12,
+              "failure_modes": [],
+              "name": "fetch_remote_status",
+              "params": {},
+              "params_schema": {
+                "url": "str"
+              },
+              "resource_cost": {
+                "attention": 0.12,
+                "network": 0.2
+              },
+              "reversible": false
+            },
+            "action_ambiguity": 0.13538770519999999,
+            "ambiguity": 0.13538770519999999,
+            "choice": "fetch_remote_status",
+            "commitment_bias": 0.0,
+            "cost": 0.12,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.18764640784488162,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": -0.11738299868000003,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.24020967347511846,
+            "predicted_effects": {
+              "energy_delta": -0.135,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 0.9872758201816867,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.043964872000000016,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_uncertainty_above": 0.35
+              },
+              "cost_estimate": 0.06,
+              "failure_modes": [
+                "context_budget_exceeded",
+                "false_alarm"
+              ],
+              "name": "scan",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.2,
+                "energy": 0.06
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.08943219346666666,
+            "ambiguity": 0.08943219346666666,
+            "choice": "scan",
+            "commitment_bias": 0.0,
+            "cost": 0.06,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.1818180054448816,
+            "goal_alignment": 0.48523908000000004,
+            "identity_bias": -0.11500799868000007,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.18841307587511835,
+            "predicted_effects": {
+              "energy_delta": -0.1250000000000001,
+              "fatigue_delta": 0.16000000000000003,
+              "free_energy_drop": 0.9931042225816866,
+              "stress_delta": 0.030000000000000027,
+              "temperature_delta": 0.010000000000000009
+            },
+            "predicted_error": 0.08409198133333333,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_social_below": 0.35
+              },
+              "cost_estimate": 0.07,
+              "failure_modes": [
+                "external_rejection",
+                "threat_exposure"
+              ],
+              "name": "seek_contact",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.14,
+                "energy": 0.07
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.10307723113333335,
+            "ambiguity": 0.10307723113333335,
+            "choice": "seek_contact",
+            "commitment_bias": 0.0,
+            "cost": 0.07,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.20587743644488166,
+            "goal_alignment": 0.4800000000000001,
+            "identity_bias": -0.12000799868000009,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.15411456487511832,
+            "predicted_effects": {
+              "energy_delta": -0.1250000000000001,
+              "fatigue_delta": 0.13,
+              "free_energy_drop": 0.9690447915816867,
+              "stress_delta": -0.08000000000000002,
+              "temperature_delta": 0.030000000000000027
+            },
+            "predicted_error": 0.0945063746666667,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {},
+              "cost_estimate": 0.2,
+              "failure_modes": [],
+              "name": "delete_workspace_note",
+              "params": {},
+              "params_schema": {
+                "path": "str"
+              },
+              "resource_cost": {
+                "attention": 0.1,
+                "file": 0.15
+              },
+              "reversible": false
+            },
+            "action_ambiguity": 0.22005437186666668,
+            "ambiguity": 0.22005437186666668,
+            "choice": "delete_workspace_note",
+            "commitment_bias": 0.0,
+            "cost": 0.2,
+            "dominant_component": "goal_alignment",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 0.28564640784488166,
+            "goal_alignment": 0.5452390800000001,
+            "identity_bias": -0.22298299867999993,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": 0.036609673475118565,
+            "predicted_effects": {
+              "energy_delta": -0.21499999999999997,
+              "fatigue_delta": 0.08000000000000002,
+              "free_energy_drop": 0.8892758201816866,
+              "stress_delta": 0.0,
+              "temperature_delta": 0.0
+            },
+            "predicted_error": 0.05729820533333335,
+            "predicted_outcome": "resource_gain",
+            "preferred_probability": 0.993306847254501,
+            "risk": 0.006715652344033707,
+            "social_bias": 0.0,
+            "value_score": 0.25934622467605517,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "preferred_when_temperature_offset_above": 0.12
+              },
+              "cost_estimate": 0.09,
+              "failure_modes": [
+                "resource_exhaustion",
+                "temperature_rebound"
+              ],
+              "name": "thermoregulate",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.12,
+                "energy": 0.09
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.12452103853333332,
+            "ambiguity": 0.12452103853333332,
+            "choice": "thermoregulate",
+            "commitment_bias": 0.0,
+            "cost": 0.09,
+            "dominant_component": "expected_free_energy",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 155.63309174266917,
+            "goal_alignment": 0.59323908,
+            "identity_bias": -0.13628052491999998,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": -155.1761331875892,
+            "predicted_effects": {
+              "energy_delta": -0.18499999999999994,
+              "fatigue_delta": 0.11000000000000004,
+              "free_energy_drop": 0.9434758201816866,
+              "stress_delta": -0.06,
+              "temperature_delta": -0.2
+            },
+            "predicted_error": 0.09863153866666667,
+            "predicted_outcome": "integrity_loss",
+            "preferred_probability": 1e-12,
+            "risk": 105.00671565234403,
+            "social_bias": 0.0,
+            "value_score": -0.6680104684941067,
+            "workspace_bias": 0.0
+          },
+          {
+            "action": {
+              "constraints": {
+                "requires_min_energy": 0.1
+              },
+              "cost_estimate": 0.12,
+              "failure_modes": [
+                "resource_exhaustion",
+                "threat_exposure",
+                "environment_shift"
+              ],
+              "name": "forage",
+              "params": {},
+              "params_schema": {},
+              "resource_cost": {
+                "attention": 0.18,
+                "energy": 0.12
+              },
+              "reversible": true
+            },
+            "action_ambiguity": 0.1699016392,
+            "ambiguity": 0.1699016392,
+            "choice": "forage",
+            "commitment_bias": 0.0,
+            "cost": 0.12,
+            "dominant_component": "expected_free_energy",
+            "epistemic_bonus": 0.0,
+            "expected_free_energy": 155.72241691666915,
+            "goal_alignment": 0.4800000000000001,
+            "identity_bias": -0.10948299868000005,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
+            "policy_bias": 0.0,
+            "policy_score": -155.35189991534915,
+            "predicted_effects": {
+              "energy_delta": 0.04499999999999993,
+              "fatigue_delta": 0.23000000000000004,
+              "free_energy_drop": 0.8541506461816867,
+              "stress_delta": 0.09999999999999998,
+              "temperature_delta": 0.07999999999999996
+            },
+            "predicted_error": 0.142576112,
+            "predicted_outcome": "integrity_loss",
+            "preferred_probability": 1e-12,
+            "risk": 105.00671565234403,
+            "social_bias": 0.0,
+            "value_score": -0.6680104684941067,
+            "workspace_bias": 0.0
+          }
+        ],
+        "episodic_memory": {
+          "episode_created": true,
+          "episode_score": 0.15512286674622044,
+          "gating_reasons": [
+            "action_novelty_trace"
+          ],
+          "merged_into_episode_id": null,
+          "policy_delta": 0.0008394565430042134,
+          "predicted_outcome": "resource_gain",
+          "prediction_error": 0.215794188,
+          "preference_log_value": 5.0,
+          "preferred_probability": 0.993306847254501,
+          "redundancy_penalty": 0.0,
+          "risk": 0.006715652344033707,
+          "support_delta": 0,
+          "threat_significance": 0.0016789130860084267,
+          "total_surprise": 0.2225098403440337,
+          "value_label": "resource_gain",
+          "value_relevance": 0.25934622467605517,
+          "value_score": 0.25934622467605517,
+          "weighted_surprise": 0.2225098403440337
+        },
+        "errors": {
+          "danger": 0.05436589999999997,
+          "food": -0.09094180200000002,
+          "novelty": -0.17405408,
+          "shelter": -0.079954252,
+          "social": 0.5769231,
+          "temperature": -0.00040166279999998
+        },
+        "event": "cycle",
+        "expected_free_energy": 0.13355581044488163,
+        "free_energy_after": 0.8555226325108405,
+        "free_energy_before": 1.1666283973816867,
+        "hierarchy": {
+          "interoceptive_prediction": {
+            "danger": 0.2956341,
+            "food": 0.45983372,
+            "novelty": 0.47405408,
+            "shelter": 0.42844072,
+            "social": 0.3230769,
+            "temperature": 0.501147608
+          },
+          "interoceptive_update": {
+            "belief_after": {
+              "danger": 0.3359174957902387,
+              "food": 0.43877086810684246,
+              "novelty": 0.37838322976593664,
+              "shelter": 0.34646359336639193,
+              "social": 0.7507548726351647,
+              "temperature": 0.49974287078778257
+            },
+            "belief_before": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "digestion_exceeded": true,
+            "digestion_threshold": 0.06,
+            "error_precision": {
+              "danger": 0.87611226,
+              "food": 0.9273185228,
+              "novelty": 1.043675712,
+              "shelter": 0.9119359528000001,
+              "social": 1.60769234,
+              "temperature": 0.80056232792
+            },
+            "incoming_observation": {
+              "danger": 0.35,
+              "food": 0.368891918,
+              "novelty": 0.3,
+              "shelter": 0.348486468,
+              "social": 0.9,
+              "temperature": 0.5007459452
+            },
+            "kalman_gain": {
+              "danger": 0.6606622127149326,
+              "food": 0.6732781905196636,
+              "novelty": 0.698729786937849,
+              "shelter": 0.6695879868103589,
+              "social": 0.7813084146486156,
+              "temperature": 0.6401618776183166
+            },
+            "layer_name": "interoceptive",
+            "prediction": {
+              "danger": 0.2956341,
+              "food": 0.45983372,
+              "novelty": 0.47405408,
+              "shelter": 0.42844072,
+              "social": 0.3230769,
+              "temperature": 0.501147608
+            },
+            "propagated_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.2028396926858241,
+              "temperature": 0.0
+            },
+            "raw_error": {
+              "danger": 0.05436589999999997,
+              "food": -0.09094180200000002,
+              "novelty": -0.17405408,
+              "shelter": -0.079954252,
+              "social": 0.5769231,
+              "temperature": -0.00040166279999998
+            },
+            "residual_error": {
+              "danger": 0.01844840420976123,
+              "food": -0.029712670106842476,
+              "novelty": -0.05243730976593667,
+              "shelter": -0.026417845366391888,
+              "social": 0.1261682273648353,
+              "temperature": -0.00014453358778256244
+            },
+            "top_down_prediction": {
+              "danger": 0.29393625,
+              "food": 0.4442135,
+              "novelty": 0.463964,
+              "shelter": 0.43950100000000003,
+              "social": 0.33205125,
+              "temperature": 0.5015939
+            },
+            "weighted_error": {
+              "danger": 0.04763063151593397,
+              "food": -0.0843320174914101,
+              "novelty": -0.18165601587050495,
+              "shelter": -0.07291315697803132,
+              "social": 0.9275148486390541,
+              "temperature": -0.0003215561062068494
+            }
+          },
+          "observation": {
+            "danger": 0.35,
+            "food": 0.368891918,
+            "novelty": 0.3,
+            "shelter": 0.348486468,
+            "social": 0.9,
+            "temperature": 0.5007459452
+          },
+          "sensorimotor_observation": {
+            "danger": 0.29393625,
+            "food": 0.4442135,
+            "novelty": 0.463964,
+            "shelter": 0.43950100000000003,
+            "social": 0.5348909426858242,
+            "temperature": 0.5015939
+          },
+          "sensorimotor_prediction": {
+            "danger": 0.29393625,
+            "food": 0.4442135,
+            "novelty": 0.463964,
+            "shelter": 0.43950100000000003,
+            "social": 0.33205125,
+            "temperature": 0.5015939
+          },
+          "sensorimotor_update": {
+            "belief_after": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.4125811908820466,
+              "temperature": 0.5
+            },
+            "belief_before": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "digestion_exceeded": false,
+            "digestion_threshold": 0.1,
+            "error_precision": {
+              "danger": 0.65,
+              "food": 0.65,
+              "novelty": 0.65,
+              "shelter": 0.65,
+              "social": 0.8731236619544066,
+              "temperature": 0.65
+            },
+            "incoming_observation": {
+              "danger": 0.29393625,
+              "food": 0.4442135,
+              "novelty": 0.463964,
+              "shelter": 0.43950100000000003,
+              "social": 0.5348909426858242,
+              "temperature": 0.5015939
+            },
+            "kalman_gain": {
+              "danger": 0.48148148148148145,
+              "food": 0.48148148148148145,
+              "novelty": 0.48148148148148145,
+              "shelter": 0.48148148148148145,
+              "social": 0.5550254459141891,
+              "temperature": 0.48148148148148145
+            },
+            "layer_name": "sensorimotor",
+            "prediction": {
+              "danger": 0.29393625,
+              "food": 0.4442135,
+              "novelty": 0.463964,
+              "shelter": 0.43950100000000003,
+              "social": 0.33205125,
+              "temperature": 0.5015939
+            },
+            "propagated_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "raw_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.20283969268582414,
+              "temperature": 0.0
+            },
+            "residual_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.09025850180377751,
+              "temperature": 0.0
+            },
+            "top_down_prediction": {
+              "danger": 0.288975,
+              "food": 0.39857,
+              "novelty": 0.43448,
+              "shelter": 0.47182,
+              "social": 0.358275,
+              "temperature": 0.5028980000000001
+            },
+            "weighted_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.17710413526755323,
+              "temperature": 0.0
+            }
+          },
+          "strategic_observation": {
+            "danger": 0.288975,
+            "food": 0.39857,
+            "novelty": 0.43448,
+            "shelter": 0.47182,
+            "social": 0.358275,
+            "temperature": 0.5028980000000001
+          },
+          "strategic_prediction": {
+            "danger": 0.288975,
+            "food": 0.39857,
+            "novelty": 0.43448,
+            "shelter": 0.47182,
+            "social": 0.358275,
+            "temperature": 0.5028980000000001
+          },
+          "strategic_prior": {
+            "danger": 0.2825,
+            "food": 0.339,
+            "novelty": 0.396,
+            "shelter": 0.514,
+            "social": 0.3925,
+            "temperature": 0.5046
+          },
+          "strategic_update": {
+            "belief_after": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "belief_before": {
+              "danger": 0.3,
+              "food": 0.5,
+              "novelty": 0.5,
+              "shelter": 0.4,
+              "social": 0.3,
+              "temperature": 0.5
+            },
+            "digestion_exceeded": false,
+            "digestion_threshold": 0.14,
+            "error_precision": {
+              "danger": 0.55,
+              "food": 0.55,
+              "novelty": 0.55,
+              "shelter": 0.55,
+              "social": 0.55,
+              "temperature": 0.55
+            },
+            "incoming_observation": {
+              "danger": 0.288975,
+              "food": 0.39857,
+              "novelty": 0.43448,
+              "shelter": 0.47182,
+              "social": 0.358275,
+              "temperature": 0.5028980000000001
+            },
+            "kalman_gain": {
+              "danger": 0.3666666666666667,
+              "food": 0.3666666666666667,
+              "novelty": 0.3666666666666667,
+              "shelter": 0.3666666666666667,
+              "social": 0.3666666666666667,
+              "temperature": 0.3666666666666667
+            },
+            "layer_name": "strategic",
+            "prediction": {
+              "danger": 0.288975,
+              "food": 0.39857,
+              "novelty": 0.43448,
+              "shelter": 0.47182,
+              "social": 0.358275,
+              "temperature": 0.5028980000000001
+            },
+            "propagated_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "raw_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "residual_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            },
+            "top_down_prediction": {
+              "danger": 0.2825,
+              "food": 0.339,
+              "novelty": 0.396,
+              "shelter": 0.514,
+              "social": 0.3925,
+              "temperature": 0.5046
+            },
+            "weighted_error": {
+              "danger": 0.0,
+              "food": 0.0,
+              "novelty": 0.0,
+              "shelter": 0.0,
+              "social": 0.0,
+              "temperature": 0.0
+            }
+          }
+        },
+        "homeostasis": {
+          "agenda": {
+            "active_tasks": [],
+            "chronic_debt_pressure": 0.0,
+            "cycle": 1,
+            "interrupt_action": null,
+            "interrupt_reason": "",
+            "memory_compaction_recommended": false,
+            "policy_shift_strength": 0.0,
+            "protected_mode": false,
+            "protected_mode_ticks_remaining": 0,
+            "recommended_action": "rest",
+            "recovery_focus": [],
+            "recovery_rebound_active": false,
+            "recovery_rebound_ticks_remaining": 0,
+            "sleep_recommended": false,
+            "state": {
+              "acute_energy_debt": 0.0,
+              "acute_fatigue_debt": 0.0,
+              "acute_stress_debt": 0.0,
+              "acute_thermal_debt": 0.0,
+              "chronic_energy_debt": 0.0,
+              "chronic_fatigue_debt": 0.0,
+              "chronic_runtime_debt": 0.0,
+              "chronic_stress_debt": 0.0,
+              "short_term_sleep_pressure": 0.0
+            },
+            "suppressed_actions": [],
+            "telemetry_backoff_recommended": false
+          },
+          "effects": {
+            "debt_reversal_applied": true,
+            "energy_recovery_applied": true,
+            "guard_activated_tick": null,
+            "memory_compaction_applied": false,
+            "protected_mode_duration": 0,
+            "recovery_rebound_activated": false,
+            "recovery_result": "success",
+            "retired_episodes": 0,
+            "stress_recovery_applied": false,
+            "suppressed_actions": [],
+            "telemetry_backoff_applied": false
+          }
+        },
+        "identity": {
+          "chapter_transition_evidence": [],
+          "commitments": [],
+          "core_identity": "",
+          "core_summary": "",
+          "identity_tension_history": [],
+          "repair_history": [],
+          "self_inconsistency_events": [
+            {
+              "action": "hide",
+              "active_commitments": [],
+              "behavioral_classification": "aligned",
+              "commitment_compatibility_score": 0.5,
+              "conflict_type": "none",
+              "consistency_classification": "irrelevant",
+              "evidence": {
+                "adaptation_pressure": 0.43405408,
+                "danger": 0.07563410000000001,
+                "social": 0.3030769,
+                "stress": 0.0,
+                "temptation_gain": 0.40983372
+              },
+              "relevant_commitments": [],
+              "repair_policy": "",
+              "repair_result": {},
+              "repair_triggered": false,
+              "self_inconsistency_error": 0.5,
+              "severity_level": "none",
+              "tick": 1
+            }
+          ],
+          "trait_self_model": {}
+        },
+        "io": {
+          "action": {
+            "acknowledgment": {
+              "ack_id": "ack-000001",
+              "acknowledged_channels": [
+                "energy_delta",
+                "fatigue_delta",
+                "loneliness_delta",
+                "stress_delta",
+                "temperature_delta"
+              ],
+              "action": {
+                "constraints": {
+                  "preferred_when_danger_above": 0.45
+                },
+                "cost_estimate": 0.05,
+                "failure_modes": [
+                  "resource_starvation",
+                  "shelter_unavailable"
+                ],
+                "name": "hide",
+                "params": {},
+                "params_schema": {},
+                "resource_cost": {
+                  "attention": 0.08,
+                  "energy": 0.05
+                },
+                "reversible": true
+              },
+              "action_name": "hide",
+              "confidence": 1.0,
+              "cycle": 1,
+              "feedback": {
+                "energy_delta": 0.03,
+                "fatigue_delta": 0.01,
+                "loneliness_delta": -0.01,
+                "stress_delta": -0.02,
+                "temperature_delta": 0.0
+              },
+              "metadata": {
+                "non_zero_feedback_count": 4
+              },
+              "source_id": "simulated_world",
+              "source_type": "simulated_world",
+              "success": true
+            },
+            "dispatch": {
+              "acknowledgment": {
+                "ack_id": "ack-000001",
+                "acknowledged_channels": [
+                  "energy_delta",
+                  "fatigue_delta",
+                  "loneliness_delta",
+                  "stress_delta",
+                  "temperature_delta"
+                ],
+                "action": {
+                  "constraints": {
+                    "preferred_when_danger_above": 0.45
+                  },
+                  "cost_estimate": 0.05,
+                  "failure_modes": [
+                    "resource_starvation",
+                    "shelter_unavailable"
+                  ],
+                  "name": "hide",
+                  "params": {},
+                  "params_schema": {},
+                  "resource_cost": {
+                    "attention": 0.08,
+                    "energy": 0.05
+                  },
+                  "reversible": true
+                },
+                "action_name": "hide",
+                "confidence": 1.0,
+                "cycle": 1,
+                "feedback": {
+                  "energy_delta": 0.03,
+                  "fatigue_delta": 0.01,
+                  "loneliness_delta": -0.01,
+                  "stress_delta": -0.02,
+                  "temperature_delta": 0.0
+                },
+                "metadata": {
+                  "non_zero_feedback_count": 4
+                },
+                "source_id": "simulated_world",
+                "source_type": "simulated_world",
+                "success": true
+              },
+              "action": {
+                "constraints": {
+                  "preferred_when_danger_above": 0.45
+                },
+                "cost_estimate": 0.05,
+                "failure_modes": [
+                  "resource_starvation",
+                  "shelter_unavailable"
+                ],
+                "name": "hide",
+                "params": {},
+                "params_schema": {},
+                "resource_cost": {
+                  "attention": 0.08,
+                  "energy": 0.05
+                },
+                "reversible": true
+              },
+              "action_name": "hide",
+              "adapter_name": "SimulatedWorldActionAdapter",
+              "cycle": 1,
+              "dispatch_id": "dispatch-000001",
+              "feedback": {
+                "energy_delta": 0.03,
+                "fatigue_delta": 0.01,
+                "loneliness_delta": -0.01,
+                "stress_delta": -0.02,
+                "temperature_delta": 0.0
+              },
+              "source_id": "simulated_world",
+              "source_type": "simulated_world"
+            }
+          },
+          "perception": {
+            "primary_observation": {
+              "adapter_name": "SimulatedWorldAdapter",
+              "confidence": 1.0,
+              "cycle": 1,
+              "metadata": {
+                "channel_count": 6
+              },
+              "observation": {
+                "danger": 0.35,
+                "food": 0.2,
+                "novelty": 0.3,
+                "shelter": 0.2,
+                "social": 0.9,
+                "temperature": 0.5
+              },
+              "packet_id": "perception-000001",
+              "signals": [
+                {
+                  "channel": "food",
+                  "confidence": 1.0,
+                  "normalized_value": 0.2,
+                  "provenance": {},
+                  "raw_value": 0.2,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "danger",
+                  "confidence": 1.0,
+                  "normalized_value": 0.35,
+                  "provenance": {},
+                  "raw_value": 0.35,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "novelty",
+                  "confidence": 1.0,
+                  "normalized_value": 0.3,
+                  "provenance": {},
+                  "raw_value": 0.3,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "shelter",
+                  "confidence": 1.0,
+                  "normalized_value": 0.2,
+                  "provenance": {},
+                  "raw_value": 0.2,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "temperature",
+                  "confidence": 1.0,
+                  "normalized_value": 0.5,
+                  "provenance": {},
+                  "raw_value": 0.5,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "social",
+                  "confidence": 1.0,
+                  "normalized_value": 0.9,
+                  "provenance": {},
+                  "raw_value": 0.9,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                }
+              ],
+              "source_id": "simulated_world",
+              "source_type": "simulated_world"
+            },
+            "validation_observation": {
+              "adapter_name": "SimulatedWorldAdapter",
+              "confidence": 1.0,
+              "cycle": 1,
+              "metadata": {
+                "channel_count": 6
+              },
+              "observation": {
+                "danger": 0.38,
+                "food": 0.18,
+                "novelty": 0.28,
+                "shelter": 0.22,
+                "social": 0.84,
+                "temperature": 0.5
+              },
+              "packet_id": "perception-000002",
+              "signals": [
+                {
+                  "channel": "food",
+                  "confidence": 1.0,
+                  "normalized_value": 0.18,
+                  "provenance": {},
+                  "raw_value": 0.18,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "danger",
+                  "confidence": 1.0,
+                  "normalized_value": 0.38,
+                  "provenance": {},
+                  "raw_value": 0.38,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "novelty",
+                  "confidence": 1.0,
+                  "normalized_value": 0.28,
+                  "provenance": {},
+                  "raw_value": 0.28,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "shelter",
+                  "confidence": 1.0,
+                  "normalized_value": 0.22,
+                  "provenance": {},
+                  "raw_value": 0.22,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "temperature",
+                  "confidence": 1.0,
+                  "normalized_value": 0.5,
+                  "provenance": {},
+                  "raw_value": 0.5,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                },
+                {
+                  "channel": "social",
+                  "confidence": 1.0,
+                  "normalized_value": 0.84,
+                  "provenance": {},
+                  "raw_value": 0.84,
+                  "role": "exteroceptive",
+                  "source_id": "simulated_world_validation",
+                  "source_type": "simulated_world",
+                  "units": "normalized"
+                }
+              ],
+              "source_id": "simulated_world_validation",
+              "source_type": "simulated_world"
+            }
+          }
+        },
+        "memory_context_summary": "no episodic memory influence",
+        "memory_hit": false,
+        "memory_hits": 0,
+        "observation": {
+          "danger": 0.35,
+          "food": 0.2,
+          "novelty": 0.3,
+          "shelter": 0.2,
+          "social": 0.9,
+          "temperature": 0.5
+        },
+        "prediction": {
+          "danger": 0.2956341,
+          "food": 0.45983372,
+          "novelty": 0.47405408,
+          "shelter": 0.42844072,
+          "social": 0.3230769,
+          "temperature": 0.501147608
+        },
+        "prediction_after_memory": {
+          "danger": 0.29393625,
+          "food": 0.4442135,
+          "novelty": 0.463964,
+          "shelter": 0.43950100000000003,
+          "social": 0.33205125,
+          "temperature": 0.5015939
+        },
+        "prediction_before_memory": {
+          "danger": 0.29393625,
+          "food": 0.4442135,
+          "novelty": 0.463964,
+          "shelter": 0.43950100000000003,
+          "social": 0.33205125,
+          "temperature": 0.5015939
+        },
+        "prediction_delta": {
+          "danger": 0.0,
+          "food": 0.0,
+          "novelty": 0.0,
+          "shelter": 0.0,
+          "social": 0.0,
+          "temperature": 0.0
+        },
+        "prediction_errors": {
+          "danger": {
+            "error_source": "world",
+            "value": 0.05436589999999997
+          },
+          "food": {
+            "error_source": "world",
+            "value": 0.25983372
+          },
+          "novelty": {
+            "error_source": "world",
+            "value": 0.17405408
+          },
+          "shelter": {
+            "error_source": "world",
+            "value": 0.22844071999999999
+          },
+          "social": {
+            "error_source": "world",
+            "value": 0.5769231
+          },
+          "temperature": {
+            "error_source": "ambiguous",
+            "value": 0.0011476080000000222
+          }
+        },
+        "recent_action_history": [
+          "hide"
+        ],
+        "retrieved_episode_ids": [],
+        "retrieved_memories": [],
+        "running_metrics": {
+          "action_counts": {
+            "hide": 1
+          },
+          "action_distribution": {
+            "hide": 1.0
+          },
+          "action_entropy": 0.0,
+          "action_switch_count": 0,
+          "avg_free_energy_after": 0.8555226325108405,
+          "avg_free_energy_before": 1.1666283973816867,
+          "avg_free_energy_drop": 0.3111057648708462,
+          "cycles_completed": 1,
+          "dominant_action": "hide",
+          "dominant_action_share": 1.0,
+          "internal_update_count": 0,
+          "last_choice": "hide",
+          "max_action_streak": 1,
+          "max_stress": 0.23,
+          "memory_hit_rate": 0.0,
+          "memory_retrieval_count": 0,
+          "min_energy": 0.8700000000000001,
+          "persistence_error_count": 0,
+          "sleep_count": 0,
+          "survival_ticks": 1,
+          "telemetry_error_count": 0,
+          "termination_reason": "",
+          "unique_actions": 1
+        },
+        "sleep_triggered": false,
+        "social_memory": {
+          "interaction_history": [],
+          "others": {}
+        },
+        "state_load_status": "fresh",
+        "state_version": "0.4",
+        "world_state": {
+          "food_density": 0.2,
+          "novelty_density": 0.3,
+          "seed": 224,
+          "shelter_density": 0.2,
+          "social_density": 0.9,
+          "temperature": 0.5,
+          "threat_density": 0.35,
+          "tick": 1
+        }
+      }
+    },
+    "checks": {
+      "policy_shift_from_workspace": true,
+      "broadcast_visible_in_runtime_trace": true,
+      "conscious_report_leakage_free": true,
+      "semantic_report_leakage_free": true,
+      "maintenance_priority_applied": true,
+      "metacognitive_review_triggered": true
+    },
+    "passed": true
+  },
+  "open_world_runtime": {
+    "seed": 243,
+    "cycles": 4,
+    "full_workspace": {
+      "seed": 243,
+      "cycles": 4,
+      "workspace_enabled": true,
+      "rows": [
+        {
+          "cycle": 1,
+          "choice": "hide",
+          "workspace_bias": 0.05117,
+          "workspace_broadcast_channels": [
+            "novelty",
+            "danger"
+          ],
+          "workspace_suppressed_channels": [
+            "food",
+            "social",
+            "temperature",
+            "shelter"
+          ],
+          "conscious_report": {
+            "text": "Consciously accessible now: novelty, danger.",
+            "channels": [
+              "novelty",
+              "danger"
+            ],
+            "carry_over_channels": [],
+            "suppressed_channels": [
+              "food",
+              "social",
+              "temperature",
+              "shelter"
+            ],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.279224,
+            "active_tasks": [
+              "resource_guard"
+            ],
+            "recommended_action": "hide"
+          }
+        },
+        {
+          "cycle": 2,
+          "choice": "exploit_shelter",
+          "workspace_bias": 0.045889,
+          "workspace_broadcast_channels": [
+            "novelty",
+            "danger"
+          ],
+          "workspace_suppressed_channels": [
+            "temperature",
+            "shelter",
+            "food",
+            "social"
+          ],
+          "conscious_report": {
+            "text": "Consciously accessible now: novelty, danger.",
+            "channels": [
+              "novelty",
+              "danger"
+            ],
+            "carry_over_channels": [],
+            "suppressed_channels": [
+              "temperature",
+              "shelter",
+              "food",
+              "social"
+            ],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.192622,
+            "active_tasks": [
+              "resource_guard"
+            ],
+            "recommended_action": "hide"
+          }
+        },
+        {
+          "cycle": 3,
+          "choice": "hide",
+          "workspace_bias": 0.026957,
+          "workspace_broadcast_channels": [
+            "novelty",
+            "shelter"
+          ],
+          "workspace_suppressed_channels": [
+            "danger",
+            "food",
+            "social",
+            "temperature"
+          ],
+          "conscious_report": {
+            "text": "Consciously accessible now: novelty, shelter.",
+            "channels": [
+              "novelty",
+              "shelter"
+            ],
+            "carry_over_channels": [],
+            "suppressed_channels": [
+              "danger",
+              "food",
+              "social",
+              "temperature"
+            ],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.253224,
+            "active_tasks": [
+              "shelter_security"
+            ],
+            "recommended_action": "exploit_shelter"
+          }
+        },
+        {
+          "cycle": 4,
+          "choice": "hide",
+          "workspace_bias": 0.01872,
+          "workspace_broadcast_channels": [
+            "novelty",
+            "shelter"
+          ],
+          "workspace_suppressed_channels": [
+            "danger",
+            "food",
+            "social",
+            "temperature"
+          ],
+          "conscious_report": {
+            "text": "Consciously accessible now: novelty, shelter.",
+            "channels": [
+              "novelty",
+              "shelter"
+            ],
+            "carry_over_channels": [],
+            "suppressed_channels": [
+              "danger",
+              "food",
+              "social",
+              "temperature"
+            ],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.244597,
+            "active_tasks": [
+              "shelter_security"
+            ],
+            "recommended_action": "exploit_shelter"
+          }
+        }
+      ]
+    },
+    "no_workspace": {
+      "seed": 243,
+      "cycles": 4,
+      "workspace_enabled": false,
+      "rows": [
+        {
+          "cycle": 1,
+          "choice": "hide",
+          "workspace_bias": 0.0,
+          "workspace_broadcast_channels": [],
+          "workspace_suppressed_channels": [],
+          "conscious_report": {
+            "text": "No contents currently reached global access.",
+            "channels": [],
+            "carry_over_channels": [],
+            "suppressed_channels": [],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.0,
+            "active_tasks": [],
+            "recommended_action": "rest"
+          }
+        },
+        {
+          "cycle": 2,
+          "choice": "exploit_shelter",
+          "workspace_bias": 0.0,
+          "workspace_broadcast_channels": [],
+          "workspace_suppressed_channels": [],
+          "conscious_report": {
+            "text": "No contents currently reached global access.",
+            "channels": [],
+            "carry_over_channels": [],
+            "suppressed_channels": [],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.0,
+            "active_tasks": [],
+            "recommended_action": "rest"
+          }
+        },
+        {
+          "cycle": 3,
+          "choice": "hide",
+          "workspace_bias": 0.0,
+          "workspace_broadcast_channels": [],
+          "workspace_suppressed_channels": [],
+          "conscious_report": {
+            "text": "No contents currently reached global access.",
+            "channels": [],
+            "carry_over_channels": [],
+            "suppressed_channels": [],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.0,
+            "active_tasks": [],
+            "recommended_action": "rest"
+          }
+        },
+        {
+          "cycle": 4,
+          "choice": "hide",
+          "workspace_bias": 0.0,
+          "workspace_broadcast_channels": [],
+          "workspace_suppressed_channels": [],
+          "conscious_report": {
+            "text": "No contents currently reached global access.",
+            "channels": [],
+            "carry_over_channels": [],
+            "suppressed_channels": [],
+            "leakage_free": true
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.0,
+            "active_tasks": [],
+            "recommended_action": "rest"
+          }
+        }
+      ]
+    },
+    "checks": {
+      "workspace_trace_present": true,
+      "workspace_bias_observed": true,
+      "workspace_absent_when_disabled": true,
+      "maintenance_priority_delta_present": true,
+      "semantic_report_leakage_free": true
+    },
+    "passed": true
+  }
+}

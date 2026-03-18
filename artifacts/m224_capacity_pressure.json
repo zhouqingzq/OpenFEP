@@ -1,0 +1,414 @@
+{
+  "milestone_id": "M2.24",
+  "schema_version": "m224_v2",
+  "generated_at": "2026-03-18T04:33:29+00:00",
+  "codebase_version": "d67e367b88b6f2516db1cbe2f84a688a9939562d",
+  "seed_set": [
+    224,
+    243,
+    321,
+    340,
+    418,
+    437
+  ],
+  "protocol": "capacity_pressure_protocol",
+  "variant_breakdown": {
+    "low_capacity_workspace": [
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      }
+    ],
+    "full_workspace": [
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "food",
+          "shelter",
+          "social",
+          "temperature"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      }
+    ],
+    "high_capacity_workspace": [
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "suppressed_channels": [
+          "food",
+          "shelter",
+          "social",
+          "temperature",
+          "conflict"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "suppressed_channels": [
+          "food",
+          "shelter",
+          "social",
+          "temperature",
+          "conflict"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "suppressed_channels": [
+          "food",
+          "shelter",
+          "social",
+          "temperature",
+          "conflict"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "suppressed_channels": [
+          "food",
+          "shelter",
+          "social",
+          "temperature",
+          "conflict"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "suppressed_channels": [
+          "food",
+          "shelter",
+          "social",
+          "temperature",
+          "conflict"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      },
+      {
+        "top_latent_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty",
+          "stress"
+        ],
+        "suppressed_channels": [
+          "food",
+          "shelter",
+          "social",
+          "temperature",
+          "conflict"
+        ],
+        "high_salience_retention_rate": 1.0,
+        "eviction_success_rate": 1.0,
+        "low_salience_intrusion_rate": 0.0
+      }
+    ]
+  },
+  "monotonic_metrics": [
+    "policy_causality_gain",
+    "memory_priority_gain",
+    "maintenance_priority_gain",
+    "broadcast_to_report_alignment"
+  ],
+  "workspace_capacity_effect_size": 0.155569
+}

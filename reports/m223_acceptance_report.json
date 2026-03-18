@@ -2,7 +2,7 @@
   "milestone_id": "M2.23",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-18T03:15:03+00:00",
+  "generated_at": "2026-03-18T04:33:00+00:00",
   "seed_set": [
     223,
     242,
@@ -729,7 +729,7 @@
           "policy": "metacognitive_review+policy_rebias",
           "target_action": "forage",
           "repaired_action": "exploit_shelter",
-          "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+          "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
           "outcome": "repaired_and_recovered",
           "applied_policy_trace": {
             "policy": "metacognitive_review+policy_rebias",
@@ -897,7 +897,7 @@
           "policy": "metacognitive_review+policy_rebias",
           "target_action": "forage",
           "repaired_action": "exploit_shelter",
-          "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+          "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
           "outcome": "repaired_and_recovered",
           "applied_policy_trace": {
             "policy": "metacognitive_review+policy_rebias",
@@ -1177,7 +1177,7 @@
           "policy": "reflective_pause+policy_rebias",
           "target_action": "forage",
           "repaired_action": "exploit_shelter",
-          "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+          "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
           "outcome": "repaired_and_recovered",
           "applied_policy_trace": {
             "policy": "reflective_pause+policy_rebias",
@@ -1570,7 +1570,7 @@
           "policy": "social_repair+policy_rebias",
           "target_action": "hide",
           "repaired_action": "exploit_shelter",
-          "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+          "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
           "outcome": "repaired_and_recovered",
           "applied_policy_trace": {
             "policy": "social_repair+policy_rebias",
@@ -2597,6 +2597,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m223_v1",
-    "codebase_version": "44bf6bdae870955af6a9ed601e860317d2d49f16"
+    "codebase_version": "d67e367b88b6f2516db1cbe2f84a688a9939562d"
   }
 }

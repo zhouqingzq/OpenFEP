@@ -1,0 +1,2777 @@
+{
+  "milestone_id": "M2.24",
+  "schema_version": "m224_v2",
+  "generated_at": "2026-03-18T04:33:29+00:00",
+  "codebase_version": "d67e367b88b6f2516db1cbe2f84a688a9939562d",
+  "seed_set": [
+    224,
+    243,
+    321,
+    340,
+    418,
+    437
+  ],
+  "protocol": "persistence_protocol",
+  "variant_breakdown": {
+    "full_workspace": [
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.464888,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3303,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.397594,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "forage",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.464994,
+                "rest": 0.1025,
+                "exploit_shelter": 0.325905,
+                "forage": 0.478639,
+                "scan": 0.030911,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.150998,
+              "priority": 0.102335,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "social",
+              "stress",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "danger"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.521,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "danger",
+                "source": "carry_over",
+                "salience": 0.390506,
+                "carry_over_strength": 0.390506
+              }
+            ],
+            "suppressed_channels": [
+              "social",
+              "stress",
+              "temperature",
+              "food",
+              "food"
+            ],
+            "carry_over_contents": [
+              "danger"
+            ],
+            "carry_over_sources": [
+              {
+                "channel": "danger",
+                "age": 1,
+                "salience": 0.390506,
+                "carry_over_strength": 0.390506
+              }
+            ],
+            "broadcast_intensity": 0.455753,
+            "replacement_pressure": 0.277452,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.367873,
+                "rest": 0.18,
+                "exploit_shelter": 0.28501,
+                "forage": 0.181421,
+                "scan": 0.542137,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "evidence_action_hit": false
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "danger"
+              ],
+              "effective_threshold": 0.12346,
+              "priority": 0.229873,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.394284,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.270392,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.456753,
+                "rest": 0.18,
+                "exploit_shelter": 0.34255,
+                "forage": 0.116202,
+                "scan": 0.247009,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.20196,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 1.0,
+        "broadcast_to_action_latency": 0.0,
+        "broadcast_to_memory_alignment": 1.0,
+        "carry_over_tick_count": 1,
+        "persistence_evidence_hits": 1
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.467349,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3312,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.399274,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "forage",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.466221,
+                "rest": 0.1025,
+                "exploit_shelter": 0.326686,
+                "forage": 0.478081,
+                "scan": 0.030465,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.150592,
+              "priority": 0.103408,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "social",
+              "stress",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "danger"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5223,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "danger",
+                "source": "carry_over",
+                "salience": 0.392573,
+                "carry_over_strength": 0.392573
+              }
+            ],
+            "suppressed_channels": [
+              "social",
+              "stress",
+              "temperature",
+              "food",
+              "food"
+            ],
+            "carry_over_contents": [
+              "danger"
+            ],
+            "carry_over_sources": [
+              {
+                "channel": "danger",
+                "age": 1,
+                "salience": 0.392573,
+                "carry_over_strength": 0.392573
+              }
+            ],
+            "broadcast_intensity": 0.457437,
+            "replacement_pressure": 0.278208,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.368553,
+                "rest": 0.18,
+                "exploit_shelter": 0.285443,
+                "forage": 0.181112,
+                "scan": 0.54189,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "evidence_action_hit": false
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "danger"
+              ],
+              "effective_threshold": 0.122998,
+              "priority": 0.231335,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.396721,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.27161,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.457973,
+                "rest": 0.18,
+                "exploit_shelter": 0.343326,
+                "forage": 0.115647,
+                "scan": 0.246565,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.201339,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 1.0,
+        "broadcast_to_action_latency": 0.0,
+        "broadcast_to_memory_alignment": 1.0,
+        "carry_over_tick_count": 1,
+        "persistence_evidence_hits": 1
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.517069,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3492,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.433134,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.490894,
+                "rest": 0.1025,
+                "exploit_shelter": 0.342387,
+                "forage": 0.466866,
+                "scan": 0.021493,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.142472,
+              "priority": 0.124861,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "danger"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5106,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "danger",
+                "source": "carry_over",
+                "salience": 0.434338,
+                "carry_over_strength": 0.434338
+              }
+            ],
+            "suppressed_channels": [
+              "stress",
+              "social",
+              "temperature",
+              "food",
+              "food"
+            ],
+            "carry_over_contents": [
+              "danger"
+            ],
+            "carry_over_sources": [
+              {
+                "channel": "danger",
+                "age": 1,
+                "salience": 0.434338,
+                "carry_over_strength": 0.434338
+              }
+            ],
+            "broadcast_intensity": 0.472469,
+            "replacement_pressure": 0.293328,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.382413,
+                "rest": 0.18,
+                "exploit_shelter": 0.294263,
+                "forage": 0.174812,
+                "scan": 0.53685,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "evidence_action_hit": false
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "danger"
+              ],
+              "effective_threshold": 0.127156,
+              "priority": 0.227844,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.374876,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.260688,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.447016,
+                "rest": 0.18,
+                "exploit_shelter": 0.336353,
+                "forage": 0.120628,
+                "scan": 0.25055,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.206917,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 1.0,
+        "broadcast_to_action_latency": 0.0,
+        "broadcast_to_memory_alignment": 1.0,
+        "carry_over_tick_count": 1,
+        "persistence_evidence_hits": 1
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.46963,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3501,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.409865,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "forage",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.462448,
+                "rest": 0.1025,
+                "exploit_shelter": 0.324285,
+                "forage": 0.479796,
+                "scan": 0.031837,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.142066,
+              "priority": 0.116267,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "danger"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5119,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "danger",
+                "source": "carry_over",
+                "salience": 0.394489,
+                "carry_over_strength": 0.394489
+              }
+            ],
+            "suppressed_channels": [
+              "stress",
+              "social",
+              "temperature",
+              "food",
+              "food"
+            ],
+            "carry_over_contents": [
+              "danger"
+            ],
+            "carry_over_sources": [
+              {
+                "channel": "danger",
+                "age": 1,
+                "salience": 0.394489,
+                "carry_over_strength": 0.394489
+              }
+            ],
+            "broadcast_intensity": 0.453195,
+            "replacement_pressure": 0.294084,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.369183,
+                "rest": 0.18,
+                "exploit_shelter": 0.285844,
+                "forage": 0.180826,
+                "scan": 0.541661,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "evidence_action_hit": false
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "danger"
+              ],
+              "effective_threshold": 0.126694,
+              "priority": 0.229306,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.377294,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.261897,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.448231,
+                "rest": 0.18,
+                "exploit_shelter": 0.337126,
+                "forage": 0.120076,
+                "scan": 0.250108,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.206299,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 1.0,
+        "broadcast_to_action_latency": 0.0,
+        "broadcast_to_memory_alignment": 1.0,
+        "carry_over_tick_count": 1,
+        "persistence_evidence_hits": 1
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.494576,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3411,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.417838,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.479758,
+                "rest": 0.1025,
+                "exploit_shelter": 0.335301,
+                "forage": 0.471928,
+                "scan": 0.025542,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.146126,
+              "priority": 0.115207,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "danger"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.4989,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "danger",
+                "source": "carry_over",
+                "salience": 0.415444,
+                "carry_over_strength": 0.415444
+              }
+            ],
+            "suppressed_channels": [
+              "stress",
+              "social",
+              "temperature",
+              "food",
+              "food"
+            ],
+            "carry_over_contents": [
+              "danger"
+            ],
+            "carry_over_sources": [
+              {
+                "channel": "danger",
+                "age": 1,
+                "salience": 0.415444,
+                "carry_over_strength": 0.415444
+              }
+            ],
+            "broadcast_intensity": 0.457172,
+            "replacement_pressure": 0.286524,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.376113,
+                "rest": 0.18,
+                "exploit_shelter": 0.290254,
+                "forage": 0.177676,
+                "scan": 0.539141,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "evidence_action_hit": false
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "danger"
+              ],
+              "effective_threshold": 0.131314,
+              "priority": 0.214686,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.423684,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.285092,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.471438,
+                "rest": 0.18,
+                "exploit_shelter": 0.351895,
+                "forage": 0.109527,
+                "scan": 0.241669,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.194484,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 1.0,
+        "broadcast_to_action_latency": 0.0,
+        "broadcast_to_memory_alignment": 1.0,
+        "carry_over_tick_count": 1,
+        "persistence_evidence_hits": 1
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.497066,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.342,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.419533,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.480993,
+                "rest": 0.1025,
+                "exploit_shelter": 0.336087,
+                "forage": 0.471367,
+                "scan": 0.025093,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.14572,
+              "priority": 0.11628,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "danger"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5002,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "danger",
+                "source": "carry_over",
+                "salience": 0.417535,
+                "carry_over_strength": 0.417535
+              }
+            ],
+            "suppressed_channels": [
+              "stress",
+              "social",
+              "temperature",
+              "food",
+              "food"
+            ],
+            "carry_over_contents": [
+              "danger"
+            ],
+            "carry_over_sources": [
+              {
+                "channel": "danger",
+                "age": 1,
+                "salience": 0.417535,
+                "carry_over_strength": 0.417535
+              }
+            ],
+            "broadcast_intensity": 0.458867,
+            "replacement_pressure": 0.28728,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.376808,
+                "rest": 0.18,
+                "exploit_shelter": 0.290696,
+                "forage": 0.17736,
+                "scan": 0.538888,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "hide"
+              ],
+              "evidence_action_hit": false
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "danger"
+              ],
+              "effective_threshold": 0.130852,
+              "priority": 0.216148,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.42615,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.286325,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.472666,
+                "rest": 0.18,
+                "exploit_shelter": 0.352676,
+                "forage": 0.108969,
+                "scan": 0.241222,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.193859,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 1.0,
+        "broadcast_to_action_latency": 0.0,
+        "broadcast_to_memory_alignment": 1.0,
+        "carry_over_tick_count": 1,
+        "persistence_evidence_hits": 1
+      }
+    ],
+    "no_persistence_workspace": [
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.464888,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3303,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.397594,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "forage",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.464994,
+                "rest": 0.1025,
+                "exploit_shelter": 0.325905,
+                "forage": 0.478639,
+                "scan": 0.030911,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.150998,
+              "priority": 0.102335,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "social",
+              "stress",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "social"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.521,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "social",
+                "source": "attention",
+                "salience": 0.258086,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "stress",
+              "temperature",
+              "danger",
+              "food"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.389543,
+            "replacement_pressure": 0.2502,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "forage",
+                "scan",
+                "seek_contact"
+              ],
+              "scores": {
+                "hide": 0.200495,
+                "rest": 0.18,
+                "exploit_shelter": 0.21,
+                "forage": 0.235,
+                "scan": 0.585,
+                "seek_contact": 0.417824,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "forage",
+                "scan",
+                "seek_contact"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "social"
+              ],
+              "effective_threshold": 0.12346,
+              "priority": 0.229873,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.394284,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.270392,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.456753,
+                "rest": 0.18,
+                "exploit_shelter": 0.34255,
+                "forage": 0.116202,
+                "scan": 0.247009,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.20196,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 0.0,
+        "broadcast_to_action_latency": 3.0,
+        "broadcast_to_memory_alignment": 0.0,
+        "carry_over_tick_count": 0,
+        "persistence_evidence_hits": 0
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.467349,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3312,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.399274,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "forage",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.466221,
+                "rest": 0.1025,
+                "exploit_shelter": 0.326686,
+                "forage": 0.478081,
+                "scan": 0.030465,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.150592,
+              "priority": 0.103408,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "social",
+              "stress",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "social"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5223,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "social",
+                "source": "attention",
+                "salience": 0.259349,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "stress",
+              "temperature",
+              "danger",
+              "food"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.390825,
+            "replacement_pressure": 0.2511,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "forage",
+                "scan",
+                "seek_contact"
+              ],
+              "scores": {
+                "hide": 0.200291,
+                "rest": 0.18,
+                "exploit_shelter": 0.21,
+                "forage": 0.235,
+                "scan": 0.585,
+                "seek_contact": 0.418721,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "forage",
+                "scan",
+                "seek_contact"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "social"
+              ],
+              "effective_threshold": 0.122998,
+              "priority": 0.231335,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.396721,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.27161,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.457973,
+                "rest": 0.18,
+                "exploit_shelter": 0.343326,
+                "forage": 0.115647,
+                "scan": 0.246565,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.201339,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 0.0,
+        "broadcast_to_action_latency": 3.0,
+        "broadcast_to_memory_alignment": 0.0,
+        "carry_over_tick_count": 0,
+        "persistence_evidence_hits": 0
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.517069,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3492,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.433134,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.490894,
+                "rest": 0.1025,
+                "exploit_shelter": 0.342387,
+                "forage": 0.466866,
+                "scan": 0.021493,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.142472,
+              "priority": 0.124861,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "stress"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5106,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "stress",
+                "source": "attention",
+                "salience": 0.2691,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "social",
+              "temperature",
+              "danger",
+              "food"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.38985,
+            "replacement_pressure": 0.248038,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.358388,
+                "rest": 0.310065,
+                "exploit_shelter": 0.21,
+                "forage": 0.126612,
+                "scan": 0.585,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "stress"
+              ],
+              "effective_threshold": 0.127156,
+              "priority": 0.227844,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.374876,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.260688,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.447016,
+                "rest": 0.18,
+                "exploit_shelter": 0.336353,
+                "forage": 0.120628,
+                "scan": 0.25055,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.206917,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 0.0,
+        "broadcast_to_action_latency": 3.0,
+        "broadcast_to_memory_alignment": 0.0,
+        "carry_over_tick_count": 0,
+        "persistence_evidence_hits": 0
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.46963,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3501,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.409865,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "forage",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.462448,
+                "rest": 0.1025,
+                "exploit_shelter": 0.324285,
+                "forage": 0.479796,
+                "scan": 0.031837,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.142066,
+              "priority": 0.116267,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "stress"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5119,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "stress",
+                "source": "attention",
+                "salience": 0.27,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "social",
+              "temperature",
+              "danger",
+              "food"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.39095,
+            "replacement_pressure": 0.249288,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.35875,
+                "rest": 0.3105,
+                "exploit_shelter": 0.21,
+                "forage": 0.12625,
+                "scan": 0.585,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "stress"
+              ],
+              "effective_threshold": 0.126694,
+              "priority": 0.229306,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.377294,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.261897,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.448231,
+                "rest": 0.18,
+                "exploit_shelter": 0.337126,
+                "forage": 0.120076,
+                "scan": 0.250108,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.206299,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 0.0,
+        "broadcast_to_action_latency": 3.0,
+        "broadcast_to_memory_alignment": 0.0,
+        "carry_over_tick_count": 0,
+        "persistence_evidence_hits": 0
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.494576,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.3411,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.417838,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.479758,
+                "rest": 0.1025,
+                "exploit_shelter": 0.335301,
+                "forage": 0.471928,
+                "scan": 0.025542,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.146126,
+              "priority": 0.115207,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "stress"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.4989,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "stress",
+                "source": "attention",
+                "salience": 0.261,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "social",
+              "temperature",
+              "danger",
+              "food"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.37995,
+            "replacement_pressure": 0.245672,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.355125,
+                "rest": 0.30615,
+                "exploit_shelter": 0.21,
+                "forage": 0.129875,
+                "scan": 0.585,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "stress"
+              ],
+              "effective_threshold": 0.131314,
+              "priority": 0.214686,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.423684,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.285092,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.471438,
+                "rest": 0.18,
+                "exploit_shelter": 0.351895,
+                "forage": 0.109527,
+                "scan": 0.241669,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.194484,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 0.0,
+        "broadcast_to_action_latency": 3.0,
+        "broadcast_to_memory_alignment": 0.0,
+        "carry_over_tick_count": 0,
+        "persistence_evidence_hits": 0
+      },
+      {
+        "trace": [
+          {
+            "tick": 1,
+            "attended_channels": [
+              "danger",
+              "food",
+              "temperature",
+              "novelty"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "food"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.497066,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "food",
+                "source": "attention",
+                "salience": 0.342,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "novelty",
+              "social",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.419533,
+            "replacement_pressure": 0.135,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "scores": {
+                "hide": 0.480993,
+                "rest": 0.1025,
+                "exploit_shelter": 0.336087,
+                "forage": 0.471367,
+                "scan": 0.025093,
+                "seek_contact": 0.08,
+                "thermoregulate": 0.05
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "food"
+              ],
+              "effective_threshold": 0.14572,
+              "priority": 0.11628,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          },
+          {
+            "tick": 2,
+            "attended_channels": [
+              "novelty",
+              "stress",
+              "social",
+              "temperature"
+            ],
+            "broadcast_channels": [
+              "novelty",
+              "stress"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.5002,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "stress",
+                "source": "attention",
+                "salience": 0.2619,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "social",
+              "temperature",
+              "danger",
+              "food"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.38105,
+            "replacement_pressure": 0.246931,
+            "policy": {
+              "chosen_action": "scan",
+              "target_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.355488,
+                "rest": 0.306585,
+                "exploit_shelter": 0.21,
+                "forage": 0.129512,
+                "scan": 0.585,
+                "seek_contact": 0.2,
+                "thermoregulate": 0.12
+              },
+              "evidence_actions": [
+                "forage",
+                "hide",
+                "rest",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": true,
+              "target_channels": [
+                "novelty",
+                "stress"
+              ],
+              "effective_threshold": 0.130852,
+              "priority": 0.216148,
+              "alignment": 1.0,
+              "carry_over_memory_hit": true
+            }
+          },
+          {
+            "tick": 3,
+            "attended_channels": [
+              "danger",
+              "novelty",
+              "temperature",
+              "social"
+            ],
+            "broadcast_channels": [
+              "danger",
+              "novelty"
+            ],
+            "broadcast_sources": [
+              {
+                "channel": "danger",
+                "source": "attention",
+                "salience": 0.42615,
+                "carry_over_strength": 0.0
+              },
+              {
+                "channel": "novelty",
+                "source": "attention",
+                "salience": 0.1465,
+                "carry_over_strength": 0.0
+              }
+            ],
+            "suppressed_channels": [
+              "temperature",
+              "social",
+              "food",
+              "stress"
+            ],
+            "carry_over_contents": [],
+            "carry_over_sources": [],
+            "broadcast_intensity": 0.286325,
+            "replacement_pressure": 0.126,
+            "policy": {
+              "chosen_action": "hide",
+              "target_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "scores": {
+                "hide": 0.472666,
+                "rest": 0.18,
+                "exploit_shelter": 0.352676,
+                "forage": 0.108969,
+                "scan": 0.241222,
+                "seek_contact": 0.12,
+                "thermoregulate": 0.15
+              },
+              "evidence_actions": [
+                "exploit_shelter",
+                "forage",
+                "hide",
+                "scan"
+              ],
+              "evidence_action_hit": true
+            },
+            "memory": {
+              "write_selected": false,
+              "target_channels": [
+                "danger",
+                "novelty"
+              ],
+              "effective_threshold": 0.193859,
+              "priority": 0.0,
+              "alignment": 0.0,
+              "carry_over_memory_hit": false
+            }
+          }
+        ],
+        "workspace_persistence_gain": 0.0,
+        "broadcast_to_action_latency": 3.0,
+        "broadcast_to_memory_alignment": 0.0,
+        "carry_over_tick_count": 0,
+        "persistence_evidence_hits": 0
+      }
+    ]
+  }
+}

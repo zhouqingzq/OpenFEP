@@ -13,6 +13,8 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Mapping
 
+from .workspace import GlobalWorkspaceState
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -355,6 +357,7 @@ class MetaCognitiveLayer:
     def review_self_consistency(
         self,
         assessment: Mapping[str, object],
+        workspace_state: GlobalWorkspaceState | None = None,
     ) -> SelfConsistencyReview:
         severity = str(assessment.get("severity_level", "none"))
         error = float(assessment.get("self_inconsistency_error", 0.0))
@@ -376,6 +379,27 @@ class MetaCognitiveLayer:
             pause_strength = 0.0
             rebias_strength = 0.0
             review_required = False
+        workspace_conflict_channels: list[str] = []
+        workspace_review_gain = 0.0
+        if workspace_state is not None:
+            workspace_conflict_channels = [
+                content.channel
+                for content in workspace_state.broadcast_contents
+                if content.channel in {"danger", "stress", "social", "conflict"}
+                and (content.salience >= 0.18 or abs(content.error_value) >= 0.12)
+            ]
+            workspace_review_gain = min(
+                0.30,
+                sum(
+                    min(0.18, content.salience + abs(content.error_value) * 0.50)
+                    for content in workspace_state.broadcast_contents
+                    if content.channel in workspace_conflict_channels
+                ),
+            )
+            if workspace_conflict_channels:
+                review_required = True
+                pause_strength = max(pause_strength, 0.20 + workspace_review_gain)
+                rebias_strength = max(rebias_strength, 0.10 + workspace_review_gain * 0.70)
         recommended_policy = str(assessment.get("repair_policy", ""))
         if not recommended_policy and review_required:
             recommended_policy = "metacognitive_review+policy_rebias"
@@ -383,7 +407,8 @@ class MetaCognitiveLayer:
             f"conflict_type={conflict_type}; "
             f"severity={severity}; "
             f"behavior={behavioral_classification}; "
-            f"error={error:.3f}"
+            f"error={error:.3f}; "
+            f"workspace_conflicts={','.join(workspace_conflict_channels) or 'none'}"
         )
         self.meta_beliefs["last_self_consistency_review"] = {
             "severity": severity,
@@ -392,11 +417,13 @@ class MetaCognitiveLayer:
             "error": round(error, 6),
             "review_required": review_required,
             "recommended_policy": recommended_policy,
+            "workspace_conflict_channels": list(workspace_conflict_channels),
+            "workspace_review_gain": round(workspace_review_gain, 6),
         }
         return SelfConsistencyReview(
-            pause_strength=round(pause_strength, 4),
+            pause_strength=round(min(1.0, pause_strength), 4),
             review_required=review_required,
-            rebias_strength=round(rebias_strength, 4),
+            rebias_strength=round(min(1.0, rebias_strength), 4),
             recommended_policy=recommended_policy,
             notes=notes,
         )

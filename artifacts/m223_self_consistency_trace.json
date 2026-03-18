@@ -156,7 +156,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -324,7 +324,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -602,7 +602,7 @@
         "policy": "reflective_pause+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "reflective_pause+policy_rebias",
@@ -993,7 +993,7 @@
         "policy": "social_repair+policy_rebias",
         "target_action": "hide",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "social_repair+policy_rebias",
@@ -1734,7 +1734,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -1902,7 +1902,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -2180,7 +2180,7 @@
         "policy": "reflective_pause+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "reflective_pause+policy_rebias",
@@ -2571,7 +2571,7 @@
         "policy": "social_repair+policy_rebias",
         "target_action": "hide",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "social_repair+policy_rebias",
@@ -3312,7 +3312,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -3480,7 +3480,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -3758,7 +3758,7 @@
         "policy": "reflective_pause+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "reflective_pause+policy_rebias",
@@ -4149,7 +4149,7 @@
         "policy": "social_repair+policy_rebias",
         "target_action": "hide",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "social_repair+policy_rebias",
@@ -4890,7 +4890,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -5058,7 +5058,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -5336,7 +5336,7 @@
         "policy": "reflective_pause+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "reflective_pause+policy_rebias",
@@ -5727,7 +5727,7 @@
         "policy": "social_repair+policy_rebias",
         "target_action": "hide",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "social_repair+policy_rebias",
@@ -6468,7 +6468,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -6636,7 +6636,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -6914,7 +6914,7 @@
         "policy": "reflective_pause+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "reflective_pause+policy_rebias",
@@ -7305,7 +7305,7 @@
         "policy": "social_repair+policy_rebias",
         "target_action": "hide",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "social_repair+policy_rebias",
@@ -8046,7 +8046,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -8214,7 +8214,7 @@
         "policy": "metacognitive_review+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=temptation_conflict; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "metacognitive_review+policy_rebias",
@@ -8492,7 +8492,7 @@
         "policy": "reflective_pause+policy_rebias",
         "target_action": "forage",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000",
+        "review_notes": "conflict_type=stress_drift; severity=high; behavior=self_conflict; error=1.000; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "reflective_pause+policy_rebias",
@@ -8883,7 +8883,7 @@
         "policy": "social_repair+policy_rebias",
         "target_action": "hide",
         "repaired_action": "exploit_shelter",
-        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359",
+        "review_notes": "conflict_type=social_contradiction; severity=medium; behavior=temporary_deviation; error=0.359; workspace_conflicts=none",
         "outcome": "repaired_and_recovered",
         "applied_policy_trace": {
           "policy": "social_repair+policy_rebias",

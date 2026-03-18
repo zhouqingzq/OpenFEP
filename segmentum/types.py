@@ -414,9 +414,14 @@ class DecisionDiagnostics:
     attention_selected_channels: list[str] = field(default_factory=list)
     attention_dropped_channels: list[str] = field(default_factory=list)
     attention_salience_scores: dict[str, float] = field(default_factory=dict)
+    workspace_latent_channels: list[str] = field(default_factory=list)
+    workspace_attended_channels: list[str] = field(default_factory=list)
     workspace_broadcast_channels: list[str] = field(default_factory=list)
     workspace_suppressed_channels: list[str] = field(default_factory=list)
+    workspace_carry_over_channels: list[str] = field(default_factory=list)
     workspace_broadcast_intensity: float = 0.0
+    workspace_persistence_horizon: int = 0
+    conscious_report_channels: list[str] = field(default_factory=list)
     current_commitments: list[str] = field(default_factory=list)
     relevant_commitments: list[str] = field(default_factory=list)
     commitment_focus: list[str] = field(default_factory=list)

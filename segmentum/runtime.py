@@ -487,6 +487,10 @@ class SegmentRuntime:
             persistence_error_count=self.metrics.persistence_error_count,
             should_sleep=self.agent.should_sleep(),
         )
+        maintenance_agenda = self._apply_workspace_maintenance_priority(
+            diagnostics,
+            maintenance_agenda,
+        )
         original_choice_name = diagnostics.chosen.choice
         if maintenance_agenda.interrupt_action:
             self._apply_maintenance_interrupt(diagnostics, maintenance_agenda)
@@ -943,6 +947,35 @@ class SegmentRuntime:
         }
         diagnostics.structured_explanation = details
 
+    def _apply_workspace_maintenance_priority(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> MaintenanceAgenda:
+        signal = self.agent.global_workspace.maintenance_signal(self.agent.last_workspace_state)
+        priority_gain = float(signal.get("priority_gain", 0.0))
+        active_tasks = list(agenda.active_tasks)
+        for task in signal.get("active_tasks", []):
+            if task not in active_tasks:
+                active_tasks.insert(0, str(task))
+        recommended_action = agenda.recommended_action
+        if str(signal.get("recommended_action", "")):
+            recommended_action = str(signal["recommended_action"])
+        updated = replace(
+            agenda,
+            active_tasks=tuple(active_tasks),
+            recommended_action=recommended_action,
+            policy_shift_strength=min(1.0, agenda.policy_shift_strength + priority_gain),
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["workspace_maintenance_priority"] = {
+            "priority_gain": round(priority_gain, 6),
+            "active_tasks": list(active_tasks),
+            "recommended_action": recommended_action,
+        }
+        diagnostics.structured_explanation = details
+        return updated
+
     def _apply_continuity_rebind_prior(self, diagnostics: DecisionDiagnostics) -> None:
         if self.continuity_rebind_ticks_remaining <= 0 or not self.restart_policy_anchors:
             return
@@ -1205,9 +1238,14 @@ class SegmentRuntime:
                 "attention_selected_channels": list(diagnostics.attention_selected_channels),
                 "attention_dropped_channels": list(diagnostics.attention_dropped_channels),
                 "attention_salience_scores": dict(diagnostics.attention_salience_scores),
+                "workspace_latent_channels": list(diagnostics.workspace_latent_channels),
+                "workspace_attended_channels": list(diagnostics.workspace_attended_channels),
                 "workspace_broadcast_channels": list(diagnostics.workspace_broadcast_channels),
                 "workspace_suppressed_channels": list(diagnostics.workspace_suppressed_channels),
+                "workspace_carry_over_channels": list(diagnostics.workspace_carry_over_channels),
                 "workspace_broadcast_intensity": diagnostics.workspace_broadcast_intensity,
+                "workspace_persistence_horizon": diagnostics.workspace_persistence_horizon,
+                "conscious_report_channels": list(diagnostics.conscious_report_channels),
                 "current_commitments": list(diagnostics.current_commitments),
                 "relevant_commitments": list(diagnostics.relevant_commitments),
                 "commitment_focus": list(diagnostics.commitment_focus),

@@ -1,0 +1,1177 @@
+{
+  "milestone_id": "M2.24",
+  "schema_version": "m224_v2",
+  "generated_at": "2026-03-18T04:33:29+00:00",
+  "codebase_version": "d67e367b88b6f2516db1cbe2f84a688a9939562d",
+  "seed_set": [
+    224,
+    243,
+    321,
+    340,
+    418,
+    437
+  ],
+  "protocol": "report_leakage_protocol",
+  "variant_breakdown": {
+    "full_workspace": [
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      }
+    ],
+    "no_workspace": [
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.0,
+        "report_leakage_rate": 1.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.0
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.0,
+        "report_leakage_rate": 1.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.0
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.0,
+        "report_leakage_rate": 1.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.0
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.0,
+        "report_leakage_rate": 1.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.0
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.0,
+        "report_leakage_rate": 1.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.0
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [],
+        "suppressed_channels": [
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.0,
+        "report_leakage_rate": 1.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.0
+      }
+    ],
+    "report_only_workspace": [
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      }
+    ],
+    "policy_only_workspace": [
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      }
+    ],
+    "memory_only_workspace": [
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      },
+      {
+        "channels": [
+          "danger",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.5,
+        "report_leakage_rate": 0.5,
+        "suppressed_content_intrusion_rate": 0.5,
+        "broadcast_to_report_alignment": 0.5
+      }
+    ],
+    "no_persistence_workspace": [
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty"
+        ],
+        "broadcast_channels": [
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.92,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.92
+      }
+    ],
+    "high_capacity_workspace": [
+      {
+        "channels": [
+          "danger",
+          "novelty",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "conflict",
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 1.0,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 1.0
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "conflict",
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 1.0,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 1.0
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "conflict",
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 1.0,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 1.0
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "conflict",
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 1.0,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 1.0
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "conflict",
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 1.0,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 1.0
+      },
+      {
+        "channels": [
+          "danger",
+          "novelty",
+          "conflict"
+        ],
+        "broadcast_channels": [
+          "conflict",
+          "danger",
+          "novelty"
+        ],
+        "suppressed_channels": [
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 1.0,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 1.0
+      }
+    ],
+    "low_capacity_workspace": [
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.82,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.82
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.82,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.82
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.82,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.82
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.82,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.82
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.82,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.82
+      },
+      {
+        "channels": [
+          "danger"
+        ],
+        "broadcast_channels": [
+          "danger"
+        ],
+        "suppressed_channels": [
+          "novelty",
+          "conflict",
+          "stress",
+          "social",
+          "temperature",
+          "food"
+        ],
+        "report_fidelity": 0.82,
+        "report_leakage_rate": 0.0,
+        "suppressed_content_intrusion_rate": 0.0,
+        "broadcast_to_report_alignment": 0.82
+      }
+    ]
+  },
+  "semantic_runtime_checks": {
+    "controlled_runtime_probe": {
+      "semantic_leakage_free": true,
+      "matched_aliases": {}
+    },
+    "open_world_runtime_probe": [
+      {
+        "cycle": 1,
+        "choice": "hide",
+        "workspace_bias": 0.05117,
+        "workspace_broadcast_channels": [
+          "novelty",
+          "danger"
+        ],
+        "workspace_suppressed_channels": [
+          "food",
+          "social",
+          "temperature",
+          "shelter"
+        ],
+        "conscious_report": {
+          "text": "Consciously accessible now: novelty, danger.",
+          "channels": [
+            "novelty",
+            "danger"
+          ],
+          "carry_over_channels": [],
+          "suppressed_channels": [
+            "food",
+            "social",
+            "temperature",
+            "shelter"
+          ],
+          "leakage_free": true
+        },
+        "semantic_report": {
+          "semantic_leakage_free": true,
+          "matched_aliases": {}
+        },
+        "workspace_maintenance_priority": {
+          "priority_gain": 0.279224,
+          "active_tasks": [
+            "resource_guard"
+          ],
+          "recommended_action": "hide"
+        }
+      },
+      {
+        "cycle": 2,
+        "choice": "exploit_shelter",
+        "workspace_bias": 0.045889,
+        "workspace_broadcast_channels": [
+          "novelty",
+          "danger"
+        ],
+        "workspace_suppressed_channels": [
+          "temperature",
+          "shelter",
+          "food",
+          "social"
+        ],
+        "conscious_report": {
+          "text": "Consciously accessible now: novelty, danger.",
+          "channels": [
+            "novelty",
+            "danger"
+          ],
+          "carry_over_channels": [],
+          "suppressed_channels": [
+            "temperature",
+            "shelter",
+            "food",
+            "social"
+          ],
+          "leakage_free": true
+        },
+        "semantic_report": {
+          "semantic_leakage_free": true,
+          "matched_aliases": {}
+        },
+        "workspace_maintenance_priority": {
+          "priority_gain": 0.192622,
+          "active_tasks": [
+            "resource_guard"
+          ],
+          "recommended_action": "hide"
+        }
+      },
+      {
+        "cycle": 3,
+        "choice": "hide",
+        "workspace_bias": 0.026957,
+        "workspace_broadcast_channels": [
+          "novelty",
+          "shelter"
+        ],
+        "workspace_suppressed_channels": [
+          "danger",
+          "food",
+          "social",
+          "temperature"
+        ],
+        "conscious_report": {
+          "text": "Consciously accessible now: novelty, shelter.",
+          "channels": [
+            "novelty",
+            "shelter"
+          ],
+          "carry_over_channels": [],
+          "suppressed_channels": [
+            "danger",
+            "food",
+            "social",
+            "temperature"
+          ],
+          "leakage_free": true
+        },
+        "semantic_report": {
+          "semantic_leakage_free": true,
+          "matched_aliases": {}
+        },
+        "workspace_maintenance_priority": {
+          "priority_gain": 0.253224,
+          "active_tasks": [
+            "shelter_security"
+          ],
+          "recommended_action": "exploit_shelter"
+        }
+      },
+      {
+        "cycle": 4,
+        "choice": "hide",
+        "workspace_bias": 0.01872,
+        "workspace_broadcast_channels": [
+          "novelty",
+          "shelter"
+        ],
+        "workspace_suppressed_channels": [
+          "danger",
+          "food",
+          "social",
+          "temperature"
+        ],
+        "conscious_report": {
+          "text": "Consciously accessible now: novelty, shelter.",
+          "channels": [
+            "novelty",
+            "shelter"
+          ],
+          "carry_over_channels": [],
+          "suppressed_channels": [
+            "danger",
+            "food",
+            "social",
+            "temperature"
+          ],
+          "leakage_free": true
+        },
+        "semantic_report": {
+          "semantic_leakage_free": true,
+          "matched_aliases": {}
+        },
+        "workspace_maintenance_priority": {
+          "priority_gain": 0.244597,
+          "active_tasks": [
+            "shelter_security"
+          ],
+          "recommended_action": "exploit_shelter"
+        }
+      }
+    ]
+  }
+}
