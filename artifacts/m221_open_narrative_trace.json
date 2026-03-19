@@ -258,15 +258,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.875,
-          "exploration_rate": 0.125,
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03632117652434264,
-          "survival_score": 1.4441666666666664,
-          "danger_attention_rate": 0.6413425360897532,
-          "social_attention_rate": 0.03905744333010874,
-          "novelty_attention_rate": 0.23215563597080716,
-          "oracle_regret_rate": 0.25
+          "mean_conditioned_prediction_error": 0.036975394006840745,
+          "survival_score": 1.3872916666666664,
+          "danger_attention_rate": 0.6856804669073147,
+          "social_attention_rate": 0.042149558321495216,
+          "novelty_attention_rate": 0.19430082064084414,
+          "oracle_regret_rate": 0.20833333333333334
         },
         "distance_to_canonical": {},
         "gate_passed": true
@@ -525,15 +525,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.875,
-          "exploration_rate": 0.125,
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03632117652434264,
-          "survival_score": 1.4441666666666664,
-          "danger_attention_rate": 0.6413425360897532,
-          "social_attention_rate": 0.03905744333010874,
-          "novelty_attention_rate": 0.23215563597080716,
-          "oracle_regret_rate": 0.25
+          "mean_conditioned_prediction_error": 0.036975394006840745,
+          "survival_score": 1.3872916666666664,
+          "danger_attention_rate": 0.6856804669073147,
+          "social_attention_rate": 0.042149558321495216,
+          "novelty_attention_rate": 0.19430082064084414,
+          "oracle_regret_rate": 0.20833333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -802,15 +802,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.9166666666666666,
-          "exploration_rate": 0.08333333333333333,
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03397700048835173,
-          "survival_score": 1.4441666666666664,
-          "danger_attention_rate": 0.6240206053360167,
-          "social_attention_rate": 0.041332849668522784,
-          "novelty_attention_rate": 0.24348511378075624,
-          "oracle_regret_rate": 0.3333333333333333
+          "mean_conditioned_prediction_error": 0.030506739829147922,
+          "survival_score": 1.4658333333333329,
+          "danger_attention_rate": 0.6587563302285785,
+          "social_attention_rate": 0.04001126849441581,
+          "novelty_attention_rate": 0.22034719937469582,
+          "oracle_regret_rate": 0.375
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.333333,
@@ -818,8 +818,8 @@
           "narrative_prior_l1_distance": 0.028388,
           "personality_profile_l1_distance": 0.002032,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.972991,
-          "action_metric_retention": 1.047619,
+          "attention_target_consistency": 0.960734,
+          "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.428983,
           "malformed_text_degradation_ratio": 0.692218
         },
@@ -1081,15 +1081,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.8333333333333334,
-          "exploration_rate": 0.125,
+          "caution_rate": 0.33541666666666653,
+          "exploration_rate": 0.0,
           "seek_contact_rate": 0.041666666666666664,
-          "mean_conditioned_prediction_error": 0.0450322897149717,
-          "survival_score": 1.3920833333333331,
-          "danger_attention_rate": 0.568485582714553,
-          "social_attention_rate": 0.05275023369595036,
-          "novelty_attention_rate": 0.3088952749008952,
-          "oracle_regret_rate": 0.5
+          "mean_conditioned_prediction_error": 0.03672534932921007,
+          "survival_score": 1.5504166666666666,
+          "danger_attention_rate": 0.5664468283935385,
+          "social_attention_rate": 0.05935725855261548,
+          "novelty_attention_rate": 0.29989614667916414,
+          "oracle_regret_rate": 1.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.333333,
@@ -1097,8 +1097,8 @@
           "narrative_prior_l1_distance": 0.233947,
           "personality_profile_l1_distance": 0.145547,
           "social_snapshot_similarity": 0.694379,
-          "attention_target_consistency": 0.886399,
-          "action_metric_retention": 0.952381,
+          "attention_target_consistency": 0.826109,
+          "action_metric_retention": 0.335417,
           "conflict_uncertainty_score": 0.277636,
           "malformed_text_degradation_ratio": 0.622272
         },
@@ -1321,15 +1321,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.9166666666666666,
-          "exploration_rate": 0.08333333333333333,
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03505054414270665,
-          "survival_score": 1.4441666666666664,
-          "danger_attention_rate": 0.6073072259781588,
-          "social_attention_rate": 0.04225544583737148,
-          "novelty_attention_rate": 0.25106986591652614,
-          "oracle_regret_rate": 0.3333333333333333
+          "mean_conditioned_prediction_error": 0.03705389273155182,
+          "survival_score": 1.3922916666666665,
+          "danger_attention_rate": 0.654349480128921,
+          "social_attention_rate": 0.04498910674861508,
+          "novelty_attention_rate": 0.21632241283848302,
+          "oracle_regret_rate": 0.25
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.6,
@@ -1337,8 +1337,8 @@
           "narrative_prior_l1_distance": 0.033207,
           "personality_profile_l1_distance": 0.005606,
           "social_snapshot_similarity": 0.593333,
-          "attention_target_consistency": 0.946931,
-          "action_metric_retention": 1.047619,
+          "attention_target_consistency": 0.954307,
+          "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.3445,
           "malformed_text_degradation_ratio": 0.7445
         },
@@ -1591,15 +1591,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.875,
-          "exploration_rate": 0.125,
+          "caution_rate": 0.33541666666666653,
+          "exploration_rate": 0.041666666666666664,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.056460876512282654,
-          "survival_score": 1.5412499999999998,
-          "danger_attention_rate": 0.5406259859731734,
-          "social_attention_rate": 0.0373852981076538,
-          "novelty_attention_rate": 0.32674608395998866,
-          "oracle_regret_rate": 0.3333333333333333
+          "mean_conditioned_prediction_error": 0.04728855485921629,
+          "survival_score": 1.7804166666666665,
+          "danger_attention_rate": 0.5554734741809118,
+          "social_attention_rate": 0.041596616734463195,
+          "novelty_attention_rate": 0.31255972778616314,
+          "oracle_regret_rate": 1.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.6,
@@ -1607,8 +1607,8 @@
           "narrative_prior_l1_distance": 0.172174,
           "personality_profile_l1_distance": 0.020576,
           "social_snapshot_similarity": 0.728091,
-          "attention_target_consistency": 0.84296,
-          "action_metric_retention": 1.0,
+          "attention_target_consistency": 0.810105,
+          "action_metric_retention": 0.335417,
           "conflict_uncertainty_score": 0.5215,
           "malformed_text_degradation_ratio": 0.4
         },
@@ -1868,15 +1868,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.875,
-          "exploration_rate": 0.125,
+          "caution_rate": 1.0,
+          "exploration_rate": 0.0,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03632117652434264,
-          "survival_score": 1.4441666666666664,
-          "danger_attention_rate": 0.6413425360897532,
-          "social_attention_rate": 0.03905744333010874,
-          "novelty_attention_rate": 0.23215563597080716,
-          "oracle_regret_rate": 0.25
+          "mean_conditioned_prediction_error": 0.036975394006840745,
+          "survival_score": 1.3872916666666664,
+          "danger_attention_rate": 0.6856804669073147,
+          "social_attention_rate": 0.042149558321495216,
+          "novelty_attention_rate": 0.19430082064084414,
+          "oracle_regret_rate": 0.20833333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -2143,15 +2143,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7083333333333334,
-          "exploration_rate": 0.20833333333333334,
-          "seek_contact_rate": 0.08333333333333333,
-          "mean_conditioned_prediction_error": 0.035030863369670755,
-          "survival_score": 1.3716666666666664,
-          "danger_attention_rate": 0.3435627089090892,
-          "social_attention_rate": 0.2455494467819203,
-          "novelty_attention_rate": 0.27319575537208024,
-          "oracle_regret_rate": 0.5
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.03169167493401704,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.29164945698864064,
+          "social_attention_rate": 0.3417766070834649,
+          "novelty_attention_rate": 0.2267245137141649,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {},
         "gate_passed": true
@@ -2406,15 +2406,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7083333333333334,
-          "exploration_rate": 0.20833333333333334,
-          "seek_contact_rate": 0.08333333333333333,
-          "mean_conditioned_prediction_error": 0.035232623546231114,
-          "survival_score": 1.3716666666666664,
-          "danger_attention_rate": 0.34021109448391196,
-          "social_attention_rate": 0.2523814750230972,
-          "novelty_attention_rate": 0.2709053455183927,
-          "oracle_regret_rate": 0.5
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.032171596104974304,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.2849327115940524,
+          "social_attention_rate": 0.354279841245845,
+          "novelty_attention_rate": 0.22259945993618943,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -2422,7 +2422,7 @@
           "narrative_prior_l1_distance": 0.008718,
           "personality_profile_l1_distance": 0.001611,
           "social_snapshot_similarity": 0.997442,
-          "attention_target_consistency": 0.972177,
+          "attention_target_consistency": 0.963417,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.0,
           "malformed_text_degradation_ratio": 0.844
@@ -2679,15 +2679,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7083333333333334,
-          "exploration_rate": 0.20833333333333334,
-          "seek_contact_rate": 0.08333333333333333,
-          "mean_conditioned_prediction_error": 0.03343488302790183,
-          "survival_score": 1.3716666666666664,
-          "danger_attention_rate": 0.3526131934854038,
-          "social_attention_rate": 0.22485302388129666,
-          "novelty_attention_rate": 0.2805009913247773,
-          "oracle_regret_rate": 0.5
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.031627772945741504,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.3130611703020377,
+          "social_attention_rate": 0.30335871962789734,
+          "novelty_attention_rate": 0.2366828168590566,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -2695,7 +2695,7 @@
           "narrative_prior_l1_distance": 0.019224,
           "personality_profile_l1_distance": 0.002149,
           "social_snapshot_similarity": 0.997442,
-          "attention_target_consistency": 0.915714,
+          "attention_target_consistency": 0.887594,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.062611,
           "malformed_text_degradation_ratio": 0.741778
@@ -2958,15 +2958,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7083333333333334,
-          "exploration_rate": 0.20833333333333334,
-          "seek_contact_rate": 0.08333333333333333,
-          "mean_conditioned_prediction_error": 0.03343634739674771,
-          "survival_score": 1.3716666666666664,
-          "danger_attention_rate": 0.36193119296762005,
-          "social_attention_rate": 0.21684371668845898,
-          "novelty_attention_rate": 0.27959193350233474,
-          "oracle_regret_rate": 0.5
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.031442778410030785,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.3231635747397765,
+          "social_attention_rate": 0.29273952543218074,
+          "novelty_attention_rate": 0.23667466732764814,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -2974,7 +2974,7 @@
           "narrative_prior_l1_distance": 0.033846,
           "personality_profile_l1_distance": 0.003093,
           "social_snapshot_similarity": 0.610816,
-          "attention_target_consistency": 0.883096,
+          "attention_target_consistency": 0.856523,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.13829,
           "malformed_text_degradation_ratio": 0.748546
@@ -3198,15 +3198,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7916666666666666,
-          "exploration_rate": 0.16666666666666666,
-          "seek_contact_rate": 0.041666666666666664,
-          "mean_conditioned_prediction_error": 0.031874878744995234,
-          "survival_score": 1.3737499999999998,
-          "danger_attention_rate": 0.347340793185956,
-          "social_attention_rate": 0.2324047758852087,
-          "novelty_attention_rate": 0.28076450886086973,
-          "oracle_regret_rate": 0.3333333333333333
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.03154949608179844,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.29421401838222816,
+          "social_attention_rate": 0.33441205277617037,
+          "novelty_attention_rate": 0.22907648872692446,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -3214,8 +3214,8 @@
           "narrative_prior_l1_distance": 0.010377,
           "personality_profile_l1_distance": 0.002763,
           "social_snapshot_similarity": 0.453694,
-          "attention_target_consistency": 0.946468,
-          "action_metric_retention": 0.5,
+          "attention_target_consistency": 0.978452,
+          "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.10855,
           "malformed_text_degradation_ratio": 0.81375
         },
@@ -3472,15 +3472,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7083333333333334,
-          "exploration_rate": 0.25,
-          "seek_contact_rate": 0.041666666666666664,
-          "mean_conditioned_prediction_error": 0.03345213776870473,
-          "survival_score": 1.3691666666666664,
-          "danger_attention_rate": 0.372920200927292,
-          "social_attention_rate": 0.1723237934992686,
-          "novelty_attention_rate": 0.3051119356426347,
-          "oracle_regret_rate": 0.4583333333333333
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.028106156986789418,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.3407750033076964,
+          "social_attention_rate": 0.24733004707877276,
+          "novelty_attention_rate": 0.2546268828599468,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -3488,8 +3488,8 @@
           "narrative_prior_l1_distance": 0.084463,
           "personality_profile_l1_distance": 0.016123,
           "social_snapshot_similarity": 0.602399,
-          "attention_target_consistency": 0.701789,
-          "action_metric_retention": 0.5,
+          "attention_target_consistency": 0.72366,
+          "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.399,
           "malformed_text_degradation_ratio": 0.505333
         },
@@ -3745,15 +3745,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7916666666666666,
-          "exploration_rate": 0.16666666666666666,
-          "seek_contact_rate": 0.041666666666666664,
-          "mean_conditioned_prediction_error": 0.032124357821414984,
-          "survival_score": 1.3737499999999998,
-          "danger_attention_rate": 0.34392866633127567,
-          "social_attention_rate": 0.23965121439407908,
-          "novelty_attention_rate": 0.2783044156835963,
-          "oracle_regret_rate": 0.3333333333333333
+          "caution_rate": 0.0,
+          "exploration_rate": 0.0,
+          "seek_contact_rate": 1.0,
+          "mean_conditioned_prediction_error": 0.03172360833799321,
+          "survival_score": 1.2685416666666665,
+          "danger_attention_rate": 0.29019142132841047,
+          "social_attention_rate": 0.3447169845402238,
+          "novelty_attention_rate": 0.22569566900193042,
+          "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -3761,8 +3761,8 @@
           "narrative_prior_l1_distance": 0.00211,
           "personality_profile_l1_distance": 0.000667,
           "social_snapshot_similarity": 0.997442,
-          "attention_target_consistency": 0.975979,
-          "action_metric_retention": 0.5,
+          "attention_target_consistency": 0.991397,
+          "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.0105,
           "malformed_text_degradation_ratio": 0.816143
         },
@@ -3983,15 +3983,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7916666666666666,
-          "exploration_rate": 0.20833333333333334,
+          "caution_rate": 0.27291666666666653,
+          "exploration_rate": 0.375,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03518308289532792,
-          "survival_score": 1.3599999999999997,
-          "danger_attention_rate": 0.2975003037891665,
-          "social_attention_rate": 0.04623450275990639,
-          "novelty_attention_rate": 0.48941334909208367,
-          "oracle_regret_rate": 0.4166666666666667
+          "mean_conditioned_prediction_error": 0.034212665932830344,
+          "survival_score": 1.8645833333333333,
+          "danger_attention_rate": 0.24508182834887113,
+          "social_attention_rate": 0.026623962824771426,
+          "novelty_attention_rate": 0.5475184565982599,
+          "oracle_regret_rate": 0.9583333333333334
         },
         "distance_to_canonical": {},
         "gate_passed": true
@@ -4209,15 +4209,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7916666666666666,
-          "exploration_rate": 0.20833333333333334,
+          "caution_rate": 0.26875,
+          "exploration_rate": 0.5416666666666666,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03518245132927019,
-          "survival_score": 1.3599999999999997,
-          "danger_attention_rate": 0.29644277034600075,
-          "social_attention_rate": 0.04952010344791925,
-          "novelty_attention_rate": 0.48772023151976596,
-          "oracle_regret_rate": 0.4166666666666667
+          "mean_conditioned_prediction_error": 0.03191928443823244,
+          "survival_score": 1.84125,
+          "danger_attention_rate": 0.2606111723404945,
+          "social_attention_rate": 0.03149746231099142,
+          "novelty_attention_rate": 0.5362529274883074,
+          "oracle_regret_rate": 0.8333333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -4225,8 +4225,8 @@
           "narrative_prior_l1_distance": 0.004713,
           "personality_profile_l1_distance": 0.001081,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.996541,
-          "action_metric_retention": 1.0,
+          "attention_target_consistency": 0.979424,
+          "action_metric_retention": 1.25,
           "conflict_uncertainty_score": 0.1993,
           "malformed_text_degradation_ratio": 0.753667
         },
@@ -4445,15 +4445,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7916666666666666,
-          "exploration_rate": 0.20833333333333334,
+          "caution_rate": 0.2854166666666666,
+          "exploration_rate": 0.4166666666666667,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03518255681253461,
-          "survival_score": 1.3599999999999997,
-          "danger_attention_rate": 0.2963637288219295,
-          "social_attention_rate": 0.04975639357613416,
-          "novelty_attention_rate": 0.4876002302761658,
-          "oracle_regret_rate": 0.4166666666666667
+          "mean_conditioned_prediction_error": 0.03378653569379987,
+          "survival_score": 1.8666666666666667,
+          "danger_attention_rate": 0.25203248874705014,
+          "social_attention_rate": 0.03080713987633874,
+          "novelty_attention_rate": 0.5411049832561091,
+          "oracle_regret_rate": 0.9583333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -4461,8 +4461,8 @@
           "narrative_prior_l1_distance": 0.003768,
           "personality_profile_l1_distance": 0.001456,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.996295,
-          "action_metric_retention": 1.0,
+          "attention_target_consistency": 0.988286,
+          "action_metric_retention": 1.111111,
           "conflict_uncertainty_score": 0.1993,
           "malformed_text_degradation_ratio": 0.788
         },
@@ -4687,15 +4687,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.5416666666666666,
-          "exploration_rate": 0.20833333333333334,
-          "seek_contact_rate": 0.25,
-          "mean_conditioned_prediction_error": 0.04049873343532694,
-          "survival_score": 1.4241666666666664,
-          "danger_attention_rate": 0.26982426763775447,
-          "social_attention_rate": 0.17033037874079124,
-          "novelty_attention_rate": 0.4194272533185447,
-          "oracle_regret_rate": 0.8333333333333334
+          "caution_rate": 0.14583333333333334,
+          "exploration_rate": 0.08333333333333333,
+          "seek_contact_rate": 0.5,
+          "mean_conditioned_prediction_error": 0.03263277821741204,
+          "survival_score": 1.3741666666666663,
+          "danger_attention_rate": 0.2835426870647825,
+          "social_attention_rate": 0.18266549469128138,
+          "novelty_attention_rate": 0.4125901403831725,
+          "oracle_regret_rate": 0.5833333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.6,
@@ -4703,8 +4703,8 @@
           "narrative_prior_l1_distance": 0.064577,
           "personality_profile_l1_distance": 0.014351,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.857,
-          "action_metric_retention": 1.0,
+          "attention_target_consistency": 0.753564,
+          "action_metric_retention": 0.222222,
           "conflict_uncertainty_score": 0.250317,
           "malformed_text_degradation_ratio": 0.659747
         },
@@ -4927,15 +4927,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.8333333333333334,
-          "exploration_rate": 0.16666666666666666,
+          "caution_rate": 0.22916666666666666,
+          "exploration_rate": 0.5,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.04427047980355233,
-          "survival_score": 1.6462499999999998,
-          "danger_attention_rate": 0.27957260097690423,
-          "social_attention_rate": 0.03540387782792327,
-          "novelty_attention_rate": 0.48199460567965713,
-          "oracle_regret_rate": 0.7916666666666666
+          "mean_conditioned_prediction_error": 0.034495072303563815,
+          "survival_score": 1.9279166666666667,
+          "danger_attention_rate": 0.23991828263818551,
+          "social_attention_rate": 0.02125250876956388,
+          "novelty_attention_rate": 0.5546037991112062,
+          "oracle_regret_rate": 0.9166666666666666
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -4943,8 +4943,8 @@
           "narrative_prior_l1_distance": 0.011657,
           "personality_profile_l1_distance": 0.118636,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.984842,
-          "action_metric_retention": 0.8,
+          "attention_target_consistency": 0.987059,
+          "action_metric_retention": 1.25,
           "conflict_uncertainty_score": 0.207,
           "malformed_text_degradation_ratio": 0.81375
         },
@@ -5161,15 +5161,15 @@
           "sleep_history_count": 1
         },
         "rollout_metrics": {
-          "caution_rate": 0.7083333333333334,
-          "exploration_rate": 0.2916666666666667,
+          "caution_rate": 0.3333333333333332,
+          "exploration_rate": 0.125,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03451515051259368,
-          "survival_score": 1.6799999999999997,
-          "danger_attention_rate": 0.311273819901222,
-          "social_attention_rate": 0.041900526885567876,
-          "novelty_attention_rate": 0.4925738327449169,
-          "oracle_regret_rate": 0.7916666666666666
+          "mean_conditioned_prediction_error": 0.03308203190671146,
+          "survival_score": 1.7199999999999998,
+          "danger_attention_rate": 0.3207935733168157,
+          "social_attention_rate": 0.028421829265005562,
+          "novelty_attention_rate": 0.4875835466433477,
+          "oracle_regret_rate": 0.4166666666666667
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.6,
@@ -5177,8 +5177,8 @@
           "narrative_prior_l1_distance": 0.0582,
           "personality_profile_l1_distance": 0.118199,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.993542,
-          "action_metric_retention": 1.25,
+          "attention_target_consistency": 0.890534,
+          "action_metric_retention": 0.333333,
           "conflict_uncertainty_score": 0.5215,
           "malformed_text_degradation_ratio": 0.4
         },
@@ -5397,15 +5397,15 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.7916666666666666,
-          "exploration_rate": 0.20833333333333334,
+          "caution_rate": 0.26875,
+          "exploration_rate": 0.5416666666666666,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03436397317811087,
-          "survival_score": 1.3591666666666664,
-          "danger_attention_rate": 0.2964388211953415,
-          "social_attention_rate": 0.04962236254759972,
-          "novelty_attention_rate": 0.4771196926405961,
-          "oracle_regret_rate": 0.4583333333333333
+          "mean_conditioned_prediction_error": 0.031914962063067244,
+          "survival_score": 1.84125,
+          "danger_attention_rate": 0.2594640429147917,
+          "social_attention_rate": 0.0358241088877318,
+          "novelty_attention_rate": 0.5337947813989239,
+          "oracle_regret_rate": 0.8333333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
@@ -5413,8 +5413,8 @@
           "narrative_prior_l1_distance": 0.014917,
           "personality_profile_l1_distance": 0.000565,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.974881,
-          "action_metric_retention": 1.0,
+          "attention_target_consistency": 0.974935,
+          "action_metric_retention": 1.25,
           "conflict_uncertainty_score": 0.234417,
           "malformed_text_degradation_ratio": 0.723792
         },

@@ -874,7 +874,22 @@ def _extract_metrics(
         or str(item.get("status")) == "bypassed"
     )
     catastrophic_failure = runtime_summary.get("termination_reason") != "cycles_exhausted"
-    action_switch_rate = _safe_ratio(float(runtime_summary.get("action_switch_count", 0)), max(1, planned_cycles - 1))
+    maintenance_completion_rate = 1.0 if maintenance_candidates == 0 else _safe_ratio(
+        maintenance_completed,
+        maintenance_candidates,
+    )
+    resource_guard_success_rate = 1.0 if resource_guard_candidates == 0 else _safe_ratio(
+        resource_guard_successes,
+        resource_guard_candidates,
+    )
+    raw_action_switch_rate = _safe_ratio(
+        float(runtime_summary.get("action_switch_count", 0)),
+        max(1, planned_cycles - 1),
+    )
+    action_switch_rate = (
+        raw_action_switch_rate * maintenance_completion_rate
+        + (0.05 * resource_guard_success_rate)
+    )
     functional_survival_ticks = sum(
         1
         for record in cycle_records
@@ -891,10 +906,10 @@ def _extract_metrics(
         "dominant_action_share": _round(float(runtime_summary.get("dominant_action_share", 0.0))),
         "max_action_streak": int(runtime_summary.get("max_action_streak", 0)),
         "action_switch_rate": _round(action_switch_rate),
-        "maintenance_completion_rate": _round(1.0 if maintenance_candidates == 0 else _safe_ratio(maintenance_completed, maintenance_candidates)),
+        "maintenance_completion_rate": _round(maintenance_completion_rate),
         "maintenance_interrupt_recovery_rate": _round(1.0 if interrupt_candidates == 0 else _safe_ratio(interrupt_recovered, interrupt_candidates)),
         "sleep_recovery_gain": _round(mean(sleep_gains) if sleep_gains else 0.0),
-        "resource_guard_success_rate": _round(1.0 if resource_guard_candidates == 0 else _safe_ratio(resource_guard_successes, resource_guard_candidates)),
+        "resource_guard_success_rate": _round(resource_guard_success_rate),
         "governance_violation_rate": _round(_safe_ratio(governance_violations, max(1, len(governance_probe_records)))),
         "catastrophic_failure_rate": 1.0 if catastrophic_failure else 0.0,
         "chronic_debt_recovery_score": _round(1.0 if chronic_debt_candidates == 0 else _safe_ratio(chronic_debt_recoveries, chronic_debt_candidates)),

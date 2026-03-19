@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-17T13:23:53+00:00",
+  "generated_at": "2026-03-18T14:44:45+00:00",
   "seed_set": [
     221,
     240,
@@ -114,12 +114,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9780405,
-            "std": 0.0038721753898809676
+            "mean": 0.962502,
+            "std": 0.0030768391789843938
           },
           "action_metric_retention": {
-            "mean": 0.96627,
-            "std": 0.052080800089860387
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.428983,
@@ -155,12 +155,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8911603333333333,
-            "std": 0.005603521918301797
+            "mean": 0.8252925,
+            "std": 0.007191796547687745
           },
           "action_metric_retention": {
-            "mean": 0.8992605,
-            "std": 0.03708786490551864
+            "mean": 0.335417,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.277636,
@@ -196,12 +196,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9591668333333333,
-            "std": 0.0064365874347790605
+            "mean": 0.9537465,
+            "std": 0.0022745485083125066
           },
           "action_metric_retention": {
-            "mean": 0.9586941666666666,
-            "std": 0.0498829657779643
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.3445,
@@ -237,12 +237,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8589155,
-            "std": 0.009807297601786119
+            "mean": 0.8076490000000001,
+            "std": 0.0041451418552324645
           },
           "action_metric_retention": {
-            "mean": 0.9109846666666667,
-            "std": 0.12380316149526319
+            "mean": 0.39166683333333335,
+            "std": 0.11848157869814849
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -321,12 +321,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.96252,
-            "std": 0.016896949468271867
+            "mean": 0.962946,
+            "std": 0.0009807837002452204
           },
           "action_metric_retention": {
-            "mean": 1.0833333333333333,
-            "std": 0.11785113019775792
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.0,
@@ -362,12 +362,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8964865,
-            "std": 0.03567067533119236
+            "mean": 0.8939995000000001,
+            "std": 0.003578745578644371
           },
           "action_metric_retention": {
-            "mean": 0.8333333333333334,
-            "std": 0.2545876113480169
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.062611,
@@ -403,12 +403,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8879693333333333,
-            "std": 0.021030489054914725
+            "mean": 0.8662315,
+            "std": 0.005770989682599219
           },
           "action_metric_retention": {
-            "mean": 0.9444445,
-            "std": 0.12422587452398956
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.13829,
@@ -444,12 +444,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9669793333333333,
-            "std": 0.014840274724171687
+            "mean": 0.9798973333333334,
+            "std": 0.0007800772753744037
           },
           "action_metric_retention": {
-            "mean": 0.9166666666666666,
-            "std": 0.18633899812498247
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.10855,
@@ -485,12 +485,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7113128333333333,
-            "std": 0.055201306051628485
+            "mean": 0.73055,
+            "std": 0.009181587553359181
           },
           "action_metric_retention": {
-            "mean": 0.6944443333333333,
-            "std": 0.3105651260700224
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.399,
@@ -526,12 +526,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9902663333333334,
-            "std": 0.007199023537181191
+            "mean": 0.9915335,
+            "std": 0.00024945457168255213
           },
           "action_metric_retention": {
-            "mean": 0.9166666666666666,
-            "std": 0.18633899812498247
+            "mean": 1.0,
+            "std": 0.0
           },
           "conflict_uncertainty_score": {
             "mean": 0.0105,
@@ -569,12 +569,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9965685,
-            "std": 0.0002924584016004282
+            "mean": 0.9771646666666667,
+            "std": 0.011189996986396167
           },
           "action_metric_retention": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 1.1321548333333333,
+            "std": 0.10457376950015823
           },
           "conflict_uncertainty_score": {
             "mean": 0.1993,
@@ -610,12 +610,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9961198333333333,
-            "std": 0.0008180842288881766
+            "mean": 0.9868706666666667,
+            "std": 0.0023960875517300274
           },
           "action_metric_retention": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 1.0972221666666666,
+            "std": 0.10607809501874339
           },
           "conflict_uncertainty_score": {
             "mean": 0.1993,
@@ -651,12 +651,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8520565,
-            "std": 0.010304902502369115
+            "mean": 0.7549341666666667,
+            "std": 0.004962788208815223
           },
           "action_metric_retention": {
-            "mean": 0.8861111666666667,
-            "std": 0.22203111296273823
+            "mean": 0.18249133333333334,
+            "std": 0.059480757035830965
           },
           "conflict_uncertainty_score": {
             "mean": 0.250317,
@@ -692,12 +692,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.981671,
-            "std": 0.016402539965911792
+            "mean": 0.9867323333333333,
+            "std": 0.005729829016258302
           },
           "action_metric_retention": {
-            "mean": 1.0416666666666667,
-            "std": 0.18800856954464126
+            "mean": 1.0906566666666666,
+            "std": 0.19018093058599636
           },
           "conflict_uncertainty_score": {
             "mean": 0.207,
@@ -733,12 +733,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9844918333333333,
-            "std": 0.013038742352653846
+            "mean": 0.8904185,
+            "std": 0.026499783771130412
           },
           "action_metric_retention": {
-            "mean": 1.15,
-            "std": 0.10801234497346433
+            "mean": 0.6117845,
+            "std": 0.37145430908648325
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -774,12 +774,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9750666666666666,
-            "std": 0.012536519794406896
+            "mean": 0.9728653333333334,
+            "std": 0.0113766922062415
           },
           "action_metric_retention": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 1.1321548333333333,
+            "std": 0.10457376950015823
           },
           "conflict_uncertainty_score": {
             "mean": 0.234417,
@@ -819,12 +819,12 @@
         "std": 0.016128242805711974
       },
       "attention_target_consistency": {
-        "mean": 0.9568822777777778,
-        "std": 0.048038061956473116
+        "mean": 0.9477907222222223,
+        "std": 0.03943422766498604
       },
       "action_metric_retention": {
-        "mean": 0.9332011111111111,
-        "std": 0.16638958060056555
+        "mean": 1.032407388888889,
+        "std": 0.07649399839285786
       }
     },
     "canonical_vs_adversarial_surface": {
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "549bf5dd38067267d91d6313d409f93131b9857d"
+    "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135"
   }
 }

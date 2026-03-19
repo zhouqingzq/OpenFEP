@@ -4,8 +4,9 @@
   "event_count": 3,
   "action_distribution": {
     "forage": 0.05,
-    "hide": 0.3333333333333333,
-    "rest": 0.6166666666666667
+    "hide": 0.38333333333333336,
+    "rest": 0.5166666666666667,
+    "unstable_workspace_note": 0.05
   },
-  "mean_conditioned_prediction_error": 0.05767351991287553
+  "mean_conditioned_prediction_error": 0.0639790945091441
 }

@@ -492,10 +492,10 @@ class SegmentRuntime:
             maintenance_agenda,
         )
         original_choice_name = diagnostics.chosen.choice
-        if maintenance_agenda.interrupt_action:
-            self._apply_maintenance_interrupt(diagnostics, maintenance_agenda)
         self._apply_homeostatic_policy_landscape(diagnostics, maintenance_agenda)
         self._apply_continuity_rebind_prior(diagnostics)
+        if maintenance_agenda.interrupt_action:
+            self._apply_maintenance_interrupt(diagnostics, maintenance_agenda)
         choice = ActionSchema.from_dict(diagnostics.chosen.action_descriptor)
         expected_fe = diagnostics.chosen.expected_free_energy
         choice_cost = diagnostics.chosen.cost

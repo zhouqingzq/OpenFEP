@@ -7,56 +7,56 @@
       "caution_rate": 0.9444444444444443,
       "seek_contact_rate": 0.0,
       "exploration_rate": 0.05555555555555555,
-      "mean_survival_score": 1.3919444444444438
+      "mean_survival_score": 1.3786111111111108
     },
     "threat_sensitive": {
-      "caution_rate": 0.9444444444444443,
+      "caution_rate": 0.8888888888888888,
       "seek_contact_rate": 0.0,
-      "exploration_rate": 0.05555555555555555,
-      "mean_survival_score": 1.3786111111111108
+      "exploration_rate": 0.1111111111111111,
+      "mean_survival_score": 1.3563888888888886
     },
     "social_approach": {
-      "caution_rate": 0.6666666666666666,
-      "seek_contact_rate": 0.2222222222222222,
+      "caution_rate": 0.5,
+      "seek_contact_rate": 0.3888888888888889,
       "exploration_rate": 0.1111111111111111,
-      "mean_survival_score": 1.3663888888888884
+      "mean_survival_score": 1.3808333333333327
     },
     "exploratory": {
-      "caution_rate": 0.9444444444444443,
+      "caution_rate": 0.7777777777777778,
       "seek_contact_rate": 0.0,
-      "exploration_rate": 0.05555555555555555,
-      "mean_survival_score": 1.393055555555555
+      "exploration_rate": 0.2222222222222222,
+      "mean_survival_score": 1.3586111111111105
     },
     "rigid_cautious": {
-      "caution_rate": 0.9444444444444443,
+      "caution_rate": 0.8888888888888888,
       "seek_contact_rate": 0.0,
-      "exploration_rate": 0.05555555555555555,
-      "mean_survival_score": 1.3786111111111108
+      "exploration_rate": 0.1111111111111111,
+      "mean_survival_score": 1.3563888888888886
     }
   },
   "anova": {
     "caution_rate": {
-      "f_statistic": 3.130001482045009e+30,
+      "f_statistic": 2.5791212212050882e+31,
       "p_value": 0.0,
       "eta_squared": 1.0,
       "group_means": {
         "neutral": 0.9444444444444443,
-        "threat_sensitive": 0.9444444444444443,
-        "social_approach": 0.6666666666666666,
-        "exploratory": 0.9444444444444443,
-        "rigid_cautious": 0.9444444444444443
+        "threat_sensitive": 0.8888888888888888,
+        "social_approach": 0.5,
+        "exploratory": 0.7777777777777778,
+        "rigid_cautious": 0.8888888888888888
       },
       "df_between": 4,
       "df_within": 10
     },
     "seek_contact_rate": {
-      "f_statistic": 29629629629.629623,
+      "f_statistic": 90740740740.74074,
       "p_value": 0.0,
       "eta_squared": 1.0,
       "group_means": {
         "neutral": 0.0,
         "threat_sensitive": 0.0,
-        "social_approach": 0.2222222222222222,
+        "social_approach": 0.3888888888888889,
         "exploratory": 0.0,
         "rigid_cautious": 0.0
       },
@@ -64,29 +64,29 @@
       "df_within": 10
     },
     "exploration_rate": {
-      "f_statistic": 1851851851.851852,
+      "f_statistic": 11111111111.111113,
       "p_value": 0.0,
       "eta_squared": 1.0,
       "group_means": {
         "neutral": 0.05555555555555555,
-        "threat_sensitive": 0.05555555555555555,
+        "threat_sensitive": 0.1111111111111111,
         "social_approach": 0.1111111111111111,
-        "exploratory": 0.05555555555555555,
-        "rigid_cautious": 0.05555555555555555
+        "exploratory": 0.2222222222222222,
+        "rigid_cautious": 0.1111111111111111
       },
       "df_between": 4,
       "df_within": 10
     },
     "mean_survival_score": {
-      "f_statistic": 1.2357245851113516e+28,
+      "f_statistic": 1.5675047422081193e+28,
       "p_value": 0.0,
       "eta_squared": 1.0,
       "group_means": {
-        "neutral": 1.3919444444444438,
-        "threat_sensitive": 1.3786111111111108,
-        "social_approach": 1.3663888888888884,
-        "exploratory": 1.393055555555555,
-        "rigid_cautious": 1.3786111111111108
+        "neutral": 1.3786111111111108,
+        "threat_sensitive": 1.3563888888888886,
+        "social_approach": 1.3808333333333327,
+        "exploratory": 1.3586111111111105,
+        "rigid_cautious": 1.3563888888888886
       },
       "df_between": 4,
       "df_within": 10

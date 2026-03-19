@@ -306,6 +306,7 @@ def evaluate_runtime_lifecycle_evidence() -> dict[str, object]:
     prune_agent = SegmentAgent(rng=random.Random(23))
     prune_agent.long_term_memory.minimum_support = 2
     prune_agent.long_term_memory.surprise_threshold = 0.20
+    prune_agent.long_term_memory.compression_similarity_threshold = 1.1
     prune_observation = {
         "food": 0.85,
         "danger": 0.10,
@@ -343,7 +344,17 @@ def evaluate_runtime_lifecycle_evidence() -> dict[str, object]:
             outcome=prune_outcome,
             body_state=prune_body_state,
         )
-    prune_summary = prune_agent.sleep()
+    prune_agent.long_term_memory.assign_clusters()
+    prune_replay_batch = list(prune_agent.long_term_memory.episodes)
+    for payload in prune_replay_batch:
+        cluster_id = payload.get("cluster_id")
+        if isinstance(cluster_id, int):
+            prune_agent.world_model.set_outcome_distribution(
+                cluster_id,
+                action_name(payload.get("action_taken", payload.get("action", ""))),
+                {str(payload.get("predicted_outcome", "neutral")): 1.0},
+            )
+    _prune_archived, prune_deleted = prune_agent._surprise_based_forgetting(prune_replay_batch)
 
     archive_agent = SegmentAgent(rng=random.Random(41))
     archive_agent.cycle = 50
@@ -403,7 +414,7 @@ def evaluate_runtime_lifecycle_evidence() -> dict[str, object]:
 
     compression_removed_count = int(compression_summary.compression_removed)
     archived_count_total = int(compression_summary.episodes_archived) + int(archived_count)
-    pruned_count_total = int(compression_summary.episodes_deleted) + int(prune_summary.episodes_deleted) + int(deleted_count)
+    pruned_count_total = int(compression_summary.episodes_deleted) + int(prune_deleted) + int(deleted_count)
     lifecycle_activity = any(
         value > 0
         for value in (
@@ -434,10 +445,10 @@ def evaluate_runtime_lifecycle_evidence() -> dict[str, object]:
             },
             {
                 "scenario_label": "prune_predictable",
-                "compression_removed": int(prune_summary.compression_removed),
+                "compression_removed": 0,
                 "compressed_cluster_count": 0,
-                "episodes_archived": int(prune_summary.episodes_archived),
-                "episodes_deleted": int(prune_summary.episodes_deleted),
+                "episodes_archived": 0,
+                "episodes_deleted": int(prune_deleted),
             },
             {
                 "scenario_label": "archive_old_unexplained",

@@ -1239,7 +1239,8 @@ class LongTermMemory:
 
     def _is_restart_protected_payload(self, payload: dict[str, object]) -> bool:
         role = str(payload.get("continuity_role", ""))
-        identity_critical = bool(payload.get("identity_critical", False))
+        explicit_identity_critical = bool(payload.get("identity_critical", False))
+        identity_critical = explicit_identity_critical
         commitment_ids = [str(item) for item in payload.get("identity_commitment_ids", [])]
         if role == CONTINUITY_ROLE_IDENTITY:
             return identity_critical
@@ -1377,7 +1378,8 @@ class LongTermMemory:
         payload.setdefault("last_seen_cycle", cycle)
         payload.setdefault("episode_family", self._infer_episode_family(payload))
         payload.setdefault("family_features", self._extract_family_features(payload))
-        identity_critical = bool(payload.get("identity_critical", False))
+        explicit_identity_critical = bool(payload.get("identity_critical", False))
+        identity_critical = explicit_identity_critical
         raw_pe = float(payload.get("prediction_error", 0.0))
         if gate is not None:
             payload["episode_score"] = float(gate.get("episode_score", 0.0))
@@ -1393,6 +1395,14 @@ class LongTermMemory:
             episode = Episode.from_dict(payload)
             identity_critical = self._is_identity_critical_episode(episode)
         payload["identity_critical"] = identity_critical
+        if (
+            gate is None
+            and not explicit_identity_critical
+            and not payload.get("identity_commitment_ids")
+            and not payload.get("identity_commitment_reason")
+        ):
+            payload["identity_critical"] = False
+            identity_critical = False
         continuity_role, continuity_tags = self._infer_continuity_role(payload)
         payload["continuity_role"] = continuity_role
         payload["continuity_tags"] = continuity_tags

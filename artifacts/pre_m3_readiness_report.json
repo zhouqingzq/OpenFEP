@@ -9,7 +9,7 @@
   "profile": null,
   "metrics": {
     "attention_passed": true,
-    "transfer_passed": true,
+    "transfer_passed": false,
     "personality_passed": true,
     "soak_passed": true,
     "snapshot_passed": true
@@ -24,48 +24,48 @@
       "summary": {
         "cycles_completed": 256,
         "survival_ticks": 256,
-        "sleep_count": 51,
+        "sleep_count": 35,
         "internal_update_count": 0,
         "memory_retrieval_count": 255,
         "telemetry_error_count": 0,
         "persistence_error_count": 0,
         "memory_hit_rate": 0.99609375,
-        "avg_free_energy_before": 0.43444109135644643,
-        "avg_free_energy_after": 0.4966172012167007,
-        "avg_free_energy_drop": 0.028670272031169404,
-        "min_energy": 0.3799999999999996,
+        "avg_free_energy_before": 0.38673577621545446,
+        "avg_free_energy_after": 0.4476671971192565,
+        "avg_free_energy_drop": 0.026709751161283785,
+        "min_energy": 0.8,
         "max_stress": 0.10999999999999999,
         "action_counts": {
-          "append_workspace_note": 46,
-          "delete_workspace_note": 10,
-          "exploit_shelter": 21,
-          "fetch_remote_status": 11,
-          "hide": 28,
-          "rest": 37,
-          "scan": 20,
-          "seek_contact": 5,
-          "unstable_workspace_note": 38,
-          "write_workspace_note": 40
+          "append_workspace_note": 30,
+          "delete_workspace_note": 41,
+          "exploit_shelter": 5,
+          "fetch_remote_status": 18,
+          "hide": 12,
+          "rest": 76,
+          "scan": 10,
+          "seek_contact": 21,
+          "unstable_workspace_note": 18,
+          "write_workspace_note": 25
         },
         "action_distribution": {
-          "append_workspace_note": 0.1796875,
-          "delete_workspace_note": 0.0390625,
-          "exploit_shelter": 0.08203125,
-          "fetch_remote_status": 0.04296875,
-          "hide": 0.109375,
-          "rest": 0.14453125,
-          "scan": 0.078125,
-          "seek_contact": 0.01953125,
-          "unstable_workspace_note": 0.1484375,
-          "write_workspace_note": 0.15625
+          "append_workspace_note": 0.1171875,
+          "delete_workspace_note": 0.16015625,
+          "exploit_shelter": 0.01953125,
+          "fetch_remote_status": 0.0703125,
+          "hide": 0.046875,
+          "rest": 0.296875,
+          "scan": 0.0390625,
+          "seek_contact": 0.08203125,
+          "unstable_workspace_note": 0.0703125,
+          "write_workspace_note": 0.09765625
         },
-        "action_switch_count": 114,
+        "action_switch_count": 89,
         "unique_actions": 10,
-        "action_entropy": 3.0964928568934402,
-        "dominant_action": "append_workspace_note",
-        "dominant_action_share": 0.1796875,
-        "max_action_streak": 12,
-        "last_choice": "append_workspace_note",
+        "action_entropy": 2.9687121750550034,
+        "dominant_action": "rest",
+        "dominant_action_share": 0.296875,
+        "max_action_streak": 21,
+        "last_choice": "seek_contact",
         "termination_reason": "cycles_exhausted"
       },
       "checks": {
@@ -94,17 +94,17 @@
       "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe",
       "revalidated_this_round": true,
       "lifecycle_activity_observed": true,
-      "compression_specifically_verified": true,
-      "compression_removed_count": 4,
+      "compression_specifically_verified": false,
+      "compression_removed_count": 0,
       "archived_count": 1,
       "pruned_count": 4,
-      "compressed_cluster_count": 1,
+      "compressed_cluster_count": 0,
       "compressed_cluster_count_status": "REVALIDATED_THIS_ROUND",
       "probe_results": [
         {
           "scenario_label": "compression",
-          "compression_removed": 4,
-          "compressed_cluster_count": 1,
+          "compression_removed": 0,
+          "compressed_cluster_count": 0,
           "episodes_archived": 0,
           "episodes_deleted": 0
         },
@@ -242,7 +242,7 @@
     "gate_results": {
       "attention_main_loop_established": true,
       "multi_environment_established": true,
-      "transfer_benchmark_established": true,
+      "transfer_benchmark_established": false,
       "personality_narrative_evidence_established": true,
       "long_run_soak_regression_passed": true,
       "snapshot_compatibility_passed": true,
@@ -251,11 +251,11 @@
     }
   },
   "acceptance": {
-    "passed": true,
+    "passed": false,
     "gate_results": {
       "attention_main_loop_established": true,
       "multi_environment_established": true,
-      "transfer_benchmark_established": true,
+      "transfer_benchmark_established": false,
       "personality_narrative_evidence_established": true,
       "long_run_soak_regression_passed": true,
       "snapshot_compatibility_passed": true,
@@ -263,10 +263,10 @@
       "runtime_family_coverage_revalidated": true
     }
   },
-  "generated_at": "2026-03-17T12:30:03+00:00",
-  "codebase_version": "549bf5dd38067267d91d6313d409f93131b9857d",
+  "generated_at": "2026-03-18T14:42:28+00:00",
+  "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135",
   "final_recommendation": {
-    "status": "READY_FOR_M3",
-    "passed": true
+    "status": "NOT_READY_FOR_M3",
+    "passed": false
   }
 }

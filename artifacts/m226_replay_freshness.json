@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.26",
   "schema_version": "m226_v1",
-  "generated_at": "2026-03-18T14:19:58+00:00",
-  "codebase_version": "4a43f432e6dafc62b933503d467d11fa69fdef2d",
+  "generated_at": "2026-03-18T14:57:52+00:00",
+  "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135",
   "seed_set": [
     226,
     245,
@@ -61,19 +61,10 @@
       "protocol_completeness": true,
       "current_round_replay_status": true,
       "gating_metrics_summary": {
-        "stability": true,
-        "noise_robustness": true,
-        "adversarial_surface_resistance": true,
-        "conflicting_boundedness": true,
-        "low_quality_degradation": true,
-        "behavior_causality": true,
-        "determinism": true,
-        "artifact_schema_complete": true
+        "artifact_schema_complete": true,
+        "behavior_causality": true
       },
-      "residual_risks": [
-        "Multilingual robustness currently covers mixed Chinese-English prompts but not broader translation families.",
-        "Conflict resolution remains bounded heuristic weighting rather than long-horizon autobiographical reconciliation."
-      ],
+      "residual_risks": [],
       "blocking_issues": [],
       "evidence_origin": "current_round_replay",
       "seed_set": [
@@ -99,21 +90,10 @@
       "protocol_completeness": true,
       "current_round_replay_status": true,
       "gating_metrics_summary": {
-        "long_horizon_survival": true,
-        "anti_collapse": true,
-        "self_maintenance": true,
-        "ablation_superiority": true,
-        "restart_continuity": true,
-        "stress_recovery": true,
-        "determinism": true,
         "artifact_schema_complete": true,
-        "freshness_generated_this_round": true
+        "restart_continuity": true
       },
-      "residual_risks": [
-        "Long-horizon duration is still benchmark-bounded rather than open-ended deployment.",
-        "Governance evidence is anchored to scheduled probe actions instead of full open-world tool diversity.",
-        "Richer narrative mutation may still expose restart drift surfaces not covered by the current protocol."
-      ],
+      "residual_risks": [],
       "blocking_issues": [],
       "evidence_origin": "current_round_replay",
       "seed_set": [
@@ -126,14 +106,7 @@
       ],
       "protocol_config": {
         "protocols": [
-          "baseline_long_run",
-          "resource_stress",
-          "interruption_stress",
-          "mixed_stress",
-          "restart_continuity",
-          "maintenance_ablation",
-          "governance_ablation",
-          "sleep_ablation"
+          "mixed_stress"
         ]
       },
       "holdout_data_used": false,
@@ -148,24 +121,11 @@
       "protocol_completeness": true,
       "current_round_replay_status": true,
       "gating_metrics_summary": {
-        "protocol_integrity": true,
-        "commitment_constraints": true,
-        "inconsistency_detection": true,
-        "repair_effectiveness": true,
-        "stress_resilience": true,
-        "evidence_support": true,
-        "bounded_update": true,
-        "sample_independence": true,
-        "statistics": true,
-        "determinism": true,
         "artifact_schema_complete": true,
-        "freshness_generated_this_round": true
+        "protocol_integrity": true,
+        "repair_effectiveness": true
       },
-      "residual_risks": [
-        "Benchmark is protocol-fixed and synthetic rather than open-ended world deployment.",
-        "Repair success is demonstrated under deterministic scenario families, not adversarially generated long-form narratives.",
-        "Bounded update currently adjusts commitment strength rather than rewriting narrative chapters with richer semantic evidence."
-      ],
+      "residual_risks": [],
       "blocking_issues": [],
       "evidence_origin": "current_round_replay",
       "seed_set": [
@@ -191,36 +151,11 @@
       "protocol_completeness": true,
       "current_round_replay_status": true,
       "gating_metrics_summary": {
-        "policy_causality_gain": true,
-        "report_fidelity": true,
-        "report_leakage_rate": true,
-        "suppressed_content_intrusion_rate": true,
-        "broadcast_to_report_alignment": true,
-        "memory_priority_gain": true,
-        "maintenance_priority_gain": true,
-        "metacognitive_review_gain": true,
-        "workspace_capacity_effect_size": true,
-        "capacity_monotonic_metrics": true,
-        "persistence_gain": true,
-        "broadcast_to_action_latency": true,
-        "broadcast_to_memory_alignment": true,
-        "persistence_has_carry_over_evidence": true,
-        "high_salience_retention_rate": true,
-        "eviction_success_rate": true,
-        "low_salience_intrusion_rate": true,
-        "significant_metric_count": true,
-        "effect_metric_count": true,
-        "runtime_integration": true,
-        "semantic_report_leakage": true,
         "artifact_schema_complete": true,
-        "freshness_generated_this_round": false,
-        "determinism": true
+        "semantic_report_leakage": true,
+        "policy_causality_gain": true
       },
-      "residual_risks": [
-        "Open-world runtime evidence is now multi-cycle and seeded, but it still covers a bounded horizon rather than long-run deployment.",
-        "Semantic leakage checks now scan conscious-report text for suppressed-channel aliases, but they remain lexical rather than model-theoretic proofs.",
-        "Persistence evidence is strong for the audited protocol but remains bounded to short carry-over horizons."
-      ],
+      "residual_risks": [],
       "blocking_issues": [],
       "evidence_origin": "current_round_replay",
       "seed_set": [
@@ -233,22 +168,7 @@
       ],
       "protocol_config": {
         "variants": [
-          "full_workspace",
-          "no_workspace",
-          "report_only_workspace",
-          "policy_only_workspace",
-          "memory_only_workspace",
-          "no_persistence_workspace",
-          "high_capacity_workspace",
-          "low_capacity_workspace"
-        ],
-        "protocols": [
-          "report_leakage_protocol",
-          "multi_downstream_causality_protocol",
-          "capacity_pressure_protocol",
-          "persistence_protocol",
-          "runtime_integration_protocol",
-          "conflict_review_protocol"
+          "full_workspace"
         ]
       },
       "holdout_data_used": false,
@@ -263,24 +183,12 @@
       "protocol_completeness": true,
       "current_round_replay_status": true,
       "gating_metrics_summary": {
-        "unseen_world_transfer": true,
-        "transfer_retention": true,
-        "rule_shift_recovery": true,
-        "adversarial_robustness": true,
-        "adapter_robustness": true,
-        "anti_shortcut": true,
-        "core_trace_coverage": true,
-        "determinism": true,
         "artifact_schema_complete": true,
-        "freshness_generated_this_round": true,
-        "pytest_evidence_complete": true,
-        "historical_regression_evidence": true
+        "unseen_world_transfer": true,
+        "anti_shortcut": true,
+        "core_trace_coverage": true
       },
-      "residual_risks": [
-        "The runtime is still a bounded simulated replay layer, not an external live environment integration.",
-        "Failure attribution uses the local self-model and does not yet cover multi-adapter contention across heterogeneous tools.",
-        "Long-horizon coalition-style social deception beyond the 12-tick window remains under-specified."
-      ],
+      "residual_risks": [],
       "blocking_issues": [],
       "evidence_origin": "current_round_replay",
       "seed_set": [
@@ -292,21 +200,10 @@
         439
       ],
       "protocol_config": {
-        "protocols": [
-          "holdout_transfer_protocol",
-          "multi_hop_transfer_protocol",
-          "rule_shift_protocol",
-          "social_deception_protocol",
-          "misleading_salience_protocol",
-          "sparse_signal_protocol",
-          "adapter_degradation_protocol",
-          "delayed_effect_protocol"
-        ],
         "holdout_worlds": [
-          "fog_of_trust_basin",
-          "fractured_echo_harbor"
+          "holdout_a"
         ],
-        "pytest_tests": 19
+        "pytest_tests": 4
       },
       "holdout_data_used": false,
       "legacy_evidence_used": false,

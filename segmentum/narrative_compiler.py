@@ -153,6 +153,15 @@ _EVENT_TO_DIRECTION = {
     "exploration": "exploration",
 }
 
+_SEMANTIC_CUES["rescue"] = _SEMANTIC_CUES["rescue"] + (
+    "rescued",
+    "saved",
+    "救",
+    "救了",
+    "救助",
+    "好人",
+)
+
 
 def _clamp(value: float, low: float = -1.0, high: float = 1.0) -> float:
     return max(low, min(high, value))

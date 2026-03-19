@@ -3038,6 +3038,11 @@ class SegmentAgent:
                     LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
                 ):
                     continue
+                if str(payload.get("predicted_outcome", "neutral")) in {
+                    "survival_threat",
+                    "integrity_loss",
+                }:
+                    continue
                 if self.long_term_memory.delete_episode(payload):
                     episodes_deleted += 1
                 continue

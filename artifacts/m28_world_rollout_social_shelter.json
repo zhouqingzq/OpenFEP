@@ -3,8 +3,9 @@
   "ticks": 60,
   "event_count": 3,
   "action_distribution": {
-    "hide": 0.3,
-    "rest": 0.7
+    "exploit_shelter": 0.05,
+    "hide": 0.4666666666666667,
+    "rest": 0.48333333333333334
   },
-  "mean_conditioned_prediction_error": 0.03807571869451043
+  "mean_conditioned_prediction_error": 0.03597543586655632
 }

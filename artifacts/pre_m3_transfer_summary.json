@@ -10,7 +10,7 @@
   "metrics": {
     "verified_world_count": 3,
     "verified_transfer_paths": 2,
-    "transfer_paths_passing": 2
+    "transfer_paths_passing": 1
   },
   "summary": {
     "world_rollouts": [
@@ -19,44 +19,45 @@
         "ticks": 60,
         "event_count": 4,
         "action_distribution": {
-          "exploit_shelter": 0.03333333333333333,
-          "hide": 0.38333333333333336,
-          "rest": 0.5833333333333334
+          "exploit_shelter": 0.016666666666666666,
+          "hide": 0.3333333333333333,
+          "rest": 0.65
         },
-        "mean_conditioned_prediction_error": 0.04261624449755132
+        "mean_conditioned_prediction_error": 0.046413700704660533
       },
       {
         "world_id": "predator_river",
         "ticks": 60,
         "event_count": 3,
         "action_distribution": {
-          "forage": 0.03333333333333333,
-          "hide": 0.26666666666666666,
-          "rest": 0.6333333333333333,
-          "unstable_workspace_note": 0.06666666666666667
+          "forage": 0.05,
+          "hide": 0.38333333333333336,
+          "rest": 0.5166666666666667,
+          "unstable_workspace_note": 0.05
         },
-        "mean_conditioned_prediction_error": 0.05543752515867506
+        "mean_conditioned_prediction_error": 0.06117592130285537
       },
       {
         "world_id": "social_shelter",
         "ticks": 60,
         "event_count": 3,
         "action_distribution": {
-          "hide": 0.3,
-          "rest": 0.7
+          "exploit_shelter": 0.05,
+          "hide": 0.4666666666666667,
+          "rest": 0.48333333333333334
         },
-        "mean_conditioned_prediction_error": 0.038365479537088236
+        "mean_conditioned_prediction_error": 0.036413144371564884
       }
     ],
     "comparison_records": [
       {
         "train_world": "predator_river",
         "world_id": "foraging_valley",
-        "passed_gate": true,
+        "passed_gate": false,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.3120759659286383,
-          "survival_score_lift": -0.027697195745268632,
-          "first_50_cycle_regret_reduction": 0.22222222222222232
+          "conditioned_prediction_error_reduction": -0.06214447907747367,
+          "survival_score_lift": -0.021958658082006144,
+          "first_50_cycle_regret_reduction": -0.40909090909090895
         }
       },
       {
@@ -64,9 +65,9 @@
         "world_id": "social_shelter",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.32294170846118964,
-          "survival_score_lift": 0.009622154423844176,
-          "first_50_cycle_regret_reduction": 0.25806451612903236
+          "conditioned_prediction_error_reduction": -0.09864348979632287,
+          "survival_score_lift": 0.1932429179038604,
+          "first_50_cycle_regret_reduction": 0.17647058823529416
         }
       }
     ]
@@ -76,18 +77,18 @@
     "verified_world_count": 3,
     "required_transfer_paths": 2,
     "verified_transfer_paths": 2,
-    "transfer_paths_passing": 2,
+    "transfer_paths_passing": 1,
     "seed_reproducible": true,
-    "passed": true,
+    "passed": false,
     "comparison_records": [
       {
         "train_world": "predator_river",
         "world_id": "foraging_valley",
-        "passed_gate": true,
+        "passed_gate": false,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.3120759659286383,
-          "survival_score_lift": -0.027697195745268632,
-          "first_50_cycle_regret_reduction": 0.22222222222222232
+          "conditioned_prediction_error_reduction": -0.06214447907747367,
+          "survival_score_lift": -0.021958658082006144,
+          "first_50_cycle_regret_reduction": -0.40909090909090895
         }
       },
       {
@@ -95,13 +96,13 @@
         "world_id": "social_shelter",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.32294170846118964,
-          "survival_score_lift": 0.009622154423844176,
-          "first_50_cycle_regret_reduction": 0.25806451612903236
+          "conditioned_prediction_error_reduction": -0.09864348979632287,
+          "survival_score_lift": 0.1932429179038604,
+          "first_50_cycle_regret_reduction": 0.17647058823529416
         }
       }
     ]
   },
-  "generated_at": "2026-03-17T12:29:10+00:00",
-  "codebase_version": "549bf5dd38067267d91d6313d409f93131b9857d"
+  "generated_at": "2026-03-18T14:41:32+00:00",
+  "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135"
 }
