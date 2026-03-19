@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from segmentum.m226_maturity_audit import SEED_SET, build_m226_maturity_audit
+from segmentum.m226_maturity_audit import _standardize_replays
 from segmentum.m226_maturity_audit import run_m226_full_replay
 
 from tests._m226_test_utils import base_standardized_replays
@@ -19,6 +20,64 @@ def test_inherited_only_evidence_cannot_grant_default_mature() -> None:
 
     assert report["default_mature"] is False
     assert "inherited_only_evidence_detected" in report["blocking_reasons"]
+
+
+def test_standardization_respects_explicit_stale_freshness_flags() -> None:
+    raw_replays = {
+        "M2.21": {
+            "status": "PASS",
+            "gates": {"artifact_schema_complete": True},
+            "residual_risks": [],
+            "freshness": {"generated_this_round": False, "codebase_version": "test-sha"},
+            "seed_set": list(SEED_SET),
+            "cycles": 24,
+        },
+        "M2.22": {
+            "status": "PASS",
+            "gates": {"artifact_schema_complete": True},
+            "residual_risks": [],
+            "freshness": {"generated_this_round": False},
+            "seed_set": list(SEED_SET),
+            "protocols": {"mixed_stress": {}},
+        },
+        "M2.23": {
+            "status": "PASS",
+            "gates": {"artifact_schema_complete": True},
+            "residual_risks": [],
+            "freshness": {"generated_this_round": False, "codebase_version": "test-sha"},
+            "seed_set": list(SEED_SET),
+            "scenario_definitions": {"s1": {}},
+        },
+        "M2.24": {
+            "seed_set": list(SEED_SET),
+            "variants": ["full_workspace"],
+            "protocols": ["workspace_protocol"],
+            "acceptance_report": {
+                "status": "PASS",
+                "codebase_version": "test-sha",
+                "freshness": {"generated_this_round": False},
+                "gates": {"artifact_schema_complete": True},
+                "residual_risks": [],
+            },
+        },
+        "M2.25": {
+            "acceptance_report": {
+                "status": "BLOCKED",
+                "codebase_version": "test-sha",
+                "seed_set": list(SEED_SET),
+                "protocols": [],
+                "holdout_worlds": [],
+                "goal_details": {},
+                "residual_risks": [],
+                "gates": {"artifact_schema_complete": True, "freshness_generated_this_round": False},
+            }
+        },
+    }
+
+    standardized = _standardize_replays(raw_replays)
+    for milestone_id, replay in standardized.items():
+        assert replay["freshness_status"] is False, milestone_id
+        assert replay["current_round_replay_status"] is False, milestone_id
 
 
 def test_holdout_contamination_blocks_maturity() -> None:

@@ -89,6 +89,25 @@ def _sorted_false_keys(mapping: dict[str, object]) -> list[str]:
     return sorted(key for key, value in mapping.items() if not bool(value))
 
 
+def _extract_freshness_flag(
+    payload: dict[str, object],
+    *,
+    report: dict[str, object] | None = None,
+    default: bool = True,
+) -> bool:
+    if report is not None:
+        gates = report.get("gates", {})
+        if isinstance(gates, dict) and "freshness_generated_this_round" in gates:
+            return bool(gates.get("freshness_generated_this_round"))
+        report_freshness = report.get("freshness", {})
+        if isinstance(report_freshness, dict) and "generated_this_round" in report_freshness:
+            return bool(report_freshness.get("generated_this_round"))
+    freshness = payload.get("freshness", {})
+    if isinstance(freshness, dict) and "generated_this_round" in freshness:
+        return bool(freshness.get("generated_this_round"))
+    return default
+
+
 def _risk_entry(*, risk_id: str, priority: str, owner: str, summary: str, next_action: str) -> dict[str, object]:
     return {
         "risk_id": risk_id,
@@ -132,6 +151,7 @@ def _default_protocol_config(seed_set: list[int]) -> dict[str, object]:
 
 def _standardize_m221(payload: dict[str, object]) -> dict[str, object]:
     gates = {key: bool(value) for key, value in dict(payload.get("gates", {})).items()}
+    freshness = _extract_freshness_flag(payload)
     score = _bool_ratio(
         [
             gates.get("stability", False),
@@ -147,14 +167,14 @@ def _standardize_m221(payload: dict[str, object]) -> dict[str, object]:
         "milestone_id": "M2.21",
         "dimension": "narrative_grounding_robustness",
         "milestone_status": bool(payload.get("status") == "PASS"),
-        "freshness_status": True,
+        "freshness_status": freshness,
         "protocol_completeness": bool(gates.get("artifact_schema_complete", False)),
-        "current_round_replay_status": True,
+        "current_round_replay_status": freshness,
         "gating_metrics_summary": gates,
         "residual_risks": list(payload.get("residual_risks", [])),
         "blocking_issues": _sorted_false_keys(gates),
         "score": _round(score),
-        "evidence_origin": "current_round_replay",
+        "evidence_origin": "current_round_replay" if freshness else "stale_or_inherited_artifact",
         "legacy_evidence_used": False,
         "inherited_only_evidence": False,
         "holdout_data_used": False,
@@ -174,6 +194,7 @@ def _standardize_m221(payload: dict[str, object]) -> dict[str, object]:
 
 def _standardize_m222(payload: dict[str, object]) -> dict[str, object]:
     gates = {key: bool(value) for key, value in dict(payload.get("gates", {})).items()}
+    freshness = _extract_freshness_flag(payload)
     critical = [
         "long_horizon_survival",
         "anti_collapse",
@@ -186,14 +207,14 @@ def _standardize_m222(payload: dict[str, object]) -> dict[str, object]:
         "milestone_id": "M2.22",
         "dimension": "long_horizon_autonomy",
         "milestone_status": bool(payload.get("status") == "PASS"),
-        "freshness_status": True,
+        "freshness_status": freshness,
         "protocol_completeness": bool(gates.get("artifact_schema_complete", False)),
-        "current_round_replay_status": True,
+        "current_round_replay_status": freshness,
         "gating_metrics_summary": gates,
         "residual_risks": list(payload.get("residual_risks", [])),
         "blocking_issues": _sorted_false_keys({name: gates.get(name, False) for name in critical}),
         "score": _round(_bool_ratio([gates.get(name, False) for name in critical])),
-        "evidence_origin": "current_round_replay",
+        "evidence_origin": "current_round_replay" if freshness else "stale_or_inherited_artifact",
         "legacy_evidence_used": False,
         "inherited_only_evidence": False,
         "holdout_data_used": False,
@@ -213,6 +234,7 @@ def _standardize_m222(payload: dict[str, object]) -> dict[str, object]:
 
 def _standardize_m223(payload: dict[str, object]) -> dict[str, object]:
     gates = {key: bool(value) for key, value in dict(payload.get("gates", {})).items()}
+    freshness = _extract_freshness_flag(payload)
     critical = [
         "protocol_integrity",
         "commitment_constraints",
@@ -228,14 +250,14 @@ def _standardize_m223(payload: dict[str, object]) -> dict[str, object]:
         "milestone_id": "M2.23",
         "dimension": "self_consistency_and_repair",
         "milestone_status": bool(payload.get("status") == "PASS"),
-        "freshness_status": True,
+        "freshness_status": freshness,
         "protocol_completeness": bool(gates.get("artifact_schema_complete", False)),
-        "current_round_replay_status": True,
+        "current_round_replay_status": freshness,
         "gating_metrics_summary": gates,
         "residual_risks": list(payload.get("residual_risks", [])),
         "blocking_issues": _sorted_false_keys({name: gates.get(name, False) for name in critical}),
         "score": _round(_bool_ratio([gates.get(name, False) for name in critical])),
-        "evidence_origin": "current_round_replay",
+        "evidence_origin": "current_round_replay" if freshness else "stale_or_inherited_artifact",
         "legacy_evidence_used": False,
         "inherited_only_evidence": False,
         "holdout_data_used": False,
@@ -256,6 +278,7 @@ def _standardize_m223(payload: dict[str, object]) -> dict[str, object]:
 def _standardize_m224(payload: dict[str, object]) -> dict[str, object]:
     report = dict(payload.get("acceptance_report", {}))
     gates = {key: bool(value) for key, value in dict(report.get("gates", {})).items()}
+    freshness = _extract_freshness_flag(payload, report=report)
     critical = [
         "policy_causality_gain",
         "report_fidelity",
@@ -277,14 +300,14 @@ def _standardize_m224(payload: dict[str, object]) -> dict[str, object]:
         "milestone_id": "M2.24",
         "dimension": "functional_conscious_access",
         "milestone_status": bool(report.get("status") == "PASS"),
-        "freshness_status": True,
+        "freshness_status": freshness,
         "protocol_completeness": bool(gates.get("artifact_schema_complete", False)),
-        "current_round_replay_status": True,
+        "current_round_replay_status": freshness,
         "gating_metrics_summary": gates,
         "residual_risks": list(report.get("residual_risks", [])),
         "blocking_issues": _sorted_false_keys({name: gates.get(name, False) for name in critical}),
         "score": _round(_bool_ratio([gates.get(name, False) for name in critical])),
-        "evidence_origin": "current_round_replay",
+        "evidence_origin": "current_round_replay" if freshness else "stale_or_inherited_artifact",
         "legacy_evidence_used": False,
         "inherited_only_evidence": False,
         "holdout_data_used": False,

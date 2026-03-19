@@ -178,11 +178,14 @@ class HomeostasisScheduler:
         approach_energy = max(0.0, (self.energy_floor + 0.20) - energy)
         approach_stress = max(0.0, stress - (self.stress_ceiling - 0.24))
         approach_fatigue = max(0.0, fatigue - (self.fatigue_ceiling - 0.24))
-        threat_pressure = max(
+        acute_guard_pressure = max(
             acute_energy_debt * 1.35,
             acute_stress_debt * 1.20,
             acute_fatigue_debt * 1.10,
             acute_thermal_debt * 1.05,
+        )
+        threat_pressure = max(
+            acute_guard_pressure,
             approach_energy * 0.95,
             approach_stress * 0.90,
             approach_fatigue * 0.90,
@@ -192,10 +195,10 @@ class HomeostasisScheduler:
             + previous.chronic_stress_debt
             + previous.chronic_fatigue_debt
         )
-        if threat_pressure > 0.08 or chronic_pressure > 0.18:
+        if acute_guard_pressure > 0.02 or chronic_pressure > 0.18:
             self.protected_mode_ticks_remaining = max(
                 self.protected_mode_ticks_remaining,
-                5 + int(threat_pressure > 0.16) + int(chronic_pressure > 0.28),
+                5 + int(acute_guard_pressure > 0.12) + int(chronic_pressure > 0.28),
             )
             self.last_guard_tick = cycle
             self.protected_mode_activations += 1

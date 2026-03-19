@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from segmentum.narrative_compiler import NarrativeCompiler
-from segmentum.narrative_types import NarrativeEpisode
+from segmentum.narrative_types import AppraisalVector, NarrativeEpisode
 
 
 class TestNarrativeCompiler(unittest.TestCase):
@@ -68,6 +68,29 @@ class TestNarrativeCompiler(unittest.TestCase):
         for value in compiled.appraisal.values():
             self.assertGreaterEqual(value, -1.0)
             self.assertLessEqual(value, 1.0)
+
+    def test_supportive_social_paraphrase_maps_to_social_signal(self) -> None:
+        compiler = NarrativeCompiler()
+        episode = NarrativeEpisode(
+            episode_id="n-003",
+            timestamp=4,
+            source="user_diary",
+            raw_text=(
+                "When the group welcomed me, listened carefully, and stood by me, "
+                "I felt safe enough to reconnect."
+            ),
+            tags=["social"],
+            metadata={},
+        )
+
+        compiled = compiler.compile_episode(episode)
+        appraisal = AppraisalVector.from_dict(compiled.appraisal)
+        signal = compiler.extract_personality_signal(appraisal)
+
+        self.assertGreater(compiled.appraisal["trust_impact"], 0.4)
+        self.assertGreater(compiled.appraisal["attachment_signal"], 0.4)
+        self.assertGreater(signal.extraversion_delta, 0.0)
+        self.assertGreater(signal.agreeableness_delta, 0.0)
 
 
 if __name__ == "__main__":

@@ -56,6 +56,23 @@ class M214HomeostasisSchedulerTests(unittest.TestCase):
             agenda.state.chronic_energy_debt,
         )
 
+    def test_approach_pressure_alone_does_not_latch_protected_mode(self) -> None:
+        scheduler = HomeostasisScheduler()
+
+        agenda = scheduler.assess(
+            cycle=1,
+            energy=0.42,
+            stress=0.20,
+            fatigue=0.20,
+            temperature=0.50,
+            telemetry_error_count=0,
+            persistence_error_count=0,
+            should_sleep=False,
+        )
+
+        self.assertFalse(agenda.protected_mode)
+        self.assertIsNone(agenda.interrupt_action)
+
     def test_agenda_roundtrip(self) -> None:
         agenda = MaintenanceAgenda(
             cycle=4,

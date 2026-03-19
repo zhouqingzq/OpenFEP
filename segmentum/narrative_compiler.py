@@ -86,6 +86,9 @@ _SEMANTIC_CUES: dict[str, tuple[str, ...]] = {
         "excluded",
         "rejected",
         "abandoned",
+        "ignored",
+        "mocked",
+        "shunned",
         "humiliat",
         "deceived",
         "lied to",
@@ -99,6 +102,15 @@ _SEMANTIC_CUES: dict[str, tuple[str, ...]] = {
         "protect",
         "helped",
         "help",
+        "supported",
+        "comforted",
+        "encouraged",
+        "welcomed",
+        "accepted",
+        "invited",
+        "listened",
+        "cared",
+        "stayed with me",
         "shared",
         "cooperate",
         "friend",
@@ -399,10 +411,10 @@ class NarrativeCompiler:
             appraisal.meaning_violation = 0.30
         elif event.event_type == "rescue":
             appraisal.social_threat = -0.15
-            appraisal.controllability = 0.45
-            appraisal.attachment_signal = 0.70 + min(0.05, social_strength * 0.03)
-            appraisal.trust_impact = 0.60
-            appraisal.self_efficacy_impact = 0.20
+            appraisal.controllability = 0.48
+            appraisal.attachment_signal = 0.72 + min(0.06, social_strength * 0.035)
+            appraisal.trust_impact = 0.62 + min(0.05, social_strength * 0.02)
+            appraisal.self_efficacy_impact = 0.22
         elif event.event_type == "exploration":
             appraisal.novelty = 0.72 + min(0.10, exploration_strength * 0.04)
             appraisal.controllability = 0.40
@@ -526,14 +538,15 @@ class NarrativeCompiler:
             - appraisal.uncertainty * 0.10
         )
         extraversion = (
-            max(0.0, appraisal.attachment_signal) * 0.30
-            + max(0.0, appraisal.trust_impact) * 0.20
+            max(0.0, appraisal.attachment_signal) * 0.34
+            + max(0.0, appraisal.trust_impact) * 0.24
+            + max(0.0, appraisal.controllability) * 0.05
             - appraisal.social_threat * 0.20
             - max(0.0, -appraisal.attachment_signal) * 0.15
         )
         agreeableness = (
-            max(0.0, appraisal.trust_impact) * 0.38
-            + max(0.0, appraisal.attachment_signal) * 0.20
+            max(0.0, appraisal.trust_impact) * 0.42
+            + max(0.0, appraisal.attachment_signal) * 0.22
             + max(0.0, -appraisal.trust_impact) * -0.35
             - appraisal.social_threat * 0.10
         )
