@@ -21,16 +21,6 @@
       "duration": 1,
       "recovery_window": 0,
       "status": "denied"
-    },
-    {
-      "tick": 20,
-      "event_type": "stress_spike_injection",
-      "magnitude": 0.18,
-      "duration": 1,
-      "recovery_window": 12,
-      "recovery_tick": 24,
-      "recovered": true,
-      "result": "recovered"
     }
   ],
   "trace_excerpt": [
@@ -1054,12 +1044,12 @@
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 18,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.705738,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 5,
+          "policy_shift_strength": 0.505738,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "hide",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1076,43 +1066,35 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 18,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 5,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 19,
-      "choice": "hide",
-      "free_energy_after": 0.426585,
+      "choice": "append_workspace_note",
+      "free_energy_after": 0.324116,
       "alive": true,
       "body_state": {
-        "dopamine": 0.02852215451541207,
+        "dopamine": 0.04355218053290477,
         "energy": 1.0,
-        "fatigue": 0.3999999999999998,
+        "fatigue": 0.3799999999999998,
         "stress": 0.0,
-        "temperature": 0.5331480189690152
+        "temperature": 0.5269762710385417
       },
       "homeostasis": {
         "agenda": {
@@ -1121,12 +1103,12 @@
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 19,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.8886109999999999,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 6,
+          "policy_shift_strength": 0.688611,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "hide",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1143,58 +1125,49 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 19,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 6,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 20,
-      "choice": "unstable_workspace_note",
-      "free_energy_after": 0.520064,
+      "choice": "append_workspace_note",
+      "free_energy_after": 0.490476,
       "alive": true,
       "body_state": {
-        "dopamine": 0.020535951251096692,
+        "dopamine": 0.031357569983691436,
         "energy": 1.0,
-        "fatigue": 0.4799999999999998,
+        "fatigue": 0.4599999999999998,
         "stress": 0.18,
-        "temperature": 0.5331480189690152
+        "temperature": 0.5269762710385417
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "thermal_rebalance",
-            "resource_guard"
+            "thermal_rebalance"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 20,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.371786,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 5,
+          "policy_shift_strength": 0.176022,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "thermoregulate",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1211,59 +1184,50 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 19,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 5,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 21,
-      "choice": "unstable_workspace_note",
-      "free_energy_after": 0.362579,
+      "choice": "append_workspace_note",
+      "free_energy_after": 0.370164,
       "alive": true,
       "body_state": {
-        "dopamine": 0.014785884900789617,
+        "dopamine": 0.022577450388257835,
         "energy": 1.0,
-        "fatigue": 0.5599999999999998,
+        "fatigue": 0.5399999999999998,
         "stress": 0.18,
-        "temperature": 0.5331480189690152
+        "temperature": 0.5269762710385417
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "thermal_rebalance",
             "resource_guard"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 21,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.430794,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 4,
-          "recommended_action": "thermoregulate",
+          "policy_shift_strength": 0.129783,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
+          "recommended_action": "hide",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1279,28 +1243,20 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 19,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 4,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
@@ -1308,29 +1264,28 @@
     {
       "cycle": 22,
       "choice": "rest",
-      "free_energy_after": 0.393111,
+      "free_energy_after": 0.414048,
       "alive": true,
       "body_state": {
-        "dopamine": 0.02352254372059988,
+        "dopamine": 0.01625576427954564,
         "energy": 1.0,
-        "fatigue": 0.5399999999999998,
+        "fatigue": 0.5199999999999998,
         "stress": 0.15,
-        "temperature": 0.5331480189690152
+        "temperature": 0.5269762710385417
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "thermal_rebalance",
-            "resource_guard"
+            "thermal_rebalance"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 22,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.650427,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 5,
+          "policy_shift_strength": 0.412774,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "thermoregulate",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1347,58 +1302,48 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 22,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 5,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 23,
-      "choice": "rest",
-      "free_energy_after": 0.30188,
+      "choice": "append_workspace_note",
+      "free_energy_after": 0.339627,
       "alive": true,
       "body_state": {
-        "dopamine": 0.05772229831435052,
+        "dopamine": 0.012102016868297313,
         "energy": 1.0,
-        "fatigue": 0.5199999999999998,
-        "stress": 0.12,
-        "temperature": 0.5331480189690152
+        "fatigue": 0.5999999999999998,
+        "stress": 0.15,
+        "temperature": 0.5269762710385417
       },
       "homeostasis": {
         "agenda": {
-          "active_tasks": [
-            "resource_guard"
-          ],
+          "active_tasks": [],
           "chronic_debt_pressure": 0.0,
           "cycle": 23,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.5327470000000001,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 4,
-          "recommended_action": "exploit_shelter",
+          "policy_shift_strength": 0.291818,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1414,58 +1359,49 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 22,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 4,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 24,
-      "choice": "rest",
-      "free_energy_after": 0.595954,
+      "choice": "append_workspace_note",
+      "free_energy_after": 0.709421,
       "alive": true,
       "body_state": {
-        "dopamine": 0.04156005478633237,
+        "dopamine": 0.008713452145174065,
         "energy": 1.0,
-        "fatigue": 0.4999999999999998,
-        "stress": 0.09,
-        "temperature": 0.5331480189690152
+        "fatigue": 0.6799999999999997,
+        "stress": 0.15,
+        "temperature": 0.5269762710385417
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "thermal_rebalance",
-            "resource_guard"
+            "thermal_rebalance"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 24,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.555859,
-          "protected_mode": true,
-          "protected_mode_ticks_remaining": 3,
+          "policy_shift_strength": 0.5704359999999999,
+          "protected_mode": false,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "thermoregulate",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1482,28 +1418,20 @@
             "chronic_stress_debt": 0.0,
             "short_term_sleep_pressure": 0.0
           },
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 22,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 3,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }

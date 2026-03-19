@@ -7,7 +7,7 @@
       "eval_cycles": 40,
       "train_summary": {
         "world_id": "predator_river",
-        "mean_conditioned_prediction_error": 0.0769014468756921,
+        "mean_conditioned_prediction_error": 0.07690295894483877,
         "survival_score": 1.3980833333333327
       },
       "comparisons": [
@@ -20,7 +20,7 @@
             "transfer_carryover": "world_specific_homeostatic_carryover"
           },
           "transferred": {
-            "mean_conditioned_prediction_error": 0.0869475445586155,
+            "mean_conditioned_prediction_error": 0.08694742993301816,
             "survival_score": 1.803875,
             "action_distribution": {
               "exploit_shelter": 0.075,
@@ -38,7 +38,7 @@
             }
           },
           "improvements": {
-            "conditioned_prediction_error_reduction": -0.10537318950967789,
+            "conditioned_prediction_error_reduction": -0.1053717322625205,
             "survival_score_lift": -0.021958658082006144,
             "first_50_cycle_regret_reduction": -0.2068965517241379
           }

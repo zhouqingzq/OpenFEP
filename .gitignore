@@ -5,3 +5,4 @@ consciousness_stream.log
 secrets/
 __pycache__/
 *.pyc
+*.egg-info/

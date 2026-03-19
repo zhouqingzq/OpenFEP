@@ -334,7 +334,7 @@
           ],
           "policy_seed_sources": {
             "semantic": 1.0,
-            "lexical": 1.0,
+            "lexical": 1.333333,
             "uncertainty_penalty": 0.55
           }
         },
@@ -356,7 +356,7 @@
           },
           "lexical_bias": {
             "exploration": 0.0,
-            "social": 0.0,
+            "social": 0.3333333333333333,
             "threat": 1.0
           },
           "semantic_bias": {
@@ -365,12 +365,12 @@
             "exploration": 0.0
           },
           "policy_distribution": {
-            "exploit_shelter": 0.21665519927845733,
-            "forage": 0.05264336747438209,
-            "hide": 0.44959716192948096,
-            "rest": 0.21344211962292706,
-            "scan": 0.026594091280971264,
-            "seek_contact": 0.04106806041378118
+            "exploit_shelter": 0.215159143811346,
+            "forage": 0.05227985255307168,
+            "hide": 0.4458868645053204,
+            "rest": 0.21196825123187452,
+            "scan": 0.026410452781704882,
+            "seek_contact": 0.048295435116682495
           },
           "learned_preferences": [
             "hide",
@@ -514,7 +514,7 @@
             ],
             "policy_seed_sources": {
               "semantic": 1.0,
-              "lexical": 1.0,
+              "lexical": 1.333333,
               "uncertainty_penalty": 0.55
             }
           },
@@ -537,7 +537,7 @@
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.002409,
+          "policy_distribution_l1_distance": 0.0,
           "narrative_prior_l1_distance": 0.0,
           "personality_profile_l1_distance": 0.0,
           "social_snapshot_similarity": 1.0,
@@ -836,14 +836,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.14575000000000002,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.6406875,
-                "trust_impact": 0.51255,
-                "self_efficacy_impact": 0.17615000000000003,
+                "attachment_signal": 0.666315,
+                "trust_impact": 0.5723475,
+                "self_efficacy_impact": 0.19376500000000002,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -876,8 +876,8 @@
               "episode_id": "m221-threat_hardened-conflicting",
               "counterpart_id": "mixed_group",
               "event_type": "rescue",
-              "trust_impact": 0.51255,
-              "attachment_signal": 0.6406875
+              "trust_impact": 0.5723475,
+              "attachment_signal": 0.666315
             }
           ],
           "identity_commitments": [
@@ -899,14 +899,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.14575000000000002,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.6406875,
-            "trust_impact": 0.51255,
-            "self_efficacy_impact": 0.17615000000000003,
+            "attachment_signal": 0.666315,
+            "trust_impact": 0.5723475,
+            "self_efficacy_impact": 0.19376500000000002,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -920,34 +920,34 @@
             "exploration": 0.0
           },
           "policy_distribution": {
-            "exploit_shelter": 0.1021829022806821,
-            "forage": 0.09178014720482539,
-            "hide": 0.11749654655449339,
-            "rest": 0.12808806170726603,
-            "scan": 0.12563234582078744,
-            "seek_contact": 0.43481999643194574
+            "exploit_shelter": 0.10011345658117272,
+            "forage": 0.09094517901218965,
+            "hide": 0.11371463466982967,
+            "rest": 0.12549397519629105,
+            "scan": 0.12633001747955228,
+            "seek_contact": 0.4434027370609647
           },
           "learned_preferences": [
             "seek_contact",
-            "rest"
+            "scan"
           ],
           "learned_avoidances": [
             "exploit_shelter",
             "forage"
           ],
           "narrative_priors": {
-            "trust_prior": 0.19451913222839995,
-            "controllability_prior": 0.1195995529916701,
+            "trust_prior": 0.21064474547901835,
+            "controllability_prior": 0.1281886288120507,
             "trauma_bias": 0.023129626631640768,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": -0.013414133034248524
+            "meaning_stability": -0.012534458337673375
           },
           "personality_profile": {
-            "openness": 0.516235401753242,
-            "conscientiousness": 0.5055229228897473,
-            "extraversion": 0.5425318819729681,
-            "agreeableness": 0.5466001489442954,
-            "neuroticism": 0.4982902318020308,
+            "openness": 0.5173177618701248,
+            "conscientiousness": 0.5062855538281029,
+            "extraversion": 0.5559811805493421,
+            "agreeableness": 0.5558462102427668,
+            "neuroticism": 0.497908916332853,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -960,7 +960,7 @@
               "statement": "Initialization narrative provisionally prioritizes seek_contact as a bounded response style.",
               "target_actions": [
                 "seek_contact",
-                "rest"
+                "scan"
               ],
               "discouraged_actions": [
                 "exploit_shelter",
@@ -988,11 +988,11 @@
               "mixed_group": {
                 "other_id": "mixed_group",
                 "display_name": "mixed_group",
-                "trust": 0.46638050000000003,
+                "trust": 0.472958225,
                 "threat": 0.1,
-                "reciprocity": 0.5440902343749999,
+                "reciprocity": 0.55236578125,
                 "predictability": 0.6062749999999999,
-                "attachment": 0.20508593749999998,
+                "attachment": 0.208289375,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 1,
@@ -1017,14 +1017,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.14575000000000002,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.6406875,
-                  "trust_impact": 0.51255,
-                  "self_efficacy_impact": 0.17615000000000003,
+                  "attachment_signal": 0.666315,
+                  "trust_impact": 0.5723475,
+                  "self_efficacy_impact": 0.19376500000000002,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -1057,8 +1057,8 @@
                 "episode_id": "m221-threat_hardened-conflicting",
                 "counterpart_id": "mixed_group",
                 "event_type": "rescue",
-                "trust_impact": 0.51255,
-                "attachment_signal": 0.6406875
+                "trust_impact": 0.5723475,
+                "attachment_signal": 0.666315
               }
             ],
             "identity_commitments": [
@@ -1081,24 +1081,24 @@
           "sleep_history_count": 0
         },
         "rollout_metrics": {
-          "caution_rate": 0.33541666666666653,
+          "caution_rate": 0.3312499999999999,
           "exploration_rate": 0.0,
-          "seek_contact_rate": 0.041666666666666664,
-          "mean_conditioned_prediction_error": 0.03672534932921007,
-          "survival_score": 1.5504166666666666,
-          "danger_attention_rate": 0.5664468283935385,
-          "social_attention_rate": 0.05935725855261548,
-          "novelty_attention_rate": 0.29989614667916414,
-          "oracle_regret_rate": 1.0
+          "seek_contact_rate": 0.20833333333333334,
+          "mean_conditioned_prediction_error": 0.029874206664472505,
+          "survival_score": 1.3966666666666665,
+          "danger_attention_rate": 0.563711851891086,
+          "social_attention_rate": 0.05983119759243616,
+          "novelty_attention_rate": 0.304796692715642,
+          "oracle_regret_rate": 0.9166666666666666
         },
         "distance_to_canonical": {
-          "identity_commitment_jaccard": 0.333333,
-          "policy_distribution_l1_distance": 0.175082,
-          "narrative_prior_l1_distance": 0.233947,
-          "personality_profile_l1_distance": 0.145547,
-          "social_snapshot_similarity": 0.694379,
-          "attention_target_consistency": 0.826109,
-          "action_metric_retention": 0.335417,
+          "identity_commitment_jaccard": 0.6,
+          "policy_distribution_l1_distance": 0.177897,
+          "narrative_prior_l1_distance": 0.239066,
+          "personality_profile_l1_distance": 0.148316,
+          "social_snapshot_similarity": 0.692737,
+          "attention_target_consistency": 0.82212,
+          "action_metric_retention": 0.33125,
           "conflict_uncertainty_score": 0.277636,
           "malformed_text_degradation_ratio": 0.622272
         },
@@ -1399,12 +1399,12 @@
             {
               "direction": "threat",
               "semantic_support": 0.0,
-              "lexical_support": 0.0
+              "lexical_support": 0.333333
             }
           ],
           "policy_seed_sources": {
             "semantic": 0.0,
-            "lexical": 0.0,
+            "lexical": 0.333333,
             "uncertainty_penalty": 0.18
           }
         },
@@ -1426,7 +1426,7 @@
           },
           "lexical_bias": {
             "exploration": 0.0,
-            "social": 0.0,
+            "social": 0.3333333333333333,
             "threat": 0.0
           },
           "semantic_bias": {
@@ -1435,12 +1435,12 @@
             "exploration": 0.0
           },
           "policy_distribution": {
-            "exploit_shelter": 0.1411846245665525,
-            "forage": 0.1668545563059257,
-            "hide": 0.1454629465231147,
-            "rest": 0.2101896794039442,
-            "scan": 0.18656692472078604,
-            "seek_contact": 0.14974126847967692
+            "exploit_shelter": 0.14028148968739756,
+            "forage": 0.1657872150851062,
+            "hide": 0.14397131796159943,
+            "rest": 0.20884513051067138,
+            "scan": 0.18537348671342999,
+            "seek_contact": 0.15574136004179537
           },
           "learned_preferences": [
             "rest",
@@ -1575,12 +1575,12 @@
               {
                 "direction": "threat",
                 "semantic_support": 0.0,
-                "lexical_support": 0.0
+                "lexical_support": 0.333333
               }
             ],
             "policy_seed_sources": {
               "semantic": 0.0,
-              "lexical": 0.0,
+              "lexical": 0.333333,
               "uncertainty_penalty": 0.18
             }
           },
@@ -1603,7 +1603,7 @@
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.6,
-          "policy_distribution_l1_distance": 0.125392,
+          "policy_distribution_l1_distance": 0.126639,
           "narrative_prior_l1_distance": 0.172174,
           "personality_profile_l1_distance": 0.020576,
           "social_snapshot_similarity": 0.728091,
@@ -1904,14 +1904,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.027500000000000004,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.729375,
-                "trust_impact": 0.5835,
-                "self_efficacy_impact": 0.1955,
+                "attachment_signal": 0.7585500000000001,
+                "trust_impact": 0.651575,
+                "self_efficacy_impact": 0.21505000000000002,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -1941,8 +1941,8 @@
               "episode_id": "m221-social_trusting-canonical",
               "counterpart_id": "ally_mira",
               "event_type": "rescue",
-              "trust_impact": 0.5835,
-              "attachment_signal": 0.729375
+              "trust_impact": 0.651575,
+              "attachment_signal": 0.7585500000000001
             }
           ],
           "identity_commitments": [
@@ -1964,14 +1964,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.027500000000000004,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.729375,
-            "trust_impact": 0.5835,
-            "self_efficacy_impact": 0.1955,
+            "attachment_signal": 0.7585500000000001,
+            "trust_impact": 0.651575,
+            "self_efficacy_impact": 0.21505000000000002,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -1985,12 +1985,12 @@
             "exploration": 0.05
           },
           "policy_distribution": {
-            "exploit_shelter": 0.06089787312425066,
-            "forage": 0.08299392263134203,
-            "hide": 0.00923070133889207,
-            "rest": 0.08305893594020705,
-            "scan": 0.13166244994220672,
-            "seek_contact": 0.6321561170231015
+            "exploit_shelter": 0.05935128175202615,
+            "forage": 0.08207674509924022,
+            "hide": 0.0072036649147029595,
+            "rest": 0.08094953166841619,
+            "scan": 0.13208884385841538,
+            "seek_contact": 0.6383299327071993
           },
           "learned_preferences": [
             "seek_contact",
@@ -2001,18 +2001,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.4153334204165625,
-            "controllability_prior": 0.20141963841515628,
+            "trust_prior": 0.44500337941542184,
+            "controllability_prior": 0.21562930539885936,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": 0.0135891025265625
+            "meaning_stability": 0.015167012779218753
           },
           "personality_profile": {
-            "openness": 0.5246029953710938,
-            "conscientiousness": 0.5122249550332812,
-            "extraversion": 0.5733743331950586,
-            "agreeableness": 0.5803927476745859,
-            "neuroticism": 0.49418822576011723,
+            "openness": 0.5262431950625,
+            "conscientiousness": 0.5135075911919609,
+            "extraversion": 0.5958499895663985,
+            "agreeableness": 0.5963436896735117,
+            "neuroticism": 0.49354690768077736,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -2053,11 +2053,11 @@
               "ally_mira": {
                 "other_id": "ally_mira",
                 "display_name": "Mira",
-                "trust": 0.7441849999999999,
+                "trust": 0.7516732500000001,
                 "threat": 0.0,
-                "reciprocity": 0.67573046875,
+                "reciprocity": 0.6851515625,
                 "predictability": 0.64175,
-                "attachment": 0.216171875,
+                "attachment": 0.21981875,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 0,
@@ -2082,14 +2082,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.027500000000000004,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.729375,
-                  "trust_impact": 0.5835,
-                  "self_efficacy_impact": 0.1955,
+                  "attachment_signal": 0.7585500000000001,
+                  "trust_impact": 0.651575,
+                  "self_efficacy_impact": 0.21505000000000002,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -2119,8 +2119,8 @@
                 "episode_id": "m221-social_trusting-canonical",
                 "counterpart_id": "ally_mira",
                 "event_type": "rescue",
-                "trust_impact": 0.5835,
-                "attachment_signal": 0.729375
+                "trust_impact": 0.651575,
+                "attachment_signal": 0.7585500000000001
               }
             ],
             "identity_commitments": [
@@ -2146,11 +2146,11 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.03169167493401704,
+          "mean_conditioned_prediction_error": 0.03194876165419332,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.29164945698864064,
-          "social_attention_rate": 0.3417766070834649,
-          "novelty_attention_rate": 0.2267245137141649,
+          "danger_attention_rate": 0.28748321259151227,
+          "social_attention_rate": 0.35062185382139993,
+          "novelty_attention_rate": 0.223871950395593,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {},
@@ -2167,14 +2167,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.0,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.75,
-                "trust_impact": 0.6,
-                "self_efficacy_impact": 0.2,
+                "attachment_signal": 0.78,
+                "trust_impact": 0.67,
+                "self_efficacy_impact": 0.22,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -2204,8 +2204,8 @@
               "episode_id": "m221-social_trusting-paraphrase",
               "counterpart_id": "ally_mira",
               "event_type": "rescue",
-              "trust_impact": 0.6,
-              "attachment_signal": 0.75
+              "trust_impact": 0.67,
+              "attachment_signal": 0.78
             }
           ],
           "identity_commitments": [
@@ -2227,14 +2227,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.0,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.75,
-            "trust_impact": 0.6,
-            "self_efficacy_impact": 0.2,
+            "attachment_signal": 0.78,
+            "trust_impact": 0.67,
+            "self_efficacy_impact": 0.22,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -2248,12 +2248,12 @@
             "exploration": 0.0
           },
           "policy_distribution": {
-            "exploit_shelter": 0.05903475550974653,
-            "forage": 0.07841668279381876,
-            "hide": 0.004958842744487963,
-            "rest": 0.07971034564603852,
-            "scan": 0.12202194352166038,
-            "seek_contact": 0.655857429784248
+            "exploit_shelter": 0.05749150896360987,
+            "forage": 0.07757274390542933,
+            "hide": 0.0029768946444451673,
+            "rest": 0.07762661184300279,
+            "scan": 0.12265105533490869,
+            "seek_contact": 0.6616811853086041
           },
           "learned_preferences": [
             "seek_contact",
@@ -2264,18 +2264,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.450696,
-            "controllability_prior": 0.20635799999999999,
+            "trust_prior": 0.48259919999999995,
+            "controllability_prior": 0.2212968,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": 0.016880000000000003
+            "meaning_stability": 0.018568
           },
           "personality_profile": {
-            "openness": 0.5256365000000001,
-            "conscientiousness": 0.5136728,
-            "extraversion": 0.5786186,
-            "agreeableness": 0.5861386399999999,
-            "neuroticism": 0.49316360000000004,
+            "openness": 0.5273456000000001,
+            "conscientiousness": 0.51504008,
+            "extraversion": 0.602546,
+            "agreeableness": 0.60322964,
+            "neuroticism": 0.49247996,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -2316,11 +2316,11 @@
               "ally_mira": {
                 "other_id": "ally_mira",
                 "display_name": "Mira",
-                "trust": 0.746,
+                "trust": 0.7537,
                 "threat": 0.0,
-                "reciprocity": 0.6784374999999999,
+                "reciprocity": 0.688125,
                 "predictability": 0.6499999999999999,
-                "attachment": 0.21875,
+                "attachment": 0.2225,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 0,
@@ -2345,14 +2345,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.0,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.75,
-                  "trust_impact": 0.6,
-                  "self_efficacy_impact": 0.2,
+                  "attachment_signal": 0.78,
+                  "trust_impact": 0.67,
+                  "self_efficacy_impact": 0.22,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -2382,8 +2382,8 @@
                 "episode_id": "m221-social_trusting-paraphrase",
                 "counterpart_id": "ally_mira",
                 "event_type": "rescue",
-                "trust_impact": 0.6,
-                "attachment_signal": 0.75
+                "trust_impact": 0.67,
+                "attachment_signal": 0.78
               }
             ],
             "identity_commitments": [
@@ -2409,20 +2409,20 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.032171596104974304,
+          "mean_conditioned_prediction_error": 0.03225255947808025,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.2849327115940524,
-          "social_attention_rate": 0.354279841245845,
-          "novelty_attention_rate": 0.22259945993618943,
+          "danger_attention_rate": 0.2806431336054596,
+          "social_attention_rate": 0.36352796159613393,
+          "novelty_attention_rate": 0.21953818985677445,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.0079,
-          "narrative_prior_l1_distance": 0.008718,
-          "personality_profile_l1_distance": 0.001611,
-          "social_snapshot_similarity": 0.997442,
-          "attention_target_consistency": 0.963417,
+          "policy_distribution_l1_distance": 0.007784,
+          "narrative_prior_l1_distance": 0.009333,
+          "personality_profile_l1_distance": 0.00192,
+          "social_snapshot_similarity": 0.997345,
+          "attention_target_consistency": 0.963191,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.0,
           "malformed_text_degradation_ratio": 0.844
@@ -2440,14 +2440,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.0,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.75,
-                "trust_impact": 0.6,
-                "self_efficacy_impact": 0.2,
+                "attachment_signal": 0.78,
+                "trust_impact": 0.67,
+                "self_efficacy_impact": 0.22,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -2477,8 +2477,8 @@
               "episode_id": "m221-social_trusting-noisy",
               "counterpart_id": "ally_mira",
               "event_type": "rescue",
-              "trust_impact": 0.6,
-              "attachment_signal": 0.75
+              "trust_impact": 0.67,
+              "attachment_signal": 0.78
             }
           ],
           "identity_commitments": [
@@ -2500,14 +2500,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.0,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.75,
-            "trust_impact": 0.6,
-            "self_efficacy_impact": 0.2,
+            "attachment_signal": 0.78,
+            "trust_impact": 0.67,
+            "self_efficacy_impact": 0.22,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -2521,12 +2521,12 @@
             "exploration": 0.255556
           },
           "policy_distribution": {
-            "exploit_shelter": 0.06392861329591754,
-            "forage": 0.0992231787054621,
-            "hide": 0.01996222765941636,
-            "rest": 0.08841994636303432,
-            "scan": 0.17302781592663927,
-            "seek_contact": 0.5554382180495304
+            "exploit_shelter": 0.062361449216979864,
+            "forage": 0.09792171037419921,
+            "hide": 0.017735839069260923,
+            "rest": 0.08625239482925826,
+            "scan": 0.17236739937390938,
+            "seek_contact": 0.5633612071363925
           },
           "learned_preferences": [
             "seek_contact",
@@ -2537,18 +2537,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.3339922379043893,
-            "controllability_prior": 0.19133289340877283,
+            "trust_prior": 0.3602758792213757,
+            "controllability_prior": 0.20364031275561564,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": 0.008897808527506004
+            "meaning_stability": 0.010288477380256603
           },
           "personality_profile": {
-            "openness": 0.5215238470722499,
-            "conscientiousness": 0.5114793851052,
-            "extraversion": 0.5660064643548994,
-            "agreeableness": 0.5723201261627594,
-            "neuroticism": 0.4942603074474,
+            "openness": 0.5229587702103998,
+            "conscientiousness": 0.5126273236157199,
+            "extraversion": 0.5860953882889992,
+            "agreeableness": 0.5866693575442592,
+            "neuroticism": 0.49368633819214003,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -2589,11 +2589,11 @@
               "ally_mira": {
                 "other_id": "ally_mira",
                 "display_name": "Mira",
-                "trust": 0.746,
+                "trust": 0.7537,
                 "threat": 0.0,
-                "reciprocity": 0.6784374999999999,
+                "reciprocity": 0.688125,
                 "predictability": 0.6499999999999999,
-                "attachment": 0.21875,
+                "attachment": 0.2225,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 0,
@@ -2618,14 +2618,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.0,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.75,
-                  "trust_impact": 0.6,
-                  "self_efficacy_impact": 0.2,
+                  "attachment_signal": 0.78,
+                  "trust_impact": 0.67,
+                  "self_efficacy_impact": 0.22,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -2655,8 +2655,8 @@
                 "episode_id": "m221-social_trusting-noisy",
                 "counterpart_id": "ally_mira",
                 "event_type": "rescue",
-                "trust_impact": 0.6,
-                "attachment_signal": 0.75
+                "trust_impact": 0.67,
+                "attachment_signal": 0.78
               }
             ],
             "identity_commitments": [
@@ -2682,20 +2682,20 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.031627772945741504,
+          "mean_conditioned_prediction_error": 0.03239281707522962,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.3130611703020377,
-          "social_attention_rate": 0.30335871962789734,
-          "novelty_attention_rate": 0.2366828168590566,
+          "danger_attention_rate": 0.3082451694754845,
+          "social_attention_rate": 0.31276382413454257,
+          "novelty_attention_rate": 0.233990823190666,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.025573,
-          "narrative_prior_l1_distance": 0.019224,
-          "personality_profile_l1_distance": 0.002149,
-          "social_snapshot_similarity": 0.997442,
-          "attention_target_consistency": 0.887594,
+          "policy_distribution_l1_distance": 0.02499,
+          "narrative_prior_l1_distance": 0.020319,
+          "personality_profile_l1_distance": 0.002637,
+          "social_snapshot_similarity": 0.997345,
+          "attention_target_consistency": 0.892026,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.062611,
           "malformed_text_degradation_ratio": 0.741778
@@ -2713,14 +2713,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.0,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.75,
-                "trust_impact": 0.6,
-                "self_efficacy_impact": 0.2,
+                "attachment_signal": 0.78,
+                "trust_impact": 0.67,
+                "self_efficacy_impact": 0.22,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -2753,8 +2753,8 @@
               "episode_id": "m221-social_trusting-conflicting",
               "counterpart_id": "mixed_group",
               "event_type": "rescue",
-              "trust_impact": 0.6,
-              "attachment_signal": 0.75
+              "trust_impact": 0.67,
+              "attachment_signal": 0.78
             }
           ],
           "identity_commitments": [
@@ -2776,14 +2776,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.0,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.75,
-            "trust_impact": 0.6,
-            "self_efficacy_impact": 0.2,
+            "attachment_signal": 0.78,
+            "trust_impact": 0.67,
+            "self_efficacy_impact": 0.22,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -2797,12 +2797,12 @@
             "exploration": 0.034091
           },
           "policy_distribution": {
-            "exploit_shelter": 0.07493313581190117,
-            "forage": 0.08502808914044097,
-            "hide": 0.04723097083872698,
-            "rest": 0.09858373842010668,
-            "scan": 0.12923411138271418,
-            "seek_contact": 0.5649899544061101
+            "exploit_shelter": 0.0730692303525031,
+            "forage": 0.08406060230945407,
+            "hide": 0.04429360058167452,
+            "rest": 0.09613154198847243,
+            "scan": 0.12965333281036617,
+            "seek_contact": 0.5727916919575297
           },
           "learned_preferences": [
             "seek_contact",
@@ -2813,18 +2813,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.3121212270881218,
-            "controllability_prior": 0.16034857888012963,
+            "trust_prior": 0.3365033577052372,
+            "controllability_prior": 0.1717656082960805,
             "trauma_bias": 0.01319376430443884,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": 0.001837398210114003
+            "meaning_stability": 0.0031274580311254022
           },
           "personality_profile": {
-            "openness": 0.5204911553082934,
-            "conscientiousness": 0.5109286161644231,
-            "extraversion": 0.5628395429454328,
-            "agreeableness": 0.5688502818358656,
-            "neuroticism": 0.49453569191778846,
+            "openness": 0.5218572323288462,
+            "conscientiousness": 0.5120214777808654,
+            "extraversion": 0.5819646212331733,
+            "agreeableness": 0.5825110520413944,
+            "neuroticism": 0.4939892611095673,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -2865,11 +2865,11 @@
               "mixed_group": {
                 "other_id": "mixed_group",
                 "display_name": "mixed_group",
-                "trust": 0.47600000000000003,
+                "trust": 0.48369999999999996,
                 "threat": 0.1,
-                "reciprocity": 0.5584374999999999,
+                "reciprocity": 0.568125,
                 "predictability": 0.6499999999999999,
-                "attachment": 0.21875,
+                "attachment": 0.2225,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 1,
@@ -2894,14 +2894,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.0,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.75,
-                  "trust_impact": 0.6,
-                  "self_efficacy_impact": 0.2,
+                  "attachment_signal": 0.78,
+                  "trust_impact": 0.67,
+                  "self_efficacy_impact": 0.22,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -2934,8 +2934,8 @@
                 "episode_id": "m221-social_trusting-conflicting",
                 "counterpart_id": "mixed_group",
                 "event_type": "rescue",
-                "trust_impact": 0.6,
-                "attachment_signal": 0.75
+                "trust_impact": 0.67,
+                "attachment_signal": 0.78
               }
             ],
             "identity_commitments": [
@@ -2961,20 +2961,20 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.031442778410030785,
+          "mean_conditioned_prediction_error": 0.03163114222156157,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.3231635747397765,
-          "social_attention_rate": 0.29273952543218074,
-          "novelty_attention_rate": 0.23667466732764814,
+          "danger_attention_rate": 0.3183885142459643,
+          "social_attention_rate": 0.3023127000809968,
+          "novelty_attention_rate": 0.23373686607357866,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.023198,
-          "narrative_prior_l1_distance": 0.033846,
-          "personality_profile_l1_distance": 0.003093,
-          "social_snapshot_similarity": 0.610816,
-          "attention_target_consistency": 0.856523,
+          "policy_distribution_l1_distance": 0.022658,
+          "narrative_prior_l1_distance": 0.035519,
+          "personality_profile_l1_distance": 0.003781,
+          "social_snapshot_similarity": 0.607026,
+          "attention_target_consistency": 0.862219,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.13829,
           "malformed_text_degradation_ratio": 0.748546
@@ -2992,14 +2992,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.12100000000000001,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.65925,
-                "trust_impact": 0.5274,
-                "self_efficacy_impact": 0.18020000000000003,
+                "attachment_signal": 0.68562,
+                "trust_impact": 0.5889300000000001,
+                "self_efficacy_impact": 0.19822,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -3046,14 +3046,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.12100000000000001,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.65925,
-            "trust_impact": 0.5274,
-            "self_efficacy_impact": 0.18020000000000003,
+            "attachment_signal": 0.68562,
+            "trust_impact": 0.5889300000000001,
+            "self_efficacy_impact": 0.19822,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -3067,12 +3067,12 @@
             "exploration": 0.0
           },
           "policy_distribution": {
-            "exploit_shelter": 0.06231786464088166,
-            "forage": 0.08223178496437959,
-            "hide": 0.010886385718666463,
-            "rest": 0.08701077578913774,
-            "scan": 0.1276703390022486,
-            "seek_contact": 0.629882849884686
+            "exploit_shelter": 0.06083668498063382,
+            "forage": 0.08145889884728806,
+            "hide": 0.008974587263821587,
+            "rest": 0.08494269158785865,
+            "scan": 0.12837761881760018,
+            "seek_contact": 0.6354095185027978
           },
           "learned_preferences": [
             "seek_contact",
@@ -3083,18 +3083,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.3857293547099999,
-            "controllability_prior": 0.18736401379499998,
+            "trust_prior": 0.41163158650949994,
+            "controllability_prior": 0.20083830079949996,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": 0.0053638964500000025
+            "meaning_stability": 0.006768686095
           },
           "personality_profile": {
-            "openness": 0.5239761265625,
-            "conscientiousness": 0.508942562405,
-            "extraversion": 0.564630046761875,
-            "agreeableness": 0.57081205123475,
-            "neuroticism": 0.49681810160375,
+            "openness": 0.5255745350000001,
+            "conscientiousness": 0.51009469520675,
+            "extraversion": 0.58491896474075,
+            "agreeableness": 0.584862061400375,
+            "neuroticism": 0.496242035202875,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -3143,14 +3143,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.12100000000000001,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.65925,
-                  "trust_impact": 0.5274,
-                  "self_efficacy_impact": 0.18020000000000003,
+                  "attachment_signal": 0.68562,
+                  "trust_impact": 0.5889300000000001,
+                  "self_efficacy_impact": 0.19822,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -3201,20 +3201,20 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.03154949608179844,
+          "mean_conditioned_prediction_error": 0.03191019203724275,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.29421401838222816,
-          "social_attention_rate": 0.33441205277617037,
-          "novelty_attention_rate": 0.22907648872692446,
+          "danger_attention_rate": 0.2904308895079683,
+          "social_attention_rate": 0.34240973727034424,
+          "novelty_attention_rate": 0.22651636047155674,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.002343,
-          "narrative_prior_l1_distance": 0.010377,
-          "personality_profile_l1_distance": 0.002763,
-          "social_snapshot_similarity": 0.453694,
-          "attention_target_consistency": 0.978452,
+          "policy_distribution_l1_distance": 0.002416,
+          "narrative_prior_l1_distance": 0.011312,
+          "personality_profile_l1_distance": 0.003243,
+          "social_snapshot_similarity": 0.450268,
+          "attention_target_consistency": 0.976578,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.10855,
           "malformed_text_degradation_ratio": 0.81375
@@ -3232,14 +3232,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.18,
-                "controllability": 0.2025,
+                "controllability": 0.216,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.3285,
-                "trust_impact": 0.27,
-                "self_efficacy_impact": 0.09000000000000001,
+                "attachment_signal": 0.33975,
+                "trust_impact": 0.28800000000000003,
+                "self_efficacy_impact": 0.099,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -3270,8 +3270,8 @@
               "episode_id": "m221-social_trusting-low_signal",
               "counterpart_id": "quiet_ally",
               "event_type": "rescue",
-              "trust_impact": 0.27,
-              "attachment_signal": 0.3285
+              "trust_impact": 0.28800000000000003,
+              "attachment_signal": 0.33975
             }
           ],
           "identity_commitments": [
@@ -3293,14 +3293,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.18,
-            "controllability": 0.2025,
+            "controllability": 0.216,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.3285,
-            "trust_impact": 0.27,
-            "self_efficacy_impact": 0.09000000000000001,
+            "attachment_signal": 0.33975,
+            "trust_impact": 0.28800000000000003,
+            "self_efficacy_impact": 0.099,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -3314,12 +3314,12 @@
             "exploration": 0.0
           },
           "policy_distribution": {
-            "exploit_shelter": 0.09390745153111756,
-            "forage": 0.11487061699395112,
-            "hide": 0.06624109753077834,
-            "rest": 0.1387243602089072,
-            "scan": 0.14389188598954294,
-            "seek_contact": 0.4423645877457029
+            "exploit_shelter": 0.09318816866007161,
+            "forage": 0.11448997958519783,
+            "hide": 0.06524430066187224,
+            "rest": 0.1376618028242889,
+            "scan": 0.1443705877462775,
+            "seek_contact": 0.445045160522292
           },
           "learned_preferences": [
             "seek_contact",
@@ -3330,18 +3330,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.1797974814,
-            "controllability_prior": 0.055599263325,
+            "trust_prior": 0.18470931816,
+            "controllability_prior": 0.059624240669999995,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": -0.027372003000000002
+            "meaning_stability": -0.026917203300000005
           },
           "personality_profile": {
-            "openness": 0.5069072704437501,
-            "conscientiousness": 0.50122795919,
-            "extraversion": 0.5208139082705,
-            "agreeableness": 0.522962836853,
-            "neuroticism": 0.500613979595,
+            "openness": 0.50736775514,
+            "conscientiousness": 0.501596346947,
+            "extraversion": 0.52666513381085,
+            "agreeableness": 0.52670197258655,
+            "neuroticism": 0.5004297857165,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -3382,11 +3382,11 @@
               "quiet_ally": {
                 "other_id": "quiet_ally",
                 "display_name": "quiet_ally",
-                "trust": 0.7097,
+                "trust": 0.7116800000000001,
                 "threat": 0.0,
-                "reciprocity": 0.624015625,
+                "reciprocity": 0.6266171875,
                 "predictability": 0.596,
-                "attachment": 0.1660625,
+                "attachment": 0.16746875,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 0,
@@ -3410,14 +3410,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.18,
-                  "controllability": 0.2025,
+                  "controllability": 0.216,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.3285,
-                  "trust_impact": 0.27,
-                  "self_efficacy_impact": 0.09000000000000001,
+                  "attachment_signal": 0.33975,
+                  "trust_impact": 0.28800000000000003,
+                  "self_efficacy_impact": 0.099,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -3448,8 +3448,8 @@
                 "episode_id": "m221-social_trusting-low_signal",
                 "counterpart_id": "quiet_ally",
                 "event_type": "rescue",
-                "trust_impact": 0.27,
-                "attachment_signal": 0.3285
+                "trust_impact": 0.28800000000000003,
+                "attachment_signal": 0.33975
               }
             ],
             "identity_commitments": [
@@ -3475,20 +3475,20 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.028106156986789418,
+          "mean_conditioned_prediction_error": 0.02810394019546552,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.3407750033076964,
-          "social_attention_rate": 0.24733004707877276,
-          "novelty_attention_rate": 0.2546268828599468,
+          "danger_attention_rate": 0.3398783574965829,
+          "social_attention_rate": 0.24926730454996113,
+          "novelty_attention_rate": 0.25395619715432927,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.063264,
-          "narrative_prior_l1_distance": 0.084463,
-          "personality_profile_l1_distance": 0.016123,
-          "social_snapshot_similarity": 0.602399,
-          "attention_target_consistency": 0.72366,
+          "policy_distribution_l1_distance": 0.064428,
+          "narrative_prior_l1_distance": 0.091677,
+          "personality_profile_l1_distance": 0.019611,
+          "social_snapshot_similarity": 0.599986,
+          "attention_target_consistency": 0.710929,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.399,
           "malformed_text_degradation_ratio": 0.505333
@@ -3506,14 +3506,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.0,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.75,
-                "trust_impact": 0.6,
-                "self_efficacy_impact": 0.2,
+                "attachment_signal": 0.78,
+                "trust_impact": 0.67,
+                "self_efficacy_impact": 0.22,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -3543,8 +3543,8 @@
               "episode_id": "m221-social_trusting-multilingual",
               "counterpart_id": "ally_mira",
               "event_type": "rescue",
-              "trust_impact": 0.6,
-              "attachment_signal": 0.75
+              "trust_impact": 0.67,
+              "attachment_signal": 0.78
             }
           ],
           "identity_commitments": [
@@ -3566,14 +3566,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.0,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.75,
-            "trust_impact": 0.6,
-            "self_efficacy_impact": 0.2,
+            "attachment_signal": 0.78,
+            "trust_impact": 0.67,
+            "self_efficacy_impact": 0.22,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -3587,12 +3587,12 @@
             "exploration": 0.042857
           },
           "policy_distribution": {
-            "exploit_shelter": 0.06071373641453935,
-            "forage": 0.08250771279661516,
-            "hide": 0.008803310893757894,
-            "rest": 0.08240747506840403,
-            "scan": 0.13012909471815515,
-            "seek_contact": 0.6354386701085285
+            "exploit_shelter": 0.059142034984626814,
+            "forage": 0.08156607691196711,
+            "hide": 0.006741116410762545,
+            "rest": 0.08027418606249999,
+            "scan": 0.13054221754614506,
+            "seek_contact": 0.6417343680839984
           },
           "learned_preferences": [
             "seek_contact",
@@ -3603,18 +3603,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.42397611093970494,
-            "controllability_prior": 0.20160494167427576,
+            "trust_prior": 0.454502389183005,
+            "controllability_prior": 0.21589899259772571,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": 0.015311469970000005
+            "meaning_stability": 0.016926616967000003
           },
           "personality_profile": {
-            "openness": 0.5246044160478125,
-            "conscientiousness": 0.5131223552255,
-            "extraversion": 0.575453542546625,
-            "agreeableness": 0.58267083792065,
-            "neuroticism": 0.49343882238725,
+            "openness": 0.526244710451,
+            "conscientiousness": 0.51443459074805,
+            "extraversion": 0.59841766419125,
+            "agreeableness": 0.599073781952525,
+            "neuroticism": 0.492782704625975,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -3655,11 +3655,11 @@
               "ally_mira": {
                 "other_id": "ally_mira",
                 "display_name": "Mira",
-                "trust": 0.746,
+                "trust": 0.7537,
                 "threat": 0.0,
-                "reciprocity": 0.6784374999999999,
+                "reciprocity": 0.688125,
                 "predictability": 0.6499999999999999,
-                "attachment": 0.21875,
+                "attachment": 0.2225,
                 "interaction_count": 1,
                 "last_seen_tick": 1,
                 "rupture_count": 0,
@@ -3684,14 +3684,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.0,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.75,
-                  "trust_impact": 0.6,
-                  "self_efficacy_impact": 0.2,
+                  "attachment_signal": 0.78,
+                  "trust_impact": 0.67,
+                  "self_efficacy_impact": 0.22,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -3721,8 +3721,8 @@
                 "episode_id": "m221-social_trusting-multilingual",
                 "counterpart_id": "ally_mira",
                 "event_type": "rescue",
-                "trust_impact": 0.6,
-                "attachment_signal": 0.75
+                "trust_impact": 0.67,
+                "attachment_signal": 0.78
               }
             ],
             "identity_commitments": [
@@ -3748,20 +3748,20 @@
           "caution_rate": 0.0,
           "exploration_rate": 0.0,
           "seek_contact_rate": 1.0,
-          "mean_conditioned_prediction_error": 0.03172360833799321,
+          "mean_conditioned_prediction_error": 0.031980947109432625,
           "survival_score": 1.2685416666666665,
-          "danger_attention_rate": 0.29019142132841047,
-          "social_attention_rate": 0.3447169845402238,
-          "novelty_attention_rate": 0.22569566900193042,
+          "danger_attention_rate": 0.2859489878793175,
+          "social_attention_rate": 0.35373884498078634,
+          "novelty_attention_rate": 0.22278112106018347,
           "oracle_regret_rate": 0.0
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
-          "policy_distribution_l1_distance": 0.001094,
-          "narrative_prior_l1_distance": 0.00211,
-          "personality_profile_l1_distance": 0.000667,
-          "social_snapshot_similarity": 0.997442,
-          "attention_target_consistency": 0.991397,
+          "policy_distribution_l1_distance": 0.001135,
+          "narrative_prior_l1_distance": 0.002306,
+          "personality_profile_l1_distance": 0.000777,
+          "social_snapshot_similarity": 0.997345,
+          "attention_target_consistency": 0.99111,
           "action_metric_retention": 1.0,
           "conflict_uncertainty_score": 0.0105,
           "malformed_text_degradation_ratio": 0.816143
@@ -3879,7 +3879,7 @@
           "personality_profile": {
             "openness": 0.5463223204620312,
             "conscientiousness": 0.5055929459580313,
-            "extraversion": 0.5,
+            "extraversion": 0.50407946459375,
             "agreeableness": 0.5,
             "neuroticism": 0.5002631254662968,
             "update_count": 1,
@@ -3986,11 +3986,11 @@
           "caution_rate": 0.27291666666666653,
           "exploration_rate": 0.375,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.034212665932830344,
+          "mean_conditioned_prediction_error": 0.03421177764331717,
           "survival_score": 1.8645833333333333,
-          "danger_attention_rate": 0.24508182834887113,
-          "social_attention_rate": 0.026623962824771426,
-          "novelty_attention_rate": 0.5475184565982599,
+          "danger_attention_rate": 0.2450839788779935,
+          "social_attention_rate": 0.026614741345565476,
+          "novelty_attention_rate": 0.5475217682478583,
           "oracle_regret_rate": 0.9583333333333334
         },
         "distance_to_canonical": {},
@@ -4105,7 +4105,7 @@
           "personality_profile": {
             "openness": 0.5518493970260541,
             "conscientiousness": 0.5083371924773901,
-            "extraversion": 0.5,
+            "extraversion": 0.5039700916559,
             "agreeableness": 0.5,
             "neuroticism": 0.49880897250323,
             "update_count": 1,
@@ -4212,20 +4212,20 @@
           "caution_rate": 0.26875,
           "exploration_rate": 0.5416666666666666,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03191928443823244,
+          "mean_conditioned_prediction_error": 0.03191835671339283,
           "survival_score": 1.84125,
-          "danger_attention_rate": 0.2606111723404945,
-          "social_attention_rate": 0.03149746231099142,
-          "novelty_attention_rate": 0.5362529274883074,
+          "danger_attention_rate": 0.2606141383594703,
+          "social_attention_rate": 0.03148545976644607,
+          "novelty_attention_rate": 0.5362579539566064,
           "oracle_regret_rate": 0.8333333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
           "policy_distribution_l1_distance": 0.007487,
           "narrative_prior_l1_distance": 0.004713,
-          "personality_profile_l1_distance": 0.001081,
+          "personality_profile_l1_distance": 0.001093,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.979424,
+          "attention_target_consistency": 0.979428,
           "action_metric_retention": 1.25,
           "conflict_uncertainty_score": 0.1993,
           "malformed_text_degradation_ratio": 0.753667
@@ -4341,7 +4341,7 @@
           "personality_profile": {
             "openness": 0.55479250832,
             "conscientiousness": 0.50871698996,
-            "extraversion": 0.5,
+            "extraversion": 0.5041509476,
             "agreeableness": 0.5,
             "neuroticism": 0.49875471572,
             "update_count": 1,
@@ -4448,20 +4448,20 @@
           "caution_rate": 0.2854166666666666,
           "exploration_rate": 0.4166666666666667,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.03378653569379987,
+          "mean_conditioned_prediction_error": 0.03378563944069005,
           "survival_score": 1.8666666666666667,
-          "danger_attention_rate": 0.25203248874705014,
-          "social_attention_rate": 0.03080713987633874,
-          "novelty_attention_rate": 0.5411049832561091,
+          "danger_attention_rate": 0.25203520161868986,
+          "social_attention_rate": 0.030796294470642437,
+          "novelty_attention_rate": 0.5411090314870971,
           "oracle_regret_rate": 0.9583333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
           "policy_distribution_l1_distance": 0.006511,
           "narrative_prior_l1_distance": 0.003768,
-          "personality_profile_l1_distance": 0.001456,
+          "personality_profile_l1_distance": 0.001464,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.988286,
+          "attention_target_consistency": 0.988288,
           "action_metric_retention": 1.111111,
           "conflict_uncertainty_score": 0.1993,
           "malformed_text_degradation_ratio": 0.788
@@ -4479,14 +4479,14 @@
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
                 "uncertainty": 0.13475,
-                "controllability": 0.45,
+                "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.6489375,
-                "trust_impact": 0.51915,
-                "self_efficacy_impact": 0.17795000000000002,
+                "attachment_signal": 0.674895,
+                "trust_impact": 0.5797175,
+                "self_efficacy_impact": 0.195745,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
@@ -4534,14 +4534,14 @@
             "physical_threat": 0.0,
             "social_threat": 0.0,
             "uncertainty": 0.13475,
-            "controllability": 0.45,
+            "controllability": 0.48,
             "novelty": 0.0,
             "loss": 0.0,
             "moral_salience": 0.0,
             "contamination": 0.0,
-            "attachment_signal": 0.6489375,
-            "trust_impact": 0.51915,
-            "self_efficacy_impact": 0.17795000000000002,
+            "attachment_signal": 0.674895,
+            "trust_impact": 0.5797175,
+            "self_efficacy_impact": 0.195745,
             "meaning_violation": 0.0
           },
           "lexical_bias": {
@@ -4555,12 +4555,12 @@
             "exploration": 0.376344
           },
           "policy_distribution": {
-            "exploit_shelter": 0.07090473543656212,
-            "forage": 0.11411713839249334,
-            "hide": 0.035446124275305115,
-            "rest": 0.10261701832078168,
-            "scan": 0.20325037455625963,
-            "seek_contact": 0.4736646090185981
+            "exploit_shelter": 0.06940400817752383,
+            "forage": 0.11276376793318099,
+            "hide": 0.03322742353525476,
+            "rest": 0.10044508783282423,
+            "scan": 0.2023113867964975,
+            "seek_contact": 0.48184832572471875
           },
           "learned_preferences": [
             "seek_contact",
@@ -4571,18 +4571,18 @@
             "hide"
           ],
           "narrative_priors": {
-            "trust_prior": 0.22354495731970442,
-            "controllability_prior": 0.15491329080835056,
+            "trust_prior": 0.24132080524798352,
+            "controllability_prior": 0.16428151640138647,
             "trauma_bias": 0.0,
             "contamination_sensitivity": 0.0,
-            "meaning_stability": -0.010353836068673714
+            "meaning_stability": -0.009386683675541085
           },
           "personality_profile": {
-            "openness": 0.5175175989834138,
-            "conscientiousness": 0.5062144655593603,
-            "extraversion": 0.5464817810625561,
-            "agreeableness": 0.5509278644685397,
-            "neuroticism": 0.4979418767594376,
+            "openness": 0.5186854389156413,
+            "conscientiousness": 0.5070457340231199,
+            "extraversion": 0.5611319826603715,
+            "agreeableness": 0.5610325994821388,
+            "neuroticism": 0.49752624252755784,
             "update_count": 1,
             "last_updated_tick": 0,
             "meaning_construction_tendency": 0.5,
@@ -4631,14 +4631,14 @@
                   "physical_threat": 0.0,
                   "social_threat": 0.0,
                   "uncertainty": 0.13475,
-                  "controllability": 0.45,
+                  "controllability": 0.48,
                   "novelty": 0.0,
                   "loss": 0.0,
                   "moral_salience": 0.0,
                   "contamination": 0.0,
-                  "attachment_signal": 0.6489375,
-                  "trust_impact": 0.51915,
-                  "self_efficacy_impact": 0.17795000000000002,
+                  "attachment_signal": 0.674895,
+                  "trust_impact": 0.5797175,
+                  "self_efficacy_impact": 0.195745,
                   "meaning_violation": 0.0
                 },
                 "semantic_direction_scores": {
@@ -4690,20 +4690,20 @@
           "caution_rate": 0.14583333333333334,
           "exploration_rate": 0.08333333333333333,
           "seek_contact_rate": 0.5,
-          "mean_conditioned_prediction_error": 0.03263277821741204,
+          "mean_conditioned_prediction_error": 0.03264882153255625,
           "survival_score": 1.3741666666666663,
-          "danger_attention_rate": 0.2835426870647825,
-          "social_attention_rate": 0.18266549469128138,
-          "novelty_attention_rate": 0.4125901403831725,
+          "danger_attention_rate": 0.2820200559341659,
+          "social_attention_rate": 0.18702545147515012,
+          "novelty_attention_rate": 0.4103773047680529,
           "oracle_regret_rate": 0.5833333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 0.6,
-          "policy_distribution_l1_distance": 0.12418,
-          "narrative_prior_l1_distance": 0.064577,
-          "personality_profile_l1_distance": 0.014351,
+          "policy_distribution_l1_distance": 0.126907,
+          "narrative_prior_l1_distance": 0.066066,
+          "personality_profile_l1_distance": 0.016657,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.753564,
+          "attention_target_consistency": 0.749518,
           "action_metric_retention": 0.222222,
           "conflict_uncertainty_score": 0.250317,
           "malformed_text_degradation_ratio": 0.659747
@@ -4821,7 +4821,7 @@
           "personality_profile": {
             "openness": 0.6036506411066176,
             "conscientiousness": 0.5146954999051471,
-            "extraversion": 0.5,
+            "extraversion": 0.5084282518382354,
             "agreeableness": 0.5,
             "neuroticism": 0.4989734389261029,
             "update_count": 2,
@@ -4930,20 +4930,20 @@
           "caution_rate": 0.22916666666666666,
           "exploration_rate": 0.5,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.034495072303563815,
+          "mean_conditioned_prediction_error": 0.03449311994648295,
           "survival_score": 1.9279166666666667,
-          "danger_attention_rate": 0.23991828263818551,
-          "social_attention_rate": 0.02125250876956388,
-          "novelty_attention_rate": 0.5546037991112062,
+          "danger_attention_rate": 0.23992694445367016,
+          "social_attention_rate": 0.021216590170388627,
+          "novelty_attention_rate": 0.5546212084356954,
           "oracle_regret_rate": 0.9166666666666666
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
           "policy_distribution_l1_distance": 0.010327,
           "narrative_prior_l1_distance": 0.011657,
-          "personality_profile_l1_distance": 0.118636,
+          "personality_profile_l1_distance": 0.119119,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.987059,
+          "attention_target_consistency": 0.987034,
           "action_metric_retention": 1.25,
           "conflict_uncertainty_score": 0.207,
           "malformed_text_degradation_ratio": 0.81375
@@ -5175,9 +5175,9 @@
           "identity_commitment_jaccard": 0.6,
           "policy_distribution_l1_distance": 0.095084,
           "narrative_prior_l1_distance": 0.0582,
-          "personality_profile_l1_distance": 0.118199,
+          "personality_profile_l1_distance": 0.118652,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.890534,
+          "attention_target_consistency": 0.890528,
           "action_metric_retention": 0.333333,
           "conflict_uncertainty_score": 0.5215,
           "malformed_text_degradation_ratio": 0.4
@@ -5293,7 +5293,7 @@
           "personality_profile": {
             "openness": 0.5482722902210947,
             "conscientiousness": 0.5074999425899492,
-            "extraversion": 0.5,
+            "extraversion": 0.5037146818177064,
             "agreeableness": 0.5,
             "neuroticism": 0.49903604006830515,
             "update_count": 1,
@@ -5400,20 +5400,20 @@
           "caution_rate": 0.26875,
           "exploration_rate": 0.5416666666666666,
           "seek_contact_rate": 0.0,
-          "mean_conditioned_prediction_error": 0.031914962063067244,
+          "mean_conditioned_prediction_error": 0.031914094029247275,
           "survival_score": 1.84125,
-          "danger_attention_rate": 0.2594640429147917,
-          "social_attention_rate": 0.0358241088877318,
-          "novelty_attention_rate": 0.5337947813989239,
+          "danger_attention_rate": 0.25946710028686704,
+          "social_attention_rate": 0.03581251437680116,
+          "novelty_attention_rate": 0.5337994417740825,
           "oracle_regret_rate": 0.8333333333333334
         },
         "distance_to_canonical": {
           "identity_commitment_jaccard": 1.0,
           "policy_distribution_l1_distance": 0.024897,
           "narrative_prior_l1_distance": 0.014917,
-          "personality_profile_l1_distance": 0.000565,
+          "personality_profile_l1_distance": 0.000605,
           "social_snapshot_similarity": 1.0,
-          "attention_target_consistency": 0.974935,
+          "attention_target_consistency": 0.974937,
           "action_metric_retention": 1.25,
           "conflict_uncertainty_score": 0.234417,
           "malformed_text_degradation_ratio": 0.723792

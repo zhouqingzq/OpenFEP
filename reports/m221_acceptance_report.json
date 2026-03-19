@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-18T14:44:45+00:00",
+  "generated_at": "2026-03-19T07:53:18+00:00",
   "seed_set": [
     221,
     240,
@@ -57,7 +57,7 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.002409,
+            "mean": 0.0,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
@@ -135,32 +135,32 @@
       "conflicting": {
         "metric_summary": {
           "identity_commitment_jaccard": {
-            "mean": 0.333333,
+            "mean": 0.6,
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.175082,
+            "mean": 0.177897,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.233947,
+            "mean": 0.239066,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.145547,
+            "mean": 0.148316,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.694379,
+            "mean": 0.692737,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8252925,
-            "std": 0.007191796547687745
+            "mean": 0.8259996666666667,
+            "std": 0.007337859285165473
           },
           "action_metric_retention": {
-            "mean": 0.335417,
-            "std": 0.0
+            "mean": 0.3805556666666667,
+            "std": 0.07149051564523942
           },
           "conflict_uncertainty_score": {
             "mean": 0.277636,
@@ -221,7 +221,7 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.125392,
+            "mean": 0.126639,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
@@ -305,24 +305,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.0079,
+            "mean": 0.007784,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.008718,
+            "mean": 0.009333,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.001611,
+            "mean": 0.00192,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.997442,
+            "mean": 0.997345,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.962946,
-            "std": 0.0009807837002452204
+            "mean": 0.9629698333333333,
+            "std": 0.0009205408585295176
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -346,24 +346,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.025573,
+            "mean": 0.02499,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.019224,
+            "mean": 0.020319,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.002149,
+            "mean": 0.002637,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.997442,
+            "mean": 0.997345,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8939995000000001,
-            "std": 0.003578745578644371
+            "mean": 0.8964909999999999,
+            "std": 0.002783722507722351
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -387,24 +387,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.023198,
+            "mean": 0.022658,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.033846,
+            "mean": 0.035519,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.003093,
+            "mean": 0.003781,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.610816,
+            "mean": 0.607026,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8662315,
-            "std": 0.005770989682599219
+            "mean": 0.8676951666666667,
+            "std": 0.0028782065837755512
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -428,24 +428,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.002343,
+            "mean": 0.002416,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.010377,
+            "mean": 0.011312,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.002763,
+            "mean": 0.003243,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.453694,
+            "mean": 0.450268,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9798973333333334,
-            "std": 0.0007800772753744037
+            "mean": 0.977869,
+            "std": 0.0006809091960998484
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -469,24 +469,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.063264,
+            "mean": 0.064428,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.084463,
+            "mean": 0.091677,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.016123,
+            "mean": 0.019611,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.602399,
+            "mean": 0.599986,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.73055,
-            "std": 0.009181587553359181
+            "mean": 0.7186315,
+            "std": 0.008126457156514567
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -510,24 +510,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.001094,
+            "mean": 0.001135,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.00211,
+            "mean": 0.002306,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.000667,
+            "mean": 0.000777,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.997442,
+            "mean": 0.997345,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9915335,
-            "std": 0.00024945457168255213
+            "mean": 0.9913933333333333,
+            "std": 0.0003320560528317757
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -561,7 +561,7 @@
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.001081,
+            "mean": 0.001093,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -569,8 +569,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9771646666666667,
-            "std": 0.011189996986396167
+            "mean": 0.9771663333333334,
+            "std": 0.01118981947525914
           },
           "action_metric_retention": {
             "mean": 1.1321548333333333,
@@ -602,7 +602,7 @@
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.001456,
+            "mean": 0.001464,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -610,8 +610,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9868706666666667,
-            "std": 0.0023960875517300274
+            "mean": 0.9868715,
+            "std": 0.002396700840043804
           },
           "action_metric_retention": {
             "mean": 1.0972221666666666,
@@ -635,15 +635,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.12418,
+            "mean": 0.126907,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.064577,
+            "mean": 0.066066,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.014351,
+            "mean": 0.016657,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -651,8 +651,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7549341666666667,
-            "std": 0.004962788208815223
+            "mean": 0.7513818333333333,
+            "std": 0.004804578074318543
           },
           "action_metric_retention": {
             "mean": 0.18249133333333334,
@@ -684,7 +684,7 @@
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.118636,
+            "mean": 0.119119,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -692,8 +692,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9867323333333333,
-            "std": 0.005729829016258302
+            "mean": 0.9867265000000001,
+            "std": 0.0057270810700856345
           },
           "action_metric_retention": {
             "mean": 1.0906566666666666,
@@ -725,7 +725,7 @@
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.118199,
+            "mean": 0.118652,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -733,8 +733,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8904185,
-            "std": 0.026499783771130412
+            "mean": 0.8904056666666667,
+            "std": 0.026505092301082226
           },
           "action_metric_retention": {
             "mean": 0.6117845,
@@ -766,7 +766,7 @@
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.000565,
+            "mean": 0.000605,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -774,8 +774,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9728653333333334,
-            "std": 0.0113766922062415
+            "mean": 0.9728656666666666,
+            "std": 0.011376569396009619
           },
           "action_metric_retention": {
             "mean": 1.1321548333333333,
@@ -801,26 +801,26 @@
         "std": 0.0
       },
       "policy_distribution_l1_distance": {
-        "mean": 0.005932,
-        "std": 0.0024968365318271575
+        "mean": 0.005090333333333333,
+        "std": 0.0036014508496191116
       },
       "narrative_prior_l1_distance": {
-        "mean": 0.004477,
-        "std": 0.0035630186639982677
+        "mean": 0.0046819999999999995,
+        "std": 0.0038102443491198827
       },
       "personality_profile_l1_distance": {
-        "mean": 0.0008973333333333333,
-        "std": 0.0006703881131271812
+        "mean": 0.0010043333333333334,
+        "std": 0.000786340186489848
       }
     },
     "canonical_vs_noisy": {
       "policy_distribution_l1_distance": {
-        "mean": 0.026031,
-        "std": 0.016128242805711974
+        "mean": 0.025836666666666668,
+        "std": 0.01613610102293061
       },
       "attention_target_consistency": {
-        "mean": 0.9477907222222223,
-        "std": 0.03943422766498604
+        "mean": 0.9486215,
+        "std": 0.03828089182063728
       },
       "action_metric_retention": {
         "mean": 1.032407388888889,
@@ -847,12 +847,12 @@
         "std": 0.06028974871955154
       },
       "extreme_single_commitment_ratio": {
-        "mean": 0.49115818661888466,
-        "std": 0.05456234008112106
+        "mean": 0.4993475849144044,
+        "std": 0.054252763164329094
       },
       "policy_distribution_l1_distance": {
-        "mean": 0.10748666666666666,
-        "std": 0.06311992763691106
+        "mean": 0.109154,
+        "std": 0.06460734497459764
       }
     },
     "low_signal_degradation": {
@@ -867,12 +867,12 @@
         "std": 0.0
       },
       "policy_distribution_l1_distance": {
-        "mean": 0.008663666666666667,
-        "std": 0.011487385613020144
+        "mean": 0.008677333333333334,
+        "std": 0.011478392638150847
       },
       "narrative_prior_l1_distance": {
-        "mean": 0.0056756666666666665,
-        "std": 0.006591140838698226
+        "mean": 0.005741,
+        "std": 0.006556352695414324
       }
     }
   },
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135"
+    "codebase_version": "f665a3f401bc62009a6414390070d841ba8d4e8f"
   }
 }

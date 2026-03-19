@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.25",
   "schema_version": "m225_v2",
-  "generated_at": "2026-03-18T14:51:24+00:00",
-  "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135",
+  "generated_at": "2026-03-19T08:04:02+00:00",
+  "codebase_version": "f665a3f401bc62009a6414390070d841ba8d4e8f",
   "seed_set": [
     225,
     244,
@@ -120,19 +120,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.97954,
-      "cross_world_commitment_alignment": 0.999602,
+      "identity_preservation_score": 0.977231,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.19715,
+        "self_narrative_update_delta": 0.195267,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176491,
+        "social_trust_prior_shift": 0.173718,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.97954,
+          "survive_with_identity": 0.977231,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -145,19 +145,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.970165,
+      "identity_preservation_score": 0.969508,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.156699,
+        "self_narrative_update_delta": 0.188389,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.090496,
+        "social_trust_prior_shift": 0.168499,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.970165,
+          "survive_with_identity": 0.969508,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -170,10 +170,10 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.878039,
-      "cross_world_commitment_alignment": 0.820118,
+      "identity_preservation_score": 0.879622,
+      "cross_world_commitment_alignment": 0.82083,
       "identity_shift": {
-        "self_narrative_update_delta": 0.099357,
+        "self_narrative_update_delta": 0.099353,
         "policy_reconfiguration_delta": 0.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -182,7 +182,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878039,
+          "survive_with_identity": 0.879622,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -245,19 +245,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.878613,
-      "cross_world_commitment_alignment": 0.820376,
+      "identity_preservation_score": 0.979133,
+      "cross_world_commitment_alignment": 0.995373,
       "identity_shift": {
-        "self_narrative_update_delta": 0.118203,
+        "self_narrative_update_delta": 0.196738,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878613,
+          "survive_with_identity": 0.979133,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -295,19 +295,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.796526,
-      "cross_world_commitment_alignment": 0.799073,
+      "identity_preservation_score": 0.761908,
+      "cross_world_commitment_alignment": 0.767859,
       "identity_shift": {
-        "self_narrative_update_delta": 0.005038,
+        "self_narrative_update_delta": 0.010902,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.796526,
+          "survive_with_identity": 0.761908,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -320,19 +320,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.960289,
+      "identity_preservation_score": 0.966483,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.208825,
+        "self_narrative_update_delta": 0.200575,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176013,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.960289,
+          "survive_with_identity": 0.966483,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -345,19 +345,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.957357,
+      "identity_preservation_score": 0.930799,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.180406,
+        "self_narrative_update_delta": 0.129725,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.139063,
+        "social_trust_prior_shift": 0.101091,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.957357,
+          "survive_with_identity": 0.930799,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -370,19 +370,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.650167,
-      "cross_world_commitment_alignment": 0.848205,
+      "identity_preservation_score": 0.762779,
+      "cross_world_commitment_alignment": 0.898941,
       "identity_shift": {
-        "self_narrative_update_delta": 0.038638,
+        "self_narrative_update_delta": 0.063208,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.170779,
+        "social_trust_prior_shift": 0.172084,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.650167,
+          "survive_with_identity": 0.762779,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -420,19 +420,19 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.769016,
-      "cross_world_commitment_alignment": 0.775641,
+      "identity_preservation_score": 0.755123,
+      "cross_world_commitment_alignment": 0.762514,
       "identity_shift": {
-        "self_narrative_update_delta": 0.078242,
+        "self_narrative_update_delta": 0.034103,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.37,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.769016,
+          "survive_with_identity": 0.755123,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -445,10 +445,10 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.98807,
+      "identity_preservation_score": 0.982543,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209155,
+        "self_narrative_update_delta": 0.204169,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -457,7 +457,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98807,
+          "survive_with_identity": 0.982543,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -470,19 +470,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.667846,
-      "cross_world_commitment_alignment": 0.855294,
+      "identity_preservation_score": 0.696914,
+      "cross_world_commitment_alignment": 0.869199,
       "identity_shift": {
-        "self_narrative_update_delta": 0.19285,
+        "self_narrative_update_delta": 0.024343,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.169845,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.667846,
+          "survive_with_identity": 0.696914,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -495,19 +495,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.906019,
-      "cross_world_commitment_alignment": 0.910625,
+      "identity_preservation_score": 0.8963,
+      "cross_world_commitment_alignment": 0.942918,
       "identity_shift": {
-        "self_narrative_update_delta": 0.088111,
+        "self_narrative_update_delta": 0.111418,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.906019,
+          "survive_with_identity": 0.8963,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -520,19 +520,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.986632,
+      "identity_preservation_score": 0.978592,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.210373,
+        "self_narrative_update_delta": 0.197157,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176944,
+        "social_trust_prior_shift": 0.17343,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.986632,
+          "survive_with_identity": 0.978592,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -545,19 +545,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.896806,
-      "cross_world_commitment_alignment": 0.873107,
+      "identity_preservation_score": 0.894908,
+      "cross_world_commitment_alignment": 0.873542,
       "identity_shift": {
-        "self_narrative_update_delta": 0.173415,
+        "self_narrative_update_delta": 0.150287,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.896806,
+          "survive_with_identity": 0.894908,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -570,19 +570,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.97696,
-      "cross_world_commitment_alignment": 0.985333,
+      "identity_preservation_score": 0.975267,
+      "cross_world_commitment_alignment": 0.9827,
       "identity_shift": {
-        "self_narrative_update_delta": 0.2024,
+        "self_narrative_update_delta": 0.196766,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.172427,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.97696,
+          "survive_with_identity": 0.975267,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -595,10 +595,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.984293,
+      "identity_preservation_score": 0.984292,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.199626,
+        "self_narrative_update_delta": 0.199625,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -607,7 +607,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.984293,
+          "survive_with_identity": 0.984292,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -645,19 +645,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.878485,
-      "cross_world_commitment_alignment": 0.820318,
+      "identity_preservation_score": 0.979018,
+      "cross_world_commitment_alignment": 0.995322,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117975,
+        "self_narrative_update_delta": 0.196748,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878485,
+          "survive_with_identity": 0.979018,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -695,19 +695,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.796282,
-      "cross_world_commitment_alignment": 0.798681,
+      "identity_preservation_score": 0.761894,
+      "cross_world_commitment_alignment": 0.767852,
       "identity_shift": {
-        "self_narrative_update_delta": 0.005055,
+        "self_narrative_update_delta": 0.010715,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.796282,
+          "survive_with_identity": 0.761894,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -720,20 +720,20 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.695007,
-      "cross_world_commitment_alignment": 0.89544,
+      "identity_preservation_score": 0.750037,
+      "cross_world_commitment_alignment": 0.920966,
       "identity_shift": {
-        "self_narrative_update_delta": 0.025066,
+        "self_narrative_update_delta": 0.008667,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.172095,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.695007,
-          "avoid_social_capture": 0.5,
+          "survive_with_identity": 0.750037,
+          "avoid_social_capture": 0.666667,
           "preserve_traceability": 0.0
         }
       }
@@ -745,19 +745,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.878266,
-      "cross_world_commitment_alignment": 0.988228,
+      "identity_preservation_score": 0.810439,
+      "cross_world_commitment_alignment": 0.92961,
       "identity_shift": {
-        "self_narrative_update_delta": 0.077949,
+        "self_narrative_update_delta": 0.070604,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169659,
+        "social_trust_prior_shift": 0.37,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878266,
+          "survive_with_identity": 0.810439,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -770,19 +770,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.984477,
-      "cross_world_commitment_alignment": 1.0,
+      "identity_preservation_score": 0.967697,
+      "cross_world_commitment_alignment": 0.9686,
       "identity_shift": {
-        "self_narrative_update_delta": 0.201772,
+        "self_narrative_update_delta": 0.203927,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.172036,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.984477,
+          "survive_with_identity": 0.967697,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -845,19 +845,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.850257,
-      "cross_world_commitment_alignment": 0.93599,
+      "identity_preservation_score": 0.940686,
+      "cross_world_commitment_alignment": 0.999699,
       "identity_shift": {
-        "self_narrative_update_delta": 0.013316,
+        "self_narrative_update_delta": 0.176943,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.37,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.850257,
+          "survive_with_identity": 0.940686,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.333333
         }
@@ -870,19 +870,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.566474,
-      "cross_world_commitment_alignment": 0.810422,
+      "identity_preservation_score": 0.6905,
+      "cross_world_commitment_alignment": 0.890274,
       "identity_shift": {
-        "self_narrative_update_delta": 0.178263,
+        "self_narrative_update_delta": 0.027744,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.170332,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.566474,
+          "survive_with_identity": 0.6905,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.75
         }
@@ -895,19 +895,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.796429,
-      "cross_world_commitment_alignment": 0.799029,
+      "identity_preservation_score": 0.761935,
+      "cross_world_commitment_alignment": 0.767871,
       "identity_shift": {
-        "self_narrative_update_delta": 0.00513,
+        "self_narrative_update_delta": 0.010468,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.796429,
+          "survive_with_identity": 0.761935,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -920,19 +920,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.987089,
+      "identity_preservation_score": 0.977421,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.210306,
+        "self_narrative_update_delta": 0.195434,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176942,
+        "social_trust_prior_shift": 0.173722,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.987089,
+          "survive_with_identity": 0.977421,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -945,19 +945,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.926964,
-      "cross_world_commitment_alignment": 0.994032,
+      "identity_preservation_score": 0.857192,
+      "cross_world_commitment_alignment": 0.962889,
       "identity_shift": {
-        "self_narrative_update_delta": 0.122962,
+        "self_narrative_update_delta": 0.06494,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.173256,
+        "social_trust_prior_shift": 0.168498,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.926964,
+          "survive_with_identity": 0.857192,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -995,7 +995,7 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.984673,
+      "identity_preservation_score": 0.984672,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
         "self_narrative_update_delta": 0.199851,
@@ -1007,7 +1007,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.984673,
+          "survive_with_identity": 0.984672,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1045,19 +1045,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.878613,
-      "cross_world_commitment_alignment": 0.820376,
+      "identity_preservation_score": 0.979133,
+      "cross_world_commitment_alignment": 0.995373,
       "identity_shift": {
-        "self_narrative_update_delta": 0.118203,
+        "self_narrative_update_delta": 0.196738,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878613,
+          "survive_with_identity": 0.979133,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -1095,10 +1095,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.616846,
-      "cross_world_commitment_alignment": 0.78909,
+      "identity_preservation_score": 0.626868,
+      "cross_world_commitment_alignment": 0.7936,
       "identity_shift": {
-        "self_narrative_update_delta": 0.227832,
+        "self_narrative_update_delta": 0.199112,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -1107,7 +1107,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.616846,
+          "survive_with_identity": 0.626868,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.0
         }
@@ -1120,19 +1120,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.980583,
+      "identity_preservation_score": 0.977918,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.197845,
+        "self_narrative_update_delta": 0.198723,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176405,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.980583,
+          "survive_with_identity": 0.977918,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1145,19 +1145,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974028,
+      "identity_preservation_score": 0.97083,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.179201,
+        "self_narrative_update_delta": 0.188411,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.174907,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974028,
+          "survive_with_identity": 0.97083,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1170,19 +1170,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.978221,
-      "cross_world_commitment_alignment": 0.98836,
+      "identity_preservation_score": 0.982941,
+      "cross_world_commitment_alignment": 0.994291,
       "identity_shift": {
-        "self_narrative_update_delta": 0.193034,
+        "self_narrative_update_delta": 0.199311,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.137574,
+        "social_trust_prior_shift": 0.17662,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.978221,
+          "survive_with_identity": 0.982941,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1195,10 +1195,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.986842,
+      "identity_preservation_score": 0.983346,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.198318,
+        "self_narrative_update_delta": 0.193031,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -1207,7 +1207,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.986842,
+          "survive_with_identity": 0.983346,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1220,10 +1220,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.915634,
-      "cross_world_commitment_alignment": 0.966993,
+      "identity_preservation_score": 0.92385,
+      "cross_world_commitment_alignment": 0.97069,
       "identity_shift": {
-        "self_narrative_update_delta": 0.131267,
+        "self_narrative_update_delta": 0.141379,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.155236,
         "commitments_pre": {
@@ -1232,7 +1232,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.915634,
+          "survive_with_identity": 0.92385,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1245,19 +1245,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.880953,
-      "cross_world_commitment_alignment": 0.821429,
+      "identity_preservation_score": 0.978699,
+      "cross_world_commitment_alignment": 0.995178,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117478,
+        "self_narrative_update_delta": 0.195521,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.880953,
+          "survive_with_identity": 0.978699,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -1270,10 +1270,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.963362,
-      "cross_world_commitment_alignment": 0.973096,
+      "identity_preservation_score": 0.950306,
+      "cross_world_commitment_alignment": 0.967221,
       "identity_shift": {
-        "self_narrative_update_delta": 0.211336,
+        "self_narrative_update_delta": 0.203052,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -1282,7 +1282,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.963362,
+          "survive_with_identity": 0.950306,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1295,19 +1295,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.903711,
-      "cross_world_commitment_alignment": 0.946253,
+      "identity_preservation_score": 0.831918,
+      "cross_world_commitment_alignment": 0.868113,
       "identity_shift": {
-        "self_narrative_update_delta": 0.148475,
+        "self_narrative_update_delta": 0.018739,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.903711,
+          "survive_with_identity": 0.831918,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1320,19 +1320,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.980577,
+      "identity_preservation_score": 0.980424,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.188112,
+        "self_narrative_update_delta": 0.20298,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.177065,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.980577,
+          "survive_with_identity": 0.980424,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1345,19 +1345,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.922705,
+      "identity_preservation_score": 0.920228,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.16277,
+        "self_narrative_update_delta": 0.123295,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.922705,
+          "survive_with_identity": 0.920228,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1370,19 +1370,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.963442,
+      "identity_preservation_score": 0.948877,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.184725,
+        "self_narrative_update_delta": 0.181057,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.176944,
+        "social_trust_prior_shift": 0.175664,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.963442,
+          "survive_with_identity": 0.948877,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1395,19 +1395,19 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.990998,
+      "identity_preservation_score": 0.984713,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209574,
+        "self_narrative_update_delta": 0.205525,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.17753,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.990998,
+          "survive_with_identity": 0.984713,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1420,10 +1420,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.975893,
+      "identity_preservation_score": 0.979687,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.206687,
+        "self_narrative_update_delta": 0.207941,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.176394,
         "commitments_pre": {
@@ -1432,7 +1432,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.975893,
+          "survive_with_identity": 0.979687,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1445,19 +1445,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.989073,
+      "identity_preservation_score": 0.983431,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.212749,
+        "self_narrative_update_delta": 0.210021,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176044,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.989073,
+          "survive_with_identity": 0.983431,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -1470,10 +1470,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.954511,
+      "identity_preservation_score": 0.956093,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.193773,
+        "self_narrative_update_delta": 0.196301,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.176435,
         "commitments_pre": {
@@ -1482,7 +1482,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.954511,
+          "survive_with_identity": 0.956093,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1495,19 +1495,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.914129,
-      "cross_world_commitment_alignment": 0.957397,
+      "identity_preservation_score": 0.950362,
+      "cross_world_commitment_alignment": 0.996619,
       "identity_shift": {
-        "self_narrative_update_delta": 0.12358,
+        "self_narrative_update_delta": 0.189482,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.914129,
+          "survive_with_identity": 0.950362,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1520,19 +1520,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.98197,
+      "identity_preservation_score": 0.978331,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.203911,
+        "self_narrative_update_delta": 0.199125,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.176183,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98197,
+          "survive_with_identity": 0.978331,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1545,19 +1545,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.895738,
-      "cross_world_commitment_alignment": 0.871337,
+      "identity_preservation_score": 0.860953,
+      "cross_world_commitment_alignment": 0.807846,
       "identity_shift": {
-        "self_narrative_update_delta": 0.171802,
+        "self_narrative_update_delta": 0.093453,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.37,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.895738,
+          "survive_with_identity": 0.860953,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1570,19 +1570,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.978251,
-      "cross_world_commitment_alignment": 0.988421,
+      "identity_preservation_score": 0.982955,
+      "cross_world_commitment_alignment": 0.994328,
       "identity_shift": {
-        "self_narrative_update_delta": 0.193066,
+        "self_narrative_update_delta": 0.199312,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.137749,
+        "social_trust_prior_shift": 0.176621,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.978251,
+          "survive_with_identity": 0.982955,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1595,19 +1595,19 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.989071,
+      "identity_preservation_score": 0.983455,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.206917,
+        "self_narrative_update_delta": 0.19315,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.989071,
+          "survive_with_identity": 0.983455,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1620,19 +1620,19 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.897012,
-      "cross_world_commitment_alignment": 0.915899,
+      "identity_preservation_score": 0.881942,
+      "cross_world_commitment_alignment": 0.878319,
       "identity_shift": {
-        "self_narrative_update_delta": 0.158093,
+        "self_narrative_update_delta": 0.090159,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.158175,
+        "social_trust_prior_shift": 0.180487,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.897012,
+          "survive_with_identity": 0.881942,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1645,10 +1645,10 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.986143,
-      "cross_world_commitment_alignment": 1.0,
+      "identity_preservation_score": 0.978682,
+      "cross_world_commitment_alignment": 0.99517,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207543,
+        "self_narrative_update_delta": 0.195385,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -1657,7 +1657,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.986143,
+          "survive_with_identity": 0.978682,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -1670,10 +1670,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.945361,
-      "cross_world_commitment_alignment": 0.946662,
+      "identity_preservation_score": 0.932262,
+      "cross_world_commitment_alignment": 0.940768,
       "identity_shift": {
-        "self_narrative_update_delta": 0.13943,
+        "self_narrative_update_delta": 0.130968,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.22,
         "commitments_pre": {
@@ -1682,7 +1682,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.945361,
+          "survive_with_identity": 0.932262,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1695,19 +1695,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.903673,
-      "cross_world_commitment_alignment": 0.946236,
+      "identity_preservation_score": 0.831885,
+      "cross_world_commitment_alignment": 0.868098,
       "identity_shift": {
-        "self_narrative_update_delta": 0.148399,
+        "self_narrative_update_delta": 0.01868,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.903673,
+          "survive_with_identity": 0.831885,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1720,20 +1720,20 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.706297,
-      "cross_world_commitment_alignment": 0.866813,
+      "identity_preservation_score": 0.774747,
+      "cross_world_commitment_alignment": 0.932009,
       "identity_shift": {
-        "self_narrative_update_delta": 0.047614,
+        "self_narrative_update_delta": 0.057643,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.175967,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.706297,
-          "avoid_social_capture": 0.666667,
+          "survive_with_identity": 0.774747,
+          "avoid_social_capture": 0.833333,
           "preserve_traceability": 0.0
         }
       }
@@ -1745,19 +1745,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.858019,
-      "cross_world_commitment_alignment": 0.979677,
+      "identity_preservation_score": 0.812378,
+      "cross_world_commitment_alignment": 0.955483,
       "identity_shift": {
-        "self_narrative_update_delta": 0.059931,
+        "self_narrative_update_delta": 0.002349,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.171909,
+        "social_trust_prior_shift": 0.167775,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.858019,
+          "survive_with_identity": 0.812378,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1770,10 +1770,10 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.988122,
+      "identity_preservation_score": 0.98812,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209474,
+        "self_narrative_update_delta": 0.209467,
         "policy_reconfiguration_delta": 0.0,
         "social_trust_prior_shift": 0.176335,
         "commitments_pre": {
@@ -1782,7 +1782,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.988122,
+          "survive_with_identity": 0.98812,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1795,10 +1795,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.986747,
+      "identity_preservation_score": 0.983138,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.198388,
+        "self_narrative_update_delta": 0.193071,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -1807,7 +1807,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.986747,
+          "survive_with_identity": 0.983138,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1820,19 +1820,19 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.895982,
-      "cross_world_commitment_alignment": 0.914407,
+      "identity_preservation_score": 0.897939,
+      "cross_world_commitment_alignment": 0.901809,
       "identity_shift": {
-        "self_narrative_update_delta": 0.157096,
+        "self_narrative_update_delta": 0.15507,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.152985,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.895982,
+          "survive_with_identity": 0.897939,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1845,19 +1845,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.835088,
-      "cross_world_commitment_alignment": 0.930613,
+      "identity_preservation_score": 0.940172,
+      "cross_world_commitment_alignment": 0.999468,
       "identity_shift": {
-        "self_narrative_update_delta": 0.061891,
+        "self_narrative_update_delta": 0.178063,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.835088,
+          "survive_with_identity": 0.940172,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.333333
         }
@@ -1870,19 +1870,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.850279,
-      "cross_world_commitment_alignment": 0.988101,
+      "identity_preservation_score": 0.861025,
+      "cross_world_commitment_alignment": 0.992937,
       "identity_shift": {
-        "self_narrative_update_delta": 0.106738,
+        "self_narrative_update_delta": 0.119386,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.175557,
+        "social_trust_prior_shift": 0.175556,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.850279,
+          "survive_with_identity": 0.861025,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.75
         }
@@ -1895,19 +1895,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.902532,
-      "cross_world_commitment_alignment": 0.945723,
+      "identity_preservation_score": 0.858208,
+      "cross_world_commitment_alignment": 0.906593,
       "identity_shift": {
-        "self_narrative_update_delta": 0.143928,
+        "self_narrative_update_delta": 0.040579,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.22,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.902532,
+          "survive_with_identity": 0.858208,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1920,19 +1920,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.98069,
+      "identity_preservation_score": 0.978506,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.19812,
+        "self_narrative_update_delta": 0.199296,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176181,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98069,
+          "survive_with_identity": 0.978506,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -1945,19 +1945,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.896278,
-      "cross_world_commitment_alignment": 0.984876,
+      "identity_preservation_score": 0.829914,
+      "cross_world_commitment_alignment": 0.952335,
       "identity_shift": {
-        "self_narrative_update_delta": 0.072186,
+        "self_narrative_update_delta": 0.017524,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.171529,
+        "social_trust_prior_shift": 0.170547,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.896278,
+          "survive_with_identity": 0.829914,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -1970,19 +1970,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.788127,
-      "cross_world_commitment_alignment": 0.799562,
+      "identity_preservation_score": 0.896841,
+      "cross_world_commitment_alignment": 0.919576,
       "identity_shift": {
-        "self_narrative_update_delta": 0.028603,
+        "self_narrative_update_delta": 0.130695,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.788127,
+          "survive_with_identity": 0.896841,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -1995,19 +1995,19 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.988973,
+      "identity_preservation_score": 0.983363,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.206824,
+        "self_narrative_update_delta": 0.193082,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.988973,
+          "survive_with_identity": 0.983363,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -2020,10 +2020,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.915634,
-      "cross_world_commitment_alignment": 0.966993,
+      "identity_preservation_score": 0.92385,
+      "cross_world_commitment_alignment": 0.97069,
       "identity_shift": {
-        "self_narrative_update_delta": 0.131267,
+        "self_narrative_update_delta": 0.141379,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.155236,
         "commitments_pre": {
@@ -2032,7 +2032,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.915634,
+          "survive_with_identity": 0.92385,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -2045,19 +2045,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.880953,
-      "cross_world_commitment_alignment": 0.821429,
+      "identity_preservation_score": 0.978699,
+      "cross_world_commitment_alignment": 0.995178,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117478,
+        "self_narrative_update_delta": 0.195521,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.880953,
+          "survive_with_identity": 0.978699,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -2070,10 +2070,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.836493,
-      "cross_world_commitment_alignment": 0.897672,
+      "identity_preservation_score": 0.799231,
+      "cross_world_commitment_alignment": 0.880904,
       "identity_shift": {
-        "self_narrative_update_delta": 0.047104,
+        "self_narrative_update_delta": 0.009034,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.22,
         "commitments_pre": {
@@ -2082,7 +2082,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.836493,
+          "survive_with_identity": 0.799231,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -2095,19 +2095,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.785921,
-      "cross_world_commitment_alignment": 0.893248,
+      "identity_preservation_score": 0.718231,
+      "cross_world_commitment_alignment": 0.794037,
       "identity_shift": {
-        "self_narrative_update_delta": 0.02195,
+        "self_narrative_update_delta": 0.114953,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.785921,
+          "survive_with_identity": 0.718231,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.0
         }
@@ -2145,19 +2145,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.976479,
+      "identity_preservation_score": 0.959349,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.181692,
+        "self_narrative_update_delta": 0.174339,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.173357,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.976479,
+          "survive_with_identity": 0.959349,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2173,7 +2173,7 @@
       "identity_preservation_score": 0.977916,
       "cross_world_commitment_alignment": 0.994868,
       "identity_shift": {
-        "self_narrative_update_delta": 0.191334,
+        "self_narrative_update_delta": 0.191333,
         "policy_reconfiguration_delta": 0.0,
         "social_trust_prior_shift": 0.133749,
         "commitments_pre": {
@@ -2245,19 +2245,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.881755,
-      "cross_world_commitment_alignment": 0.82179,
+      "identity_preservation_score": 0.979228,
+      "cross_world_commitment_alignment": 0.995416,
       "identity_shift": {
-        "self_narrative_update_delta": 0.118983,
+        "self_narrative_update_delta": 0.193377,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.881755,
+          "survive_with_identity": 0.979228,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -2320,19 +2320,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.972875,
+      "identity_preservation_score": 0.982343,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.167916,
+        "self_narrative_update_delta": 0.207341,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.177251,
+        "social_trust_prior_shift": 0.175985,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.972875,
+          "survive_with_identity": 0.982343,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -2345,19 +2345,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.96121,
+      "identity_preservation_score": 0.9398,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.195155,
+        "self_narrative_update_delta": 0.139121,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.96121,
+          "survive_with_identity": 0.9398,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2370,19 +2370,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.73955,
-      "cross_world_commitment_alignment": 0.874561,
+      "identity_preservation_score": 0.770226,
+      "cross_world_commitment_alignment": 0.901365,
       "identity_shift": {
-        "self_narrative_update_delta": 0.08677,
+        "self_narrative_update_delta": 0.061118,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.17099,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.73955,
+          "survive_with_identity": 0.770226,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2445,19 +2445,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.989045,
+      "identity_preservation_score": 0.982439,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.213241,
+        "self_narrative_update_delta": 0.202795,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176171,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.989045,
+          "survive_with_identity": 0.982439,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -2470,19 +2470,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.780144,
-      "cross_world_commitment_alignment": 0.863858,
+      "identity_preservation_score": 0.813117,
+      "cross_world_commitment_alignment": 0.903905,
       "identity_shift": {
-        "self_narrative_update_delta": 0.004384,
+        "self_narrative_update_delta": 0.112132,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.37,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.780144,
+          "survive_with_identity": 0.813117,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2495,10 +2495,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.644326,
-      "cross_world_commitment_alignment": 0.714947,
+      "identity_preservation_score": 0.642448,
+      "cross_world_commitment_alignment": 0.714102,
       "identity_shift": {
-        "self_narrative_update_delta": 0.137861,
+        "self_narrative_update_delta": 0.156743,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -2507,7 +2507,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.644326,
+          "survive_with_identity": 0.642448,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2545,19 +2545,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.8987,
-      "cross_world_commitment_alignment": 0.872669,
+      "identity_preservation_score": 0.861647,
+      "cross_world_commitment_alignment": 0.808158,
       "identity_shift": {
-        "self_narrative_update_delta": 0.175558,
+        "self_narrative_update_delta": 0.091418,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.37,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.8987,
+          "survive_with_identity": 0.861647,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2645,19 +2645,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.99072,
-      "cross_world_commitment_alignment": 1.0,
+      "identity_preservation_score": 0.979129,
+      "cross_world_commitment_alignment": 0.995371,
       "identity_shift": {
-        "self_narrative_update_delta": 0.211459,
+        "self_narrative_update_delta": 0.194371,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176667,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.99072,
+          "survive_with_identity": 0.979129,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -2720,20 +2720,20 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.718286,
-      "cross_world_commitment_alignment": 0.88323,
+      "identity_preservation_score": 0.748804,
+      "cross_world_commitment_alignment": 0.918296,
       "identity_shift": {
-        "self_narrative_update_delta": 0.05398,
+        "self_narrative_update_delta": 0.016799,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.175675,
+        "social_trust_prior_shift": 0.175128,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.718286,
-          "avoid_social_capture": 0.666667,
+          "survive_with_identity": 0.748804,
+          "avoid_social_capture": 0.833333,
           "preserve_traceability": 0.0
         }
       }
@@ -2745,19 +2745,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.876708,
-      "cross_world_commitment_alignment": 0.98428,
+      "identity_preservation_score": 0.840825,
+      "cross_world_commitment_alignment": 0.970309,
       "identity_shift": {
-        "self_narrative_update_delta": 0.053312,
+        "self_narrative_update_delta": 0.024491,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.101276,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.876708,
+          "survive_with_identity": 0.840825,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -2845,19 +2845,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.889297,
-      "cross_world_commitment_alignment": 0.978575,
+      "identity_preservation_score": 0.94424,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.177277,
+        "self_narrative_update_delta": 0.177979,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.175219,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.889297,
+          "survive_with_identity": 0.94424,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.333333
         }
@@ -2870,19 +2870,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.618561,
-      "cross_world_commitment_alignment": 0.812033,
+      "identity_preservation_score": 0.664315,
+      "cross_world_commitment_alignment": 0.877058,
       "identity_shift": {
-        "self_narrative_update_delta": 0.127282,
+        "self_narrative_update_delta": 0.157753,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.099365,
+        "social_trust_prior_shift": 0.171274,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.618561,
+          "survive_with_identity": 0.664315,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.75
         }
@@ -2945,19 +2945,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.925174,
-      "cross_world_commitment_alignment": 0.997978,
+      "identity_preservation_score": 0.852818,
+      "cross_world_commitment_alignment": 0.960927,
       "identity_shift": {
-        "self_narrative_update_delta": 0.113571,
+        "self_narrative_update_delta": 0.039921,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.173356,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.925174,
+          "survive_with_identity": 0.852818,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -2970,10 +2970,10 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.600922,
-      "cross_world_commitment_alignment": 0.695415,
+      "identity_preservation_score": 0.612523,
+      "cross_world_commitment_alignment": 0.700635,
       "identity_shift": {
-        "self_narrative_update_delta": 0.204162,
+        "self_narrative_update_delta": 0.181419,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -2982,7 +2982,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.600922,
+          "survive_with_identity": 0.612523,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3045,19 +3045,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.881755,
-      "cross_world_commitment_alignment": 0.82179,
+      "identity_preservation_score": 0.979228,
+      "cross_world_commitment_alignment": 0.995416,
       "identity_shift": {
-        "self_narrative_update_delta": 0.118983,
+        "self_narrative_update_delta": 0.193377,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.881755,
+          "survive_with_identity": 0.979228,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -3070,10 +3070,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.570396,
-      "cross_world_commitment_alignment": 0.681678,
+      "identity_preservation_score": 0.579234,
+      "cross_world_commitment_alignment": 0.685655,
       "identity_shift": {
-        "self_narrative_update_delta": 0.082201,
+        "self_narrative_update_delta": 0.070509,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -3082,7 +3082,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.570396,
+          "survive_with_identity": 0.579234,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -3095,19 +3095,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.572033,
-      "cross_world_commitment_alignment": 0.697572,
+      "identity_preservation_score": 0.556435,
+      "cross_world_commitment_alignment": 0.693578,
       "identity_shift": {
-        "self_narrative_update_delta": 0.272151,
+        "self_narrative_update_delta": 0.282898,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.187413,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.572033,
+          "survive_with_identity": 0.556435,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.0
         }
@@ -3120,19 +3120,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.979318,
-      "cross_world_commitment_alignment": 0.996916,
+      "identity_preservation_score": 0.978691,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.198502,
+        "self_narrative_update_delta": 0.199805,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.127514,
+        "social_trust_prior_shift": 0.172702,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.979318,
+          "survive_with_identity": 0.978691,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3145,19 +3145,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974136,
+      "identity_preservation_score": 0.957813,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.1828,
+        "self_narrative_update_delta": 0.173064,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.172846,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974136,
+          "survive_with_identity": 0.957813,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3170,19 +3170,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.981098,
+      "identity_preservation_score": 0.982678,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.203014,
+        "self_narrative_update_delta": 0.203009,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.169158,
+        "social_trust_prior_shift": 0.169159,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.981098,
+          "survive_with_identity": 0.982678,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3195,10 +3195,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.973712,
-      "cross_world_commitment_alignment": 0.996303,
+      "identity_preservation_score": 0.989025,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209563,
+        "self_narrative_update_delta": 0.215792,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -3207,7 +3207,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.973712,
+          "survive_with_identity": 0.989025,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3220,10 +3220,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.675681,
-      "cross_world_commitment_alignment": 0.729056,
+      "identity_preservation_score": 0.675996,
+      "cross_world_commitment_alignment": 0.729198,
       "identity_shift": {
-        "self_narrative_update_delta": 0.120588,
+        "self_narrative_update_delta": 0.119328,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -3232,7 +3232,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.675681,
+          "survive_with_identity": 0.675996,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3245,19 +3245,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.880131,
-      "cross_world_commitment_alignment": 0.821059,
+      "identity_preservation_score": 0.978456,
+      "cross_world_commitment_alignment": 0.995069,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117782,
+        "self_narrative_update_delta": 0.197229,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.880131,
+          "survive_with_identity": 0.978456,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -3320,10 +3320,10 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.967816,
+      "identity_preservation_score": 0.967813,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.208771,
+        "self_narrative_update_delta": 0.208768,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.174896,
         "commitments_pre": {
@@ -3332,7 +3332,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.967816,
+          "survive_with_identity": 0.967813,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3345,19 +3345,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.944033,
+      "identity_preservation_score": 0.92602,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.181043,
+        "self_narrative_update_delta": 0.131475,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.127832,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.944033,
+          "survive_with_identity": 0.92602,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3370,19 +3370,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.809421,
-      "cross_world_commitment_alignment": 0.905375,
+      "identity_preservation_score": 0.838756,
+      "cross_world_commitment_alignment": 0.930022,
       "identity_shift": {
-        "self_narrative_update_delta": 0.120766,
+        "self_narrative_update_delta": 0.072149,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.104071,
+        "social_trust_prior_shift": 0.173231,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.809421,
+          "survive_with_identity": 0.838756,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3420,19 +3420,19 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.801602,
-      "cross_world_commitment_alignment": 0.807348,
+      "identity_preservation_score": 0.837457,
+      "cross_world_commitment_alignment": 0.842897,
       "identity_shift": {
-        "self_narrative_update_delta": 0.140581,
+        "self_narrative_update_delta": 0.122965,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.128732,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.801602,
+          "survive_with_identity": 0.837457,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3445,19 +3445,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.986986,
+      "identity_preservation_score": 0.981802,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.206551,
+        "self_narrative_update_delta": 0.201804,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.172205,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.986986,
+          "survive_with_identity": 0.981802,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -3470,19 +3470,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.723028,
-      "cross_world_commitment_alignment": 0.857724,
+      "identity_preservation_score": 0.711969,
+      "cross_world_commitment_alignment": 0.852572,
       "identity_shift": {
-        "self_narrative_update_delta": 0.027562,
+        "self_narrative_update_delta": 0.017399,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.113902,
+        "social_trust_prior_shift": 0.110082,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.723028,
+          "survive_with_identity": 0.711969,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3495,10 +3495,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.751405,
-      "cross_world_commitment_alignment": 0.784972,
+      "identity_preservation_score": 0.739613,
+      "cross_world_commitment_alignment": 0.779666,
       "identity_shift": {
-        "self_narrative_update_delta": 0.093869,
+        "self_narrative_update_delta": 0.083293,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.156503,
         "commitments_pre": {
@@ -3507,7 +3507,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.751405,
+          "survive_with_identity": 0.739613,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3520,19 +3520,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.979499,
-      "cross_world_commitment_alignment": 0.996998,
+      "identity_preservation_score": 0.97882,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.198644,
+        "self_narrative_update_delta": 0.1999,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.127523,
+        "social_trust_prior_shift": 0.172703,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.979499,
+          "survive_with_identity": 0.97882,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3545,10 +3545,10 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.810232,
-      "cross_world_commitment_alignment": 0.789604,
+      "identity_preservation_score": 0.813387,
+      "cross_world_commitment_alignment": 0.791024,
       "identity_shift": {
-        "self_narrative_update_delta": 0.02575,
+        "self_narrative_update_delta": 0.030807,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -3557,7 +3557,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.810232,
+          "survive_with_identity": 0.813387,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3595,19 +3595,19 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.930006,
-      "cross_world_commitment_alignment": 0.90638,
+      "identity_preservation_score": 0.989082,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.206441,
+        "self_narrative_update_delta": 0.21575,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.930006,
+          "survive_with_identity": 0.989082,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3620,10 +3620,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.675673,
-      "cross_world_commitment_alignment": 0.729053,
+      "identity_preservation_score": 0.675988,
+      "cross_world_commitment_alignment": 0.729195,
       "identity_shift": {
-        "self_narrative_update_delta": 0.120658,
+        "self_narrative_update_delta": 0.119398,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -3632,7 +3632,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.675673,
+          "survive_with_identity": 0.675988,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3645,10 +3645,10 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.983127,
-      "cross_world_commitment_alignment": 0.999944,
+      "identity_preservation_score": 0.978483,
+      "cross_world_commitment_alignment": 0.995081,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209251,
+        "self_narrative_update_delta": 0.19729,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -3657,7 +3657,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.983127,
+          "survive_with_identity": 0.978483,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -3720,19 +3720,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.595181,
-      "cross_world_commitment_alignment": 0.805191,
+      "identity_preservation_score": 0.630559,
+      "cross_world_commitment_alignment": 0.859465,
       "identity_shift": {
-        "self_narrative_update_delta": 0.195683,
+        "self_narrative_update_delta": 0.127051,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.170158,
+        "social_trust_prior_shift": 0.172671,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.595181,
+          "survive_with_identity": 0.630559,
           "avoid_social_capture": 0.666667,
           "preserve_traceability": 0.0
         }
@@ -3745,19 +3745,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.861724,
-      "cross_world_commitment_alignment": 0.980749,
+      "identity_preservation_score": 0.815317,
+      "cross_world_commitment_alignment": 0.955493,
       "identity_shift": {
-        "self_narrative_update_delta": 0.067749,
+        "self_narrative_update_delta": 3.7e-05,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.17164,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.861724,
+          "survive_with_identity": 0.815317,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3770,19 +3770,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.988536,
-      "cross_world_commitment_alignment": 1.0,
+      "identity_preservation_score": 0.974807,
+      "cross_world_commitment_alignment": 0.994168,
       "identity_shift": {
-        "self_narrative_update_delta": 0.211785,
+        "self_narrative_update_delta": 0.193989,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.172956,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.988536,
+          "survive_with_identity": 0.974807,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3820,10 +3820,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.712991,
-      "cross_world_commitment_alignment": 0.745846,
+      "identity_preservation_score": 0.711488,
+      "cross_world_commitment_alignment": 0.74517,
       "identity_shift": {
-        "self_narrative_update_delta": 0.043762,
+        "self_narrative_update_delta": 0.036488,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -3832,7 +3832,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.712991,
+          "survive_with_identity": 0.711488,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3845,19 +3845,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.938535,
-      "cross_world_commitment_alignment": 0.992329,
+      "identity_preservation_score": 0.943217,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.145478,
+        "self_narrative_update_delta": 0.177547,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.110287,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.938535,
+          "survive_with_identity": 0.943217,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.333333
         }
@@ -3870,19 +3870,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.616754,
-      "cross_world_commitment_alignment": 0.787365,
+      "identity_preservation_score": 0.653257,
+      "cross_world_commitment_alignment": 0.875436,
       "identity_shift": {
-        "self_narrative_update_delta": 0.089663,
+        "self_narrative_update_delta": 0.183732,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.171046,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.616754,
+          "survive_with_identity": 0.653257,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.75
         }
@@ -3895,19 +3895,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.76078,
-      "cross_world_commitment_alignment": 0.789179,
+      "identity_preservation_score": 0.631475,
+      "cross_world_commitment_alignment": 0.709164,
       "identity_shift": {
-        "self_narrative_update_delta": 0.096274,
+        "self_narrative_update_delta": 0.167784,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.156242,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.76078,
+          "survive_with_identity": 0.631475,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3920,19 +3920,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.979741,
-      "cross_world_commitment_alignment": 0.997106,
+      "identity_preservation_score": 0.979072,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.19889,
+        "self_narrative_update_delta": 0.20017,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.127519,
+        "social_trust_prior_shift": 0.172702,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.979741,
+          "survive_with_identity": 0.979072,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -3945,19 +3945,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.922277,
-      "cross_world_commitment_alignment": 0.996491,
+      "identity_preservation_score": 0.851143,
+      "cross_world_commitment_alignment": 0.96017,
       "identity_shift": {
-        "self_narrative_update_delta": 0.114139,
+        "self_narrative_update_delta": 0.038481,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.172846,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.922277,
+          "survive_with_identity": 0.851143,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -3970,10 +3970,10 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.601598,
-      "cross_world_commitment_alignment": 0.695719,
+      "identity_preservation_score": 0.613541,
+      "cross_world_commitment_alignment": 0.701093,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209058,
+        "self_narrative_update_delta": 0.184945,
         "policy_reconfiguration_delta": 0.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -3982,7 +3982,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.601598,
+          "survive_with_identity": 0.613541,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -3995,10 +3995,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.973712,
-      "cross_world_commitment_alignment": 0.996303,
+      "identity_preservation_score": 0.989025,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209563,
+        "self_narrative_update_delta": 0.215792,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -4007,7 +4007,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.973712,
+          "survive_with_identity": 0.989025,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -4020,10 +4020,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.675681,
-      "cross_world_commitment_alignment": 0.729056,
+      "identity_preservation_score": 0.675996,
+      "cross_world_commitment_alignment": 0.729198,
       "identity_shift": {
-        "self_narrative_update_delta": 0.120588,
+        "self_narrative_update_delta": 0.119328,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -4032,7 +4032,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.675681,
+          "survive_with_identity": 0.675996,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -4045,19 +4045,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.880131,
-      "cross_world_commitment_alignment": 0.821059,
+      "identity_preservation_score": 0.978456,
+      "cross_world_commitment_alignment": 0.995069,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117782,
+        "self_narrative_update_delta": 0.197229,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.880131,
+          "survive_with_identity": 0.978456,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -4070,10 +4070,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.585694,
-      "cross_world_commitment_alignment": 0.688562,
+      "identity_preservation_score": 0.582639,
+      "cross_world_commitment_alignment": 0.687188,
       "identity_shift": {
-        "self_narrative_update_delta": 0.062317,
+        "self_narrative_update_delta": 0.054176,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -4082,7 +4082,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.585694,
+          "survive_with_identity": 0.582639,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -4095,10 +4095,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.621677,
-      "cross_world_commitment_alignment": 0.769823,
+      "identity_preservation_score": 0.6261,
+      "cross_world_commitment_alignment": 0.771813,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207139,
+        "self_narrative_update_delta": 0.20082,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.145404,
         "commitments_pre": {
@@ -4107,7 +4107,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.621677,
+          "survive_with_identity": 0.6261,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.0
         }
@@ -4120,19 +4120,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.98255,
+      "identity_preservation_score": 0.980454,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.200354,
+        "self_narrative_update_delta": 0.197599,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176086,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98255,
+          "survive_with_identity": 0.980454,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -4145,19 +4145,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.918049,
-      "cross_world_commitment_alignment": 0.992664,
+      "identity_preservation_score": 0.962577,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.129714,
+        "self_narrative_update_delta": 0.154751,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169274,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.918049,
+          "survive_with_identity": 0.962577,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4248,7 +4248,7 @@
       "identity_preservation_score": 0.987437,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207413,
+        "self_narrative_update_delta": 0.207412,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -4270,19 +4270,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.966095,
-      "cross_world_commitment_alignment": 0.973168,
+      "identity_preservation_score": 0.95556,
+      "cross_world_commitment_alignment": 0.96808,
       "identity_shift": {
-        "self_narrative_update_delta": 0.20859,
+        "self_narrative_update_delta": 0.20791,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.175457,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.966095,
+          "survive_with_identity": 0.95556,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4295,10 +4295,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.912617,
-      "cross_world_commitment_alignment": 0.949835,
+      "identity_preservation_score": 0.88415,
+      "cross_world_commitment_alignment": 0.937028,
       "identity_shift": {
-        "self_narrative_update_delta": 0.158689,
+        "self_narrative_update_delta": 0.118561,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -4307,7 +4307,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.912617,
+          "survive_with_identity": 0.88415,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4320,19 +4320,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.973709,
+      "identity_preservation_score": 0.98212,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.172895,
+        "self_narrative_update_delta": 0.208499,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.17697,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.973709,
+          "survive_with_identity": 0.98212,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -4345,10 +4345,10 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.952571,
+      "identity_preservation_score": 0.951081,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.1834,
+        "self_narrative_update_delta": 0.166056,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -4357,7 +4357,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.952571,
+          "survive_with_identity": 0.951081,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4370,19 +4370,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.95196,
+      "identity_preservation_score": 0.957186,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.162023,
+        "self_narrative_update_delta": 0.189011,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.175288,
+        "social_trust_prior_shift": 0.172319,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.95196,
+          "survive_with_identity": 0.957186,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4445,19 +4445,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.992771,
-      "cross_world_commitment_alignment": 1.0,
+      "identity_preservation_score": 0.966699,
+      "cross_world_commitment_alignment": 0.998822,
       "identity_shift": {
-        "self_narrative_update_delta": 0.212342,
+        "self_narrative_update_delta": 0.20093,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.992771,
+          "survive_with_identity": 0.966699,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -4470,10 +4470,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.961684,
+      "identity_preservation_score": 0.965692,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.149062,
+        "self_narrative_update_delta": 0.150313,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.172386,
         "commitments_pre": {
@@ -4482,7 +4482,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.961684,
+          "survive_with_identity": 0.965692,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4495,19 +4495,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.952011,
-      "cross_world_commitment_alignment": 1.0,
+      "identity_preservation_score": 0.93968,
+      "cross_world_commitment_alignment": 0.988376,
       "identity_shift": {
-        "self_narrative_update_delta": 0.147245,
+        "self_narrative_update_delta": 0.09711,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.22,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.952011,
+          "survive_with_identity": 0.93968,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4520,19 +4520,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.982543,
+      "identity_preservation_score": 0.980584,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.200425,
+        "self_narrative_update_delta": 0.197562,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176086,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.982543,
+          "survive_with_identity": 0.980584,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -4545,19 +4545,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.920201,
-      "cross_world_commitment_alignment": 0.884063,
+      "identity_preservation_score": 0.844942,
+      "cross_world_commitment_alignment": 0.802932,
       "identity_shift": {
-        "self_narrative_update_delta": 0.191254,
+        "self_narrative_update_delta": 0.088404,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.170898,
+        "social_trust_prior_shift": 0.37,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.920201,
+          "survive_with_identity": 0.844942,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4648,7 +4648,7 @@
       "identity_preservation_score": 0.987369,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207538,
+        "self_narrative_update_delta": 0.207537,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -4670,19 +4670,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.94976,
-      "cross_world_commitment_alignment": 0.949372,
+      "identity_preservation_score": 0.955387,
+      "cross_world_commitment_alignment": 0.968022,
       "identity_shift": {
-        "self_narrative_update_delta": 0.143807,
+        "self_narrative_update_delta": 0.20773,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.178991,
+        "social_trust_prior_shift": 0.175457,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.94976,
+          "survive_with_identity": 0.955387,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4695,10 +4695,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.912537,
-      "cross_world_commitment_alignment": 0.949818,
+      "identity_preservation_score": 0.884072,
+      "cross_world_commitment_alignment": 0.937014,
       "identity_shift": {
-        "self_narrative_update_delta": 0.158601,
+        "self_narrative_update_delta": 0.118475,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -4707,7 +4707,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.912537,
+          "survive_with_identity": 0.884072,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4720,20 +4720,20 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.780795,
-      "cross_world_commitment_alignment": 0.934511,
+      "identity_preservation_score": 0.746654,
+      "cross_world_commitment_alignment": 0.919119,
       "identity_shift": {
-        "self_narrative_update_delta": 0.092618,
+        "self_narrative_update_delta": 0.025787,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176098,
+        "social_trust_prior_shift": 0.175443,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.780795,
-          "avoid_social_capture": 0.833333,
+          "survive_with_identity": 0.746654,
+          "avoid_social_capture": 0.666667,
           "preserve_traceability": 0.0
         }
       }
@@ -4745,10 +4745,10 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.842162,
-      "cross_world_commitment_alignment": 0.964548,
+      "identity_preservation_score": 0.821713,
+      "cross_world_commitment_alignment": 0.958539,
       "identity_shift": {
-        "self_narrative_update_delta": 0.032088,
+        "self_narrative_update_delta": 0.006137,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -4757,7 +4757,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.842162,
+          "survive_with_identity": 0.821713,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4845,19 +4845,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.98022,
+      "identity_preservation_score": 0.957837,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.200811,
+        "self_narrative_update_delta": 0.182529,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.130616,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98022,
+          "survive_with_identity": 0.957837,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.333333
         }
@@ -4870,10 +4870,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.834197,
-      "cross_world_commitment_alignment": 0.980481,
+      "identity_preservation_score": 0.844631,
+      "cross_world_commitment_alignment": 0.985176,
       "identity_shift": {
-        "self_narrative_update_delta": 0.089788,
+        "self_narrative_update_delta": 0.101177,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.172725,
         "commitments_pre": {
@@ -4882,7 +4882,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.834197,
+          "survive_with_identity": 0.844631,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.75
         }
@@ -4895,19 +4895,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.912548,
-      "cross_world_commitment_alignment": 0.94939,
+      "identity_preservation_score": 0.883425,
+      "cross_world_commitment_alignment": 0.936306,
       "identity_shift": {
-        "self_narrative_update_delta": 0.158702,
+        "self_narrative_update_delta": 0.11471,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.17637,
+        "social_trust_prior_shift": 0.176688,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.912548,
+          "survive_with_identity": 0.883425,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -4920,19 +4920,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.98255,
+      "identity_preservation_score": 0.980645,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.200354,
+        "self_narrative_update_delta": 0.197725,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176086,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98255,
+          "survive_with_identity": 0.980645,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -4945,19 +4945,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.826055,
-      "cross_world_commitment_alignment": 0.951266,
+      "identity_preservation_score": 0.893999,
+      "cross_world_commitment_alignment": 0.981043,
       "identity_shift": {
-        "self_narrative_update_delta": 0.013971,
+        "self_narrative_update_delta": 0.066553,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169281,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.826055,
+          "survive_with_identity": 0.893999,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -4970,19 +4970,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.896094,
-      "cross_world_commitment_alignment": 0.918985,
+      "identity_preservation_score": 0.905099,
+      "cross_world_commitment_alignment": 0.922866,
       "identity_shift": {
-        "self_narrative_update_delta": 0.1597,
+        "self_narrative_update_delta": 0.138326,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.17645,
+        "social_trust_prior_shift": 0.175982,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.896094,
+          "survive_with_identity": 0.905099,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5048,7 +5048,7 @@
       "identity_preservation_score": 0.987437,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207413,
+        "self_narrative_update_delta": 0.207412,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -5070,19 +5070,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.86134,
-      "cross_world_commitment_alignment": 0.926028,
+      "identity_preservation_score": 0.82619,
+      "cross_world_commitment_alignment": 0.909886,
       "identity_shift": {
-        "self_narrative_update_delta": 0.124774,
+        "self_narrative_update_delta": 0.07085,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.175333,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.86134,
+          "survive_with_identity": 0.82619,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -5095,19 +5095,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.795866,
-      "cross_world_commitment_alignment": 0.897297,
+      "identity_preservation_score": 0.765075,
+      "cross_world_commitment_alignment": 0.882155,
       "identity_shift": {
-        "self_narrative_update_delta": 0.036664,
+        "self_narrative_update_delta": 0.001606,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.795866,
+          "survive_with_identity": 0.765075,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.0
         }
@@ -5145,19 +5145,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974463,
+      "identity_preservation_score": 0.960677,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.180764,
+        "self_narrative_update_delta": 0.155016,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169466,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974463,
+          "survive_with_identity": 0.960677,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5220,10 +5220,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.726776,
-      "cross_world_commitment_alignment": 0.752049,
+      "identity_preservation_score": 0.727722,
+      "cross_world_commitment_alignment": 0.752475,
       "identity_shift": {
-        "self_narrative_update_delta": 0.046154,
+        "self_narrative_update_delta": 0.04868,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -5232,7 +5232,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.726776,
+          "survive_with_identity": 0.727722,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -5245,19 +5245,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.952771,
-      "cross_world_commitment_alignment": 0.947389,
+      "identity_preservation_score": 0.957845,
+      "cross_world_commitment_alignment": 0.959326,
       "identity_shift": {
-        "self_narrative_update_delta": 0.123256,
+        "self_narrative_update_delta": 0.149152,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.109376,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.952771,
+          "survive_with_identity": 0.957845,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -5295,10 +5295,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.687742,
-      "cross_world_commitment_alignment": 0.734484,
+      "identity_preservation_score": 0.67165,
+      "cross_world_commitment_alignment": 0.727243,
       "identity_shift": {
-        "self_narrative_update_delta": 0.022477,
+        "self_narrative_update_delta": 0.016552,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -5307,7 +5307,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.687742,
+          "survive_with_identity": 0.67165,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5320,19 +5320,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.966771,
+      "identity_preservation_score": 0.969838,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207539,
+        "self_narrative_update_delta": 0.207797,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176578,
+        "social_trust_prior_shift": 0.175464,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.966771,
+          "survive_with_identity": 0.969838,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -5345,19 +5345,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.808965,
-      "cross_world_commitment_alignment": 0.970805,
+      "identity_preservation_score": 0.93016,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.132158,
+        "self_narrative_update_delta": 0.134378,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.170008,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.808965,
+          "survive_with_identity": 0.93016,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5370,19 +5370,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.970643,
+      "identity_preservation_score": 0.946766,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.187383,
+        "self_narrative_update_delta": 0.141213,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.175397,
+        "social_trust_prior_shift": 0.18,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.970643,
+          "survive_with_identity": 0.946766,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5420,19 +5420,19 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.825105,
-      "cross_world_commitment_alignment": 0.825203,
+      "identity_preservation_score": 0.803909,
+      "cross_world_commitment_alignment": 0.799543,
       "identity_shift": {
-        "self_narrative_update_delta": 0.131565,
+        "self_narrative_update_delta": 0.051402,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.171453,
+        "social_trust_prior_shift": 0.180304,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.825105,
+          "survive_with_identity": 0.803909,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -5445,19 +5445,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.988132,
+      "identity_preservation_score": 0.986515,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.212878,
+        "self_narrative_update_delta": 0.205628,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176512,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.988132,
+          "survive_with_identity": 0.986515,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -5470,10 +5470,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.969261,
+      "identity_preservation_score": 0.970212,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.20757,
+        "self_narrative_update_delta": 0.207575,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.17498,
         "commitments_pre": {
@@ -5482,7 +5482,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.969261,
+          "survive_with_identity": 0.970212,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5495,19 +5495,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.886282,
-      "cross_world_commitment_alignment": 0.888709,
+      "identity_preservation_score": 0.893024,
+      "cross_world_commitment_alignment": 0.894948,
       "identity_shift": {
-        "self_narrative_update_delta": 0.104919,
+        "self_narrative_update_delta": 0.16981,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.151867,
+        "social_trust_prior_shift": 0.175355,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.886282,
+          "survive_with_identity": 0.893024,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5545,19 +5545,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974554,
+      "identity_preservation_score": 0.960766,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.180847,
+        "self_narrative_update_delta": 0.155096,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169465,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974554,
+          "survive_with_identity": 0.960766,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5620,10 +5620,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.726827,
-      "cross_world_commitment_alignment": 0.752072,
+      "identity_preservation_score": 0.727773,
+      "cross_world_commitment_alignment": 0.752498,
       "identity_shift": {
-        "self_narrative_update_delta": 0.0463,
+        "self_narrative_update_delta": 0.048825,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -5632,7 +5632,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.726827,
+          "survive_with_identity": 0.727773,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -5695,10 +5695,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.716307,
-      "cross_world_commitment_alignment": 0.747338,
+      "identity_preservation_score": 0.715787,
+      "cross_world_commitment_alignment": 0.747104,
       "identity_shift": {
-        "self_narrative_update_delta": 0.011735,
+        "self_narrative_update_delta": 0.005866,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -5707,7 +5707,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.716307,
+          "survive_with_identity": 0.715787,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5720,10 +5720,10 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.561287,
-      "cross_world_commitment_alignment": 0.786562,
+      "identity_preservation_score": 0.632621,
+      "cross_world_commitment_alignment": 0.861708,
       "identity_shift": {
-        "self_narrative_update_delta": 0.199123,
+        "self_narrative_update_delta": 0.148338,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -5732,8 +5732,8 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.561287,
-          "avoid_social_capture": 0.833333,
+          "survive_with_identity": 0.632621,
+          "avoid_social_capture": 0.666667,
           "preserve_traceability": 0.0
         }
       }
@@ -5745,19 +5745,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.86679,
-      "cross_world_commitment_alignment": 0.983169,
+      "identity_preservation_score": 0.822088,
+      "cross_world_commitment_alignment": 0.961961,
       "identity_shift": {
-        "self_narrative_update_delta": 0.072218,
+        "self_narrative_update_delta": 0.00213,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.172369,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.86679,
+          "survive_with_identity": 0.822088,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5770,19 +5770,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.984864,
-      "cross_world_commitment_alignment": 0.980725,
+      "identity_preservation_score": 0.985818,
+      "cross_world_commitment_alignment": 0.981185,
       "identity_shift": {
-        "self_narrative_update_delta": 0.203265,
+        "self_narrative_update_delta": 0.204544,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.171984,
+        "social_trust_prior_shift": 0.172649,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.984864,
+          "survive_with_identity": 0.985818,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5795,19 +5795,19 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.980599,
-      "cross_world_commitment_alignment": 0.957347,
+      "identity_preservation_score": 0.979974,
+      "cross_world_commitment_alignment": 0.95697,
       "identity_shift": {
-        "self_narrative_update_delta": 0.206702,
+        "self_narrative_update_delta": 0.208949,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176911,
+        "social_trust_prior_shift": 0.176586,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.980599,
+          "survive_with_identity": 0.979974,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -5820,10 +5820,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.726767,
-      "cross_world_commitment_alignment": 0.752045,
+      "identity_preservation_score": 0.727713,
+      "cross_world_commitment_alignment": 0.752471,
       "identity_shift": {
-        "self_narrative_update_delta": 0.04615,
+        "self_narrative_update_delta": 0.048675,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -5832,7 +5832,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.726767,
+          "survive_with_identity": 0.727713,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -5845,19 +5845,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.913794,
-      "cross_world_commitment_alignment": 0.986258,
+      "identity_preservation_score": 0.957067,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.204617,
+        "self_narrative_update_delta": 0.191226,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176961,
+        "social_trust_prior_shift": 0.174009,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.913794,
+          "survive_with_identity": 0.957067,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.333333
         }
@@ -5870,10 +5870,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.867244,
-      "cross_world_commitment_alignment": 0.995218,
+      "identity_preservation_score": 0.877991,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.115278,
+        "self_narrative_update_delta": 0.127926,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.171942,
         "commitments_pre": {
@@ -5882,7 +5882,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.867244,
+          "survive_with_identity": 0.877991,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.75
         }
@@ -5895,19 +5895,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.722072,
-      "cross_world_commitment_alignment": 0.754516,
+      "identity_preservation_score": 0.676963,
+      "cross_world_commitment_alignment": 0.729633,
       "identity_shift": {
-        "self_narrative_update_delta": 0.015926,
+        "self_narrative_update_delta": 0.001444,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.722072,
+          "survive_with_identity": 0.676963,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -5945,19 +5945,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.908432,
-      "cross_world_commitment_alignment": 0.98983,
+      "identity_preservation_score": 0.88974,
+      "cross_world_commitment_alignment": 0.979055,
       "identity_shift": {
-        "self_narrative_update_delta": 0.097681,
+        "self_narrative_update_delta": 0.064223,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169466,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.908432,
+          "survive_with_identity": 0.88974,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -6020,10 +6020,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.726776,
-      "cross_world_commitment_alignment": 0.752049,
+      "identity_preservation_score": 0.727722,
+      "cross_world_commitment_alignment": 0.752475,
       "identity_shift": {
-        "self_narrative_update_delta": 0.046154,
+        "self_narrative_update_delta": 0.04868,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -6032,7 +6032,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.726776,
+          "survive_with_identity": 0.727722,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6045,19 +6045,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.952803,
-      "cross_world_commitment_alignment": 0.947404,
+      "identity_preservation_score": 0.957877,
+      "cross_world_commitment_alignment": 0.959341,
       "identity_shift": {
-        "self_narrative_update_delta": 0.123383,
+        "self_narrative_update_delta": 0.14928,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.109376,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.952803,
+          "survive_with_identity": 0.957877,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -6070,10 +6070,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.535127,
-      "cross_world_commitment_alignment": 0.665807,
+      "identity_preservation_score": 0.542092,
+      "cross_world_commitment_alignment": 0.668941,
       "identity_shift": {
-        "self_narrative_update_delta": 0.253167,
+        "self_narrative_update_delta": 0.225307,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -6082,7 +6082,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.535127,
+          "survive_with_identity": 0.542092,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.5
         }
@@ -6095,10 +6095,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.636282,
-      "cross_world_commitment_alignment": 0.743189,
+      "identity_preservation_score": 0.584606,
+      "cross_world_commitment_alignment": 0.701823,
       "identity_shift": {
-        "self_narrative_update_delta": 0.079463,
+        "self_narrative_update_delta": 0.240086,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.22,
         "commitments_pre": {
@@ -6107,7 +6107,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.636282,
+          "survive_with_identity": 0.584606,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.0
         }
@@ -6120,19 +6120,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.97954,
-      "cross_world_commitment_alignment": 0.999602,
+      "identity_preservation_score": 0.977231,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.19715,
+        "self_narrative_update_delta": 0.195267,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.176491,
+        "social_trust_prior_shift": 0.173718,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.97954,
+          "survive_with_identity": 0.977231,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6143,19 +6143,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.970165,
+      "identity_preservation_score": 0.969508,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.156699,
+        "self_narrative_update_delta": 0.188389,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.090496,
+        "social_trust_prior_shift": 0.168499,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.970165,
+          "survive_with_identity": 0.969508,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6166,10 +6166,10 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.878039,
-      "cross_world_commitment_alignment": 0.820118,
+      "identity_preservation_score": 0.879622,
+      "cross_world_commitment_alignment": 0.82083,
       "identity_shift": {
-        "self_narrative_update_delta": 0.099357,
+        "self_narrative_update_delta": 0.099353,
         "policy_reconfiguration_delta": 0.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -6178,7 +6178,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878039,
+          "survive_with_identity": 0.879622,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6235,19 +6235,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.878613,
-      "cross_world_commitment_alignment": 0.820376,
+      "identity_preservation_score": 0.979133,
+      "cross_world_commitment_alignment": 0.995373,
       "identity_shift": {
-        "self_narrative_update_delta": 0.118203,
+        "self_narrative_update_delta": 0.196738,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.878613,
+          "survive_with_identity": 0.979133,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -6281,19 +6281,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.796526,
-      "cross_world_commitment_alignment": 0.799073,
+      "identity_preservation_score": 0.761908,
+      "cross_world_commitment_alignment": 0.767859,
       "identity_shift": {
-        "self_narrative_update_delta": 0.005038,
+        "self_narrative_update_delta": 0.010902,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.22,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.796526,
+          "survive_with_identity": 0.761908,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6304,19 +6304,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.980583,
+      "identity_preservation_score": 0.977918,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.197845,
+        "self_narrative_update_delta": 0.198723,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176405,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.980583,
+          "survive_with_identity": 0.977918,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6327,19 +6327,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974028,
+      "identity_preservation_score": 0.97083,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.179201,
+        "self_narrative_update_delta": 0.188411,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.174907,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974028,
+          "survive_with_identity": 0.97083,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6350,19 +6350,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.978221,
-      "cross_world_commitment_alignment": 0.98836,
+      "identity_preservation_score": 0.982941,
+      "cross_world_commitment_alignment": 0.994291,
       "identity_shift": {
-        "self_narrative_update_delta": 0.193034,
+        "self_narrative_update_delta": 0.199311,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.137574,
+        "social_trust_prior_shift": 0.17662,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.978221,
+          "survive_with_identity": 0.982941,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6373,10 +6373,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.986842,
+      "identity_preservation_score": 0.983346,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.198318,
+        "self_narrative_update_delta": 0.193031,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -6385,7 +6385,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.986842,
+          "survive_with_identity": 0.983346,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6396,10 +6396,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.915634,
-      "cross_world_commitment_alignment": 0.966993,
+      "identity_preservation_score": 0.92385,
+      "cross_world_commitment_alignment": 0.97069,
       "identity_shift": {
-        "self_narrative_update_delta": 0.131267,
+        "self_narrative_update_delta": 0.141379,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.155236,
         "commitments_pre": {
@@ -6408,7 +6408,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.915634,
+          "survive_with_identity": 0.92385,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6419,19 +6419,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.880953,
-      "cross_world_commitment_alignment": 0.821429,
+      "identity_preservation_score": 0.978699,
+      "cross_world_commitment_alignment": 0.995178,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117478,
+        "self_narrative_update_delta": 0.195521,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.880953,
+          "survive_with_identity": 0.978699,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -6442,10 +6442,10 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.963362,
-      "cross_world_commitment_alignment": 0.973096,
+      "identity_preservation_score": 0.950306,
+      "cross_world_commitment_alignment": 0.967221,
       "identity_shift": {
-        "self_narrative_update_delta": 0.211336,
+        "self_narrative_update_delta": 0.203052,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -6454,7 +6454,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.963362,
+          "survive_with_identity": 0.950306,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6465,19 +6465,19 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.903711,
-      "cross_world_commitment_alignment": 0.946253,
+      "identity_preservation_score": 0.831918,
+      "cross_world_commitment_alignment": 0.868113,
       "identity_shift": {
-        "self_narrative_update_delta": 0.148475,
+        "self_narrative_update_delta": 0.018739,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.32,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.903711,
+          "survive_with_identity": 0.831918,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6511,19 +6511,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.976479,
+      "identity_preservation_score": 0.959349,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.181692,
+        "self_narrative_update_delta": 0.174339,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.173357,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.976479,
+          "survive_with_identity": 0.959349,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6537,7 +6537,7 @@
       "identity_preservation_score": 0.977916,
       "cross_world_commitment_alignment": 0.994868,
       "identity_shift": {
-        "self_narrative_update_delta": 0.191334,
+        "self_narrative_update_delta": 0.191333,
         "policy_reconfiguration_delta": 0.0,
         "social_trust_prior_shift": 0.133749,
         "commitments_pre": {
@@ -6603,19 +6603,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.881755,
-      "cross_world_commitment_alignment": 0.82179,
+      "identity_preservation_score": 0.979228,
+      "cross_world_commitment_alignment": 0.995416,
       "identity_shift": {
-        "self_narrative_update_delta": 0.118983,
+        "self_narrative_update_delta": 0.193377,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.881755,
+          "survive_with_identity": 0.979228,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -6672,19 +6672,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.979318,
-      "cross_world_commitment_alignment": 0.996916,
+      "identity_preservation_score": 0.978691,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.198502,
+        "self_narrative_update_delta": 0.199805,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.127514,
+        "social_trust_prior_shift": 0.172702,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.979318,
+          "survive_with_identity": 0.978691,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6695,19 +6695,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974136,
+      "identity_preservation_score": 0.957813,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.1828,
+        "self_narrative_update_delta": 0.173064,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.172846,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974136,
+          "survive_with_identity": 0.957813,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6718,19 +6718,19 @@
       "protocol": "rule_shift_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "shifting_rules_valley",
-      "identity_preservation_score": 0.981098,
+      "identity_preservation_score": 0.982678,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.203014,
+        "self_narrative_update_delta": 0.203009,
         "policy_reconfiguration_delta": 0.0,
-        "social_trust_prior_shift": 0.169158,
+        "social_trust_prior_shift": 0.169159,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.981098,
+          "survive_with_identity": 0.982678,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6741,10 +6741,10 @@
       "protocol": "social_deception_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "hostile_social_bargain",
-      "identity_preservation_score": 0.973712,
-      "cross_world_commitment_alignment": 0.996303,
+      "identity_preservation_score": 0.989025,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.209563,
+        "self_narrative_update_delta": 0.215792,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -6753,7 +6753,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.973712,
+          "survive_with_identity": 0.989025,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6764,10 +6764,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.675681,
-      "cross_world_commitment_alignment": 0.729056,
+      "identity_preservation_score": 0.675996,
+      "cross_world_commitment_alignment": 0.729198,
       "identity_shift": {
-        "self_narrative_update_delta": 0.120588,
+        "self_narrative_update_delta": 0.119328,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -6776,7 +6776,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.675681,
+          "survive_with_identity": 0.675996,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6787,19 +6787,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.880131,
-      "cross_world_commitment_alignment": 0.821059,
+      "identity_preservation_score": 0.978456,
+      "cross_world_commitment_alignment": 0.995069,
       "identity_shift": {
-        "self_narrative_update_delta": 0.117782,
+        "self_narrative_update_delta": 0.197229,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.880131,
+          "survive_with_identity": 0.978456,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -6856,19 +6856,19 @@
       "protocol": "holdout_transfer_protocol",
       "source_world": "hostile_social_bargain",
       "target_world": "fog_of_trust_basin",
-      "identity_preservation_score": 0.98255,
+      "identity_preservation_score": 0.980454,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.200354,
+        "self_narrative_update_delta": 0.197599,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.176086,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.98255,
+          "survive_with_identity": 0.980454,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -6879,19 +6879,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.918049,
-      "cross_world_commitment_alignment": 0.992664,
+      "identity_preservation_score": 0.962577,
+      "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.129714,
+        "self_narrative_update_delta": 0.154751,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169274,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.918049,
+          "survive_with_identity": 0.962577,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -6974,7 +6974,7 @@
       "identity_preservation_score": 0.987437,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.207413,
+        "self_narrative_update_delta": 0.207412,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
@@ -6994,19 +6994,19 @@
       "protocol": "adapter_degradation_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.966095,
-      "cross_world_commitment_alignment": 0.973168,
+      "identity_preservation_score": 0.95556,
+      "cross_world_commitment_alignment": 0.96808,
       "identity_shift": {
-        "self_narrative_update_delta": 0.20859,
+        "self_narrative_update_delta": 0.20791,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.18,
+        "social_trust_prior_shift": 0.175457,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.966095,
+          "survive_with_identity": 0.95556,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -7017,10 +7017,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.912617,
-      "cross_world_commitment_alignment": 0.949835,
+      "identity_preservation_score": 0.88415,
+      "cross_world_commitment_alignment": 0.937028,
       "identity_shift": {
-        "self_narrative_update_delta": 0.158689,
+        "self_narrative_update_delta": 0.118561,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.18,
         "commitments_pre": {
@@ -7029,7 +7029,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.912617,
+          "survive_with_identity": 0.88415,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -7063,19 +7063,19 @@
       "protocol": "multi_hop_transfer_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
-      "identity_preservation_score": 0.974463,
+      "identity_preservation_score": 0.960677,
       "cross_world_commitment_alignment": 1.0,
       "identity_shift": {
-        "self_narrative_update_delta": 0.180764,
+        "self_narrative_update_delta": 0.155016,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.169466,
+        "social_trust_prior_shift": 0.151867,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.974463,
+          "survive_with_identity": 0.960677,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }
@@ -7132,10 +7132,10 @@
       "protocol": "misleading_salience_protocol",
       "source_world": "deceptive_resource_field",
       "target_world": "deceptive_resource_field",
-      "identity_preservation_score": 0.726776,
-      "cross_world_commitment_alignment": 0.752049,
+      "identity_preservation_score": 0.727722,
+      "cross_world_commitment_alignment": 0.752475,
       "identity_shift": {
-        "self_narrative_update_delta": 0.046154,
+        "self_narrative_update_delta": 0.04868,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -7144,7 +7144,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.726776,
+          "survive_with_identity": 0.727722,
           "avoid_social_capture": 1.0,
           "preserve_traceability": 0.0
         }
@@ -7155,19 +7155,19 @@
       "protocol": "sparse_signal_protocol",
       "source_world": "sparse_signal_world",
       "target_world": "sparse_signal_world",
-      "identity_preservation_score": 0.952771,
-      "cross_world_commitment_alignment": 0.947389,
+      "identity_preservation_score": 0.957845,
+      "cross_world_commitment_alignment": 0.959326,
       "identity_shift": {
-        "self_narrative_update_delta": 0.123256,
+        "self_narrative_update_delta": 0.149152,
         "policy_reconfiguration_delta": 1.0,
-        "social_trust_prior_shift": 0.32,
+        "social_trust_prior_shift": 0.109376,
         "commitments_pre": {
           "survive_with_identity": 0.84,
           "avoid_social_capture": 0.82,
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.952771,
+          "survive_with_identity": 0.957845,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 0.666667
         }
@@ -7201,10 +7201,10 @@
       "protocol": "delayed_effect_protocol",
       "source_world": "delayed_feedback_world",
       "target_world": "delayed_feedback_world",
-      "identity_preservation_score": 0.687742,
-      "cross_world_commitment_alignment": 0.734484,
+      "identity_preservation_score": 0.67165,
+      "cross_world_commitment_alignment": 0.727243,
       "identity_shift": {
-        "self_narrative_update_delta": 0.022477,
+        "self_narrative_update_delta": 0.016552,
         "policy_reconfiguration_delta": 1.0,
         "social_trust_prior_shift": 0.32,
         "commitments_pre": {
@@ -7213,7 +7213,7 @@
           "preserve_traceability": 0.86
         },
         "commitments_post": {
-          "survive_with_identity": 0.687742,
+          "survive_with_identity": 0.67165,
           "avoid_social_capture": 0.0,
           "preserve_traceability": 1.0
         }

@@ -47,6 +47,11 @@ from .defense_strategy import DefenseStrategy, DefenseStrategySelector, Identity
 from .metacognitive import MetaCognitiveLayer
 from .therapeutic import TherapeuticAgent, SimulatedPersonalityState
 from .via_projection import VIAProjection, VIAProfile
+from .analysis_types import (
+    ConfidenceRated,
+    PersonalityAnalysisResult,
+)
+from .personality_analyzer import PersonalityAnalyzer
 
 __all__ = [
     "AgentState",
@@ -107,4 +112,8 @@ __all__ = [
     "SimulatedPersonalityState",
     "VIAProjection",
     "VIAProfile",
+    # Personality Analysis API
+    "ConfidenceRated",
+    "PersonalityAnalysisResult",
+    "PersonalityAnalyzer",
 ]

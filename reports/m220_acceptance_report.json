@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.20",
   "status": "PASS",
-  "generated_at": "2026-03-19T00:29:42+00:00",
+  "generated_at": "2026-03-19T07:52:46+00:00",
   "seed_set": [
     220,
     239,
@@ -38,7 +38,7 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m220_v1",
-    "codebase_version": "85201d9a7c6ffac639890231cb062fd8b6f63135"
+    "codebase_version": "f665a3f401bc62009a6414390070d841ba8d4e8f"
   },
   "recommendation": "ACCEPT",
   "summary": {
@@ -99,11 +99,11 @@
           "caution_rate": 0.7916666666666666,
           "exploration_rate": 0.14583333333333331,
           "seek_contact_rate": 0.0625,
-          "mean_conditioned_prediction_error": 0.03137562077753196,
+          "mean_conditioned_prediction_error": 0.031472287465840534,
           "survival_score": 1.398333333333333,
-          "danger_attention_rate": 0.35175900926716047,
-          "social_attention_rate": 0.235686800760326,
-          "novelty_attention_rate": 0.27472231328678043,
+          "danger_attention_rate": 0.34893576431949536,
+          "social_attention_rate": 0.24115216710780013,
+          "novelty_attention_rate": 0.2731522003673139,
           "oracle_regret_rate": 0.22916666666666669
         },
         "ablated_mean_metrics": {
@@ -117,7 +117,7 @@
           "novelty_attention_rate": 0.33364665823798245,
           "oracle_regret_rate": 0.8958333333333333
         },
-        "attention_delta": 0.1434168578464718,
+        "attention_delta": 0.14888222419394592,
         "action_delta": 0.020833333333333336,
         "regret_improvement": 0.6666666666666665,
         "causality_passed": true,
@@ -131,11 +131,11 @@
           "caution_rate": 0.7291666666666667,
           "exploration_rate": 0.25,
           "seek_contact_rate": 0.020833333333333332,
-          "mean_conditioned_prediction_error": 0.033287126883691696,
+          "mean_conditioned_prediction_error": 0.03328477364110351,
           "survival_score": 1.577083333333333,
-          "danger_attention_rate": 0.31925677770044214,
-          "social_attention_rate": 0.02882208366822423,
-          "novelty_attention_rate": 0.4899758943822796,
+          "danger_attention_rate": 0.3192703757550407,
+          "social_attention_rate": 0.028778257991893385,
+          "novelty_attention_rate": 0.4899971571448991,
           "oracle_regret_rate": 0.27083333333333337
         },
         "ablated_mean_metrics": {
@@ -149,7 +149,7 @@
           "novelty_attention_rate": 0.4914818457410878,
           "oracle_regret_rate": 0.45833333333333337
         },
-        "attention_delta": -0.0015059513588081552,
+        "attention_delta": -0.0014846885961886658,
         "action_delta": 0.20833333333333334,
         "regret_improvement": 0.1875,
         "causality_passed": true,
