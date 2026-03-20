@@ -1,6 +1,6 @@
 # M3 Readiness Repair Report
 
-Generated: 2026-03-13
+Generated: 2026-03-20
 Generator: `evals/m3_readiness_evaluation.py`
 
 ## 1. Audit Problem Summary
@@ -13,12 +13,12 @@ Generator: `evals/m3_readiness_evaluation.py`
 ## 2. Strict vs Legacy Metric Inheritance
 
 Strict metrics
-- `ICI` = 1.0000 (status=INHERITED_STRICT_BASELINE, origin=reports/m2_followup_metrics.json:new_metrics, gating=True)
-- `EAA` = 0.9725 (status=INHERITED_STRICT_BASELINE, origin=reports/m2_followup_metrics.json:new_metrics, gating=True)
-- `MUR` = 1.0000 (status=INHERITED_STRICT_BASELINE, origin=reports/m2_followup_metrics.json:new_metrics, gating=True)
-- `PSSR` = 0.9997 (status=INHERITED_STRICT_BASELINE, origin=reports/m2_followup_metrics.json:new_metrics, gating=True)
-- `CAQ` = 1.0000 (status=INHERITED_STRICT_BASELINE, origin=reports/m2_followup_metrics.json:new_metrics, gating=True)
-- `VCUS` = 1.0000 (status=INHERITED_STRICT_BASELINE, origin=reports/m2_followup_metrics.json:new_metrics, gating=True)
+- `ICI` = 1.0000 (status=REVALIDATED_THIS_ROUND, origin=evals/m2_followup_repair.py:run_followup_evaluation, gating=True)
+- `EAA` = 0.9725 (status=REVALIDATED_THIS_ROUND, origin=evals/m2_followup_repair.py:run_followup_evaluation, gating=True)
+- `MUR` = 1.0000 (status=REVALIDATED_THIS_ROUND, origin=evals/m2_followup_repair.py:run_followup_evaluation, gating=True)
+- `PSSR` = 0.9997 (status=REVALIDATED_THIS_ROUND, origin=evals/m2_followup_repair.py:run_followup_evaluation, gating=True)
+- `CAQ` = 1.0000 (status=REVALIDATED_THIS_ROUND, origin=evals/m2_followup_repair.py:run_followup_evaluation, gating=True)
+- `VCUS` = 1.0000 (status=REVALIDATED_THIS_ROUND, origin=evals/m2_followup_repair.py:run_followup_evaluation, gating=True)
 
 Legacy metrics (non-gating, comparison only)
 - `ICI` = 1.0000 (status=LEGACY_FOR_COMPARISON_ONLY, non_gating=True)
@@ -52,22 +52,33 @@ Legacy metrics (non-gating, comparison only)
 - `family_schema_count`: 4
 - `runtime_validated_family_count`: 4
 - `family_coverage_status`: RUNTIME_DIVERSITY_VALIDATED
-- Report rule: schema implemented != runtime coverage verified.
+- `evidence_kind`: runtime_replay
+- `fully_graduated`: true
+- `missing_graduation_families`: none
+- `limitations`: none
+- Report rule: schema implemented != runtime coverage verified, and framework probes cannot satisfy runtime replay gates.
 
 ## 6. Current-Round Test Evidence
 
 - Test evidence status: REVALIDATED_THIS_ROUND
-- Current-round passed count: 34
+- Test suite scope: targeted_readiness_tests_only
+- Readiness targets: tests/test_m3_readiness.py, tests/test_memory.py, tests/test_counterfactual_artifact.py, tests/test_m23_ultimate_consolidation_loop.py
+- Current-round passed count: 41
 - Current-round failed count: 0
-- Current-round summary: 34 passed in 0.31s
+- Current-round summary: 41 passed in 0.82s
 - Carried-forward unverified test claim present: false
+- Historical regressions status: REVALIDATED_THIS_ROUND
+- Historical regression checks: soak_regression_passed, snapshot_compatibility_passed, runtime_lifecycle_passed, runtime_family_coverage_passed
+- Boundary: readiness targets are partial readiness checks, not a complete historical milestone regression proof.
 
 ## 7. Final Readiness Conclusion
 
+- `pre_m3_gate_status`: READY_FOR_M3
+- `pre_m3_gate_passed`: True
 - `controlled_ready_status`: CONTROLLED_READY_VERIFIED
 - `open_ready_status`: OPEN_READY_VERIFIED
-- `final_recommendation`: OPEN_READY_VERIFIED
-- Rationale: Controlled readiness is verified and lifecycle/compression runtime evidence is revalidated this round.
+- `final_recommendation`: READY_FOR_M3
+- Rationale: Pre-M3 gate passed and all readiness gates, runtime evidence, and historical regressions are verified in the current round.
 - Why this is more conservative: n/a
 
 ## 8. Next Evidence Needed

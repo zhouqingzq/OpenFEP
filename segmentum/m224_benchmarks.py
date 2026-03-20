@@ -1385,16 +1385,16 @@ def run_m224_workspace_benchmark(seed_set: list[int] | None = None) -> dict[str,
     payload = _build_payload(seed_values, generated_at=generated_at, codebase_version=codebase_version)
     replay = _build_payload(seed_values, generated_at=generated_at, codebase_version=codebase_version)
     determinism = _derive_determinism(payload["acceptance_report"], replay["acceptance_report"], seed_values)
-    payload["acceptance_report"]["gates"]["determinism"] = bool(determinism["passed"])
-    payload["acceptance_report"]["gates"]["artifact_schema_complete"] = bool(payload["schema_check"]["passed"])
-    payload["acceptance_report"]["determinism"] = determinism
-    payload["acceptance_report"]["artifact_schema_complete"] = payload["schema_check"]
-    payload["acceptance_report"]["status"] = (
-        "PASS"
-        if all(value for key, value in payload["acceptance_report"]["gates"].items() if key != "freshness_generated_this_round")
-        else "FAIL"
+    _finalize_acceptance_report(
+        report=payload["acceptance_report"],
+        schema_check=payload["schema_check"],
+        determinism=determinism,
+        freshness=_runtime_freshness(
+            generated_at=generated_at,
+            codebase_version=codebase_version,
+            seed_set=seed_values,
+        ),
     )
-    payload["acceptance_report"]["recommendation"] = "ACCEPT" if payload["acceptance_report"]["status"] == "PASS" else "REJECT"
     return payload
 
 
@@ -1444,6 +1444,39 @@ def _written_freshness(
     }
 
 
+def _runtime_freshness(
+    *,
+    generated_at: str,
+    codebase_version: str,
+    seed_set: list[int],
+) -> dict[str, object]:
+    return {
+        "generated_this_round": True,
+        "artifact_schema_version": SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "codebase_version": codebase_version,
+        "seed_set": list(seed_set),
+        "artifacts": {},
+    }
+
+
+def _finalize_acceptance_report(
+    *,
+    report: dict[str, object],
+    schema_check: dict[str, object],
+    determinism: dict[str, object],
+    freshness: dict[str, object],
+) -> None:
+    report["freshness"] = freshness
+    report["determinism"] = determinism
+    report["artifact_schema_complete"] = schema_check
+    report["gates"]["determinism"] = bool(determinism["passed"])
+    report["gates"]["artifact_schema_complete"] = bool(schema_check["passed"])
+    report["gates"]["freshness_generated_this_round"] = bool(freshness["generated_this_round"])
+    report["status"] = "PASS" if all(bool(value) for value in report["gates"].values()) else "FAIL"
+    report["recommendation"] = "ACCEPT" if report["status"] == "PASS" else "REJECT"
+
+
 def write_m224_acceptance_artifacts(seed_set: list[int] | None = None) -> dict[str, Path]:
     payload = run_m224_workspace_benchmark(seed_set=seed_set)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -1465,17 +1498,18 @@ def write_m224_acceptance_artifacts(seed_set: list[int] | None = None) -> dict[s
     report = dict(payload["acceptance_report"])
     report_path = artifact_paths["report"]
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    report["freshness"] = _written_freshness(
+    freshness = _written_freshness(
         paths=artifact_paths,
         write_started_at=write_started_at,
         generated_at=str(report["generated_at"]),
         codebase_version=str(report["codebase_version"]),
         seed_set=list(payload["seed_set"]),
     )
-    report["gates"]["freshness_generated_this_round"] = bool(report["freshness"]["generated_this_round"])
-    report["artifact_schema_complete"] = _written_schema_complete(artifact_paths)
-    report["gates"]["artifact_schema_complete"] = bool(report["artifact_schema_complete"]["passed"])
-    report["status"] = "PASS" if all(bool(value) for value in report["gates"].values()) else "FAIL"
-    report["recommendation"] = "ACCEPT" if report["status"] == "PASS" else "REJECT"
+    _finalize_acceptance_report(
+        report=report,
+        schema_check=_written_schema_complete(artifact_paths),
+        determinism=dict(payload["acceptance_report"]["determinism"]),
+        freshness=freshness,
+    )
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     return artifact_paths

@@ -13,6 +13,15 @@ class TestM224Acceptance(unittest.TestCase):
         right = run_m224_workspace_benchmark(seed_set=list(SEED_SET))
         self.assertEqual(left["acceptance_report"]["goal_details"], right["acceptance_report"]["goal_details"])
 
+    def test_runtime_return_is_already_fresh_without_write_side_effects(self) -> None:
+        payload = run_m224_workspace_benchmark(seed_set=list(SEED_SET))
+        report = payload["acceptance_report"]
+
+        self.assertTrue(report["freshness"]["generated_this_round"])
+        self.assertTrue(report["gates"]["freshness_generated_this_round"])
+        self.assertEqual(report["freshness"]["seed_set"], list(SEED_SET))
+        self.assertEqual(report["status"], "PASS")
+
     def test_acceptance_artifact_schema_complete(self) -> None:
         written = write_m224_acceptance_artifacts(seed_set=list(SEED_SET))
         report = json.loads(Path(written["report"]).read_text(encoding="utf-8"))

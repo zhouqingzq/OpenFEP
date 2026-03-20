@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-19T07:59:31+00:00",
-  "codebase_version": "f665a3f401bc62009a6414390070d841ba8d4e8f",
+  "generated_at": "2026-03-20T04:23:23+00:00",
+  "codebase_version": "23c599dc3820924ad0913aaacba383220bfb1883",
   "seed_set": [
     224,
     243,
@@ -1516,7 +1516,7 @@
             },
             "predicted_error": 0.09863153866666667,
             "predicted_outcome": "integrity_loss",
-            "preferred_probability": 1e-12,
+            "preferred_probability": 2.4897906369168703e-46,
             "risk": 105.00671565234403,
             "social_bias": 0.0,
             "value_score": -0.6680104684941067,
@@ -1565,7 +1565,7 @@
             },
             "predicted_error": 0.142576112,
             "predicted_outcome": "integrity_loss",
-            "preferred_probability": 1e-12,
+            "preferred_probability": 2.4897906369168703e-46,
             "risk": 105.00671565234403,
             "social_bias": 0.0,
             "value_score": -0.6680104684941067,
@@ -3595,7 +3595,7 @@
             },
             "predicted_error": 0.09863153866666667,
             "predicted_outcome": "integrity_loss",
-            "preferred_probability": 1e-12,
+            "preferred_probability": 2.4897906369168703e-46,
             "risk": 105.00671565234403,
             "social_bias": 0.0,
             "value_score": -0.6680104684941067,
@@ -3644,7 +3644,7 @@
             },
             "predicted_error": 0.142576112,
             "predicted_outcome": "integrity_loss",
-            "preferred_probability": 1e-12,
+            "preferred_probability": 2.4897906369168703e-46,
             "risk": 105.00671565234403,
             "social_bias": 0.0,
             "value_score": -0.6680104684941067,
@@ -4624,8 +4624,8 @@
         },
         {
           "cycle": 3,
-          "choice": "hide",
-          "workspace_bias": 0.026957,
+          "choice": "rest",
+          "workspace_bias": 0.0,
           "workspace_broadcast_channels": [
             "novelty",
             "shelter"
@@ -4665,8 +4665,8 @@
         },
         {
           "cycle": 4,
-          "choice": "hide",
-          "workspace_bias": 0.01872,
+          "choice": "rest",
+          "workspace_bias": 0.0,
           "workspace_broadcast_channels": [
             "novelty",
             "shelter"
@@ -4697,7 +4697,7 @@
             "matched_aliases": {}
           },
           "workspace_maintenance_priority": {
-            "priority_gain": 0.244597,
+            "priority_gain": 0.233067,
             "active_tasks": [
               "shelter_security"
             ],
@@ -4759,7 +4759,7 @@
         },
         {
           "cycle": 3,
-          "choice": "hide",
+          "choice": "rest",
           "workspace_bias": 0.0,
           "workspace_broadcast_channels": [],
           "workspace_suppressed_channels": [],
@@ -4782,7 +4782,7 @@
         },
         {
           "cycle": 4,
-          "choice": "hide",
+          "choice": "rest",
           "workspace_bias": 0.0,
           "workspace_broadcast_channels": [],
           "workspace_suppressed_channels": [],

@@ -3,9 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 from pathlib import Path
-import subprocess
 import sys
 
+from .audit_provenance import (
+    codebase_version as resolve_codebase_version,
+    normalize_codebase_provenance,
+)
 from .m221_benchmarks import run_m221_open_narrative_benchmark
 from .m222_benchmarks import run_m222_long_horizon_trial
 from .m223_benchmarks import run_m223_self_consistency_benchmark
@@ -54,19 +57,7 @@ def _generated_at() -> str:
 
 
 def _codebase_version() -> str:
-    try:
-        completed = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError:
-        return "unknown"
-    if completed.returncode != 0:
-        return "unknown"
-    return completed.stdout.strip() or "unknown"
+    return resolve_codebase_version(ROOT)
 
 
 def _round(value: float) -> float:
@@ -802,11 +793,12 @@ def build_m226_maturity_audit(
     standardized_replays: dict[str, dict[str, object]],
     seed_set: list[int] | None = None,
     protocol_config: dict[str, object] | None = None,
-    codebase_version: str | None = None,
+    codebase_version: str | dict[str, object] | None = None,
 ) -> dict[str, object]:
     selected_seed_set = list(seed_set or SEED_SET)
     selected_protocol = dict(protocol_config or _default_protocol_config(selected_seed_set))
-    version = codebase_version or _codebase_version()
+    provenance = normalize_codebase_provenance(codebase_version, root=ROOT)
+    version = str(provenance["git_commit"])
     replay_freshness = _build_replay_freshness(standardized_replays, seed_set=selected_seed_set, codebase_version=version, protocol_config=selected_protocol)
     cross_consistency = _build_cross_milestone_consistency(standardized_replays)
     red_team_audit = _build_red_team_audit(standardized_replays, replay_freshness, cross_consistency, protocol_config=selected_protocol)
@@ -826,6 +818,7 @@ def build_m226_maturity_audit(
         "schema_version": SCHEMA_VERSION,
         "generated_at": _generated_at(),
         "codebase_version": version,
+        "codebase_provenance": provenance,
         "seed_set": selected_seed_set,
         "protocol_config": selected_protocol,
         "replay_freshness": replay_freshness,
@@ -838,6 +831,7 @@ def build_m226_maturity_audit(
             "schema_version": SCHEMA_VERSION,
             "generated_at": _generated_at(),
             "codebase_version": version,
+            "codebase_provenance": provenance,
             "protocol_version": selected_protocol["protocol_version"],
             "seed_set": selected_seed_set,
             "dimension_scores": scorecard["dimension_scores"],
@@ -899,7 +893,6 @@ def run_m226_full_replay(
         standardized_replays=standardized,
         seed_set=selected_seed_set,
         protocol_config=_default_protocol_config(selected_seed_set),
-        codebase_version=_codebase_version(),
     )
 
 

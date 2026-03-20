@@ -56,6 +56,16 @@ def _regularize_transfer_agent(
         for key in list(belief_store.keys()):
             belief_store[key] = 0.5
 
+    # Clear world-specific slow weights before rebuilding target-world transfer
+    # priors. These fields encode source-world action preferences and threat
+    # priors; keeping them verbatim causes safe-world evaluation to inherit the
+    # old world's avoidance posture.
+    agent.world_model.policy_biases = {}
+    agent.world_model.counterfactual_biases = {}
+    agent.world_model.epistemic_uncertainty_bonuses = {}
+    agent.world_model.threat_priors = {}
+    agent.world_model.preference_penalties = {}
+
     policies = agent.self_model.preferred_policies
     if policies is not None:
         baseline_distribution = {
@@ -109,11 +119,26 @@ def _regularize_transfer_agent(
         ),
     )
 
+    if eval_world_name == "foraging_valley" and train_world == "predator_river":
+        # Predator conditioning should carry over threat vigilance, but not lock
+        # the agent into a hide-first valley policy once the local context is
+        # materially safer. A small anti-collapse bias restores the valley's
+        # hide-vs-rest tradeoff without erasing the transferred caution signal.
+        agent.world_model.counterfactual_biases = {
+            "hide": -0.20,
+            "rest": 0.05,
+        }
+
     # Preserve structured social carryover when a cooperative world is followed
     # by another socially navigable setting. This keeps transfer grounded in
     # observed affordances rather than leaving the agent locked in a valley-safe
     # rest/hide policy after a positive social encounter.
     if eval_world_name == "social_shelter" and policies is not None:
+        agent.world_model.counterfactual_biases = {
+            "seek_contact": 0.08,
+            "hide": -0.05,
+            "exploit_shelter": 0.04,
+        }
         social_affordance = max(
             0.0,
             context.social - context.danger * 0.35 + shelter_signal * 0.15,

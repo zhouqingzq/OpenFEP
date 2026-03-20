@@ -767,6 +767,7 @@ class SegmentAgent:
         )
         if lifecycle_stage != LIFECYCLE_PROTECTED_IDENTITY_CRITICAL:
             payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+        self.long_term_memory._synchronize_continuity_metadata(payload)
 
     def _update_social_memory_from_embodied_episode(
         self,
@@ -3029,6 +3030,12 @@ class SegmentAgent:
             payload["dream_prediction_error"] = prediction_error
             payload["dream_total_surprise"] = total_surprise
 
+            if self.long_term_memory.should_preserve_restart_continuity(
+                payload,
+                current_cycle=self.cycle,
+            ):
+                continue
+
             if total_surprise < self.long_term_memory.surprise_threshold:
                 # Never delete identity-critical or protected episodes — they
                 # represent core learned dangers even when fully predicted.
@@ -3246,7 +3253,13 @@ class SegmentAgent:
         self.counterfactual_insights.extend(cf_insights)
 
         episodes_archived, episodes_deleted = self._surprise_based_forgetting(replay_batch)
-        compression_removed = self.long_term_memory.compress_episodes()
+        try:
+            compression_removed = self.long_term_memory.compress_episodes(current_cycle=self.cycle)
+        except TypeError as exc:
+            if "current_cycle" not in str(exc):
+                raise
+            # Keep the sleep pipeline compatible with older zero-arg compression hooks.
+            compression_removed = self.long_term_memory.compress_episodes()
 
         # Body restoration
         self.energy = clamp(self.energy + 0.31)

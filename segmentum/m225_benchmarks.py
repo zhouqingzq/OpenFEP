@@ -4,9 +4,11 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import json
 import math
+import os
 from pathlib import Path
 from statistics import mean, pstdev
 import subprocess
+import sys
 import tempfile
 
 from .action_schema import action_name
@@ -23,6 +25,7 @@ MILESTONE_ID = "M2.25"
 SCHEMA_VERSION = "m225_v2"
 SEED_SET = [225, 244, 322, 341, 419, 438]
 M225_PYTEST_LOG = REPORTS_DIR / "m225_pytest_execution_log.json"
+M225_SKIP_AUTORUN_ENV = "SEGMENTUM_M225_SKIP_AUTORUN"
 VARIANT_SET = [
     "full_system",
     "no_transfer_regularization",
@@ -2104,10 +2107,15 @@ def _normalize_pytest_record(item: dict[str, object]) -> dict[str, object]:
     }
 
 
-def _collect_pytest_tests(pytest_evidence: list[dict[str, object]] | None = None) -> list[dict[str, object]]:
+def _collect_pytest_tests(
+    pytest_evidence: list[dict[str, object]] | None = None,
+    *,
+    include_persisted: bool = False,
+) -> list[dict[str, object]]:
+    persisted = load_m225_test_execution_log() if include_persisted else []
     combined = [
         _normalize_pytest_record(item)
-        for item in snapshot_m225_test_execution_log() + list(pytest_evidence or [])
+        for item in persisted + snapshot_m225_test_execution_log() + list(pytest_evidence or [])
         if str(item.get("status", "")).lower() != "running"
     ]
     deduped: dict[str, dict[str, object]] = {}
@@ -2115,6 +2123,34 @@ def _collect_pytest_tests(pytest_evidence: list[dict[str, object]] | None = None
         key = str(item.get("nodeid") or item.get("name"))
         deduped[key] = item
     return list(deduped.values())
+
+
+def _required_pytest_suites() -> list[str]:
+    return list(REQUIRED_CURRENT_ROUND_PYTEST_SUITES) + list(REQUIRED_HISTORICAL_REGRESSION_SUITES)
+
+
+def _missing_required_pytest_suites(pytest_tests: list[dict[str, object]]) -> list[str]:
+    executed_suites = {_suite_from_nodeid(str(item.get("nodeid", ""))) for item in pytest_tests}
+    return [suite for suite in _required_pytest_suites() if suite not in executed_suites]
+
+
+def _autorun_required_pytest_suites(missing_suites: list[str]) -> list[dict[str, object]]:
+    if not missing_suites:
+        return []
+    clear_m225_persisted_test_execution_log(M225_PYTEST_LOG)
+    env = os.environ.copy()
+    env["SEGMENTUM_M225_TEST_LOG"] = str(M225_PYTEST_LOG)
+    env["SEGMENTUM_M225_CLEAR_LOG"] = "1"
+    env[M225_SKIP_AUTORUN_ENV] = "1"
+    subprocess.run(
+        [sys.executable, "-m", "pytest", *missing_suites, "-q"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return load_m225_test_execution_log(M225_PYTEST_LOG)
 
 
 def _build_historical_regressions(pytest_tests: list[dict[str, object]]) -> list[dict[str, object]]:
@@ -2548,7 +2584,13 @@ def write_m225_acceptance_artifacts(
     *,
     pytest_evidence: list[dict[str, object]] | None = None,
 ) -> dict[str, Path]:
-    payload = run_m225_open_world_transfer(seed_set=seed_set, pytest_evidence=pytest_evidence)
+    resolved_pytest_evidence = list(pytest_evidence or [])
+    if not os.environ.get(M225_SKIP_AUTORUN_ENV):
+        existing_pytest_tests = _collect_pytest_tests(resolved_pytest_evidence, include_persisted=True)
+        missing_suites = _missing_required_pytest_suites(existing_pytest_tests)
+        if missing_suites:
+            resolved_pytest_evidence.extend(_autorun_required_pytest_suites(missing_suites))
+    payload = run_m225_open_world_transfer(seed_set=seed_set, pytest_evidence=resolved_pytest_evidence)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     artifact_paths = {
@@ -2584,7 +2626,7 @@ def write_m225_acceptance_artifacts(
     report["gates"]["freshness_generated_this_round"] = bool(report["freshness"]["generated_this_round"])
     report["artifact_schema_complete"] = _written_schema_complete(artifact_paths)
     report["gates"]["artifact_schema_complete"] = bool(report["artifact_schema_complete"]["passed"])
-    pytest_tests = _collect_pytest_tests(pytest_evidence)
+    pytest_tests = _collect_pytest_tests(resolved_pytest_evidence, include_persisted=True)
     report["pytest_tests"] = pytest_tests
     report["tests"] = list(pytest_tests)
     report["historical_regressions"] = _build_historical_regressions(pytest_tests)

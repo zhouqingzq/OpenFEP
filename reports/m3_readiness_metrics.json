@@ -1,16 +1,165 @@
 {
-  "generated_at": "2026-03-13",
+  "milestone_id": "Pre-M3",
+  "status": "PASS",
+  "generated_at": "2026-03-20",
   "generator_path": "evals/m3_readiness_evaluation.py",
+  "seed_set": [
+    11,
+    21,
+    31,
+    33,
+    42,
+    17,
+    23,
+    29,
+    41,
+    44,
+    91,
+    43,
+    142,
+    143
+  ],
+  "artifacts": [
+    {
+      "path": "reports\\m2_followup_metrics.json",
+      "kind": "strict_metrics",
+      "gating": true
+    },
+    {
+      "path": "reports\\m2_metrics.json",
+      "kind": "legacy_metrics",
+      "gating": false
+    },
+    {
+      "path": "artifacts\\pre_m3_readiness_report.json",
+      "kind": "pre_m3_readiness",
+      "gating": true
+    },
+    {
+      "path": "artifacts\\pre_m3_regression_summary.json",
+      "kind": "historical_regressions",
+      "gating": true
+    }
+  ],
+  "tests": {
+    "readiness_targets": {
+      "suite_type": "readiness_targets",
+      "suite_scope": "targeted_readiness_tests_only",
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "revalidated_this_round": true,
+      "targets": [
+        "tests/test_m3_readiness.py",
+        "tests/test_memory.py",
+        "tests/test_counterfactual_artifact.py",
+        "tests/test_m23_ultimate_consolidation_loop.py"
+      ],
+      "target_count": 4,
+      "passed_count": 41,
+      "failed_count": 0,
+      "output_summary": "41 passed in 0.82s",
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m3_readiness.py",
+        "tests/test_memory.py",
+        "tests/test_counterfactual_artifact.py",
+        "tests/test_m23_ultimate_consolidation_loop.py",
+        "-q"
+      ]
+    },
+    "historical_regressions": {
+      "suite_type": "historical_regressions",
+      "suite_scope": "pre_m3_regression_suite",
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "artifacts\\pre_m3_regression_summary.json",
+      "revalidated_this_round": true,
+      "generated_at": "2026-03-20T01:57:29+00:00",
+      "required_checks": [
+        "soak_regression_passed",
+        "snapshot_compatibility_passed",
+        "runtime_lifecycle_passed",
+        "runtime_family_coverage_passed"
+      ],
+      "checks": {
+        "soak_regression_passed": true,
+        "snapshot_compatibility_passed": true,
+        "runtime_lifecycle_passed": true,
+        "runtime_family_coverage_passed": true
+      },
+      "passed": true,
+      "missing_checks": []
+    },
+    "coverage_boundary": {
+      "readiness_targets_are_full_regression": false,
+      "note": "The 4 readiness-target test files are scoped smoke/readiness checks and do not substitute for historical milestone regression replay."
+    }
+  },
+  "gates": {
+    "current_round_gating_tests_passed": true,
+    "strict_metrics_current_round_replayed": true,
+    "runtime_family_replay_verified": true,
+    "historical_regressions_current_round_replayed": true,
+    "controlled_ready_verified": true,
+    "open_ready_verified": true,
+    "pre_m3_gate_passed": true
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "strict_metrics": {
+      "classification": "current_round_replay",
+      "gating": true,
+      "generated_this_round": true,
+      "origin": "evals/m2_followup_repair.py:run_followup_evaluation"
+    },
+    "legacy_metrics": {
+      "classification": "inherited",
+      "gating": false,
+      "generated_this_round": false,
+      "origin": "reports/m2_metrics.json:metrics"
+    },
+    "readiness_target_tests": {
+      "classification": "current_round_replay",
+      "gating": true,
+      "generated_this_round": true,
+      "origin": "evals/m3_readiness_evaluation.py:pytest"
+    },
+    "historical_regressions": {
+      "classification": "current_round_replay",
+      "gating": true,
+      "generated_this_round": true,
+      "origin": "artifacts\\pre_m3_regression_summary.json"
+    },
+    "lifecycle_runtime_probe": {
+      "classification": "current_round_replay",
+      "gating": true,
+      "generated_this_round": true,
+      "origin": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe"
+    },
+    "family_coverage": {
+      "classification": "current_round_replay",
+      "gating": true,
+      "generated_this_round": true,
+      "origin": "evals/m3_readiness_evaluation.py:runtime_counterfactual_replay"
+    }
+  },
+  "recommendation": {
+    "status": "READY_FOR_M3",
+    "rationale": "Pre-M3 gate passed and all readiness gates, runtime evidence, and historical regressions are verified in the current round.",
+    "why_more_conservative": "",
+    "blocking_gaps": []
+  },
   "strict_metrics": {
     "ICI": {
       "name": "ICI",
       "value": 1.0,
       "threshold": 0.8,
       "passes_threshold": true,
-      "verification_status": "INHERITED_STRICT_BASELINE",
-      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
-      "revalidated_this_round": false,
-      "inherited_from_followup": true,
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m2_followup_repair.py:run_followup_evaluation",
+      "revalidated_this_round": true,
+      "inherited_from_followup": false,
       "claimed_not_replayed": false,
       "strict_metric": true,
       "gating_metric": true,
@@ -22,10 +171,10 @@
       "value": 0.9725,
       "threshold": 0.8,
       "passes_threshold": true,
-      "verification_status": "INHERITED_STRICT_BASELINE",
-      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
-      "revalidated_this_round": false,
-      "inherited_from_followup": true,
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m2_followup_repair.py:run_followup_evaluation",
+      "revalidated_this_round": true,
+      "inherited_from_followup": false,
       "claimed_not_replayed": false,
       "strict_metric": true,
       "gating_metric": true,
@@ -37,10 +186,10 @@
       "value": 1.0,
       "threshold": 0.55,
       "passes_threshold": true,
-      "verification_status": "INHERITED_STRICT_BASELINE",
-      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
-      "revalidated_this_round": false,
-      "inherited_from_followup": true,
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m2_followup_repair.py:run_followup_evaluation",
+      "revalidated_this_round": true,
+      "inherited_from_followup": false,
       "claimed_not_replayed": false,
       "strict_metric": true,
       "gating_metric": true,
@@ -52,10 +201,10 @@
       "value": 0.9997,
       "threshold": 0.3,
       "passes_threshold": true,
-      "verification_status": "INHERITED_STRICT_BASELINE",
-      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
-      "revalidated_this_round": false,
-      "inherited_from_followup": true,
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m2_followup_repair.py:run_followup_evaluation",
+      "revalidated_this_round": true,
+      "inherited_from_followup": false,
       "claimed_not_replayed": false,
       "strict_metric": true,
       "gating_metric": true,
@@ -67,10 +216,10 @@
       "value": 1.0,
       "threshold": 0.55,
       "passes_threshold": true,
-      "verification_status": "INHERITED_STRICT_BASELINE",
-      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
-      "revalidated_this_round": false,
-      "inherited_from_followup": true,
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m2_followup_repair.py:run_followup_evaluation",
+      "revalidated_this_round": true,
+      "inherited_from_followup": false,
       "claimed_not_replayed": false,
       "strict_metric": true,
       "gating_metric": true,
@@ -82,10 +231,10 @@
       "value": 1.0,
       "threshold": 0.8,
       "passes_threshold": true,
-      "verification_status": "INHERITED_STRICT_BASELINE",
-      "evidence_origin": "reports/m2_followup_metrics.json:new_metrics",
-      "revalidated_this_round": false,
-      "inherited_from_followup": true,
+      "verification_status": "REVALIDATED_THIS_ROUND",
+      "evidence_origin": "evals/m2_followup_repair.py:run_followup_evaluation",
+      "revalidated_this_round": true,
+      "inherited_from_followup": false,
       "claimed_not_replayed": false,
       "strict_metric": true,
       "gating_metric": true,
@@ -202,37 +351,39 @@
     "legacy::VCUS"
   ],
   "verification_status": {
-    "strict_baseline_source": "reports/m2_followup_metrics.json",
+    "strict_baseline_source": "evals/m2_followup_repair.py:run_followup_evaluation",
     "legacy_comparison_source": "reports/m2_metrics.json",
     "readiness_generator_rebuilt_this_round": true
   },
   "evidence_origin": {
-    "strict_metrics": "reports/m2_followup_metrics.json:new_metrics",
+    "strict_metrics": "evals/m2_followup_repair.py:run_followup_evaluation",
     "legacy_metrics": "reports/m2_metrics.json:metrics",
     "lifecycle": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe",
-    "family_coverage": "evals/m3_readiness_evaluation.py:runtime_family_probe",
+    "family_coverage": "evals/m3_readiness_evaluation.py:runtime_counterfactual_replay",
     "tests": "evals/m3_readiness_evaluation.py:pytest"
   },
   "revalidated_this_round": {
-    "strict_metrics": false,
+    "strict_metrics": true,
     "legacy_metrics": false,
     "lifecycle": true,
     "family_schema": true,
     "tests": true
   },
   "inherited_from_followup": {
-    "ICI": true,
-    "EAA": true,
-    "MUR": true,
-    "PSSR": true,
-    "CAQ": true,
-    "VCUS": true
+    "ICI": false,
+    "EAA": false,
+    "MUR": false,
+    "PSSR": false,
+    "CAQ": false,
+    "VCUS": false
   },
   "claimed_not_revalidated": {
     "tests": null,
     "compressed_cluster_count": false
   },
   "current_round_test_evidence": {
+    "suite_type": "readiness_targets",
+    "suite_scope": "targeted_readiness_tests_only",
     "verification_status": "REVALIDATED_THIS_ROUND",
     "evidence_origin": "evals/m3_readiness_evaluation.py:pytest",
     "revalidated_this_round": true,
@@ -246,10 +397,38 @@
       "tests/test_m23_ultimate_consolidation_loop.py",
       "-q"
     ],
+    "targets": [
+      "tests/test_m3_readiness.py",
+      "tests/test_memory.py",
+      "tests/test_counterfactual_artifact.py",
+      "tests/test_m23_ultimate_consolidation_loop.py"
+    ],
     "target_count": 4,
-    "passed_count": 34,
+    "passed_count": 41,
     "failed_count": 0,
-    "output_summary": "34 passed in 0.31s"
+    "output_summary": "41 passed in 0.82s"
+  },
+  "historical_regressions": {
+    "suite_type": "historical_regressions",
+    "suite_scope": "pre_m3_regression_suite",
+    "verification_status": "REVALIDATED_THIS_ROUND",
+    "evidence_origin": "artifacts\\pre_m3_regression_summary.json",
+    "revalidated_this_round": true,
+    "generated_at": "2026-03-20T01:57:29+00:00",
+    "required_checks": [
+      "soak_regression_passed",
+      "snapshot_compatibility_passed",
+      "runtime_lifecycle_passed",
+      "runtime_family_coverage_passed"
+    ],
+    "checks": {
+      "soak_regression_passed": true,
+      "snapshot_compatibility_passed": true,
+      "runtime_lifecycle_passed": true,
+      "runtime_family_coverage_passed": true
+    },
+    "passed": true,
+    "missing_checks": []
   },
   "lifecycle_evidence": {
     "verification_status": "REVALIDATED_THIS_ROUND",
@@ -288,18 +467,24 @@
   },
   "family_coverage": {
     "verification_status": "REVALIDATED_THIS_ROUND",
-    "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_family_probe",
+    "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_counterfactual_replay",
     "revalidated_this_round": true,
+    "evidence_kind": "runtime_replay",
     "family_schema_count": 4,
     "runtime_validated_family_count": 4,
+    "fully_graduated": true,
+    "missing_graduation_families": [],
     "family_coverage_status": "RUNTIME_DIVERSITY_VALIDATED",
     "family_probe_results": [
       {
         "scenario_label": "danger_avoidance",
-        "review_family": "danger_avoidance",
-        "graduated": true,
-        "average_benefit": 20.532592970578186,
-        "pass_rate": 1.0,
+        "probe_type": "runtime_counterfactual_replay",
+        "runtime_event_captured": true,
+        "review_families_seen": [
+          "danger_avoidance"
+        ],
+        "candidate_review_count": 5,
+        "absorption_count": 4,
         "coverage": {
           "total_families": 4,
           "families_covered": 1,
@@ -308,45 +493,33 @@
           "graduation_family_count": 1,
           "per_family_rates": {
             "danger_avoidance": {
-              "reviewed": 2,
-              "graduated": 1
-            }
-          }
-        }
-      },
-      {
-        "scenario_label": "resource_risk",
-        "review_family": "resource_risk",
-        "graduated": true,
-        "average_benefit": 29.61757635433727,
-        "pass_rate": 0.6666666666666666,
-        "coverage": {
-          "total_families": 4,
-          "families_covered": 1,
-          "families_graduated": 1,
-          "caq_family_coverage": 0.25,
-          "graduation_family_count": 1,
-          "per_family_rates": {
-            "resource_risk": {
-              "reviewed": 2,
-              "graduated": 1
+              "reviewed": 9,
+              "graduated": 4
             }
           }
         }
       },
       {
         "scenario_label": "retreat_vs_explore",
-        "review_family": "retreat_vs_explore",
-        "graduated": true,
-        "average_benefit": 32.08980295214045,
-        "pass_rate": 1.0,
+        "probe_type": "runtime_counterfactual_replay",
+        "runtime_event_captured": true,
+        "review_families_seen": [
+          "integrity_preservation",
+          "retreat_vs_explore"
+        ],
+        "candidate_review_count": 4,
+        "absorption_count": 4,
         "coverage": {
           "total_families": 4,
-          "families_covered": 1,
-          "families_graduated": 1,
-          "caq_family_coverage": 0.25,
-          "graduation_family_count": 1,
+          "families_covered": 2,
+          "families_graduated": 2,
+          "caq_family_coverage": 0.5,
+          "graduation_family_count": 2,
           "per_family_rates": {
+            "integrity_preservation": {
+              "reviewed": 6,
+              "graduated": 3
+            },
             "retreat_vs_explore": {
               "reviewed": 2,
               "graduated": 1
@@ -356,10 +529,41 @@
       },
       {
         "scenario_label": "integrity_preservation",
-        "review_family": "integrity_preservation",
-        "graduated": true,
-        "average_benefit": 0.05549999999999974,
-        "pass_rate": 1.0,
+        "probe_type": "runtime_counterfactual_replay",
+        "runtime_event_captured": true,
+        "review_families_seen": [
+          "integrity_preservation",
+          "retreat_vs_explore"
+        ],
+        "candidate_review_count": 3,
+        "absorption_count": 3,
+        "coverage": {
+          "total_families": 4,
+          "families_covered": 2,
+          "families_graduated": 2,
+          "caq_family_coverage": 0.5,
+          "graduation_family_count": 2,
+          "per_family_rates": {
+            "integrity_preservation": {
+              "reviewed": 4,
+              "graduated": 2
+            },
+            "retreat_vs_explore": {
+              "reviewed": 2,
+              "graduated": 1
+            }
+          }
+        }
+      },
+      {
+        "scenario_label": "resource_risk",
+        "probe_type": "runtime_counterfactual_replay",
+        "runtime_event_captured": true,
+        "review_families_seen": [
+          "resource_risk"
+        ],
+        "candidate_review_count": 2,
+        "absorption_count": 2,
         "coverage": {
           "total_families": 4,
           "families_covered": 1,
@@ -367,9 +571,9 @@
           "caq_family_coverage": 0.25,
           "graduation_family_count": 1,
           "per_family_rates": {
-            "integrity_preservation": {
-              "reviewed": 2,
-              "graduated": 1
+            "resource_risk": {
+              "reviewed": 4,
+              "graduated": 2
             }
           }
         }
@@ -383,23 +587,42 @@
       "graduation_family_count": 4,
       "per_family_rates": {
         "danger_avoidance": {
-          "reviewed": 2,
-          "graduated": 1
+          "reviewed": 9,
+          "graduated": 4
         },
         "integrity_preservation": {
-          "reviewed": 2,
-          "graduated": 1
+          "reviewed": 10,
+          "graduated": 5
         },
         "resource_risk": {
-          "reviewed": 2,
-          "graduated": 1
+          "reviewed": 4,
+          "graduated": 2
         },
         "retreat_vs_explore": {
-          "reviewed": 2,
-          "graduated": 1
+          "reviewed": 4,
+          "graduated": 2
         }
       }
-    }
+    },
+    "limitations": []
+  },
+  "pre_m3_readiness": {
+    "status": "READY_FOR_M3",
+    "passed": true,
+    "evidence_origin": "artifacts\\pre_m3_readiness_report.json",
+    "revalidated_this_round": true,
+    "seed_set": [
+      17,
+      23,
+      29,
+      41,
+      44,
+      91,
+      42,
+      43,
+      142,
+      143
+    ]
   },
   "controlled_ready_status": {
     "status": "CONTROLLED_READY_VERIFIED",
@@ -410,8 +633,9 @@
     "reasons": []
   },
   "final_recommendation": {
-    "status": "OPEN_READY_VERIFIED",
-    "rationale": "Controlled readiness is verified and lifecycle/compression runtime evidence is revalidated this round.",
-    "why_more_conservative": ""
+    "status": "READY_FOR_M3",
+    "rationale": "Pre-M3 gate passed and all readiness gates, runtime evidence, and historical regressions are verified in the current round.",
+    "why_more_conservative": "",
+    "blocking_gaps": []
   }
 }

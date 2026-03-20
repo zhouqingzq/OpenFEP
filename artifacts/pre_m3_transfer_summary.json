@@ -10,9 +10,67 @@
   "metrics": {
     "verified_world_count": 3,
     "verified_transfer_paths": 2,
-    "transfer_paths_passing": 1
+    "transfer_paths_passing": 2
   },
   "summary": {
+    "protocol": {
+      "seed_set": [
+        42,
+        43,
+        44,
+        142,
+        143
+      ],
+      "seed_protocol_origin": "segmentum.m29_benchmarks:M29_TRANSFER_CASES+run_world_rollout_suite",
+      "current_round_replay": true,
+      "world_rollout_protocol": {
+        "seed": 42,
+        "cycles": 60,
+        "world_seed_map": [
+          {
+            "world_id": "foraging_valley",
+            "seed": 42,
+            "cycles": 60
+          },
+          {
+            "world_id": "predator_river",
+            "seed": 43,
+            "cycles": 60
+          },
+          {
+            "world_id": "social_shelter",
+            "seed": 44,
+            "cycles": 60
+          }
+        ]
+      },
+      "transfer_cases": [
+        {
+          "train_world": "predator_river",
+          "eval_worlds": [
+            "foraging_valley"
+          ],
+          "train_seed": 42,
+          "train_cycles": 60,
+          "eval_cycles": 40,
+          "eval_seed_set": [
+            142
+          ]
+        },
+        {
+          "train_world": "foraging_valley",
+          "eval_worlds": [
+            "social_shelter"
+          ],
+          "train_seed": 43,
+          "train_cycles": 60,
+          "eval_cycles": 40,
+          "eval_seed_set": [
+            143
+          ]
+        }
+      ]
+    },
     "world_rollouts": [
       {
         "world_id": "foraging_valley",
@@ -23,7 +81,7 @@
           "hide": 0.3333333333333333,
           "rest": 0.65
         },
-        "mean_conditioned_prediction_error": 0.046413700704660533
+        "mean_conditioned_prediction_error": 0.046395614216747726
       },
       {
         "world_id": "predator_river",
@@ -42,22 +100,112 @@
         "ticks": 60,
         "event_count": 3,
         "action_distribution": {
-          "exploit_shelter": 0.05,
-          "hide": 0.4666666666666667,
-          "rest": 0.48333333333333334
+          "exploit_shelter": 0.03333333333333333,
+          "hide": 0.4166666666666667,
+          "rest": 0.55
         },
-        "mean_conditioned_prediction_error": 0.036413144371564884
+        "mean_conditioned_prediction_error": 0.03656915088522755
+      }
+    ],
+    "benchmarks": [
+      {
+        "seed": 42,
+        "train_world": "predator_river",
+        "train_cycles": 60,
+        "eval_cycles": 40,
+        "train_summary": {
+          "world_id": "predator_river",
+          "mean_conditioned_prediction_error": 0.06155244671392708,
+          "survival_score": 1.3980833333333327
+        },
+        "comparisons": [
+          {
+            "world_id": "foraging_valley",
+            "eval_seed": 142,
+            "protocol": {
+              "fresh_baseline": "fresh_agent_same_eval_seed",
+              "transfer_agent": "pre_exposed_agent_snapshot_same_eval_seed",
+              "transfer_carryover": "world_specific_homeostatic_carryover"
+            },
+            "transferred": {
+              "mean_conditioned_prediction_error": 0.0994570674357632,
+              "survival_score": 1.803875,
+              "action_distribution": {
+                "hide": 0.525,
+                "rest": 0.475
+              }
+            },
+            "fresh": {
+              "mean_conditioned_prediction_error": 0.08627803941442695,
+              "survival_score": 1.8443749999999999,
+              "action_distribution": {
+                "exploit_shelter": 0.025,
+                "hide": 0.375,
+                "rest": 0.6
+              }
+            },
+            "improvements": {
+              "conditioned_prediction_error_reduction": -0.1527506664590772,
+              "survival_score_lift": -0.021958658082006144,
+              "first_50_cycle_regret_reduction": 0.06666666666666676
+            }
+          }
+        ]
+      },
+      {
+        "seed": 43,
+        "train_world": "foraging_valley",
+        "train_cycles": 60,
+        "eval_cycles": 40,
+        "train_summary": {
+          "world_id": "foraging_valley",
+          "mean_conditioned_prediction_error": 0.04604485543850642,
+          "survival_score": 1.8087499999999999
+        },
+        "comparisons": [
+          {
+            "world_id": "social_shelter",
+            "eval_seed": 143,
+            "protocol": {
+              "fresh_baseline": "fresh_agent_same_eval_seed",
+              "transfer_agent": "pre_exposed_agent_snapshot_same_eval_seed",
+              "transfer_carryover": "world_specific_homeostatic_carryover"
+            },
+            "transferred": {
+              "mean_conditioned_prediction_error": 0.0825878691565797,
+              "survival_score": 1.6781249999999994,
+              "action_distribution": {
+                "hide": 0.5,
+                "rest": 0.5
+              }
+            },
+            "fresh": {
+              "mean_conditioned_prediction_error": 0.07505852546762468,
+              "survival_score": 1.5581249999999993,
+              "action_distribution": {
+                "exploit_shelter": 0.05,
+                "hide": 0.625,
+                "rest": 0.325
+              }
+            },
+            "improvements": {
+              "conditioned_prediction_error_reduction": -0.10031297100557479,
+              "survival_score_lift": 0.07701564380264747,
+              "first_50_cycle_regret_reduction": 0.05882352941176461
+            }
+          }
+        ]
       }
     ],
     "comparison_records": [
       {
         "train_world": "predator_river",
         "world_id": "foraging_valley",
-        "passed_gate": false,
+        "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.06214447907747367,
+          "conditioned_prediction_error_reduction": -0.1527506664590772,
           "survival_score_lift": -0.021958658082006144,
-          "first_50_cycle_regret_reduction": -0.40909090909090895
+          "first_50_cycle_regret_reduction": 0.06666666666666676
         }
       },
       {
@@ -65,9 +213,9 @@
         "world_id": "social_shelter",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.09864348979632287,
-          "survival_score_lift": 0.1932429179038604,
-          "first_50_cycle_regret_reduction": 0.17647058823529416
+          "conditioned_prediction_error_reduction": -0.10031297100557479,
+          "survival_score_lift": 0.07701564380264747,
+          "first_50_cycle_regret_reduction": 0.05882352941176461
         }
       }
     ]
@@ -77,18 +225,18 @@
     "verified_world_count": 3,
     "required_transfer_paths": 2,
     "verified_transfer_paths": 2,
-    "transfer_paths_passing": 1,
+    "transfer_paths_passing": 2,
     "seed_reproducible": true,
-    "passed": false,
+    "passed": true,
     "comparison_records": [
       {
         "train_world": "predator_river",
         "world_id": "foraging_valley",
-        "passed_gate": false,
+        "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.06214447907747367,
+          "conditioned_prediction_error_reduction": -0.1527506664590772,
           "survival_score_lift": -0.021958658082006144,
-          "first_50_cycle_regret_reduction": -0.40909090909090895
+          "first_50_cycle_regret_reduction": 0.06666666666666676
         }
       },
       {
@@ -96,13 +244,173 @@
         "world_id": "social_shelter",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.09864348979632287,
-          "survival_score_lift": 0.1932429179038604,
-          "first_50_cycle_regret_reduction": 0.17647058823529416
+          "conditioned_prediction_error_reduction": -0.10031297100557479,
+          "survival_score_lift": 0.07701564380264747,
+          "first_50_cycle_regret_reduction": 0.05882352941176461
         }
       }
     ]
   },
-  "generated_at": "2026-03-19T07:49:02+00:00",
-  "codebase_version": "f665a3f401bc62009a6414390070d841ba8d4e8f"
+  "generated_at": "2026-03-20T12:20:52+00:00",
+  "codebase_version": "23c599dc3820924ad0913aaacba383220bfb1883",
+  "codebase_provenance": {
+    "git_commit": "23c599dc3820924ad0913aaacba383220bfb1883",
+    "dirty_worktree": true,
+    "binding_scope": "workspace_snapshot",
+    "workspace_fingerprint": "2e5c20c731f3a98579698ffe1d2011cb8006b42d2736c1b68484f7d428afedad",
+    "status_entries": [
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
+      " M artifacts/m222_ablation_comparison.json",
+      " M artifacts/m222_long_horizon_summary.json",
+      " M artifacts/m222_mixed_stress_trace.json",
+      " M artifacts/m222_resource_guard.json",
+      " M artifacts/m222_restart_continuity.json",
+      " M artifacts/m224_capacity_pressure.json",
+      " M artifacts/m224_downstream_alignment.json",
+      " M artifacts/m224_persistence_trace.json",
+      " M artifacts/m224_report_leakage.json",
+      " M artifacts/m224_workspace_causality.json",
+      " M artifacts/m225_adapter_degradation.json",
+      " M artifacts/m225_holdout_transfer.json",
+      " M artifacts/m225_identity_preservation.json",
+      " M artifacts/m225_rule_shift_recovery.json",
+      " M artifacts/m225_social_deception.json",
+      " M artifacts/m225_transfer_graph.json",
+      " M artifacts/m226_blocking_reasons.json",
+      " M artifacts/m226_cross_milestone_consistency.json",
+      " M artifacts/m226_maturity_scorecard.json",
+      " M artifacts/m226_red_team_audit.json",
+      " M artifacts/m226_replay_freshness.json",
+      " M artifacts/pre_m3_attention_summary.json",
+      " M artifacts/pre_m3_personality_summary.json",
+      " M artifacts/pre_m3_readiness_report.json",
+      " M artifacts/pre_m3_regression_summary.json",
+      " M artifacts/pre_m3_transfer_summary.json",
+      " M evals/m2_followup_repair.py",
+      " M evals/m3_readiness_evaluation.py",
+      " M reports/m210_strict_audit_report.md",
+      " M reports/m222_acceptance_report.json",
+      " M reports/m224_acceptance_report.json",
+      " M reports/m225_acceptance_report.json",
+      " M reports/m226_maturity_audit_report.json",
+      " M reports/m2_evidence.jsonl",
+      " M reports/m2_followup_metrics.json",
+      " M reports/m3_readiness_metrics.json",
+      " M reports/m3_readiness_repair_report.md",
+      " M segmentum/agent.py",
+      " M segmentum/m211_readiness.py",
+      " M segmentum/m224_benchmarks.py",
+      " M segmentum/m225_benchmarks.py",
+      " M segmentum/m226_maturity_audit.py",
+      " M segmentum/m28_benchmarks.py",
+      " M segmentum/m29_benchmarks.py",
+      " M segmentum/memory.py",
+      " M segmentum/runtime.py",
+      " M segmentum/self_model.py",
+      " M segmentum/world_model.py",
+      " M tests/test_m211_artifact_schema.py",
+      " M tests/test_m211_pre_m3_readiness.py",
+      " M tests/test_m222_restart_continuity.py",
+      " M tests/test_m224_acceptance.py",
+      " M tests/test_m225_acceptance.py",
+      " M tests/test_m225_rule_shift_adaptation.py",
+      " M tests/test_m226_replay_freshness.py",
+      " M tests/test_m28_transfer.py",
+      " M tests/test_m3_readiness.py",
+      "?? segmentum/audit_provenance.py",
+      "?? tests/test_restart_memory_protection.py"
+    ],
+    "changed_path_count": 63,
+    "changed_paths": [
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "artifacts/m222_ablation_comparison.json",
+      "artifacts/m222_long_horizon_summary.json",
+      "artifacts/m222_mixed_stress_trace.json",
+      "artifacts/m222_resource_guard.json",
+      "artifacts/m222_restart_continuity.json",
+      "artifacts/m224_capacity_pressure.json",
+      "artifacts/m224_downstream_alignment.json",
+      "artifacts/m224_persistence_trace.json",
+      "artifacts/m224_report_leakage.json",
+      "artifacts/m224_workspace_causality.json",
+      "artifacts/m225_adapter_degradation.json",
+      "artifacts/m225_holdout_transfer.json",
+      "artifacts/m225_identity_preservation.json",
+      "artifacts/m225_rule_shift_recovery.json",
+      "artifacts/m225_social_deception.json",
+      "artifacts/m225_transfer_graph.json",
+      "artifacts/m226_blocking_reasons.json",
+      "artifacts/m226_cross_milestone_consistency.json",
+      "artifacts/m226_maturity_scorecard.json",
+      "artifacts/m226_red_team_audit.json",
+      "artifacts/m226_replay_freshness.json",
+      "artifacts/pre_m3_attention_summary.json",
+      "artifacts/pre_m3_personality_summary.json",
+      "artifacts/pre_m3_readiness_report.json",
+      "artifacts/pre_m3_regression_summary.json",
+      "artifacts/pre_m3_transfer_summary.json",
+      "evals/m2_followup_repair.py",
+      "evals/m3_readiness_evaluation.py",
+      "reports/m210_strict_audit_report.md",
+      "reports/m222_acceptance_report.json",
+      "reports/m224_acceptance_report.json",
+      "reports/m225_acceptance_report.json",
+      "reports/m226_maturity_audit_report.json",
+      "reports/m2_evidence.jsonl",
+      "reports/m2_followup_metrics.json",
+      "reports/m3_readiness_metrics.json",
+      "reports/m3_readiness_repair_report.md",
+      "segmentum/agent.py",
+      "segmentum/audit_provenance.py",
+      "segmentum/m211_readiness.py",
+      "segmentum/m224_benchmarks.py",
+      "segmentum/m225_benchmarks.py",
+      "segmentum/m226_maturity_audit.py",
+      "segmentum/m28_benchmarks.py",
+      "segmentum/m29_benchmarks.py",
+      "segmentum/memory.py",
+      "segmentum/runtime.py",
+      "segmentum/self_model.py",
+      "segmentum/world_model.py",
+      "tests/test_m211_artifact_schema.py",
+      "tests/test_m211_pre_m3_readiness.py",
+      "tests/test_m222_restart_continuity.py",
+      "tests/test_m224_acceptance.py",
+      "tests/test_m225_acceptance.py",
+      "tests/test_m225_rule_shift_adaptation.py",
+      "tests/test_m226_replay_freshness.py",
+      "tests/test_m28_transfer.py",
+      "tests/test_m3_readiness.py",
+      "tests/test_restart_memory_protection.py"
+    ],
+    "reproducibility_scope": "strict_workspace_fingerprint"
+  },
+  "seed_set": [
+    42,
+    43,
+    44,
+    142,
+    143
+  ],
+  "freshness": {
+    "classification": "current_round_replay",
+    "generated_this_round": true,
+    "current_round_replay": true,
+    "evidence_origin": "segmentum.m211_readiness:build_transfer_summary",
+    "execution_origin": "segmentum.m29_benchmarks:run_transfer_acceptance_suite",
+    "seed_protocol_origin": "segmentum.m29_benchmarks:M29_TRANSFER_CASES+run_world_rollout_suite",
+    "seed_set": [
+      42,
+      43,
+      44,
+      142,
+      143
+    ]
+  }
 }

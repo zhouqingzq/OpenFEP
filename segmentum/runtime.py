@@ -39,6 +39,7 @@ from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 
 STATE_VERSION = "0.4"
 SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.3", "0.2", "0.1"}
+RESTART_MEMORY_CONTINUITY_WINDOW = 24
 
 
 def format_state(values: dict[str, float]) -> str:
@@ -226,6 +227,10 @@ class SegmentRuntime:
             runtime.restart_policy_anchors = dict(restart_anchors)
             runtime._activate_continuity_rebind()
             runtime.agent.self_model.apply_restart_anchors(runtime.restart_policy_anchors)
+        runtime.agent.long_term_memory.activate_restart_continuity_window(
+            current_cycle=runtime.agent.cycle,
+            duration=max(RESTART_MEMORY_CONTINUITY_WINDOW, runtime.continuity_rebind_total_ticks),
+        )
         runtime.agent.self_model.record_restart_consistency(
             payload.get("m218") if isinstance(payload.get("m218"), dict) else None,
             current_tick=runtime.agent.cycle,
@@ -492,6 +497,7 @@ class SegmentRuntime:
             maintenance_agenda,
         )
         original_choice_name = diagnostics.chosen.choice
+        self._enforce_restart_commitment_continuity()
         self._apply_homeostatic_policy_landscape(diagnostics, maintenance_agenda)
         self._apply_continuity_rebind_prior(diagnostics)
         if maintenance_agenda.interrupt_action:
@@ -527,6 +533,7 @@ class SegmentRuntime:
         sleep_summary = None
         if self.agent.should_sleep():
             sleep_summary = self.agent.sleep()
+            self._enforce_restart_commitment_continuity()
         maintenance_effects = self.homeostasis_scheduler.apply_background_maintenance(
             self.agent
         )
@@ -899,8 +906,26 @@ class SegmentRuntime:
         window = 6
         if isinstance(policy_distribution, dict) and policy_distribution:
             window += 4
+        commitment_snapshot = self.restart_policy_anchors.get("commitment_snapshot")
+        if isinstance(commitment_snapshot, list) and commitment_snapshot:
+            window = max(window, 24)
         self.continuity_rebind_ticks_remaining = window
         self.continuity_rebind_total_ticks = window
+
+    def _enforce_restart_commitment_continuity(self) -> None:
+        if self.continuity_rebind_ticks_remaining <= 0 or not self.restart_policy_anchors:
+            return
+        reference_commitments = [
+            str(item)
+            for item in self.restart_policy_anchors.get("commitment_snapshot", [])
+            if str(item)
+        ]
+        if not reference_commitments:
+            return
+        self.agent.self_model.enforce_restart_commitment_continuity(
+            reference_commitment_ids=reference_commitments,
+            max_new_commitments=1,
+        )
 
     def _resort_diagnostics(self, diagnostics: DecisionDiagnostics) -> None:
         diagnostics.ranked_options.sort(
@@ -1018,16 +1043,29 @@ class SegmentRuntime:
         recent_action_weights: dict[str, float] = {}
         for index, action in enumerate(reversed(recent_actions[-8:]), start=1):
             recent_action_weights[action] = max(recent_action_weights.get(action, 0.0), 1.0 / index)
+        recent_priority_actions = {str(action) for action in recent_actions[-4:]}
+        preferred_rebind_actions = set(recent_priority_actions) | set(commitment_priors)
+        if maintenance_recommended:
+            preferred_rebind_actions.add(maintenance_recommended)
         for option in diagnostics.ranked_options:
             if option.choice in learned_avoidances:
                 option.policy_score -= 0.18 * decay
             if option.choice in learned_preferences:
                 option.policy_score += 0.18 * decay
             if option.choice in commitment_priors:
-                option.policy_score += 0.15 * decay
-            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.16 * decay
+                option.policy_score += 0.40 * decay
+            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.60 * decay
+            if option.choice in recent_priority_actions:
+                option.policy_score += 0.42 * decay
+            elif recent_action_weights:
+                option.policy_score -= 0.24 * decay
+            if preferred_rebind_actions:
+                if option.choice in preferred_rebind_actions:
+                    option.policy_score += 0.62 * decay
+                else:
+                    option.policy_score -= 0.42 * decay
             if maintenance_recommended and option.choice == maintenance_recommended:
-                option.policy_score += 0.28 * decay
+                option.policy_score += 0.34 * decay
             if option.choice in maintenance_suppressed:
                 option.policy_score -= 0.26 * decay
         self._resort_diagnostics(diagnostics)

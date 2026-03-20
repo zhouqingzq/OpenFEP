@@ -5,6 +5,7 @@ import math
 import random
 import tempfile
 from dataclasses import asdict
+from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
 from statistics import mean
@@ -70,6 +71,11 @@ THRESHOLDS = {
     "CAQ": 0.55,
     "VCUS": 0.80,
 }
+FOLLOWUP_SEED_SET = [11, 21, 31, 33, 42]
+
+
+def _generated_at() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 class EvidenceWriter:
@@ -786,6 +792,7 @@ def run_followup_evaluation() -> dict[str, object]:
     evidence = EvidenceWriter()
     audit = gap_audit()
     legacy = load_legacy_metrics()
+    generated_at = _generated_at()
     gating = evaluate_episode_gating(evidence)
     narrative = evaluate_narrative_binding(evidence)
     mixed = evaluate_mixed_attribution(evidence)
@@ -821,6 +828,9 @@ def run_followup_evaluation() -> dict[str, object]:
         and all((new_metrics[name] or 0.0) >= THRESHOLDS[name] for name in THRESHOLDS)
     )
     payload = {
+        "milestone_id": "M2_followup_repair",
+        "generated_at": generated_at,
+        "seed_set": list(FOLLOWUP_SEED_SET),
         "previous_metrics": legacy.get("metrics", {}),
         "new_metrics": new_metrics,
         "metric_definitions": {

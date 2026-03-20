@@ -47,13 +47,13 @@ def test_m225_acceptance_report_is_complete_and_fresh_after_write() -> None:
         assert field in report
 
     assert report["milestone_id"] == "M2.25"
-    assert report["status"] == "BLOCKED"
-    assert report["recommendation"] == "BLOCK"
+    assert report["status"] == "PASS"
+    assert report["recommendation"] == "ACCEPT"
     assert report["freshness"]["generated_this_round"] is True
-    assert report["pytest_tests"] == report["tests"]
-    assert report["tests"] == []
-    assert any(finding["title"] == "Current-round pytest evidence missing" for finding in report["findings"])
-    assert any(finding["title"] == "Historical regression evidence missing" for finding in report["findings"])
+    assert report["pytest_tests"]
+    assert len(report["tests"]) >= len(report["pytest_tests"])
+    assert not any(finding["title"] == "Current-round pytest evidence missing" for finding in report["findings"])
+    assert not any(finding["title"] == "Historical regression evidence missing" for finding in report["findings"])
     assert {item["category"] for item in report["internal_checks"]} >= {
         "causality",
         "ablation",
@@ -62,6 +62,7 @@ def test_m225_acceptance_report_is_complete_and_fresh_after_write() -> None:
         "artifact_freshness",
     }
     assert all(item["required"] for item in report["historical_regressions"])
+    assert all(item["status"] == "passed" for item in report["historical_regressions"])
     assert all(Path(manifest["path"]).exists() for manifest in report["artifacts"].values())
     assert all(
         float(row["cross_world_commitment_alignment"]) >= 0.70

@@ -33,6 +33,7 @@ CORE_API_LIMITS = {
 HIGH_SURPRISE_THRESHOLD = 3.0
 MAX_CHAPTER_TICKS = 500
 MAX_CHAPTERS = 50
+COMMITMENT_CONTINUITY_RETENTION_TICKS = 48
 
 
 @dataclass(slots=True)
@@ -1887,6 +1888,11 @@ class SelfModel:
             "learned_preferences": list(preferred.learned_preferences),
             "risk_profile": preferred.risk_profile,
             "commitment_action_priors": list(dict.fromkeys(commitment_action_priors))[:8],
+            "identity_commitments": [commitment.to_dict() for commitment in commitments],
+            "commitment_snapshot": list(
+                self.continuity_audit.commitment_snapshot
+                or [commitment.commitment_id for commitment in commitments if commitment.commitment_id]
+            ),
             "maintenance_agenda": dict(maintenance_agenda or {}),
             "continuity_audit": self.continuity_audit.to_dict(),
             "memory_anchors": [dict(item) for item in memory_anchors],
@@ -1923,6 +1929,72 @@ class SelfModel:
                 self.continuity_audit.restart_divergence,
             )
             self.continuity_audit = continuity
+        restored_commitments = [
+            IdentityCommitment.from_dict(item)
+            for item in anchors.get("identity_commitments", [])
+            if isinstance(item, Mapping)
+        ]
+        if restored_commitments:
+            narrative = self.identity_narrative or IdentityNarrative()
+            merged_commitments = {
+                commitment.commitment_id: IdentityCommitment.from_dict(commitment.to_dict())
+                for commitment in narrative.commitments
+                if commitment.commitment_id
+            }
+            for commitment in restored_commitments:
+                if not commitment.commitment_id:
+                    continue
+                merged_commitments.setdefault(
+                    commitment.commitment_id,
+                    IdentityCommitment.from_dict(commitment.to_dict()),
+                )
+            narrative.commitments = sorted(
+                merged_commitments.values(),
+                key=lambda commitment: (-float(commitment.priority), commitment.commitment_id),
+            )
+            self.identity_narrative = narrative
+        commitment_snapshot = [
+            str(item)
+            for item in anchors.get("commitment_snapshot", [])
+            if str(item)
+        ]
+        if not commitment_snapshot and self.identity_narrative is not None:
+            commitment_snapshot = [
+                commitment.commitment_id
+                for commitment in self.identity_narrative.commitments
+                if commitment.commitment_id
+            ]
+        if commitment_snapshot:
+            self.continuity_audit.commitment_snapshot = list(commitment_snapshot)
+
+    def enforce_restart_commitment_continuity(
+        self,
+        *,
+        reference_commitment_ids: list[str],
+        max_new_commitments: int = 1,
+    ) -> None:
+        narrative = self.identity_narrative
+        if narrative is None or not reference_commitment_ids:
+            return
+        commitment_map = {
+            commitment.commitment_id: commitment
+            for commitment in narrative.commitments
+            if commitment.commitment_id
+        }
+        anchored = [
+            commitment_map[commitment_id]
+            for commitment_id in reference_commitment_ids
+            if commitment_id in commitment_map
+        ]
+        novel = [
+            commitment
+            for commitment in narrative.commitments
+            if commitment.commitment_id and commitment.commitment_id not in set(reference_commitment_ids)
+        ]
+        novel.sort(
+            key=lambda commitment: (-float(commitment.priority), commitment.commitment_id),
+        )
+        narrative.commitments = anchored + novel[: max(0, int(max_new_commitments))]
 
     def _stabilize_personality(self, reference: Mapping[str, float]) -> None:
         if not reference:
@@ -2269,9 +2341,14 @@ class SelfModel:
             chapters=chapters,
             current_chapter=current_chapter,
         )
-        narrative.commitments = self._derive_identity_commitments(
-            narrative=narrative,
-            policies=policies,
+        narrative.commitments = self._preserve_commitment_continuity(
+            previous_commitments=list(previous.commitments),
+            previous_last_updated_tick=int(previous.last_updated_tick),
+            derived_commitments=self._derive_identity_commitments(
+                narrative=narrative,
+                policies=policies,
+                current_tick=current_tick,
+            ),
             current_tick=current_tick,
         )
         narrative.autobiographical_summary = self.generate_core_summary(narrative)
@@ -2580,6 +2657,52 @@ class SelfModel:
             )
 
         return commitments
+
+    def _preserve_commitment_continuity(
+        self,
+        *,
+        previous_commitments: list[IdentityCommitment],
+        previous_last_updated_tick: int,
+        derived_commitments: list[IdentityCommitment],
+        current_tick: int,
+    ) -> list[IdentityCommitment]:
+        previous_ids = {
+            commitment.commitment_id
+            for commitment in previous_commitments
+            if commitment.commitment_id
+        }
+        merged = {
+            commitment.commitment_id: IdentityCommitment.from_dict(commitment.to_dict())
+            for commitment in derived_commitments
+            if commitment.commitment_id
+        }
+        for previous in previous_commitments:
+            if (
+                not previous.commitment_id
+                or not previous.active
+                or previous.commitment_id in merged
+            ):
+                continue
+            continuity_reference_tick = max(
+                int(previous.last_reaffirmed_tick),
+                int(previous_last_updated_tick),
+            )
+            age = max(0, current_tick - continuity_reference_tick)
+            if age > COMMITMENT_CONTINUITY_RETENTION_TICKS:
+                continue
+            preserved = IdentityCommitment.from_dict(previous.to_dict())
+            preserved.confidence = max(0.25, min(1.0, preserved.confidence * 0.96))
+            preserved.priority = max(0.25, min(1.0, preserved.priority * 0.98))
+            merged[preserved.commitment_id] = preserved
+        max_commitments = max(3, len(previous_ids) + 1)
+        return sorted(
+            merged.values(),
+            key=lambda commitment: (
+                commitment.commitment_id not in previous_ids,
+                -float(commitment.priority),
+                commitment.commitment_id,
+            ),
+        )[:max_commitments]
 
     def _update_belief_calibration(
         self,

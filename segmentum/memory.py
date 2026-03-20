@@ -319,6 +319,8 @@ class LongTermMemory:
     lifecycle_events: list[dict[str, object]] = field(default_factory=list)
     rehearsal_log: list[dict[str, object]] = field(default_factory=list)
     preference_model: PreferenceModel = field(default_factory=PreferenceModel)
+    restart_continuity_until_cycle: int = 0
+    restart_continuity_anchor_ids: list[str] = field(default_factory=list)
 
     @property
     def value_hierarchy(self) -> PreferenceModel:
@@ -810,7 +812,11 @@ class LongTermMemory:
         )
         return self.delete_episode(payload, record_event=False)
 
-    def compress_episodes(self) -> int:
+    def compress_episodes(
+        self,
+        *,
+        current_cycle: int | None = None,
+    ) -> int:
         if len(self.episodes) < 2:
             return 0
 
@@ -827,6 +833,16 @@ class LongTermMemory:
         for index, payload in enumerate(ordered_payloads):
             if index in used:
                 continue
+            if current_cycle is not None and self.should_preserve_restart_continuity(
+                payload,
+                current_cycle=current_cycle,
+            ):
+                retained = dict(payload)
+                retained["consolidated"] = bool(retained.get("consolidated", False))
+                retained["compressed_count"] = int(retained.get("compressed_count", 1))
+                compressed.append(retained)
+                used.add(index)
+                continue
             if self._is_restart_protected_payload(payload):
                 retained = dict(payload)
                 retained["consolidated"] = bool(retained.get("consolidated", False))
@@ -842,6 +858,11 @@ class LongTermMemory:
                 if other_index in used:
                     continue
                 candidate = ordered_payloads[other_index]
+                if current_cycle is not None and self.should_preserve_restart_continuity(
+                    candidate,
+                    current_cycle=current_cycle,
+                ):
+                    continue
                 if self._is_restart_protected_payload(candidate):
                     continue
                 if action_name(candidate.get("action_taken", candidate.get("action", ""))) != base_episode.action_taken.name:
@@ -1031,6 +1052,8 @@ class LongTermMemory:
         for payload in candidates:
             if len(self.episodes) <= retain_recent:
                 break
+            if self.should_preserve_restart_continuity(payload, current_cycle=current_cycle):
+                continue
             if bool(payload.get("identity_critical", False)) or self._is_restart_protected_payload(payload):
                 continue
             lifecycle_stage = str(payload.get("lifecycle_stage", ""))
@@ -1100,6 +1123,8 @@ class LongTermMemory:
             "rehearsal_log": list(self.rehearsal_log),
             "preference_model": self.preference_model.to_dict(),
             "value_hierarchy": self.preference_model.legacy_value_hierarchy_dict(),
+            "restart_continuity_until_cycle": self.restart_continuity_until_cycle,
+            "restart_continuity_anchor_ids": list(self.restart_continuity_anchor_ids),
         }
 
     @classmethod
@@ -1113,7 +1138,7 @@ class LongTermMemory:
         if not isinstance(preference_payload, dict):
             preference_payload = {}
 
-        return cls(
+        memory = cls(
             episodes=list(payload.get("episodes", [])),
             semantic_patterns=list(payload.get("semantic_patterns", [])),
             max_episodes=int(payload.get("max_episodes", 1024)),
@@ -1150,7 +1175,13 @@ class LongTermMemory:
             lifecycle_events=list(payload.get("lifecycle_events", [])),
             rehearsal_log=list(payload.get("rehearsal_log", [])),
             preference_model=PreferenceModel.from_dict(preference_payload),
+            restart_continuity_until_cycle=int(payload.get("restart_continuity_until_cycle", 0)),
+            restart_continuity_anchor_ids=[
+                str(value) for value in payload.get("restart_continuity_anchor_ids", []) if str(value)
+            ],
         )
+        memory._rehydrate_continuity_payloads()
+        return memory
 
     def _build_episode(
         self,
@@ -1219,12 +1250,11 @@ class LongTermMemory:
         action = action_name(payload.get("action_taken", payload.get("action", "")))
         predicted_outcome = str(payload.get("predicted_outcome", "neutral"))
         observation = self._episode_observation(payload)
-        if bool(payload.get("identity_critical", False)) or predicted_outcome in {
-            "survival_threat",
-            "integrity_loss",
-        }:
+        if bool(payload.get("identity_critical", False)):
             tags.extend(["identity", "threat"])
             return CONTINUITY_ROLE_IDENTITY, tags
+        if predicted_outcome in {"survival_threat", "integrity_loss"}:
+            tags.append("threat")
         if action in {"hide", "exploit_shelter"} and float(observation.get("danger", 0.0)) >= 0.55:
             tags.extend(["commitment", "guard"])
             return CONTINUITY_ROLE_COMMITMENT, tags
@@ -1239,16 +1269,78 @@ class LongTermMemory:
 
     def _is_restart_protected_payload(self, payload: dict[str, object]) -> bool:
         role = str(payload.get("continuity_role", ""))
-        explicit_identity_critical = bool(payload.get("identity_critical", False))
-        identity_critical = explicit_identity_critical
+        identity_critical = bool(payload.get("identity_critical", False))
         commitment_ids = [str(item) for item in payload.get("identity_commitment_ids", [])]
-        if role == CONTINUITY_ROLE_IDENTITY:
-            return identity_critical
-        if role == CONTINUITY_ROLE_COMMITMENT:
-            return identity_critical or bool(commitment_ids)
+        if identity_critical:
+            return True
+        if commitment_ids:
+            return True
         if role == CONTINUITY_ROLE_MAINTENANCE:
             return bool(payload.get("restart_protected", False))
-        return bool(payload.get("restart_protected", False)) and (identity_critical or bool(commitment_ids))
+        return bool(payload.get("restart_protected", False))
+
+    def _synchronize_continuity_metadata(self, payload: dict[str, object]) -> None:
+        commitment_ids = list(
+            dict.fromkeys(
+                str(item)
+                for item in payload.get("identity_commitment_ids", [])
+                if str(item)
+            )
+        )
+        if commitment_ids:
+            payload["identity_commitment_ids"] = commitment_ids
+        continuity_role, inferred_tags = self._infer_continuity_role(payload)
+        existing_tags = [str(tag) for tag in payload.get("continuity_tags", []) if str(tag)]
+        payload["continuity_role"] = continuity_role or str(payload.get("continuity_role", ""))
+        payload["continuity_tags"] = list(dict.fromkeys([*existing_tags, *inferred_tags]))
+        payload["restart_protected"] = (
+            bool(payload.get("restart_protected", False))
+            or bool(payload.get("identity_critical", False))
+            or bool(commitment_ids)
+            or payload["continuity_role"] == CONTINUITY_ROLE_MAINTENANCE
+        )
+
+    def _rehydrate_continuity_payloads(self) -> None:
+        for bucket in (self.episodes, self.archived_episodes):
+            for payload in bucket:
+                self._synchronize_continuity_metadata(payload)
+
+    def activate_restart_continuity_window(
+        self,
+        *,
+        current_cycle: int,
+        duration: int,
+    ) -> None:
+        self._rehydrate_continuity_payloads()
+        protected_ids = {
+            str(payload.get("episode_id", ""))
+            for payload in [*self.episodes, *self.archived_episodes]
+            if payload.get("episode_id")
+            and (
+                self._is_restart_protected_payload(payload)
+                or bool(payload.get("identity_critical", False))
+            )
+        }
+        self.restart_continuity_anchor_ids = sorted(protected_ids)
+        self.restart_continuity_until_cycle = max(
+            int(self.restart_continuity_until_cycle),
+            int(current_cycle) + max(0, int(duration)),
+        )
+
+    def should_preserve_restart_continuity(
+        self,
+        payload: dict[str, object],
+        *,
+        current_cycle: int,
+    ) -> bool:
+        if int(current_cycle) > int(self.restart_continuity_until_cycle):
+            return False
+        episode_id = str(payload.get("episode_id", ""))
+        if not episode_id:
+            return False
+        if episode_id not in set(self.restart_continuity_anchor_ids):
+            return False
+        return self._is_restart_protected_payload(payload) or bool(payload.get("identity_critical", False))
 
     def _assign_embedding_to_cluster(
         self,
@@ -1403,14 +1495,7 @@ class LongTermMemory:
         ):
             payload["identity_critical"] = False
             identity_critical = False
-        continuity_role, continuity_tags = self._infer_continuity_role(payload)
-        payload["continuity_role"] = continuity_role
-        payload["continuity_tags"] = continuity_tags
-        payload["restart_protected"] = continuity_role in {
-            CONTINUITY_ROLE_IDENTITY,
-            CONTINUITY_ROLE_COMMITMENT,
-            CONTINUITY_ROLE_MAINTENANCE,
-        }
+        self._synchronize_continuity_metadata(payload)
         if identity_critical:
             initial_stage = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
         elif raw_pe < RAW_PE_RISK_GATE:
@@ -1536,6 +1621,7 @@ class LongTermMemory:
         )
         if bool(gate.get("identity_critical", False)):
             payload["identity_critical"] = True
+            self._synchronize_continuity_metadata(payload)
             self._set_lifecycle_stage(
                 payload,
                 LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
@@ -1787,6 +1873,7 @@ class LongTermMemory:
                 )
             )
             merged_payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+        self._synchronize_continuity_metadata(merged_payload)
         return merged_payload
 
 

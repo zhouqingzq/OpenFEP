@@ -112,8 +112,20 @@ class GenerativeWorldModel:
         if not isinstance(action_context, dict):
             action_context = {}
         if not action_context:
-            aggregate = memory_context.get("aggregate", {})
-            action_context = aggregate if isinstance(aggregate, dict) else {}
+            # Narrative/event memories can still help with state prediction, but
+            # they are not valid action-specific evidence. Falling back to the
+            # aggregate memory payload here leaks risk/surprise from unrelated
+            # actions such as `observe_world` into every candidate action.
+            return {
+                "projected_snapshot": projected_snapshot,
+                "predicted_effects": predicted_effects,
+                "predicted_outcome": predicted_outcome,
+                "preferred_probability": preferred_probability,
+                "risk": risk,
+                "expected_surprise": predicted_error,
+                "applied_memory": False,
+                "action_descriptor": ensure_action_schema(action).to_dict(),
+            }
 
         predicted_effects = dict(predicted_effects)
         projected_snapshot = {

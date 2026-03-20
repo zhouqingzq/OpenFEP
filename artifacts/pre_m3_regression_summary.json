@@ -20,38 +20,50 @@
       "summary": {
         "cycles_completed": 256,
         "survival_ticks": 256,
-        "sleep_count": 58,
+        "sleep_count": 56,
         "internal_update_count": 0,
         "memory_retrieval_count": 255,
         "telemetry_error_count": 0,
         "persistence_error_count": 0,
         "memory_hit_rate": 0.99609375,
-        "avg_free_energy_before": 0.4304932646718128,
-        "avg_free_energy_after": 0.4867208576765315,
-        "avg_free_energy_drop": 0.026330770127726708,
-        "min_energy": 0.30499999999999755,
+        "avg_free_energy_before": 0.39166055224968543,
+        "avg_free_energy_after": 0.4531877962276327,
+        "avg_free_energy_drop": 0.021418983177392183,
+        "min_energy": 0.8,
         "max_stress": 0.10999999999999999,
         "action_counts": {
-          "exploit_shelter": 148,
-          "hide": 20,
-          "rest": 62,
-          "scan": 9,
-          "seek_contact": 17
+          "append_workspace_note": 43,
+          "delete_workspace_note": 6,
+          "exploit_shelter": 137,
+          "fetch_remote_status": 3,
+          "hide": 3,
+          "rest": 18,
+          "scan": 6,
+          "seek_contact": 9,
+          "thermoregulate": 2,
+          "unstable_workspace_note": 23,
+          "write_workspace_note": 6
         },
         "action_distribution": {
-          "exploit_shelter": 0.578125,
-          "hide": 0.078125,
-          "rest": 0.2421875,
-          "scan": 0.03515625,
-          "seek_contact": 0.06640625
+          "append_workspace_note": 0.16796875,
+          "delete_workspace_note": 0.0234375,
+          "exploit_shelter": 0.53515625,
+          "fetch_remote_status": 0.01171875,
+          "hide": 0.01171875,
+          "rest": 0.0703125,
+          "scan": 0.0234375,
+          "seek_contact": 0.03515625,
+          "thermoregulate": 0.0078125,
+          "unstable_workspace_note": 0.08984375,
+          "write_workspace_note": 0.0234375
         },
-        "action_switch_count": 50,
-        "unique_actions": 5,
-        "action_entropy": 1.6694764665271302,
+        "action_switch_count": 70,
+        "unique_actions": 11,
+        "action_entropy": 2.252231328658813,
         "dominant_action": "exploit_shelter",
-        "dominant_action_share": 0.578125,
-        "max_action_streak": 31,
-        "last_choice": "exploit_shelter",
+        "dominant_action_share": 0.53515625,
+        "max_action_streak": 18,
+        "last_choice": "append_workspace_note",
         "termination_reason": "cycles_exhausted"
       },
       "checks": {
@@ -112,18 +124,24 @@
     },
     "runtime_family_coverage": {
       "verification_status": "REVALIDATED_THIS_ROUND",
-      "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_family_probe",
+      "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_counterfactual_replay",
       "revalidated_this_round": true,
+      "evidence_kind": "runtime_replay",
       "family_schema_count": 4,
       "runtime_validated_family_count": 4,
+      "fully_graduated": true,
+      "missing_graduation_families": [],
       "family_coverage_status": "RUNTIME_DIVERSITY_VALIDATED",
       "family_probe_results": [
         {
           "scenario_label": "danger_avoidance",
-          "review_family": "danger_avoidance",
-          "graduated": true,
-          "average_benefit": 20.532592970578186,
-          "pass_rate": 1.0,
+          "probe_type": "runtime_counterfactual_replay",
+          "runtime_event_captured": true,
+          "review_families_seen": [
+            "danger_avoidance"
+          ],
+          "candidate_review_count": 5,
+          "absorption_count": 4,
           "coverage": {
             "total_families": 4,
             "families_covered": 1,
@@ -132,45 +150,33 @@
             "graduation_family_count": 1,
             "per_family_rates": {
               "danger_avoidance": {
-                "reviewed": 2,
-                "graduated": 1
-              }
-            }
-          }
-        },
-        {
-          "scenario_label": "resource_risk",
-          "review_family": "resource_risk",
-          "graduated": true,
-          "average_benefit": 29.61757635433727,
-          "pass_rate": 0.6666666666666666,
-          "coverage": {
-            "total_families": 4,
-            "families_covered": 1,
-            "families_graduated": 1,
-            "caq_family_coverage": 0.25,
-            "graduation_family_count": 1,
-            "per_family_rates": {
-              "resource_risk": {
-                "reviewed": 2,
-                "graduated": 1
+                "reviewed": 9,
+                "graduated": 4
               }
             }
           }
         },
         {
           "scenario_label": "retreat_vs_explore",
-          "review_family": "retreat_vs_explore",
-          "graduated": true,
-          "average_benefit": 32.08980295214045,
-          "pass_rate": 1.0,
+          "probe_type": "runtime_counterfactual_replay",
+          "runtime_event_captured": true,
+          "review_families_seen": [
+            "integrity_preservation",
+            "retreat_vs_explore"
+          ],
+          "candidate_review_count": 4,
+          "absorption_count": 4,
           "coverage": {
             "total_families": 4,
-            "families_covered": 1,
-            "families_graduated": 1,
-            "caq_family_coverage": 0.25,
-            "graduation_family_count": 1,
+            "families_covered": 2,
+            "families_graduated": 2,
+            "caq_family_coverage": 0.5,
+            "graduation_family_count": 2,
             "per_family_rates": {
+              "integrity_preservation": {
+                "reviewed": 6,
+                "graduated": 3
+              },
               "retreat_vs_explore": {
                 "reviewed": 2,
                 "graduated": 1
@@ -180,10 +186,41 @@
         },
         {
           "scenario_label": "integrity_preservation",
-          "review_family": "integrity_preservation",
-          "graduated": true,
-          "average_benefit": 0.05549999999999974,
-          "pass_rate": 1.0,
+          "probe_type": "runtime_counterfactual_replay",
+          "runtime_event_captured": true,
+          "review_families_seen": [
+            "integrity_preservation",
+            "retreat_vs_explore"
+          ],
+          "candidate_review_count": 3,
+          "absorption_count": 3,
+          "coverage": {
+            "total_families": 4,
+            "families_covered": 2,
+            "families_graduated": 2,
+            "caq_family_coverage": 0.5,
+            "graduation_family_count": 2,
+            "per_family_rates": {
+              "integrity_preservation": {
+                "reviewed": 4,
+                "graduated": 2
+              },
+              "retreat_vs_explore": {
+                "reviewed": 2,
+                "graduated": 1
+              }
+            }
+          }
+        },
+        {
+          "scenario_label": "resource_risk",
+          "probe_type": "runtime_counterfactual_replay",
+          "runtime_event_captured": true,
+          "review_families_seen": [
+            "resource_risk"
+          ],
+          "candidate_review_count": 2,
+          "absorption_count": 2,
           "coverage": {
             "total_families": 4,
             "families_covered": 1,
@@ -191,9 +228,9 @@
             "caq_family_coverage": 0.25,
             "graduation_family_count": 1,
             "per_family_rates": {
-              "integrity_preservation": {
-                "reviewed": 2,
-                "graduated": 1
+              "resource_risk": {
+                "reviewed": 4,
+                "graduated": 2
               }
             }
           }
@@ -207,23 +244,24 @@
         "graduation_family_count": 4,
         "per_family_rates": {
           "danger_avoidance": {
-            "reviewed": 2,
-            "graduated": 1
+            "reviewed": 9,
+            "graduated": 4
           },
           "integrity_preservation": {
-            "reviewed": 2,
-            "graduated": 1
+            "reviewed": 10,
+            "graduated": 5
           },
           "resource_risk": {
-            "reviewed": 2,
-            "graduated": 1
+            "reviewed": 4,
+            "graduated": 2
           },
           "retreat_vs_explore": {
-            "reviewed": 2,
-            "graduated": 1
+            "reviewed": 4,
+            "graduated": 2
           }
         }
-      }
+      },
+      "limitations": []
     }
   },
   "acceptance": {
@@ -235,6 +273,6 @@
       "runtime_family_coverage_passed": true
     }
   },
-  "generated_at": "2026-03-16T15:51:48+00:00",
-  "codebase_version": "abd7a72768408e481d63e732a911e0ca2f69fb2d"
+  "generated_at": "2026-03-20T01:57:29+00:00",
+  "codebase_version": "23c599dc3820924ad0913aaacba383220bfb1883"
 }

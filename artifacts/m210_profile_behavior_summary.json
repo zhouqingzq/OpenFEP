@@ -3,14 +3,14 @@
   "profiles": {
     "neutral": {
       "behavior_summary": {
-        "caution_rate": 0.9814814814814815,
+        "caution_rate": 0.9444444444444444,
         "exploration_rate": 0.018518518518518517,
-        "seek_contact_rate": 0.0,
-        "action_entropy": 0.7793902076027632,
-        "survival_score": 1.738765432098765,
-        "mean_conditioned_prediction_error": 0.04488192621295224,
-        "narrative_consistency_proxy": 0.7577932098765432,
-        "dominant_action_share": 0.7901234567901234
+        "seek_contact_rate": 0.037037037037037035,
+        "action_entropy": 1.150330022172627,
+        "survival_score": 1.5937037037037032,
+        "mean_conditioned_prediction_error": 0.045424790415934,
+        "narrative_consistency_proxy": 0.7411265432098766,
+        "dominant_action_share": 0.6851851851851852
       },
       "stability_checks": {
         "same_profile_stable": true,
@@ -22,14 +22,14 @@
     },
     "threat_sensitive": {
       "behavior_summary": {
-        "caution_rate": 0.9814814814814815,
-        "exploration_rate": 0.018518518518518517,
-        "seek_contact_rate": 0.0,
-        "action_entropy": 0.6643411311172867,
-        "survival_score": 1.525617283950617,
-        "mean_conditioned_prediction_error": 0.047362743735386896,
-        "narrative_consistency_proxy": 0.8598765432098765,
-        "dominant_action_share": 0.8395061728395061
+        "caution_rate": 0.8827160493827161,
+        "exploration_rate": 0.04938271604938271,
+        "seek_contact_rate": 0.06790123456790123,
+        "action_entropy": 1.3390887055338772,
+        "survival_score": 1.5438271604938267,
+        "mean_conditioned_prediction_error": 0.0461368952597527,
+        "narrative_consistency_proxy": 0.6868055555555556,
+        "dominant_action_share": 0.654320987654321
       },
       "stability_checks": {
         "same_profile_stable": true,
@@ -41,33 +41,33 @@
     },
     "social_approach": {
       "behavior_summary": {
-        "caution_rate": 0.5864197530864198,
+        "caution_rate": 0.8148148148148148,
         "exploration_rate": 0.018518518518518517,
-        "seek_contact_rate": 0.3950617283950617,
-        "action_entropy": 0.6888453093163555,
-        "survival_score": 1.6602469135802458,
-        "mean_conditioned_prediction_error": 0.0504228557919694,
-        "narrative_consistency_proxy": 0.7032407407407407,
-        "dominant_action_share": 0.8271604938271604
+        "seek_contact_rate": 0.16666666666666666,
+        "action_entropy": 1.5117685292166885,
+        "survival_score": 1.637098765432098,
+        "mean_conditioned_prediction_error": 0.04835518375018212,
+        "narrative_consistency_proxy": 0.7094135802469136,
+        "dominant_action_share": 0.5740740740740741
       },
       "stability_checks": {
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": true
+        "narrative_bias_persists": false
       },
-      "final_passed": true
+      "final_passed": false
     },
     "exploratory": {
       "behavior_summary": {
-        "caution_rate": 0.537037037037037,
-        "exploration_rate": 0.45061728395061723,
-        "seek_contact_rate": 0.012345679012345678,
-        "action_entropy": 1.0205904754136863,
-        "survival_score": 1.59395061728395,
-        "mean_conditioned_prediction_error": 0.04524095710453772,
-        "narrative_consistency_proxy": 0.7785493827160493,
-        "dominant_action_share": 0.7345679012345679
+        "caution_rate": 0.8888888888888888,
+        "exploration_rate": 0.0925925925925926,
+        "seek_contact_rate": 0.018518518518518517,
+        "action_entropy": 1.4664901258680578,
+        "survival_score": 1.7148765432098763,
+        "mean_conditioned_prediction_error": 0.04563266690665856,
+        "narrative_consistency_proxy": 0.6272376543209877,
+        "dominant_action_share": 0.5555555555555556
       },
       "stability_checks": {
         "same_profile_stable": true,
@@ -79,14 +79,14 @@
     },
     "rigid_cautious": {
       "behavior_summary": {
-        "caution_rate": 0.9938271604938271,
+        "caution_rate": 0.9814814814814815,
         "exploration_rate": 0.006172839506172839,
-        "seek_contact_rate": 0.0,
-        "action_entropy": 0.899919781370771,
-        "survival_score": 1.6197530864197527,
-        "mean_conditioned_prediction_error": 0.04799186516799016,
-        "narrative_consistency_proxy": 0.7993827160493827,
-        "dominant_action_share": 0.7098765432098766
+        "seek_contact_rate": 0.012345679012345678,
+        "action_entropy": 1.1963510290422956,
+        "survival_score": 1.6780246913580241,
+        "mean_conditioned_prediction_error": 0.04198729150767691,
+        "narrative_consistency_proxy": 0.7360339506172839,
+        "dominant_action_share": 0.654320987654321
       },
       "stability_checks": {
         "same_profile_stable": true,

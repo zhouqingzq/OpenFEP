@@ -6,15 +6,40 @@
       "std": 0.0
     },
     "maintenance_interrupt_recovery_rate": {
-      "mean": 1.0,
-      "std": 0.0
+      "mean": 0.988154,
+      "std": 0.017123
     }
   },
   "per_seed": [
     {
-      "seed": 222,
+      "seed": 226,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.970588
+    },
+    {
+      "seed": 245,
       "resource_guard_success_rate": 1.0,
       "maintenance_interrupt_recovery_rate": 1.0
+    },
+    {
+      "seed": 323,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 1.0
+    },
+    {
+      "seed": 342,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 1.0
+    },
+    {
+      "seed": 420,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 1.0
+    },
+    {
+      "seed": 439,
+      "resource_guard_success_rate": 1.0,
+      "maintenance_interrupt_recovery_rate": 0.958333
     }
   ]
 }
