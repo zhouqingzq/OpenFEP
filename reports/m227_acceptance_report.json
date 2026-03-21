@@ -1,0 +1,484 @@
+{
+  "milestone_id": "M2.27",
+  "status": "PASS",
+  "generated_at": "2026-03-21T14:56:24+00:00",
+  "seed_set": [
+    227,
+    342
+  ],
+  "artifacts": {
+    "specification": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
+    "soak": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
+    "summary": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m227_subject_state.py",
+      "tests/test_m227_subject_state_causality.py",
+      "tests/test_m227_snapshot_roundtrip.py",
+      "tests/test_m227_subject_state_ablation.py",
+      "tests/test_m227_subject_state_stress.py",
+      "tests/test_m227_subject_state_soak.py",
+      "tests/test_m227_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m223_commitment_alignment.py",
+      "tests/test_m224_workspace_causality.py",
+      "tests/test_m222_restart_continuity.py",
+      "tests/test_m214_homeostasis_scheduler.py"
+    ]
+  },
+  "gates": {
+    "schema_roundtrip": {
+      "passed": true,
+      "evidence": "subject_state snapshot and restart round-trip preserved"
+    },
+    "determinism": {
+      "passed": true,
+      "evidence": [
+        {
+          "seed": 227,
+          "equivalent": true,
+          "signature_a": {
+            "cycle": 8,
+            "current_phase": "forming",
+            "dominant_goal": "SURVIVAL",
+            "continuity_score": 0.7,
+            "continuity_anchors": [
+              "ep-000005-exploit_shelter",
+              "ep-000001-hide"
+            ],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": false,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_labels": [
+              "goal:survival",
+              "identity tension",
+              "self inconsistency",
+              "continuity fragility"
+            ],
+            "last_choice": "rest"
+          },
+          "signature_b": {
+            "cycle": 8,
+            "current_phase": "forming",
+            "dominant_goal": "SURVIVAL",
+            "continuity_score": 0.7,
+            "continuity_anchors": [
+              "ep-000005-exploit_shelter",
+              "ep-000001-hide"
+            ],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": false,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_labels": [
+              "goal:survival",
+              "identity tension",
+              "self inconsistency",
+              "continuity fragility"
+            ],
+            "last_choice": "rest"
+          }
+        },
+        {
+          "seed": 342,
+          "equivalent": true,
+          "signature_a": {
+            "cycle": 8,
+            "current_phase": "forming",
+            "dominant_goal": "SURVIVAL",
+            "continuity_score": 0.7,
+            "continuity_anchors": [
+              "ep-000005-exploit_shelter"
+            ],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": false,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_labels": [
+              "goal:survival",
+              "identity tension",
+              "self inconsistency",
+              "continuity fragility"
+            ],
+            "last_choice": "rest"
+          },
+          "signature_b": {
+            "cycle": 8,
+            "current_phase": "forming",
+            "dominant_goal": "SURVIVAL",
+            "continuity_score": 0.7,
+            "continuity_anchors": [
+              "ep-000005-exploit_shelter"
+            ],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": false,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_labels": [
+              "goal:survival",
+              "identity tension",
+              "self inconsistency",
+              "continuity fragility"
+            ],
+            "last_choice": "rest"
+          }
+        }
+      ]
+    },
+    "causality": {
+      "passed": true,
+      "evidence": "subject_state changes policy scores, memory threshold, and maintenance routing"
+    },
+    "ablation": {
+      "passed": true,
+      "evidence": {
+        "policy_reroute_removed_without_subject_state": true,
+        "forage_penalty_removed_without_subject_state": true,
+        "memory_protection_removed_without_subject_state": true
+      }
+    },
+    "stress": {
+      "passed": true,
+      "evidence": {
+        "restored_subject_state_equal_before_step": true,
+        "restored_signature_before_step": {
+          "cycle": 0,
+          "current_phase": "forming",
+          "dominant_goal": "CONTROL",
+          "continuity_score": 0.58,
+          "continuity_anchors": [
+            "stress-anchor-001"
+          ],
+          "status_flags": {
+            "threatened": true,
+            "repairing": false,
+            "overloaded": true,
+            "socially_destabilized": false,
+            "continuity_fragile": true
+          },
+          "priority_labels": [
+            "goal:control",
+            "need:energy",
+            "continuity fragility",
+            "maintenance pressure"
+          ],
+          "last_choice": ""
+        },
+        "post_restore_cycle": 1,
+        "post_restore_alive": true,
+        "post_restore_subject_state": {
+          "tick": 1,
+          "core_identity_summary": "I am a risk-seeking, survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 1 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.03, 'resource_cost': {'energy': 0.03, 'attention': 0.03}, 'failure_modes': ['opportunity_loss', 'environment_shift'], 'constraints': {'preferred_when_fatigue_above': 0.4}, 'reversible': True} (surprise=1005.06).",
+          "current_phase": "survival_crisis",
+          "current_self_narrative_phase": "survival_crisis",
+          "active_commitments": [
+            "Protect survival and integrity before opportunistic gain.",
+            "When conditions are stable, reduce uncertainty through active exploration."
+          ],
+          "dominant_preferences": [
+            "strategy:expected_free_energy",
+            "prefer:stabilize_comfort",
+            "prefer:stabilize_hunger",
+            "prefer:stabilize_safety"
+          ],
+          "dominant_goal": "SURVIVAL",
+          "dominant_needs": [
+            {
+              "name": "maintenance",
+              "intensity": 1.0,
+              "reason": "active homeostatic protection"
+            },
+            {
+              "name": "energy",
+              "intensity": 0.115,
+              "reason": "low energy reserve"
+            },
+            {
+              "name": "stress",
+              "intensity": 0.075,
+              "reason": "elevated stress"
+            }
+          ],
+          "dominant_workspace_contents": [
+            "danger",
+            "novelty"
+          ],
+          "active_social_focus": [],
+          "socially_salient_bindings": [],
+          "identity_tension_level": 0.5,
+          "self_inconsistency_level": 0.5,
+          "maintenance_pressure": 1.0,
+          "continuity_score": 0.1,
+          "continuity_anchors": [
+            "ep-000001-rest",
+            "commitment-survival-priority",
+            "commitment-exploration-drive"
+          ],
+          "unresolved_tensions": [
+            {
+              "label": "maintenance pressure",
+              "tension_type": "maintenance",
+              "intensity": 1.0,
+              "repair_target": "hide",
+              "evidence": [
+                "thermal_rebalance",
+                "energy_recovery",
+                "stress_relief"
+              ]
+            },
+            {
+              "label": "continuity fragility",
+              "tension_type": "continuity",
+              "intensity": 0.9,
+              "repair_target": "protect continuity anchors",
+              "evidence": [
+                "continuity_score_drop"
+              ]
+            },
+            {
+              "label": "identity tension",
+              "tension_type": "identity",
+              "intensity": 0.5,
+              "repair_target": "",
+              "evidence": []
+            },
+            {
+              "label": "self inconsistency",
+              "tension_type": "continuity",
+              "intensity": 0.5,
+              "repair_target": "",
+              "evidence": [
+                "none",
+                "none"
+              ]
+            }
+          ],
+          "subject_priority_stack": [
+            {
+              "label": "maintenance pressure",
+              "weight": 1.0,
+              "priority_type": "maintenance",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": [
+                "thermal_rebalance",
+                "energy_recovery",
+                "stress_relief"
+              ]
+            },
+            {
+              "label": "need:maintenance",
+              "weight": 1.0,
+              "priority_type": "need",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": [
+                "active homeostatic protection"
+              ]
+            },
+            {
+              "label": "continuity fragility",
+              "weight": 0.9,
+              "priority_type": "continuity",
+              "preferred_actions": [
+                "rest",
+                "scan",
+                "hide"
+              ],
+              "avoid_actions": [
+                "forage"
+              ],
+              "evidence": [
+                "continuity_score_drop"
+              ]
+            },
+            {
+              "label": "goal:survival",
+              "weight": 0.7,
+              "priority_type": "goal",
+              "preferred_actions": [
+                "hide",
+                "exploit_shelter",
+                "rest"
+              ],
+              "avoid_actions": [
+                "forage"
+              ],
+              "evidence": [
+                "SURVIVAL"
+              ]
+            },
+            {
+              "label": "commitment continuity",
+              "weight": 0.62,
+              "priority_type": "commitment",
+              "preferred_actions": [
+                "hide",
+                "rest",
+                "exploit_shelter",
+                "scan"
+              ],
+              "avoid_actions": [],
+              "evidence": [
+                "active commitments"
+              ]
+            },
+            {
+              "label": "identity tension",
+              "weight": 0.5,
+              "priority_type": "identity",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": []
+            }
+          ],
+          "status_flags": {
+            "threatened": true,
+            "repairing": false,
+            "overloaded": false,
+            "socially_destabilized": false,
+            "continuity_fragile": true
+          },
+          "protected_targets": [
+            "need:maintenance"
+          ],
+          "repair_targets": [
+            "hide",
+            "protect continuity anchors"
+          ],
+          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis."
+        }
+      }
+    },
+    "soak_stability": {
+      "passed": true,
+      "evidence": {
+        "subject_state_never_empty": true,
+        "anchors_recovered_after_pressure": true,
+        "continuity_not_collapsed_to_zero": true,
+        "phase_changes_bounded": true,
+        "min_continuity_score": 0.5,
+        "max_continuity_score": 0.86,
+        "final_continuity_score": 0.783333,
+        "max_anchor_count": 12,
+        "final_anchor_count": 12,
+        "non_empty_anchor_cycles": 72,
+        "threatened_cycles": 38,
+        "fragile_cycles": 52,
+        "distinct_phases": [
+          "consolidation",
+          "forming",
+          "goal_realignment",
+          "survival_crisis"
+        ],
+        "final_signature": {
+          "cycle": 72,
+          "current_phase": "survival_crisis",
+          "dominant_goal": "INTEGRITY",
+          "continuity_score": 0.783333,
+          "continuity_anchors": [
+            "ep-000072-seek_contact",
+            "ep-000070-hide",
+            "ep-000069-unstable_workspace_note",
+            "ep-000066-rest",
+            "ep-000067-rest",
+            "ep-000065-hide",
+            "ep-000064-hide",
+            "ep-000060-exploit_shelter",
+            "ep-000059-exploit_shelter",
+            "ep-000058-rest",
+            "ep-000057-exploit_shelter",
+            "ep-000056-exploit_shelter"
+          ],
+          "status_flags": {
+            "threatened": false,
+            "repairing": false,
+            "overloaded": false,
+            "socially_destabilized": false,
+            "continuity_fragile": false
+          },
+          "priority_labels": [
+            "goal:integrity",
+            "commitment continuity",
+            "maintenance pressure",
+            "need:maintenance"
+          ],
+          "last_choice": "seek_contact"
+        }
+      }
+    },
+    "regression": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m223_commitment_alignment.py",
+        "tests/test_m224_workspace_causality.py",
+        "tests/test_m222_restart_continuity.py",
+        "tests/test_m214_homeostasis_scheduler.py"
+      ]
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "current_round": true,
+    "generated_at": "2026-03-21T14:56:24+00:00",
+    "codebase_version": "614d7026e0ff093f397aa9602873fb9862432fad",
+    "artifact_records": {
+      "specification": {
+        "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
+        "exists": true,
+        "size_bytes": 2349,
+        "modified_at": "2026-03-21T13:18:29+00:00"
+      },
+      "canonical_trace": {
+        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
+        "exists": true,
+        "size_bytes": 53906,
+        "modified_at": "2026-03-21T14:56:18+00:00"
+      },
+      "ablation": {
+        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
+        "exists": true,
+        "size_bytes": 1669,
+        "modified_at": "2026-03-21T14:56:18+00:00"
+      },
+      "stress": {
+        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
+        "exists": true,
+        "size_bytes": 11131,
+        "modified_at": "2026-03-21T14:56:18+00:00"
+      },
+      "soak": {
+        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
+        "exists": true,
+        "size_bytes": 15295,
+        "modified_at": "2026-03-21T14:56:24+00:00"
+      },
+      "summary": {
+        "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
+        "exists": true,
+        "size_bytes": 215,
+        "modified_at": "2026-03-21T14:55:59+00:00"
+      }
+    }
+  },
+  "recommendation": "ACCEPT"
+}

@@ -1,0 +1,752 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Mapping
+
+from .homeostasis import MaintenanceAgenda
+
+if TYPE_CHECKING:
+    from .agent import SegmentAgent
+    from .types import DecisionDiagnostics
+
+
+def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
+    return max(low, min(high, float(value)))
+
+
+@dataclass(frozen=True)
+class DominantNeed:
+    name: str
+    intensity: float
+    reason: str
+
+    def to_dict(self) -> dict[str, object]:
+        return {"name": self.name, "intensity": round(self.intensity, 6), "reason": self.reason}
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "DominantNeed":
+        if not payload:
+            return cls(name="", intensity=0.0, reason="")
+        return cls(
+            name=str(payload.get("name", "")),
+            intensity=float(payload.get("intensity", 0.0)),
+            reason=str(payload.get("reason", "")),
+        )
+
+
+@dataclass(frozen=True)
+class ActiveTension:
+    label: str
+    tension_type: str
+    intensity: float
+    repair_target: str = ""
+    evidence: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "label": self.label,
+            "tension_type": self.tension_type,
+            "intensity": round(self.intensity, 6),
+            "repair_target": self.repair_target,
+            "evidence": list(self.evidence),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "ActiveTension":
+        if not payload:
+            return cls(label="", tension_type="none", intensity=0.0)
+        return cls(
+            label=str(payload.get("label", "")),
+            tension_type=str(payload.get("tension_type", "none")),
+            intensity=float(payload.get("intensity", 0.0)),
+            repair_target=str(payload.get("repair_target", "")),
+            evidence=tuple(str(item) for item in payload.get("evidence", [])),
+        )
+
+
+@dataclass(frozen=True)
+class SubjectBinding:
+    binding_id: str
+    binding_type: str
+    salience: float
+    summary: str
+    evidence: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "binding_id": self.binding_id,
+            "binding_type": self.binding_type,
+            "salience": round(self.salience, 6),
+            "summary": self.summary,
+            "evidence": list(self.evidence),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "SubjectBinding":
+        if not payload:
+            return cls(binding_id="", binding_type="", salience=0.0, summary="")
+        return cls(
+            binding_id=str(payload.get("binding_id", "")),
+            binding_type=str(payload.get("binding_type", "")),
+            salience=float(payload.get("salience", 0.0)),
+            summary=str(payload.get("summary", "")),
+            evidence=tuple(str(item) for item in payload.get("evidence", [])),
+        )
+
+
+@dataclass(frozen=True)
+class SubjectPriority:
+    label: str
+    weight: float
+    priority_type: str
+    preferred_actions: tuple[str, ...] = ()
+    avoid_actions: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "label": self.label,
+            "weight": round(self.weight, 6),
+            "priority_type": self.priority_type,
+            "preferred_actions": list(self.preferred_actions),
+            "avoid_actions": list(self.avoid_actions),
+            "evidence": list(self.evidence),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "SubjectPriority":
+        if not payload:
+            return cls(label="", weight=0.0, priority_type="")
+        return cls(
+            label=str(payload.get("label", "")),
+            weight=float(payload.get("weight", 0.0)),
+            priority_type=str(payload.get("priority_type", "")),
+            preferred_actions=tuple(str(item) for item in payload.get("preferred_actions", [])),
+            avoid_actions=tuple(str(item) for item in payload.get("avoid_actions", [])),
+            evidence=tuple(str(item) for item in payload.get("evidence", [])),
+        )
+
+
+@dataclass(frozen=True)
+class SubjectState:
+    tick: int = 0
+    core_identity_summary: str = ""
+    current_phase: str = "forming"
+    current_self_narrative_phase: str = "forming"
+    active_commitments: tuple[str, ...] = ()
+    dominant_preferences: tuple[str, ...] = ()
+    dominant_goal: str = ""
+    dominant_needs: tuple[DominantNeed, ...] = ()
+    dominant_workspace_contents: tuple[str, ...] = ()
+    active_social_focus: tuple[str, ...] = ()
+    socially_salient_bindings: tuple[SubjectBinding, ...] = ()
+    identity_tension_level: float = 0.0
+    self_inconsistency_level: float = 0.0
+    maintenance_pressure: float = 0.0
+    continuity_score: float = 1.0
+    continuity_anchors: tuple[str, ...] = ()
+    unresolved_tensions: tuple[ActiveTension, ...] = ()
+    subject_priority_stack: tuple[SubjectPriority, ...] = ()
+    status_flags: dict[str, bool] = field(default_factory=dict)
+    protected_targets: tuple[str, ...] = ()
+    repair_targets: tuple[str, ...] = ()
+    same_subject_basis: str = ""
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "tick": self.tick,
+            "core_identity_summary": self.core_identity_summary,
+            "current_phase": self.current_phase,
+            "current_self_narrative_phase": self.current_self_narrative_phase,
+            "active_commitments": list(self.active_commitments),
+            "dominant_preferences": list(self.dominant_preferences),
+            "dominant_goal": self.dominant_goal,
+            "dominant_needs": [item.to_dict() for item in self.dominant_needs],
+            "dominant_workspace_contents": list(self.dominant_workspace_contents),
+            "active_social_focus": list(self.active_social_focus),
+            "socially_salient_bindings": [item.to_dict() for item in self.socially_salient_bindings],
+            "identity_tension_level": round(self.identity_tension_level, 6),
+            "self_inconsistency_level": round(self.self_inconsistency_level, 6),
+            "maintenance_pressure": round(self.maintenance_pressure, 6),
+            "continuity_score": round(self.continuity_score, 6),
+            "continuity_anchors": list(self.continuity_anchors),
+            "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions],
+            "subject_priority_stack": [item.to_dict() for item in self.subject_priority_stack],
+            "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
+            "protected_targets": list(self.protected_targets),
+            "repair_targets": list(self.repair_targets),
+            "same_subject_basis": self.same_subject_basis,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "SubjectState":
+        if not payload:
+            return cls()
+        status_flags = payload.get("status_flags", {})
+        return cls(
+            tick=int(payload.get("tick", 0)),
+            core_identity_summary=str(payload.get("core_identity_summary", "")),
+            current_phase=str(payload.get("current_phase", "forming")),
+            current_self_narrative_phase=str(
+                payload.get("current_self_narrative_phase", payload.get("current_phase", "forming"))
+            ),
+            active_commitments=tuple(str(item) for item in payload.get("active_commitments", [])),
+            dominant_preferences=tuple(str(item) for item in payload.get("dominant_preferences", [])),
+            dominant_goal=str(payload.get("dominant_goal", "")),
+            dominant_needs=tuple(
+                DominantNeed.from_dict(item)
+                for item in payload.get("dominant_needs", [])
+                if isinstance(item, Mapping)
+            ),
+            dominant_workspace_contents=tuple(
+                str(item) for item in payload.get("dominant_workspace_contents", [])
+            ),
+            active_social_focus=tuple(str(item) for item in payload.get("active_social_focus", [])),
+            socially_salient_bindings=tuple(
+                SubjectBinding.from_dict(item)
+                for item in payload.get("socially_salient_bindings", [])
+                if isinstance(item, Mapping)
+            ),
+            identity_tension_level=float(payload.get("identity_tension_level", 0.0)),
+            self_inconsistency_level=float(payload.get("self_inconsistency_level", 0.0)),
+            maintenance_pressure=float(payload.get("maintenance_pressure", 0.0)),
+            continuity_score=float(payload.get("continuity_score", 1.0)),
+            continuity_anchors=tuple(str(item) for item in payload.get("continuity_anchors", [])),
+            unresolved_tensions=tuple(
+                ActiveTension.from_dict(item)
+                for item in payload.get("unresolved_tensions", [])
+                if isinstance(item, Mapping)
+            ),
+            subject_priority_stack=tuple(
+                SubjectPriority.from_dict(item)
+                for item in payload.get("subject_priority_stack", [])
+                if isinstance(item, Mapping)
+            ),
+            status_flags=(
+                {str(key): bool(value) for key, value in status_flags.items()}
+                if isinstance(status_flags, Mapping)
+                else {}
+            ),
+            protected_targets=tuple(str(item) for item in payload.get("protected_targets", [])),
+            repair_targets=tuple(str(item) for item in payload.get("repair_targets", [])),
+            same_subject_basis=str(payload.get("same_subject_basis", "")),
+        )
+
+    def summary_text(self) -> str:
+        labels = [priority.label for priority in self.subject_priority_stack[:2] if priority.label]
+        flags = [name.replace("_", "-") for name, active in self.status_flags.items() if active]
+        tensions = [tension.label for tension in self.unresolved_tensions[:2] if tension.label]
+        parts = [f"My current subject state is {self.current_phase or 'forming'}-dominant."]
+        if self.dominant_goal:
+            parts.append(f"Primary goal: {self.dominant_goal}.")
+        if flags:
+            parts.append("Flags: " + ", ".join(flags) + ".")
+        if labels:
+            parts.append("Priorities: " + ", ".join(labels) + ".")
+        if tensions:
+            parts.append("Unresolved tensions: " + ", ".join(tensions) + ".")
+        if self.same_subject_basis:
+            parts.append(self.same_subject_basis)
+        return " ".join(parts)
+
+    def explanation_payload(self) -> dict[str, object]:
+        return {
+            "summary": self.summary_text(),
+            "dominant_goal": self.dominant_goal,
+            "current_phase": self.current_phase,
+            "active_commitments": list(self.active_commitments),
+            "dominant_workspace_contents": list(self.dominant_workspace_contents),
+            "active_social_focus": list(self.active_social_focus),
+            "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
+            "priority_stack": [item.to_dict() for item in self.subject_priority_stack[:4]],
+            "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions[:4]],
+            "continuity_score": round(self.continuity_score, 6),
+            "continuity_anchors": list(self.continuity_anchors),
+        }
+
+
+GOAL_ACTIONS = {
+    "SURVIVAL": (("hide", "exploit_shelter", "rest"), ("forage",)),
+    "INTEGRITY": (("rest", "thermoregulate", "exploit_shelter"), ("forage",)),
+    "CONTROL": (("scan", "hide"), ()),
+    "RESOURCES": (("forage", "rest"), ("hide",)),
+    "SOCIAL": (("seek_contact", "scan"), ("hide",)),
+}
+
+NEED_ACTIONS = {
+    "energy": (("rest", "forage"), ()),
+    "stress": (("hide", "rest"), ("seek_contact",)),
+    "fatigue": (("rest", "exploit_shelter"), ("forage",)),
+    "temperature": (("thermoregulate", "exploit_shelter"), ()),
+    "danger": (("hide", "exploit_shelter", "scan"), ("forage", "seek_contact")),
+    "continuity": (("rest", "scan", "hide"), ("forage",)),
+    "social": (("seek_contact", "scan"), ("hide",)),
+}
+
+
+def _top_commitments(agent: "SegmentAgent") -> tuple[list[str], list[str], list[str]]:
+    narrative = agent.self_model.identity_narrative
+    if narrative is None:
+        return [], [], []
+    active = [commitment for commitment in narrative.commitments if commitment.active]
+    active.sort(
+        key=lambda commitment: (
+            float(commitment.priority),
+            float(commitment.confidence),
+            commitment.commitment_id,
+        ),
+        reverse=True,
+    )
+    summaries = [
+        commitment.statement or commitment.commitment_id
+        for commitment in active[:4]
+        if commitment.statement or commitment.commitment_id
+    ]
+    target_actions = [
+        action
+        for commitment in active[:4]
+        for action in commitment.target_actions[:3]
+        if action
+    ]
+    commitment_ids = [commitment.commitment_id for commitment in active[:4] if commitment.commitment_id]
+    return summaries, target_actions, commitment_ids
+
+
+def _dominant_needs(agent: "SegmentAgent", maintenance_agenda: MaintenanceAgenda | None) -> list[DominantNeed]:
+    observation = {}
+    if agent.last_decision_diagnostics is not None:
+        observation = dict(agent.last_decision_diagnostics.prediction_after_memory)
+    needs = [
+        DominantNeed("energy", max(0.0, 0.55 - agent.energy), "low energy reserve"),
+        DominantNeed("stress", max(0.0, agent.stress - 0.45), "elevated stress"),
+        DominantNeed("fatigue", max(0.0, agent.fatigue - 0.40), "fatigue load"),
+        DominantNeed("temperature", max(0.0, abs(agent.temperature - 0.5) - 0.08), "thermal drift"),
+        DominantNeed("danger", max(0.0, float(observation.get("danger", 0.0)) - 0.35), "hazard exposure"),
+        DominantNeed("social", max(0.0, 0.35 - float(observation.get("social", 0.35))), "social deprivation"),
+    ]
+    if maintenance_agenda is not None and maintenance_agenda.policy_shift_strength > 0.25:
+        needs.append(
+            DominantNeed(
+                "maintenance",
+                max(maintenance_agenda.policy_shift_strength, maintenance_agenda.chronic_debt_pressure),
+                "active homeostatic protection",
+            )
+        )
+    needs.sort(key=lambda item: (-item.intensity, item.name))
+    return [item for item in needs if item.intensity > 0.02][:3]
+
+
+def _social_bindings(agent: "SegmentAgent") -> list[SubjectBinding]:
+    bindings: list[SubjectBinding] = []
+    current_tick = max(1, agent.cycle)
+    for other_id, model in sorted(agent.social_memory.others.items()):
+        recency = 1.0 / (1.0 + max(0, current_tick - int(model.last_seen_tick)))
+        salience = max(
+            float(model.threat),
+            float(model.trust) * 0.85,
+            float(model.attachment) * 0.90,
+        ) * (0.65 + 0.35 * recency)
+        if salience <= 0.10:
+            continue
+        if model.threat >= 0.45:
+            binding_type = "social_threat"
+            summary = f"{other_id} is socially destabilizing"
+        elif model.trust >= 0.58:
+            binding_type = "trusted_other"
+            summary = f"{other_id} is a trusted counterpart"
+        else:
+            binding_type = "social_monitor"
+            summary = f"{other_id} remains socially salient"
+        bindings.append(
+            SubjectBinding(
+                binding_id=other_id,
+                binding_type=binding_type,
+                salience=round(salience, 6),
+                summary=summary,
+                evidence=(
+                    f"trust={model.trust:.2f}",
+                    f"threat={model.threat:.2f}",
+                    f"attachment={model.attachment:.2f}",
+                ),
+            )
+        )
+    bindings.sort(key=lambda item: (-item.salience, item.binding_id))
+    return bindings[:3]
+
+
+def _tensions(
+    agent: "SegmentAgent",
+    diagnostics: "DecisionDiagnostics | None",
+    maintenance_agenda: MaintenanceAgenda | None,
+    continuity_score: float,
+) -> list[ActiveTension]:
+    tensions: list[ActiveTension] = []
+    if diagnostics is not None and diagnostics.identity_tension > 0.05:
+        tensions.append(
+            ActiveTension(
+                label="identity tension",
+                tension_type="identity",
+                intensity=diagnostics.identity_tension,
+                repair_target=diagnostics.identity_repair_policy,
+                evidence=tuple(diagnostics.violated_commitments[:3]),
+            )
+        )
+    if diagnostics is not None and diagnostics.self_inconsistency_error > 0.05:
+        tensions.append(
+            ActiveTension(
+                label="self inconsistency",
+                tension_type="continuity",
+                intensity=diagnostics.self_inconsistency_error,
+                repair_target=diagnostics.repair_policy,
+                evidence=(diagnostics.conflict_type, diagnostics.severity_level),
+            )
+        )
+    if maintenance_agenda is not None and maintenance_agenda.policy_shift_strength > 0.25:
+        tensions.append(
+            ActiveTension(
+                label="maintenance pressure",
+                tension_type="maintenance",
+                intensity=max(
+                    maintenance_agenda.policy_shift_strength,
+                    maintenance_agenda.chronic_debt_pressure,
+                ),
+                repair_target=maintenance_agenda.recommended_action,
+                evidence=tuple(maintenance_agenda.active_tasks[:3]),
+            )
+        )
+    if continuity_score < 0.78:
+        tensions.append(
+            ActiveTension(
+                label="continuity fragility",
+                tension_type="continuity",
+                intensity=1.0 - continuity_score,
+                repair_target="protect continuity anchors",
+                evidence=("continuity_score_drop",),
+            )
+        )
+    if diagnostics is not None:
+        for alert in diagnostics.social_alerts[:2]:
+            tensions.append(
+                ActiveTension(
+                    label="social destabilization",
+                    tension_type="social",
+                    intensity=0.45,
+                    repair_target="stabilize social bindings",
+                    evidence=(alert,),
+                )
+            )
+    tensions.sort(key=lambda item: (-item.intensity, item.label))
+    return tensions[:4]
+
+
+def _priority_stack(
+    dominant_goal: str,
+    needs: list[DominantNeed],
+    tensions: list[ActiveTension],
+    commitment_targets: list[str],
+    status_flags: Mapping[str, bool],
+) -> list[SubjectPriority]:
+    priorities: list[SubjectPriority] = []
+    goal_pref, goal_avoid = GOAL_ACTIONS.get(dominant_goal, ((), ()))
+    if dominant_goal:
+        priorities.append(
+            SubjectPriority(
+                label=f"goal:{dominant_goal.lower()}",
+                weight=0.70,
+                priority_type="goal",
+                preferred_actions=tuple(goal_pref),
+                avoid_actions=tuple(goal_avoid),
+                evidence=(dominant_goal,),
+            )
+        )
+    for need in needs:
+        pref, avoid = NEED_ACTIONS.get(need.name, ((), ()))
+        priorities.append(
+            SubjectPriority(
+                label=f"need:{need.name}",
+                weight=_clamp(need.intensity, 0.0, 1.0),
+                priority_type="need",
+                preferred_actions=tuple(pref),
+                avoid_actions=tuple(avoid),
+                evidence=(need.reason,),
+            )
+        )
+    if commitment_targets:
+        priorities.append(
+            SubjectPriority(
+                label="commitment continuity",
+                weight=0.62 if status_flags.get("continuity_fragile", False) else 0.48,
+                priority_type="commitment",
+                preferred_actions=tuple(dict.fromkeys(commitment_targets))[:4],
+                avoid_actions=(),
+                evidence=("active commitments",),
+            )
+        )
+    for tension in tensions:
+        pref, avoid = NEED_ACTIONS.get(tension.tension_type, ((), ()))
+        priorities.append(
+            SubjectPriority(
+                label=tension.label,
+                weight=_clamp(tension.intensity, 0.0, 1.0),
+                priority_type=tension.tension_type,
+                preferred_actions=tuple(pref),
+                avoid_actions=tuple(avoid),
+                evidence=tension.evidence,
+            )
+        )
+    priorities.sort(key=lambda item: (-item.weight, item.label))
+    return priorities[:6]
+
+
+def derive_subject_state(
+    agent: "SegmentAgent",
+    *,
+    diagnostics: "DecisionDiagnostics | None" = None,
+    continuity_report: Mapping[str, object] | None = None,
+    maintenance_agenda: MaintenanceAgenda | None = None,
+    previous_state: SubjectState | None = None,
+    restart_anchors: Mapping[str, object] | None = None,
+) -> SubjectState:
+    narrative = agent.self_model.identity_narrative
+    current_chapter = narrative.current_chapter if narrative is not None else None
+    core_identity_summary = (
+        (narrative.core_summary if narrative is not None and narrative.core_summary else "")
+        or (narrative.core_identity if narrative is not None and narrative.core_identity else "")
+        or "I am an adaptive subject maintaining continuity under uncertainty."
+    )
+    current_phase = (
+        current_chapter.dominant_theme
+        if current_chapter is not None and current_chapter.dominant_theme
+        else "forming"
+    )
+    continuity_payload = (
+        dict(continuity_report)
+        if isinstance(continuity_report, Mapping)
+        else agent.self_model.continuity_audit.to_dict()
+    )
+    continuity_score = _clamp(float(continuity_payload.get("continuity_score", 1.0)))
+    workspace_contents = (
+        tuple(agent.global_workspace.report_focus(agent.last_workspace_state))
+        if agent.last_workspace_state is not None
+        else ()
+    )
+    active_goal = (
+        diagnostics.active_goal
+        if diagnostics is not None and diagnostics.active_goal
+        else agent.goal_stack.active_goal.name
+    )
+    preferences: list[str] = []
+    preferred_policies = agent.self_model.preferred_policies
+    if preferred_policies is not None:
+        if preferred_policies.dominant_strategy:
+            preferences.append(f"strategy:{preferred_policies.dominant_strategy}")
+        preferences.extend(
+            f"prefer:{action}"
+            for action in sorted(preferred_policies.learned_preferences)[:3]
+        )
+    commitment_summaries, commitment_targets, commitment_ids = _top_commitments(agent)
+    bindings = _social_bindings(agent)
+    active_social_focus = list(
+        diagnostics.social_focus if diagnostics is not None else [item.binding_id for item in bindings[:2]]
+    )
+    identity_tension_level = (
+        float(diagnostics.identity_tension)
+        if diagnostics is not None
+        else float(agent.identity_tension_history[-1].get("identity_tension", 0.0))
+        if agent.identity_tension_history
+        else 0.0
+    )
+    self_inconsistency_level = (
+        float(diagnostics.self_inconsistency_error)
+        if diagnostics is not None
+        else float(agent.self_model.self_inconsistency_events[-1].self_inconsistency_error)
+        if agent.self_model.self_inconsistency_events
+        else 0.0
+    )
+    dominant_needs = _dominant_needs(agent, maintenance_agenda)
+    maintenance_pressure = max(
+        max((need.intensity for need in dominant_needs), default=0.0),
+        float(maintenance_agenda.policy_shift_strength) if maintenance_agenda is not None else 0.0,
+        float(maintenance_agenda.chronic_debt_pressure) if maintenance_agenda is not None else 0.0,
+    )
+    continuity_anchors = list(
+        dict.fromkeys(
+            [
+                *[str(item) for item in continuity_payload.get("protected_anchor_ids", []) if str(item)],
+                *commitment_ids,
+                *[
+                    str(item)
+                    for item in getattr(agent.long_term_memory, "restart_continuity_anchor_ids", [])
+                    if str(item)
+                ],
+                *[str(item) for item in (restart_anchors or {}).get("commitment_snapshot", []) if str(item)],
+            ]
+        )
+    )[:12]
+    continuity_fragile = continuity_score < 0.78 and (
+        bool(continuity_anchors)
+        or bool(commitment_summaries)
+        or bool(previous_state is not None and previous_state.continuity_anchors)
+    )
+    status_flags = {
+        "threatened": (
+            agent.energy < 0.25
+            or any(need.name == "danger" and need.intensity > 0.15 for need in dominant_needs)
+            or (maintenance_agenda.protected_mode if maintenance_agenda is not None else False)
+        ),
+        "repairing": bool(diagnostics and (diagnostics.repair_triggered or diagnostics.repair_policy)),
+        "overloaded": (
+            agent.stress > 0.72
+            or agent.fatigue > 0.70
+            or (
+                agent.last_workspace_state is not None
+                and agent.last_workspace_state.replacement_pressure > 0.45
+            )
+        ),
+        "socially_destabilized": bool(
+            (diagnostics and diagnostics.social_alerts)
+            or any(binding.binding_type == "social_threat" for binding in bindings)
+        ),
+        "continuity_fragile": continuity_fragile,
+    }
+    tensions = _tensions(agent, diagnostics, maintenance_agenda, continuity_score)
+    priorities = _priority_stack(active_goal, dominant_needs, tensions, commitment_targets, status_flags)
+    protected_targets = tuple(
+        item.label for item in priorities[:3] if item.priority_type in {"goal", "need", "commitment"}
+    )
+    repair_targets = tuple(item.repair_target for item in tensions if item.repair_target)[:4]
+    same_subject_bits = []
+    if commitment_summaries:
+        same_subject_bits.append("I remain the same subject through active commitments.")
+    if continuity_anchors:
+        same_subject_bits.append(f"Anchors held: {', '.join(continuity_anchors[:3])}.")
+    elif previous_state is not None and previous_state.continuity_anchors:
+        same_subject_bits.append("Continuity still depends on prior anchors awaiting rebind.")
+    if current_phase:
+        same_subject_bits.append(f"Current narrative phase: {current_phase}.")
+    return SubjectState(
+        tick=int(agent.cycle),
+        core_identity_summary=core_identity_summary,
+        current_phase=current_phase,
+        current_self_narrative_phase=current_phase,
+        active_commitments=tuple(commitment_summaries),
+        dominant_preferences=tuple(dict.fromkeys(preferences))[:4],
+        dominant_goal=active_goal,
+        dominant_needs=tuple(dominant_needs),
+        dominant_workspace_contents=tuple(workspace_contents[:4]),
+        active_social_focus=tuple(active_social_focus[:3]),
+        socially_salient_bindings=tuple(bindings),
+        identity_tension_level=_clamp(identity_tension_level),
+        self_inconsistency_level=_clamp(self_inconsistency_level),
+        maintenance_pressure=_clamp(maintenance_pressure),
+        continuity_score=continuity_score,
+        continuity_anchors=tuple(continuity_anchors),
+        unresolved_tensions=tuple(tensions),
+        subject_priority_stack=tuple(priorities),
+        status_flags=status_flags,
+        protected_targets=protected_targets,
+        repair_targets=repair_targets,
+        same_subject_basis=" ".join(same_subject_bits).strip(),
+    )
+
+
+def subject_action_bias(subject_state: SubjectState, action: str) -> float:
+    bias = 0.0
+    for priority in subject_state.subject_priority_stack[:4]:
+        gain = 0.0 if priority.priority_type == "goal" else 0.14
+        penalty = 0.0 if priority.priority_type == "goal" else 0.12
+        if action in priority.preferred_actions:
+            bias += gain * priority.weight
+        if action in priority.avoid_actions:
+            bias -= penalty * priority.weight
+    if subject_state.status_flags.get("threatened", False):
+        if action in {"hide", "exploit_shelter", "rest", "thermoregulate"}:
+            bias += 0.12
+        elif action in {"forage", "seek_contact"}:
+            bias -= 0.10
+    if subject_state.status_flags.get("repairing", False) and action in {"rest", "scan", "seek_contact"}:
+        bias += 0.08
+    if subject_state.status_flags.get("socially_destabilized", False):
+        if action == "hide":
+            bias += 0.06
+        elif action == "seek_contact":
+            bias -= 0.06
+    if subject_state.status_flags.get("continuity_fragile", False):
+        if action in {"rest", "scan", "hide"}:
+            bias += 0.05
+        if subject_state.active_commitments and action == "forage":
+            bias -= 0.04
+    return max(-0.45, min(0.45, round(bias, 6)))
+
+
+def subject_memory_threshold_delta(subject_state: SubjectState) -> float:
+    delta = 0.0
+    delta -= min(0.12, subject_state.maintenance_pressure * 0.12)
+    delta -= min(0.10, subject_state.identity_tension_level * 0.10)
+    delta -= min(0.10, subject_state.self_inconsistency_level * 0.10)
+    if subject_state.status_flags.get("continuity_fragile", False):
+        delta -= 0.08
+    if subject_state.status_flags.get("repairing", False):
+        delta -= 0.06
+    if subject_state.status_flags.get("threatened", False):
+        delta -= 0.05
+    return max(-0.30, min(0.05, round(delta, 6)))
+
+
+def apply_subject_state_to_maintenance_agenda(
+    subject_state: SubjectState,
+    agenda: MaintenanceAgenda,
+) -> tuple[MaintenanceAgenda, dict[str, object]]:
+    priority_gain = min(
+        0.35,
+        0.14 * subject_state.maintenance_pressure
+        + (0.10 if subject_state.status_flags.get("continuity_fragile", False) else 0.0)
+        + (0.08 if subject_state.status_flags.get("repairing", False) else 0.0),
+    )
+    active_tasks = list(agenda.active_tasks)
+    recommended_action = agenda.recommended_action
+    interrupt_action = agenda.interrupt_action
+    interrupt_reason = agenda.interrupt_reason
+    if subject_state.status_flags.get("continuity_fragile", False) and "continuity_guard" not in active_tasks:
+        active_tasks.append("continuity_guard")
+    if subject_state.status_flags.get("repairing", False) and "repair_stabilization" not in active_tasks:
+        active_tasks.append("repair_stabilization")
+    if subject_state.status_flags.get("threatened", False):
+        recommended_action = "hide"
+        if interrupt_action is None and agenda.policy_shift_strength + priority_gain > 0.30:
+            interrupt_action = "hide"
+            interrupt_reason = "subject-state threat mitigation"
+    elif subject_state.status_flags.get("continuity_fragile", False) and recommended_action not in {
+        "rest",
+        "hide",
+        "exploit_shelter",
+        "scan",
+    }:
+        recommended_action = "scan"
+    updated = MaintenanceAgenda(
+        cycle=agenda.cycle,
+        active_tasks=tuple(dict.fromkeys(active_tasks)),
+        recommended_action=recommended_action,
+        interrupt_action=interrupt_action,
+        interrupt_reason=interrupt_reason,
+        sleep_recommended=agenda.sleep_recommended,
+        memory_compaction_recommended=agenda.memory_compaction_recommended,
+        telemetry_backoff_recommended=agenda.telemetry_backoff_recommended,
+        protected_mode=agenda.protected_mode or subject_state.status_flags.get("threatened", False),
+        protected_mode_ticks_remaining=agenda.protected_mode_ticks_remaining,
+        recovery_rebound_active=agenda.recovery_rebound_active,
+        recovery_rebound_ticks_remaining=agenda.recovery_rebound_ticks_remaining,
+        policy_shift_strength=round(min(1.0, agenda.policy_shift_strength + priority_gain), 6),
+        suppressed_actions=agenda.suppressed_actions,
+        recovery_focus=agenda.recovery_focus,
+        chronic_debt_pressure=agenda.chronic_debt_pressure,
+        state=agenda.state,
+    )
+    details = {
+        "priority_gain": round(priority_gain, 6),
+        "recommended_action": recommended_action,
+        "interrupt_action": interrupt_action,
+        "active_tasks": list(updated.active_tasks),
+        "status_flags": {str(key): bool(value) for key, value in subject_state.status_flags.items()},
+    }
+    return updated, details

@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-03-21T14:56:18+00:00",
+  "mechanism": "subject_state",
+  "comparison": "full_subject_state_vs_ablated_subject_state",
+  "baseline": {
+    "hide_bias": 0.0,
+    "forage_bias": 0.0,
+    "memory_threshold_delta": 0.0,
+    "recommended_action": "forage",
+    "active_tasks": [
+      "energy_recovery"
+    ],
+    "details": {
+      "priority_gain": 0.0,
+      "recommended_action": "forage",
+      "interrupt_action": null,
+      "active_tasks": [
+        "energy_recovery"
+      ],
+      "status_flags": {
+        "threatened": false,
+        "repairing": false,
+        "overloaded": false,
+        "socially_destabilized": false,
+        "continuity_fragile": false
+      }
+    }
+  },
+  "full_mechanism": {
+    "hide_bias": 0.2988,
+    "forage_bias": -0.3476,
+    "memory_threshold_delta": -0.3,
+    "recommended_action": "hide",
+    "active_tasks": [
+      "energy_recovery",
+      "continuity_guard",
+      "repair_stabilization"
+    ],
+    "details": {
+      "priority_gain": 0.3032,
+      "recommended_action": "hide",
+      "interrupt_action": "hide",
+      "active_tasks": [
+        "energy_recovery",
+        "continuity_guard",
+        "repair_stabilization"
+      ],
+      "status_flags": {
+        "threatened": true,
+        "repairing": true,
+        "overloaded": true,
+        "socially_destabilized": false,
+        "continuity_fragile": true
+      }
+    }
+  },
+  "degradation_checks": {
+    "policy_reroute_removed_without_subject_state": true,
+    "forage_penalty_removed_without_subject_state": true,
+    "memory_protection_removed_without_subject_state": true
+  }
+}

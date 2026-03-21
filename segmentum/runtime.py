@@ -33,12 +33,13 @@ from .self_model import (
 )
 from .state import AgentState, PolicyTendency, TickInput
 from .sleep_consolidator import build_sleep_llm_extractor
+from .subject_state import SubjectState, apply_subject_state_to_maintenance_agenda, derive_subject_state
 from .tracing import JsonlTraceWriter, derive_trace_path
 from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 
 
-STATE_VERSION = "0.4"
-SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.3", "0.2", "0.1"}
+STATE_VERSION = "0.5"
+SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.4", "0.3", "0.2", "0.1"}
 RESTART_MEMORY_CONTINUITY_WINDOW = 24
 
 
@@ -67,7 +68,8 @@ def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
         f"ws={option.workspace_bias:.3f} "
         f"social={option.social_bias:.3f} "
         f"commit={option.commitment_bias:.3f} "
-        f"id={option.identity_bias:.3f}"
+        f"id={option.identity_bias:.3f} "
+        f"subj={option.subject_bias:.3f}"
         for option in choice_ranking
     )
 
@@ -123,6 +125,12 @@ class SegmentRuntime:
         self.state_load_status = state_load_status
         self.narrative_ingestion_service = NarrativeIngestionService()
         self.last_continuity_report = self.agent.self_model.continuity_audit.to_dict()
+        self.subject_state = derive_subject_state(
+            self.agent,
+            continuity_report=self.last_continuity_report,
+            previous_state=getattr(self.agent, "subject_state", SubjectState()),
+        )
+        self.agent.subject_state = self.subject_state
         self.restart_policy_anchors: dict[str, object] = {}
         self.continuity_rebind_ticks_remaining = 0
         self.continuity_rebind_total_ticks = 0
@@ -158,6 +166,12 @@ class SegmentRuntime:
             )
             runtime.agent.self_model.record_restart_consistency(None, current_tick=runtime.agent.cycle)
             runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+            runtime.subject_state = derive_subject_state(
+                runtime.agent,
+                continuity_report=runtime.last_continuity_report,
+                previous_state=runtime.subject_state,
+            )
+            runtime.agent.subject_state = runtime.subject_state
             return runtime
 
         try:
@@ -179,6 +193,12 @@ class SegmentRuntime:
             )
             runtime.agent.self_model.record_restart_consistency(None, current_tick=runtime.agent.cycle)
             runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+            runtime.subject_state = derive_subject_state(
+                runtime.agent,
+                continuity_report=runtime.last_continuity_report,
+                previous_state=runtime.subject_state,
+            )
+            runtime.agent.subject_state = runtime.subject_state
             return runtime
 
         world = SimulatedWorld.from_dict(payload.get("world"))
@@ -240,6 +260,17 @@ class SegmentRuntime:
             current_tick=runtime.agent.cycle,
         )
         runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+        runtime.subject_state = SubjectState.from_dict(
+            payload.get("subject_state") if isinstance(payload.get("subject_state"), dict) else None
+        )
+        if not runtime.subject_state.core_identity_summary and not runtime.subject_state.subject_priority_stack:
+            runtime.subject_state = derive_subject_state(
+                runtime.agent,
+                continuity_report=runtime.last_continuity_report,
+                previous_state=runtime.agent.subject_state,
+                restart_anchors=runtime.restart_policy_anchors,
+            )
+        runtime.agent.subject_state = runtime.subject_state
         return runtime
 
     def save_snapshot(self) -> None:
@@ -496,6 +527,10 @@ class SegmentRuntime:
             persistence_error_count=self.metrics.persistence_error_count,
             should_sleep=self.agent.should_sleep(),
         )
+        maintenance_agenda = self._apply_subject_state_maintenance_priority(
+            diagnostics,
+            maintenance_agenda,
+        )
         maintenance_agenda = self._apply_workspace_maintenance_priority(
             diagnostics,
             maintenance_agenda,
@@ -559,6 +594,24 @@ class SegmentRuntime:
             current_tick=self.agent.cycle,
         )
         self.last_continuity_report = continuity_audit.to_dict()
+        self.subject_state = derive_subject_state(
+            self.agent,
+            diagnostics=diagnostics,
+            continuity_report=self.last_continuity_report,
+            maintenance_agenda=maintenance_agenda,
+            previous_state=self.subject_state,
+            restart_anchors=self.restart_policy_anchors,
+        )
+        self.agent.subject_state = self.subject_state
+        diagnostics.subject_state_summary = self.subject_state.summary_text()
+        diagnostics.subject_status_flags = dict(self.subject_state.status_flags)
+        diagnostics.subject_priority_stack = [
+            item.to_dict() for item in self.subject_state.subject_priority_stack[:4]
+        ]
+        details = dict(diagnostics.structured_explanation)
+        details["subject_state"] = self.subject_state.explanation_payload()
+        diagnostics.structured_explanation = details
+        diagnostics.explanation = str(details["subject_state"]["summary"]) + " " + diagnostics.explanation
         if self.continuity_rebind_ticks_remaining > 0:
             self.continuity_rebind_ticks_remaining -= 1
         self.homeostasis_scheduler.note_interrupt(
@@ -862,6 +915,7 @@ class SegmentRuntime:
             },
             "homeostasis": self.homeostasis_scheduler.to_dict(),
             "governance": self.governance.to_dict(),
+            "subject_state": self.subject_state.to_dict(),
             "m218": dict(self.last_continuity_report),
             "restart_anchors": self.agent.self_model.build_restart_anchors(
                 maintenance_agenda=(
@@ -1003,6 +1057,54 @@ class SegmentRuntime:
             "recommended_action": recommended_action,
         }
         diagnostics.structured_explanation = details
+        return updated
+
+    def _apply_subject_state_maintenance_priority(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> MaintenanceAgenda:
+        subject_state = derive_subject_state(
+            self.agent,
+            diagnostics=diagnostics,
+            maintenance_agenda=agenda,
+            continuity_report=self.last_continuity_report,
+            previous_state=self.subject_state,
+            restart_anchors=self.restart_policy_anchors,
+        )
+        self.subject_state = subject_state
+        self.agent.subject_state = subject_state
+        if self.continuity_rebind_ticks_remaining > 0:
+            details = dict(diagnostics.structured_explanation)
+            details["subject_state"] = subject_state.explanation_payload()
+            details["subject_state_maintenance_priority"] = {
+                "priority_gain": 0.0,
+                "recommended_action": agenda.recommended_action,
+                "interrupt_action": agenda.interrupt_action,
+                "active_tasks": list(agenda.active_tasks),
+                "status_flags": dict(subject_state.status_flags),
+                "rebind_window_active": True,
+            }
+            diagnostics.structured_explanation = details
+            diagnostics.subject_state_summary = subject_state.summary_text()
+            diagnostics.subject_status_flags = dict(subject_state.status_flags)
+            diagnostics.subject_priority_stack = [
+                item.to_dict() for item in subject_state.subject_priority_stack[:4]
+            ]
+            return agenda
+        updated, maintenance_details = apply_subject_state_to_maintenance_agenda(
+            subject_state,
+            agenda,
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["subject_state"] = subject_state.explanation_payload()
+        details["subject_state_maintenance_priority"] = maintenance_details
+        diagnostics.structured_explanation = details
+        diagnostics.subject_state_summary = subject_state.summary_text()
+        diagnostics.subject_status_flags = dict(subject_state.status_flags)
+        diagnostics.subject_priority_stack = [
+            item.to_dict() for item in subject_state.subject_priority_stack[:4]
+        ]
         return updated
 
     def _apply_continuity_rebind_prior(self, diagnostics: DecisionDiagnostics) -> None:
@@ -1243,6 +1345,7 @@ class SegmentRuntime:
                     "social_bias": option.social_bias,
                     "commitment_bias": option.commitment_bias,
                     "identity_bias": option.identity_bias,
+                    "subject_bias": option.subject_bias,
                     "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
                     "dominant_component": option.dominant_component,
@@ -1269,6 +1372,7 @@ class SegmentRuntime:
                 "social_bias": diagnostics.chosen.social_bias,
                 "commitment_bias": diagnostics.chosen.commitment_bias,
                 "identity_bias": diagnostics.chosen.identity_bias,
+                "subject_bias": diagnostics.chosen.subject_bias,
                 "goal_alignment": diagnostics.chosen.goal_alignment,
                 "active_goal": diagnostics.active_goal,
                 "goal_context": diagnostics.goal_context,
@@ -1308,6 +1412,8 @@ class SegmentRuntime:
                 "social_focus": list(diagnostics.social_focus),
                 "social_alerts": list(diagnostics.social_alerts),
                 "social_snapshot": dict(diagnostics.social_snapshot),
+                "subject_state_summary": diagnostics.subject_state_summary,
+                "subject_status_flags": dict(diagnostics.subject_status_flags),
             },
             "retrieved_memories": diagnostics.retrieved_memories,
             "episodic_memory": memory_decision.to_dict(),
@@ -1354,6 +1460,7 @@ class SegmentRuntime:
                 ],
             }
         trace_record["social_memory"] = self.agent.social_memory.to_dict()
+        trace_record["subject_state"] = self.subject_state.to_dict()
         trace_record["continuity"] = dict(self.last_continuity_report)
         if self.last_error_attribution is not None:
             trace_record["last_error_attribution"] = {

@@ -1,0 +1,401 @@
+{
+  "generated_at": "2026-03-21T14:56:18+00:00",
+  "seed": 342,
+  "failure_injection": {
+    "energy": 0.12,
+    "stress": 0.84,
+    "fatigue": 0.78,
+    "temperature": 0.67,
+    "continuity_score": 0.58,
+    "protected_anchor_ids": [
+      "stress-anchor-001"
+    ]
+  },
+  "derived_subject_state": {
+    "tick": 0,
+    "core_identity_summary": "I am an adaptive subject maintaining continuity under uncertainty.",
+    "current_phase": "forming",
+    "current_self_narrative_phase": "forming",
+    "active_commitments": [],
+    "dominant_preferences": [
+      "strategy:expected_free_energy"
+    ],
+    "dominant_goal": "CONTROL",
+    "dominant_needs": [
+      {
+        "name": "energy",
+        "intensity": 0.43,
+        "reason": "low energy reserve"
+      },
+      {
+        "name": "maintenance",
+        "intensity": 0.41,
+        "reason": "active homeostatic protection"
+      },
+      {
+        "name": "stress",
+        "intensity": 0.39,
+        "reason": "elevated stress"
+      }
+    ],
+    "dominant_workspace_contents": [],
+    "active_social_focus": [],
+    "socially_salient_bindings": [],
+    "identity_tension_level": 0.0,
+    "self_inconsistency_level": 0.0,
+    "maintenance_pressure": 0.43,
+    "continuity_score": 0.58,
+    "continuity_anchors": [
+      "stress-anchor-001"
+    ],
+    "unresolved_tensions": [
+      {
+        "label": "continuity fragility",
+        "tension_type": "continuity",
+        "intensity": 0.42,
+        "repair_target": "protect continuity anchors",
+        "evidence": [
+          "continuity_score_drop"
+        ]
+      },
+      {
+        "label": "maintenance pressure",
+        "tension_type": "maintenance",
+        "intensity": 0.41,
+        "repair_target": "forage",
+        "evidence": [
+          "energy_recovery"
+        ]
+      }
+    ],
+    "subject_priority_stack": [
+      {
+        "label": "goal:control",
+        "weight": 0.7,
+        "priority_type": "goal",
+        "preferred_actions": [
+          "scan",
+          "hide"
+        ],
+        "avoid_actions": [],
+        "evidence": [
+          "CONTROL"
+        ]
+      },
+      {
+        "label": "need:energy",
+        "weight": 0.43,
+        "priority_type": "need",
+        "preferred_actions": [
+          "rest",
+          "forage"
+        ],
+        "avoid_actions": [],
+        "evidence": [
+          "low energy reserve"
+        ]
+      },
+      {
+        "label": "continuity fragility",
+        "weight": 0.42,
+        "priority_type": "continuity",
+        "preferred_actions": [
+          "rest",
+          "scan",
+          "hide"
+        ],
+        "avoid_actions": [
+          "forage"
+        ],
+        "evidence": [
+          "continuity_score_drop"
+        ]
+      },
+      {
+        "label": "maintenance pressure",
+        "weight": 0.41,
+        "priority_type": "maintenance",
+        "preferred_actions": [],
+        "avoid_actions": [],
+        "evidence": [
+          "energy_recovery"
+        ]
+      },
+      {
+        "label": "need:maintenance",
+        "weight": 0.41,
+        "priority_type": "need",
+        "preferred_actions": [],
+        "avoid_actions": [],
+        "evidence": [
+          "active homeostatic protection"
+        ]
+      },
+      {
+        "label": "need:stress",
+        "weight": 0.39,
+        "priority_type": "need",
+        "preferred_actions": [
+          "hide",
+          "rest"
+        ],
+        "avoid_actions": [
+          "seek_contact"
+        ],
+        "evidence": [
+          "elevated stress"
+        ]
+      }
+    ],
+    "status_flags": {
+      "threatened": true,
+      "repairing": false,
+      "overloaded": true,
+      "socially_destabilized": false,
+      "continuity_fragile": true
+    },
+    "protected_targets": [
+      "goal:control",
+      "need:energy"
+    ],
+    "repair_targets": [
+      "protect continuity anchors",
+      "forage"
+    ],
+    "same_subject_basis": "Anchors held: stress-anchor-001. Current narrative phase: forming."
+  },
+  "maintenance_update": {
+    "recommended_action": "hide",
+    "policy_shift_strength": 0.5002,
+    "active_tasks": [
+      "energy_recovery",
+      "continuity_guard"
+    ],
+    "details": {
+      "priority_gain": 0.1602,
+      "recommended_action": "hide",
+      "interrupt_action": "hide",
+      "active_tasks": [
+        "energy_recovery",
+        "continuity_guard"
+      ],
+      "status_flags": {
+        "threatened": true,
+        "repairing": false,
+        "overloaded": true,
+        "socially_destabilized": false,
+        "continuity_fragile": true
+      }
+    }
+  },
+  "restart_roundtrip": {
+    "restored_subject_state_equal_before_step": true,
+    "restored_signature_before_step": {
+      "cycle": 0,
+      "current_phase": "forming",
+      "dominant_goal": "CONTROL",
+      "continuity_score": 0.58,
+      "continuity_anchors": [
+        "stress-anchor-001"
+      ],
+      "status_flags": {
+        "threatened": true,
+        "repairing": false,
+        "overloaded": true,
+        "socially_destabilized": false,
+        "continuity_fragile": true
+      },
+      "priority_labels": [
+        "goal:control",
+        "need:energy",
+        "continuity fragility",
+        "maintenance pressure"
+      ],
+      "last_choice": ""
+    },
+    "post_restore_cycle": 1,
+    "post_restore_alive": true,
+    "post_restore_subject_state": {
+      "tick": 1,
+      "core_identity_summary": "I am a risk-seeking, survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 1 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.03, 'resource_cost': {'energy': 0.03, 'attention': 0.03}, 'failure_modes': ['opportunity_loss', 'environment_shift'], 'constraints': {'preferred_when_fatigue_above': 0.4}, 'reversible': True} (surprise=1005.06).",
+      "current_phase": "survival_crisis",
+      "current_self_narrative_phase": "survival_crisis",
+      "active_commitments": [
+        "Protect survival and integrity before opportunistic gain.",
+        "When conditions are stable, reduce uncertainty through active exploration."
+      ],
+      "dominant_preferences": [
+        "strategy:expected_free_energy",
+        "prefer:stabilize_comfort",
+        "prefer:stabilize_hunger",
+        "prefer:stabilize_safety"
+      ],
+      "dominant_goal": "SURVIVAL",
+      "dominant_needs": [
+        {
+          "name": "maintenance",
+          "intensity": 1.0,
+          "reason": "active homeostatic protection"
+        },
+        {
+          "name": "energy",
+          "intensity": 0.115,
+          "reason": "low energy reserve"
+        },
+        {
+          "name": "stress",
+          "intensity": 0.075,
+          "reason": "elevated stress"
+        }
+      ],
+      "dominant_workspace_contents": [
+        "danger",
+        "novelty"
+      ],
+      "active_social_focus": [],
+      "socially_salient_bindings": [],
+      "identity_tension_level": 0.5,
+      "self_inconsistency_level": 0.5,
+      "maintenance_pressure": 1.0,
+      "continuity_score": 0.1,
+      "continuity_anchors": [
+        "ep-000001-rest",
+        "commitment-survival-priority",
+        "commitment-exploration-drive"
+      ],
+      "unresolved_tensions": [
+        {
+          "label": "maintenance pressure",
+          "tension_type": "maintenance",
+          "intensity": 1.0,
+          "repair_target": "hide",
+          "evidence": [
+            "thermal_rebalance",
+            "energy_recovery",
+            "stress_relief"
+          ]
+        },
+        {
+          "label": "continuity fragility",
+          "tension_type": "continuity",
+          "intensity": 0.9,
+          "repair_target": "protect continuity anchors",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        },
+        {
+          "label": "identity tension",
+          "tension_type": "identity",
+          "intensity": 0.5,
+          "repair_target": "",
+          "evidence": []
+        },
+        {
+          "label": "self inconsistency",
+          "tension_type": "continuity",
+          "intensity": 0.5,
+          "repair_target": "",
+          "evidence": [
+            "none",
+            "none"
+          ]
+        }
+      ],
+      "subject_priority_stack": [
+        {
+          "label": "maintenance pressure",
+          "weight": 1.0,
+          "priority_type": "maintenance",
+          "preferred_actions": [],
+          "avoid_actions": [],
+          "evidence": [
+            "thermal_rebalance",
+            "energy_recovery",
+            "stress_relief"
+          ]
+        },
+        {
+          "label": "need:maintenance",
+          "weight": 1.0,
+          "priority_type": "need",
+          "preferred_actions": [],
+          "avoid_actions": [],
+          "evidence": [
+            "active homeostatic protection"
+          ]
+        },
+        {
+          "label": "continuity fragility",
+          "weight": 0.9,
+          "priority_type": "continuity",
+          "preferred_actions": [
+            "rest",
+            "scan",
+            "hide"
+          ],
+          "avoid_actions": [
+            "forage"
+          ],
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        },
+        {
+          "label": "goal:survival",
+          "weight": 0.7,
+          "priority_type": "goal",
+          "preferred_actions": [
+            "hide",
+            "exploit_shelter",
+            "rest"
+          ],
+          "avoid_actions": [
+            "forage"
+          ],
+          "evidence": [
+            "SURVIVAL"
+          ]
+        },
+        {
+          "label": "commitment continuity",
+          "weight": 0.62,
+          "priority_type": "commitment",
+          "preferred_actions": [
+            "hide",
+            "rest",
+            "exploit_shelter",
+            "scan"
+          ],
+          "avoid_actions": [],
+          "evidence": [
+            "active commitments"
+          ]
+        },
+        {
+          "label": "identity tension",
+          "weight": 0.5,
+          "priority_type": "identity",
+          "preferred_actions": [],
+          "avoid_actions": [],
+          "evidence": []
+        }
+      ],
+      "status_flags": {
+        "threatened": true,
+        "repairing": false,
+        "overloaded": false,
+        "socially_destabilized": false,
+        "continuity_fragile": true
+      },
+      "protected_targets": [
+        "need:maintenance"
+      ],
+      "repair_targets": [
+        "hide",
+        "protect continuity anchors"
+      ],
+      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis."
+    }
+  }
+}

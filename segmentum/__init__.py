@@ -13,6 +13,7 @@ from .runtime import SegmentRuntime
 from .homeostasis import HomeostasisScheduler, MaintenanceAgenda
 from .workspace import GlobalWorkspace, GlobalWorkspaceState, WorkspaceContent
 from .social_model import OtherModel, SocialMemory
+from .subject_state import SubjectState, ActiveTension, DominantNeed, SubjectBinding, SubjectPriority
 from .governance import CapabilityDescriptor, GovernanceController, GovernanceState
 from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
@@ -71,6 +72,11 @@ __all__ = [
     "GlobalWorkspace",
     "OtherModel",
     "SocialMemory",
+    "SubjectState",
+    "ActiveTension",
+    "DominantNeed",
+    "SubjectBinding",
+    "SubjectPriority",
     "CapabilityDescriptor",
     "GovernanceController",
     "GovernanceState",

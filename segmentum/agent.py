@@ -31,6 +31,7 @@ from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_c
 from .preferences import Goal, GoalStack
 from .narrative_compiler import NarrativeCompiler
 from .social_model import SocialMemory
+from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .self_model import (
     CapabilityModel,
     NarrativePriors,
@@ -255,6 +256,7 @@ class PolicyEvaluator:
         social_bias: float,
         commitment_bias: float,
         identity_bias: float,
+        subject_bias: float,
         goal_alignment: float,
     ) -> str:
         components = [
@@ -267,6 +269,7 @@ class PolicyEvaluator:
             ("social_bias", abs(social_bias)),
             ("commitment_bias", abs(commitment_bias)),
             ("identity_bias", abs(identity_bias)),
+            ("subject_bias", abs(subject_bias)),
             ("goal_alignment", abs(goal_alignment)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
@@ -335,6 +338,11 @@ class PolicyEvaluator:
             reason = (
                 f"identity_bias ({chosen.identity_bias:.3f}) dominated, "
                 "which matches my learned preferences and autobiographical style."
+            )
+        elif chosen.dominant_component == "subject_bias":
+            reason = (
+                f"subject_bias ({chosen.subject_bias:.3f}) dominated, "
+                "so my current unified subject state overruled weaker local advantages."
             )
         elif chosen.dominant_component == "goal_alignment":
             reason = (
@@ -430,6 +438,7 @@ class PolicyEvaluator:
             f"workspace_bias={chosen.workspace_bias:.3f}",
             f"social_bias={chosen.social_bias:.3f}",
             f"commitment_bias={chosen.commitment_bias:.3f}",
+            f"subject_bias={chosen.subject_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
         workspace_channels = ", ".join(diagnostics.workspace_broadcast_channels)
@@ -462,6 +471,9 @@ class PolicyEvaluator:
             social_sentence += (
                 "Active social alerts: " + ", ".join(diagnostics.social_alerts) + ". "
             )
+        subject_sentence = ""
+        if diagnostics.subject_state_summary:
+            subject_sentence = diagnostics.subject_state_summary + " "
         explanation_text = (
             f"I chose {chosen.choice}. "
             f"This action predicted outcome '{chosen.predicted_outcome}'. "
@@ -473,6 +485,7 @@ class PolicyEvaluator:
             f"{workspace_sentence}"
             f"{commitment_sentence}"
             f"{social_sentence}"
+            f"{subject_sentence}"
             f"{consistency_statement}{bias_sentence} "
             f"This aligns with my resource_conservatism="
             f"{self.identity_traits.resource_conservatism:.2f} and "
@@ -508,6 +521,9 @@ class PolicyEvaluator:
             "social_focus": list(diagnostics.social_focus),
             "social_alerts": list(diagnostics.social_alerts),
             "social_snapshot": dict(diagnostics.social_snapshot),
+            "subject_state_summary": diagnostics.subject_state_summary,
+            "subject_status_flags": dict(diagnostics.subject_status_flags),
+            "subject_priority_stack": list(diagnostics.subject_priority_stack),
             "text": explanation_text,
         }
 
@@ -611,6 +627,7 @@ class SegmentAgent:
         self.last_workspace_state: GlobalWorkspaceState | None = None
         self.social_memory = SocialMemory()
         self.identity_tension_history: list[dict[str, object]] = []
+        self.subject_state = SubjectState()
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -890,6 +907,7 @@ class SegmentAgent:
                 "dopamine": self.dopamine,
             },
             "free_energy_history": list(self.free_energy_history),
+            "subject_state": self.subject_state.to_dict(),
         }
 
     def _current_body_state(self) -> dict[str, float]:
@@ -1126,6 +1144,8 @@ class SegmentAgent:
             "identity_tension": diagnostics.identity_tension,
             "social_focus": list(diagnostics.social_focus),
             "social_alerts": list(diagnostics.social_alerts),
+            "subject_state_summary": diagnostics.subject_state_summary,
+            "subject_status_flags": dict(diagnostics.subject_status_flags),
         }
         self.decision_history.append(record)
         if len(self.decision_history) > self.decision_history_limit:
@@ -1175,10 +1195,12 @@ class SegmentAgent:
     def explain_decision_details(self, action: str | None = None) -> dict[str, object]:
         if self.last_decision_diagnostics is None:
             return {"text": "No decision has been evaluated yet."}
-        return self.policy_evaluator.explain_structured(
+        details = self.policy_evaluator.explain_structured(
             self.last_decision_diagnostics,
             action=action,
         )
+        details["subject_state"] = self.subject_state.explanation_payload()
+        return details
 
     def should_sleep(self) -> bool:
         """Decide if the agent needs to sleep."""
@@ -1845,6 +1867,10 @@ class SegmentAgent:
             errors=errors,
             attention_trace=self.last_attention_trace,
         )
+        self.subject_state = derive_subject_state(
+            self,
+            previous_state=self.subject_state,
+        )
         action_options = self.evaluate_action_options(
             observed,
             prediction,
@@ -1893,6 +1919,7 @@ class SegmentAgent:
                 predicted_outcome=predicted_effects,
                 cost=float(option["cost"]),
             )
+            subject_bias = subject_action_bias(self.subject_state, action)
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
                 action=action,
@@ -1911,6 +1938,7 @@ class SegmentAgent:
                 + social_bias
                 + commitment_bias
                 + identity_bias
+                + subject_bias
                 + goal_alignment
                 - regression_penalty
             )
@@ -1924,6 +1952,7 @@ class SegmentAgent:
                 social_bias=social_bias,
                 commitment_bias=commitment_bias,
                 identity_bias=identity_bias,
+                subject_bias=subject_bias,
                 goal_alignment=goal_alignment,
             )
             ranked_options.append(
@@ -1948,6 +1977,7 @@ class SegmentAgent:
                     social_bias=social_bias,
                     commitment_bias=commitment_bias,
                     identity_bias=identity_bias,
+                    subject_bias=subject_bias,
                     goal_alignment=goal_alignment,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
@@ -2169,7 +2199,18 @@ class SegmentAgent:
             social_alerts=list(chosen_social["alerts"]),
             social_snapshot=dict(chosen_social["snapshot"]),
         )
+        self.subject_state = derive_subject_state(
+            self,
+            diagnostics=diagnostics,
+            previous_state=self.subject_state,
+        )
+        diagnostics.subject_state_summary = self.subject_state.summary_text()
+        diagnostics.subject_status_flags = dict(self.subject_state.status_flags)
+        diagnostics.subject_priority_stack = [
+            item.to_dict() for item in self.subject_state.subject_priority_stack[:4]
+        ]
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
+        diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
         workspace_review = self.metacognitive_layer.review_self_consistency(
             chosen_assessment,
             workspace_state=self.last_workspace_state,
@@ -2210,31 +2251,34 @@ class SegmentAgent:
     def conscious_report(self) -> dict[str, object]:
         if self.last_decision_diagnostics is None:
             return {
-                "text": "No consciously accessible contents are available yet.",
+                "text": (
+                    "No consciously accessible contents are available yet. "
+                    + "Subject state: "
+                    + self.subject_state.summary_text()
+                ),
                 "channels": [],
                 "carry_over_channels": [],
                 "suppressed_channels": [],
                 "leakage_free": True,
+                "subject_state": self.subject_state.explanation_payload(),
             }
         report_payload = self.global_workspace.conscious_report_payload(self.last_workspace_state)
         channels = list(report_payload["accessible_channels"])
         carry_over_channels = list(report_payload["carry_over_contents"])
         if channels:
-            text = (
-                "Consciously accessible now: "
-                + ", ".join(channels)
-                + "."
-            )
+            text = "Consciously accessible now: " + ", ".join(channels) + "."
         else:
             text = "No contents currently reached global access."
         if carry_over_channels:
             text += " Carry-over still accessible: " + ", ".join(carry_over_channels) + "."
+        text += " Subject state: " + self.subject_state.summary_text()
         return {
             "text": text,
             "channels": channels,
             "carry_over_channels": carry_over_channels,
             "suppressed_channels": list(report_payload["suppressed_channels"]),
             "leakage_free": bool(report_payload["leakage_checked"]),
+            "subject_state": self.subject_state.explanation_payload(),
         }
 
     def choose_intervention(
@@ -2278,6 +2322,7 @@ class SegmentAgent:
                 social_bias=0.0,
                 commitment_bias=0.0,
                 identity_bias=0.0,
+                subject_bias=0.0,
                 goal_alignment=0.0,
                 value_score=neutral_preference.value_score,
                 predicted_outcome=neutral_preference.outcome,
@@ -2319,6 +2364,9 @@ class SegmentAgent:
             social_focus=[],
             social_alerts=[],
             social_snapshot=self.social_memory.snapshot(),
+            subject_state_summary=self.subject_state.summary_text(),
+            subject_status_flags=dict(self.subject_state.status_flags),
+            subject_priority_stack=[item.to_dict() for item in self.subject_state.subject_priority_stack[:4]],
         )
         self.last_decision_diagnostics = diagnostics
         return diagnostics
@@ -2422,6 +2470,7 @@ class SegmentAgent:
             0.05,
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
+            + subject_memory_threshold_delta(self.subject_state),
         )
         try:
             memory_decision = self.long_term_memory.maybe_store_episode(
@@ -3374,6 +3423,7 @@ class SegmentAgent:
             ),
             "social_memory": self.social_memory.to_dict(),
             "identity_tension_history": list(self.identity_tension_history),
+            "subject_state": self.subject_state.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
             "defense_strategy_selector": self.defense_strategy_selector.to_dict(),
@@ -3479,6 +3529,11 @@ class SegmentAgent:
         agent.social_memory = SocialMemory.from_dict(
             payload.get("social_memory")
             if isinstance(payload.get("social_memory"), dict)
+            else None
+        )
+        agent.subject_state = SubjectState.from_dict(
+            payload.get("subject_state")
+            if isinstance(payload.get("subject_state"), dict)
             else None
         )
         agent.identity_tension_history = [
@@ -3596,6 +3651,8 @@ class SegmentAgent:
             reset_precisions=reset_predictive_precisions,
         )
         agent._sync_self_model_body_schema()
+        if not agent.subject_state.core_identity_summary and not agent.subject_state.subject_priority_stack:
+            agent.subject_state = derive_subject_state(agent, previous_state=agent.subject_state)
 
         return agent
 

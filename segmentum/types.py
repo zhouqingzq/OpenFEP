@@ -369,6 +369,7 @@ class InterventionScore:
     social_bias: float
     commitment_bias: float
     identity_bias: float
+    subject_bias: float
     goal_alignment: float
     value_score: float
     predicted_outcome: str
@@ -390,6 +391,7 @@ class InterventionScore:
             "social_bias": self.social_bias,
             "commitment_bias": self.commitment_bias,
             "identity_bias": self.identity_bias,
+            "subject_bias": self.subject_bias,
             "goal_alignment": self.goal_alignment,
         }
 
@@ -440,3 +442,6 @@ class DecisionDiagnostics:
     social_focus: list[str] = field(default_factory=list)
     social_alerts: list[str] = field(default_factory=list)
     social_snapshot: dict[str, object] = field(default_factory=dict)
+    subject_state_summary: str = ""
+    subject_status_flags: dict[str, bool] = field(default_factory=dict)
+    subject_priority_stack: list[dict[str, object]] = field(default_factory=list)
