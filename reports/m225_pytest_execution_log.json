@@ -1,21 +1,5 @@
 [
   {
-    "name": "tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
-    "category": "pytest",
-    "status": "passed",
-    "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
-    "nodeid": "tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
-    "suite": "tests/test_m225_freshness_guards.py"
-  },
-  {
-    "name": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
-    "category": "pytest",
-    "status": "passed",
-    "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
-    "nodeid": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
-    "suite": "tests/test_m225_freshness_guards.py"
-  },
-  {
     "name": "tests/test_self_model.py::SelfModelTests::test_core_beliefs_are_immutable",
     "category": "pytest",
     "status": "passed",
@@ -150,5 +134,21 @@
     "details": "pytest call phase outcome for tests/test_baseline_regressions.py::BehaviorRegressionTests::test_long_run_does_not_collapse_to_single_action",
     "nodeid": "tests/test_baseline_regressions.py::BehaviorRegressionTests::test_long_run_does_not_collapse_to_single_action",
     "suite": "tests/test_baseline_regressions.py"
+  },
+  {
+    "name": "tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
+    "nodeid": "tests/test_m225_freshness_guards.py::test_report_schema_contains_tests_and_findings_with_semantics",
+    "suite": "tests/test_m225_freshness_guards.py"
+  },
+  {
+    "name": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
+    "category": "pytest",
+    "status": "passed",
+    "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
+    "nodeid": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
+    "suite": "tests/test_m225_freshness_guards.py"
   }
 ]

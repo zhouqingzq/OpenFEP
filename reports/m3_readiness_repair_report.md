@@ -65,7 +65,7 @@ Legacy metrics (non-gating, comparison only)
 - Readiness targets: tests/test_m3_readiness.py, tests/test_memory.py, tests/test_counterfactual_artifact.py, tests/test_m23_ultimate_consolidation_loop.py
 - Current-round passed count: 41
 - Current-round failed count: 0
-- Current-round summary: 41 passed in 0.82s
+- Current-round summary: 41 passed in 0.72s
 - Carried-forward unverified test claim present: false
 - Historical regressions status: REVALIDATED_THIS_ROUND
 - Historical regression checks: soak_regression_passed, snapshot_compatibility_passed, runtime_lifecycle_passed, runtime_family_coverage_passed

@@ -56,7 +56,7 @@
       "target_count": 4,
       "passed_count": 41,
       "failed_count": 0,
-      "output_summary": "41 passed in 0.82s",
+      "output_summary": "41 passed in 0.72s",
       "command": [
         "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
         "-m",
@@ -406,7 +406,7 @@
     "target_count": 4,
     "passed_count": 41,
     "failed_count": 0,
-    "output_summary": "41 passed in 0.82s"
+    "output_summary": "41 passed in 0.72s"
   },
   "historical_regressions": {
     "suite_type": "historical_regressions",

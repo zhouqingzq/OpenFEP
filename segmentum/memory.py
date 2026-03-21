@@ -819,6 +819,7 @@ class LongTermMemory:
     ) -> int:
         if len(self.episodes) < 2:
             return 0
+        self._rehydrate_continuity_payloads()
 
         ordered_payloads = sorted(
             self.episodes,
@@ -1290,14 +1291,17 @@ class LongTermMemory:
         if commitment_ids:
             payload["identity_commitment_ids"] = commitment_ids
         continuity_role, inferred_tags = self._infer_continuity_role(payload)
-        existing_tags = [str(tag) for tag in payload.get("continuity_tags", []) if str(tag)]
-        payload["continuity_role"] = continuity_role or str(payload.get("continuity_role", ""))
-        payload["continuity_tags"] = list(dict.fromkeys([*existing_tags, *inferred_tags]))
+        persistent_tags = [
+            str(tag)
+            for tag in payload.get("continuity_tags", [])
+            if str(tag) and str(tag) not in {"identity", "threat", "commitment", "guard", "maintenance", "recovery"}
+        ]
+        payload["continuity_role"] = continuity_role
+        payload["continuity_tags"] = list(dict.fromkeys([*persistent_tags, *inferred_tags]))
         payload["restart_protected"] = (
-            bool(payload.get("restart_protected", False))
-            or bool(payload.get("identity_critical", False))
+            bool(payload.get("identity_critical", False))
             or bool(commitment_ids)
-            or payload["continuity_role"] == CONTINUITY_ROLE_MAINTENANCE
+            or continuity_role == CONTINUITY_ROLE_MAINTENANCE
         )
 
     def _rehydrate_continuity_payloads(self) -> None:

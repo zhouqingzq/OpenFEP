@@ -136,6 +136,7 @@ class SegmentRuntime:
         reset: bool = False,
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
         reset_predictive_precisions: bool = False,
+        enable_restart_rebind: bool = False,
     ) -> SegmentRuntime:
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
@@ -225,12 +226,15 @@ class SegmentRuntime:
         restart_anchors = payload.get("restart_anchors")
         if isinstance(restart_anchors, dict):
             runtime.restart_policy_anchors = dict(restart_anchors)
-            runtime._activate_continuity_rebind()
+            runtime.restart_policy_anchors["policy_rebind_enabled"] = bool(enable_restart_rebind)
+            if enable_restart_rebind:
+                runtime._activate_continuity_rebind()
             runtime.agent.self_model.apply_restart_anchors(runtime.restart_policy_anchors)
-        runtime.agent.long_term_memory.activate_restart_continuity_window(
-            current_cycle=runtime.agent.cycle,
-            duration=max(RESTART_MEMORY_CONTINUITY_WINDOW, runtime.continuity_rebind_total_ticks),
-        )
+        if enable_restart_rebind:
+            runtime.agent.long_term_memory.activate_restart_continuity_window(
+                current_cycle=runtime.agent.cycle,
+                duration=max(RESTART_MEMORY_CONTINUITY_WINDOW, runtime.continuity_rebind_total_ticks),
+            )
         runtime.agent.self_model.record_restart_consistency(
             payload.get("m218") if isinstance(payload.get("m218"), dict) else None,
             current_tick=runtime.agent.cycle,
@@ -1003,6 +1007,8 @@ class SegmentRuntime:
 
     def _apply_continuity_rebind_prior(self, diagnostics: DecisionDiagnostics) -> None:
         if self.continuity_rebind_ticks_remaining <= 0 or not self.restart_policy_anchors:
+            return
+        if not bool(self.restart_policy_anchors.get("policy_rebind_enabled", False)):
             return
         decay = self.continuity_rebind_ticks_remaining / max(1, self.continuity_rebind_total_ticks)
         preferred_distribution = self.restart_policy_anchors.get("preferred_policy_distribution")

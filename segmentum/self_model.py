@@ -1936,6 +1936,11 @@ class SelfModel:
         ]
         if restored_commitments:
             narrative = self.identity_narrative or IdentityNarrative()
+            existing_order = [
+                commitment.commitment_id
+                for commitment in narrative.commitments
+                if commitment.commitment_id
+            ]
             merged_commitments = {
                 commitment.commitment_id: IdentityCommitment.from_dict(commitment.to_dict())
                 for commitment in narrative.commitments
@@ -1948,10 +1953,17 @@ class SelfModel:
                     commitment.commitment_id,
                     IdentityCommitment.from_dict(commitment.to_dict()),
                 )
-            narrative.commitments = sorted(
-                merged_commitments.values(),
-                key=lambda commitment: (-float(commitment.priority), commitment.commitment_id),
+            missing_ids = sorted(
+                commitment_id
+                for commitment_id in merged_commitments
+                if commitment_id not in set(existing_order)
             )
+            ordered_ids = existing_order + missing_ids
+            narrative.commitments = [
+                merged_commitments[commitment_id]
+                for commitment_id in ordered_ids
+                if commitment_id in merged_commitments
+            ]
             self.identity_narrative = narrative
         commitment_snapshot = [
             str(item)
@@ -2337,6 +2349,23 @@ class SelfModel:
             narrative=narrative,
             policies=policies,
         )
+        previous_strategy_candidates: list[str] = []
+        if previous.trait_self_model:
+            previous_strategy_candidates.extend(
+                str(item)
+                for item in previous.trait_self_model.get("prior_dominant_strategies", [])
+                if str(item)
+            )
+            previous_dominant = str(previous.trait_self_model.get("dominant_strategy", ""))
+            if previous_dominant:
+                previous_strategy_candidates.append(previous_dominant)
+        previous_strategy_candidates = list(dict.fromkeys(previous_strategy_candidates))
+        current_strategy = str(narrative.trait_self_model.get("dominant_strategy", ""))
+        narrative.trait_self_model["prior_dominant_strategies"] = [
+            strategy
+            for strategy in previous_strategy_candidates
+            if strategy and strategy != current_strategy
+        ][-4:]
         narrative.chapter_transition_evidence = self._derive_chapter_transition_evidence(
             chapters=chapters,
             current_chapter=current_chapter,
@@ -2834,8 +2863,32 @@ class SelfModel:
             )
         latest = chapters[-1]
         parts.append(f"Currently in a {latest.dominant_theme} phase.")
+        prior_strategies = [
+            str(chapter.state_summary.get("dominant_strategy", ""))
+            for chapter in chapters[:-1]
+            if str(chapter.state_summary.get("dominant_strategy", ""))
+        ]
+        prior_strategies.extend(
+            str(item)
+            for item in narrative.trait_self_model.get("prior_dominant_strategies", [])
+            if str(item)
+        )
+        prior_strategies = list(dict.fromkeys(prior_strategies))
         if latest.state_summary.get("dominant_strategy"):
-            parts.append(f"My dominant strategy remains {latest.state_summary.get('dominant_strategy')}.")
+            latest_strategy = str(latest.state_summary.get("dominant_strategy"))
+            distinct_prior_strategies = [
+                strategy for strategy in prior_strategies if strategy != latest_strategy
+            ]
+            if not distinct_prior_strategies:
+                parts.append(f"My dominant strategy remains {latest_strategy}.")
+            else:
+                parts.append(f"My dominant strategy is now {latest_strategy}.")
+                if prior_strategies:
+                    parts.append(
+                        "I previously relied on "
+                        + ", ".join(distinct_prior_strategies[-2:])
+                        + "."
+                    )
         if latest.key_events and (
             "near-death" in latest.key_events[0]
             or latest.dominant_theme == "survival_crisis"

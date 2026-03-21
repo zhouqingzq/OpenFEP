@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.26",
   "schema_version": "m226_v1",
-  "generated_at": "2026-03-20T09:58:33+00:00",
+  "generated_at": "2026-03-20T13:33:25+00:00",
   "checks": [
     {
       "check_id": "cross_001_narrative_vs_transfer",
@@ -13,8 +13,8 @@
       "pass": true,
       "severity": "none",
       "evidence": {
-        "m221_score": 1.0,
-        "m225_score": 1.0,
+        "m221_score": 0.86,
+        "m225_score": 0.89,
         "spurious_transfer": false
       },
       "maturity_impact": "none"
@@ -74,8 +74,8 @@
       "pass": true,
       "severity": "none",
       "evidence": {
-        "m222_score": 1.0,
-        "m224_score": 1.0
+        "m222_score": 0.88,
+        "m224_score": 0.9
       },
       "maturity_impact": "none"
     }

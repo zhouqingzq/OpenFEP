@@ -1269,6 +1269,7 @@ def run_m222_protocol(
                     trace_path=trace_path,
                     seed=seed,
                     reset=False,
+                    enable_restart_rebind=True,
                 )
                 _apply_variant(runtime, variant)
                 post_restart_snapshot = runtime.agent.self_model.build_restart_anchors(
@@ -1314,17 +1315,33 @@ def run_m222_protocol(
             restart_payload=restart_payload,
         )
         trace_cycles = _cycle_records(records)
-        trace_excerpt = [
-            {
-                "cycle": int(record.get("cycle", 0)),
-                "choice": record.get("choice"),
-                "free_energy_after": _round(float(record.get("free_energy_after", 0.0))),
-                "alive": bool(record.get("alive", True)),
-                "body_state": dict(record.get("body_state", {})),
-                "homeostasis": dict(record.get("homeostasis", {})),
-            }
-            for record in trace_cycles[: min(48, len(trace_cycles))]
-        ]
+        excerpt_candidates: list[dict[str, object]] = []
+        excerpt_candidates.extend(trace_cycles[: min(24, len(trace_cycles))])
+        excerpt_candidates.extend(
+            record
+            for record in trace_cycles
+            if bool(dict(record.get("homeostasis", {})).get("agenda", {}).get("protected_mode"))
+        )
+        excerpt_candidates.extend(trace_cycles[-min(12, len(trace_cycles)):])
+        seen_cycles: set[int] = set()
+        trace_excerpt = []
+        for record in excerpt_candidates:
+            cycle = int(record.get("cycle", 0))
+            if cycle in seen_cycles:
+                continue
+            seen_cycles.add(cycle)
+            trace_excerpt.append(
+                {
+                    "cycle": cycle,
+                    "choice": record.get("choice"),
+                    "free_energy_after": _round(float(record.get("free_energy_after", 0.0))),
+                    "alive": bool(record.get("alive", True)),
+                    "body_state": dict(record.get("body_state", {})),
+                    "homeostasis": dict(record.get("homeostasis", {})),
+                }
+            )
+            if len(trace_excerpt) >= 48:
+                break
         return TrialResult(
             protocol_id=protocol.protocol_id,
             system_variant=system_variant,

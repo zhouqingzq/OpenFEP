@@ -1,11 +1,11 @@
 {
   "milestone_id": "M2.26",
   "schema_version": "m226_v1",
-  "generated_at": "2026-03-20T09:58:33+00:00",
+  "generated_at": "2026-03-20T13:33:25+00:00",
   "dimension_scores": [
     {
       "dimension": "narrative_grounding_robustness",
-      "score": 1.0,
+      "score": 0.86,
       "threshold": 0.8,
       "pass": true,
       "evidence_origin": "current_round_replay",
@@ -13,7 +13,7 @@
     },
     {
       "dimension": "long_horizon_autonomy",
-      "score": 1.0,
+      "score": 0.88,
       "threshold": 0.85,
       "pass": true,
       "evidence_origin": "current_round_replay",
@@ -21,7 +21,7 @@
     },
     {
       "dimension": "self_consistency_and_repair",
-      "score": 1.0,
+      "score": 0.87,
       "threshold": 0.8,
       "pass": true,
       "evidence_origin": "current_round_replay",
@@ -29,7 +29,7 @@
     },
     {
       "dimension": "functional_conscious_access",
-      "score": 1.0,
+      "score": 0.9,
       "threshold": 0.8,
       "pass": true,
       "evidence_origin": "current_round_replay",
@@ -37,7 +37,7 @@
     },
     {
       "dimension": "open_world_transfer",
-      "score": 1.0,
+      "score": 0.89,
       "threshold": 0.8,
       "pass": true,
       "evidence_origin": "current_round_replay",
@@ -45,7 +45,7 @@
     },
     {
       "dimension": "fault_tolerance_and_attribution",
-      "score": 1.0,
+      "score": 0.885,
       "threshold": 0.8,
       "pass": true,
       "evidence_origin": "current_round_replay",
@@ -69,5 +69,5 @@
     }
   ],
   "critical_dimension_pass_count": "5 / 5",
-  "weighted_total_score": 1.0
+  "weighted_total_score": 0.8985
 }
