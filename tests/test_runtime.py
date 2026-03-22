@@ -188,6 +188,16 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
             self.assertEqual(reloaded.agent.cycle, 5)
             self.assertGreaterEqual(len(reloaded.agent.long_term_memory.episodes), 3)
 
+    def test_sleep_does_not_compress_active_memory_below_recovery_floor(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=11, reset=True)
+
+        runtime.run(cycles=5, verbose=False)
+
+        self.assertGreaterEqual(
+            len(runtime.agent.long_term_memory.episodes),
+            runtime.agent.long_term_memory.minimum_active_episodes,
+        )
+
     def test_integrate_outcome_keeps_negative_free_energy_drop_for_memory(self) -> None:
         runtime = SegmentRuntime.load_or_create(seed=17, reset=True)
         runtime.agent.cycle = 1

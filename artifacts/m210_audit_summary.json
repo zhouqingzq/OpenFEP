@@ -7,7 +7,10 @@
       "caution_rate",
       "exploration_rate",
       "seek_contact_rate",
-      "action_entropy"
+      "action_entropy",
+      "survival_score",
+      "mean_conditioned_prediction_error",
+      "narrative_consistency_proxy"
     ],
     "effect_metrics": [
       "caution_rate",
@@ -22,11 +25,10 @@
   },
   "stability_acceptance": {
     "required_profiles": 5,
-    "profiles_passing": 4,
+    "profiles_passing": 3,
     "passed_profiles": [
       "neutral",
       "threat_sensitive",
-      "exploratory",
       "rigid_cautious"
     ],
     "passed": false
@@ -38,7 +40,8 @@
     "artifact_freshness": true
   },
   "failing_profiles": [
-    "social_approach"
+    "social_approach",
+    "exploratory"
   ],
   "stale_or_missing_inputs": [],
   "final_recommendation": {

@@ -1,6 +1,6 @@
 {
   "milestone_id": "Pre-M3",
-  "status": "PASS",
+  "status": "BLOCKED",
   "seed_set": [
     17,
     23,
@@ -50,13 +50,13 @@
         "name": "attention",
         "artifact": "artifacts/pre_m3_attention_summary.json",
         "passed": true,
-        "generated_at": "2026-03-20T13:11:00+00:00"
+        "generated_at": "2026-03-22T03:42:01+00:00"
       },
       {
         "name": "transfer",
         "artifact": "artifacts/pre_m3_transfer_summary.json",
-        "passed": true,
-        "generated_at": "2026-03-20T13:11:02+00:00",
+        "passed": false,
+        "generated_at": "2026-03-22T03:42:03+00:00",
         "seed_set": [
           42,
           43,
@@ -72,7 +72,7 @@
         "name": "personality",
         "artifact": "artifacts/pre_m3_personality_summary.json",
         "passed": true,
-        "generated_at": "2026-03-20T13:11:32+00:00"
+        "generated_at": "2026-03-22T03:43:01+00:00"
       }
     ],
     "historical_regressions": [
@@ -105,7 +105,7 @@
   "gates": {
     "attention_main_loop_established": true,
     "multi_environment_established": true,
-    "transfer_benchmark_established": true,
+    "transfer_benchmark_established": false,
     "transfer_seed_protocol_canonical": true,
     "personality_narrative_evidence_established": true,
     "long_run_soak_regression_passed": true,
@@ -158,41 +158,57 @@
     }
   },
   "codebase_provenance": {
-    "git_commit": "7de4f48e3f72bb9c39584352a25260f3edbe2241",
+    "git_commit": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
     "dirty_worktree": true,
     "binding_scope": "workspace_snapshot",
-    "workspace_fingerprint": "311d6de1905cc7d8df26298d374cdc342b496382391030dd2a86635577ba242d",
+    "workspace_fingerprint": "d2e7c7c36ef9875f42abf3e4faf689d0f3fffd72422ded8ab4037cd61928cded",
     "status_entries": [
-      " D reports/m225_pytest_execution_log.json",
-      " M artifacts/m226_blocking_reasons.json",
-      " M artifacts/m226_cross_milestone_consistency.json",
-      " M artifacts/m226_maturity_scorecard.json",
-      " M artifacts/m226_red_team_audit.json",
-      " M artifacts/m226_replay_freshness.json",
-      " M reports/m226_maturity_audit_report.json",
-      " M reports/m2_followup_metrics.json",
-      " M reports/m3_readiness_metrics.json",
-      " M reports/m3_readiness_repair_report.md"
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
+      " M reports/m210_strict_audit_report.md",
+      " M segmentum/__init__.py",
+      " M segmentum/agent.py",
+      " M segmentum/memory.py",
+      " M segmentum/runtime.py",
+      " M segmentum/subject_state.py",
+      " M segmentum/types.py",
+      " M segmentum/workspace.py",
+      " M tests/test_runtime.py",
+      "?? segmentum/prediction_ledger.py",
+      "?? tests/test_m228_ledger_causality.py",
+      "?? tests/test_m228_prediction_ledger.py",
+      "?? tests/test_m228_sleep_ledger_integration.py",
+      "?? tests/test_m228_snapshot_roundtrip.py"
     ],
-    "changed_path_count": 10,
+    "changed_path_count": 18,
     "changed_paths": [
-      "artifacts/m226_blocking_reasons.json",
-      "artifacts/m226_cross_milestone_consistency.json",
-      "artifacts/m226_maturity_scorecard.json",
-      "artifacts/m226_red_team_audit.json",
-      "artifacts/m226_replay_freshness.json",
-      "reports/m225_pytest_execution_log.json",
-      "reports/m226_maturity_audit_report.json",
-      "reports/m2_followup_metrics.json",
-      "reports/m3_readiness_metrics.json",
-      "reports/m3_readiness_repair_report.md"
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "reports/m210_strict_audit_report.md",
+      "segmentum/__init__.py",
+      "segmentum/agent.py",
+      "segmentum/memory.py",
+      "segmentum/prediction_ledger.py",
+      "segmentum/runtime.py",
+      "segmentum/subject_state.py",
+      "segmentum/types.py",
+      "segmentum/workspace.py",
+      "tests/test_m228_ledger_causality.py",
+      "tests/test_m228_prediction_ledger.py",
+      "tests/test_m228_sleep_ledger_integration.py",
+      "tests/test_m228_snapshot_roundtrip.py",
+      "tests/test_runtime.py"
     ],
     "reproducibility_scope": "strict_workspace_fingerprint"
   },
   "recommendation": {
-    "status": "READY_FOR_M3",
-    "passed": true,
-    "rationale": "All Pre-M3 gates are satisfied with current-round evidence.",
+    "status": "NOT_READY_FOR_M3",
+    "passed": false,
+    "rationale": "Pre-M3 evidence is incomplete for M3 admission; blocking findings remain open.",
     "blocking_gaps": []
   },
   "schema_version": "pre_m3_v1",
@@ -205,7 +221,7 @@
   "profile": null,
   "metrics": {
     "attention_passed": true,
-    "transfer_passed": true,
+    "transfer_passed": false,
     "personality_passed": true,
     "soak_passed": true,
     "snapshot_passed": true
@@ -291,38 +307,40 @@
         "telemetry_error_count": 0,
         "persistence_error_count": 0,
         "memory_hit_rate": 0.99609375,
-        "avg_free_energy_before": 0.37775109997217615,
-        "avg_free_energy_after": 0.42909955279190315,
-        "avg_free_energy_drop": 0.020397596568541614,
-        "min_energy": 0.8,
+        "avg_free_energy_before": 0.37328898037458985,
+        "avg_free_energy_after": 0.4290831518994532,
+        "avg_free_energy_drop": 0.02368586918777575,
+        "min_energy": 0.81,
         "max_stress": 0.10999999999999999,
         "action_counts": {
-          "append_workspace_note": 20,
-          "exploit_shelter": 157,
+          "append_workspace_note": 8,
+          "delete_workspace_note": 1,
+          "exploit_shelter": 162,
           "fetch_remote_status": 4,
           "hide": 3,
-          "rest": 21,
-          "scan": 4,
-          "seek_contact": 4,
-          "unstable_workspace_note": 29,
-          "write_workspace_note": 14
+          "rest": 25,
+          "scan": 3,
+          "seek_contact": 7,
+          "unstable_workspace_note": 34,
+          "write_workspace_note": 9
         },
         "action_distribution": {
-          "append_workspace_note": 0.078125,
-          "exploit_shelter": 0.61328125,
+          "append_workspace_note": 0.03125,
+          "delete_workspace_note": 0.00390625,
+          "exploit_shelter": 0.6328125,
           "fetch_remote_status": 0.015625,
           "hide": 0.01171875,
-          "rest": 0.08203125,
-          "scan": 0.015625,
-          "seek_contact": 0.015625,
-          "unstable_workspace_note": 0.11328125,
-          "write_workspace_note": 0.0546875
+          "rest": 0.09765625,
+          "scan": 0.01171875,
+          "seek_contact": 0.02734375,
+          "unstable_workspace_note": 0.1328125,
+          "write_workspace_note": 0.03515625
         },
-        "action_switch_count": 63,
-        "unique_actions": 9,
-        "action_entropy": 1.9575312866337649,
+        "action_switch_count": 65,
+        "unique_actions": 10,
+        "action_entropy": 1.8757170848207039,
         "dominant_action": "exploit_shelter",
-        "dominant_action_share": 0.61328125,
+        "dominant_action_share": 0.6328125,
         "max_action_streak": 17,
         "last_choice": "exploit_shelter",
         "termination_reason": "cycles_exhausted"
@@ -353,17 +371,17 @@
       "evidence_origin": "evals/m3_readiness_evaluation.py:runtime_lifecycle_probe",
       "revalidated_this_round": true,
       "lifecycle_activity_observed": true,
-      "compression_specifically_verified": true,
-      "compression_removed_count": 4,
-      "archived_count": 1,
-      "pruned_count": 4,
-      "compressed_cluster_count": 1,
+      "compression_specifically_verified": false,
+      "compression_removed_count": 0,
+      "archived_count": 0,
+      "pruned_count": 1,
+      "compressed_cluster_count": 0,
       "compressed_cluster_count_status": "REVALIDATED_THIS_ROUND",
       "probe_results": [
         {
           "scenario_label": "compression",
-          "compression_removed": 4,
-          "compressed_cluster_count": 1,
+          "compression_removed": 0,
+          "compressed_cluster_count": 0,
           "episodes_archived": 0,
           "episodes_deleted": 0
         },
@@ -372,13 +390,13 @@
           "compression_removed": 0,
           "compressed_cluster_count": 0,
           "episodes_archived": 0,
-          "episodes_deleted": 4
+          "episodes_deleted": 1
         },
         {
           "scenario_label": "archive_old_unexplained",
           "compression_removed": 0,
           "compressed_cluster_count": 0,
-          "episodes_archived": 1,
+          "episodes_archived": 0,
           "episodes_deleted": 0
         }
       ]
@@ -527,7 +545,7 @@
     "gate_results": {
       "attention_main_loop_established": true,
       "multi_environment_established": true,
-      "transfer_benchmark_established": true,
+      "transfer_benchmark_established": false,
       "transfer_seed_protocol_canonical": true,
       "personality_narrative_evidence_established": true,
       "long_run_soak_regression_passed": true,
@@ -537,11 +555,11 @@
     }
   },
   "acceptance": {
-    "passed": true,
+    "passed": false,
     "gate_results": {
       "attention_main_loop_established": true,
       "multi_environment_established": true,
-      "transfer_benchmark_established": true,
+      "transfer_benchmark_established": false,
       "transfer_seed_protocol_canonical": true,
       "personality_narrative_evidence_established": true,
       "long_run_soak_regression_passed": true,
@@ -550,10 +568,10 @@
       "runtime_family_coverage_revalidated": true
     }
   },
-  "generated_at": "2026-03-20T13:12:26+00:00",
-  "codebase_version": "7de4f48e3f72bb9c39584352a25260f3edbe2241",
+  "generated_at": "2026-03-22T03:44:00+00:00",
+  "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
   "final_recommendation": {
-    "status": "READY_FOR_M3",
-    "passed": true
+    "status": "NOT_READY_FOR_M3",
+    "passed": false
   }
 }

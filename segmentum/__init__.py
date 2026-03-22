@@ -14,6 +14,15 @@ from .homeostasis import HomeostasisScheduler, MaintenanceAgenda
 from .workspace import GlobalWorkspace, GlobalWorkspaceState, WorkspaceContent
 from .social_model import OtherModel, SocialMemory
 from .subject_state import SubjectState, ActiveTension, DominantNeed, SubjectBinding, SubjectPriority
+from .prediction_ledger import (
+    DiscrepancySource,
+    LedgerDiscrepancy,
+    LedgerPriority,
+    PredictionHypothesis,
+    PredictionLedger,
+    PredictionLedgerUpdate,
+    VerificationStatus,
+)
 from .governance import CapabilityDescriptor, GovernanceController, GovernanceState
 from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
@@ -77,6 +86,13 @@ __all__ = [
     "DominantNeed",
     "SubjectBinding",
     "SubjectPriority",
+    "PredictionLedger",
+    "PredictionHypothesis",
+    "LedgerDiscrepancy",
+    "PredictionLedgerUpdate",
+    "VerificationStatus",
+    "DiscrepancySource",
+    "LedgerPriority",
     "CapabilityDescriptor",
     "GovernanceController",
     "GovernanceState",

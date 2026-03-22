@@ -261,6 +261,7 @@ class GlobalWorkspace:
         prediction: Mapping[str, float],
         errors: Mapping[str, float],
         attention_trace: AttentionTrace | None,
+        ledger_focus: Mapping[str, float] | None = None,
     ) -> GlobalWorkspaceState | None:
         if not self.enabled:
             self.last_state = None
@@ -279,6 +280,12 @@ class GlobalWorkspace:
         else:
             salience_scores = dict(attention_trace.salience_scores)
             attended_channels = attention_trace.allocation.selected_channels
+        if ledger_focus:
+            for channel, value in ledger_focus.items():
+                salience_scores[str(channel)] = max(
+                    float(salience_scores.get(str(channel), 0.0)),
+                    float(value),
+                )
 
         latent_candidates = self._latent_candidates(
             observation=observation,
@@ -286,6 +293,28 @@ class GlobalWorkspace:
             errors=errors,
             salience_scores=salience_scores,
         )
+        if ledger_focus:
+            latent_candidates = tuple(
+                sorted(
+                    [
+                        *latent_candidates,
+                        *[
+                            self._build_content(
+                                channel=str(channel),
+                                salience=float(value),
+                                observation=observation,
+                                prediction=prediction,
+                                errors=errors,
+                                source="prediction_ledger",
+                                report_accessible=True,
+                            )
+                            for channel, value in ledger_focus.items()
+                            if str(channel) not in {content.channel for content in latent_candidates}
+                        ],
+                    ],
+                    key=lambda item: (-item.salience, item.channel),
+                )
+            )
         latent_index = {content.channel: content for content in latent_candidates}
         carry_over_candidates = self._carry_over_candidates(
             observation=observation,

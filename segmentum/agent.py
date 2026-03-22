@@ -32,6 +32,7 @@ from .preferences import Goal, GoalStack
 from .narrative_compiler import NarrativeCompiler
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
+from .prediction_ledger import PredictionLedger
 from .self_model import (
     CapabilityModel,
     NarrativePriors,
@@ -256,6 +257,7 @@ class PolicyEvaluator:
         social_bias: float,
         commitment_bias: float,
         identity_bias: float,
+        ledger_bias: float,
         subject_bias: float,
         goal_alignment: float,
     ) -> str:
@@ -269,6 +271,7 @@ class PolicyEvaluator:
             ("social_bias", abs(social_bias)),
             ("commitment_bias", abs(commitment_bias)),
             ("identity_bias", abs(identity_bias)),
+            ("ledger_bias", abs(ledger_bias)),
             ("subject_bias", abs(subject_bias)),
             ("goal_alignment", abs(goal_alignment)),
         ]
@@ -338,6 +341,11 @@ class PolicyEvaluator:
             reason = (
                 f"identity_bias ({chosen.identity_bias:.3f}) dominated, "
                 "which matches my learned preferences and autobiographical style."
+            )
+        elif chosen.dominant_component == "ledger_bias":
+            reason = (
+                f"ledger_bias ({chosen.ledger_bias:.3f}) dominated, "
+                "so unresolved predictions and discrepancy burdens constrained the policy."
             )
         elif chosen.dominant_component == "subject_bias":
             reason = (
@@ -438,6 +446,7 @@ class PolicyEvaluator:
             f"workspace_bias={chosen.workspace_bias:.3f}",
             f"social_bias={chosen.social_bias:.3f}",
             f"commitment_bias={chosen.commitment_bias:.3f}",
+            f"ledger_bias={chosen.ledger_bias:.3f}",
             f"subject_bias={chosen.subject_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
@@ -474,6 +483,9 @@ class PolicyEvaluator:
         subject_sentence = ""
         if diagnostics.subject_state_summary:
             subject_sentence = diagnostics.subject_state_summary + " "
+        ledger_sentence = ""
+        if diagnostics.ledger_summary:
+            ledger_sentence = diagnostics.ledger_summary + " "
         explanation_text = (
             f"I chose {chosen.choice}. "
             f"This action predicted outcome '{chosen.predicted_outcome}'. "
@@ -485,6 +497,7 @@ class PolicyEvaluator:
             f"{workspace_sentence}"
             f"{commitment_sentence}"
             f"{social_sentence}"
+            f"{ledger_sentence}"
             f"{subject_sentence}"
             f"{consistency_statement}{bias_sentence} "
             f"This aligns with my resource_conservatism="
@@ -521,6 +534,8 @@ class PolicyEvaluator:
             "social_focus": list(diagnostics.social_focus),
             "social_alerts": list(diagnostics.social_alerts),
             "social_snapshot": dict(diagnostics.social_snapshot),
+            "ledger_summary": diagnostics.ledger_summary,
+            "prediction_ledger": dict(diagnostics.ledger_payload),
             "subject_state_summary": diagnostics.subject_state_summary,
             "subject_status_flags": dict(diagnostics.subject_status_flags),
             "subject_priority_stack": list(diagnostics.subject_priority_stack),
@@ -627,6 +642,7 @@ class SegmentAgent:
         self.last_workspace_state: GlobalWorkspaceState | None = None
         self.social_memory = SocialMemory()
         self.identity_tension_history: list[dict[str, object]] = []
+        self.prediction_ledger = PredictionLedger()
         self.subject_state = SubjectState()
 
         self.base_metabolic_rate = 0.015
@@ -1144,6 +1160,7 @@ class SegmentAgent:
             "identity_tension": diagnostics.identity_tension,
             "social_focus": list(diagnostics.social_focus),
             "social_alerts": list(diagnostics.social_alerts),
+            "ledger_summary": diagnostics.ledger_summary,
             "subject_state_summary": diagnostics.subject_state_summary,
             "subject_status_flags": dict(diagnostics.subject_status_flags),
         }
@@ -1199,6 +1216,7 @@ class SegmentAgent:
             self.last_decision_diagnostics,
             action=action,
         )
+        details["prediction_ledger"] = self.prediction_ledger.explanation_payload()
         details["subject_state"] = self.subject_state.explanation_payload()
         return details
 
@@ -1860,12 +1878,17 @@ class SegmentAgent:
             if item.get("episode_id")
         ]
         current_cluster_id = self.long_term_memory.infer_cluster_id(current_state_snapshot)
+        ledger_verification = self.prediction_ledger.verify_predictions(
+            tick=self.cycle,
+            observation=observed,
+        )
         self.last_workspace_state = self.global_workspace.broadcast(
             tick=self.cycle,
             observation=observed,
             prediction=prediction,
             errors=errors,
             attention_trace=self.last_attention_trace,
+            ledger_focus=self.prediction_ledger.workspace_focus(),
         )
         self.subject_state = derive_subject_state(
             self,
@@ -1919,6 +1942,7 @@ class SegmentAgent:
                 predicted_outcome=predicted_effects,
                 cost=float(option["cost"]),
             )
+            ledger_bias = self.prediction_ledger.prediction_action_bias(action)
             subject_bias = subject_action_bias(self.subject_state, action)
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
@@ -1938,6 +1962,7 @@ class SegmentAgent:
                 + social_bias
                 + commitment_bias
                 + identity_bias
+                + ledger_bias
                 + subject_bias
                 + goal_alignment
                 - regression_penalty
@@ -1952,6 +1977,7 @@ class SegmentAgent:
                 social_bias=social_bias,
                 commitment_bias=commitment_bias,
                 identity_bias=identity_bias,
+                ledger_bias=ledger_bias,
                 subject_bias=subject_bias,
                 goal_alignment=goal_alignment,
             )
@@ -1977,6 +2003,7 @@ class SegmentAgent:
                     social_bias=social_bias,
                     commitment_bias=commitment_bias,
                     identity_bias=identity_bias,
+                    ledger_bias=ledger_bias,
                     subject_bias=subject_bias,
                     goal_alignment=goal_alignment,
                     value_score=float(option["value_score"]),
@@ -2198,12 +2225,27 @@ class SegmentAgent:
             social_focus=list(chosen_social["focus"]),
             social_alerts=list(chosen_social["alerts"]),
             social_snapshot=dict(chosen_social["snapshot"]),
+            ledger_summary="",
+            ledger_payload=ledger_verification.to_dict(),
         )
         self.subject_state = derive_subject_state(
             self,
             diagnostics=diagnostics,
             previous_state=self.subject_state,
         )
+        ledger_seed = self.prediction_ledger.seed_predictions(
+            tick=self.cycle,
+            diagnostics=diagnostics,
+            prediction=prediction,
+            subject_state=self.subject_state,
+        )
+        ledger_payload = self.prediction_ledger.explanation_payload()
+        diagnostics.ledger_summary = str(ledger_payload["summary"])
+        diagnostics.ledger_payload = {
+            **ledger_verification.to_dict(),
+            "seed_update": ledger_seed.to_dict(),
+            **ledger_payload,
+        }
         diagnostics.subject_state_summary = self.subject_state.summary_text()
         diagnostics.subject_status_flags = dict(self.subject_state.status_flags)
         diagnostics.subject_priority_stack = [
@@ -2322,6 +2364,7 @@ class SegmentAgent:
                 social_bias=0.0,
                 commitment_bias=0.0,
                 identity_bias=0.0,
+                ledger_bias=0.0,
                 subject_bias=0.0,
                 goal_alignment=0.0,
                 value_score=neutral_preference.value_score,
@@ -2364,6 +2407,8 @@ class SegmentAgent:
             social_focus=[],
             social_alerts=[],
             social_snapshot=self.social_memory.snapshot(),
+            ledger_summary=self.prediction_ledger.explanation_payload()["summary"],
+            ledger_payload=self.prediction_ledger.explanation_payload(),
             subject_state_summary=self.subject_state.summary_text(),
             subject_status_flags=dict(self.subject_state.status_flags),
             subject_priority_stack=[item.to_dict() for item in self.subject_state.subject_priority_stack[:4]],
@@ -2470,6 +2515,7 @@ class SegmentAgent:
             0.05,
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
+            + self.prediction_ledger.memory_threshold_delta(),
             + subject_memory_threshold_delta(self.subject_state),
         )
         try:
@@ -2489,7 +2535,15 @@ class SegmentAgent:
                 action_name(payload.get("action_taken", payload.get("action", "")))
                 for payload in self.long_term_memory.episodes[-1:]
             }
-            if action.name not in recent_episode_actions:
+            last_episode_cycle = 0.0
+            if self.long_term_memory.episodes:
+                last_episode_cycle = float(
+                    self.long_term_memory.episodes[-1].get(
+                        "cycle",
+                        self.long_term_memory.episodes[-1].get("timestamp", 0),
+                    )
+                )
+            if action.name not in recent_episode_actions or (self.cycle - last_episode_cycle) >= 2:
                 payload = self.long_term_memory.store_episode(
                     self.cycle,
                     observed,
@@ -2573,6 +2627,7 @@ class SegmentAgent:
             0.05,
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
+            + self.prediction_ledger.memory_threshold_delta(),
         )
         try:
             memory_decision = self.long_term_memory.maybe_store_episode(
@@ -3086,6 +3141,8 @@ class SegmentAgent:
                 continue
 
             if total_surprise < self.long_term_memory.surprise_threshold:
+                if len(self.long_term_memory.episodes) <= self.long_term_memory.minimum_active_episodes:
+                    continue
                 # Never delete identity-critical or protected episodes — they
                 # represent core learned dangers even when fully predicted.
                 lifecycle = str(payload.get("lifecycle_stage", ""))
@@ -3105,6 +3162,8 @@ class SegmentAgent:
 
             episode_age = self.cycle - int(payload.get("timestamp", payload.get("cycle", 0)))
             if episode_age > self.long_term_memory.max_active_age:
+                if len(self.long_term_memory.episodes) <= self.long_term_memory.minimum_active_episodes:
+                    continue
                 if self.long_term_memory.archive_episode(
                     payload,
                     archive_cycle=self.cycle,
@@ -3179,7 +3238,16 @@ class SegmentAgent:
                 0,
                 sleep_cycle_id=sleep_cycle_id,
             )
+            ledger_sleep = self.prediction_ledger.sleep_review(tick=self.cycle)
             self.sleep_history.append(summary)
+            self.narrative_trace.append(
+                {
+                    "sleep_cycle_id": sleep_cycle_id,
+                    "prediction_ledger_sleep": ledger_sleep,
+                    "rule_ids": [],
+                }
+            )
+            self.narrative_trace = self.narrative_trace[-128:]
             return summary
 
         replay_batch = self.long_term_memory.replay_during_sleep(rng=self.rng)
@@ -3353,16 +3421,18 @@ class SegmentAgent:
             counterfactual_energy_spent=cf_summary.energy_spent,
             counterfactual_log=cf_summary.counterfactual_log,
         )
+        ledger_sleep = self.prediction_ledger.sleep_review(tick=self.cycle)
         self.sleep_history.append(summary)
+        self.narrative_trace.append(
+            {
+                "sleep_cycle_id": sleep_cycle_id,
+                "prediction_ledger_sleep": ledger_sleep,
+                "rule_ids": [rule.rule_id for rule in consolidation.rules],
+            }
+        )
+        self.narrative_trace = self.narrative_trace[-128:]
         if narrative_prior_updates:
-            self.narrative_trace.append(
-                {
-                    "sleep_cycle_id": sleep_cycle_id,
-                    "narrative_prior_updates": narrative_prior_updates,
-                    "rule_ids": [rule.rule_id for rule in consolidation.rules],
-                }
-            )
-            self.narrative_trace = self.narrative_trace[-128:]
+            self.narrative_trace[-1]["narrative_prior_updates"] = narrative_prior_updates
         self._refresh_self_model_continuity(summary, weight_adjustments=conflict_adjustments)
         self._sync_self_model_body_schema()
         # Keep only last 3 episodes in working memory
@@ -3423,6 +3493,7 @@ class SegmentAgent:
             ),
             "social_memory": self.social_memory.to_dict(),
             "identity_tension_history": list(self.identity_tension_history),
+            "prediction_ledger": self.prediction_ledger.to_dict(),
             "subject_state": self.subject_state.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
@@ -3529,6 +3600,11 @@ class SegmentAgent:
         agent.social_memory = SocialMemory.from_dict(
             payload.get("social_memory")
             if isinstance(payload.get("social_memory"), dict)
+            else None
+        )
+        agent.prediction_ledger = PredictionLedger.from_dict(
+            payload.get("prediction_ledger")
+            if isinstance(payload.get("prediction_ledger"), dict)
             else None
         )
         agent.subject_state = SubjectState.from_dict(

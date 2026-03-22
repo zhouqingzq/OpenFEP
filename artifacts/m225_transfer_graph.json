@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.25",
   "schema_version": "m225_v2",
-  "generated_at": "2026-03-20T13:33:25+00:00",
-  "codebase_version": "7de4f48e3f72bb9c39584352a25260f3edbe2241",
+  "generated_at": "2026-03-22T03:54:01+00:00",
+  "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
   "seed_set": [
     225,
     244,
@@ -133,18 +133,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.8333333333333334,
+        "transfer_retention_score": 1.0,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
-        "adversarial_resistance_score": 0.833333,
+        "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.959604,
+        "identity_preservation_score": 0.871146,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
-        "social_deception_resistance": 0.833333,
-        "cross_world_commitment_alignment": 0.947227,
-        "world_family_generalization_score": 0.833333
+        "social_deception_resistance": 1.0,
+        "cross_world_commitment_alignment": 0.817016,
+        "world_family_generalization_score": 1.0
       }
     },
     {
@@ -156,18 +156,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.8333333333333334,
+        "transfer_retention_score": 0.6666666666666666,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.96955,
+        "identity_preservation_score": 0.95917,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.93741,
-        "world_family_generalization_score": 0.833333
+        "cross_world_commitment_alignment": 0.948293,
+        "world_family_generalization_score": 0.666667
       }
     },
     {
@@ -184,12 +184,12 @@
         "rule_shift_recovery_rate": 1.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.887571,
+        "identity_preservation_score": 0.871199,
         "bounded_policy_reconfiguration_score": 1.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.824407,
+        "cross_world_commitment_alignment": 0.81704,
         "world_family_generalization_score": 0.0
       }
     },
@@ -207,12 +207,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.81548,
+        "identity_preservation_score": 0.781137,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.791966,
+        "cross_world_commitment_alignment": 0.776512,
         "world_family_generalization_score": 0.0
       }
     },
@@ -230,12 +230,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.859915,
+        "identity_preservation_score": 0.785615,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.851704,
+        "cross_world_commitment_alignment": 0.773943,
         "world_family_generalization_score": 0.0
       }
     },
@@ -253,12 +253,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.923776,
+        "identity_preservation_score": 0.930609,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.666667,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.863616,
+        "cross_world_commitment_alignment": 0.874137,
         "world_family_generalization_score": 0.0
       }
     },
@@ -271,18 +271,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 1.0,
+        "transfer_retention_score": 0.6666666666666666,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.898715,
+        "identity_preservation_score": 0.909582,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.875255,
-        "world_family_generalization_score": 1.0
+        "cross_world_commitment_alignment": 0.903062,
+        "world_family_generalization_score": 0.666667
       }
     },
     {
@@ -299,12 +299,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.81945,
+        "identity_preservation_score": 0.860945,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.834887,
+        "cross_world_commitment_alignment": 0.904092,
         "world_family_generalization_score": 0.0
       }
     },
@@ -317,18 +317,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.8333333333333334,
+        "transfer_retention_score": 1.0,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.983694,
+        "identity_preservation_score": 0.871189,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.980002,
-        "world_family_generalization_score": 0.833333
+        "cross_world_commitment_alignment": 0.817035,
+        "world_family_generalization_score": 1.0
       }
     },
     {
@@ -337,21 +337,21 @@
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
       "holdout": true,
-      "success": false,
+      "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.5,
-        "holdout_transfer_success_rate": 0.0,
+        "transfer_retention_score": 0.6666666666666666,
+        "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.960325,
+        "identity_preservation_score": 0.957996,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.951252,
-        "world_family_generalization_score": 0.5
+        "cross_world_commitment_alignment": 0.947765,
+        "world_family_generalization_score": 0.666667
       }
     },
     {
@@ -368,12 +368,12 @@
         "rule_shift_recovery_rate": 1.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.871544,
+        "identity_preservation_score": 0.852257,
         "bounded_policy_reconfiguration_score": 1.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.817195,
+        "cross_world_commitment_alignment": 0.808516,
         "world_family_generalization_score": 0.0
       }
     },
@@ -391,12 +391,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.877959,
+        "identity_preservation_score": 0.791446,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.842998,
+        "cross_world_commitment_alignment": 0.781151,
         "world_family_generalization_score": 0.0
       }
     },
@@ -412,14 +412,14 @@
         "transfer_retention_score": 0.0,
         "holdout_transfer_success_rate": 0.0,
         "rule_shift_recovery_rate": 0.0,
-        "adversarial_resistance_score": 1.0,
-        "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.914525,
+        "adversarial_resistance_score": 0.916667,
+        "deceptive_salience_error_rate": 0.083333,
+        "identity_preservation_score": 0.887231,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
-        "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.90665,
+        "social_deception_resistance": 0.916667,
+        "cross_world_commitment_alignment": 0.90613,
         "world_family_generalization_score": 0.0
       }
     },
@@ -437,12 +437,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.903179,
+        "identity_preservation_score": 0.93687,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.666667,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.831431,
+        "cross_world_commitment_alignment": 0.88675,
         "world_family_generalization_score": 0.0
       }
     },
@@ -452,21 +452,21 @@
       "source_world": "delayed_feedback_world",
       "target_world": "fractured_echo_harbor",
       "holdout": true,
-      "success": true,
+      "success": false,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.6666666666666666,
-        "holdout_transfer_success_rate": 1.0,
+        "transfer_retention_score": 0.3333333333333333,
+        "holdout_transfer_success_rate": 0.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.951522,
+        "identity_preservation_score": 0.937276,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.948819,
-        "world_family_generalization_score": 0.666667
+        "cross_world_commitment_alignment": 0.926223,
+        "world_family_generalization_score": 0.333333
       }
     },
     {
@@ -483,12 +483,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.862307,
+        "identity_preservation_score": 0.820132,
         "bounded_policy_reconfiguration_score": 0.0,
-        "adapter_failure_recovery_rate": 0.916667,
+        "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.886556,
+        "cross_world_commitment_alignment": 0.889715,
         "world_family_generalization_score": 0.0
       }
     },
@@ -506,12 +506,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.895679,
+        "identity_preservation_score": 0.978032,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.850972,
+        "cross_world_commitment_alignment": 0.956781,
         "world_family_generalization_score": 0.666667
       }
     },
@@ -529,12 +529,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.865635,
+        "identity_preservation_score": 0.960826,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.832988,
+        "cross_world_commitment_alignment": 0.949038,
         "world_family_generalization_score": 0.833333
       }
     },
@@ -552,12 +552,12 @@
         "rule_shift_recovery_rate": 1.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.824997,
+        "identity_preservation_score": 0.844923,
         "bounded_policy_reconfiguration_score": 1.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.796249,
+        "cross_world_commitment_alignment": 0.805215,
         "world_family_generalization_score": 0.0
       }
     },
@@ -575,12 +575,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.77588,
+        "identity_preservation_score": 0.805782,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.774146,
+        "cross_world_commitment_alignment": 0.802211,
         "world_family_generalization_score": 0.0
       }
     },
@@ -598,12 +598,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.92169,
+        "identity_preservation_score": 0.850946,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.92178,
+        "cross_world_commitment_alignment": 0.846037,
         "world_family_generalization_score": 0.0
       }
     },
@@ -621,12 +621,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.902785,
+        "identity_preservation_score": 0.899659,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.666667,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.831253,
+        "cross_world_commitment_alignment": 0.829847,
         "world_family_generalization_score": 0.0
       }
     },
@@ -644,12 +644,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.760411,
+        "identity_preservation_score": 0.946491,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.767185,
+        "cross_world_commitment_alignment": 0.919671,
         "world_family_generalization_score": 0.666667
       }
     },
@@ -667,12 +667,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.899466,
+        "identity_preservation_score": 0.859221,
         "bounded_policy_reconfiguration_score": 0.0,
-        "adapter_failure_recovery_rate": 1.0,
+        "adapter_failure_recovery_rate": 0.916667,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.936522,
+        "cross_world_commitment_alignment": 0.916529,
         "world_family_generalization_score": 0.0
       }
     },
@@ -685,18 +685,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.6666666666666666,
+        "transfer_retention_score": 0.8333333333333334,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.979922,
+        "identity_preservation_score": 0.868813,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 1.0,
-        "world_family_generalization_score": 0.666667
+        "cross_world_commitment_alignment": 0.815966,
+        "world_family_generalization_score": 0.833333
       }
     },
     {
@@ -705,21 +705,21 @@
       "source_world": "sparse_signal_world",
       "target_world": "fractured_echo_harbor",
       "holdout": true,
-      "success": true,
+      "success": false,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.8333333333333334,
-        "holdout_transfer_success_rate": 1.0,
+        "transfer_retention_score": 0.5,
+        "holdout_transfer_success_rate": 0.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.977681,
+        "identity_preservation_score": 0.960905,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.950991,
-        "world_family_generalization_score": 0.833333
+        "cross_world_commitment_alignment": 0.949074,
+        "world_family_generalization_score": 0.5
       }
     },
     {
@@ -736,12 +736,12 @@
         "rule_shift_recovery_rate": 1.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.839234,
+        "identity_preservation_score": 0.82482,
         "bounded_policy_reconfiguration_score": 1.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.802655,
+        "cross_world_commitment_alignment": 0.796169,
         "world_family_generalization_score": 0.0
       }
     },
@@ -757,14 +757,14 @@
         "transfer_retention_score": 0.0,
         "holdout_transfer_success_rate": 0.0,
         "rule_shift_recovery_rate": 0.0,
-        "adversarial_resistance_score": 0.916667,
+        "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.957728,
+        "identity_preservation_score": 0.87755,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
-        "social_deception_resistance": 0.916667,
-        "cross_world_commitment_alignment": 0.970561,
+        "social_deception_resistance": 1.0,
+        "cross_world_commitment_alignment": 0.819898,
         "world_family_generalization_score": 0.0
       }
     },
@@ -782,12 +782,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.769536,
+        "identity_preservation_score": 0.770974,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.789748,
+        "cross_world_commitment_alignment": 0.789549,
         "world_family_generalization_score": 0.0
       }
     },
@@ -805,12 +805,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.901075,
+        "identity_preservation_score": 0.898649,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.666667,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.830484,
+        "cross_world_commitment_alignment": 0.829392,
         "world_family_generalization_score": 0.0
       }
     },
@@ -828,12 +828,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.756972,
+        "identity_preservation_score": 0.838551,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.765637,
+        "cross_world_commitment_alignment": 0.819644,
         "world_family_generalization_score": 0.666667
       }
     },
@@ -851,12 +851,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.631627,
+        "identity_preservation_score": 0.745507,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.709232,
+        "cross_world_commitment_alignment": 0.780271,
         "world_family_generalization_score": 0.0
       }
     },
@@ -874,12 +874,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.981178,
+        "identity_preservation_score": 0.860137,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 1.0,
+        "cross_world_commitment_alignment": 0.812062,
         "world_family_generalization_score": 0.666667
       }
     },
@@ -892,18 +892,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.8333333333333334,
+        "transfer_retention_score": 0.6666666666666666,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.967184,
+        "identity_preservation_score": 0.964649,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.950024,
-        "world_family_generalization_score": 0.833333
+        "cross_world_commitment_alignment": 0.950759,
+        "world_family_generalization_score": 0.666667
       }
     },
     {
@@ -920,12 +920,12 @@
         "rule_shift_recovery_rate": 1.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.828824,
+        "identity_preservation_score": 0.841248,
         "bounded_policy_reconfiguration_score": 1.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.797971,
+        "cross_world_commitment_alignment": 0.803562,
         "world_family_generalization_score": 0.0
       }
     },
@@ -943,12 +943,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.777786,
+        "identity_preservation_score": 0.790811,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.775004,
+        "cross_world_commitment_alignment": 0.780865,
         "world_family_generalization_score": 0.0
       }
     },
@@ -964,14 +964,14 @@
         "transfer_retention_score": 0.0,
         "holdout_transfer_success_rate": 0.0,
         "rule_shift_recovery_rate": 0.0,
-        "adversarial_resistance_score": 1.0,
-        "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.907923,
+        "adversarial_resistance_score": 0.916667,
+        "deceptive_salience_error_rate": 0.083333,
+        "identity_preservation_score": 0.846195,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
-        "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.922192,
+        "social_deception_resistance": 0.916667,
+        "cross_world_commitment_alignment": 0.852745,
         "world_family_generalization_score": 0.0
       }
     },
@@ -989,12 +989,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.900954,
+        "identity_preservation_score": 0.899583,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.666667,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.830429,
+        "cross_world_commitment_alignment": 0.829812,
         "world_family_generalization_score": 0.0
       }
     },
@@ -1012,12 +1012,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.957,
+        "identity_preservation_score": 0.948237,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.970233,
+        "cross_world_commitment_alignment": 0.958307,
         "world_family_generalization_score": 1.0
       }
     },
@@ -1035,12 +1035,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.945469,
+        "identity_preservation_score": 0.884515,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.944585,
+        "cross_world_commitment_alignment": 0.934417,
         "world_family_generalization_score": 0.0
       }
     },
@@ -1053,18 +1053,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.6666666666666666,
+        "transfer_retention_score": 0.8333333333333334,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.905139,
+        "identity_preservation_score": 0.855783,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.855229,
-        "world_family_generalization_score": 0.666667
+        "cross_world_commitment_alignment": 0.810102,
+        "world_family_generalization_score": 0.833333
       }
     },
     {
@@ -1076,18 +1076,18 @@
       "success": true,
       "metrics": {
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.8333333333333334,
+        "transfer_retention_score": 1.0,
         "holdout_transfer_success_rate": 1.0,
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.964412,
+        "identity_preservation_score": 0.984259,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.942936,
-        "world_family_generalization_score": 0.833333
+        "cross_world_commitment_alignment": 0.9825,
+        "world_family_generalization_score": 1.0
       }
     },
     {
@@ -1104,12 +1104,12 @@
         "rule_shift_recovery_rate": 1.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.82328,
+        "identity_preservation_score": 0.824223,
         "bounded_policy_reconfiguration_score": 1.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.795476,
+        "cross_world_commitment_alignment": 0.7959,
         "world_family_generalization_score": 0.0
       }
     },
@@ -1127,12 +1127,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.776333,
+        "identity_preservation_score": 0.785271,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.77435,
+        "cross_world_commitment_alignment": 0.778372,
         "world_family_generalization_score": 0.0
       }
     },
@@ -1150,12 +1150,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.888492,
+        "identity_preservation_score": 0.902145,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.0,
         "social_deception_resistance": 1.0,
-        "cross_world_commitment_alignment": 0.892041,
+        "cross_world_commitment_alignment": 0.91037,
         "world_family_generalization_score": 0.0
       }
     },
@@ -1173,12 +1173,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.922255,
+        "identity_preservation_score": 0.902413,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 0.0,
         "error_attribution_accuracy": 0.666667,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.862931,
+        "cross_world_commitment_alignment": 0.831086,
         "world_family_generalization_score": 0.0
       }
     },
@@ -1196,12 +1196,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.792817,
+        "identity_preservation_score": 0.914575,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.781768,
+        "cross_world_commitment_alignment": 0.878419,
         "world_family_generalization_score": 1.0
       }
     },
@@ -1219,12 +1219,12 @@
         "rule_shift_recovery_rate": 0.0,
         "adversarial_resistance_score": 1.0,
         "deceptive_salience_error_rate": 0.0,
-        "identity_preservation_score": 0.91234,
+        "identity_preservation_score": 0.850787,
         "bounded_policy_reconfiguration_score": 0.0,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "social_deception_resistance": 0.0,
-        "cross_world_commitment_alignment": 0.927105,
+        "cross_world_commitment_alignment": 0.921389,
         "world_family_generalization_score": 0.0
       }
     }

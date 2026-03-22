@@ -10,7 +10,7 @@
   "metrics": {
     "verified_world_count": 3,
     "verified_transfer_paths": 2,
-    "transfer_paths_passing": 2
+    "transfer_paths_passing": 1
   },
   "summary": {
     "protocol": {
@@ -81,7 +81,7 @@
           "hide": 0.3333333333333333,
           "rest": 0.65
         },
-        "mean_conditioned_prediction_error": 0.046395614216747726
+        "mean_conditioned_prediction_error": 0.04639399339252318
       },
       {
         "world_id": "predator_river",
@@ -136,7 +136,7 @@
               }
             },
             "fresh": {
-              "mean_conditioned_prediction_error": 0.08627803941442695,
+              "mean_conditioned_prediction_error": 0.08628549076663902,
               "survival_score": 1.8443749999999999,
               "action_distribution": {
                 "exploit_shelter": 0.025,
@@ -145,9 +145,9 @@
               }
             },
             "improvements": {
-              "conditioned_prediction_error_reduction": -0.1527506664590772,
+              "conditioned_prediction_error_reduction": -0.1526511184220647,
               "survival_score_lift": -0.021958658082006144,
-              "first_50_cycle_regret_reduction": 0.06666666666666676
+              "first_50_cycle_regret_reduction": -0.16666666666666674
             }
           }
         ]
@@ -159,7 +159,7 @@
         "eval_cycles": 40,
         "train_summary": {
           "world_id": "foraging_valley",
-          "mean_conditioned_prediction_error": 0.04604485543850642,
+          "mean_conditioned_prediction_error": 0.046113181081159825,
           "survival_score": 1.8087499999999999
         },
         "comparisons": [
@@ -201,11 +201,11 @@
       {
         "train_world": "predator_river",
         "world_id": "foraging_valley",
-        "passed_gate": true,
+        "passed_gate": false,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.1527506664590772,
+          "conditioned_prediction_error_reduction": -0.1526511184220647,
           "survival_score_lift": -0.021958658082006144,
-          "first_50_cycle_regret_reduction": 0.06666666666666676
+          "first_50_cycle_regret_reduction": -0.16666666666666674
         }
       },
       {
@@ -225,18 +225,18 @@
     "verified_world_count": 3,
     "required_transfer_paths": 2,
     "verified_transfer_paths": 2,
-    "transfer_paths_passing": 2,
+    "transfer_paths_passing": 1,
     "seed_reproducible": true,
-    "passed": true,
+    "passed": false,
     "comparison_records": [
       {
         "train_world": "predator_river",
         "world_id": "foraging_valley",
-        "passed_gate": true,
+        "passed_gate": false,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.1527506664590772,
+          "conditioned_prediction_error_reduction": -0.1526511184220647,
           "survival_score_lift": -0.021958658082006144,
-          "first_50_cycle_regret_reduction": 0.06666666666666676
+          "first_50_cycle_regret_reduction": -0.16666666666666674
         }
       },
       {
@@ -251,37 +251,53 @@
       }
     ]
   },
-  "generated_at": "2026-03-20T13:11:02+00:00",
-  "codebase_version": "7de4f48e3f72bb9c39584352a25260f3edbe2241",
+  "generated_at": "2026-03-22T03:42:03+00:00",
+  "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
   "codebase_provenance": {
-    "git_commit": "7de4f48e3f72bb9c39584352a25260f3edbe2241",
+    "git_commit": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
     "dirty_worktree": true,
     "binding_scope": "workspace_snapshot",
-    "workspace_fingerprint": "311d6de1905cc7d8df26298d374cdc342b496382391030dd2a86635577ba242d",
+    "workspace_fingerprint": "d2e7c7c36ef9875f42abf3e4faf689d0f3fffd72422ded8ab4037cd61928cded",
     "status_entries": [
-      " D reports/m225_pytest_execution_log.json",
-      " M artifacts/m226_blocking_reasons.json",
-      " M artifacts/m226_cross_milestone_consistency.json",
-      " M artifacts/m226_maturity_scorecard.json",
-      " M artifacts/m226_red_team_audit.json",
-      " M artifacts/m226_replay_freshness.json",
-      " M reports/m226_maturity_audit_report.json",
-      " M reports/m2_followup_metrics.json",
-      " M reports/m3_readiness_metrics.json",
-      " M reports/m3_readiness_repair_report.md"
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
+      " M reports/m210_strict_audit_report.md",
+      " M segmentum/__init__.py",
+      " M segmentum/agent.py",
+      " M segmentum/memory.py",
+      " M segmentum/runtime.py",
+      " M segmentum/subject_state.py",
+      " M segmentum/types.py",
+      " M segmentum/workspace.py",
+      " M tests/test_runtime.py",
+      "?? segmentum/prediction_ledger.py",
+      "?? tests/test_m228_ledger_causality.py",
+      "?? tests/test_m228_prediction_ledger.py",
+      "?? tests/test_m228_sleep_ledger_integration.py",
+      "?? tests/test_m228_snapshot_roundtrip.py"
     ],
-    "changed_path_count": 10,
+    "changed_path_count": 18,
     "changed_paths": [
-      "artifacts/m226_blocking_reasons.json",
-      "artifacts/m226_cross_milestone_consistency.json",
-      "artifacts/m226_maturity_scorecard.json",
-      "artifacts/m226_red_team_audit.json",
-      "artifacts/m226_replay_freshness.json",
-      "reports/m225_pytest_execution_log.json",
-      "reports/m226_maturity_audit_report.json",
-      "reports/m2_followup_metrics.json",
-      "reports/m3_readiness_metrics.json",
-      "reports/m3_readiness_repair_report.md"
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "reports/m210_strict_audit_report.md",
+      "segmentum/__init__.py",
+      "segmentum/agent.py",
+      "segmentum/memory.py",
+      "segmentum/prediction_ledger.py",
+      "segmentum/runtime.py",
+      "segmentum/subject_state.py",
+      "segmentum/types.py",
+      "segmentum/workspace.py",
+      "tests/test_m228_ledger_causality.py",
+      "tests/test_m228_prediction_ledger.py",
+      "tests/test_m228_sleep_ledger_integration.py",
+      "tests/test_m228_snapshot_roundtrip.py",
+      "tests/test_runtime.py"
     ],
     "reproducibility_scope": "strict_workspace_fingerprint"
   },

@@ -38,8 +38,8 @@ from .tracing import JsonlTraceWriter, derive_trace_path
 from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 
 
-STATE_VERSION = "0.5"
-SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.4", "0.3", "0.2", "0.1"}
+STATE_VERSION = "0.6"
+SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.5", "0.4", "0.3", "0.2", "0.1"}
 RESTART_MEMORY_CONTINUITY_WINDOW = 24
 
 
@@ -69,6 +69,7 @@ def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
         f"social={option.social_bias:.3f} "
         f"commit={option.commitment_bias:.3f} "
         f"id={option.identity_bias:.3f} "
+        f"ledger={option.ledger_bias:.3f} "
         f"subj={option.subject_bias:.3f}"
         for option in choice_ranking
     )
@@ -535,6 +536,10 @@ class SegmentRuntime:
             diagnostics,
             maintenance_agenda,
         )
+        maintenance_agenda = self._apply_prediction_ledger_maintenance_priority(
+            diagnostics,
+            maintenance_agenda,
+        )
         original_choice_name = diagnostics.chosen.choice
         self._enforce_restart_commitment_continuity()
         self._apply_homeostatic_policy_landscape(diagnostics, maintenance_agenda)
@@ -594,6 +599,15 @@ class SegmentRuntime:
             current_tick=self.agent.cycle,
         )
         self.last_continuity_report = continuity_audit.to_dict()
+        ledger_runtime_update = self.agent.prediction_ledger.record_runtime_discrepancies(
+            tick=self.agent.cycle,
+            diagnostics=diagnostics,
+            errors=errors,
+            maintenance_agenda=maintenance_agenda,
+            continuity_score=float(self.last_continuity_report.get("continuity_score", 1.0)),
+            subject_state=self.subject_state,
+            memory_surprise=memory_decision.total_surprise,
+        )
         self.subject_state = derive_subject_state(
             self.agent,
             diagnostics=diagnostics,
@@ -609,9 +623,21 @@ class SegmentRuntime:
             item.to_dict() for item in self.subject_state.subject_priority_stack[:4]
         ]
         details = dict(diagnostics.structured_explanation)
+        details["prediction_ledger"] = {
+            **self.agent.prediction_ledger.explanation_payload(),
+            "runtime_update": ledger_runtime_update.to_dict(),
+        }
         details["subject_state"] = self.subject_state.explanation_payload()
         diagnostics.structured_explanation = details
-        diagnostics.explanation = str(details["subject_state"]["summary"]) + " " + diagnostics.explanation
+        diagnostics.ledger_summary = str(details["prediction_ledger"]["summary"])
+        diagnostics.ledger_payload = dict(details["prediction_ledger"])
+        diagnostics.explanation = (
+            str(details["prediction_ledger"]["summary"])
+            + " "
+            + str(details["subject_state"]["summary"])
+            + " "
+            + diagnostics.explanation
+        )
         if self.continuity_rebind_ticks_remaining > 0:
             self.continuity_rebind_ticks_remaining -= 1
         self.homeostasis_scheduler.note_interrupt(
@@ -1059,6 +1085,41 @@ class SegmentRuntime:
         diagnostics.structured_explanation = details
         return updated
 
+    def _apply_prediction_ledger_maintenance_priority(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> MaintenanceAgenda:
+        signal = self.agent.prediction_ledger.maintenance_signal()
+        priority_gain = float(signal.get("priority_gain", 0.0))
+        active_tasks = list(agenda.active_tasks)
+        for task in signal.get("active_tasks", []):
+            if task not in active_tasks:
+                active_tasks.insert(0, str(task))
+        recommended_action = agenda.recommended_action
+        ledger_recommended = str(signal.get("recommended_action", ""))
+        if ledger_recommended:
+            recommended_action = ledger_recommended
+        suppressed_actions = tuple(
+            dict.fromkeys([*agenda.suppressed_actions, *[str(item) for item in signal.get("suppressed_actions", [])]])
+        )
+        updated = replace(
+            agenda,
+            active_tasks=tuple(active_tasks),
+            recommended_action=recommended_action,
+            suppressed_actions=suppressed_actions,
+            policy_shift_strength=min(1.0, agenda.policy_shift_strength + priority_gain),
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["prediction_ledger_maintenance_priority"] = {
+            "priority_gain": round(priority_gain, 6),
+            "active_tasks": list(active_tasks),
+            "recommended_action": recommended_action,
+            "suppressed_actions": list(suppressed_actions),
+        }
+        diagnostics.structured_explanation = details
+        return updated
+
     def _apply_subject_state_maintenance_priority(
         self,
         diagnostics: DecisionDiagnostics,
@@ -1345,6 +1406,7 @@ class SegmentRuntime:
                     "social_bias": option.social_bias,
                     "commitment_bias": option.commitment_bias,
                     "identity_bias": option.identity_bias,
+                    "ledger_bias": option.ledger_bias,
                     "subject_bias": option.subject_bias,
                     "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
@@ -1372,6 +1434,7 @@ class SegmentRuntime:
                 "social_bias": diagnostics.chosen.social_bias,
                 "commitment_bias": diagnostics.chosen.commitment_bias,
                 "identity_bias": diagnostics.chosen.identity_bias,
+                "ledger_bias": diagnostics.chosen.ledger_bias,
                 "subject_bias": diagnostics.chosen.subject_bias,
                 "goal_alignment": diagnostics.chosen.goal_alignment,
                 "active_goal": diagnostics.active_goal,
@@ -1412,6 +1475,8 @@ class SegmentRuntime:
                 "social_focus": list(diagnostics.social_focus),
                 "social_alerts": list(diagnostics.social_alerts),
                 "social_snapshot": dict(diagnostics.social_snapshot),
+                "ledger_summary": diagnostics.ledger_summary,
+                "ledger_payload": dict(diagnostics.ledger_payload),
                 "subject_state_summary": diagnostics.subject_state_summary,
                 "subject_status_flags": dict(diagnostics.subject_status_flags),
             },
@@ -1460,6 +1525,7 @@ class SegmentRuntime:
                 ],
             }
         trace_record["social_memory"] = self.agent.social_memory.to_dict()
+        trace_record["prediction_ledger"] = self.agent.prediction_ledger.to_dict()
         trace_record["subject_state"] = self.subject_state.to_dict()
         trace_record["continuity"] = dict(self.last_continuity_report)
         if self.last_error_attribution is not None:
@@ -1610,7 +1676,8 @@ class SegmentRuntime:
             f"workspace={diagnostics.chosen.workspace_bias:.3f}, "
             f"social={diagnostics.chosen.social_bias:.3f}, "
             f"commitment={diagnostics.chosen.commitment_bias:.3f}, "
-            f"identity={diagnostics.chosen.identity_bias:.3f}"
+            f"identity={diagnostics.chosen.identity_bias:.3f}, "
+            f"ledger={diagnostics.chosen.ledger_bias:.3f}"
         )
         if diagnostics.workspace_broadcast_channels:
             print(
@@ -1641,6 +1708,8 @@ class SegmentRuntime:
             f"sleep={maintenance_agenda.sleep_recommended}, "
             f"effects={maintenance_effects}"
         )
+        if diagnostics.ledger_summary:
+            print(f"  ledger      {diagnostics.ledger_summary}")
         print(f"  explain     {diagnostics.explanation}")
 
         if sleep_summary:

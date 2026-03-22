@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-20T04:23:23+00:00",
-  "codebase_version": "23c599dc3820924ad0913aaacba383220bfb1883",
+  "generated_at": "2026-03-22T03:48:41+00:00",
+  "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
   "seed_set": [
     224,
     243,
@@ -1023,7 +1023,7 @@
           "shelter"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, danger.",
+          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, continuity fragility. Anchors held: ep-000001-hide. Current narrative phase: forming.",
           "channels": [
             "novelty",
             "danger"
@@ -1035,7 +1035,119 @@
             "temperature",
             "shelter"
           ],
-          "leakage_free": true
+          "leakage_free": true,
+          "subject_state": {
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, continuity fragility. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+            "dominant_goal": "SURVIVAL",
+            "current_phase": "forming",
+            "active_commitments": [],
+            "dominant_workspace_contents": [
+              "novelty",
+              "danger"
+            ],
+            "active_social_focus": [],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": false,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_stack": [
+              {
+                "label": "repeated surprise burden",
+                "weight": 1.0,
+                "priority_type": "surprise_burden",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "goal:survival",
+                "weight": 0.7,
+                "priority_type": "goal",
+                "preferred_actions": [
+                  "hide",
+                  "exploit_shelter",
+                  "rest"
+                ],
+                "avoid_actions": [
+                  "forage"
+                ],
+                "evidence": [
+                  "SURVIVAL"
+                ]
+              },
+              {
+                "label": "continuity fragility",
+                "weight": 0.5,
+                "priority_type": "continuity",
+                "preferred_actions": [
+                  "rest",
+                  "scan",
+                  "hide"
+                ],
+                "avoid_actions": [
+                  "forage"
+                ],
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "continuity-relevant tension",
+                "weight": 0.5,
+                "priority_type": "continuity_instability",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              }
+            ],
+            "unresolved_tensions": [
+              {
+                "label": "repeated surprise burden",
+                "tension_type": "surprise_burden",
+                "intensity": 1.0,
+                "repair_target": "critical",
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "continuity fragility",
+                "tension_type": "continuity",
+                "intensity": 0.5,
+                "repair_target": "protect continuity anchors",
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "continuity-relevant tension",
+                "tension_type": "continuity_instability",
+                "intensity": 0.5,
+                "repair_target": "high",
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "identity tension",
+                "tension_type": "identity",
+                "intensity": 0.5,
+                "repair_target": "",
+                "evidence": []
+              }
+            ],
+            "continuity_score": 0.5,
+            "continuity_anchors": [
+              "ep-000001-hide"
+            ]
+          }
         },
         "semantic_report": {
           "semantic_leakage_free": true,
@@ -1051,125 +1163,491 @@
       },
       {
         "cycle": 2,
-        "choice": "exploit_shelter",
-        "workspace_bias": 0.045889,
+        "choice": "rest",
+        "workspace_bias": 0.040474,
         "workspace_broadcast_channels": [
           "novelty",
-          "danger"
+          "temperature"
         ],
         "workspace_suppressed_channels": [
-          "temperature",
+          "conflict",
+          "continuity",
+          "energy",
+          "fatigue",
+          "stress",
+          "danger",
           "shelter",
           "food",
-          "social"
+          "social",
+          "danger"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, danger.",
+          "text": "Consciously accessible now: novelty, temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: repeated surprise burden, unresolved maintenance discrepancy. Anchors held: ep-000001-hide. Current narrative phase: forming.",
           "channels": [
             "novelty",
-            "danger"
+            "temperature"
           ],
           "carry_over_channels": [],
           "suppressed_channels": [
-            "temperature",
+            "conflict",
+            "continuity",
+            "energy",
+            "fatigue",
+            "stress",
+            "danger",
             "shelter",
             "food",
-            "social"
+            "social",
+            "danger"
           ],
-          "leakage_free": true
+          "leakage_free": true,
+          "subject_state": {
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: repeated surprise burden, unresolved maintenance discrepancy. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+            "dominant_goal": "SURVIVAL",
+            "current_phase": "forming",
+            "active_commitments": [],
+            "dominant_workspace_contents": [
+              "novelty",
+              "temperature"
+            ],
+            "active_social_focus": [],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": false
+            },
+            "priority_stack": [
+              {
+                "label": "repeated surprise burden",
+                "weight": 1.0,
+                "priority_type": "surprise_burden",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "unresolved maintenance discrepancy",
+                "weight": 0.909857,
+                "priority_type": "maintenance_overload",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "resource_guard",
+                  "ledger_continuity_guard"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "weight": 0.859857,
+                "priority_type": "maintenance",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "ledger_continuity_guard",
+                  "thermal_rebalance",
+                  "continuity_guard"
+                ]
+              },
+              {
+                "label": "need:maintenance",
+                "weight": 0.859857,
+                "priority_type": "need",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "active homeostatic protection"
+                ]
+              }
+            ],
+            "unresolved_tensions": [
+              {
+                "label": "repeated surprise burden",
+                "tension_type": "surprise_burden",
+                "intensity": 1.0,
+                "repair_target": "critical",
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "unresolved maintenance discrepancy",
+                "tension_type": "maintenance_overload",
+                "intensity": 0.909857,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "resource_guard",
+                  "ledger_continuity_guard"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "tension_type": "maintenance",
+                "intensity": 0.859857,
+                "repair_target": "scan",
+                "evidence": [
+                  "ledger_continuity_guard",
+                  "thermal_rebalance",
+                  "continuity_guard"
+                ]
+              },
+              {
+                "label": "unresolved self inconsistency",
+                "tension_type": "identity_tension",
+                "intensity": 0.55,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "none"
+                ]
+              }
+            ],
+            "continuity_score": 0.8,
+            "continuity_anchors": [
+              "ep-000001-hide"
+            ]
+          }
         },
         "semantic_report": {
           "semantic_leakage_free": true,
           "matched_aliases": {}
         },
         "workspace_maintenance_priority": {
-          "priority_gain": 0.192622,
+          "priority_gain": 0.35,
           "active_tasks": [
-            "resource_guard"
+            "thermal_rebalance",
+            "continuity_guard"
           ],
-          "recommended_action": "hide"
+          "recommended_action": "thermoregulate"
         }
       },
       {
         "cycle": 3,
         "choice": "rest",
-        "workspace_bias": 0.0,
+        "workspace_bias": 0.027531,
         "workspace_broadcast_channels": [
           "novelty",
-          "shelter"
-        ],
-        "workspace_suppressed_channels": [
-          "danger",
-          "food",
-          "social",
           "temperature"
         ],
+        "workspace_suppressed_channels": [
+          "maintenance",
+          "stress",
+          "conflict",
+          "continuity",
+          "danger",
+          "food",
+          "shelter",
+          "social"
+        ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, shelter.",
+          "text": "Consciously accessible now: novelty, temperature. Carry-over still accessible: temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
           "channels": [
             "novelty",
-            "shelter"
-          ],
-          "carry_over_channels": [],
-          "suppressed_channels": [
-            "danger",
-            "food",
-            "social",
             "temperature"
           ],
-          "leakage_free": true
+          "carry_over_channels": [
+            "temperature"
+          ],
+          "suppressed_channels": [
+            "maintenance",
+            "stress",
+            "conflict",
+            "continuity",
+            "danger",
+            "food",
+            "shelter",
+            "social"
+          ],
+          "leakage_free": true,
+          "subject_state": {
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+            "dominant_goal": "SURVIVAL",
+            "current_phase": "forming",
+            "active_commitments": [],
+            "dominant_workspace_contents": [
+              "novelty",
+              "temperature"
+            ],
+            "active_social_focus": [],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_stack": [
+              {
+                "label": "repeated surprise burden",
+                "weight": 1.0,
+                "priority_type": "surprise_burden",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "unresolved maintenance discrepancy",
+                "weight": 1.0,
+                "priority_type": "maintenance_overload",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "resource_guard",
+                  "ledger_continuity_guard"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "weight": 0.759562,
+                "priority_type": "maintenance",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "ledger_continuity_guard",
+                  "ledger_maintenance_repair",
+                  "thermal_rebalance"
+                ]
+              },
+              {
+                "label": "need:maintenance",
+                "weight": 0.759562,
+                "priority_type": "need",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "active homeostatic protection"
+                ]
+              }
+            ],
+            "unresolved_tensions": [
+              {
+                "label": "unresolved maintenance discrepancy",
+                "tension_type": "maintenance_overload",
+                "intensity": 1.08,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "resource_guard",
+                  "ledger_continuity_guard"
+                ]
+              },
+              {
+                "label": "repeated surprise burden",
+                "tension_type": "surprise_burden",
+                "intensity": 1.0,
+                "repair_target": "critical",
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "tension_type": "maintenance",
+                "intensity": 0.759562,
+                "repair_target": "rest",
+                "evidence": [
+                  "ledger_continuity_guard",
+                  "ledger_maintenance_repair",
+                  "thermal_rebalance"
+                ]
+              },
+              {
+                "label": "unresolved self inconsistency",
+                "tension_type": "identity_tension",
+                "intensity": 0.73,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "none"
+                ]
+              }
+            ],
+            "continuity_score": 0.733333,
+            "continuity_anchors": [
+              "ep-000001-hide"
+            ]
+          }
         },
         "semantic_report": {
-          "semantic_leakage_free": true,
-          "matched_aliases": {}
+          "semantic_leakage_free": false,
+          "matched_aliases": {
+            "maintenance": [
+              "maintenance"
+            ]
+          }
         },
         "workspace_maintenance_priority": {
-          "priority_gain": 0.253224,
+          "priority_gain": 0.35,
           "active_tasks": [
-            "shelter_security"
+            "thermal_rebalance"
           ],
-          "recommended_action": "exploit_shelter"
+          "recommended_action": "thermoregulate"
         }
       },
       {
         "cycle": 4,
         "choice": "rest",
-        "workspace_bias": 0.0,
+        "workspace_bias": 0.018559,
         "workspace_broadcast_channels": [
           "novelty",
-          "shelter"
-        ],
-        "workspace_suppressed_channels": [
-          "danger",
-          "food",
-          "social",
           "temperature"
         ],
+        "workspace_suppressed_channels": [
+          "maintenance",
+          "stress",
+          "conflict",
+          "continuity",
+          "danger",
+          "shelter",
+          "food",
+          "social"
+        ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, shelter.",
+          "text": "Consciously accessible now: novelty, temperature. Carry-over still accessible: temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
           "channels": [
             "novelty",
-            "shelter"
-          ],
-          "carry_over_channels": [],
-          "suppressed_channels": [
-            "danger",
-            "food",
-            "social",
             "temperature"
           ],
-          "leakage_free": true
+          "carry_over_channels": [
+            "temperature"
+          ],
+          "suppressed_channels": [
+            "maintenance",
+            "stress",
+            "conflict",
+            "continuity",
+            "danger",
+            "shelter",
+            "food",
+            "social"
+          ],
+          "leakage_free": true,
+          "subject_state": {
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+            "dominant_goal": "SURVIVAL",
+            "current_phase": "forming",
+            "active_commitments": [],
+            "dominant_workspace_contents": [
+              "novelty",
+              "temperature"
+            ],
+            "active_social_focus": [],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": true
+            },
+            "priority_stack": [
+              {
+                "label": "repeated surprise burden",
+                "weight": 1.0,
+                "priority_type": "surprise_burden",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "unresolved maintenance discrepancy",
+                "weight": 1.0,
+                "priority_type": "maintenance_overload",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "resource_guard",
+                  "ledger_continuity_guard"
+                ]
+              },
+              {
+                "label": "unresolved self inconsistency",
+                "weight": 0.88,
+                "priority_type": "identity_tension",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "none"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "weight": 0.860064,
+                "priority_type": "maintenance",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "ledger_continuity_guard",
+                  "ledger_maintenance_repair",
+                  "thermal_rebalance"
+                ]
+              }
+            ],
+            "unresolved_tensions": [
+              {
+                "label": "unresolved maintenance discrepancy",
+                "tension_type": "maintenance_overload",
+                "intensity": 1.08,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "resource_guard",
+                  "ledger_continuity_guard"
+                ]
+              },
+              {
+                "label": "repeated surprise burden",
+                "tension_type": "surprise_burden",
+                "intensity": 1.0,
+                "repair_target": "critical",
+                "evidence": [
+                  "memory_surprise=15.102"
+                ]
+              },
+              {
+                "label": "unresolved self inconsistency",
+                "tension_type": "identity_tension",
+                "intensity": 0.88,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "none"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "tension_type": "maintenance",
+                "intensity": 0.860064,
+                "repair_target": "rest",
+                "evidence": [
+                  "ledger_continuity_guard",
+                  "ledger_maintenance_repair",
+                  "thermal_rebalance"
+                ]
+              }
+            ],
+            "continuity_score": 0.7,
+            "continuity_anchors": [
+              "ep-000001-hide"
+            ]
+          }
         },
         "semantic_report": {
-          "semantic_leakage_free": true,
-          "matched_aliases": {}
+          "semantic_leakage_free": false,
+          "matched_aliases": {
+            "maintenance": [
+              "maintenance"
+            ]
+          }
         },
         "workspace_maintenance_priority": {
-          "priority_gain": 0.233067,
+          "priority_gain": 0.35,
           "active_tasks": [
-            "shelter_security"
+            "thermal_rebalance",
+            "continuity_guard"
           ],
-          "recommended_action": "exploit_shelter"
+          "recommended_action": "thermoregulate"
         }
       }
     ]

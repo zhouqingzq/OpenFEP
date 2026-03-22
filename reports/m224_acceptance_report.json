@@ -1,10 +1,10 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "status": "PASS",
-  "recommendation": "ACCEPT",
-  "generated_at": "2026-03-20T04:23:23+00:00",
-  "codebase_version": "23c599dc3820924ad0913aaacba383220bfb1883",
+  "status": "FAIL",
+  "recommendation": "REJECT",
+  "generated_at": "2026-03-22T03:48:41+00:00",
+  "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
   "seed_set": [
     224,
     243,
@@ -599,13 +599,13 @@
     "open_world_probe": {
       "seed": 243,
       "cycles": 4,
-      "passed": true,
+      "passed": false,
       "checks": {
         "workspace_trace_present": true,
         "workspace_bias_observed": true,
         "workspace_absent_when_disabled": true,
         "maintenance_priority_delta_present": true,
-        "semantic_report_leakage_free": true
+        "semantic_report_leakage_free": false
       }
     },
     "full_workspace": {
@@ -647,7 +647,7 @@
         "telemetry_backoff_recommended": false
       },
       "conscious_report": {
-        "text": "Consciously accessible now: social, danger.",
+        "text": "Consciously accessible now: social, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
         "channels": [
           "social",
           "danger"
@@ -659,7 +659,116 @@
           "shelter",
           "temperature"
         ],
-        "leakage_free": true
+        "leakage_free": true,
+        "subject_state": {
+          "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
+          "dominant_goal": "SURVIVAL",
+          "current_phase": "forming",
+          "active_commitments": [],
+          "dominant_workspace_contents": [
+            "social",
+            "danger"
+          ],
+          "active_social_focus": [],
+          "status_flags": {
+            "threatened": false,
+            "repairing": false,
+            "overloaded": false,
+            "socially_destabilized": false,
+            "continuity_fragile": false
+          },
+          "priority_stack": [
+            {
+              "label": "goal:survival",
+              "weight": 0.7,
+              "priority_type": "goal",
+              "preferred_actions": [
+                "hide",
+                "exploit_shelter",
+                "rest"
+              ],
+              "avoid_actions": [
+                "forage"
+              ],
+              "evidence": [
+                "SURVIVAL"
+              ]
+            },
+            {
+              "label": "continuity fragility",
+              "weight": 0.5,
+              "priority_type": "continuity",
+              "preferred_actions": [
+                "rest",
+                "scan",
+                "hide"
+              ],
+              "avoid_actions": [
+                "forage"
+              ],
+              "evidence": [
+                "continuity_score_drop"
+              ]
+            },
+            {
+              "label": "continuity-relevant tension",
+              "weight": 0.5,
+              "priority_type": "continuity_instability",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": [
+                "continuity_score_drop"
+              ]
+            },
+            {
+              "label": "identity tension",
+              "weight": 0.5,
+              "priority_type": "identity",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": []
+            }
+          ],
+          "unresolved_tensions": [
+            {
+              "label": "continuity fragility",
+              "tension_type": "continuity",
+              "intensity": 0.5,
+              "repair_target": "protect continuity anchors",
+              "evidence": [
+                "continuity_score_drop"
+              ]
+            },
+            {
+              "label": "continuity-relevant tension",
+              "tension_type": "continuity_instability",
+              "intensity": 0.5,
+              "repair_target": "high",
+              "evidence": [
+                "continuity_score_drop"
+              ]
+            },
+            {
+              "label": "identity tension",
+              "tension_type": "identity",
+              "intensity": 0.5,
+              "repair_target": "",
+              "evidence": []
+            },
+            {
+              "label": "self inconsistency",
+              "tension_type": "continuity",
+              "intensity": 0.5,
+              "repair_target": "",
+              "evidence": [
+                "none",
+                "none"
+              ]
+            }
+          ],
+          "continuity_score": 0.5,
+          "continuity_anchors": []
+        }
       },
       "semantic_report": {
         "semantic_leakage_free": true,
@@ -3686,13 +3795,13 @@
       "open_world_probe": {
         "seed": 243,
         "cycles": 4,
-        "passed": true,
+        "passed": false,
         "checks": {
           "workspace_trace_present": true,
           "workspace_bias_observed": true,
           "workspace_absent_when_disabled": true,
           "maintenance_priority_delta_present": true,
-          "semantic_report_leakage_free": true
+          "semantic_report_leakage_free": false
         }
       },
       "full_workspace": {
@@ -3734,7 +3843,7 @@
           "telemetry_backoff_recommended": false
         },
         "conscious_report": {
-          "text": "Consciously accessible now: social, danger.",
+          "text": "Consciously accessible now: social, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
           "channels": [
             "social",
             "danger"
@@ -3746,7 +3855,116 @@
             "shelter",
             "temperature"
           ],
-          "leakage_free": true
+          "leakage_free": true,
+          "subject_state": {
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
+            "dominant_goal": "SURVIVAL",
+            "current_phase": "forming",
+            "active_commitments": [],
+            "dominant_workspace_contents": [
+              "social",
+              "danger"
+            ],
+            "active_social_focus": [],
+            "status_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": false,
+              "socially_destabilized": false,
+              "continuity_fragile": false
+            },
+            "priority_stack": [
+              {
+                "label": "goal:survival",
+                "weight": 0.7,
+                "priority_type": "goal",
+                "preferred_actions": [
+                  "hide",
+                  "exploit_shelter",
+                  "rest"
+                ],
+                "avoid_actions": [
+                  "forage"
+                ],
+                "evidence": [
+                  "SURVIVAL"
+                ]
+              },
+              {
+                "label": "continuity fragility",
+                "weight": 0.5,
+                "priority_type": "continuity",
+                "preferred_actions": [
+                  "rest",
+                  "scan",
+                  "hide"
+                ],
+                "avoid_actions": [
+                  "forage"
+                ],
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "continuity-relevant tension",
+                "weight": 0.5,
+                "priority_type": "continuity_instability",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "identity tension",
+                "weight": 0.5,
+                "priority_type": "identity",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": []
+              }
+            ],
+            "unresolved_tensions": [
+              {
+                "label": "continuity fragility",
+                "tension_type": "continuity",
+                "intensity": 0.5,
+                "repair_target": "protect continuity anchors",
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "continuity-relevant tension",
+                "tension_type": "continuity_instability",
+                "intensity": 0.5,
+                "repair_target": "high",
+                "evidence": [
+                  "continuity_score_drop"
+                ]
+              },
+              {
+                "label": "identity tension",
+                "tension_type": "identity",
+                "intensity": 0.5,
+                "repair_target": "",
+                "evidence": []
+              },
+              {
+                "label": "self inconsistency",
+                "tension_type": "continuity",
+                "intensity": 0.5,
+                "repair_target": "",
+                "evidence": [
+                  "none",
+                  "none"
+                ]
+              }
+            ],
+            "continuity_score": 0.5,
+            "continuity_anchors": []
+          }
         },
         "semantic_report": {
           "semantic_leakage_free": true,
@@ -5489,8 +5707,8 @@
     "low_salience_intrusion_rate": true,
     "significant_metric_count": true,
     "effect_metric_count": true,
-    "runtime_integration": true,
-    "semantic_report_leakage": true,
+    "runtime_integration": false,
+    "semantic_report_leakage": false,
     "artifact_schema_complete": true,
     "freshness_generated_this_round": true,
     "determinism": true
@@ -5507,7 +5725,7 @@
     "broadcast_to_action_latency": 0.0,
     "broadcast_to_memory_alignment": 1.0,
     "runtime_integration_passed": true,
-    "open_world_runtime_passed": true
+    "open_world_runtime_passed": false
   },
   "artifacts": {
     "workspace_causality": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
@@ -5524,8 +5742,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m224_v2",
-    "generated_at": "2026-03-20T04:23:23+00:00",
-    "codebase_version": "23c599dc3820924ad0913aaacba383220bfb1883",
+    "generated_at": "2026-03-22T03:48:41+00:00",
+    "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
     "seed_set": [
       224,
       243,
@@ -5537,32 +5755,32 @@
     "artifacts": {
       "workspace_causality": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
-        "modified_at": "2026-03-20T04:23:23+00:00",
+        "modified_at": "2026-03-22T03:48:41+00:00",
         "matches_round_metadata": true
       },
       "report_leakage": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
-        "modified_at": "2026-03-20T04:23:23+00:00",
+        "modified_at": "2026-03-22T03:48:41+00:00",
         "matches_round_metadata": true
       },
       "capacity_pressure": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
-        "modified_at": "2026-03-20T04:23:23+00:00",
+        "modified_at": "2026-03-22T03:48:41+00:00",
         "matches_round_metadata": true
       },
       "persistence_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
-        "modified_at": "2026-03-20T04:23:23+00:00",
+        "modified_at": "2026-03-22T03:48:41+00:00",
         "matches_round_metadata": true
       },
       "downstream_alignment": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json",
-        "modified_at": "2026-03-20T04:23:23+00:00",
+        "modified_at": "2026-03-22T03:48:41+00:00",
         "matches_round_metadata": true
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m224_acceptance_report.json",
-        "modified_at": "2026-03-20T04:23:23+00:00",
+        "modified_at": "2026-03-22T03:48:41+00:00",
         "matches_round_metadata": true
       }
     }
@@ -6142,7 +6360,7 @@
         "broadcast_to_action_latency": 0.0,
         "broadcast_to_memory_alignment": 1.0,
         "runtime_integration_passed": true,
-        "open_world_runtime_passed": true
+        "open_world_runtime_passed": false
       },
       "integration_breakdown": {
         "seed": 224,
@@ -6158,13 +6376,13 @@
         "open_world_probe": {
           "seed": 243,
           "cycles": 4,
-          "passed": true,
+          "passed": false,
           "checks": {
             "workspace_trace_present": true,
             "workspace_bias_observed": true,
             "workspace_absent_when_disabled": true,
             "maintenance_priority_delta_present": true,
-            "semantic_report_leakage_free": true
+            "semantic_report_leakage_free": false
           }
         },
         "full_workspace": {
@@ -6206,7 +6424,7 @@
             "telemetry_backoff_recommended": false
           },
           "conscious_report": {
-            "text": "Consciously accessible now: social, danger.",
+            "text": "Consciously accessible now: social, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
             "channels": [
               "social",
               "danger"
@@ -6218,7 +6436,116 @@
               "shelter",
               "temperature"
             ],
-            "leakage_free": true
+            "leakage_free": true,
+            "subject_state": {
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
+              "dominant_goal": "SURVIVAL",
+              "current_phase": "forming",
+              "active_commitments": [],
+              "dominant_workspace_contents": [
+                "social",
+                "danger"
+              ],
+              "active_social_focus": [],
+              "status_flags": {
+                "threatened": false,
+                "repairing": false,
+                "overloaded": false,
+                "socially_destabilized": false,
+                "continuity_fragile": false
+              },
+              "priority_stack": [
+                {
+                  "label": "goal:survival",
+                  "weight": 0.7,
+                  "priority_type": "goal",
+                  "preferred_actions": [
+                    "hide",
+                    "exploit_shelter",
+                    "rest"
+                  ],
+                  "avoid_actions": [
+                    "forage"
+                  ],
+                  "evidence": [
+                    "SURVIVAL"
+                  ]
+                },
+                {
+                  "label": "continuity fragility",
+                  "weight": 0.5,
+                  "priority_type": "continuity",
+                  "preferred_actions": [
+                    "rest",
+                    "scan",
+                    "hide"
+                  ],
+                  "avoid_actions": [
+                    "forage"
+                  ],
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "continuity-relevant tension",
+                  "weight": 0.5,
+                  "priority_type": "continuity_instability",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "identity tension",
+                  "weight": 0.5,
+                  "priority_type": "identity",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": []
+                }
+              ],
+              "unresolved_tensions": [
+                {
+                  "label": "continuity fragility",
+                  "tension_type": "continuity",
+                  "intensity": 0.5,
+                  "repair_target": "protect continuity anchors",
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "continuity-relevant tension",
+                  "tension_type": "continuity_instability",
+                  "intensity": 0.5,
+                  "repair_target": "high",
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "identity tension",
+                  "tension_type": "identity",
+                  "intensity": 0.5,
+                  "repair_target": "",
+                  "evidence": []
+                },
+                {
+                  "label": "self inconsistency",
+                  "tension_type": "continuity",
+                  "intensity": 0.5,
+                  "repair_target": "",
+                  "evidence": [
+                    "none",
+                    "none"
+                  ]
+                }
+              ],
+              "continuity_score": 0.5,
+              "continuity_anchors": []
+            }
           },
           "semantic_report": {
             "semantic_leakage_free": true,
@@ -6814,7 +7141,7 @@
         "broadcast_to_action_latency": 0.0,
         "broadcast_to_memory_alignment": 1.0,
         "runtime_integration_passed": true,
-        "open_world_runtime_passed": true
+        "open_world_runtime_passed": false
       },
       "integration_breakdown": {
         "seed": 224,
@@ -6830,13 +7157,13 @@
         "open_world_probe": {
           "seed": 243,
           "cycles": 4,
-          "passed": true,
+          "passed": false,
           "checks": {
             "workspace_trace_present": true,
             "workspace_bias_observed": true,
             "workspace_absent_when_disabled": true,
             "maintenance_priority_delta_present": true,
-            "semantic_report_leakage_free": true
+            "semantic_report_leakage_free": false
           }
         },
         "full_workspace": {
@@ -6878,7 +7205,7 @@
             "telemetry_backoff_recommended": false
           },
           "conscious_report": {
-            "text": "Consciously accessible now: social, danger.",
+            "text": "Consciously accessible now: social, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
             "channels": [
               "social",
               "danger"
@@ -6890,7 +7217,116 @@
               "shelter",
               "temperature"
             ],
-            "leakage_free": true
+            "leakage_free": true,
+            "subject_state": {
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, continuity fragility. Unresolved tensions: continuity fragility, continuity-relevant tension. Current narrative phase: forming.",
+              "dominant_goal": "SURVIVAL",
+              "current_phase": "forming",
+              "active_commitments": [],
+              "dominant_workspace_contents": [
+                "social",
+                "danger"
+              ],
+              "active_social_focus": [],
+              "status_flags": {
+                "threatened": false,
+                "repairing": false,
+                "overloaded": false,
+                "socially_destabilized": false,
+                "continuity_fragile": false
+              },
+              "priority_stack": [
+                {
+                  "label": "goal:survival",
+                  "weight": 0.7,
+                  "priority_type": "goal",
+                  "preferred_actions": [
+                    "hide",
+                    "exploit_shelter",
+                    "rest"
+                  ],
+                  "avoid_actions": [
+                    "forage"
+                  ],
+                  "evidence": [
+                    "SURVIVAL"
+                  ]
+                },
+                {
+                  "label": "continuity fragility",
+                  "weight": 0.5,
+                  "priority_type": "continuity",
+                  "preferred_actions": [
+                    "rest",
+                    "scan",
+                    "hide"
+                  ],
+                  "avoid_actions": [
+                    "forage"
+                  ],
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "continuity-relevant tension",
+                  "weight": 0.5,
+                  "priority_type": "continuity_instability",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "identity tension",
+                  "weight": 0.5,
+                  "priority_type": "identity",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": []
+                }
+              ],
+              "unresolved_tensions": [
+                {
+                  "label": "continuity fragility",
+                  "tension_type": "continuity",
+                  "intensity": 0.5,
+                  "repair_target": "protect continuity anchors",
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "continuity-relevant tension",
+                  "tension_type": "continuity_instability",
+                  "intensity": 0.5,
+                  "repair_target": "high",
+                  "evidence": [
+                    "continuity_score_drop"
+                  ]
+                },
+                {
+                  "label": "identity tension",
+                  "tension_type": "identity",
+                  "intensity": 0.5,
+                  "repair_target": "",
+                  "evidence": []
+                },
+                {
+                  "label": "self inconsistency",
+                  "tension_type": "continuity",
+                  "intensity": 0.5,
+                  "repair_target": "",
+                  "evidence": [
+                    "none",
+                    "none"
+                  ]
+                }
+              ],
+              "continuity_score": 0.5,
+              "continuity_anchors": []
+            }
           },
           "semantic_report": {
             "semantic_leakage_free": true,

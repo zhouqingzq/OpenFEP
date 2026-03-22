@@ -381,6 +381,7 @@ def _tensions(
     continuity_score: float,
 ) -> list[ActiveTension]:
     tensions: list[ActiveTension] = []
+    prediction_ledger = getattr(agent, "prediction_ledger", None)
     if diagnostics is not None and diagnostics.identity_tension > 0.05:
         tensions.append(
             ActiveTension(
@@ -433,6 +434,17 @@ def _tensions(
                     intensity=0.45,
                     repair_target="stabilize social bindings",
                     evidence=(alert,),
+                )
+            )
+    if prediction_ledger is not None:
+        for discrepancy in prediction_ledger.top_discrepancies(limit=3):
+            tensions.append(
+                ActiveTension(
+                    label=discrepancy.label,
+                    tension_type=discrepancy.discrepancy_type,
+                    intensity=discrepancy.severity + (0.08 if discrepancy.chronic else 0.0),
+                    repair_target=discrepancy.linked_goal or discrepancy.priority,
+                    evidence=tuple(discrepancy.supporting_evidence[:2]),
                 )
             )
     tensions.sort(key=lambda item: (-item.intensity, item.label))

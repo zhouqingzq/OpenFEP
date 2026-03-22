@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-19T07:53:18+00:00",
+  "generated_at": "2026-03-22T03:44:32+00:00",
   "seed_set": [
     221,
     240,
@@ -114,8 +114,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.962502,
-            "std": 0.0030768391789843938
+            "mean": 0.9597163333333334,
+            "std": 0.002311690699226202
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -155,12 +155,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8259996666666667,
-            "std": 0.007337859285165473
+            "mean": 0.8146206666666667,
+            "std": 0.008090642571651655
           },
           "action_metric_retention": {
-            "mean": 0.3805556666666667,
-            "std": 0.07149051564523942
+            "mean": 0.2555556666666667,
+            "std": 0.09556617269840947
           },
           "conflict_uncertainty_score": {
             "mean": 0.277636,
@@ -196,8 +196,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9537465,
-            "std": 0.0022745485083125066
+            "mean": 0.9545601666666667,
+            "std": 0.001568969982362823
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -237,12 +237,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8076490000000001,
-            "std": 0.0041451418552324645
+            "mean": 0.8057971666666667,
+            "std": 0.004111947973757564
           },
           "action_metric_retention": {
-            "mean": 0.39166683333333335,
-            "std": 0.11848157869814849
+            "mean": 0.4559026666666667,
+            "std": 0.02049772928616458
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -321,8 +321,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9629698333333333,
-            "std": 0.0009205408585295176
+            "mean": 0.9615315,
+            "std": 0.0006665755146018234
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -362,8 +362,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8964909999999999,
-            "std": 0.002783722507722351
+            "mean": 0.8920680000000001,
+            "std": 0.001952445901939405
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -403,8 +403,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8676951666666667,
-            "std": 0.0028782065837755512
+            "mean": 0.8608775,
+            "std": 0.0017784055358663203
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -444,8 +444,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.977869,
-            "std": 0.0006809091960998484
+            "mean": 0.974228,
+            "std": 0.0016410107657579063
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -485,8 +485,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7186315,
-            "std": 0.008126457156514567
+            "mean": 0.6931783333333333,
+            "std": 0.005542605755017732
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -526,8 +526,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9913933333333333,
-            "std": 0.0003320560528317757
+            "mean": 0.9904513333333334,
+            "std": 0.0001683782118393478
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -569,12 +569,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9771663333333334,
-            "std": 0.01118981947525914
+            "mean": 0.9710388333333333,
+            "std": 0.005269116922112168
           },
           "action_metric_retention": {
-            "mean": 1.1321548333333333,
-            "std": 0.10457376950015823
+            "mean": 1.0344016666666667,
+            "std": 0.08733144603685941
           },
           "conflict_uncertainty_score": {
             "mean": 0.1993,
@@ -610,12 +610,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9868715,
-            "std": 0.002396700840043804
+            "mean": 0.9862475,
+            "std": 0.0026716687512988333
           },
           "action_metric_retention": {
-            "mean": 1.0972221666666666,
-            "std": 0.10607809501874339
+            "mean": 1.082265,
+            "std": 0.09625474487698428
           },
           "conflict_uncertainty_score": {
             "mean": 0.1993,
@@ -651,12 +651,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7513818333333333,
-            "std": 0.004804578074318543
+            "mean": 0.7417078333333333,
+            "std": 0.006824643859246821
           },
           "action_metric_retention": {
-            "mean": 0.18249133333333334,
-            "std": 0.059480757035830965
+            "mean": 0.4549755,
+            "std": 0.0468987483015272
           },
           "conflict_uncertainty_score": {
             "mean": 0.250317,
@@ -692,12 +692,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9867265000000001,
-            "std": 0.0057270810700856345
+            "mean": 0.9905883333333333,
+            "std": 0.0038831368190620596
           },
           "action_metric_retention": {
-            "mean": 1.0906566666666666,
-            "std": 0.19018093058599636
+            "mean": 0.9604701666666666,
+            "std": 0.05949416535094477
           },
           "conflict_uncertainty_score": {
             "mean": 0.207,
@@ -733,12 +733,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8904056666666667,
-            "std": 0.026505092301082226
+            "mean": 0.8862733333333334,
+            "std": 0.020699149569218773
           },
           "action_metric_retention": {
-            "mean": 0.6117845,
-            "std": 0.37145430908648325
+            "mean": 0.32365683333333334,
+            "std": 0.1371366292636856
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -774,12 +774,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9728656666666666,
-            "std": 0.011376569396009619
+            "mean": 0.9662305,
+            "std": 0.005226796907922336
           },
           "action_metric_retention": {
-            "mean": 1.1321548333333333,
-            "std": 0.10457376950015823
+            "mean": 1.0224968333333333,
+            "std": 0.09567914593302043
           },
           "conflict_uncertainty_score": {
             "mean": 0.234417,
@@ -819,12 +819,12 @@
         "std": 0.01613610102293061
       },
       "attention_target_consistency": {
-        "mean": 0.9486215,
-        "std": 0.03828089182063728
+        "mean": 0.9460106111111112,
+        "std": 0.03971965556824324
       },
       "action_metric_retention": {
-        "mean": 1.032407388888889,
-        "std": 0.07649399839285786
+        "mean": 1.0274216666666667,
+        "std": 0.06776592734799201
       }
     },
     "canonical_vs_adversarial_surface": {
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "f665a3f401bc62009a6414390070d841ba8d4e8f"
+    "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57"
   }
 }

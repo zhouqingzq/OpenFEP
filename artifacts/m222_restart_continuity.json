@@ -1,123 +1,93 @@
 {
-  "seed": 226,
+  "seed": 222,
   "protocol_id": "restart_continuity",
   "continuity": {
-    "restart_identity_continuity": 0.8888888888888888,
+    "restart_identity_continuity": 0.6666666666666666,
     "restart_policy_continuity": 1.0,
-    "restart_memory_integrity": 0.9892857142857143,
+    "restart_memory_integrity": 0.95,
     "identity_narrative_continuity": {
-      "commitment_similarity": 0.666667,
+      "commitment_similarity": 0.0,
       "personality_similarity": 1.0,
       "narrative_prior_similarity": 1.0,
-      "narrative_version_before": 1,
-      "narrative_version_after": 6
+      "narrative_version_before": 0,
+      "narrative_version_after": 2
     },
     "commitments_persistence": {
-      "before": [
-        "commitment-survival-priority",
-        "commitment-capability-rest"
-      ],
+      "before": [],
       "after": [
         "commitment-survival-priority",
-        "commitment-capability-rest",
-        "commitment-exploration-drive"
+        "commitment-capability-rest"
       ]
     },
     "preferred_policy_continuity": {
-      "audit_similarity": 0.369318,
+      "audit_similarity": 0.5,
       "anchor_policy_similarity": 1.0,
       "dominant_strategy_match": 1.0,
       "avoidance_similarity": 1.0,
       "preference_similarity": 1.0,
       "anchor_restore_score": 1.0,
-      "action_distribution_similarity": 0.645833,
-      "anchor_distribution_similarity": 0.5625,
-      "top_action_similarity": 0.25,
+      "action_distribution_similarity": 0.75,
+      "anchor_distribution_similarity": 0.5,
+      "top_action_similarity": 0.0,
       "rebind_consistency": 0.75,
       "maintenance_anchor_similarity": 1.0,
       "restart_divergence": 0.0
     },
     "long_term_memory_integrity": {
-      "before_episode_count": 14,
-      "after_episode_count": 20,
-      "preserved_count": 13,
-      "overall_memory_integrity": 0.928571,
+      "before_episode_count": 9,
+      "after_episode_count": 15,
+      "preserved_count": 6,
+      "overall_memory_integrity": 0.666667,
       "protected_memory_integrity": 1.0,
       "critical_memory_integrity": 1.0,
       "protected_before": [
         "ep-000001-hide",
-        "ep-000002-exploit_shelter",
-        "ep-000003-rest",
-        "ep-000013-rest",
-        "ep-000014-rest",
-        "ep-000015-unstable_workspace_note",
-        "ep-000016-append_workspace_note",
-        "ep-000018-hide",
-        "ep-000019-rest",
-        "ep-000021-rest",
-        "ep-000022-seek_contact",
-        "ep-000023-hide",
-        "ep-000024-exploit_shelter"
+        "ep-000002-rest",
+        "ep-000006-scan",
+        "ep-000010-rest",
+        "ep-000011-exploit_shelter"
       ],
       "protected_after": [
         "ep-000001-hide",
-        "ep-000002-exploit_shelter",
-        "ep-000003-rest",
-        "ep-000013-rest",
-        "ep-000014-rest",
-        "ep-000015-unstable_workspace_note",
-        "ep-000016-append_workspace_note",
+        "ep-000002-rest",
+        "ep-000006-scan",
+        "ep-000010-rest",
+        "ep-000011-exploit_shelter",
+        "ep-000014-unstable_workspace_note",
+        "ep-000015-rest",
+        "ep-000017-hide",
         "ep-000018-hide",
         "ep-000019-rest",
-        "ep-000021-rest",
-        "ep-000022-seek_contact",
-        "ep-000023-hide",
-        "ep-000024-exploit_shelter",
-        "ep-000025-rest",
-        "ep-000027-rest",
-        "ep-000029-rest",
-        "ep-000031-exploit_shelter",
-        "ep-000035-exploit_shelter",
-        "ep-000039-scan",
-        "ep-000040-exploit_shelter"
+        "ep-000020-rest",
+        "ep-000022-hide",
+        "ep-000023-exploit_shelter",
+        "ep-000024-exploit_shelter"
       ],
       "critical_before": [
         "ep-000001-hide",
-        "ep-000002-exploit_shelter",
-        "ep-000014-rest",
-        "ep-000015-unstable_workspace_note",
-        "ep-000016-append_workspace_note",
-        "ep-000018-hide",
-        "ep-000019-rest",
-        "ep-000021-rest",
-        "ep-000022-seek_contact",
-        "ep-000023-hide",
-        "ep-000024-exploit_shelter"
+        "ep-000006-scan",
+        "ep-000010-rest",
+        "ep-000011-exploit_shelter"
       ],
       "critical_after": [
         "ep-000001-hide",
-        "ep-000002-exploit_shelter",
-        "ep-000014-rest",
-        "ep-000015-unstable_workspace_note",
-        "ep-000016-append_workspace_note",
+        "ep-000006-scan",
+        "ep-000010-rest",
+        "ep-000011-exploit_shelter",
+        "ep-000014-unstable_workspace_note",
+        "ep-000015-rest",
+        "ep-000017-hide",
         "ep-000018-hide",
         "ep-000019-rest",
-        "ep-000021-rest",
-        "ep-000022-seek_contact",
-        "ep-000023-hide",
-        "ep-000024-exploit_shelter",
-        "ep-000025-rest",
-        "ep-000027-rest",
-        "ep-000029-rest",
-        "ep-000031-exploit_shelter",
-        "ep-000035-exploit_shelter",
-        "ep-000039-scan",
-        "ep-000040-exploit_shelter"
+        "ep-000020-rest",
+        "ep-000022-hide",
+        "ep-000023-exploit_shelter",
+        "ep-000024-exploit_shelter"
       ]
     },
     "maintenance_agenda_continuity": {
       "before": {
-        "cycle": 24,
+        "cycle": 12,
         "active_tasks": [],
         "recommended_action": "rest",
         "interrupt_action": null,
@@ -129,7 +99,7 @@
         "protected_mode_ticks_remaining": 0,
         "recovery_rebound_active": false,
         "recovery_rebound_ticks_remaining": 0,
-        "policy_shift_strength": 0.2772,
+        "policy_shift_strength": 0.0,
         "suppressed_actions": [],
         "recovery_focus": [],
         "chronic_debt_pressure": 0.0,
@@ -146,26 +116,20 @@
         }
       },
       "after": {
-        "cycle": 48,
-        "active_tasks": [
-          "resource_guard"
-        ],
-        "recommended_action": "exploit_shelter",
-        "interrupt_action": "exploit_shelter",
-        "interrupt_reason": "protected mode resource guard",
+        "cycle": 24,
+        "active_tasks": [],
+        "recommended_action": "rest",
+        "interrupt_action": null,
+        "interrupt_reason": "",
         "sleep_recommended": false,
         "memory_compaction_recommended": false,
         "telemetry_backoff_recommended": false,
-        "protected_mode": true,
-        "protected_mode_ticks_remaining": 1,
+        "protected_mode": false,
+        "protected_mode_ticks_remaining": 0,
         "recovery_rebound_active": false,
         "recovery_rebound_ticks_remaining": 0,
-        "policy_shift_strength": 0.2,
-        "suppressed_actions": [
-          "forage",
-          "scan",
-          "seek_contact"
-        ],
+        "policy_shift_strength": 0.0,
+        "suppressed_actions": [],
         "recovery_focus": [],
         "chronic_debt_pressure": 0.0,
         "state": {
@@ -173,7 +137,7 @@
           "acute_stress_debt": 0.0,
           "acute_fatigue_debt": 0.0,
           "acute_thermal_debt": 0.0,
-          "short_term_sleep_pressure": 0.02088,
+          "short_term_sleep_pressure": 0.0,
           "chronic_energy_debt": 0.0,
           "chronic_stress_debt": 0.0,
           "chronic_fatigue_debt": 0.0,
@@ -182,10 +146,10 @@
       }
     },
     "action_diversity_continuity": {
-      "pre_entropy": 2.094361,
-      "post_entropy": 2.396327,
-      "pre_window_cycles": 24,
-      "post_window_cycles": 24
+      "pre_entropy": 1.584963,
+      "post_entropy": 2.186482,
+      "pre_window_cycles": 12,
+      "post_window_cycles": 12
     }
   }
 }

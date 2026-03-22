@@ -313,6 +313,7 @@ class LongTermMemory:
     compression_similarity_threshold: float = 0.95
     cluster_distance_threshold: float = 0.15
     max_active_age: int = 5000
+    minimum_active_episodes: int = 3
     cluster_centroids: list[list[float]] = field(default_factory=list)
     cluster_counts: list[int] = field(default_factory=list)
     archived_episodes: list[dict] = field(default_factory=list)
@@ -916,6 +917,31 @@ class LongTermMemory:
             removed += len(group) - 1
 
         compressed.sort(key=self._episode_cycle)
+        minimum_floor = min(self.minimum_active_episodes, len(self.episodes))
+        if len(compressed) < minimum_floor:
+            kept_ids = {
+                str(payload.get("episode_id", ""))
+                for payload in compressed
+                if payload.get("episode_id")
+            }
+            original_by_recency = sorted(
+                self.episodes,
+                key=lambda payload: (
+                    int(payload.get("last_seen_cycle", payload.get("cycle", 0))),
+                    str(payload.get("episode_id", "")),
+                ),
+                reverse=True,
+            )
+            for payload in original_by_recency:
+                episode_id = str(payload.get("episode_id", ""))
+                if episode_id and episode_id in kept_ids:
+                    continue
+                compressed.append(dict(payload))
+                if episode_id:
+                    kept_ids.add(episode_id)
+                if len(compressed) >= minimum_floor:
+                    break
+            compressed.sort(key=self._episode_cycle)
         self.episodes = compressed[-self.max_episodes :]
         self._refresh_semantic_patterns()
         return removed
@@ -1053,6 +1079,8 @@ class LongTermMemory:
         for payload in candidates:
             if len(self.episodes) <= retain_recent:
                 break
+            if len(self.episodes) <= self.minimum_active_episodes:
+                break
             if self.should_preserve_restart_continuity(payload, current_cycle=current_cycle):
                 continue
             if bool(payload.get("identity_critical", False)) or self._is_restart_protected_payload(payload):
@@ -1117,6 +1145,7 @@ class LongTermMemory:
             "compression_similarity_threshold": self.compression_similarity_threshold,
             "cluster_distance_threshold": self.cluster_distance_threshold,
             "max_active_age": self.max_active_age,
+            "minimum_active_episodes": self.minimum_active_episodes,
             "cluster_centroids": [list(centroid) for centroid in self.cluster_centroids],
             "cluster_counts": list(self.cluster_counts),
             "archived_episodes": list(self.archived_episodes),
@@ -1164,6 +1193,7 @@ class LongTermMemory:
                 payload.get("cluster_distance_threshold", 0.15)
             ),
             max_active_age=int(payload.get("max_active_age", 5000)),
+            minimum_active_episodes=int(payload.get("minimum_active_episodes", 3)),
             cluster_centroids=[
                 [float(value) for value in centroid]
                 for centroid in list(payload.get("cluster_centroids", []))
