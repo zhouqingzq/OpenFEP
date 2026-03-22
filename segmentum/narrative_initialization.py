@@ -571,6 +571,54 @@ class NarrativeInitializer:
         else:
             policies.risk_profile = "risk_neutral"
         policies.last_updated_tick = int(agent.cycle)
+        if semantic_bias["social"] >= max(semantic_bias["threat"], semantic_bias["exploration"]):
+            carryover = degradation_ratio * (1.0 - conflict_score * 0.35)
+            social_affordance = max(
+                0.0,
+                social_bias - threat_bias * 0.20 - uncertainty_score * 0.10,
+            )
+            agent.world_model.counterfactual_biases = {
+                "seek_contact": round(
+                    _clamp(0.04 + social_affordance * 0.08 * carryover, 0.0, 0.12),
+                    6,
+                ),
+                "hide": round(
+                    -_clamp(0.02 + social_affordance * 0.05 * carryover, 0.0, 0.08),
+                    6,
+                ),
+                "exploit_shelter": round(
+                    _clamp(0.01 + social_affordance * 0.03 * carryover, 0.0, 0.05),
+                    6,
+                ),
+            }
+        elif semantic_bias["threat"] >= max(semantic_bias["social"], semantic_bias["exploration"]):
+            carryover = degradation_ratio * (1.0 - conflict_score * 0.30)
+            vigilance = max(0.0, threat_bias - social_bias * 0.15)
+            agent.world_model.counterfactual_biases = {
+                "hide": round(_clamp(0.03 + vigilance * 0.08 * carryover, 0.0, 0.12), 6),
+                "exploit_shelter": round(
+                    _clamp(0.02 + vigilance * 0.04 * carryover, 0.0, 0.08),
+                    6,
+                ),
+                "forage": round(
+                    -_clamp(0.01 + vigilance * 0.04 * carryover, 0.0, 0.08),
+                    6,
+                ),
+            }
+        else:
+            carryover = degradation_ratio * (1.0 - conflict_score * 0.30)
+            curiosity = max(0.0, exploration_bias - threat_bias * 0.12)
+            agent.world_model.counterfactual_biases = {
+                "scan": round(_clamp(0.03 + curiosity * 0.08 * carryover, 0.0, 0.12), 6),
+                "forage": round(
+                    _clamp(0.02 + curiosity * 0.04 * carryover, 0.0, 0.08),
+                    6,
+                ),
+                "hide": round(
+                    -_clamp(0.01 + curiosity * 0.03 * carryover, 0.0, 0.06),
+                    6,
+                ),
+            }
 
     def _apply_identity_seed(
         self,
