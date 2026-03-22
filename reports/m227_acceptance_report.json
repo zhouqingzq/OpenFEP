@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-03-21T14:56:24+00:00",
+  "generated_at": "2026-03-22T06:46:04+00:00",
   "seed_set": [
     227,
     342
@@ -48,21 +48,21 @@
             "dominant_goal": "SURVIVAL",
             "continuity_score": 0.7,
             "continuity_anchors": [
-              "ep-000005-exploit_shelter",
+              "ep-000006-exploit_shelter",
               "ep-000001-hide"
             ],
             "status_flags": {
               "threatened": false,
               "repairing": false,
-              "overloaded": false,
+              "overloaded": true,
               "socially_destabilized": false,
               "continuity_fragile": true
             },
             "priority_labels": [
-              "goal:survival",
-              "identity tension",
-              "self inconsistency",
-              "continuity fragility"
+              "continuity-relevant tension",
+              "repeated surprise burden",
+              "unresolved self inconsistency",
+              "maintenance pressure"
             ],
             "last_choice": "rest"
           },
@@ -72,21 +72,21 @@
             "dominant_goal": "SURVIVAL",
             "continuity_score": 0.7,
             "continuity_anchors": [
-              "ep-000005-exploit_shelter",
+              "ep-000006-exploit_shelter",
               "ep-000001-hide"
             ],
             "status_flags": {
               "threatened": false,
               "repairing": false,
-              "overloaded": false,
+              "overloaded": true,
               "socially_destabilized": false,
               "continuity_fragile": true
             },
             "priority_labels": [
-              "goal:survival",
-              "identity tension",
-              "self inconsistency",
-              "continuity fragility"
+              "continuity-relevant tension",
+              "repeated surprise burden",
+              "unresolved self inconsistency",
+              "maintenance pressure"
             ],
             "last_choice": "rest"
           }
@@ -105,15 +105,15 @@
             "status_flags": {
               "threatened": false,
               "repairing": false,
-              "overloaded": false,
+              "overloaded": true,
               "socially_destabilized": false,
               "continuity_fragile": true
             },
             "priority_labels": [
-              "goal:survival",
-              "identity tension",
-              "self inconsistency",
-              "continuity fragility"
+              "continuity-relevant tension",
+              "maintenance pressure",
+              "need:maintenance",
+              "repeated surprise burden"
             ],
             "last_choice": "rest"
           },
@@ -128,15 +128,15 @@
             "status_flags": {
               "threatened": false,
               "repairing": false,
-              "overloaded": false,
+              "overloaded": true,
               "socially_destabilized": false,
               "continuity_fragile": true
             },
             "priority_labels": [
-              "goal:survival",
-              "identity tension",
-              "self inconsistency",
-              "continuity fragility"
+              "continuity-relevant tension",
+              "maintenance pressure",
+              "need:maintenance",
+              "repeated surprise burden"
             ],
             "last_choice": "rest"
           }
@@ -237,11 +237,30 @@
               "label": "maintenance pressure",
               "tension_type": "maintenance",
               "intensity": 1.0,
-              "repair_target": "hide",
+              "repair_target": "scan",
               "evidence": [
-                "thermal_rebalance",
-                "energy_recovery",
-                "stress_relief"
+                "verify:pred:action:forage",
+                "verify:pred:env:temperature",
+                "verify:pred:env:food"
+              ]
+            },
+            {
+              "label": "repeated surprise burden",
+              "tension_type": "surprise_burden",
+              "intensity": 1.0,
+              "repair_target": "critical",
+              "evidence": [
+                "memory_surprise=1005.057"
+              ]
+            },
+            {
+              "label": "unresolved maintenance discrepancy",
+              "tension_type": "maintenance_overload",
+              "intensity": 1.0,
+              "repair_target": "SURVIVAL",
+              "evidence": [
+                "verify:pred:action:forage",
+                "verify:pred:env:temperature"
               ]
             },
             {
@@ -251,23 +270,6 @@
               "repair_target": "protect continuity anchors",
               "evidence": [
                 "continuity_score_drop"
-              ]
-            },
-            {
-              "label": "identity tension",
-              "tension_type": "identity",
-              "intensity": 0.5,
-              "repair_target": "",
-              "evidence": []
-            },
-            {
-              "label": "self inconsistency",
-              "tension_type": "continuity",
-              "intensity": 0.5,
-              "repair_target": "",
-              "evidence": [
-                "none",
-                "none"
               ]
             }
           ],
@@ -279,9 +281,9 @@
               "preferred_actions": [],
               "avoid_actions": [],
               "evidence": [
-                "thermal_rebalance",
-                "energy_recovery",
-                "stress_relief"
+                "verify:pred:action:forage",
+                "verify:pred:env:temperature",
+                "verify:pred:env:food"
               ]
             },
             {
@@ -292,6 +294,27 @@
               "avoid_actions": [],
               "evidence": [
                 "active homeostatic protection"
+              ]
+            },
+            {
+              "label": "repeated surprise burden",
+              "weight": 1.0,
+              "priority_type": "surprise_burden",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": [
+                "memory_surprise=1005.057"
+              ]
+            },
+            {
+              "label": "unresolved maintenance discrepancy",
+              "weight": 1.0,
+              "priority_type": "maintenance_overload",
+              "preferred_actions": [],
+              "avoid_actions": [],
+              "evidence": [
+                "verify:pred:action:forage",
+                "verify:pred:env:temperature"
               ]
             },
             {
@@ -325,29 +348,6 @@
               "evidence": [
                 "SURVIVAL"
               ]
-            },
-            {
-              "label": "commitment continuity",
-              "weight": 0.62,
-              "priority_type": "commitment",
-              "preferred_actions": [
-                "hide",
-                "rest",
-                "exploit_shelter",
-                "scan"
-              ],
-              "avoid_actions": [],
-              "evidence": [
-                "active commitments"
-              ]
-            },
-            {
-              "label": "identity tension",
-              "weight": 0.5,
-              "priority_type": "identity",
-              "preferred_actions": [],
-              "avoid_actions": [],
-              "evidence": []
             }
           ],
           "status_flags": {
@@ -361,7 +361,9 @@
             "need:maintenance"
           ],
           "repair_targets": [
-            "hide",
+            "scan",
+            "critical",
+            "SURVIVAL",
             "protect continuity anchors"
           ],
           "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis."
@@ -375,53 +377,53 @@
         "anchors_recovered_after_pressure": true,
         "continuity_not_collapsed_to_zero": true,
         "phase_changes_bounded": true,
-        "min_continuity_score": 0.5,
-        "max_continuity_score": 0.86,
-        "final_continuity_score": 0.783333,
+        "min_continuity_score": 0.483077,
+        "max_continuity_score": 0.841667,
+        "final_continuity_score": 0.841667,
         "max_anchor_count": 12,
         "final_anchor_count": 12,
         "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 38,
-        "fragile_cycles": 52,
+        "threatened_cycles": 5,
+        "fragile_cycles": 58,
         "distinct_phases": [
-          "consolidation",
           "forming",
           "goal_realignment",
+          "resource_recovery",
           "survival_crisis"
         ],
         "final_signature": {
           "cycle": 72,
           "current_phase": "survival_crisis",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.783333,
+          "continuity_score": 0.841667,
           "continuity_anchors": [
-            "ep-000072-seek_contact",
-            "ep-000070-hide",
-            "ep-000069-unstable_workspace_note",
-            "ep-000066-rest",
-            "ep-000067-rest",
-            "ep-000065-hide",
-            "ep-000064-hide",
-            "ep-000060-exploit_shelter",
-            "ep-000059-exploit_shelter",
-            "ep-000058-rest",
-            "ep-000057-exploit_shelter",
-            "ep-000056-exploit_shelter"
+            "ep-000071-rest",
+            "ep-000070-unstable_workspace_note",
+            "ep-000065-rest",
+            "ep-000064-append_workspace_note",
+            "ep-000062-seek_contact",
+            "ep-000060-append_workspace_note",
+            "ep-000058-scan",
+            "ep-000057-unstable_workspace_note",
+            "ep-000055-rest",
+            "ep-000053-rest",
+            "ep-000052-append_workspace_note",
+            "ep-000050-scan"
           ],
           "status_flags": {
             "threatened": false,
             "repairing": false,
-            "overloaded": false,
+            "overloaded": true,
             "socially_destabilized": false,
             "continuity_fragile": false
           },
           "priority_labels": [
-            "goal:integrity",
-            "commitment continuity",
-            "maintenance pressure",
-            "need:maintenance"
+            "unresolved maintenance discrepancy",
+            "unresolved self inconsistency",
+            "verification contradicted environment_state",
+            "maintenance pressure"
           ],
-          "last_choice": "seek_contact"
+          "last_choice": "write_workspace_note"
         }
       }
     },
@@ -439,8 +441,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-21T14:56:24+00:00",
-    "codebase_version": "614d7026e0ff093f397aa9602873fb9862432fad",
+    "generated_at": "2026-03-22T06:46:04+00:00",
+    "codebase_version": "eaa5d6a17fd91d60ffdda12c3485b459c4b773a3",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -451,32 +453,32 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
-        "size_bytes": 53906,
-        "modified_at": "2026-03-21T14:56:18+00:00"
+        "size_bytes": 59799,
+        "modified_at": "2026-03-22T06:45:57+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1669,
-        "modified_at": "2026-03-21T14:56:18+00:00"
+        "modified_at": "2026-03-22T06:45:57+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
-        "size_bytes": 11131,
-        "modified_at": "2026-03-21T14:56:18+00:00"
+        "size_bytes": 11414,
+        "modified_at": "2026-03-22T06:45:57+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 15295,
-        "modified_at": "2026-03-21T14:56:24+00:00"
+        "size_bytes": 15524,
+        "modified_at": "2026-03-22T06:46:04+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-03-21T14:55:59+00:00"
+        "modified_at": "2026-03-22T06:44:51+00:00"
       }
     }
   },

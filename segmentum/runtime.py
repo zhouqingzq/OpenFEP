@@ -70,7 +70,8 @@ def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
         f"commit={option.commitment_bias:.3f} "
         f"id={option.identity_bias:.3f} "
         f"ledger={option.ledger_bias:.3f} "
-        f"subj={option.subject_bias:.3f}"
+        f"subj={option.subject_bias:.3f} "
+        f"verify={option.verification_bias:.3f}"
         for option in choice_ranking
     )
 
@@ -540,6 +541,10 @@ class SegmentRuntime:
             diagnostics,
             maintenance_agenda,
         )
+        maintenance_agenda = self._apply_verification_maintenance_priority(
+            diagnostics,
+            maintenance_agenda,
+        )
         original_choice_name = diagnostics.chosen.choice
         self._enforce_restart_commitment_continuity()
         self._apply_homeostatic_policy_landscape(diagnostics, maintenance_agenda)
@@ -555,6 +560,11 @@ class SegmentRuntime:
             choice,
             cycle=self.agent.cycle,
         )
+        verification_action_update = self.agent.verification_loop.register_action_ack(
+            tick=self.agent.cycle,
+            action_name=choice.name,
+            success=bool(action_dispatch.acknowledgment.success),
+        )
         direct_feedback = dict(action_dispatch.feedback)
         self.agent.apply_action_feedback(direct_feedback)
 
@@ -565,6 +575,13 @@ class SegmentRuntime:
             source_id="simulated_world_validation",
         )
         _, _, _, free_energy_after, _ = self.agent.perceive(validation_observation)
+        verification_validation = self.agent.verification_loop.process_observation(
+            tick=self.agent.cycle,
+            observation=asdict(validation_observation),
+            ledger=self.agent.prediction_ledger,
+            source="validation_observation",
+            subject_state=self.subject_state,
+        )
         memory_decision = self.agent.integrate_outcome(
             choice=choice,
             observed=observed,
@@ -627,12 +644,21 @@ class SegmentRuntime:
             **self.agent.prediction_ledger.explanation_payload(),
             "runtime_update": ledger_runtime_update.to_dict(),
         }
+        details["verification"] = {
+            **self.agent.verification_loop.explanation_payload(chosen_action=choice.name),
+            "action_update": verification_action_update.to_dict(),
+            "validation_update": verification_validation.to_dict(),
+        }
         details["subject_state"] = self.subject_state.explanation_payload()
         diagnostics.structured_explanation = details
         diagnostics.ledger_summary = str(details["prediction_ledger"]["summary"])
         diagnostics.ledger_payload = dict(details["prediction_ledger"])
+        diagnostics.verification_summary = str(details["verification"]["summary"])
+        diagnostics.verification_payload = dict(details["verification"])
         diagnostics.explanation = (
             str(details["prediction_ledger"]["summary"])
+            + " "
+            + str(details["verification"].get("verification_motive") or details["verification"]["summary"])
             + " "
             + str(details["subject_state"]["summary"])
             + " "
@@ -1120,6 +1146,36 @@ class SegmentRuntime:
         diagnostics.structured_explanation = details
         return updated
 
+    def _apply_verification_maintenance_priority(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> MaintenanceAgenda:
+        signal = self.agent.verification_loop.maintenance_signal()
+        priority_gain = float(signal.get("priority_gain", 0.0))
+        active_tasks = list(agenda.active_tasks)
+        for task in signal.get("active_tasks", []):
+            if task not in active_tasks:
+                active_tasks.insert(0, str(task))
+        recommended_action = agenda.recommended_action
+        verification_recommended = str(signal.get("recommended_action", ""))
+        if verification_recommended:
+            recommended_action = verification_recommended
+        updated = replace(
+            agenda,
+            active_tasks=tuple(active_tasks),
+            recommended_action=recommended_action,
+            policy_shift_strength=min(1.0, agenda.policy_shift_strength + priority_gain),
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["verification_maintenance_priority"] = {
+            "priority_gain": round(priority_gain, 6),
+            "active_tasks": list(active_tasks),
+            "recommended_action": recommended_action,
+        }
+        diagnostics.structured_explanation = details
+        return updated
+
     def _apply_subject_state_maintenance_priority(
         self,
         diagnostics: DecisionDiagnostics,
@@ -1408,6 +1464,7 @@ class SegmentRuntime:
                     "identity_bias": option.identity_bias,
                     "ledger_bias": option.ledger_bias,
                     "subject_bias": option.subject_bias,
+                    "verification_bias": option.verification_bias,
                     "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
                     "dominant_component": option.dominant_component,
@@ -1436,6 +1493,7 @@ class SegmentRuntime:
                 "identity_bias": diagnostics.chosen.identity_bias,
                 "ledger_bias": diagnostics.chosen.ledger_bias,
                 "subject_bias": diagnostics.chosen.subject_bias,
+                "verification_bias": diagnostics.chosen.verification_bias,
                 "goal_alignment": diagnostics.chosen.goal_alignment,
                 "active_goal": diagnostics.active_goal,
                 "goal_context": diagnostics.goal_context,
@@ -1477,6 +1535,8 @@ class SegmentRuntime:
                 "social_snapshot": dict(diagnostics.social_snapshot),
                 "ledger_summary": diagnostics.ledger_summary,
                 "ledger_payload": dict(diagnostics.ledger_payload),
+                "verification_summary": diagnostics.verification_summary,
+                "verification_payload": dict(diagnostics.verification_payload),
                 "subject_state_summary": diagnostics.subject_state_summary,
                 "subject_status_flags": dict(diagnostics.subject_status_flags),
             },
@@ -1526,6 +1586,7 @@ class SegmentRuntime:
             }
         trace_record["social_memory"] = self.agent.social_memory.to_dict()
         trace_record["prediction_ledger"] = self.agent.prediction_ledger.to_dict()
+        trace_record["verification_loop"] = self.agent.verification_loop.to_dict()
         trace_record["subject_state"] = self.subject_state.to_dict()
         trace_record["continuity"] = dict(self.last_continuity_report)
         if self.last_error_attribution is not None:

@@ -33,6 +33,7 @@ from .narrative_compiler import NarrativeCompiler
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
+from .verification import VerificationLoop
 from .self_model import (
     CapabilityModel,
     NarrativePriors,
@@ -260,6 +261,7 @@ class PolicyEvaluator:
         ledger_bias: float,
         subject_bias: float,
         goal_alignment: float,
+        verification_bias: float = 0.0,
     ) -> str:
         components = [
             ("expected_free_energy", abs(expected_free_energy)),
@@ -274,6 +276,7 @@ class PolicyEvaluator:
             ("ledger_bias", abs(ledger_bias)),
             ("subject_bias", abs(subject_bias)),
             ("goal_alignment", abs(goal_alignment)),
+            ("verification_bias", abs(verification_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
         return components[0][0]
@@ -356,6 +359,11 @@ class PolicyEvaluator:
             reason = (
                 f"goal_alignment ({chosen.goal_alignment:.3f}) dominated, "
                 f"so the action best served my active goal {diagnostics.active_goal}."
+            )
+        elif chosen.dominant_component == "verification_bias":
+            reason = (
+                f"verification_bias ({chosen.verification_bias:.3f}) dominated, "
+                "so the policy prioritized gathering evidence for an active prediction."
             )
         else:
             reason = (
@@ -448,6 +456,7 @@ class PolicyEvaluator:
             f"commitment_bias={chosen.commitment_bias:.3f}",
             f"ledger_bias={chosen.ledger_bias:.3f}",
             f"subject_bias={chosen.subject_bias:.3f}",
+            f"verification_bias={chosen.verification_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
         workspace_channels = ", ".join(diagnostics.workspace_broadcast_channels)
@@ -643,6 +652,7 @@ class SegmentAgent:
         self.social_memory = SocialMemory()
         self.identity_tension_history: list[dict[str, object]] = []
         self.prediction_ledger = PredictionLedger()
+        self.verification_loop = VerificationLoop()
         self.subject_state = SubjectState()
 
         self.base_metabolic_rate = 0.015
@@ -1882,13 +1892,21 @@ class SegmentAgent:
             tick=self.cycle,
             observation=observed,
         )
+        verification_refresh = self.verification_loop.refresh_targets(
+            tick=self.cycle,
+            ledger=self.prediction_ledger,
+            subject_state=self.subject_state,
+        )
         self.last_workspace_state = self.global_workspace.broadcast(
             tick=self.cycle,
             observation=observed,
             prediction=prediction,
             errors=errors,
             attention_trace=self.last_attention_trace,
-            ledger_focus=self.prediction_ledger.workspace_focus(),
+            ledger_focus={
+                **self.prediction_ledger.workspace_focus(),
+                **self.verification_loop.workspace_focus(),
+            },
         )
         self.subject_state = derive_subject_state(
             self,
@@ -1943,6 +1961,7 @@ class SegmentAgent:
                 cost=float(option["cost"]),
             )
             ledger_bias = self.prediction_ledger.prediction_action_bias(action)
+            verification_bias = self.verification_loop.action_bias(action)
             subject_bias = subject_action_bias(self.subject_state, action)
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
@@ -1965,6 +1984,7 @@ class SegmentAgent:
                 + ledger_bias
                 + subject_bias
                 + goal_alignment
+                + verification_bias
                 - regression_penalty
             )
             dominant_component = self.policy_evaluator.dominant_component(
@@ -1980,6 +2000,7 @@ class SegmentAgent:
                 ledger_bias=ledger_bias,
                 subject_bias=subject_bias,
                 goal_alignment=goal_alignment,
+                verification_bias=verification_bias,
             )
             ranked_options.append(
                 InterventionScore(
@@ -2006,6 +2027,7 @@ class SegmentAgent:
                     ledger_bias=ledger_bias,
                     subject_bias=subject_bias,
                     goal_alignment=goal_alignment,
+                    verification_bias=verification_bias,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
                     predicted_effects=predicted_effects,
@@ -2239,12 +2261,32 @@ class SegmentAgent:
             prediction=prediction,
             subject_state=self.subject_state,
         )
+        verification_seed = self.verification_loop.refresh_targets(
+            tick=self.cycle,
+            ledger=self.prediction_ledger,
+            diagnostics=diagnostics,
+            subject_state=self.subject_state,
+            workspace_channels=tuple(
+                content.channel for content in self.last_workspace_state.broadcast_contents
+            )
+            if self.last_workspace_state is not None
+            else (),
+        )
         ledger_payload = self.prediction_ledger.explanation_payload()
+        verification_payload = self.verification_loop.explanation_payload(
+            chosen_action=diagnostics.chosen.choice
+        )
         diagnostics.ledger_summary = str(ledger_payload["summary"])
         diagnostics.ledger_payload = {
             **ledger_verification.to_dict(),
             "seed_update": ledger_seed.to_dict(),
             **ledger_payload,
+        }
+        diagnostics.verification_summary = str(verification_payload["summary"])
+        diagnostics.verification_payload = {
+            "refresh_update": verification_refresh.to_dict(),
+            "seed_update": verification_seed.to_dict(),
+            **verification_payload,
         }
         diagnostics.subject_state_summary = self.subject_state.summary_text()
         diagnostics.subject_status_flags = dict(self.subject_state.status_flags)
@@ -2252,6 +2294,7 @@ class SegmentAgent:
             item.to_dict() for item in self.subject_state.subject_priority_stack[:4]
         ]
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
+        diagnostics.structured_explanation["verification"] = diagnostics.verification_payload
         diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
         workspace_review = self.metacognitive_layer.review_self_consistency(
             chosen_assessment,
@@ -2270,7 +2313,10 @@ class SegmentAgent:
                 )
             ),
         }
+        verification_motive = str(verification_payload.get("verification_motive", ""))
         diagnostics.explanation = str(diagnostics.structured_explanation["text"])
+        if verification_motive:
+            diagnostics.explanation += " " + verification_motive
         self.last_decision_diagnostics = diagnostics
         self._record_identity_tension(
             chosen_action=diagnostics.chosen.choice,
@@ -2297,12 +2343,15 @@ class SegmentAgent:
                     "No consciously accessible contents are available yet. "
                     + "Subject state: "
                     + self.subject_state.summary_text()
+                    + " Verification: "
+                    + self.verification_loop.explanation_payload()["summary"]
                 ),
                 "channels": [],
                 "carry_over_channels": [],
                 "suppressed_channels": [],
                 "leakage_free": True,
                 "subject_state": self.subject_state.explanation_payload(),
+                "verification": self.verification_loop.explanation_payload(),
             }
         report_payload = self.global_workspace.conscious_report_payload(self.last_workspace_state)
         channels = list(report_payload["accessible_channels"])
@@ -2314,6 +2363,7 @@ class SegmentAgent:
         if carry_over_channels:
             text += " Carry-over still accessible: " + ", ".join(carry_over_channels) + "."
         text += " Subject state: " + self.subject_state.summary_text()
+        text += " Verification: " + self.verification_loop.explanation_payload()["summary"]
         return {
             "text": text,
             "channels": channels,
@@ -2321,6 +2371,7 @@ class SegmentAgent:
             "suppressed_channels": list(report_payload["suppressed_channels"]),
             "leakage_free": bool(report_payload["leakage_checked"]),
             "subject_state": self.subject_state.explanation_payload(),
+            "verification": self.verification_loop.explanation_payload(),
         }
 
     def choose_intervention(
@@ -2516,6 +2567,7 @@ class SegmentAgent:
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
             + self.prediction_ledger.memory_threshold_delta(),
+            + self.verification_loop.memory_threshold_delta(),
             + subject_memory_threshold_delta(self.subject_state),
         )
         try:
@@ -2628,6 +2680,7 @@ class SegmentAgent:
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
             + self.prediction_ledger.memory_threshold_delta(),
+            + self.verification_loop.memory_threshold_delta(),
         )
         try:
             memory_decision = self.long_term_memory.maybe_store_episode(
@@ -3422,11 +3475,19 @@ class SegmentAgent:
             counterfactual_log=cf_summary.counterfactual_log,
         )
         ledger_sleep = self.prediction_ledger.sleep_review(tick=self.cycle)
+        verification_sleep = self.verification_loop.process_observation(
+            tick=self.cycle,
+            observation={},
+            ledger=self.prediction_ledger,
+            source="sleep_review",
+            subject_state=self.subject_state,
+        )
         self.sleep_history.append(summary)
         self.narrative_trace.append(
             {
                 "sleep_cycle_id": sleep_cycle_id,
                 "prediction_ledger_sleep": ledger_sleep,
+                "verification_sleep": verification_sleep.to_dict(),
                 "rule_ids": [rule.rule_id for rule in consolidation.rules],
             }
         )
@@ -3494,6 +3555,7 @@ class SegmentAgent:
             "social_memory": self.social_memory.to_dict(),
             "identity_tension_history": list(self.identity_tension_history),
             "prediction_ledger": self.prediction_ledger.to_dict(),
+            "verification_loop": self.verification_loop.to_dict(),
             "subject_state": self.subject_state.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
@@ -3605,6 +3667,11 @@ class SegmentAgent:
         agent.prediction_ledger = PredictionLedger.from_dict(
             payload.get("prediction_ledger")
             if isinstance(payload.get("prediction_ledger"), dict)
+            else None
+        )
+        agent.verification_loop = VerificationLoop.from_dict(
+            payload.get("verification_loop")
+            if isinstance(payload.get("verification_loop"), dict)
             else None
         )
         agent.subject_state = SubjectState.from_dict(

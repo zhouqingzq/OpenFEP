@@ -1,0 +1,236 @@
+{
+  "milestone_id": "M2.29",
+  "status": "PASS",
+  "generated_at": "2026-03-22T06:45:52+00:00",
+  "seed_set": [
+    229,
+    431
+  ],
+  "artifacts": {
+    "specification": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m229_verification_loop.py",
+      "tests/test_m229_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m224_acceptance.py",
+      "tests/test_m227_acceptance.py",
+      "tests/test_baseline_regressions.py"
+    ]
+  },
+  "gates": {
+    "schema_roundtrip": {
+      "passed": true,
+      "evidence": "verification loop state survives agent snapshot round-trip and runtime trace emission"
+    },
+    "determinism": {
+      "passed": true,
+      "evidence": [
+        {
+          "seed": 229,
+          "equivalent": true,
+          "signature_a": {
+            "cycle": 2,
+            "last_choice": "rest",
+            "active_targets": 0,
+            "archived_targets": 6,
+            "evidence_events": 6,
+            "recent_outcomes": [
+              "confirmed",
+              "partially_supported",
+              "confirmed",
+              "confirmed"
+            ],
+            "prioritized_prediction": "",
+            "subject_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": false
+            }
+          },
+          "signature_b": {
+            "cycle": 2,
+            "last_choice": "rest",
+            "active_targets": 0,
+            "archived_targets": 6,
+            "evidence_events": 6,
+            "recent_outcomes": [
+              "confirmed",
+              "partially_supported",
+              "confirmed",
+              "confirmed"
+            ],
+            "prioritized_prediction": "",
+            "subject_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": false
+            }
+          }
+        },
+        {
+          "seed": 431,
+          "equivalent": true,
+          "signature_a": {
+            "cycle": 2,
+            "last_choice": "hide",
+            "active_targets": 0,
+            "archived_targets": 6,
+            "evidence_events": 6,
+            "recent_outcomes": [
+              "confirmed",
+              "partially_supported",
+              "confirmed",
+              "confirmed"
+            ],
+            "prioritized_prediction": "",
+            "subject_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": false
+            }
+          },
+          "signature_b": {
+            "cycle": 2,
+            "last_choice": "hide",
+            "active_targets": 0,
+            "archived_targets": 6,
+            "evidence_events": 6,
+            "recent_outcomes": [
+              "confirmed",
+              "partially_supported",
+              "confirmed",
+              "confirmed"
+            ],
+            "prioritized_prediction": "",
+            "subject_flags": {
+              "threatened": false,
+              "repairing": false,
+              "overloaded": true,
+              "socially_destabilized": false,
+              "continuity_fragile": false
+            }
+          }
+        }
+      ]
+    },
+    "causality": {
+      "passed": true,
+      "evidence": "verification pressure changes scan ranking, workspace focus, memory sensitivity, and maintenance tasks"
+    },
+    "ablation": {
+      "passed": true,
+      "evidence": {
+        "evidence_seeking_removed_without_verification": true,
+        "target_specific_workspace_focus_removed_without_verification": true,
+        "target_specific_verification_bias_removed_without_verification": true,
+        "target_specific_maintenance_priority_removed_without_verification": true
+      }
+    },
+    "stress": {
+      "passed": true,
+      "evidence": {
+        "timeout_update": {
+          "created_targets": [],
+          "prioritized_target_id": "",
+          "evidence_ids": [
+            "miss:verify:pred:env:novelty:3"
+          ],
+          "outcomes": [
+            "expired_unverified"
+          ],
+          "prediction_updates": [
+            {
+              "prediction_id": "pred:env:novelty",
+              "previous_status": "active",
+              "new_status": "escalated",
+              "previous_confidence": 0.72,
+              "new_confidence": 0.6,
+              "ledger_discrepancy_id": "disc:verify_timeout:pred:env:novelty",
+              "discharged_discrepancy_ids": [],
+              "subject_pressure_delta": 0.0
+            }
+          ],
+          "discharged_discrepancies": [],
+          "escalated_discrepancies": [
+            "disc:verify_timeout:pred:env:novelty"
+          ],
+          "expired_targets": [
+            "verify:pred:env:novelty"
+          ],
+          "deferred_targets": [],
+          "summary": "Verification outcomes observed: expired_unverified."
+        },
+        "trace_checks": {
+          "trace_lines": 1,
+          "last_record_has_verification_loop": true,
+          "last_record_has_verification_payload": true
+        }
+      }
+    },
+    "regression": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m224_acceptance.py",
+        "tests/test_m227_acceptance.py",
+        "tests/test_baseline_regressions.py"
+      ]
+    },
+    "artifact_freshness": {
+      "passed": true,
+      "evidence": "all M2.29 acceptance artifacts were generated in the current round"
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "current_round": true,
+    "generated_at": "2026-03-22T06:45:52+00:00",
+    "codebase_version": "eaa5d6a17fd91d60ffdda12c3485b459c4b773a3",
+    "artifact_records": {
+      "specification": {
+        "path": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
+        "exists": true,
+        "size_bytes": 2414,
+        "modified_at": "2026-03-22T06:44:24+00:00"
+      },
+      "canonical_trace": {
+        "path": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
+        "exists": true,
+        "size_bytes": 55382,
+        "modified_at": "2026-03-22T06:45:52+00:00"
+      },
+      "ablation": {
+        "path": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
+        "exists": true,
+        "size_bytes": 1787,
+        "modified_at": "2026-03-22T06:45:52+00:00"
+      },
+      "stress": {
+        "path": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
+        "exists": true,
+        "size_bytes": 5949,
+        "modified_at": "2026-03-22T06:45:52+00:00"
+      },
+      "summary": {
+        "path": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md",
+        "exists": true,
+        "size_bytes": 236,
+        "modified_at": "2026-03-22T06:45:52+00:00"
+      }
+    }
+  },
+  "recommendation": "ACCEPT"
+}

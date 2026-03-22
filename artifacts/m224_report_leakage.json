@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-22T03:48:41+00:00",
-  "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57",
+  "generated_at": "2026-03-22T06:45:53+00:00",
+  "codebase_version": "eaa5d6a17fd91d60ffdda12c3485b459c4b773a3",
   "seed_set": [
     224,
     243,
@@ -1023,7 +1023,7 @@
           "shelter"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, continuity fragility. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, continuity fragility. Anchors held: ep-000001-hide. Current narrative phase: forming. Verification: I am not actively verifying any prediction right now.",
           "channels": [
             "novelty",
             "danger"
@@ -1147,6 +1147,216 @@
             "continuity_anchors": [
               "ep-000001-hide"
             ]
+          },
+          "verification": {
+            "summary": "I am not actively verifying any prediction right now.",
+            "verification_motive": "",
+            "unresolved_reason": "",
+            "prioritized_target": null,
+            "active_targets": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "created_tick": 1,
+                "priority_score": 0.507,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:action:hide",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.11",
+                    "stress stays within 0.11",
+                    "fatigue stays within 0.11",
+                    "temperature stays within 0.11"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.38",
+                    "stress diverges by >= 0.38",
+                    "fatigue diverges by >= 0.38",
+                    "temperature diverges by >= 0.38"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 1,
+                  "expires_tick": 2,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "stress",
+                    "temperature"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "inconclusive",
+                "outcome_tick": 1,
+                "evidence_ids": [
+                  "obs:verify:pred:action:hide:1:validation_observation"
+                ],
+                "last_evidence_tick": 1,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.11084
+              },
+              {
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "created_tick": 1,
+                "priority_score": 0.457,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:env:novelty",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:novelty"
+                  ],
+                  "support_criteria": [
+                    "novelty stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "novelty diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 1,
+                  "expires_tick": 2,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "novelty"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 1,
+                "evidence_ids": [
+                  "obs:verify:pred:env:novelty:1:validation_observation"
+                ],
+                "last_evidence_tick": 1,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.10484
+              },
+              {
+                "target_id": "verify:pred:env:temperature",
+                "prediction_id": "pred:env:temperature",
+                "created_tick": 1,
+                "priority_score": 0.377,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:env:temperature",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "temperature stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "temperature diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 1,
+                  "expires_tick": 2,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "temperature"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 1,
+                "evidence_ids": [
+                  "obs:verify:pred:env:temperature:1:validation_observation"
+                ],
+                "last_evidence_tick": 1,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.09524
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:hide:1:validation_observation",
+                "tick": 1,
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:hide.",
+                "observed_state": {
+                  "temperature": 0.3464808687021772
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.534222,
+                "contradiction_score": 0.465778,
+                "metadata": {
+                  "avg_error": 0.174667
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:1:validation_observation",
+                "tick": 1,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.4706641345425636
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.98391,
+                "contradiction_score": 0.01609,
+                "metadata": {
+                  "avg_error": 0.005229
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:temperature:1:validation_observation",
+                "tick": 1,
+                "target_id": "verify:pred:env:temperature",
+                "prediction_id": "pred:env:temperature",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:env:temperature.",
+                "observed_state": {
+                  "temperature": 0.3464808687021772
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [],
+                "support_score": 0.524102,
+                "contradiction_score": 0.475898,
+                "metadata": {
+                  "avg_error": 0.154667
+                }
+              }
+            ],
+            "recent_falsifications": [],
+            "counts": {
+              "active_targets": 0,
+              "archived_targets": 3,
+              "evidence_events": 3
+            }
           }
         },
         "semantic_report": {
@@ -1182,7 +1392,7 @@
           "danger"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: repeated surprise burden, unresolved maintenance discrepancy. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+          "text": "Consciously accessible now: novelty, temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. Verification: I am not actively verifying any prediction right now.",
           "channels": [
             "novelty",
             "temperature"
@@ -1202,7 +1412,7 @@
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: repeated surprise burden, unresolved maintenance discrepancy. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1220,6 +1430,28 @@
             },
             "priority_stack": [
               {
+                "label": "maintenance pressure",
+                "weight": 1.0,
+                "priority_type": "maintenance",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "verify:pred:env:food",
+                  "verify:pred:env:novelty",
+                  "verify:pred:action:rest"
+                ]
+              },
+              {
+                "label": "need:maintenance",
+                "weight": 1.0,
+                "priority_type": "need",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "active homeostatic protection"
+                ]
+              },
+              {
                 "label": "repeated surprise burden",
                 "weight": 1.0,
                 "priority_type": "surprise_burden",
@@ -1231,39 +1463,28 @@
               },
               {
                 "label": "unresolved maintenance discrepancy",
-                "weight": 0.909857,
+                "weight": 1.0,
                 "priority_type": "maintenance_overload",
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "resource_guard",
-                  "ledger_continuity_guard"
-                ]
-              },
-              {
-                "label": "maintenance pressure",
-                "weight": 0.859857,
-                "priority_type": "maintenance",
-                "preferred_actions": [],
-                "avoid_actions": [],
-                "evidence": [
-                  "ledger_continuity_guard",
-                  "thermal_rebalance",
-                  "continuity_guard"
-                ]
-              },
-              {
-                "label": "need:maintenance",
-                "weight": 0.859857,
-                "priority_type": "need",
-                "preferred_actions": [],
-                "avoid_actions": [],
-                "evidence": [
-                  "active homeostatic protection"
+                  "verify:pred:env:temperature",
+                  "verify:pred:env:novelty"
                 ]
               }
             ],
             "unresolved_tensions": [
+              {
+                "label": "maintenance pressure",
+                "tension_type": "maintenance",
+                "intensity": 1.0,
+                "repair_target": "scan",
+                "evidence": [
+                  "verify:pred:env:food",
+                  "verify:pred:env:novelty",
+                  "verify:pred:action:rest"
+                ]
+              },
               {
                 "label": "repeated surprise burden",
                 "tension_type": "surprise_burden",
@@ -1276,22 +1497,11 @@
               {
                 "label": "unresolved maintenance discrepancy",
                 "tension_type": "maintenance_overload",
-                "intensity": 0.909857,
+                "intensity": 1.0,
                 "repair_target": "SURVIVAL",
                 "evidence": [
-                  "resource_guard",
-                  "ledger_continuity_guard"
-                ]
-              },
-              {
-                "label": "maintenance pressure",
-                "tension_type": "maintenance",
-                "intensity": 0.859857,
-                "repair_target": "scan",
-                "evidence": [
-                  "ledger_continuity_guard",
-                  "thermal_rebalance",
-                  "continuity_guard"
+                  "verify:pred:env:temperature",
+                  "verify:pred:env:novelty"
                 ]
               },
               {
@@ -1308,6 +1518,322 @@
             "continuity_anchors": [
               "ep-000001-hide"
             ]
+          },
+          "verification": {
+            "summary": "I am not actively verifying any prediction right now.",
+            "verification_motive": "",
+            "unresolved_reason": "",
+            "prioritized_target": null,
+            "active_targets": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:env:temperature",
+                "prediction_id": "pred:env:temperature",
+                "created_tick": 1,
+                "priority_score": 0.377,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:env:temperature",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "temperature stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "temperature diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 1,
+                  "expires_tick": 2,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "temperature"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 1,
+                "evidence_ids": [
+                  "obs:verify:pred:env:temperature:1:validation_observation"
+                ],
+                "last_evidence_tick": 1,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.09524
+              },
+              {
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "created_tick": 2,
+                "priority_score": 0.807,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:action:rest",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.11",
+                    "stress stays within 0.11",
+                    "fatigue stays within 0.11",
+                    "temperature stays within 0.11"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.38",
+                    "stress diverges by >= 0.38",
+                    "fatigue diverges by >= 0.38",
+                    "temperature diverges by >= 0.38"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "stress",
+                    "temperature",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "partially_supported",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:action:rest:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.14684
+              },
+              {
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "created_tick": 2,
+                "priority_score": 0.677,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:novelty",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:novelty"
+                  ],
+                  "support_criteria": [
+                    "novelty stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "novelty diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "novelty",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:env:novelty:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.13124
+              },
+              {
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "created_tick": 2,
+                "priority_score": 0.597,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:food",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:food"
+                  ],
+                  "support_criteria": [
+                    "food stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "food diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "food",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:env:food:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.12164
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:hide:1:validation_observation",
+                "tick": 1,
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:hide.",
+                "observed_state": {
+                  "temperature": 0.3464808687021772
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.534222,
+                "contradiction_score": 0.465778,
+                "metadata": {
+                  "avg_error": 0.174667
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:1:validation_observation",
+                "tick": 1,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.4706641345425636
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.98391,
+                "contradiction_score": 0.01609,
+                "metadata": {
+                  "avg_error": 0.005229
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:temperature:1:validation_observation",
+                "tick": 1,
+                "target_id": "verify:pred:env:temperature",
+                "prediction_id": "pred:env:temperature",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:env:temperature.",
+                "observed_state": {
+                  "temperature": 0.3464808687021772
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [],
+                "support_score": 0.524102,
+                "contradiction_score": 0.475898,
+                "metadata": {
+                  "avg_error": 0.154667
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:action:rest:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:rest.",
+                "observed_state": {
+                  "temperature": 0.3561303894210133
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.784983,
+                "contradiction_score": 0.215017,
+                "metadata": {
+                  "avg_error": 0.080631
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.48374978194845847
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.857658,
+                "contradiction_score": 0.142342,
+                "metadata": {
+                  "avg_error": 0.046261
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:food:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "source": "validation_observation",
+                "summary": "Observed food while verifying pred:env:food.",
+                "observed_state": {
+                  "food": 0.4068192985610627
+                },
+                "compared_channels": [
+                  "food"
+                ],
+                "missing_channels": [],
+                "support_score": 0.568776,
+                "contradiction_score": 0.431224,
+                "metadata": {
+                  "avg_error": 0.140148
+                }
+              }
+            ],
+            "recent_falsifications": [],
+            "counts": {
+              "active_targets": 0,
+              "archived_targets": 6,
+              "evidence_events": 6
+            }
           }
         },
         "semantic_report": {
@@ -1342,7 +1868,7 @@
           "social"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, temperature. Carry-over still accessible: temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+          "text": "Consciously accessible now: novelty, temperature. Carry-over still accessible: temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. Verification: I am not actively verifying any prediction right now.",
           "channels": [
             "novelty",
             "temperature"
@@ -1396,25 +1922,25 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "resource_guard",
-                  "ledger_continuity_guard"
+                  "verify:pred:env:temperature",
+                  "verify:pred:env:novelty"
                 ]
               },
               {
                 "label": "maintenance pressure",
-                "weight": 0.759562,
+                "weight": 0.979562,
                 "priority_type": "maintenance",
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "ledger_continuity_guard",
-                  "ledger_maintenance_repair",
-                  "thermal_rebalance"
+                  "verify:pred:env:food",
+                  "verify:pred:env:novelty",
+                  "verify:pred:action:rest"
                 ]
               },
               {
                 "label": "need:maintenance",
-                "weight": 0.759562,
+                "weight": 0.979562,
                 "priority_type": "need",
                 "preferred_actions": [],
                 "avoid_actions": [],
@@ -1430,8 +1956,8 @@
                 "intensity": 1.08,
                 "repair_target": "SURVIVAL",
                 "evidence": [
-                  "resource_guard",
-                  "ledger_continuity_guard"
+                  "verify:pred:env:temperature",
+                  "verify:pred:env:novelty"
                 ]
               },
               {
@@ -1446,12 +1972,12 @@
               {
                 "label": "maintenance pressure",
                 "tension_type": "maintenance",
-                "intensity": 0.759562,
-                "repair_target": "rest",
+                "intensity": 0.979562,
+                "repair_target": "scan",
                 "evidence": [
-                  "ledger_continuity_guard",
-                  "ledger_maintenance_repair",
-                  "thermal_rebalance"
+                  "verify:pred:env:food",
+                  "verify:pred:env:novelty",
+                  "verify:pred:action:rest"
                 ]
               },
               {
@@ -1468,15 +1994,328 @@
             "continuity_anchors": [
               "ep-000001-hide"
             ]
+          },
+          "verification": {
+            "summary": "I am not actively verifying any prediction right now.",
+            "verification_motive": "",
+            "unresolved_reason": "",
+            "prioritized_target": null,
+            "active_targets": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "created_tick": 2,
+                "priority_score": 0.597,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:food",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:food"
+                  ],
+                  "support_criteria": [
+                    "food stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "food diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "food",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:env:food:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.12164
+              },
+              {
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "created_tick": 3,
+                "priority_score": 0.707,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:action:rest",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.11",
+                    "stress stays within 0.11",
+                    "fatigue stays within 0.11",
+                    "temperature stays within 0.11"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.38",
+                    "stress diverges by >= 0.38",
+                    "fatigue diverges by >= 0.38",
+                    "temperature diverges by >= 0.38"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 3,
+                  "expires_tick": 4,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "stress",
+                    "temperature",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "partially_supported",
+                "outcome_tick": 3,
+                "evidence_ids": [
+                  "obs:verify:pred:action:rest:3:validation_observation"
+                ],
+                "last_evidence_tick": 3,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.13484
+              },
+              {
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "created_tick": 3,
+                "priority_score": 0.577,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:novelty",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:novelty"
+                  ],
+                  "support_criteria": [
+                    "novelty stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "novelty diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 3,
+                  "expires_tick": 4,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "novelty",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 3,
+                "evidence_ids": [
+                  "obs:verify:pred:env:novelty:3:validation_observation"
+                ],
+                "last_evidence_tick": 3,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.11924
+              },
+              {
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "created_tick": 3,
+                "priority_score": 0.497,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:food",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:food"
+                  ],
+                  "support_criteria": [
+                    "food stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "food diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 3,
+                  "expires_tick": 4,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "food",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 3,
+                "evidence_ids": [
+                  "obs:verify:pred:env:food:3:validation_observation"
+                ],
+                "last_evidence_tick": 3,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.10964
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:rest:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:rest.",
+                "observed_state": {
+                  "temperature": 0.3561303894210133
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.784983,
+                "contradiction_score": 0.215017,
+                "metadata": {
+                  "avg_error": 0.080631
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.48374978194845847
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.857658,
+                "contradiction_score": 0.142342,
+                "metadata": {
+                  "avg_error": 0.046261
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:food:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "source": "validation_observation",
+                "summary": "Observed food while verifying pred:env:food.",
+                "observed_state": {
+                  "food": 0.4068192985610627
+                },
+                "compared_channels": [
+                  "food"
+                ],
+                "missing_channels": [],
+                "support_score": 0.568776,
+                "contradiction_score": 0.431224,
+                "metadata": {
+                  "avg_error": 0.140148
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:action:rest:3:validation_observation",
+                "tick": 3,
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:rest.",
+                "observed_state": {
+                  "temperature": 0.4106184116166644
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.844488,
+                "contradiction_score": 0.155512,
+                "metadata": {
+                  "avg_error": 0.058317
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:3:validation_observation",
+                "tick": 3,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.5436573761823063
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.868468,
+                "contradiction_score": 0.131532,
+                "metadata": {
+                  "avg_error": 0.042748
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:food:3:validation_observation",
+                "tick": 3,
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "source": "validation_observation",
+                "summary": "Observed food while verifying pred:env:food.",
+                "observed_state": {
+                  "food": 0.40593122386461666
+                },
+                "compared_channels": [
+                  "food"
+                ],
+                "missing_channels": [],
+                "support_score": 0.623643,
+                "contradiction_score": 0.376357,
+                "metadata": {
+                  "avg_error": 0.122316
+                }
+              }
+            ],
+            "recent_falsifications": [],
+            "counts": {
+              "active_targets": 0,
+              "archived_targets": 9,
+              "evidence_events": 9
+            }
           }
         },
         "semantic_report": {
-          "semantic_leakage_free": false,
-          "matched_aliases": {
-            "maintenance": [
-              "maintenance"
-            ]
-          }
+          "semantic_leakage_free": true,
+          "matched_aliases": {}
         },
         "workspace_maintenance_priority": {
           "priority_gain": 0.35,
@@ -1505,7 +2344,7 @@
           "social"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, temperature. Carry-over still accessible: temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+          "text": "Consciously accessible now: novelty, temperature. Carry-over still accessible: temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Anchors held: ep-000001-hide. Current narrative phase: forming. Verification: I am not actively verifying any prediction right now.",
           "channels": [
             "novelty",
             "temperature"
@@ -1525,7 +2364,7 @@
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: repeated surprise burden, unresolved maintenance discrepancy. Unresolved tensions: unresolved maintenance discrepancy, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Anchors held: ep-000001-hide. Current narrative phase: forming.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1543,6 +2382,28 @@
             },
             "priority_stack": [
               {
+                "label": "maintenance pressure",
+                "weight": 1.0,
+                "priority_type": "maintenance",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "verify:pred:env:food",
+                  "verify:pred:env:novelty",
+                  "verify:pred:action:rest"
+                ]
+              },
+              {
+                "label": "need:maintenance",
+                "weight": 1.0,
+                "priority_type": "need",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "active homeostatic protection"
+                ]
+              },
+              {
                 "label": "repeated surprise burden",
                 "weight": 1.0,
                 "priority_type": "surprise_burden",
@@ -1559,30 +2420,8 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "resource_guard",
-                  "ledger_continuity_guard"
-                ]
-              },
-              {
-                "label": "unresolved self inconsistency",
-                "weight": 0.88,
-                "priority_type": "identity_tension",
-                "preferred_actions": [],
-                "avoid_actions": [],
-                "evidence": [
-                  "none"
-                ]
-              },
-              {
-                "label": "maintenance pressure",
-                "weight": 0.860064,
-                "priority_type": "maintenance",
-                "preferred_actions": [],
-                "avoid_actions": [],
-                "evidence": [
-                  "ledger_continuity_guard",
-                  "ledger_maintenance_repair",
-                  "thermal_rebalance"
+                  "verify:pred:env:temperature",
+                  "verify:pred:env:novelty"
                 ]
               }
             ],
@@ -1593,8 +2432,19 @@
                 "intensity": 1.08,
                 "repair_target": "SURVIVAL",
                 "evidence": [
-                  "resource_guard",
-                  "ledger_continuity_guard"
+                  "verify:pred:env:temperature",
+                  "verify:pred:env:novelty"
+                ]
+              },
+              {
+                "label": "maintenance pressure",
+                "tension_type": "maintenance",
+                "intensity": 1.0,
+                "repair_target": "scan",
+                "evidence": [
+                  "verify:pred:env:food",
+                  "verify:pred:env:novelty",
+                  "verify:pred:action:rest"
                 ]
               },
               {
@@ -1614,32 +2464,334 @@
                 "evidence": [
                   "none"
                 ]
-              },
-              {
-                "label": "maintenance pressure",
-                "tension_type": "maintenance",
-                "intensity": 0.860064,
-                "repair_target": "rest",
-                "evidence": [
-                  "ledger_continuity_guard",
-                  "ledger_maintenance_repair",
-                  "thermal_rebalance"
-                ]
               }
             ],
             "continuity_score": 0.7,
             "continuity_anchors": [
               "ep-000001-hide"
             ]
+          },
+          "verification": {
+            "summary": "I am not actively verifying any prediction right now.",
+            "verification_motive": "",
+            "unresolved_reason": "",
+            "prioritized_target": null,
+            "active_targets": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "created_tick": 3,
+                "priority_score": 0.497,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:food",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:food"
+                  ],
+                  "support_criteria": [
+                    "food stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "food diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 3,
+                  "expires_tick": 4,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "food",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 3,
+                "evidence_ids": [
+                  "obs:verify:pred:env:food:3:validation_observation"
+                ],
+                "last_evidence_tick": 3,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.10964
+              },
+              {
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "created_tick": 4,
+                "priority_score": 0.807,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:action:rest",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.11",
+                    "stress stays within 0.11",
+                    "fatigue stays within 0.11",
+                    "temperature stays within 0.11"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.38",
+                    "stress diverges by >= 0.38",
+                    "fatigue diverges by >= 0.38",
+                    "temperature diverges by >= 0.38"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 4,
+                  "expires_tick": 5,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "stress",
+                    "temperature",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "partially_supported",
+                "outcome_tick": 4,
+                "evidence_ids": [
+                  "obs:verify:pred:action:rest:4:validation_observation"
+                ],
+                "last_evidence_tick": 4,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.14684
+              },
+              {
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "created_tick": 4,
+                "priority_score": 0.677,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:novelty",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:novelty"
+                  ],
+                  "support_criteria": [
+                    "novelty stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "novelty diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 4,
+                  "expires_tick": 5,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "novelty",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 4,
+                "evidence_ids": [
+                  "obs:verify:pred:env:novelty:4:validation_observation"
+                ],
+                "last_evidence_tick": 4,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.13124
+              },
+              {
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "created_tick": 4,
+                "priority_score": 0.597,
+                "selected_reason": "it is identity-relevant",
+                "plan": {
+                  "prediction_id": "pred:env:food",
+                  "selected_reason": "it is identity-relevant",
+                  "evidence_sought": [
+                    "observe:food"
+                  ],
+                  "support_criteria": [
+                    "food stays within 0.16"
+                  ],
+                  "falsification_criteria": [
+                    "food diverges by >= 0.33"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 4,
+                  "expires_tick": 5,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "food",
+                    "continuity"
+                  ]
+                },
+                "status": "resolved",
+                "outcome": "confirmed",
+                "outcome_tick": 4,
+                "evidence_ids": [
+                  "obs:verify:pred:env:food:4:validation_observation"
+                ],
+                "last_evidence_tick": 4,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "verification_bias": 0.12164
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:rest:3:validation_observation",
+                "tick": 3,
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:rest.",
+                "observed_state": {
+                  "temperature": 0.4106184116166644
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.844488,
+                "contradiction_score": 0.155512,
+                "metadata": {
+                  "avg_error": 0.058317
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:3:validation_observation",
+                "tick": 3,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.5436573761823063
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.868468,
+                "contradiction_score": 0.131532,
+                "metadata": {
+                  "avg_error": 0.042748
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:food:3:validation_observation",
+                "tick": 3,
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "source": "validation_observation",
+                "summary": "Observed food while verifying pred:env:food.",
+                "observed_state": {
+                  "food": 0.40593122386461666
+                },
+                "compared_channels": [
+                  "food"
+                ],
+                "missing_channels": [],
+                "support_score": 0.623643,
+                "contradiction_score": 0.376357,
+                "metadata": {
+                  "avg_error": 0.122316
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:action:rest:4:validation_observation",
+                "tick": 4,
+                "target_id": "verify:pred:action:rest",
+                "prediction_id": "pred:action:rest",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:rest.",
+                "observed_state": {
+                  "temperature": 0.4115984770396456
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue"
+                ],
+                "support_score": 0.848899,
+                "contradiction_score": 0.151101,
+                "metadata": {
+                  "avg_error": 0.056663
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:novelty:4:validation_observation",
+                "tick": 4,
+                "target_id": "verify:pred:env:novelty",
+                "prediction_id": "pred:env:novelty",
+                "source": "validation_observation",
+                "summary": "Observed novelty while verifying pred:env:novelty.",
+                "observed_state": {
+                  "novelty": 0.5707482414191553
+                },
+                "compared_channels": [
+                  "novelty"
+                ],
+                "missing_channels": [],
+                "support_score": 0.782913,
+                "contradiction_score": 0.217087,
+                "metadata": {
+                  "avg_error": 0.070553
+                }
+              },
+              {
+                "evidence_id": "obs:verify:pred:env:food:4:validation_observation",
+                "tick": 4,
+                "target_id": "verify:pred:env:food",
+                "prediction_id": "pred:env:food",
+                "source": "validation_observation",
+                "summary": "Observed food while verifying pred:env:food.",
+                "observed_state": {
+                  "food": 0.30801898032901187
+                },
+                "compared_channels": [
+                  "food"
+                ],
+                "missing_channels": [],
+                "support_score": 0.411924,
+                "contradiction_score": 0.588076,
+                "metadata": {
+                  "avg_error": 0.191125
+                }
+              }
+            ],
+            "recent_falsifications": [],
+            "counts": {
+              "active_targets": 0,
+              "archived_targets": 12,
+              "evidence_events": 12
+            }
           }
         },
         "semantic_report": {
-          "semantic_leakage_free": false,
-          "matched_aliases": {
-            "maintenance": [
-              "maintenance"
-            ]
-          }
+          "semantic_leakage_free": true,
+          "matched_aliases": {}
         },
         "workspace_maintenance_priority": {
           "priority_gain": 0.35,

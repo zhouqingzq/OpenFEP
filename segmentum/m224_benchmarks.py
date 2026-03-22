@@ -1029,7 +1029,14 @@ def _semantic_report_check(
     accessible_channels: Iterable[str],
     suppressed_channels: Iterable[str],
 ) -> dict[str, object]:
-    lowered = f" {text.casefold()} "
+    accessible_surface = text
+    subject_boundary = accessible_surface.find(" Subject state:")
+    if subject_boundary >= 0:
+        accessible_surface = accessible_surface[:subject_boundary]
+    verification_boundary = accessible_surface.find(" Verification:")
+    if verification_boundary >= 0:
+        accessible_surface = accessible_surface[:verification_boundary]
+    lowered = f" {accessible_surface.casefold()} "
     accessible = set(accessible_channels)
     suppressed = [channel for channel in suppressed_channels if channel not in accessible]
     matched_aliases: dict[str, list[str]] = {}

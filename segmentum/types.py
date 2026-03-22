@@ -380,6 +380,7 @@ class InterventionScore:
     commitment_compatibility_score: float = 0.5
     relevant_commitments: list[str] = field(default_factory=list)
     commitment_violations: list[str] = field(default_factory=list)
+    verification_bias: float = 0.0
 
     def policy_components(self) -> dict[str, float]:
         return {
@@ -395,6 +396,7 @@ class InterventionScore:
             "ledger_bias": self.ledger_bias,
             "subject_bias": self.subject_bias,
             "goal_alignment": self.goal_alignment,
+            "verification_bias": self.verification_bias,
         }
 
 
@@ -446,6 +448,8 @@ class DecisionDiagnostics:
     social_snapshot: dict[str, object] = field(default_factory=dict)
     ledger_summary: str = ""
     ledger_payload: dict[str, object] = field(default_factory=dict)
+    verification_summary: str = ""
+    verification_payload: dict[str, object] = field(default_factory=dict)
     subject_state_summary: str = ""
     subject_status_flags: dict[str, bool] = field(default_factory=dict)
     subject_priority_stack: list[dict[str, object]] = field(default_factory=list)

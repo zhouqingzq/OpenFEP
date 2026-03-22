@@ -391,6 +391,7 @@ def evaluate_runtime_lifecycle_evidence() -> dict[str, object]:
     archive_agent = SegmentAgent(rng=random.Random(41))
     archive_agent.cycle = 50
     archive_agent.long_term_memory.max_active_age = 5
+    archive_agent.long_term_memory.minimum_active_episodes = 0
     archive_observation = {
         "food": 0.20,
         "danger": 0.62,

@@ -1069,6 +1069,14 @@ class LongTermMemory:
         if len(self.episodes) <= retain_recent:
             return 0
         retired = 0
+        protected_floor = sum(
+            1
+            for payload in self.episodes
+            if self.should_preserve_restart_continuity(payload, current_cycle=current_cycle)
+            or bool(payload.get("identity_critical", False))
+            or self._is_restart_protected_payload(payload)
+        )
+        minimum_floor = max(int(retain_recent), protected_floor)
         candidates = sorted(
             self.episodes,
             key=lambda payload: (
@@ -1079,7 +1087,7 @@ class LongTermMemory:
         for payload in candidates:
             if len(self.episodes) <= retain_recent:
                 break
-            if len(self.episodes) <= self.minimum_active_episodes:
+            if len(self.episodes) <= minimum_floor:
                 break
             if self.should_preserve_restart_continuity(payload, current_cycle=current_cycle):
                 continue
@@ -1886,6 +1894,16 @@ class LongTermMemory:
             preference_log_value=mean(episode.preference_log_value for episode in episodes),
         )
         merged_payload = merged.to_dict()
+        first_seen_cycle = int(min(self._episode_cycle(payload) for payload in payloads))
+        last_seen_cycle = int(max(self._episode_cycle(payload) for payload in payloads))
+        merged_payload["episode_id"] = (
+            f"ep-{first_seen_cycle:06d}-{episodes[0].action_taken.name}-merged"
+        )
+        merged_payload["occurrence_count"] = len(payloads)
+        merged_payload["support"] = len(payloads)
+        merged_payload["support_count"] = len(payloads)
+        merged_payload["first_seen_cycle"] = first_seen_cycle
+        merged_payload["last_seen_cycle"] = last_seen_cycle
         merged_payload["compressed_count"] = len(payloads)
         if protected_payloads:
             reference = max(
@@ -1907,6 +1925,8 @@ class LongTermMemory:
                 )
             )
             merged_payload["lifecycle_stage"] = LIFECYCLE_PROTECTED_IDENTITY_CRITICAL
+        merged_payload.setdefault("episode_family", self._infer_episode_family(merged_payload))
+        merged_payload.setdefault("family_features", self._extract_family_features(merged_payload))
         self._synchronize_continuity_metadata(merged_payload)
         return merged_payload
 

@@ -23,6 +23,18 @@ from .prediction_ledger import (
     PredictionLedgerUpdate,
     VerificationStatus,
 )
+from .verification import (
+    FalsificationRecord,
+    PredictionUpdateResult,
+    VerificationEvidence,
+    VerificationEvidenceSource,
+    VerificationLoop,
+    VerificationLoopUpdate,
+    VerificationOutcome,
+    VerificationPlan,
+    VerificationTarget,
+    VerificationTargetStatus,
+)
 from .governance import CapabilityDescriptor, GovernanceController, GovernanceState
 from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
@@ -93,6 +105,16 @@ __all__ = [
     "VerificationStatus",
     "DiscrepancySource",
     "LedgerPriority",
+    "VerificationLoop",
+    "VerificationLoopUpdate",
+    "VerificationPlan",
+    "VerificationTarget",
+    "VerificationTargetStatus",
+    "VerificationEvidence",
+    "VerificationEvidenceSource",
+    "VerificationOutcome",
+    "FalsificationRecord",
+    "PredictionUpdateResult",
     "CapabilityDescriptor",
     "GovernanceController",
     "GovernanceState",

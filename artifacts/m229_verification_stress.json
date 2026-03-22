@@ -1,0 +1,204 @@
+{
+  "generated_at": "2026-03-22T06:45:52+00:00",
+  "failure_injection": {
+    "type": "verification_timeout_after_snapshot_restore",
+    "missing_channel": "novelty",
+    "observation": {
+      "danger": 0.5
+    }
+  },
+  "snapshot_roundtrip": {
+    "active_target_count_before_restore": 1,
+    "active_target_count_after_restore": 1,
+    "prediction_id_after_restore": "pred:env:novelty"
+  },
+  "timeout_update": {
+    "created_targets": [],
+    "prioritized_target_id": "",
+    "evidence_ids": [
+      "miss:verify:pred:env:novelty:3"
+    ],
+    "outcomes": [
+      "expired_unverified"
+    ],
+    "prediction_updates": [
+      {
+        "prediction_id": "pred:env:novelty",
+        "previous_status": "active",
+        "new_status": "escalated",
+        "previous_confidence": 0.72,
+        "new_confidence": 0.6,
+        "ledger_discrepancy_id": "disc:verify_timeout:pred:env:novelty",
+        "discharged_discrepancy_ids": [],
+        "subject_pressure_delta": 0.0
+      }
+    ],
+    "discharged_discrepancies": [],
+    "escalated_discrepancies": [
+      "disc:verify_timeout:pred:env:novelty"
+    ],
+    "expired_targets": [
+      "verify:pred:env:novelty"
+    ],
+    "deferred_targets": [],
+    "summary": "Verification outcomes observed: expired_unverified."
+  },
+  "ledger_state": {
+    "active_discrepancies": [
+      {
+        "discrepancy_id": "disc:identity_tension",
+        "label": "unresolved self inconsistency",
+        "source": "identity",
+        "discrepancy_type": "identity_tension",
+        "created_tick": 1,
+        "last_seen_tick": 1,
+        "severity": 0.5,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "conflict"
+        ],
+        "supporting_evidence": [
+          "none"
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": true,
+        "subject_critical": false,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [],
+        "linked_commitments": [],
+        "linked_goal": "SURVIVAL",
+        "age": 0,
+        "priority": "high"
+      },
+      {
+        "discrepancy_id": "disc:continuity_instability",
+        "label": "continuity-relevant tension",
+        "source": "continuity",
+        "discrepancy_type": "continuity_instability",
+        "created_tick": 1,
+        "last_seen_tick": 1,
+        "severity": 0.5,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "continuity"
+        ],
+        "supporting_evidence": [
+          "continuity_score_drop"
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": true,
+        "subject_critical": true,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [],
+        "linked_commitments": [],
+        "linked_goal": "",
+        "age": 0,
+        "priority": "high"
+      },
+      {
+        "discrepancy_id": "disc:surprise_burden",
+        "label": "repeated surprise burden",
+        "source": "memory",
+        "discrepancy_type": "surprise_burden",
+        "created_tick": 1,
+        "last_seen_tick": 1,
+        "severity": 1.0,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "novelty"
+        ],
+        "supporting_evidence": [
+          "memory_surprise=15.090"
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": true,
+        "subject_critical": false,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [],
+        "linked_commitments": [],
+        "linked_goal": "",
+        "age": 0,
+        "priority": "critical"
+      },
+      {
+        "discrepancy_id": "disc:verify_timeout:pred:env:novelty",
+        "label": "verification timeout",
+        "source": "prediction_error",
+        "discrepancy_type": "verification_timeout",
+        "created_tick": 3,
+        "last_seen_tick": 3,
+        "severity": 0.53,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "novelty"
+        ],
+        "supporting_evidence": [
+          "prediction=pred:env:novelty",
+          "expected_evidence_missing"
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": false,
+        "subject_critical": false,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [
+          "pred:env:novelty"
+        ],
+        "linked_commitments": [],
+        "linked_goal": "SURVIVAL",
+        "age": 0,
+        "priority": "medium"
+      },
+      {
+        "discrepancy_id": "disc:maintenance_overload",
+        "label": "unresolved maintenance discrepancy",
+        "source": "maintenance",
+        "discrepancy_type": "maintenance_overload",
+        "created_tick": 1,
+        "last_seen_tick": 1,
+        "severity": 0.573594,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "maintenance",
+          "stress"
+        ],
+        "supporting_evidence": [
+          "verify:pred:env:novelty",
+          "verify:pred:env:temperature",
+          "verify:pred:action:hide"
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": false,
+        "subject_critical": false,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [],
+        "linked_commitments": [],
+        "linked_goal": "SURVIVAL",
+        "age": 0,
+        "priority": "medium"
+      }
+    ],
+    "prediction_statuses": [
+      "active"
+    ]
+  },
+  "trace_checks": {
+    "trace_lines": 1,
+    "last_record_has_verification_loop": true,
+    "last_record_has_verification_payload": true
+  }
+}

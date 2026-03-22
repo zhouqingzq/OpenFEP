@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-03-22T06:45:52+00:00",
+  "mechanism": "verification_loop",
+  "comparison": "with_verification_vs_ablation",
+  "baseline": {
+    "scan_policy_score": 0.192141,
+    "scan_verification_bias": 0.0,
+    "workspace_focus": {
+      "energy": 0.38025,
+      "fatigue": 0.38025,
+      "stress": 0.38025,
+      "temperature": 0.38025,
+      "novelty": 0.34275
+    },
+    "memory_threshold_delta": -0.05535,
+    "maintenance_signal": {
+      "priority_gain": 0.18774,
+      "active_tasks": [
+        "verify:pred:action:hide",
+        "verify:pred:env:novelty",
+        "verify:pred:env:temperature"
+      ],
+      "recommended_action": "scan",
+      "suppressed_actions": []
+    }
+  },
+  "full_mechanism": {
+    "scan_policy_score": 0.298205,
+    "scan_verification_bias": 0.106064,
+    "workspace_focus": {
+      "energy": 0.38025,
+      "fatigue": 0.38025,
+      "stress": 0.38025,
+      "temperature": 0.38025,
+      "danger": 0.3504,
+      "novelty": 0.34275
+    },
+    "memory_threshold_delta": -0.05535,
+    "maintenance_signal": {
+      "priority_gain": 0.200368,
+      "active_tasks": [
+        "verify:pred:action:hide",
+        "verify:pred:env:danger",
+        "verify:pred:env:novelty"
+      ],
+      "recommended_action": "scan",
+      "suppressed_actions": []
+    },
+    "verification_summary": "I am currently trying to verify pred:action:hide because it is still unresolved."
+  },
+  "degradation_checks": {
+    "evidence_seeking_removed_without_verification": true,
+    "target_specific_workspace_focus_removed_without_verification": true,
+    "target_specific_verification_bias_removed_without_verification": true,
+    "target_specific_maintenance_priority_removed_without_verification": true
+  }
+}

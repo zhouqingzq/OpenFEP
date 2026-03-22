@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-21T14:56:18+00:00",
+  "generated_at": "2026-03-22T06:45:57+00:00",
   "seed": 342,
   "failure_injection": {
     "energy": 0.12,
@@ -268,11 +268,30 @@
           "label": "maintenance pressure",
           "tension_type": "maintenance",
           "intensity": 1.0,
-          "repair_target": "hide",
+          "repair_target": "scan",
           "evidence": [
-            "thermal_rebalance",
-            "energy_recovery",
-            "stress_relief"
+            "verify:pred:action:forage",
+            "verify:pred:env:temperature",
+            "verify:pred:env:food"
+          ]
+        },
+        {
+          "label": "repeated surprise burden",
+          "tension_type": "surprise_burden",
+          "intensity": 1.0,
+          "repair_target": "critical",
+          "evidence": [
+            "memory_surprise=1005.057"
+          ]
+        },
+        {
+          "label": "unresolved maintenance discrepancy",
+          "tension_type": "maintenance_overload",
+          "intensity": 1.0,
+          "repair_target": "SURVIVAL",
+          "evidence": [
+            "verify:pred:action:forage",
+            "verify:pred:env:temperature"
           ]
         },
         {
@@ -282,23 +301,6 @@
           "repair_target": "protect continuity anchors",
           "evidence": [
             "continuity_score_drop"
-          ]
-        },
-        {
-          "label": "identity tension",
-          "tension_type": "identity",
-          "intensity": 0.5,
-          "repair_target": "",
-          "evidence": []
-        },
-        {
-          "label": "self inconsistency",
-          "tension_type": "continuity",
-          "intensity": 0.5,
-          "repair_target": "",
-          "evidence": [
-            "none",
-            "none"
           ]
         }
       ],
@@ -310,9 +312,9 @@
           "preferred_actions": [],
           "avoid_actions": [],
           "evidence": [
-            "thermal_rebalance",
-            "energy_recovery",
-            "stress_relief"
+            "verify:pred:action:forage",
+            "verify:pred:env:temperature",
+            "verify:pred:env:food"
           ]
         },
         {
@@ -323,6 +325,27 @@
           "avoid_actions": [],
           "evidence": [
             "active homeostatic protection"
+          ]
+        },
+        {
+          "label": "repeated surprise burden",
+          "weight": 1.0,
+          "priority_type": "surprise_burden",
+          "preferred_actions": [],
+          "avoid_actions": [],
+          "evidence": [
+            "memory_surprise=1005.057"
+          ]
+        },
+        {
+          "label": "unresolved maintenance discrepancy",
+          "weight": 1.0,
+          "priority_type": "maintenance_overload",
+          "preferred_actions": [],
+          "avoid_actions": [],
+          "evidence": [
+            "verify:pred:action:forage",
+            "verify:pred:env:temperature"
           ]
         },
         {
@@ -356,29 +379,6 @@
           "evidence": [
             "SURVIVAL"
           ]
-        },
-        {
-          "label": "commitment continuity",
-          "weight": 0.62,
-          "priority_type": "commitment",
-          "preferred_actions": [
-            "hide",
-            "rest",
-            "exploit_shelter",
-            "scan"
-          ],
-          "avoid_actions": [],
-          "evidence": [
-            "active commitments"
-          ]
-        },
-        {
-          "label": "identity tension",
-          "weight": 0.5,
-          "priority_type": "identity",
-          "preferred_actions": [],
-          "avoid_actions": [],
-          "evidence": []
         }
       ],
       "status_flags": {
@@ -392,7 +392,9 @@
         "need:maintenance"
       ],
       "repair_targets": [
-        "hide",
+        "scan",
+        "critical",
+        "SURVIVAL",
         "protect continuity anchors"
       ],
       "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis."
