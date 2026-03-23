@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-03-23T08:21:38+00:00",
+  "mechanism": "reconciliation_narrative_writeback",
+  "comparison": "with_writeback_vs_ablation",
+  "ablation": {
+    "core_summary": "I remain adaptive under uncertainty.",
+    "chapter_transition_evidence_count": 0,
+    "reconciliation_summary": {},
+    "subject_core_identity_summary": "I remain adaptive under uncertainty."
+  },
+  "full_mechanism": {
+    "core_summary": "I remain adaptive under uncertainty. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
+    "chapter_transition_evidence_count": 5,
+    "reconciliation_summary": {
+      "summary": "This tension has persisted across 1 chapter(s) and is active.",
+      "counts": {
+        "active": 2,
+        "unresolved": 1,
+        "archived": 0
+      },
+      "reason": "sleep_review:3",
+      "tick": 8,
+      "dominant_thread_id": "conflict:continuity_anchor:continuity:4",
+      "dominant_status": "active",
+      "unresolved_thread_ids": [
+        "conflict:continuity_anchor:continuity:4"
+      ]
+    },
+    "subject_core_identity_summary": "I remain adaptive under uncertainty. Reconciliation: This tension has persisted across 1 chapter(s) and is active."
+  },
+  "degradation_checks": {
+    "core_summary_loses_reconciliation_clause_without_writeback": true,
+    "chapter_transition_evidence_not_written_without_writeback": true,
+    "subject_identity_summary_not_updated_without_writeback": true
+  }
+}

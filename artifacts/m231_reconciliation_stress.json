@@ -1,0 +1,294 @@
+{
+  "generated_at": "2026-03-23T08:21:38+00:00",
+  "failure_injection": {
+    "type": "cross_thread_evidence_contamination_and_unmatched_repair"
+  },
+  "thread_states": [
+    {
+      "thread_id": "conflict:continuity_anchor:continuity:5",
+      "signature": "continuity_anchor:continuity",
+      "title": "continuity anchor contradiction",
+      "created_tick": 5,
+      "latest_tick": 6,
+      "origin": {
+        "signature": "continuity_anchor:continuity",
+        "source_category": "continuity_anchor",
+        "created_tick": 5,
+        "chapter_id": 2,
+        "description": "continuity:fragile",
+        "source_refs": [
+          "continuity_score_drop"
+        ]
+      },
+      "linked_chapter_ids": [
+        2
+      ],
+      "linked_commitments": [],
+      "linked_values": [],
+      "linked_identity_elements": [],
+      "linked_social_entities": [],
+      "source_category": "continuity_anchor",
+      "severity": "low",
+      "recurrence_count": 2,
+      "persistence_class": "identity_critical",
+      "status": "active",
+      "supporting_evidence": [
+        "continuity_score_drop"
+      ],
+      "repair_attempt_history": [],
+      "pressures": [
+        {
+          "tick": 5,
+          "chapter_id": 2,
+          "intensity": 0.28,
+          "source": "continuity:fragile",
+          "summary": "continuity anchor contradiction",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        },
+        {
+          "tick": 6,
+          "chapter_id": 2,
+          "intensity": 0.28,
+          "source": "continuity:fragile",
+          "summary": "continuity anchor contradiction",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        }
+      ],
+      "chapter_bridges": [],
+      "integration_records": [
+        {
+          "tick": 5,
+          "chapter_id": 2,
+          "status": "active",
+          "summary": "promoted long-horizon conflict from continuity:fragile",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        },
+        {
+          "tick": 0,
+          "chapter_id": 2,
+          "status": "active",
+          "summary": "sleep review 1 classified thread as active",
+          "evidence": []
+        }
+      ],
+      "verification_evidence_ids": [],
+      "stable_confirmations": 0,
+      "failed_repairs": 0,
+      "current_outcome": "none",
+      "last_reopened_tick": null,
+      "archived_tick": null,
+      "last_status_reason": "continuity:fragile",
+      "protected": true
+    },
+    {
+      "thread_id": "conflict:other:9",
+      "signature": "identity_action:core_survival",
+      "title": "continuity anchor contradiction",
+      "created_tick": 5,
+      "latest_tick": 6,
+      "origin": {
+        "signature": "continuity_anchor:continuity",
+        "source_category": "continuity_anchor",
+        "created_tick": 5,
+        "chapter_id": 2,
+        "description": "continuity:fragile",
+        "source_refs": [
+          "continuity_score_drop"
+        ]
+      },
+      "linked_chapter_ids": [
+        2
+      ],
+      "linked_commitments": [
+        "core_survival"
+      ],
+      "linked_values": [],
+      "linked_identity_elements": [
+        "core_survival"
+      ],
+      "linked_social_entities": [],
+      "source_category": "continuity_anchor",
+      "severity": "low",
+      "recurrence_count": 2,
+      "persistence_class": "identity_critical",
+      "status": "active",
+      "supporting_evidence": [
+        "continuity_score_drop"
+      ],
+      "repair_attempt_history": [],
+      "pressures": [
+        {
+          "tick": 5,
+          "chapter_id": 2,
+          "intensity": 0.28,
+          "source": "continuity:fragile",
+          "summary": "continuity anchor contradiction",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        },
+        {
+          "tick": 6,
+          "chapter_id": 2,
+          "intensity": 0.28,
+          "source": "continuity:fragile",
+          "summary": "continuity anchor contradiction",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        }
+      ],
+      "chapter_bridges": [],
+      "integration_records": [
+        {
+          "tick": 5,
+          "chapter_id": 2,
+          "status": "active",
+          "summary": "promoted long-horizon conflict from continuity:fragile",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        },
+        {
+          "tick": 0,
+          "chapter_id": 2,
+          "status": "active",
+          "summary": "sleep review 1 classified thread as active",
+          "evidence": []
+        }
+      ],
+      "verification_evidence_ids": [],
+      "stable_confirmations": 0,
+      "failed_repairs": 0,
+      "current_outcome": "none",
+      "last_reopened_tick": null,
+      "archived_tick": null,
+      "last_status_reason": "continuity:fragile",
+      "protected": true
+    },
+    {
+      "thread_id": "conflict:identity_action:adaptive_exploration:6",
+      "signature": "identity_action:adaptive_exploration",
+      "title": "temporary deviation",
+      "created_tick": 6,
+      "latest_tick": 6,
+      "origin": {
+        "signature": "identity_action:adaptive_exploration",
+        "source_category": "identity_action",
+        "created_tick": 6,
+        "chapter_id": 2,
+        "description": "diagnostics:temporary_deviation",
+        "source_refs": [
+          "adaptive_exploration",
+          "medium"
+        ]
+      },
+      "linked_chapter_ids": [
+        2
+      ],
+      "linked_commitments": [
+        "adaptive_exploration"
+      ],
+      "linked_values": [],
+      "linked_identity_elements": [
+        "adaptive_exploration"
+      ],
+      "linked_social_entities": [],
+      "source_category": "identity_action",
+      "severity": "medium",
+      "recurrence_count": 1,
+      "persistence_class": "episodic",
+      "status": "partially_reconciled",
+      "supporting_evidence": [
+        "adaptive_exploration",
+        "medium"
+      ],
+      "repair_attempt_history": [
+        {
+          "attempt_id": "conflict:identity_action:adaptive_exploration:6:repair:6",
+          "tick": 6,
+          "policy": "metacognitive_review+policy_rebias",
+          "local_success": true,
+          "classification": "local_patch",
+          "target_action": "forage",
+          "repaired_action": "scan",
+          "pre_alignment": 0.35,
+          "post_alignment": 0.78,
+          "invalidated_tick": null,
+          "evidence": [
+            "adaptive_exploration"
+          ]
+        }
+      ],
+      "pressures": [
+        {
+          "tick": 6,
+          "chapter_id": 2,
+          "intensity": 0.38,
+          "source": "diagnostics:temporary_deviation",
+          "summary": "temporary deviation",
+          "evidence": [
+            "adaptive_exploration",
+            "medium"
+          ]
+        }
+      ],
+      "chapter_bridges": [],
+      "integration_records": [
+        {
+          "tick": 6,
+          "chapter_id": 2,
+          "status": "active",
+          "summary": "promoted long-horizon conflict from diagnostics:temporary_deviation",
+          "evidence": [
+            "adaptive_exploration",
+            "medium"
+          ]
+        },
+        {
+          "tick": 0,
+          "chapter_id": 2,
+          "status": "partially_reconciled",
+          "summary": "sleep review 1 classified thread as partially_reconciled",
+          "evidence": []
+        }
+      ],
+      "verification_evidence_ids": [],
+      "stable_confirmations": 1,
+      "failed_repairs": 0,
+      "current_outcome": "partial_repair",
+      "last_reopened_tick": null,
+      "archived_tick": null,
+      "last_status_reason": "diagnostics:temporary_deviation",
+      "protected": false
+    }
+  ],
+  "narrative_reconciliation": {
+    "summary": "This tension has persisted across 1 chapter(s) and is partially reconciled.",
+    "counts": {
+      "active": 3,
+      "unresolved": 3,
+      "archived": 0
+    },
+    "reason": "sleep_review:1",
+    "tick": 0,
+    "dominant_thread_id": "conflict:continuity_anchor:continuity:5",
+    "dominant_status": "active",
+    "unresolved_thread_ids": [
+      "conflict:continuity_anchor:continuity:5",
+      "conflict:other:9",
+      "conflict:identity_action:adaptive_exploration:6"
+    ]
+  },
+  "stress_checks": {
+    "unrelated_evidence_did_not_contaminate_other_thread": true,
+    "unmatched_repair_did_not_bind": true,
+    "narrative_writeback_survived_stress": true
+  }
+}

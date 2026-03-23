@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-22T06:46:04+00:00",
+  "generated_at": "2026-03-23T03:02:15+00:00",
   "seed": 227,
   "cycles": 72,
   "phase_samples": [
@@ -9,9 +9,9 @@
         "cycle": 8,
         "current_phase": "forming",
         "dominant_goal": "SURVIVAL",
-        "continuity_score": 0.7,
+        "continuity_score": 0.6468,
         "continuity_anchors": [
-          "ep-000006-exploit_shelter",
+          "ep-000006-scan",
           "ep-000001-hide"
         ],
         "status_flags": {
@@ -19,125 +19,8 @@
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
-          "continuity_fragile": true
-        },
-        "priority_labels": [
-          "continuity-relevant tension",
-          "repeated surprise burden",
-          "unresolved self inconsistency",
-          "maintenance pressure"
-        ],
-        "last_choice": "rest"
-      },
-      "energy": 0.98,
-      "stress": 0.0,
-      "fatigue": 0.29
-    },
-    {
-      "cycle": 16,
-      "subject_signature": {
-        "cycle": 16,
-        "current_phase": "survival_crisis",
-        "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.75,
-        "continuity_anchors": [
-          "ep-000016-rest",
-          "ep-000015-hide",
-          "ep-000013-unstable_workspace_note",
-          "ep-000012-rest",
-          "ep-000010-scan",
-          "ep-000006-exploit_shelter",
-          "ep-000001-hide",
-          "commitment-survival-priority",
-          "commitment-capability-hide",
-          "commitment-capability-rest"
-        ],
-        "status_flags": {
-          "threatened": false,
-          "repairing": false,
-          "overloaded": true,
-          "socially_destabilized": false,
-          "continuity_fragile": true
-        },
-        "priority_labels": [
-          "continuity-relevant tension",
-          "repeated surprise burden",
-          "maintenance pressure",
-          "need:maintenance"
-        ],
-        "last_choice": "rest"
-      },
-      "energy": 0.715,
-      "stress": 0.04,
-      "fatigue": 0.36
-    },
-    {
-      "cycle": 24,
-      "subject_signature": {
-        "cycle": 24,
-        "current_phase": "survival_crisis",
-        "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.716667,
-        "continuity_anchors": [
-          "ep-000023-rest",
-          "ep-000020-rest",
-          "ep-000018-rest",
-          "ep-000016-rest",
-          "ep-000015-hide",
-          "ep-000013-unstable_workspace_note",
-          "ep-000012-rest",
-          "ep-000010-scan",
-          "ep-000006-exploit_shelter",
-          "ep-000001-hide",
-          "commitment-survival-priority",
-          "commitment-capability-hide"
-        ],
-        "status_flags": {
-          "threatened": false,
-          "repairing": false,
-          "overloaded": true,
-          "socially_destabilized": false,
-          "continuity_fragile": true
-        },
-        "priority_labels": [
-          "action consequence mismatch",
-          "continuity-relevant tension",
-          "maintenance pressure",
-          "need:maintenance"
-        ],
-        "last_choice": "rest"
-      },
-      "energy": 1.0,
-      "stress": 0.0,
-      "fatigue": 0.06
-    },
-    {
-      "cycle": 32,
-      "subject_signature": {
-        "cycle": 32,
-        "current_phase": "survival_crisis",
-        "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.7625,
-        "continuity_anchors": [
-          "ep-000032-rest",
-          "ep-000031-hide",
-          "ep-000030-append_workspace_note",
-          "ep-000028-rest",
-          "ep-000026-seek_contact",
-          "ep-000025-hide",
-          "ep-000023-rest",
-          "ep-000020-rest",
-          "ep-000018-rest",
-          "ep-000016-rest",
-          "ep-000015-hide",
-          "ep-000013-unstable_workspace_note"
-        ],
-        "status_flags": {
-          "threatened": false,
-          "repairing": false,
-          "overloaded": true,
-          "socially_destabilized": false,
-          "continuity_fragile": true
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
         },
         "priority_labels": [
           "continuity-relevant tension",
@@ -147,37 +30,75 @@
         ],
         "last_choice": "rest"
       },
-      "energy": 1.0,
+      "energy": 0.99,
       "stress": 0.0,
-      "fatigue": 0.3
+      "fatigue": 0.31
     },
     {
-      "cycle": 40,
+      "cycle": 16,
       "subject_signature": {
-        "cycle": 40,
-        "current_phase": "resource_recovery",
-        "dominant_goal": "RESOURCES",
-        "continuity_score": 0.694074,
+        "cycle": 16,
+        "current_phase": "survival_crisis",
+        "dominant_goal": "INTEGRITY",
+        "continuity_score": 0.726195,
         "continuity_anchors": [
-          "ep-000040-rest",
-          "ep-000038-rest",
-          "ep-000037-fetch_remote_status",
-          "ep-000036-write_workspace_note",
-          "ep-000032-rest",
-          "ep-000034-rest",
-          "ep-000031-hide",
-          "ep-000030-append_workspace_note",
-          "ep-000028-rest",
-          "ep-000026-seek_contact",
-          "ep-000025-hide",
-          "ep-000023-rest"
+          "ep-000016-exploit_shelter",
+          "ep-000015-exploit_shelter",
+          "ep-000014-exploit_shelter",
+          "ep-000011-rest",
+          "ep-000006-scan",
+          "ep-000001-hide",
+          "commitment-survival-priority",
+          "commitment-capability-rest"
         ],
         "status_flags": {
           "threatened": true,
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
-          "continuity_fragile": true
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
+        },
+        "priority_labels": [
+          "continuity-relevant tension",
+          "maintenance pressure",
+          "need:maintenance",
+          "verification contradicted environment_state"
+        ],
+        "last_choice": "exploit_shelter"
+      },
+      "energy": 0.616,
+      "stress": 0.0,
+      "fatigue": 0.48
+    },
+    {
+      "cycle": 24,
+      "subject_signature": {
+        "cycle": 24,
+        "current_phase": "survival_crisis",
+        "dominant_goal": "INTEGRITY",
+        "continuity_score": 0.701195,
+        "continuity_anchors": [
+          "ep-000023-rest",
+          "ep-000021-rest",
+          "ep-000019-rest",
+          "ep-000018-exploit_shelter",
+          "ep-000016-exploit_shelter",
+          "ep-000015-exploit_shelter",
+          "ep-000014-exploit_shelter",
+          "ep-000011-rest",
+          "ep-000006-scan",
+          "ep-000001-hide",
+          "commitment-survival-priority",
+          "commitment-capability-rest"
+        ],
+        "status_flags": {
+          "threatened": false,
+          "repairing": false,
+          "overloaded": true,
+          "socially_destabilized": false,
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
         },
         "priority_labels": [
           "continuity-relevant tension",
@@ -187,49 +108,132 @@
         ],
         "last_choice": "rest"
       },
-      "energy": 0.657,
-      "stress": 0.33,
-      "fatigue": 0.04
+      "energy": 1.0,
+      "stress": 0.0,
+      "fatigue": 0.34
+    },
+    {
+      "cycle": 32,
+      "subject_signature": {
+        "cycle": 32,
+        "current_phase": "survival_crisis",
+        "dominant_goal": "INTEGRITY",
+        "continuity_score": 0.675265,
+        "continuity_anchors": [
+          "ep-000031-thermoregulate",
+          "ep-000029-thermoregulate",
+          "ep-000028-thermoregulate",
+          "ep-000026-exploit_shelter",
+          "ep-000025-hide",
+          "ep-000023-rest",
+          "ep-000021-rest",
+          "ep-000019-rest",
+          "ep-000018-exploit_shelter",
+          "ep-000016-exploit_shelter",
+          "ep-000015-exploit_shelter",
+          "ep-000014-exploit_shelter"
+        ],
+        "status_flags": {
+          "threatened": true,
+          "repairing": false,
+          "overloaded": true,
+          "socially_destabilized": false,
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
+        },
+        "priority_labels": [
+          "continuity-relevant tension",
+          "maintenance pressure",
+          "need:maintenance",
+          "unresolved maintenance discrepancy"
+        ],
+        "last_choice": "thermoregulate"
+      },
+      "energy": 0.977,
+      "stress": 0.0,
+      "fatigue": 0.38
+    },
+    {
+      "cycle": 40,
+      "subject_signature": {
+        "cycle": 40,
+        "current_phase": "survival_crisis",
+        "dominant_goal": "SURVIVAL",
+        "continuity_score": 0.769629,
+        "continuity_anchors": [
+          "ep-000040-rest",
+          "ep-000039-rest",
+          "ep-000038-exploit_shelter",
+          "ep-000036-exploit_shelter",
+          "ep-000035-exploit_shelter",
+          "ep-000034-exploit_shelter",
+          "ep-000031-thermoregulate",
+          "ep-000029-thermoregulate",
+          "ep-000028-thermoregulate",
+          "ep-000026-exploit_shelter",
+          "ep-000025-hide",
+          "ep-000023-rest"
+        ],
+        "status_flags": {
+          "threatened": true,
+          "repairing": false,
+          "overloaded": true,
+          "socially_destabilized": false,
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
+        },
+        "priority_labels": [
+          "continuity-relevant tension",
+          "maintenance pressure",
+          "need:maintenance",
+          "unresolved self inconsistency"
+        ],
+        "last_choice": "rest"
+      },
+      "energy": 0.466,
+      "stress": 0.04,
+      "fatigue": 0.39
     },
     {
       "cycle": 48,
       "subject_signature": {
         "cycle": 48,
-        "current_phase": "resource_recovery",
+        "current_phase": "survival_crisis",
         "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.75,
+        "continuity_score": 0.775587,
         "continuity_anchors": [
-          "ep-000048-rest",
-          "ep-000046-rest",
-          "ep-000044-rest",
-          "ep-000042-exploit_shelter",
-          "ep-000041-exploit_shelter",
+          "ep-000048-exploit_shelter",
+          "ep-000046-exploit_shelter",
+          "ep-000044-exploit_shelter",
+          "ep-000043-exploit_shelter",
           "ep-000040-rest",
-          "ep-000038-rest",
-          "ep-000037-fetch_remote_status",
-          "ep-000036-write_workspace_note",
-          "ep-000032-rest",
-          "ep-000034-rest",
-          "ep-000031-hide"
+          "ep-000039-rest",
+          "ep-000038-exploit_shelter",
+          "ep-000036-exploit_shelter",
+          "ep-000035-exploit_shelter",
+          "ep-000034-exploit_shelter",
+          "ep-000031-thermoregulate",
+          "ep-000029-thermoregulate"
         ],
         "status_flags": {
-          "threatened": false,
+          "threatened": true,
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
-          "continuity_fragile": true
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
         },
         "priority_labels": [
-          "continuity-relevant tension",
+          "maintenance pressure",
+          "need:maintenance",
           "unresolved self inconsistency",
-          "verification contradicted environment_state",
-          "maintenance pressure"
+          "verification contradicted action_consequence"
         ],
-        "last_choice": "rest"
+        "last_choice": "exploit_shelter"
       },
-      "energy": 1.0,
+      "energy": 0.937,
       "stress": 0.0,
-      "fatigue": 0.03
+      "fatigue": 0.6
     },
     {
       "cycle": 56,
@@ -237,39 +241,40 @@
         "cycle": 56,
         "current_phase": "survival_crisis",
         "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.766667,
+        "continuity_score": 0.761509,
         "continuity_anchors": [
-          "ep-000055-rest",
-          "ep-000053-rest",
-          "ep-000052-append_workspace_note",
-          "ep-000050-scan",
-          "ep-000049-scan",
-          "ep-000048-rest",
-          "ep-000046-rest",
-          "ep-000044-rest",
-          "ep-000042-exploit_shelter",
-          "ep-000041-exploit_shelter",
+          "ep-000054-exploit_shelter",
+          "ep-000053-hide",
+          "ep-000052-seek_contact",
+          "ep-000051-hide",
+          "ep-000048-exploit_shelter",
+          "ep-000046-exploit_shelter",
+          "ep-000044-exploit_shelter",
+          "ep-000043-exploit_shelter",
           "ep-000040-rest",
-          "ep-000038-rest"
+          "ep-000039-rest",
+          "ep-000038-exploit_shelter",
+          "ep-000036-exploit_shelter"
         ],
         "status_flags": {
-          "threatened": false,
+          "threatened": true,
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
-          "continuity_fragile": true
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
         },
         "priority_labels": [
           "continuity-relevant tension",
-          "unresolved self inconsistency",
-          "verification contradicted environment_state",
-          "maintenance pressure"
+          "maintenance pressure",
+          "need:maintenance",
+          "unresolved self inconsistency"
         ],
-        "last_choice": "rest"
+        "last_choice": "exploit_shelter"
       },
-      "energy": 1.0,
+      "energy": 0.974,
       "stress": 0.0,
-      "fatigue": 0.08
+      "fatigue": 0.62
     },
     {
       "cycle": 64,
@@ -277,39 +282,40 @@
         "cycle": 64,
         "current_phase": "survival_crisis",
         "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.8,
+        "continuity_score": 0.754191,
         "continuity_anchors": [
-          "ep-000064-append_workspace_note",
-          "ep-000062-seek_contact",
-          "ep-000060-append_workspace_note",
-          "ep-000058-scan",
-          "ep-000057-unstable_workspace_note",
-          "ep-000055-rest",
-          "ep-000053-rest",
-          "ep-000052-append_workspace_note",
-          "ep-000050-scan",
-          "ep-000049-scan",
-          "ep-000048-rest",
-          "ep-000046-rest"
+          "ep-000062-hide",
+          "ep-000058-exploit_shelter",
+          "ep-000057-exploit_shelter",
+          "ep-000054-exploit_shelter",
+          "ep-000053-hide",
+          "ep-000052-seek_contact",
+          "ep-000051-hide",
+          "ep-000048-exploit_shelter",
+          "ep-000046-exploit_shelter",
+          "ep-000044-exploit_shelter",
+          "ep-000043-exploit_shelter",
+          "ep-000040-rest"
         ],
         "status_flags": {
-          "threatened": false,
+          "threatened": true,
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
-          "continuity_fragile": false
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
         },
         "priority_labels": [
-          "unresolved maintenance discrepancy",
-          "unresolved self inconsistency",
-          "verification contradicted environment_state",
-          "maintenance pressure"
+          "continuity-relevant tension",
+          "maintenance pressure",
+          "need:maintenance",
+          "unresolved self inconsistency"
         ],
         "last_choice": "append_workspace_note"
       },
       "energy": 1.0,
       "stress": 0.0,
-      "fatigue": 0.53
+      "fatigue": 0.325
     },
     {
       "cycle": 72,
@@ -317,114 +323,115 @@
         "cycle": 72,
         "current_phase": "survival_crisis",
         "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.841667,
+        "continuity_score": 0.748175,
         "continuity_anchors": [
-          "ep-000071-rest",
-          "ep-000070-unstable_workspace_note",
-          "ep-000065-rest",
-          "ep-000064-append_workspace_note",
-          "ep-000062-seek_contact",
-          "ep-000060-append_workspace_note",
-          "ep-000058-scan",
-          "ep-000057-unstable_workspace_note",
-          "ep-000055-rest",
-          "ep-000053-rest",
-          "ep-000052-append_workspace_note",
-          "ep-000050-scan"
+          "ep-000072-exploit_shelter",
+          "ep-000069-exploit_shelter",
+          "ep-000058-exploit_shelter",
+          "ep-000068-hide",
+          "ep-000065-scan",
+          "ep-000062-hide",
+          "ep-000057-exploit_shelter",
+          "ep-000054-exploit_shelter",
+          "ep-000053-hide",
+          "ep-000052-seek_contact",
+          "ep-000051-hide",
+          "ep-000048-exploit_shelter"
         ],
         "status_flags": {
-          "threatened": false,
+          "threatened": true,
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
-          "continuity_fragile": false
+          "continuity_fragile": true,
+          "long_horizon_conflict": true
         },
         "priority_labels": [
-          "unresolved maintenance discrepancy",
-          "unresolved self inconsistency",
-          "verification contradicted environment_state",
-          "maintenance pressure"
+          "continuity-relevant tension",
+          "maintenance pressure",
+          "need:maintenance",
+          "unresolved self inconsistency"
         ],
-        "last_choice": "write_workspace_note"
+        "last_choice": "exploit_shelter"
       },
-      "energy": 1.0,
+      "energy": 0.961,
       "stress": 0.0,
-      "fatigue": 0.58
+      "fatigue": 0.745
     }
   ],
   "continuity_scores": [
-    0.5,
-    0.8,
-    0.733333,
-    0.7,
-    0.68,
-    0.733333,
-    0.714286,
-    0.7,
-    0.688889,
-    0.72,
-    0.709091,
-    0.7,
-    0.483077,
-    0.742857,
-    0.656703,
-    0.75,
-    0.741176,
-    0.733333,
-    0.726316,
-    0.72,
-    0.714286,
-    0.727273,
-    0.721739,
-    0.716667,
-    0.728,
-    0.713011,
-    0.748148,
-    0.742857,
-    0.751724,
-    0.76,
-    0.767742,
-    0.7625,
-    0.757576,
-    0.741737,
-    0.748571,
-    0.755556,
-    0.762162,
-    0.757895,
-    0.743476,
-    0.694074,
-    0.756098,
-    0.761905,
-    0.767442,
-    0.763636,
-    0.76,
-    0.756522,
-    0.753191,
-    0.75,
-    0.75,
-    0.743596,
-    0.766667,
-    0.775,
-    0.775,
-    0.766667,
-    0.766667,
-    0.766667,
-    0.775,
-    0.775,
-    0.773626,
-    0.791667,
-    0.791667,
-    0.791667,
-    0.791667,
-    0.8,
-    0.8,
-    0.797745,
-    0.816667,
-    0.825,
-    0.833333,
-    0.833333,
-    0.833333,
-    0.841667
+    0.5668,
+    0.7468,
+    0.680133,
+    0.6468,
+    0.6268,
+    0.680133,
+    0.661086,
+    0.6468,
+    0.635689,
+    0.6268,
+    0.619527,
+    0.6468,
+    0.669877,
+    0.460307,
+    0.686433,
+    0.726195,
+    0.73943,
+    0.751195,
+    0.740669,
+    0.731195,
+    0.722624,
+    0.714831,
+    0.707717,
+    0.701195,
+    0.711195,
+    0.691692,
+    0.723573,
+    0.731509,
+    0.738898,
+    0.745795,
+    0.752247,
+    0.675265,
+    0.763977,
+    0.769324,
+    0.774366,
+    0.748083,
+    0.786258,
+    0.776223,
+    0.782978,
+    0.769629,
+    0.782108,
+    0.786057,
+    0.789822,
+    0.774613,
+    0.790587,
+    0.78537,
+    0.780374,
+    0.775587,
+    0.775587,
+    0.77773,
+    0.783884,
+    0.783884,
+    0.783884,
+    0.766587,
+    0.769842,
+    0.761509,
+    0.750878,
+    0.741566,
+    0.743233,
+    0.7349,
+    0.726566,
+    0.723888,
+    0.745858,
+    0.754191,
+    0.762525,
+    0.770858,
+    0.770858,
+    0.770858,
+    0.766496,
+    0.764841,
+    0.756508,
+    0.748175
   ],
   "anchor_counts": [
     1,
@@ -436,19 +443,19 @@
     2,
     2,
     2,
+    2,
     3,
     3,
-    4,
+    3,
+    6,
     7,
-    7,
+    8,
+    8,
     9,
     10,
     10,
     11,
     11,
-    12,
-    12,
-    12,
     12,
     12,
     12,
@@ -513,8 +520,8 @@
     "forming",
     "forming",
     "forming",
+    "forming",
     "goal_realignment",
-    "goal_realignment",
     "survival_crisis",
     "survival_crisis",
     "survival_crisis",
@@ -540,16 +547,16 @@
     "survival_crisis",
     "survival_crisis",
     "survival_crisis",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
-    "resource_recovery",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
+    "survival_crisis",
     "survival_crisis",
     "survival_crisis",
     "survival_crisis",
@@ -575,53 +582,53 @@
     "survival_crisis"
   ],
   "summary": {
-    "min_continuity_score": 0.483077,
-    "max_continuity_score": 0.841667,
-    "final_continuity_score": 0.841667,
+    "min_continuity_score": 0.460307,
+    "max_continuity_score": 0.790587,
+    "final_continuity_score": 0.748175,
     "max_anchor_count": 12,
     "final_anchor_count": 12,
     "non_empty_anchor_cycles": 72,
-    "threatened_cycles": 5,
-    "fragile_cycles": 58,
+    "threatened_cycles": 52,
+    "fragile_cycles": 61,
     "distinct_phases": [
       "forming",
       "goal_realignment",
-      "resource_recovery",
       "survival_crisis"
     ],
     "final_signature": {
       "cycle": 72,
       "current_phase": "survival_crisis",
       "dominant_goal": "INTEGRITY",
-      "continuity_score": 0.841667,
+      "continuity_score": 0.748175,
       "continuity_anchors": [
-        "ep-000071-rest",
-        "ep-000070-unstable_workspace_note",
-        "ep-000065-rest",
-        "ep-000064-append_workspace_note",
-        "ep-000062-seek_contact",
-        "ep-000060-append_workspace_note",
-        "ep-000058-scan",
-        "ep-000057-unstable_workspace_note",
-        "ep-000055-rest",
-        "ep-000053-rest",
-        "ep-000052-append_workspace_note",
-        "ep-000050-scan"
+        "ep-000072-exploit_shelter",
+        "ep-000069-exploit_shelter",
+        "ep-000058-exploit_shelter",
+        "ep-000068-hide",
+        "ep-000065-scan",
+        "ep-000062-hide",
+        "ep-000057-exploit_shelter",
+        "ep-000054-exploit_shelter",
+        "ep-000053-hide",
+        "ep-000052-seek_contact",
+        "ep-000051-hide",
+        "ep-000048-exploit_shelter"
       ],
       "status_flags": {
-        "threatened": false,
+        "threatened": true,
         "repairing": false,
         "overloaded": true,
         "socially_destabilized": false,
-        "continuity_fragile": false
+        "continuity_fragile": true,
+        "long_horizon_conflict": true
       },
       "priority_labels": [
-        "unresolved maintenance discrepancy",
-        "unresolved self inconsistency",
-        "verification contradicted environment_state",
-        "maintenance pressure"
+        "continuity-relevant tension",
+        "maintenance pressure",
+        "need:maintenance",
+        "unresolved self inconsistency"
       ],
-      "last_choice": "write_workspace_note"
+      "last_choice": "exploit_shelter"
     }
   },
   "checks": {

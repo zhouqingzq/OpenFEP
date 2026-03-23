@@ -71,6 +71,7 @@ def format_action_scores(choice_ranking: list[InterventionScore]) -> str:
         f"id={option.identity_bias:.3f} "
         f"ledger={option.ledger_bias:.3f} "
         f"subj={option.subject_bias:.3f} "
+        f"recon={option.reconciliation_bias:.3f} "
         f"verify={option.verification_bias:.3f}"
         for option in choice_ranking
     )
@@ -541,6 +542,10 @@ class SegmentRuntime:
             diagnostics,
             maintenance_agenda,
         )
+        maintenance_agenda = self._apply_reconciliation_maintenance_priority(
+            diagnostics,
+            maintenance_agenda,
+        )
         maintenance_agenda = self._apply_verification_maintenance_priority(
             diagnostics,
             maintenance_agenda,
@@ -617,6 +622,14 @@ class SegmentRuntime:
             slow_continuity_modifier=self.agent.slow_variable_learner.continuity_modifier(),
         )
         self.last_continuity_report = continuity_audit.to_dict()
+        self.last_continuity_report["continuity_score"] = max(
+            0.0,
+            min(
+                1.0,
+                float(self.last_continuity_report.get("continuity_score", 1.0))
+                + self.agent.reconciliation_engine.continuity_modifier(),
+            ),
+        )
         ledger_runtime_update = self.agent.prediction_ledger.record_runtime_discrepancies(
             tick=self.agent.cycle,
             diagnostics=diagnostics,
@@ -625,6 +638,16 @@ class SegmentRuntime:
             continuity_score=float(self.last_continuity_report.get("continuity_score", 1.0)),
             subject_state=self.subject_state,
             memory_surprise=memory_decision.total_surprise,
+        )
+        reconciliation_runtime_update = self.agent.reconciliation_engine.observe_runtime(
+            tick=self.agent.cycle,
+            diagnostics=diagnostics,
+            narrative=self.agent.self_model.identity_narrative,
+            prediction_ledger=self.agent.prediction_ledger,
+            verification_loop=self.agent.verification_loop,
+            subject_state=self.subject_state,
+            continuity_score=float(self.last_continuity_report.get("continuity_score", 1.0)),
+            slow_biases=self.agent.slow_variable_learner.state.bias_payload(),
         )
         self.subject_state = derive_subject_state(
             self.agent,
@@ -645,6 +668,10 @@ class SegmentRuntime:
             **self.agent.prediction_ledger.explanation_payload(),
             "runtime_update": ledger_runtime_update.to_dict(),
         }
+        details["reconciliation"] = {
+            **self.agent.reconciliation_engine.explanation_payload(),
+            "runtime_update": reconciliation_runtime_update,
+        }
         details["verification"] = {
             **self.agent.verification_loop.explanation_payload(chosen_action=choice.name),
             "action_update": verification_action_update.to_dict(),
@@ -654,10 +681,14 @@ class SegmentRuntime:
         diagnostics.structured_explanation = details
         diagnostics.ledger_summary = str(details["prediction_ledger"]["summary"])
         diagnostics.ledger_payload = dict(details["prediction_ledger"])
+        diagnostics.reconciliation_summary = str(details["reconciliation"]["summary"])
+        diagnostics.reconciliation_payload = dict(details["reconciliation"])
         diagnostics.verification_summary = str(details["verification"]["summary"])
         diagnostics.verification_payload = dict(details["verification"])
         diagnostics.explanation = (
             str(details["prediction_ledger"]["summary"])
+            + " "
+            + str(details["reconciliation"]["summary"])
             + " "
             + str(details["verification"].get("verification_motive") or details["verification"]["summary"])
             + " "
@@ -1177,6 +1208,41 @@ class SegmentRuntime:
         diagnostics.structured_explanation = details
         return updated
 
+    def _apply_reconciliation_maintenance_priority(
+        self,
+        diagnostics: DecisionDiagnostics,
+        agenda: MaintenanceAgenda,
+    ) -> MaintenanceAgenda:
+        signal = self.agent.reconciliation_engine.maintenance_signal()
+        priority_gain = float(signal.get("priority_gain", 0.0))
+        active_tasks = list(agenda.active_tasks)
+        for task in signal.get("active_tasks", []):
+            if task not in active_tasks:
+                active_tasks.insert(0, str(task))
+        recommended_action = agenda.recommended_action
+        reconciliation_recommended = str(signal.get("recommended_action", ""))
+        if reconciliation_recommended:
+            recommended_action = reconciliation_recommended
+        suppressed_actions = tuple(
+            dict.fromkeys([*agenda.suppressed_actions, *[str(item) for item in signal.get("suppressed_actions", [])]])
+        )
+        updated = replace(
+            agenda,
+            active_tasks=tuple(active_tasks),
+            recommended_action=recommended_action,
+            suppressed_actions=suppressed_actions,
+            policy_shift_strength=min(1.0, agenda.policy_shift_strength + priority_gain),
+        )
+        details = dict(diagnostics.structured_explanation)
+        details["reconciliation_maintenance_priority"] = {
+            "priority_gain": round(priority_gain, 6),
+            "active_tasks": list(active_tasks),
+            "recommended_action": recommended_action,
+            "suppressed_actions": list(suppressed_actions),
+        }
+        diagnostics.structured_explanation = details
+        return updated
+
     def _apply_subject_state_maintenance_priority(
         self,
         diagnostics: DecisionDiagnostics,
@@ -1465,6 +1531,7 @@ class SegmentRuntime:
                     "identity_bias": option.identity_bias,
                     "ledger_bias": option.ledger_bias,
                     "subject_bias": option.subject_bias,
+                    "reconciliation_bias": option.reconciliation_bias,
                     "verification_bias": option.verification_bias,
                     "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
@@ -1494,6 +1561,7 @@ class SegmentRuntime:
                 "identity_bias": diagnostics.chosen.identity_bias,
                 "ledger_bias": diagnostics.chosen.ledger_bias,
                 "subject_bias": diagnostics.chosen.subject_bias,
+                "reconciliation_bias": diagnostics.chosen.reconciliation_bias,
                 "verification_bias": diagnostics.chosen.verification_bias,
                 "goal_alignment": diagnostics.chosen.goal_alignment,
                 "active_goal": diagnostics.active_goal,
@@ -1538,6 +1606,8 @@ class SegmentRuntime:
                 "ledger_payload": dict(diagnostics.ledger_payload),
                 "verification_summary": diagnostics.verification_summary,
                 "verification_payload": dict(diagnostics.verification_payload),
+                "reconciliation_summary": diagnostics.reconciliation_summary,
+                "reconciliation_payload": dict(diagnostics.reconciliation_payload),
                 "subject_state_summary": diagnostics.subject_state_summary,
                 "subject_status_flags": dict(diagnostics.subject_status_flags),
             },
@@ -1587,6 +1657,7 @@ class SegmentRuntime:
             }
         trace_record["social_memory"] = self.agent.social_memory.to_dict()
         trace_record["prediction_ledger"] = self.agent.prediction_ledger.to_dict()
+        trace_record["reconciliation"] = self.agent.reconciliation_engine.to_dict()
         trace_record["verification_loop"] = self.agent.verification_loop.to_dict()
         trace_record["subject_state"] = self.subject_state.to_dict()
         trace_record["slow_learning"] = self.agent.slow_variable_learner.to_dict()

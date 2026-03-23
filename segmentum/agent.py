@@ -33,6 +33,7 @@ from .narrative_compiler import NarrativeCompiler
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
+from .reconciliation import ReconciliationEngine
 from .slow_learning import SlowVariableLearner
 from .verification import VerificationLoop
 from .self_model import (
@@ -266,6 +267,7 @@ class PolicyEvaluator:
         ledger_bias: float,
         subject_bias: float,
         goal_alignment: float,
+        reconciliation_bias: float = 0.0,
         verification_bias: float = 0.0,
     ) -> str:
         components = [
@@ -281,6 +283,7 @@ class PolicyEvaluator:
             ("ledger_bias", abs(ledger_bias)),
             ("subject_bias", abs(subject_bias)),
             ("goal_alignment", abs(goal_alignment)),
+            ("reconciliation_bias", abs(reconciliation_bias)),
             ("verification_bias", abs(verification_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
@@ -369,6 +372,11 @@ class PolicyEvaluator:
             reason = (
                 f"verification_bias ({chosen.verification_bias:.3f}) dominated, "
                 "so the policy prioritized gathering evidence for an active prediction."
+            )
+        elif chosen.dominant_component == "reconciliation_bias":
+            reason = (
+                f"reconciliation_bias ({chosen.reconciliation_bias:.3f}) dominated, "
+                "so a long-running unresolved conflict constrained the local policy."
             )
         else:
             reason = (
@@ -461,6 +469,7 @@ class PolicyEvaluator:
             f"commitment_bias={chosen.commitment_bias:.3f}",
             f"ledger_bias={chosen.ledger_bias:.3f}",
             f"subject_bias={chosen.subject_bias:.3f}",
+            f"reconciliation_bias={chosen.reconciliation_bias:.3f}",
             f"verification_bias={chosen.verification_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
@@ -659,6 +668,7 @@ class SegmentAgent:
         self.social_memory = SocialMemory()
         self.identity_tension_history: list[dict[str, object]] = []
         self.prediction_ledger = PredictionLedger()
+        self.reconciliation_engine = ReconciliationEngine()
         self.verification_loop = VerificationLoop()
         self.subject_state = SubjectState()
 
@@ -1236,6 +1246,7 @@ class SegmentAgent:
             action=action,
         )
         details["prediction_ledger"] = self.prediction_ledger.explanation_payload()
+        details["reconciliation"] = self.reconciliation_engine.explanation_payload()
         details["subject_state"] = self.subject_state.explanation_payload()
         details["slow_learning"] = self.slow_variable_learner.explanation_payload()
         return details
@@ -1915,6 +1926,7 @@ class SegmentAgent:
             attention_trace=self.last_attention_trace,
             ledger_focus={
                 **self.prediction_ledger.workspace_focus(),
+                **self.reconciliation_engine.workspace_focus(),
                 **self.verification_loop.workspace_focus(),
             },
         )
@@ -1971,6 +1983,7 @@ class SegmentAgent:
                 cost=float(option["cost"]),
             )
             ledger_bias = self.prediction_ledger.prediction_action_bias(action)
+            reconciliation_bias = self.reconciliation_engine.action_bias(action)
             verification_bias = self.verification_loop.action_bias(action)
             subject_bias = subject_action_bias(self.subject_state, action)
             goal_alignment = self.goal_stack.goal_alignment_score(
@@ -1992,6 +2005,7 @@ class SegmentAgent:
                 + commitment_bias
                 + identity_bias
                 + ledger_bias
+                + reconciliation_bias
                 + subject_bias
                 + goal_alignment
                 + verification_bias
@@ -2010,6 +2024,7 @@ class SegmentAgent:
                 ledger_bias=ledger_bias,
                 subject_bias=subject_bias,
                 goal_alignment=goal_alignment,
+                reconciliation_bias=reconciliation_bias,
                 verification_bias=verification_bias,
             )
             ranked_options.append(
@@ -2037,6 +2052,7 @@ class SegmentAgent:
                     ledger_bias=ledger_bias,
                     subject_bias=subject_bias,
                     goal_alignment=goal_alignment,
+                    reconciliation_bias=reconciliation_bias,
                     verification_bias=verification_bias,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
@@ -2298,12 +2314,15 @@ class SegmentAgent:
             "seed_update": verification_seed.to_dict(),
             **verification_payload,
         }
+        diagnostics.reconciliation_payload = self.reconciliation_engine.explanation_payload()
+        diagnostics.reconciliation_summary = str(diagnostics.reconciliation_payload["summary"])
         diagnostics.subject_state_summary = self.subject_state.summary_text()
         diagnostics.subject_status_flags = dict(self.subject_state.status_flags)
         diagnostics.subject_priority_stack = [
             item.to_dict() for item in self.subject_state.subject_priority_stack[:4]
         ]
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
+        diagnostics.structured_explanation["reconciliation"] = diagnostics.reconciliation_payload
         diagnostics.structured_explanation["verification"] = diagnostics.verification_payload
         diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
         workspace_review = self.metacognitive_layer.review_self_consistency(
@@ -2583,6 +2602,7 @@ class SegmentAgent:
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
             + self.prediction_ledger.memory_threshold_delta(),
+            + self.reconciliation_engine.memory_threshold_delta(),
             + self.verification_loop.memory_threshold_delta(),
             + subject_memory_threshold_delta(self.subject_state),
             + self.slow_variable_learner.memory_threshold_delta(),
@@ -2697,6 +2717,7 @@ class SegmentAgent:
             original_surprise_threshold
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
             + self.prediction_ledger.memory_threshold_delta(),
+            + self.reconciliation_engine.memory_threshold_delta(),
             + self.verification_loop.memory_threshold_delta(),
             + self.slow_variable_learner.memory_threshold_delta(),
         )
@@ -3310,11 +3331,19 @@ class SegmentAgent:
                 sleep_cycle_id=sleep_cycle_id,
             )
             ledger_sleep = self.prediction_ledger.sleep_review(tick=self.cycle)
+            reconciliation_sleep = self.reconciliation_engine.sleep_review(
+                tick=self.cycle,
+                sleep_cycle_id=sleep_cycle_id,
+                continuity_score=self.subject_state.continuity_score,
+                verification_loop=self.verification_loop,
+                narrative=self.self_model.identity_narrative,
+            )
             self.sleep_history.append(summary)
             self.narrative_trace.append(
                 {
                     "sleep_cycle_id": sleep_cycle_id,
                     "prediction_ledger_sleep": ledger_sleep,
+                    "reconciliation_sleep": reconciliation_sleep,
                     "rule_ids": [],
                     "slow_learning": self.slow_variable_learner.explanation_payload(),
                 }
@@ -3529,12 +3558,20 @@ class SegmentAgent:
             source="sleep_review",
             subject_state=self.subject_state,
         )
+        reconciliation_sleep = self.reconciliation_engine.sleep_review(
+            tick=self.cycle,
+            sleep_cycle_id=sleep_cycle_id,
+            continuity_score=self.subject_state.continuity_score,
+            verification_loop=self.verification_loop,
+            narrative=self.self_model.identity_narrative,
+        )
         self.sleep_history.append(summary)
         self.narrative_trace.append(
             {
                 "sleep_cycle_id": sleep_cycle_id,
                 "prediction_ledger_sleep": ledger_sleep,
                 "verification_sleep": verification_sleep.to_dict(),
+                "reconciliation_sleep": reconciliation_sleep,
                 "rule_ids": [rule.rule_id for rule in consolidation.rules],
                 "slow_learning": slow_learning_audit.to_dict(),
             }
@@ -3603,6 +3640,7 @@ class SegmentAgent:
             "social_memory": self.social_memory.to_dict(),
             "identity_tension_history": list(self.identity_tension_history),
             "prediction_ledger": self.prediction_ledger.to_dict(),
+            "reconciliation_engine": self.reconciliation_engine.to_dict(),
             "verification_loop": self.verification_loop.to_dict(),
             "subject_state": self.subject_state.to_dict(),
             "slow_variable_learner": self.slow_variable_learner.to_dict(),
@@ -3716,6 +3754,11 @@ class SegmentAgent:
         agent.prediction_ledger = PredictionLedger.from_dict(
             payload.get("prediction_ledger")
             if isinstance(payload.get("prediction_ledger"), dict)
+            else None
+        )
+        agent.reconciliation_engine = ReconciliationEngine.from_dict(
+            payload.get("reconciliation_engine")
+            if isinstance(payload.get("reconciliation_engine"), dict)
             else None
         )
         agent.verification_loop = VerificationLoop.from_dict(

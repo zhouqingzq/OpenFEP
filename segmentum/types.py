@@ -380,6 +380,7 @@ class InterventionScore:
     predicted_effects: dict[str, float]
     dominant_component: str
     cost: float
+    reconciliation_bias: float = 0.0
     commitment_compatibility_score: float = 0.5
     relevant_commitments: list[str] = field(default_factory=list)
     commitment_violations: list[str] = field(default_factory=list)
@@ -398,6 +399,7 @@ class InterventionScore:
             "identity_bias": self.identity_bias,
             "ledger_bias": self.ledger_bias,
             "subject_bias": self.subject_bias,
+            "reconciliation_bias": self.reconciliation_bias,
             "goal_alignment": self.goal_alignment,
             "verification_bias": self.verification_bias,
         }
@@ -453,6 +455,8 @@ class DecisionDiagnostics:
     ledger_payload: dict[str, object] = field(default_factory=dict)
     verification_summary: str = ""
     verification_payload: dict[str, object] = field(default_factory=dict)
+    reconciliation_summary: str = ""
+    reconciliation_payload: dict[str, object] = field(default_factory=dict)
     subject_state_summary: str = ""
     subject_status_flags: dict[str, bool] = field(default_factory=dict)
     subject_priority_stack: list[dict[str, object]] = field(default_factory=list)

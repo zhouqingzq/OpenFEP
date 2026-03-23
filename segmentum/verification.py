@@ -251,6 +251,10 @@ class VerificationTarget:
     attempts: int = 0
     missed_evidence_count: int = 0
     linked_discrepancy_id: str = ""
+    linked_commitments: tuple[str, ...] = ()
+    linked_identity_anchors: tuple[str, ...] = ()
+    target_channels: tuple[str, ...] = ()
+    prediction_type: str = ""
     verification_bias: float = 0.0
 
     def to_dict(self) -> dict[str, object]:
@@ -269,6 +273,10 @@ class VerificationTarget:
             "attempts": int(self.attempts),
             "missed_evidence_count": int(self.missed_evidence_count),
             "linked_discrepancy_id": self.linked_discrepancy_id,
+            "linked_commitments": list(self.linked_commitments),
+            "linked_identity_anchors": list(self.linked_identity_anchors),
+            "target_channels": list(self.target_channels),
+            "prediction_type": self.prediction_type,
             "verification_bias": round(self.verification_bias, 6),
         }
 
@@ -300,6 +308,12 @@ class VerificationTarget:
             attempts=int(payload.get("attempts", 0)),
             missed_evidence_count=int(payload.get("missed_evidence_count", 0)),
             linked_discrepancy_id=str(payload.get("linked_discrepancy_id", "")),
+            linked_commitments=tuple(str(item) for item in payload.get("linked_commitments", [])),
+            linked_identity_anchors=tuple(
+                str(item) for item in payload.get("linked_identity_anchors", [])
+            ),
+            target_channels=tuple(str(item) for item in payload.get("target_channels", [])),
+            prediction_type=str(payload.get("prediction_type", "")),
             verification_bias=float(payload.get("verification_bias", 0.0)),
         )
 
@@ -871,6 +885,10 @@ class VerificationLoop:
             selected_reason=plan.selected_reason,
             plan=plan,
             status=VerificationTargetStatus.ACTIVE.value,
+            linked_commitments=tuple(str(item) for item in prediction.linked_commitments),
+            linked_identity_anchors=tuple(str(item) for item in prediction.linked_identity_anchors),
+            target_channels=tuple(str(item) for item in prediction.target_channels),
+            prediction_type=prediction.prediction_type,
         )
 
     def _linked_action(self, prediction: PredictionHypothesis) -> str:

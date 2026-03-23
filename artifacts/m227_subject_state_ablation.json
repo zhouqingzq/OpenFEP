@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-03-22T06:45:57+00:00",
+  "generated_at": "2026-03-23T03:02:05+00:00",
   "mechanism": "subject_state",
   "comparison": "full_subject_state_vs_ablated_subject_state",
   "baseline": {
-    "hide_bias": 0.0,
+    "hide_bias": 0.003,
     "forage_bias": 0.0,
-    "memory_threshold_delta": 0.0,
+    "memory_threshold_delta": -0.003,
     "recommended_action": "forage",
     "active_tasks": [
       "energy_recovery"
@@ -27,7 +27,7 @@
     }
   },
   "full_mechanism": {
-    "hide_bias": 0.2988,
+    "hide_bias": 0.3018,
     "forage_bias": -0.3476,
     "memory_threshold_delta": -0.3,
     "recommended_action": "hide",

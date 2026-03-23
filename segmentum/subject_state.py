@@ -455,6 +455,18 @@ def _tensions(
                     evidence=tuple(discrepancy.supporting_evidence[:2]),
                 )
             )
+    reconciliation_engine = getattr(agent, "reconciliation_engine", None)
+    if reconciliation_engine is not None:
+        for thread in reconciliation_engine.active_unresolved_threads()[:3]:
+            tensions.append(
+                ActiveTension(
+                    label=thread.title or "long-horizon conflict",
+                    tension_type="reconciliation",
+                    intensity=min(1.0, 0.18 + 0.12 * len(set(thread.linked_chapter_ids)) + 0.08 * min(thread.recurrence_count, 4)),
+                    repair_target=thread.status,
+                    evidence=(thread.thread_id, thread.current_outcome or thread.source_category),
+                )
+            )
     tensions.sort(key=lambda item: (-item.intensity, item.label))
     return tensions[:4]
 
@@ -609,6 +621,12 @@ def derive_subject_state(
         or bool(commitment_summaries)
         or bool(previous_state is not None and previous_state.continuity_anchors)
     )
+    active_reconciliation_threads = getattr(agent, "reconciliation_engine", None)
+    unresolved_reconciliation = (
+        len(active_reconciliation_threads.active_unresolved_threads())
+        if active_reconciliation_threads is not None
+        else 0
+    )
     status_flags = {
         "threatened": (
             agent.energy < 0.25
@@ -631,6 +649,7 @@ def derive_subject_state(
             or float(slow_biases.get("trust_stance", 0.5)) <= 0.34
         ),
         "continuity_fragile": continuity_fragile,
+        "long_horizon_conflict": unresolved_reconciliation > 0,
     }
     tensions = _tensions(agent, diagnostics, maintenance_agenda, continuity_score)
     priorities = _priority_stack(active_goal, dominant_needs, tensions, commitment_targets, status_flags)
@@ -647,6 +666,10 @@ def derive_subject_state(
         same_subject_bits.append("Continuity still depends on prior anchors awaiting rebind.")
     if current_phase:
         same_subject_bits.append(f"Current narrative phase: {current_phase}.")
+    if unresolved_reconciliation:
+        same_subject_bits.append(
+            f"{unresolved_reconciliation} long-horizon conflict thread(s) still shape continuity."
+        )
     return SubjectState(
         tick=int(agent.cycle),
         core_identity_summary=core_identity_summary,
@@ -700,6 +723,11 @@ def subject_action_bias(subject_state: SubjectState, action: str) -> float:
             bias += 0.05
         if subject_state.active_commitments and action == "forage":
             bias -= 0.04
+    if subject_state.status_flags.get("long_horizon_conflict", False):
+        if action in {"rest", "scan"}:
+            bias += 0.05
+        elif action == "forage":
+            bias -= 0.03
     caution_bias = float(subject_state.slow_biases.get("caution_bias", 0.5))
     threat_sensitivity = float(subject_state.slow_biases.get("threat_sensitivity", 0.5))
     trust_stance = float(subject_state.slow_biases.get("trust_stance", 0.5))
@@ -727,6 +755,8 @@ def subject_memory_threshold_delta(subject_state: SubjectState) -> float:
         delta -= 0.08
     if subject_state.status_flags.get("repairing", False):
         delta -= 0.06
+    if subject_state.status_flags.get("long_horizon_conflict", False):
+        delta -= 0.05
     if subject_state.status_flags.get("threatened", False):
         delta -= 0.05
     delta -= max(0.0, float(subject_state.slow_biases.get("threat_sensitivity", 0.5)) - 0.5) * 0.07
@@ -759,6 +789,8 @@ def apply_subject_state_to_maintenance_agenda(
         active_tasks.append("continuity_guard")
     if subject_state.status_flags.get("repairing", False) and "repair_stabilization" not in active_tasks:
         active_tasks.append("repair_stabilization")
+    if subject_state.status_flags.get("long_horizon_conflict", False) and "reconciliation_review" not in active_tasks:
+        active_tasks.append("reconciliation_review")
     if subject_state.status_flags.get("threatened", False):
         recommended_action = "hide"
         if interrupt_action is None and agenda.policy_shift_strength + priority_gain > 0.30:

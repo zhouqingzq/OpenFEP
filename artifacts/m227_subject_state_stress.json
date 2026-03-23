@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-22T06:45:57+00:00",
+  "generated_at": "2026-03-23T03:02:05+00:00",
   "seed": 342,
   "failure_injection": {
     "energy": 0.12,
@@ -147,12 +147,29 @@
         ]
       }
     ],
+    "slow_biases": {
+      "caution_bias": 0.5,
+      "threat_sensitivity": 0.5,
+      "trust_stance": 0.5,
+      "exploration_posture": 0.5,
+      "social_approach": 0.5,
+      "survival_weight": 0.72,
+      "social_weight": 0.5,
+      "exploration_weight": 0.46,
+      "maintenance_weight": 0.62,
+      "hierarchy_stability": 0.68,
+      "commitment_stability": 0.7,
+      "identity_rigidity": 0.58,
+      "plasticity": 0.42,
+      "continuity_resilience": 0.66
+    },
     "status_flags": {
       "threatened": true,
       "repairing": false,
       "overloaded": true,
       "socially_destabilized": false,
-      "continuity_fragile": true
+      "continuity_fragile": true,
+      "long_horizon_conflict": false
     },
     "protected_targets": [
       "goal:control",
@@ -166,13 +183,13 @@
   },
   "maintenance_update": {
     "recommended_action": "hide",
-    "policy_shift_strength": 0.5002,
+    "policy_shift_strength": 0.5194,
     "active_tasks": [
       "energy_recovery",
       "continuity_guard"
     ],
     "details": {
-      "priority_gain": 0.1602,
+      "priority_gain": 0.1794,
       "recommended_action": "hide",
       "interrupt_action": "hide",
       "active_tasks": [
@@ -184,7 +201,8 @@
         "repairing": false,
         "overloaded": true,
         "socially_destabilized": false,
-        "continuity_fragile": true
+        "continuity_fragile": true,
+        "long_horizon_conflict": false
       }
     }
   },
@@ -203,7 +221,8 @@
         "repairing": false,
         "overloaded": true,
         "socially_destabilized": false,
-        "continuity_fragile": true
+        "continuity_fragile": true,
+        "long_horizon_conflict": false
       },
       "priority_labels": [
         "goal:control",
@@ -217,7 +236,7 @@
     "post_restore_alive": true,
     "post_restore_subject_state": {
       "tick": 1,
-      "core_identity_summary": "I am a risk-seeking, survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 1 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.03, 'resource_cost': {'energy': 0.03, 'attention': 0.03}, 'failure_modes': ['opportunity_loss', 'environment_shift'], 'constraints': {'preferred_when_fatigue_above': 0.4}, 'reversible': True} (surprise=1005.06).",
+      "core_identity_summary": "I am a risk-seeking, survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 1 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.03, 'resource_cost': {'energy': 0.03, 'attention': 0.03}, 'failure_modes': ['opportunity_loss', 'environment_shift'], 'constraints': {'preferred_when_fatigue_above': 0.4}, 'reversible': True} (surprise=1005.06). Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence.",
       "current_phase": "survival_crisis",
       "current_self_narrative_phase": "survival_crisis",
       "active_commitments": [
@@ -257,7 +276,7 @@
       "identity_tension_level": 0.5,
       "self_inconsistency_level": 0.5,
       "maintenance_pressure": 1.0,
-      "continuity_score": 0.1,
+      "continuity_score": 0.167741,
       "continuity_anchors": [
         "ep-000001-rest",
         "commitment-survival-priority",
@@ -297,7 +316,7 @@
         {
           "label": "continuity fragility",
           "tension_type": "continuity",
-          "intensity": 0.9,
+          "intensity": 0.832259,
           "repair_target": "protect continuity anchors",
           "evidence": [
             "continuity_score_drop"
@@ -350,7 +369,7 @@
         },
         {
           "label": "continuity fragility",
-          "weight": 0.9,
+          "weight": 0.832259,
           "priority_type": "continuity",
           "preferred_actions": [
             "rest",
@@ -381,12 +400,29 @@
           ]
         }
       ],
+      "slow_biases": {
+        "caution_bias": 0.5375,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "survival_weight": 0.72,
+        "social_weight": 0.5,
+        "exploration_weight": 0.46,
+        "maintenance_weight": 0.62,
+        "hierarchy_stability": 0.689405,
+        "commitment_stability": 0.7,
+        "identity_rigidity": 0.58,
+        "plasticity": 0.42,
+        "continuity_resilience": 0.66
+      },
       "status_flags": {
         "threatened": true,
         "repairing": false,
         "overloaded": false,
         "socially_destabilized": false,
-        "continuity_fragile": true
+        "continuity_fragile": true,
+        "long_horizon_conflict": true
       },
       "protected_targets": [
         "need:maintenance"
@@ -397,7 +433,7 @@
         "SURVIVAL",
         "protect continuity anchors"
       ],
-      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis."
+      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis. 6 long-horizon conflict thread(s) still shape continuity."
     }
   }
 }

@@ -1,0 +1,171 @@
+{
+  "milestone_id": "M2.31",
+  "status": "PASS",
+  "generated_at": "2026-03-23T08:21:38+00:00",
+  "seed_set": [
+    231,
+    462
+  ],
+  "artifacts": {
+    "specification": "E:\\workspace\\segments\\reports\\m231_milestone_spec.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m231_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m231_reconciliation_threads.py",
+      "tests/test_m231_narrative_writeback.py",
+      "tests/test_m231_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m229_acceptance.py",
+      "tests/test_m230_acceptance.py",
+      "tests/test_narrative_evolution.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true,
+      "evidence": "IdentityNarrative round-trips reconciliation writeback fields including contradiction_summary and evidence_provenance."
+    },
+    "determinism": {
+      "passed": true,
+      "evidence": [
+        {
+          "seed": 231,
+          "equivalent": true,
+          "signature_a": {
+            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "counts": {
+              "active": 5,
+              "unresolved": 4,
+              "archived": 0
+            },
+            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
+            "dominant_status": "active",
+            "reason": "runtime_observation",
+            "tick": 1
+          },
+          "signature_b": {
+            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "counts": {
+              "active": 5,
+              "unresolved": 4,
+              "archived": 0
+            },
+            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
+            "dominant_status": "active",
+            "reason": "runtime_observation",
+            "tick": 1
+          }
+        },
+        {
+          "seed": 462,
+          "equivalent": true,
+          "signature_a": {
+            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "counts": {
+              "active": 6,
+              "unresolved": 5,
+              "archived": 0
+            },
+            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
+            "dominant_status": "active",
+            "reason": "runtime_observation",
+            "tick": 1
+          },
+          "signature_b": {
+            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "counts": {
+              "active": 6,
+              "unresolved": 5,
+              "archived": 0
+            },
+            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
+            "dominant_status": "active",
+            "reason": "runtime_observation",
+            "tick": 1
+          }
+        }
+      ]
+    },
+    "causality": {
+      "passed": true,
+      "evidence": {
+        "core_summary_loses_reconciliation_clause_without_writeback": true,
+        "chapter_transition_evidence_not_written_without_writeback": true,
+        "subject_identity_summary_not_updated_without_writeback": true
+      }
+    },
+    "ablation": {
+      "passed": true,
+      "evidence": {
+        "core_summary_loses_reconciliation_clause_without_writeback": true,
+        "chapter_transition_evidence_not_written_without_writeback": true,
+        "subject_identity_summary_not_updated_without_writeback": true
+      }
+    },
+    "stress": {
+      "passed": true,
+      "evidence": {
+        "unrelated_evidence_did_not_contaminate_other_thread": true,
+        "unmatched_repair_did_not_bind": true,
+        "narrative_writeback_survived_stress": true
+      }
+    },
+    "regression": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m229_acceptance.py",
+        "tests/test_m230_acceptance.py",
+        "tests/test_narrative_evolution.py"
+      ]
+    },
+    "artifact_freshness": {
+      "passed": true,
+      "evidence": "all M2.31 artifacts were generated in the current round"
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "current_round": true,
+    "generated_at": "2026-03-23T08:21:38+00:00",
+    "codebase_version": "85a1c432e4212cc90ac2e08d9d265e1b99ea3e12",
+    "artifact_records": {
+      "specification": {
+        "path": "E:\\workspace\\segments\\reports\\m231_milestone_spec.md",
+        "exists": true,
+        "size_bytes": 1985,
+        "modified_at": "2026-03-23T08:19:46+00:00"
+      },
+      "canonical_trace": {
+        "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_trace.jsonl",
+        "exists": true,
+        "size_bytes": 168232,
+        "modified_at": "2026-03-23T08:21:38+00:00"
+      },
+      "ablation": {
+        "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_ablation.json",
+        "exists": true,
+        "size_bytes": 1486,
+        "modified_at": "2026-03-23T08:21:38+00:00"
+      },
+      "stress": {
+        "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_stress.json",
+        "exists": true,
+        "size_bytes": 8696,
+        "modified_at": "2026-03-23T08:21:38+00:00"
+      },
+      "summary": {
+        "path": "E:\\workspace\\segments\\reports\\m231_acceptance_summary.md",
+        "exists": true,
+        "size_bytes": 247,
+        "modified_at": "2026-03-23T08:21:38+00:00"
+      }
+    }
+  },
+  "recommendation": "ACCEPT"
+}
