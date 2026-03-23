@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-22T06:45:53+00:00",
-  "codebase_version": "eaa5d6a17fd91d60ffdda12c3485b459c4b773a3",
+  "generated_at": "2026-03-23T10:09:55+00:00",
+  "codebase_version": "8dc8583dae8d7eebc42b4eb7ce26ec72996d06d8",
   "seed_set": [
     224,
     243,
@@ -410,5 +410,5 @@
     "maintenance_priority_gain",
     "broadcast_to_report_alignment"
   ],
-  "workspace_capacity_effect_size": 0.155569
+  "workspace_capacity_effect_size": 0.151066
 }

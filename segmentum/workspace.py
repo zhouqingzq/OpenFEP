@@ -8,7 +8,7 @@ from .attention import AttentionTrace
 
 ACTION_HINTS = {
     "danger": {"hide": 0.22, "exploit_shelter": 0.14, "scan": -0.08, "forage": -0.10},
-    "novelty": {"scan": 0.22, "forage": 0.06, "hide": -0.04},
+    "novelty": {"scan": 0.24, "forage": 0.06, "hide": -0.05},
     "food": {"forage": 0.20, "rest": -0.03},
     "shelter": {"exploit_shelter": 0.18, "hide": 0.08},
     "temperature": {"thermoregulate": 0.22, "rest": 0.04},

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-03-23T08:21:39+00:00",
+  "generated_at": "2026-03-23T10:09:58+00:00",
   "mechanism": "verification_loop",
   "comparison": "with_verification_vs_ablation",
   "baseline": {
-    "scan_policy_score": 0.182541,
+    "scan_policy_score": 0.185633,
     "scan_verification_bias": 0.0,
     "workspace_focus": {
       "energy": 0.38025,
@@ -25,7 +25,7 @@
     }
   },
   "full_mechanism": {
-    "scan_policy_score": 0.288605,
+    "scan_policy_score": 0.291697,
     "scan_verification_bias": 0.106064,
     "workspace_focus": {
       "energy": 0.38025,

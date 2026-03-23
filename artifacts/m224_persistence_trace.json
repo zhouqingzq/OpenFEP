@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-22T06:45:53+00:00",
-  "codebase_version": "eaa5d6a17fd91d60ffdda12c3485b459c4b773a3",
+  "generated_at": "2026-03-23T10:09:55+00:00",
+  "codebase_version": "8dc8583dae8d7eebc42b4eb7ce26ec72996d06d8",
   "seed_set": [
     224,
     243,
@@ -142,11 +142,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.367873,
+                "hide": 0.355373,
                 "rest": 0.18,
                 "exploit_shelter": 0.28501,
                 "forage": 0.181421,
-                "scan": 0.542137,
+                "scan": 0.567137,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -213,11 +213,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.456753,
+                "hide": 0.452797,
                 "rest": 0.18,
                 "exploit_shelter": 0.34255,
                 "forage": 0.116202,
-                "scan": 0.247009,
+                "scan": 0.254922,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -376,11 +376,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.368553,
+                "hide": 0.356053,
                 "rest": 0.18,
                 "exploit_shelter": 0.285443,
                 "forage": 0.181112,
-                "scan": 0.54189,
+                "scan": 0.56689,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -447,11 +447,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.457973,
+                "hide": 0.454017,
                 "rest": 0.18,
                 "exploit_shelter": 0.343326,
                 "forage": 0.115647,
-                "scan": 0.246565,
+                "scan": 0.254478,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -610,11 +610,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.382413,
+                "hide": 0.369913,
                 "rest": 0.18,
                 "exploit_shelter": 0.294263,
                 "forage": 0.174812,
-                "scan": 0.53685,
+                "scan": 0.56185,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -681,11 +681,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.447016,
+                "hide": 0.44306,
                 "rest": 0.18,
                 "exploit_shelter": 0.336353,
                 "forage": 0.120628,
-                "scan": 0.25055,
+                "scan": 0.258462,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -844,11 +844,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.369183,
+                "hide": 0.356683,
                 "rest": 0.18,
                 "exploit_shelter": 0.285844,
                 "forage": 0.180826,
-                "scan": 0.541661,
+                "scan": 0.566661,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -915,11 +915,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.448231,
+                "hide": 0.444275,
                 "rest": 0.18,
                 "exploit_shelter": 0.337126,
                 "forage": 0.120076,
-                "scan": 0.250108,
+                "scan": 0.258021,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -1078,11 +1078,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.376113,
+                "hide": 0.363613,
                 "rest": 0.18,
                 "exploit_shelter": 0.290254,
                 "forage": 0.177676,
-                "scan": 0.539141,
+                "scan": 0.564141,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -1149,11 +1149,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.471438,
+                "hide": 0.467482,
                 "rest": 0.18,
                 "exploit_shelter": 0.351895,
                 "forage": 0.109527,
-                "scan": 0.241669,
+                "scan": 0.249582,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -1312,11 +1312,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.376808,
+                "hide": 0.364308,
                 "rest": 0.18,
                 "exploit_shelter": 0.290696,
                 "forage": 0.17736,
-                "scan": 0.538888,
+                "scan": 0.563888,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -1383,11 +1383,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.472666,
+                "hide": 0.46871,
                 "rest": 0.18,
                 "exploit_shelter": 0.352676,
                 "forage": 0.108969,
-                "scan": 0.241222,
+                "scan": 0.249135,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -1537,11 +1537,11 @@
                 "seek_contact"
               ],
               "scores": {
-                "hide": 0.200495,
+                "hide": 0.187995,
                 "rest": 0.18,
                 "exploit_shelter": 0.21,
                 "forage": 0.235,
-                "scan": 0.585,
+                "scan": 0.61,
                 "seek_contact": 0.417824,
                 "thermoregulate": 0.12
               },
@@ -1609,11 +1609,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.456753,
+                "hide": 0.452797,
                 "rest": 0.18,
                 "exploit_shelter": 0.34255,
                 "forage": 0.116202,
-                "scan": 0.247009,
+                "scan": 0.254922,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -1761,11 +1761,11 @@
                 "seek_contact"
               ],
               "scores": {
-                "hide": 0.200291,
+                "hide": 0.187791,
                 "rest": 0.18,
                 "exploit_shelter": 0.21,
                 "forage": 0.235,
-                "scan": 0.585,
+                "scan": 0.61,
                 "seek_contact": 0.418721,
                 "thermoregulate": 0.12
               },
@@ -1833,11 +1833,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.457973,
+                "hide": 0.454017,
                 "rest": 0.18,
                 "exploit_shelter": 0.343326,
                 "forage": 0.115647,
-                "scan": 0.246565,
+                "scan": 0.254478,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -1986,11 +1986,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.358388,
+                "hide": 0.345888,
                 "rest": 0.310065,
                 "exploit_shelter": 0.21,
                 "forage": 0.126612,
-                "scan": 0.585,
+                "scan": 0.61,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -2059,11 +2059,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.447016,
+                "hide": 0.44306,
                 "rest": 0.18,
                 "exploit_shelter": 0.336353,
                 "forage": 0.120628,
-                "scan": 0.25055,
+                "scan": 0.258462,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -2212,11 +2212,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.35875,
+                "hide": 0.34625,
                 "rest": 0.3105,
                 "exploit_shelter": 0.21,
                 "forage": 0.12625,
-                "scan": 0.585,
+                "scan": 0.61,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -2285,11 +2285,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.448231,
+                "hide": 0.444275,
                 "rest": 0.18,
                 "exploit_shelter": 0.337126,
                 "forage": 0.120076,
-                "scan": 0.250108,
+                "scan": 0.258021,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -2438,11 +2438,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.355125,
+                "hide": 0.342625,
                 "rest": 0.30615,
                 "exploit_shelter": 0.21,
                 "forage": 0.129875,
-                "scan": 0.585,
+                "scan": 0.61,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -2511,11 +2511,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.471438,
+                "hide": 0.467482,
                 "rest": 0.18,
                 "exploit_shelter": 0.351895,
                 "forage": 0.109527,
-                "scan": 0.241669,
+                "scan": 0.249582,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },
@@ -2664,11 +2664,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.355488,
+                "hide": 0.342988,
                 "rest": 0.306585,
                 "exploit_shelter": 0.21,
                 "forage": 0.129512,
-                "scan": 0.585,
+                "scan": 0.61,
                 "seek_contact": 0.2,
                 "thermoregulate": 0.12
               },
@@ -2737,11 +2737,11 @@
                 "scan"
               ],
               "scores": {
-                "hide": 0.472666,
+                "hide": 0.46871,
                 "rest": 0.18,
                 "exploit_shelter": 0.352676,
                 "forage": 0.108969,
-                "scan": 0.241222,
+                "scan": 0.249135,
                 "seek_contact": 0.12,
                 "thermoregulate": 0.15
               },

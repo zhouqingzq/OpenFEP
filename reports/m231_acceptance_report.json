@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.31",
   "status": "PASS",
-  "generated_at": "2026-03-23T08:21:38+00:00",
+  "generated_at": "2026-03-23T10:10:00+00:00",
   "seed_set": [
     231,
     462
@@ -132,8 +132,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-23T08:21:38+00:00",
-    "codebase_version": "85a1c432e4212cc90ac2e08d9d265e1b99ea3e12",
+    "generated_at": "2026-03-23T10:10:00+00:00",
+    "codebase_version": "8dc8583dae8d7eebc42b4eb7ce26ec72996d06d8",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m231_milestone_spec.md",
@@ -144,26 +144,26 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_trace.jsonl",
         "exists": true,
-        "size_bytes": 168232,
-        "modified_at": "2026-03-23T08:21:38+00:00"
+        "size_bytes": 168296,
+        "modified_at": "2026-03-23T10:10:00+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_ablation.json",
         "exists": true,
         "size_bytes": 1486,
-        "modified_at": "2026-03-23T08:21:38+00:00"
+        "modified_at": "2026-03-23T10:10:00+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_stress.json",
         "exists": true,
         "size_bytes": 8696,
-        "modified_at": "2026-03-23T08:21:38+00:00"
+        "modified_at": "2026-03-23T10:10:00+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m231_acceptance_summary.md",
         "exists": true,
         "size_bytes": 247,
-        "modified_at": "2026-03-23T08:21:38+00:00"
+        "modified_at": "2026-03-23T10:09:59+00:00"
       }
     }
   },

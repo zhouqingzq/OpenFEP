@@ -785,22 +785,22 @@ class _ScriptedRuntimeWorld:
 def _runtime_probe_primary_observation() -> Observation:
     return Observation(
         food=0.20,
-        danger=0.35,
-        novelty=0.30,
-        shelter=0.20,
+        danger=0.05,
+        novelty=1.00,
+        shelter=0.10,
         temperature=0.50,
-        social=0.90,
+        social=0.10,
     )
 
 
 def _runtime_probe_validation_observation() -> Observation:
     return Observation(
-        food=0.18,
-        danger=0.38,
-        novelty=0.28,
-        shelter=0.22,
+        food=0.19,
+        danger=0.06,
+        novelty=0.90,
+        shelter=0.12,
         temperature=0.50,
-        social=0.84,
+        social=0.10,
     )
 
 

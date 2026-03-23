@@ -382,20 +382,42 @@ class MetaCognitiveLayer:
         workspace_conflict_channels: list[str] = []
         workspace_review_gain = 0.0
         if workspace_state is not None:
-            workspace_conflict_channels = [
+            direct_conflict_channels = [
                 content.channel
                 for content in workspace_state.broadcast_contents
                 if content.channel in {"danger", "stress", "social", "conflict"}
                 and (content.salience >= 0.18 or abs(content.error_value) >= 0.12)
             ]
+            suppressed_conflict_channels = [
+                channel
+                for channel in workspace_state.suppressed_channels
+                if channel in {"danger", "stress", "social", "conflict"}
+            ]
+            workspace_conflict_channels = list(direct_conflict_channels)
+            if (
+                not workspace_conflict_channels
+                and suppressed_conflict_channels
+                and workspace_state.replacement_pressure >= 0.12
+            ):
+                workspace_conflict_channels = list(suppressed_conflict_channels)
             workspace_review_gain = min(
                 0.30,
                 sum(
                     min(0.18, content.salience + abs(content.error_value) * 0.50)
                     for content in workspace_state.broadcast_contents
-                    if content.channel in workspace_conflict_channels
+                    if content.channel in direct_conflict_channels
                 ),
             )
+            if not direct_conflict_channels and workspace_conflict_channels:
+                workspace_review_gain = max(
+                    workspace_review_gain,
+                    min(
+                        0.24,
+                        0.08
+                        + workspace_state.replacement_pressure * 0.45
+                        + len(workspace_conflict_channels) * 0.03,
+                    ),
+                )
             if workspace_conflict_channels:
                 review_required = True
                 pause_strength = max(pause_strength, 0.20 + workspace_review_gain)
