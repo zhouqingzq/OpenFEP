@@ -7,6 +7,7 @@ from types import MappingProxyType
 from typing import Callable, Mapping
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .slow_learning import SlowLearningState
 
 
 SELF_ERROR = "self_error"
@@ -1737,6 +1738,7 @@ class SelfModel:
         action_history: list[str],
         rehearsal_queue: list[str] | None = None,
         current_tick: int,
+        slow_continuity_modifier: float = 0.0,
     ) -> ContinuityAudit:
         archived = archived_memory or []
         previous = self.continuity_audit
@@ -1817,7 +1819,7 @@ class SelfModel:
             + (0.0 if chapter_shift_excused else narrative_drift * 0.20)
         )
         self.continuity_audit = ContinuityAudit(
-            continuity_score=max(0.0, min(1.0, 1.0 - continuity_penalty)),
+            continuity_score=max(0.0, min(1.0, 1.0 - continuity_penalty + slow_continuity_modifier)),
             dominant_action=dominant_action,
             dominant_action_ratio=dominant_ratio,
             action_distribution=action_distribution,
@@ -2151,6 +2153,8 @@ class SelfModel:
         conflict_history: list[object] | None = None,
         weight_adjustments: list[object] | None = None,
         chapter_signal: str | None = None,
+        slow_learning_state: SlowLearningState | None = None,
+        slow_learning_explanations: list[str] | None = None,
     ) -> IdentityNarrative:
         narrative = self.generate_identity_narrative(
             episodic_memory=episodic_memory,
@@ -2161,6 +2165,8 @@ class SelfModel:
             conflict_history=conflict_history or [],
             weight_adjustments=weight_adjustments or [],
             chapter_signal=chapter_signal,
+            slow_learning_state=slow_learning_state,
+            slow_learning_explanations=slow_learning_explanations or [],
         )
         self.identity_narrative = narrative
         return narrative
@@ -2203,6 +2209,8 @@ class SelfModel:
         conflict_history: list[object],
         weight_adjustments: list[object],
         chapter_signal: str | None,
+        slow_learning_state: SlowLearningState | None,
+        slow_learning_explanations: list[str],
     ) -> IdentityNarrative:
         policies = self.preferred_policies or PreferredPolicies(last_updated_tick=current_tick)
         previous = self.identity_narrative or IdentityNarrative()
@@ -2319,7 +2327,11 @@ class SelfModel:
             core_summary="",
             behavioral_patterns=self._derive_behavioral_patterns(chapter_views, policies),
             significant_events=self._derive_significant_events(chapter_views),
-            values_statement=self._derive_values_statement(preference_labels, policies),
+            values_statement=self._derive_values_statement(
+                preference_labels,
+                policies,
+                slow_learning_state=slow_learning_state,
+            ),
             last_updated_tick=current_tick,
             version=previous_version,
         )
@@ -2381,6 +2393,8 @@ class SelfModel:
             current_tick=current_tick,
         )
         narrative.autobiographical_summary = self.generate_core_summary(narrative)
+        if slow_learning_explanations:
+            narrative.autobiographical_summary += " " + " ".join(slow_learning_explanations[:2])
         narrative.core_summary = narrative.autobiographical_summary
         self._update_belief_calibration(
             current_tick=current_tick,
@@ -3153,6 +3167,8 @@ class SelfModel:
         self,
         preference_labels: Mapping[str, float],
         policies: PreferredPolicies,
+        *,
+        slow_learning_state: SlowLearningState | None = None,
     ) -> str:
         ranked_values = sorted(
             (
@@ -3169,10 +3185,18 @@ class SelfModel:
             most_avoided = "survival_threat"
             most_sought = "resource_gain"
         emphasis = f" I usually favor {policies.dominant_strategy}." if policies.dominant_strategy else ""
-        return (
+        statement = (
             f"I prioritize avoiding {most_avoided} while moving toward {most_sought}."
             f" My current risk profile is {policies.risk_profile}.{emphasis}"
         )
+        if slow_learning_state is not None:
+            statement += (
+                " Long-horizon weights currently favor "
+                f"survival={slow_learning_state.values.survival_weight:.2f}, "
+                f"exploration={slow_learning_state.values.exploration_weight:.2f}, "
+                f"maintenance={slow_learning_state.values.maintenance_weight:.2f}."
+            )
+        return statement
 
 
 def build_default_self_model(

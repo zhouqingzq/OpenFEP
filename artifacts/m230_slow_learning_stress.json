@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-03-22T23:23:31+00:00",
+  "failure_injection": {
+    "type": "divergent_multi-variable_pressure",
+    "episodes": 14,
+    "identity_tension_events": 1
+  },
+  "anti_collapse": {
+    "triggered": true,
+    "total_delta": 0.18,
+    "max_total_delta_per_cycle": 0.18
+  },
+  "protected_anchor": {
+    "commitment_stability": 0.7,
+    "updates": [
+      {
+        "variable_path": "identity.commitment_stability",
+        "previous_value": 0.7,
+        "attempted_value": 0.7,
+        "new_value": 0.7,
+        "delta": 0.0,
+        "status": "rejected",
+        "source_pressures": [
+          "commitment_evidence"
+        ],
+        "rationale": "commitment stability moved with repeated reaffirmation versus inconsistency",
+        "protected_anchor": "commitment-continuity",
+        "clipped_reason": "insufficient repeated evidence"
+      }
+    ]
+  },
+  "snapshot_roundtrip": {
+    "caution_bias_before_restore": 0.5375,
+    "caution_bias_after_restore": 0.5375,
+    "audit_history_after_restore": 1
+  },
+  "trace_checks": {
+    "trace_lines": 1,
+    "last_record_has_slow_learning": true,
+    "last_record_has_continuity": true
+  }
+}

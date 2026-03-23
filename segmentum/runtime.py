@@ -614,6 +614,7 @@ class SegmentRuntime:
                 if payload.get("episode_id")
             ],
             current_tick=self.agent.cycle,
+            slow_continuity_modifier=self.agent.slow_variable_learner.continuity_modifier(),
         )
         self.last_continuity_report = continuity_audit.to_dict()
         ledger_runtime_update = self.agent.prediction_ledger.record_runtime_discrepancies(
@@ -1588,6 +1589,7 @@ class SegmentRuntime:
         trace_record["prediction_ledger"] = self.agent.prediction_ledger.to_dict()
         trace_record["verification_loop"] = self.agent.verification_loop.to_dict()
         trace_record["subject_state"] = self.subject_state.to_dict()
+        trace_record["slow_learning"] = self.agent.slow_variable_learner.to_dict()
         trace_record["continuity"] = dict(self.last_continuity_report)
         if self.last_error_attribution is not None:
             trace_record["last_error_attribution"] = {

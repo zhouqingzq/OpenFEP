@@ -35,6 +35,19 @@ from .verification import (
     VerificationTarget,
     VerificationTargetStatus,
 )
+from .slow_learning import (
+    ConsolidationUpdate,
+    DriftBudget as SlowLearningDriftBudget,
+    IdentityStabilityState,
+    LearningPressure,
+    PlasticityWindow,
+    ProtectedAnchor,
+    SlowLearningState,
+    SlowTraitState,
+    SlowUpdateAudit,
+    SlowVariableLearner,
+    ValueStabilityState,
+)
 from .governance import CapabilityDescriptor, GovernanceController, GovernanceState
 from .memory import AutobiographicalMemory
 from .preferences import Goal, GoalStack, ValueHierarchy
@@ -115,6 +128,17 @@ __all__ = [
     "VerificationOutcome",
     "FalsificationRecord",
     "PredictionUpdateResult",
+    "SlowVariableLearner",
+    "SlowLearningState",
+    "SlowTraitState",
+    "ValueStabilityState",
+    "IdentityStabilityState",
+    "SlowLearningDriftBudget",
+    "LearningPressure",
+    "ConsolidationUpdate",
+    "SlowUpdateAudit",
+    "ProtectedAnchor",
+    "PlasticityWindow",
     "CapabilityDescriptor",
     "GovernanceController",
     "GovernanceState",

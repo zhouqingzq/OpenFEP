@@ -147,6 +147,7 @@ class SubjectState:
     continuity_anchors: tuple[str, ...] = ()
     unresolved_tensions: tuple[ActiveTension, ...] = ()
     subject_priority_stack: tuple[SubjectPriority, ...] = ()
+    slow_biases: dict[str, float] = field(default_factory=dict)
     status_flags: dict[str, bool] = field(default_factory=dict)
     protected_targets: tuple[str, ...] = ()
     repair_targets: tuple[str, ...] = ()
@@ -172,6 +173,7 @@ class SubjectState:
             "continuity_anchors": list(self.continuity_anchors),
             "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions],
             "subject_priority_stack": [item.to_dict() for item in self.subject_priority_stack],
+            "slow_biases": {str(key): float(value) for key, value in self.slow_biases.items()},
             "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
             "protected_targets": list(self.protected_targets),
             "repair_targets": list(self.repair_targets),
@@ -222,6 +224,11 @@ class SubjectState:
                 for item in payload.get("subject_priority_stack", [])
                 if isinstance(item, Mapping)
             ),
+            slow_biases={
+                str(key): float(value)
+                for key, value in dict(payload.get("slow_biases", {})).items()
+                if isinstance(value, (int, float))
+            },
             status_flags=(
                 {str(key): bool(value) for key, value in status_flags.items()}
                 if isinstance(status_flags, Mapping)
@@ -259,6 +266,7 @@ class SubjectState:
             "active_social_focus": list(self.active_social_focus),
             "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
             "priority_stack": [item.to_dict() for item in self.subject_priority_stack[:4]],
+            "slow_biases": {str(key): float(value) for key, value in self.slow_biases.items()},
             "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions[:4]],
             "continuity_score": round(self.continuity_score, 6),
             "continuity_anchors": list(self.continuity_anchors),
@@ -519,6 +527,7 @@ def derive_subject_state(
     previous_state: SubjectState | None = None,
     restart_anchors: Mapping[str, object] | None = None,
 ) -> SubjectState:
+    slow_biases = agent.slow_variable_learner.state.bias_payload()
     narrative = agent.self_model.identity_narrative
     current_chapter = narrative.current_chapter if narrative is not None else None
     core_identity_summary = (
@@ -605,6 +614,7 @@ def derive_subject_state(
             agent.energy < 0.25
             or any(need.name == "danger" and need.intensity > 0.15 for need in dominant_needs)
             or (maintenance_agenda.protected_mode if maintenance_agenda is not None else False)
+            or float(slow_biases.get("threat_sensitivity", 0.5)) >= 0.68
         ),
         "repairing": bool(diagnostics and (diagnostics.repair_triggered or diagnostics.repair_policy)),
         "overloaded": (
@@ -618,6 +628,7 @@ def derive_subject_state(
         "socially_destabilized": bool(
             (diagnostics and diagnostics.social_alerts)
             or any(binding.binding_type == "social_threat" for binding in bindings)
+            or float(slow_biases.get("trust_stance", 0.5)) <= 0.34
         ),
         "continuity_fragile": continuity_fragile,
     }
@@ -655,6 +666,7 @@ def derive_subject_state(
         continuity_anchors=tuple(continuity_anchors),
         unresolved_tensions=tuple(tensions),
         subject_priority_stack=tuple(priorities),
+        slow_biases=slow_biases,
         status_flags=status_flags,
         protected_targets=protected_targets,
         repair_targets=repair_targets,
@@ -688,6 +700,21 @@ def subject_action_bias(subject_state: SubjectState, action: str) -> float:
             bias += 0.05
         if subject_state.active_commitments and action == "forage":
             bias -= 0.04
+    caution_bias = float(subject_state.slow_biases.get("caution_bias", 0.5))
+    threat_sensitivity = float(subject_state.slow_biases.get("threat_sensitivity", 0.5))
+    trust_stance = float(subject_state.slow_biases.get("trust_stance", 0.5))
+    exploration_posture = float(subject_state.slow_biases.get("exploration_posture", 0.5))
+    continuity_resilience = float(subject_state.slow_biases.get("continuity_resilience", 0.5))
+    if action in {"hide", "rest", "exploit_shelter", "thermoregulate"}:
+        bias += max(0.0, caution_bias - 0.5) * 0.14
+        bias += max(0.0, threat_sensitivity - 0.5) * 0.10
+        bias += max(0.0, 0.55 - continuity_resilience) * 0.06
+    if action in {"scan", "seek_contact"}:
+        bias += (exploration_posture - 0.5) * 0.12
+        if action == "seek_contact":
+            bias += (trust_stance - 0.5) * 0.10
+    if action == "forage":
+        bias -= max(0.0, caution_bias - 0.5) * 0.10
     return max(-0.45, min(0.45, round(bias, 6)))
 
 
@@ -702,6 +729,9 @@ def subject_memory_threshold_delta(subject_state: SubjectState) -> float:
         delta -= 0.06
     if subject_state.status_flags.get("threatened", False):
         delta -= 0.05
+    delta -= max(0.0, float(subject_state.slow_biases.get("threat_sensitivity", 0.5)) - 0.5) * 0.07
+    delta -= max(0.0, float(subject_state.slow_biases.get("commitment_stability", 0.5)) - 0.5) * 0.05
+    delta -= max(0.0, 0.55 - float(subject_state.slow_biases.get("continuity_resilience", 0.5))) * 0.06
     return max(-0.30, min(0.05, round(delta, 6)))
 
 
@@ -714,6 +744,12 @@ def apply_subject_state_to_maintenance_agenda(
         0.14 * subject_state.maintenance_pressure
         + (0.10 if subject_state.status_flags.get("continuity_fragile", False) else 0.0)
         + (0.08 if subject_state.status_flags.get("repairing", False) else 0.0),
+    )
+    priority_gain = min(
+        0.4,
+        priority_gain
+        + max(0.0, float(subject_state.slow_biases.get("maintenance_weight", 0.5)) - 0.5) * 0.16
+        + max(0.0, float(subject_state.slow_biases.get("caution_bias", 0.5)) - 0.5) * 0.08,
     )
     active_tasks = list(agenda.active_tasks)
     recommended_action = agenda.recommended_action

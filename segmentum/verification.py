@@ -777,6 +777,38 @@ class VerificationLoop:
         ):
             if prediction.linked_identity_anchors or "continuity" in prediction.prediction_type:
                 score += 0.10
+        if subject_state is not None:
+            slow_biases = getattr(subject_state, "slow_biases", {})
+            if isinstance(slow_biases, Mapping):
+                score += float(
+                    min(
+                        0.22,
+                        max(
+                            -0.04,
+                            (
+                                max(
+                                    0.0,
+                                    float(slow_biases.get("threat_sensitivity", 0.5)) - 0.5,
+                                )
+                                * (0.16 if "danger" in prediction.target_channels else 0.0)
+                            )
+                            + (
+                                max(
+                                    0.0,
+                                    0.5 - float(slow_biases.get("trust_stance", 0.5)),
+                                )
+                                * (0.10 if "social" in prediction.target_channels else 0.0)
+                            )
+                            + (
+                                max(
+                                    0.0,
+                                    0.55 - float(slow_biases.get("continuity_resilience", 0.5)),
+                                )
+                                * (0.12 if "continuity" in prediction.prediction_type else 0.0)
+                            ),
+                        ),
+                    )
+                )
         if any(channel in workspace_channels for channel in prediction.target_channels):
             score += 0.08
         return _clamp(score, 0.0, 1.2)

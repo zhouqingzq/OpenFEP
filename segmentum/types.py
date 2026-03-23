@@ -60,6 +60,9 @@ class SleepSummary:
     counterfactual_energy_spent: float = 0.0
     # M2.4: structured log of counterfactual reasoning (absorption/rejection entries).
     counterfactual_log: list[dict[str, object]] = field(default_factory=list)
+    slow_learning_updates: int = 0
+    slow_learning_rejections: int = 0
+    slow_learning_summary: str = ""
 
 
 @dataclass(frozen=True)

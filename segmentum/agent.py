@@ -33,6 +33,7 @@ from .narrative_compiler import NarrativeCompiler
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
+from .slow_learning import SlowVariableLearner
 from .verification import VerificationLoop
 from .self_model import (
     CapabilityModel,
@@ -87,10 +88,12 @@ class PolicyEvaluator:
         identity_traits: IdentityTraits,
         self_model: SelfModel,
         goal_stack: GoalStack,
+        slow_variable_learner: SlowVariableLearner,
     ) -> None:
         self.identity_traits = identity_traits
         self.self_model = self_model
         self.goal_stack = goal_stack
+        self.slow_variable_learner = slow_variable_learner
 
     def identity_bias(
         self,
@@ -168,6 +171,7 @@ class PolicyEvaluator:
 
         # M2.6: Personality-driven policy bias
         personality_bias = self.self_model.personality_profile.policy_bias(action, danger)
+        slow_learning_bias = self.slow_variable_learner.action_bias(action)
 
         return max(
             -1.0,
@@ -179,7 +183,8 @@ class PolicyEvaluator:
                 + threat_bias
                 + narrative_bias
                 + prior_bias
-                + personality_bias,
+                + personality_bias
+                + slow_learning_bias
             ),
         )
 
@@ -608,10 +613,12 @@ class SegmentAgent:
         )
         self.goal_stack = GoalStack()
         self.goal_stack.log_sink = self.self_model.log_sink
+        self.slow_variable_learner = SlowVariableLearner()
         self.policy_evaluator = PolicyEvaluator(
             self.identity_traits,
             self.self_model,
             self.goal_stack,
+            self.slow_variable_learner,
         )
         self.decision_loop = DecisionLoop()
         self.counterfactual_learning = CounterfactualLearning()
@@ -1217,6 +1224,8 @@ class SegmentAgent:
                 else list(self.goal_stack.weight_adjustments)
             ),
             chapter_signal=self.goal_stack.consume_chapter_signal(),
+            slow_learning_state=self.slow_variable_learner.state,
+            slow_learning_explanations=self.slow_variable_learner.recent_explanations(),
         )
 
     def explain_decision_details(self, action: str | None = None) -> dict[str, object]:
@@ -1228,6 +1237,7 @@ class SegmentAgent:
         )
         details["prediction_ledger"] = self.prediction_ledger.explanation_payload()
         details["subject_state"] = self.subject_state.explanation_payload()
+        details["slow_learning"] = self.slow_variable_learner.explanation_payload()
         return details
 
     def should_sleep(self) -> bool:
@@ -2345,6 +2355,8 @@ class SegmentAgent:
                     + self.subject_state.summary_text()
                     + " Verification: "
                     + self.verification_loop.explanation_payload()["summary"]
+                    + " Slow learning: "
+                    + self.slow_variable_learner.state.last_summary
                 ),
                 "channels": [],
                 "carry_over_channels": [],
@@ -2352,6 +2364,7 @@ class SegmentAgent:
                 "leakage_free": True,
                 "subject_state": self.subject_state.explanation_payload(),
                 "verification": self.verification_loop.explanation_payload(),
+                "slow_learning": self.slow_variable_learner.explanation_payload(),
             }
         report_payload = self.global_workspace.conscious_report_payload(self.last_workspace_state)
         channels = list(report_payload["accessible_channels"])
@@ -2364,6 +2377,8 @@ class SegmentAgent:
             text += " Carry-over still accessible: " + ", ".join(carry_over_channels) + "."
         text += " Subject state: " + self.subject_state.summary_text()
         text += " Verification: " + self.verification_loop.explanation_payload()["summary"]
+        if self.slow_variable_learner.state.last_summary:
+            text += " Slow learning: " + self.slow_variable_learner.state.last_summary
         return {
             "text": text,
             "channels": channels,
@@ -2372,6 +2387,7 @@ class SegmentAgent:
             "leakage_free": bool(report_payload["leakage_checked"]),
             "subject_state": self.subject_state.explanation_payload(),
             "verification": self.verification_loop.explanation_payload(),
+            "slow_learning": self.slow_variable_learner.explanation_payload(),
         }
 
     def choose_intervention(
@@ -2569,6 +2585,7 @@ class SegmentAgent:
             + self.prediction_ledger.memory_threshold_delta(),
             + self.verification_loop.memory_threshold_delta(),
             + subject_memory_threshold_delta(self.subject_state),
+            + self.slow_variable_learner.memory_threshold_delta(),
         )
         try:
             memory_decision = self.long_term_memory.maybe_store_episode(
@@ -2681,6 +2698,7 @@ class SegmentAgent:
             + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
             + self.prediction_ledger.memory_threshold_delta(),
             + self.verification_loop.memory_threshold_delta(),
+            + self.slow_variable_learner.memory_threshold_delta(),
         )
         try:
             memory_decision = self.long_term_memory.maybe_store_episode(
@@ -3298,6 +3316,7 @@ class SegmentAgent:
                     "sleep_cycle_id": sleep_cycle_id,
                     "prediction_ledger_sleep": ledger_sleep,
                     "rule_ids": [],
+                    "slow_learning": self.slow_variable_learner.explanation_payload(),
                 }
             )
             self.narrative_trace = self.narrative_trace[-128:]
@@ -3441,6 +3460,31 @@ class SegmentAgent:
         )
 
         conflict_adjustments = self.goal_stack.review_conflicts(self.cycle)
+        slow_learning_audit = self.slow_variable_learner.apply_sleep_cycle(
+            sleep_cycle_id=sleep_cycle_id,
+            tick=self.cycle,
+            replay_batch=replay_batch,
+            decision_history=list(self.decision_history),
+            prediction_ledger=self.prediction_ledger,
+            verification_loop=self.verification_loop,
+            social_memory=self.social_memory,
+            identity_tension_history=list(self.identity_tension_history),
+            self_model=self.self_model,
+            body_state={
+                "energy": self.energy,
+                "stress": self.stress,
+                "fatigue": self.fatigue,
+                "temperature": self.temperature,
+            },
+        )
+        slow_learning_updates = len(
+            [
+                item
+                for item in slow_learning_audit.updates
+                if item.status in {"accepted", "clipped"} and abs(item.delta) > 1e-9
+            ]
+        )
+        slow_learning_rejections = len(slow_learning_audit.updates) - slow_learning_updates
 
         summary = SleepSummary(
             average_free_energy_drop=mean(gains) if gains else 0.0,
@@ -3473,6 +3517,9 @@ class SegmentAgent:
             counterfactual_insights_absorbed=cf_summary.insights_absorbed,
             counterfactual_energy_spent=cf_summary.energy_spent,
             counterfactual_log=cf_summary.counterfactual_log,
+            slow_learning_updates=slow_learning_updates,
+            slow_learning_rejections=slow_learning_rejections,
+            slow_learning_summary=slow_learning_audit.summary,
         )
         ledger_sleep = self.prediction_ledger.sleep_review(tick=self.cycle)
         verification_sleep = self.verification_loop.process_observation(
@@ -3489,6 +3536,7 @@ class SegmentAgent:
                 "prediction_ledger_sleep": ledger_sleep,
                 "verification_sleep": verification_sleep.to_dict(),
                 "rule_ids": [rule.rule_id for rule in consolidation.rules],
+                "slow_learning": slow_learning_audit.to_dict(),
             }
         )
         self.narrative_trace = self.narrative_trace[-128:]
@@ -3557,6 +3605,7 @@ class SegmentAgent:
             "prediction_ledger": self.prediction_ledger.to_dict(),
             "verification_loop": self.verification_loop.to_dict(),
             "subject_state": self.subject_state.to_dict(),
+            "slow_variable_learner": self.slow_variable_learner.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
             "defense_strategy_selector": self.defense_strategy_selector.to_dict(),
@@ -3679,6 +3728,11 @@ class SegmentAgent:
             if isinstance(payload.get("subject_state"), dict)
             else None
         )
+        agent.slow_variable_learner = SlowVariableLearner.from_dict(
+            payload.get("slow_variable_learner")
+            if isinstance(payload.get("slow_variable_learner"), dict)
+            else None
+        )
         agent.identity_tension_history = [
             dict(entry)
             for entry in payload.get("identity_tension_history", [])
@@ -3744,6 +3798,7 @@ class SegmentAgent:
             agent.identity_traits,
             agent.self_model,
             agent.goal_stack,
+            agent.slow_variable_learner,
         )
         agent.decision_loop = DecisionLoop()
         agent.counterfactual_learning = CounterfactualLearning()

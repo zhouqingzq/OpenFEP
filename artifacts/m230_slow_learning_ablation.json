@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-03-22T23:23:31+00:00",
+  "mechanism": "slow_variable_learning",
+  "comparison": "with_sleep_consolidated_slow_learning_vs_ablation",
+  "baseline": {
+    "hide_policy_score": 1.044725,
+    "forage_policy_score": -155.447695,
+    "memory_threshold_delta": -0.0172,
+    "continuity_score": 1.0,
+    "continuity_fragile": false,
+    "verification_priority": 0.6772,
+    "refresh_created_targets": true
+  },
+  "full_mechanism": {
+    "hide_policy_score": -0.147127,
+    "forage_policy_score": -155.516329,
+    "memory_threshold_delta": -0.025,
+    "continuity_score": 0.5668,
+    "continuity_fragile": false,
+    "verification_priority": 0.6832,
+    "refresh_created_targets": true,
+    "slow_summary": "Threat sensitivity changed through repeated experience. Continuity resilience remained stable because sleep-cycle drift budget exhausted.",
+    "continuity_consistent": true
+  },
+  "degradation_checks": {
+    "forage_suppression_removed_without_slow_learning": true,
+    "verification_priority_removed_without_slow_learning": true,
+    "memory_sensitivity_removed_without_slow_learning": true,
+    "continuity_pressure_removed_without_slow_learning": true,
+    "continuity_consistency_preserved": true
+  }
+}
