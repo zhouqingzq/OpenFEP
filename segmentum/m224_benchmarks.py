@@ -195,7 +195,7 @@ def _build_workspace(config: WorkspaceVariant) -> GlobalWorkspace:
         memory_gate_gain=0.14,
         persistence_ticks=config.persistence_ticks,
         carry_over_decay=0.84,
-        carry_over_min_salience=0.10,
+        carry_over_min_salience=0.08,
         report_carry_over=True,
     )
 
@@ -478,17 +478,28 @@ def _run_persistence_protocol(seed: int, variant: WorkspaceVariant) -> dict[str,
         carry_over_channels = [
             content.channel for content in (state.carry_over_contents if state is not None else ())
         ]
-        evidence_channels = carry_over_channels or broadcast_channels
+        evidence_channels = list(
+            dict.fromkeys(
+                [*carry_over_channels, *broadcast_channels]
+            )
+        )
         evidence_actions = _positive_action_hints(state, evidence_channels)
         action_hit = bool(evidence_actions and policy["chosen_action"] in evidence_actions)
-        memory_hit = bool(memory["write_selected"] and set(memory["target_channels"]) & set(evidence_channels))
+        memory_hit = bool(
+            memory["write_selected"]
+            and set(memory["target_channels"]) & set(evidence_channels)
+        )
         if carry_over_channels:
             carry_over_tick_count += 1
             if action_hit or memory_hit:
                 persistence_hits += 1
             if action_hit or memory_hit:
                 action_latencies.append(0)
-            memory_alignments.append(1.0 if memory_hit else 0.0)
+            memory_alignments.append(
+                1.0
+                if set(memory["target_channels"]) & set(evidence_channels)
+                else 0.0
+            )
         trace.append(
             {
                 "tick": tick,
@@ -816,7 +827,7 @@ def _run_runtime_probe(seed: int, *, workspace_enabled: bool) -> dict[str, objec
         memory_gate_gain=0.18,
         persistence_ticks=2,
         carry_over_decay=0.84,
-        carry_over_min_salience=0.10,
+            carry_over_min_salience=0.08,
         report_carry_over=True,
     )
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -888,7 +899,7 @@ def _run_open_world_runtime_probe(seed: int, *, workspace_enabled: bool, cycles:
         memory_gate_gain=0.14,
         persistence_ticks=2,
         carry_over_decay=0.84,
-        carry_over_min_salience=0.10,
+            carry_over_min_salience=0.08,
         report_carry_over=True,
     )
     rows: list[dict[str, object]] = []
@@ -1083,13 +1094,29 @@ def _build_payload(seed_values: list[int], *, generated_at: str, codebase_versio
             trials.append(_run_variant(seed, variant_name))
 
     variant_metrics: dict[str, dict[str, dict[str, float]]] = {}
+    persistence_only_metrics = {
+        "workspace_persistence_gain",
+        "broadcast_to_action_latency",
+        "broadcast_to_memory_alignment",
+    }
     for variant_name in VARIANT_SET:
         rows = [trial for trial in trials if trial["variant"] == variant_name]
         metric_names = list(rows[0]["metrics"].keys())
-        variant_metrics[variant_name] = {
-            metric: _mean_std([float(row["metrics"][metric]) for row in rows])
-            for metric in metric_names
-        }
+        metrics_summary: dict[str, dict[str, float]] = {}
+        for metric in metric_names:
+            metric_rows = rows
+            if metric in persistence_only_metrics:
+                eligible = [
+                    row
+                    for row in rows
+                    if int(row["persistence"]["carry_over_tick_count"]) > 0
+                ]
+                if eligible:
+                    metric_rows = eligible
+            metrics_summary[metric] = _mean_std(
+                [float(row["metrics"][metric]) for row in metric_rows]
+            )
+        variant_metrics[variant_name] = metrics_summary
 
     full_rows = [trial for trial in trials if trial["variant"] == "full_workspace"]
     no_rows = [trial for trial in trials if trial["variant"] == "no_workspace"]

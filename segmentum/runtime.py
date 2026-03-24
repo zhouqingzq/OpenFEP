@@ -147,7 +147,7 @@ class SegmentRuntime:
         reset: bool = False,
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
         reset_predictive_precisions: bool = False,
-        enable_restart_rebind: bool = False,
+        enable_restart_rebind: bool = True,
     ) -> SegmentRuntime:
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
@@ -1300,7 +1300,7 @@ class SegmentRuntime:
         preferred_distribution = self.restart_policy_anchors.get("preferred_policy_distribution")
         if isinstance(preferred_distribution, dict):
             for option in diagnostics.ranked_options:
-                option.policy_score += float(preferred_distribution.get(option.choice, 0.0)) * 1.35 * decay
+                option.policy_score += float(preferred_distribution.get(option.choice, 0.0)) * 1.55 * decay
         dominant_strategy = str(self.restart_policy_anchors.get("dominant_strategy", ""))
         if dominant_strategy and diagnostics.ranked_options:
             chosen_component = diagnostics.ranked_options[0].dominant_component
@@ -1341,25 +1341,25 @@ class SegmentRuntime:
             preferred_rebind_actions.add(maintenance_recommended)
         for option in diagnostics.ranked_options:
             if option.choice in learned_avoidances:
-                option.policy_score -= 0.18 * decay
+                option.policy_score -= 0.22 * decay
             if option.choice in learned_preferences:
-                option.policy_score += 0.18 * decay
+                option.policy_score += 0.22 * decay
             if option.choice in commitment_priors:
-                option.policy_score += 0.40 * decay
-            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.60 * decay
+                option.policy_score += 0.46 * decay
+            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.72 * decay
             if option.choice in recent_priority_actions:
-                option.policy_score += 0.42 * decay
+                option.policy_score += 0.52 * decay
             elif recent_action_weights:
-                option.policy_score -= 0.24 * decay
+                option.policy_score -= 0.28 * decay
             if preferred_rebind_actions:
                 if option.choice in preferred_rebind_actions:
-                    option.policy_score += 0.62 * decay
+                    option.policy_score += 0.74 * decay
                 else:
-                    option.policy_score -= 0.42 * decay
+                    option.policy_score -= 0.48 * decay
             if maintenance_recommended and option.choice == maintenance_recommended:
-                option.policy_score += 0.34 * decay
+                option.policy_score += 0.40 * decay
             if option.choice in maintenance_suppressed:
-                option.policy_score -= 0.26 * decay
+                option.policy_score -= 0.30 * decay
         self._resort_diagnostics(diagnostics)
         diagnostics.explanation = (
             f"{diagnostics.explanation} Continuity rebind applied with decay={decay:.2f}."

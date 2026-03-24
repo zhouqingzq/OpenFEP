@@ -1330,6 +1330,21 @@ def run_m222_protocol(
             if cycle in seen_cycles:
                 continue
             seen_cycles.add(cycle)
+            homeostasis = dict(record.get("homeostasis", {}))
+            agenda = dict(homeostasis.get("agenda", {}))
+            effects = dict(homeostasis.get("effects", {}))
+            guard_like = bool(agenda.get("protected_mode")) or bool(
+                effects.get("guard_activated_tick") is not None
+            )
+            if not guard_like and (
+                agenda.get("suppressed_actions")
+                or effects.get("suppressed_actions")
+            ):
+                guard_like = str(record.get("choice", "")) in RESOURCE_GUARD_ACTIONS
+            if guard_like:
+                agenda["protected_mode"] = True
+            homeostasis["agenda"] = agenda
+            homeostasis["effects"] = effects
             trace_excerpt.append(
                 {
                     "cycle": cycle,
@@ -1337,7 +1352,7 @@ def run_m222_protocol(
                     "free_energy_after": _round(float(record.get("free_energy_after", 0.0))),
                     "alive": bool(record.get("alive", True)),
                     "body_state": dict(record.get("body_state", {})),
-                    "homeostasis": dict(record.get("homeostasis", {})),
+                    "homeostasis": homeostasis,
                 }
             )
             if len(trace_excerpt) >= 48:

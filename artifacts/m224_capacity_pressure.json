@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-23T10:09:55+00:00",
-  "codebase_version": "8dc8583dae8d7eebc42b4eb7ce26ec72996d06d8",
+  "generated_at": "2026-03-24T13:40:52+00:00",
+  "codebase_version": "2f135822fa6f6323a101bd4a8c149b348795515f",
   "seed_set": [
     224,
     243,
@@ -27,8 +27,8 @@
           "novelty",
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -48,8 +48,8 @@
           "novelty",
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -69,8 +69,8 @@
           "novelty",
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -90,8 +90,8 @@
           "novelty",
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -111,8 +111,8 @@
           "novelty",
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -132,8 +132,8 @@
           "novelty",
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -155,8 +155,8 @@
         "suppressed_channels": [
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -176,8 +176,8 @@
         "suppressed_channels": [
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -197,8 +197,8 @@
         "suppressed_channels": [
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -218,8 +218,8 @@
         "suppressed_channels": [
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -239,8 +239,8 @@
         "suppressed_channels": [
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -260,8 +260,8 @@
         "suppressed_channels": [
           "stress",
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature"
         ],
         "high_salience_retention_rate": 1.0,
@@ -283,8 +283,8 @@
         ],
         "suppressed_channels": [
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature",
           "conflict"
         ],
@@ -305,8 +305,8 @@
         ],
         "suppressed_channels": [
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature",
           "conflict"
         ],
@@ -327,10 +327,10 @@
         ],
         "suppressed_channels": [
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature",
-          "conflict"
+          "social"
         ],
         "high_salience_retention_rate": 1.0,
         "eviction_success_rate": 1.0,
@@ -349,10 +349,10 @@
         ],
         "suppressed_channels": [
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature",
-          "conflict"
+          "social"
         ],
         "high_salience_retention_rate": 1.0,
         "eviction_success_rate": 1.0,
@@ -371,10 +371,10 @@
         ],
         "suppressed_channels": [
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature",
-          "conflict"
+          "social"
         ],
         "high_salience_retention_rate": 1.0,
         "eviction_success_rate": 1.0,
@@ -393,10 +393,10 @@
         ],
         "suppressed_channels": [
           "food",
-          "shelter",
           "social",
+          "shelter",
           "temperature",
-          "conflict"
+          "social"
         ],
         "high_salience_retention_rate": 1.0,
         "eviction_success_rate": 1.0,
@@ -410,5 +410,5 @@
     "maintenance_priority_gain",
     "broadcast_to_report_alignment"
   ],
-  "workspace_capacity_effect_size": 0.151066
+  "workspace_capacity_effect_size": 0.146381
 }
