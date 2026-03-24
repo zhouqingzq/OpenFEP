@@ -112,7 +112,7 @@ class TestM231ReconciliationThreads(unittest.TestCase):
 
         self.assertIn(2, thread.linked_chapter_ids)
         self.assertGreaterEqual(len(thread.chapter_bridges), 1)
-        self.assertIn(thread.persistence_class, {"recurring", "long_horizon", "identity_critical"})
+        self.assertEqual(thread.persistence_class, "long_horizon")
 
     def test_local_patch_requires_sleep_and_evidence_before_reconciliation(self) -> None:
         agent = SegmentAgent(rng=random.Random(232))
@@ -183,6 +183,19 @@ class TestM231ReconciliationThreads(unittest.TestCase):
             narrative.contradiction_summary["reconciliation"]["dominant_status"],
             ReconciliationStatus.RECONCILED.value,
         )
+        self.assertEqual(
+            narrative.contradiction_summary["reconciliation"]["dominant_thread_id"],
+            thread.thread_id,
+        )
+        if narrative.current_chapter is not None:
+            self.assertEqual(
+                narrative.current_chapter.state_summary["reconciliation"]["dominant_thread_id"],
+                thread.thread_id,
+            )
+        self.assertEqual(
+            narrative.chapter_transition_evidence[-1]["dominant_thread_id"],
+            thread.thread_id,
+        )
         self.assertIn("Reconciliation:", narrative.autobiographical_summary)
 
     def test_verification_evidence_binds_only_to_matching_thread(self) -> None:
@@ -246,6 +259,62 @@ class TestM231ReconciliationThreads(unittest.TestCase):
 
         self.assertEqual(matching.verification_evidence_ids, ["verify:adaptive:6"])
         self.assertEqual(unrelated.verification_evidence_ids, [])
+
+    def test_verification_evidence_with_weak_anchors_does_not_bind(self) -> None:
+        engine = ReconciliationEngine()
+        left = ConflictThread(
+            thread_id="conflict:left:1",
+            signature="identity_action:adaptive_exploration",
+            title="left conflict",
+            created_tick=1,
+            latest_tick=4,
+            origin=ConflictOrigin(
+                signature="identity_action:adaptive_exploration",
+                source_category="identity_action",
+                created_tick=1,
+                chapter_id=1,
+            ),
+            linked_commitments=["adaptive_exploration"],
+            linked_identity_elements=["adaptive_exploration"],
+            status=ReconciliationStatus.PARTIALLY_RECONCILED.value,
+        )
+        right = ConflictThread(
+            thread_id="conflict:right:1",
+            signature="self_expectation_falsification:adaptive_exploration",
+            title="right conflict",
+            created_tick=1,
+            latest_tick=4,
+            origin=ConflictOrigin(
+                signature="self_expectation_falsification:adaptive_exploration",
+                source_category="self_expectation_falsification",
+                created_tick=1,
+                chapter_id=1,
+            ),
+            linked_commitments=["adaptive_exploration"],
+            linked_identity_elements=["adaptive_exploration"],
+            status=ReconciliationStatus.PARTIALLY_RECONCILED.value,
+        )
+        engine.active_threads.extend([left, right])
+
+        verification_loop = SimpleNamespace(
+            archived_targets=[
+                SimpleNamespace(
+                    target_id="verify:weak",
+                    prediction_id="pred:weak",
+                    outcome="confirmed",
+                    outcome_tick=6,
+                    linked_commitments=("adaptive_exploration",),
+                    linked_identity_anchors=(),
+                    target_channels=(),
+                    prediction_type="",
+                )
+            ]
+        )
+
+        engine._attach_verification_evidence(tick=6, verification_loop=verification_loop)
+
+        self.assertEqual(left.verification_evidence_ids, [])
+        self.assertEqual(right.verification_evidence_ids, [])
 
     def test_unmatched_repair_attempt_does_not_bind_to_any_thread(self) -> None:
         engine = ReconciliationEngine()

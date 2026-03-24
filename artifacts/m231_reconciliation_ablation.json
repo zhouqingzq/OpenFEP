@@ -1,36 +1,54 @@
 {
-  "generated_at": "2026-03-23T10:10:00+00:00",
+  "generated_at": "2026-03-23T23:21:41+00:00",
   "mechanism": "reconciliation_narrative_writeback",
   "comparison": "with_writeback_vs_ablation",
   "ablation": {
     "core_summary": "I remain adaptive under uncertainty.",
     "chapter_transition_evidence_count": 0,
     "reconciliation_summary": {},
+    "target_thread": {
+      "linked_chapter_ids": [],
+      "chapter_bridge_count": 0
+    },
     "subject_core_identity_summary": "I remain adaptive under uncertainty."
   },
   "full_mechanism": {
-    "core_summary": "I remain adaptive under uncertainty. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
-    "chapter_transition_evidence_count": 5,
+    "core_summary": "I remain adaptive under uncertainty. Reconciliation: This long-horizon conflict has been reconciled across 2 chapter(s).",
+    "chapter_transition_evidence_count": 6,
     "reconciliation_summary": {
-      "summary": "This tension has persisted across 1 chapter(s) and is active.",
+      "summary": "This long-horizon conflict has been reconciled across 2 chapter(s).",
       "counts": {
         "active": 2,
         "unresolved": 1,
         "archived": 0
       },
       "reason": "sleep_review:3",
-      "tick": 8,
-      "dominant_thread_id": "conflict:continuity_anchor:continuity:4",
-      "dominant_status": "active",
+      "tick": 9,
+      "dominant_thread_id": "conflict:identity_action:adaptive_exploration:5",
+      "dominant_status": "reconciled",
+      "dominant_outcome": "deep_repair",
+      "linked_chapter_ids": [
+        2,
+        3
+      ],
       "unresolved_thread_ids": [
         "conflict:continuity_anchor:continuity:4"
       ]
     },
-    "subject_core_identity_summary": "I remain adaptive under uncertainty. Reconciliation: This tension has persisted across 1 chapter(s) and is active."
+    "target_thread": {
+      "linked_chapter_ids": [
+        2,
+        3
+      ],
+      "chapter_bridge_count": 1
+    },
+    "subject_core_identity_summary": "I remain adaptive under uncertainty. Reconciliation: This long-horizon conflict has been reconciled across 2 chapter(s)."
   },
   "degradation_checks": {
     "core_summary_loses_reconciliation_clause_without_writeback": true,
     "chapter_transition_evidence_not_written_without_writeback": true,
+    "cross_chapter_thread_survives_with_writeback": true,
+    "writeback_targets_reconciled_thread_with_writeback": true,
     "subject_identity_summary_not_updated_without_writeback": true
   }
 }

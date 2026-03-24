@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T10:10:00+00:00",
+  "generated_at": "2026-03-23T23:21:41+00:00",
   "failure_injection": {
     "type": "cross_thread_evidence_contamination_and_unmatched_repair"
   },
@@ -9,7 +9,7 @@
       "signature": "continuity_anchor:continuity",
       "title": "continuity anchor contradiction",
       "created_tick": 5,
-      "latest_tick": 6,
+      "latest_tick": 7,
       "origin": {
         "signature": "continuity_anchor:continuity",
         "source_category": "continuity_anchor",
@@ -21,15 +21,16 @@
         ]
       },
       "linked_chapter_ids": [
-        2
+        2,
+        3
       ],
       "linked_commitments": [],
       "linked_values": [],
       "linked_identity_elements": [],
       "linked_social_entities": [],
       "source_category": "continuity_anchor",
-      "severity": "low",
-      "recurrence_count": 2,
+      "severity": "medium",
+      "recurrence_count": 3,
       "persistence_class": "identity_critical",
       "status": "active",
       "supporting_evidence": [
@@ -56,9 +57,29 @@
           "evidence": [
             "continuity_score_drop"
           ]
+        },
+        {
+          "tick": 7,
+          "chapter_id": 3,
+          "intensity": 0.3,
+          "source": "continuity:fragile",
+          "summary": "continuity anchor contradiction",
+          "evidence": [
+            "continuity_score_drop"
+          ]
         }
       ],
-      "chapter_bridges": [],
+      "chapter_bridges": [
+        {
+          "chapter_id": 3,
+          "role": "persistence",
+          "tick": 7,
+          "summary": "conflict persisted into chapter 3",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        }
+      ],
       "integration_records": [
         {
           "tick": 5,
@@ -71,7 +92,7 @@
         },
         {
           "tick": 0,
-          "chapter_id": 2,
+          "chapter_id": 3,
           "status": "active",
           "summary": "sleep review 1 classified thread as active",
           "evidence": []
@@ -91,7 +112,7 @@
       "signature": "identity_action:core_survival",
       "title": "continuity anchor contradiction",
       "created_tick": 5,
-      "latest_tick": 6,
+      "latest_tick": 7,
       "origin": {
         "signature": "continuity_anchor:continuity",
         "source_category": "continuity_anchor",
@@ -103,7 +124,8 @@
         ]
       },
       "linked_chapter_ids": [
-        2
+        2,
+        3
       ],
       "linked_commitments": [
         "core_survival"
@@ -114,8 +136,8 @@
       ],
       "linked_social_entities": [],
       "source_category": "continuity_anchor",
-      "severity": "low",
-      "recurrence_count": 2,
+      "severity": "medium",
+      "recurrence_count": 3,
       "persistence_class": "identity_critical",
       "status": "active",
       "supporting_evidence": [
@@ -142,9 +164,29 @@
           "evidence": [
             "continuity_score_drop"
           ]
+        },
+        {
+          "tick": 7,
+          "chapter_id": 3,
+          "intensity": 0.3,
+          "source": "continuity:fragile",
+          "summary": "continuity anchor contradiction",
+          "evidence": [
+            "continuity_score_drop"
+          ]
         }
       ],
-      "chapter_bridges": [],
+      "chapter_bridges": [
+        {
+          "chapter_id": 3,
+          "role": "persistence",
+          "tick": 7,
+          "summary": "conflict persisted into chapter 3",
+          "evidence": [
+            "continuity_score_drop"
+          ]
+        }
+      ],
       "integration_records": [
         {
           "tick": 5,
@@ -157,7 +199,7 @@
         },
         {
           "tick": 0,
-          "chapter_id": 2,
+          "chapter_id": 3,
           "status": "active",
           "summary": "sleep review 1 classified thread as active",
           "evidence": []
@@ -177,7 +219,7 @@
       "signature": "identity_action:adaptive_exploration",
       "title": "temporary deviation",
       "created_tick": 6,
-      "latest_tick": 6,
+      "latest_tick": 7,
       "origin": {
         "signature": "identity_action:adaptive_exploration",
         "source_category": "identity_action",
@@ -190,7 +232,8 @@
         ]
       },
       "linked_chapter_ids": [
-        2
+        2,
+        3
       ],
       "linked_commitments": [
         "adaptive_exploration"
@@ -202,8 +245,8 @@
       "linked_social_entities": [],
       "source_category": "identity_action",
       "severity": "medium",
-      "recurrence_count": 1,
-      "persistence_class": "episodic",
+      "recurrence_count": 2,
+      "persistence_class": "long_horizon",
       "status": "partially_reconciled",
       "supporting_evidence": [
         "adaptive_exploration",
@@ -213,6 +256,21 @@
         {
           "attempt_id": "conflict:identity_action:adaptive_exploration:6:repair:6",
           "tick": 6,
+          "policy": "metacognitive_review+policy_rebias",
+          "local_success": true,
+          "classification": "local_patch",
+          "target_action": "forage",
+          "repaired_action": "scan",
+          "pre_alignment": 0.35,
+          "post_alignment": 0.78,
+          "invalidated_tick": null,
+          "evidence": [
+            "adaptive_exploration"
+          ]
+        },
+        {
+          "attempt_id": "conflict:identity_action:adaptive_exploration:6:repair:7",
+          "tick": 7,
           "policy": "metacognitive_review+policy_rebias",
           "local_success": true,
           "classification": "local_patch",
@@ -237,9 +295,31 @@
             "adaptive_exploration",
             "medium"
           ]
+        },
+        {
+          "tick": 7,
+          "chapter_id": 3,
+          "intensity": 0.38,
+          "source": "diagnostics:temporary_deviation",
+          "summary": "temporary deviation",
+          "evidence": [
+            "adaptive_exploration",
+            "medium"
+          ]
         }
       ],
-      "chapter_bridges": [],
+      "chapter_bridges": [
+        {
+          "chapter_id": 3,
+          "role": "persistence",
+          "tick": 7,
+          "summary": "conflict persisted into chapter 3",
+          "evidence": [
+            "adaptive_exploration",
+            "medium"
+          ]
+        }
+      ],
       "integration_records": [
         {
           "tick": 6,
@@ -253,7 +333,7 @@
         },
         {
           "tick": 0,
-          "chapter_id": 2,
+          "chapter_id": 3,
           "status": "partially_reconciled",
           "summary": "sleep review 1 classified thread as partially_reconciled",
           "evidence": []
@@ -263,14 +343,14 @@
       "stable_confirmations": 1,
       "failed_repairs": 0,
       "current_outcome": "partial_repair",
-      "last_reopened_tick": null,
+      "last_reopened_tick": 7,
       "archived_tick": null,
       "last_status_reason": "diagnostics:temporary_deviation",
       "protected": false
     }
   ],
   "narrative_reconciliation": {
-    "summary": "This tension has persisted across 1 chapter(s) and is partially reconciled.",
+    "summary": "This long-horizon conflict is partially reconciled across 2 chapter(s).",
     "counts": {
       "active": 3,
       "unresolved": 3,
@@ -278,17 +358,24 @@
     },
     "reason": "sleep_review:1",
     "tick": 0,
-    "dominant_thread_id": "conflict:continuity_anchor:continuity:5",
-    "dominant_status": "active",
+    "dominant_thread_id": "conflict:identity_action:adaptive_exploration:6",
+    "dominant_status": "partially_reconciled",
+    "dominant_outcome": "partial_repair",
+    "linked_chapter_ids": [
+      2,
+      3
+    ],
     "unresolved_thread_ids": [
+      "conflict:identity_action:adaptive_exploration:6",
       "conflict:continuity_anchor:continuity:5",
-      "conflict:other:9",
-      "conflict:identity_action:adaptive_exploration:6"
+      "conflict:other:9"
     ]
   },
   "stress_checks": {
     "unrelated_evidence_did_not_contaminate_other_thread": true,
     "unmatched_repair_did_not_bind": true,
-    "narrative_writeback_survived_stress": true
+    "cross_chapter_links_survived_stress": true,
+    "narrative_writeback_survived_stress": true,
+    "narrative_writeback_still_targets_intended_thread": true
   }
 }

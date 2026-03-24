@@ -1,7 +1,8 @@
 {
   "milestone_id": "M2.31",
   "status": "PASS",
-  "generated_at": "2026-03-23T10:10:00+00:00",
+  "generated_at": "2026-03-23T23:21:46+00:00",
+  "strict": true,
   "seed_set": [
     231,
     462
@@ -14,16 +15,56 @@
     "summary": "E:\\workspace\\segments\\reports\\m231_acceptance_summary.md"
   },
   "tests": {
-    "milestone": [
-      "tests/test_m231_reconciliation_threads.py",
-      "tests/test_m231_narrative_writeback.py",
-      "tests/test_m231_acceptance.py"
-    ],
-    "regressions": [
-      "tests/test_m229_acceptance.py",
-      "tests/test_m230_acceptance.py",
-      "tests/test_narrative_evolution.py"
-    ]
+    "milestone": {
+      "label": "milestone",
+      "paths": [
+        "tests/test_m231_reconciliation_threads.py",
+        "tests/test_m231_narrative_writeback.py",
+        "tests/test_m231_acceptance.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m231_reconciliation_threads.py",
+        "tests/test_m231_narrative_writeback.py",
+        "tests/test_m231_acceptance.py",
+        "-q"
+      ],
+      "stdout": "..................                                                       [100%]\n18 passed in 1.98s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-23T23:21:41+00:00",
+      "completed_at": "2026-03-23T23:21:44+00:00"
+    },
+    "regressions": {
+      "label": "regression",
+      "paths": [
+        "tests/test_m229_acceptance.py",
+        "tests/test_m230_acceptance.py",
+        "tests/test_narrative_evolution.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m229_acceptance.py",
+        "tests/test_m230_acceptance.py",
+        "tests/test_narrative_evolution.py",
+        "-q"
+      ],
+      "stdout": ".........                                                                [100%]\n9 passed in 1.41s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-23T23:21:44+00:00",
+      "completed_at": "2026-03-23T23:21:46+00:00"
+    }
   },
   "gates": {
     "schema": {
@@ -37,57 +78,238 @@
           "seed": 231,
           "equivalent": true,
           "signature_a": {
-            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "summary": "This long-horizon conflict has been reconciled across 2 chapter(s).",
             "counts": {
               "active": 5,
               "unresolved": 4,
               "archived": 0
             },
-            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
-            "dominant_status": "active",
+            "dominant_thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "dominant_status": "reconciled",
+            "dominant_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
             "reason": "runtime_observation",
             "tick": 1
           },
           "signature_b": {
-            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "summary": "This long-horizon conflict has been reconciled across 2 chapter(s).",
             "counts": {
               "active": 5,
               "unresolved": 4,
               "archived": 0
             },
-            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
-            "dominant_status": "active",
+            "dominant_thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "dominant_status": "reconciled",
+            "dominant_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
             "reason": "runtime_observation",
             "tick": 1
+          },
+          "target_thread_a": {
+            "thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "status": "reconciled",
+            "current_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
+            "spans_multiple_chapters": true
+          },
+          "target_thread_b": {
+            "thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "status": "reconciled",
+            "current_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
+            "spans_multiple_chapters": true
+          },
+          "narrative_alignment_a": {
+            "writeback_matches_target_thread": true,
+            "current_chapter_matches_target": true,
+            "contradiction_summary_matches_target": true,
+            "core_summary_mentions_reconciliation": true
+          },
+          "narrative_alignment_b": {
+            "writeback_matches_target_thread": true,
+            "current_chapter_matches_target": true,
+            "contradiction_summary_matches_target": true,
+            "core_summary_mentions_reconciliation": true
+          },
+          "claim_alignment_a": {
+            "updated_claim_ids": [
+              "claim-reconciliation-conflict-identity_action-adaptive_exploration-5"
+            ],
+            "all_updated_claims_bound_to_target_thread": true,
+            "any_claim_updated": true
+          },
+          "claim_alignment_b": {
+            "updated_claim_ids": [
+              "claim-reconciliation-conflict-identity_action-adaptive_exploration-5"
+            ],
+            "all_updated_claims_bound_to_target_thread": true,
+            "any_claim_updated": true
           }
         },
         {
           "seed": 462,
           "equivalent": true,
           "signature_a": {
-            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "summary": "This long-horizon conflict has been reconciled across 2 chapter(s).",
             "counts": {
               "active": 6,
               "unresolved": 5,
               "archived": 0
             },
-            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
-            "dominant_status": "active",
+            "dominant_thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "dominant_status": "reconciled",
+            "dominant_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
             "reason": "runtime_observation",
             "tick": 1
           },
           "signature_b": {
-            "summary": "This tension has persisted across 1 chapter(s) and is active.",
+            "summary": "This long-horizon conflict has been reconciled across 2 chapter(s).",
             "counts": {
               "active": 6,
               "unresolved": 5,
               "archived": 0
             },
-            "dominant_thread_id": "conflict:self_expectation_falsification:none:1",
-            "dominant_status": "active",
+            "dominant_thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "dominant_status": "reconciled",
+            "dominant_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
             "reason": "runtime_observation",
             "tick": 1
+          },
+          "target_thread_a": {
+            "thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "status": "reconciled",
+            "current_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
+            "spans_multiple_chapters": true
+          },
+          "target_thread_b": {
+            "thread_id": "conflict:identity_action:adaptive_exploration:5",
+            "status": "reconciled",
+            "current_outcome": "deep_repair",
+            "linked_chapter_ids": [
+              2,
+              3
+            ],
+            "chapter_bridge_count": 1,
+            "spans_multiple_chapters": true
+          },
+          "narrative_alignment_a": {
+            "writeback_matches_target_thread": true,
+            "current_chapter_matches_target": true,
+            "contradiction_summary_matches_target": true,
+            "core_summary_mentions_reconciliation": true
+          },
+          "narrative_alignment_b": {
+            "writeback_matches_target_thread": true,
+            "current_chapter_matches_target": true,
+            "contradiction_summary_matches_target": true,
+            "core_summary_mentions_reconciliation": true
+          },
+          "claim_alignment_a": {
+            "updated_claim_ids": [
+              "claim-reconciliation-conflict-identity_action-adaptive_exploration-5"
+            ],
+            "all_updated_claims_bound_to_target_thread": true,
+            "any_claim_updated": true
+          },
+          "claim_alignment_b": {
+            "updated_claim_ids": [
+              "claim-reconciliation-conflict-identity_action-adaptive_exploration-5"
+            ],
+            "all_updated_claims_bound_to_target_thread": true,
+            "any_claim_updated": true
           }
+        }
+      ]
+    },
+    "long_horizon": {
+      "passed": true,
+      "evidence": [
+        {
+          "seed": 231,
+          "spans_multiple_chapters": true,
+          "chapter_bridge_count": 1,
+          "linked_chapter_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "seed": 462,
+          "spans_multiple_chapters": true,
+          "chapter_bridge_count": 1,
+          "linked_chapter_ids": [
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    "narrative_alignment": {
+      "passed": true,
+      "evidence": [
+        {
+          "seed": 231,
+          "writeback_matches_target_thread": true,
+          "current_chapter_matches_target": true,
+          "contradiction_summary_matches_target": true,
+          "core_summary_mentions_reconciliation": true
+        },
+        {
+          "seed": 462,
+          "writeback_matches_target_thread": true,
+          "current_chapter_matches_target": true,
+          "contradiction_summary_matches_target": true,
+          "core_summary_mentions_reconciliation": true
+        }
+      ]
+    },
+    "claim_alignment": {
+      "passed": true,
+      "evidence": [
+        {
+          "updated_claim_ids": [
+            "claim-reconciliation-conflict-identity_action-adaptive_exploration-5"
+          ],
+          "all_updated_claims_bound_to_target_thread": true,
+          "any_claim_updated": true
+        },
+        {
+          "updated_claim_ids": [
+            "claim-reconciliation-conflict-identity_action-adaptive_exploration-5"
+          ],
+          "all_updated_claims_bound_to_target_thread": true,
+          "any_claim_updated": true
         }
       ]
     },
@@ -96,6 +318,8 @@
       "evidence": {
         "core_summary_loses_reconciliation_clause_without_writeback": true,
         "chapter_transition_evidence_not_written_without_writeback": true,
+        "cross_chapter_thread_survives_with_writeback": true,
+        "writeback_targets_reconciled_thread_with_writeback": true,
         "subject_identity_summary_not_updated_without_writeback": true
       }
     },
@@ -104,6 +328,8 @@
       "evidence": {
         "core_summary_loses_reconciliation_clause_without_writeback": true,
         "chapter_transition_evidence_not_written_without_writeback": true,
+        "cross_chapter_thread_survives_with_writeback": true,
+        "writeback_targets_reconciled_thread_with_writeback": true,
         "subject_identity_summary_not_updated_without_writeback": true
       }
     },
@@ -112,28 +338,177 @@
       "evidence": {
         "unrelated_evidence_did_not_contaminate_other_thread": true,
         "unmatched_repair_did_not_bind": true,
-        "narrative_writeback_survived_stress": true
+        "cross_chapter_links_survived_stress": true,
+        "narrative_writeback_survived_stress": true,
+        "narrative_writeback_still_targets_intended_thread": true
+      }
+    },
+    "milestone_tests": {
+      "passed": true,
+      "evidence": {
+        "label": "milestone",
+        "paths": [
+          "tests/test_m231_reconciliation_threads.py",
+          "tests/test_m231_narrative_writeback.py",
+          "tests/test_m231_acceptance.py"
+        ],
+        "executed": true,
+        "passed": true,
+        "returncode": 0,
+        "command": [
+          "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_m231_reconciliation_threads.py",
+          "tests/test_m231_narrative_writeback.py",
+          "tests/test_m231_acceptance.py",
+          "-q"
+        ],
+        "stdout": "..................                                                       [100%]\n18 passed in 1.98s",
+        "stderr": "",
+        "execution_source": "subprocess",
+        "started_at": "2026-03-23T23:21:41+00:00",
+        "completed_at": "2026-03-23T23:21:44+00:00"
       }
     },
     "regression": {
       "passed": true,
-      "evidence": [
-        "tests/test_m229_acceptance.py",
-        "tests/test_m230_acceptance.py",
-        "tests/test_narrative_evolution.py"
-      ]
+      "evidence": {
+        "label": "regression",
+        "paths": [
+          "tests/test_m229_acceptance.py",
+          "tests/test_m230_acceptance.py",
+          "tests/test_narrative_evolution.py"
+        ],
+        "executed": true,
+        "passed": true,
+        "returncode": 0,
+        "command": [
+          "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_m229_acceptance.py",
+          "tests/test_m230_acceptance.py",
+          "tests/test_narrative_evolution.py",
+          "-q"
+        ],
+        "stdout": ".........                                                                [100%]\n9 passed in 1.41s",
+        "stderr": "",
+        "execution_source": "subprocess",
+        "started_at": "2026-03-23T23:21:44+00:00",
+        "completed_at": "2026-03-23T23:21:46+00:00"
+      }
     },
     "artifact_freshness": {
       "passed": true,
-      "evidence": "all M2.31 artifacts were generated in the current round"
+      "evidence": {
+        "strict": true,
+        "audit_started_at": "2026-03-23T23:21:41+00:00",
+        "generated_at": "2026-03-23T23:21:46+00:00",
+        "artifact_records": {
+          "specification": {
+            "path": "E:\\workspace\\segments\\reports\\m231_milestone_spec.md",
+            "exists": true,
+            "size_bytes": 1985,
+            "modified_at": "2026-03-23T08:19:46+00:00"
+          },
+          "canonical_trace": {
+            "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_trace.jsonl",
+            "exists": true,
+            "size_bytes": 191171,
+            "modified_at": "2026-03-23T23:21:41+00:00"
+          },
+          "ablation": {
+            "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_ablation.json",
+            "exists": true,
+            "size_bytes": 1973,
+            "modified_at": "2026-03-23T23:21:41+00:00"
+          },
+          "stress": {
+            "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_stress.json",
+            "exists": true,
+            "size_bytes": 11114,
+            "modified_at": "2026-03-23T23:21:41+00:00"
+          },
+          "summary": {
+            "path": "E:\\workspace\\segments\\reports\\m231_acceptance_summary.md",
+            "exists": true,
+            "size_bytes": 247,
+            "modified_at": "2026-03-23T23:21:46+00:00"
+          }
+        },
+        "artifact_times_within_round": true,
+        "milestone_execution_authentic": true,
+        "regression_execution_authentic": true,
+        "suite_times_within_round": true,
+        "git": {
+          "head": "7ce5a96b2b3b02c827ea8b9ec48c0826dda4dd90",
+          "dirty": true,
+          "dirty_paths": [
+            "M artifacts/m229_verification_ablation.json",
+            "M artifacts/m229_verification_stress.json",
+            "M artifacts/m230_slow_learning_ablation.json",
+            "M artifacts/m230_slow_learning_stress.json",
+            "M artifacts/m231_reconciliation_ablation.json",
+            "M artifacts/m231_reconciliation_stress.json",
+            "M artifacts/m231_reconciliation_trace.jsonl",
+            "M reports/m229_acceptance_report.json",
+            "M reports/m229_acceptance_summary.md",
+            "M reports/m230_acceptance_report.json",
+            "M reports/m230_acceptance_summary.md",
+            "M reports/m231_acceptance_report.json",
+            "M reports/m231_acceptance_summary.md",
+            "M segmentum/m231_audit.py",
+            "M segmentum/reconciliation.py",
+            "M segmentum/self_model.py",
+            "M tests/test_m231_acceptance.py",
+            "M tests/test_m231_narrative_writeback.py",
+            "M tests/test_m231_reconciliation_threads.py",
+            "?? reports/m232_milestone_spec.md",
+            "?? reports/m232_strict_audit_preparation.md",
+            "?? segmentum/m232_audit.py",
+            "?? tests/test_m232_audit_preparation.py"
+          ]
+        }
+      }
     }
   },
   "findings": [],
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-23T10:10:00+00:00",
-    "codebase_version": "8dc8583dae8d7eebc42b4eb7ce26ec72996d06d8",
+    "audit_started_at": "2026-03-23T23:21:41+00:00",
+    "generated_at": "2026-03-23T23:21:46+00:00",
+    "codebase_version": "7ce5a96b2b3b02c827ea8b9ec48c0826dda4dd90",
+    "git": {
+      "head": "7ce5a96b2b3b02c827ea8b9ec48c0826dda4dd90",
+      "dirty": true,
+      "dirty_paths": [
+        "M artifacts/m229_verification_ablation.json",
+        "M artifacts/m229_verification_stress.json",
+        "M artifacts/m230_slow_learning_ablation.json",
+        "M artifacts/m230_slow_learning_stress.json",
+        "M artifacts/m231_reconciliation_ablation.json",
+        "M artifacts/m231_reconciliation_stress.json",
+        "M artifacts/m231_reconciliation_trace.jsonl",
+        "M reports/m229_acceptance_report.json",
+        "M reports/m229_acceptance_summary.md",
+        "M reports/m230_acceptance_report.json",
+        "M reports/m230_acceptance_summary.md",
+        "M reports/m231_acceptance_report.json",
+        "M reports/m231_acceptance_summary.md",
+        "M segmentum/m231_audit.py",
+        "M segmentum/reconciliation.py",
+        "M segmentum/self_model.py",
+        "M tests/test_m231_acceptance.py",
+        "M tests/test_m231_narrative_writeback.py",
+        "M tests/test_m231_reconciliation_threads.py",
+        "?? reports/m232_milestone_spec.md",
+        "?? reports/m232_strict_audit_preparation.md",
+        "?? segmentum/m232_audit.py",
+        "?? tests/test_m232_audit_preparation.py"
+      ]
+    },
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m231_milestone_spec.md",
@@ -144,26 +519,26 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_trace.jsonl",
         "exists": true,
-        "size_bytes": 168296,
-        "modified_at": "2026-03-23T10:10:00+00:00"
+        "size_bytes": 191171,
+        "modified_at": "2026-03-23T23:21:41+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_ablation.json",
         "exists": true,
-        "size_bytes": 1486,
-        "modified_at": "2026-03-23T10:10:00+00:00"
+        "size_bytes": 1973,
+        "modified_at": "2026-03-23T23:21:41+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m231_reconciliation_stress.json",
         "exists": true,
-        "size_bytes": 8696,
-        "modified_at": "2026-03-23T10:10:00+00:00"
+        "size_bytes": 11114,
+        "modified_at": "2026-03-23T23:21:41+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m231_acceptance_summary.md",
         "exists": true,
         "size_bytes": 247,
-        "modified_at": "2026-03-23T10:09:59+00:00"
+        "modified_at": "2026-03-23T23:21:46+00:00"
       }
     }
   },

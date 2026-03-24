@@ -637,6 +637,13 @@ class NarrativeClaim:
     stale_since: int | None = None
     last_validated_at: int = 0
     source_sleep_session_id: int | None = None
+    reconciliation_status: str = ""
+    reconciliation_thread_id: str = ""
+    reconciliation_outcome: str = ""
+    reconciliation_tick: int = 0
+    reconciliation_contested: bool = False
+    reconciliation_source_chapter_ids: list[int] = field(default_factory=list)
+    reconciliation_evidence_ids: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -654,6 +661,13 @@ class NarrativeClaim:
             "stale_since": self.stale_since,
             "last_validated_at": self.last_validated_at,
             "source_sleep_session_id": self.source_sleep_session_id,
+            "reconciliation_status": self.reconciliation_status,
+            "reconciliation_thread_id": self.reconciliation_thread_id,
+            "reconciliation_outcome": self.reconciliation_outcome,
+            "reconciliation_tick": self.reconciliation_tick,
+            "reconciliation_contested": self.reconciliation_contested,
+            "reconciliation_source_chapter_ids": list(self.reconciliation_source_chapter_ids),
+            "reconciliation_evidence_ids": list(self.reconciliation_evidence_ids),
         }
 
     @classmethod
@@ -681,6 +695,17 @@ class NarrativeClaim:
                 if isinstance(source_sleep_session_id, (int, float))
                 else None
             ),
+            reconciliation_status=str(data.get("reconciliation_status", "")),
+            reconciliation_thread_id=str(data.get("reconciliation_thread_id", "")),
+            reconciliation_outcome=str(data.get("reconciliation_outcome", "")),
+            reconciliation_tick=int(data.get("reconciliation_tick", 0)),
+            reconciliation_contested=bool(data.get("reconciliation_contested", False)),
+            reconciliation_source_chapter_ids=[
+                int(item) for item in data.get("reconciliation_source_chapter_ids", [])
+            ],
+            reconciliation_evidence_ids=[
+                str(item) for item in data.get("reconciliation_evidence_ids", [])
+            ],
         )
 
 

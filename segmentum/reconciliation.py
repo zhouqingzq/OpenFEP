@@ -429,25 +429,88 @@ class ReconciliationEngine:
             }
         ]
 
+    def _thread_outcome_priority(self, outcome: str) -> int:
+        ordering = {
+            ReconciliationOutcome.DEEP_REPAIR.value: 0,
+            ReconciliationOutcome.PARTIAL_REPAIR.value: 1,
+            ReconciliationOutcome.LOCAL_PATCH.value: 2,
+            ReconciliationOutcome.TEMPORARY_SUPPRESSION.value: 3,
+            ReconciliationOutcome.DEFERRED_CONFLICT.value: 4,
+            ReconciliationOutcome.UNRESOLVED_CHRONIC.value: 5,
+            ReconciliationOutcome.NONE.value: 6,
+        }
+        return ordering.get(str(outcome), 7)
+
+    def _dominant_thread_priority(self, thread: ConflictThread) -> tuple[object, ...]:
+        chapters = len(set(int(item) for item in thread.linked_chapter_ids))
+        bridge_count = len(thread.chapter_bridges)
+        verification_count = len(thread.verification_evidence_ids)
+        reconciled = thread.status == ReconciliationStatus.RECONCILED.value
+        partially_reconciled = thread.status == ReconciliationStatus.PARTIALLY_RECONCILED.value
+        status_priority = {
+            ReconciliationStatus.RECONCILED.value: 0,
+            ReconciliationStatus.PARTIALLY_RECONCILED.value: 1,
+            ReconciliationStatus.PATCHED.value: 2,
+            ReconciliationStatus.REOPENED.value: 3,
+            ReconciliationStatus.ACTIVE.value: 4,
+            ReconciliationStatus.SUPPRESSED.value: 5,
+            ReconciliationStatus.ARCHIVED_RECONCILED.value: 6,
+            ReconciliationStatus.ARCHIVED_UNRESOLVED.value: 7,
+        }.get(thread.status, 8)
+        return (
+            status_priority,
+            0 if reconciled and chapters >= 2 else 1,
+            0 if partially_reconciled and chapters >= 2 else 1,
+            0 if chapters >= 2 else 1,
+            0 if bridge_count > 0 else 1,
+            self._thread_outcome_priority(thread.current_outcome),
+            -chapters,
+            -bridge_count,
+            -verification_count,
+            -thread.stable_confirmations,
+            -self._severity_weight(thread.severity),
+            -thread.recurrence_count,
+            thread.created_tick,
+            thread.thread_id,
+        )
+
+    def dominant_thread(self) -> ConflictThread | None:
+        candidates = [
+            item
+            for item in self.active_threads
+            if item.status
+            not in {
+                ReconciliationStatus.ARCHIVED_RECONCILED.value,
+                ReconciliationStatus.ARCHIVED_UNRESOLVED.value,
+            }
+        ]
+        if not candidates:
+            return None
+        return sorted(candidates, key=self._dominant_thread_priority)[0]
+
+    def _thread_summary(self, thread: ConflictThread | None) -> str:
+        if thread is None:
+            return "No long-horizon conflict thread is currently dominant."
+        chapters = max(1, len(set(int(item) for item in thread.linked_chapter_ids)))
+        status = str(thread.status).replace("_", " ")
+        if (
+            thread.status == ReconciliationStatus.RECONCILED.value
+            and thread.current_outcome == ReconciliationOutcome.DEEP_REPAIR.value
+        ):
+            return f"This long-horizon conflict has been reconciled across {chapters} chapter(s)."
+        if thread.status == ReconciliationStatus.PARTIALLY_RECONCILED.value:
+            return f"This long-horizon conflict is partially reconciled across {chapters} chapter(s)."
+        return f"This tension has persisted across {chapters} chapter(s) and is {status}."
+
     def explanation_payload(self) -> dict[str, object]:
-        active = [item.to_dict() for item in self.active_threads]
-        unresolved = [item.to_dict() for item in self.active_unresolved_threads()]
-        summary = "No long-horizon conflict thread is currently dominant."
-        if unresolved:
-            top = sorted(
-                self.active_unresolved_threads(),
-                key=lambda item: (
-                    -self._severity_weight(item.severity),
-                    -item.recurrence_count,
-                    item.created_tick,
-                ),
-            )[0]
-            summary = (
-                f"This tension has persisted across {max(1, len(set(top.linked_chapter_ids)))} chapter(s) "
-                f"and is {top.status.replace('_', ' ')}."
-            )
+        active_threads = sorted(self.active_threads, key=self._dominant_thread_priority)
+        unresolved_threads = sorted(self.active_unresolved_threads(), key=self._dominant_thread_priority)
+        dominant = self.dominant_thread()
+        active = [item.to_dict() for item in active_threads]
+        unresolved = [item.to_dict() for item in unresolved_threads]
         return {
-            "summary": summary,
+            "summary": self._thread_summary(dominant),
+            "dominant_thread": dominant.to_dict() if dominant is not None else {},
             "active_threads": active,
             "unresolved_threads": unresolved,
             "archived_threads": [item.to_dict() for item in self.archived_threads[-8:]],
@@ -687,8 +750,8 @@ class ReconciliationEngine:
         summary = str(payload.get("summary", ""))
         counts = dict(payload.get("counts", {}))
         unresolved = [dict(item) for item in payload.get("unresolved_threads", [])]
-        active = [dict(item) for item in payload.get("active_threads", [])]
-        dominant = unresolved[0] if unresolved else (active[0] if active else None)
+        dominant_payload = payload.get("dominant_thread", {})
+        dominant = dict(dominant_payload) if isinstance(dominant_payload, Mapping) and dominant_payload else None
         chapter_id = None
         current_chapter = getattr(narrative, "current_chapter", None)
         if current_chapter is not None:
@@ -701,6 +764,9 @@ class ReconciliationEngine:
                 "counts": counts,
                 "dominant_thread_id": str(dominant.get("thread_id", "")) if dominant else "",
                 "dominant_status": str(dominant.get("status", "")) if dominant else "",
+                "dominant_outcome": str(dominant.get("current_outcome", "")) if dominant else "",
+                "linked_chapter_ids": list(dominant.get("linked_chapter_ids", [])) if dominant else [],
+                "chapter_bridge_count": len(list(dominant.get("chapter_bridges", []))) if dominant else 0,
                 "reason": reason,
                 "tick": int(tick),
             }
@@ -720,6 +786,7 @@ class ReconciliationEngine:
             "summary": summary,
             "dominant_thread_id": str(dominant.get("thread_id", "")) if dominant else "",
             "dominant_status": str(dominant.get("status", "")) if dominant else "",
+            "dominant_outcome": str(dominant.get("current_outcome", "")) if dominant else "",
             "linked_chapter_ids": list(dominant.get("linked_chapter_ids", [])) if dominant else [],
         }
         if not transition_evidence or transition_evidence[-1] != transition_entry:
@@ -736,6 +803,8 @@ class ReconciliationEngine:
             "tick": int(tick),
             "dominant_thread_id": str(dominant.get("thread_id", "")) if dominant else "",
             "dominant_status": str(dominant.get("status", "")) if dominant else "",
+            "dominant_outcome": str(dominant.get("current_outcome", "")) if dominant else "",
+            "linked_chapter_ids": list(dominant.get("linked_chapter_ids", [])) if dominant else [],
             "unresolved_thread_ids": [str(item.get("thread_id", "")) for item in unresolved[:4]],
         }
         narrative.contradiction_summary = contradiction_summary
@@ -753,6 +822,20 @@ class ReconciliationEngine:
                 "verification_evidence_ids": list(thread.verification_evidence_ids[-4:]),
                 "latest_tick": int(thread.latest_tick),
             }
+        claim_revisions = self._write_back_to_claims(
+            narrative=narrative,
+            dominant=dominant,
+            tick=tick,
+        )
+        if claim_revisions:
+            evidence_provenance["reconciliation_claim_updates"] = {
+                "tick": int(tick),
+                "dominant_thread_id": str(dominant.get("thread_id", "")) if dominant else "",
+                "updated_claim_ids": [str(item["claim_id"]) for item in claim_revisions],
+                "contested_claim_ids": [
+                    str(item["claim_id"]) for item in claim_revisions if bool(item.get("contested", False))
+                ],
+            }
         narrative.evidence_provenance = evidence_provenance
 
         significant_events = list(getattr(narrative, "significant_events", []))
@@ -768,8 +851,258 @@ class ReconciliationEngine:
             getattr(narrative, "core_summary", ""),
             clause,
         )
+        self._recalibrate_commitments_from_claims(
+            narrative=narrative,
+            claim_revisions=claim_revisions,
+            dominant=dominant,
+            tick=tick,
+        )
         narrative.last_updated_tick = max(int(getattr(narrative, "last_updated_tick", 0)), int(tick))
         narrative.version = int(getattr(narrative, "version", 0)) + 1
+
+    def _write_back_to_claims(
+        self,
+        *,
+        narrative,
+        dominant: dict[str, object] | None,
+        tick: int,
+    ) -> list[dict[str, object]]:
+        claims = getattr(narrative, "claims", None)
+        if not isinstance(claims, list):
+            return []
+        target_claims = self._target_claims_for_reconciliation(
+            narrative=narrative,
+            dominant=dominant,
+        )
+        if not target_claims:
+            return []
+        thread_id = str(dominant.get("thread_id", "")) if dominant else ""
+        status = str(dominant.get("status", "")) if dominant else ""
+        outcome = str(dominant.get("current_outcome", "")) if dominant else ""
+        linked_chapter_ids = [
+            int(item) for item in dominant.get("linked_chapter_ids", []) if isinstance(item, int)
+        ] if dominant else []
+        evidence_ids = self._claim_reconciliation_evidence_ids(dominant)
+        revisions: list[dict[str, object]] = []
+        for claim in target_claims:
+            if str(getattr(claim, "claim_type", "")) == "reconciliation":
+                self._refresh_reconciliation_claim(claim=claim, dominant=dominant)
+            claim.reconciliation_thread_id = thread_id
+            claim.reconciliation_status = status
+            claim.reconciliation_outcome = outcome
+            claim.reconciliation_tick = int(tick)
+            claim.reconciliation_source_chapter_ids = list(linked_chapter_ids)
+            claim.reconciliation_evidence_ids = list(evidence_ids)
+            claim.last_validated_at = max(int(getattr(claim, "last_validated_at", 0)), int(tick))
+            claim.stale_since = None
+
+            if status == ReconciliationStatus.RECONCILED.value:
+                claim.supported_by = list(dict.fromkeys([*claim.supported_by, *evidence_ids]))[-16:]
+                claim.support_count = max(int(claim.support_count), len(claim.supported_by))
+                claim.support_score = round(max(float(claim.support_score), float(claim.support_count), 1.0), 4)
+                if claim.contradict_count > 0:
+                    claim.contradict_count = max(0, int(claim.contradict_count) - 1)
+                claim.contradiction_score = round(max(0.0, float(claim.contradiction_score) * 0.5), 4)
+                claim.reconciliation_contested = False
+                claim.confidence = round(max(float(claim.confidence), 0.72), 4)
+            elif status in {
+                ReconciliationStatus.PARTIALLY_RECONCILED.value,
+                ReconciliationStatus.REOPENED.value,
+                ReconciliationStatus.ACTIVE.value,
+                ReconciliationStatus.SUPPRESSED.value,
+            }:
+                claim.contradicted_by = list(dict.fromkeys([*claim.contradicted_by, *evidence_ids]))[-16:]
+                claim.contradict_count = max(int(claim.contradict_count), len(claim.contradicted_by), 1)
+                claim.contradiction_score = round(
+                    max(float(claim.contradiction_score), float(claim.contradict_count), 0.5),
+                    4,
+                )
+                claim.reconciliation_contested = True
+                confidence_cap = 0.58 if status == ReconciliationStatus.PARTIALLY_RECONCILED.value else 0.45
+                claim.confidence = round(min(float(claim.confidence), confidence_cap), 4)
+            revisions.append(
+                {
+                    "claim_id": str(claim.claim_id),
+                    "claim_key": str(claim.claim_key),
+                    "contested": bool(getattr(claim, "reconciliation_contested", False)),
+                }
+            )
+
+        contradiction_summary = getattr(narrative, "contradiction_summary", None)
+        if isinstance(contradiction_summary, dict):
+            contradiction_summary["reconciled_claim_ids"] = [
+                str(item["claim_id"]) for item in revisions if not bool(item.get("contested", False))
+            ]
+            contradiction_summary["contested_claim_ids"] = [
+                str(item["claim_id"]) for item in revisions if bool(item.get("contested", False))
+            ]
+            narrative.contradiction_summary = contradiction_summary
+        return revisions
+
+    def _refresh_reconciliation_claim(self, *, claim, dominant: dict[str, object] | None) -> None:
+        if not dominant:
+            return
+        anchors = self._claim_anchor_tokens(dominant)
+        claim_key = anchors[0] if anchors else "reconciliation"
+        thread_id = str(dominant.get("thread_id", "unknown")).replace(":", "-")
+        claim.claim_id = f"claim-reconciliation-{thread_id}"
+        claim.claim_key = claim_key
+        claim.text = (
+            f"Reconciliation for {claim_key.replace('_', ' ')} remains "
+            f"{str(dominant.get('status', 'active')).replace('_', ' ')} across chapters."
+        )
+
+    def _target_claims_for_reconciliation(self, *, narrative, dominant: dict[str, object] | None) -> list[object]:
+        claims = getattr(narrative, "claims", None)
+        if not isinstance(claims, list):
+            return []
+        if not claims:
+            synthesized = self._synthesize_reconciliation_claim(dominant)
+            if synthesized is None:
+                return []
+            narrative.claims = [synthesized]
+            return narrative.claims
+        if not dominant:
+            return []
+        anchors = set(self._claim_anchor_tokens(dominant))
+        matched: list[object] = []
+        explicit_thread_matches: list[object] = []
+        for claim in claims:
+            if self._claim_matches_reconciliation_thread(claim=claim, dominant=dominant):
+                explicit_thread_matches.append(claim)
+                continue
+            claim_tokens = self._claim_tokens(claim)
+            if anchors & claim_tokens:
+                matched.append(claim)
+        if matched:
+            return matched[:4]
+        if explicit_thread_matches:
+            return explicit_thread_matches[:4]
+        synthesized = self._synthesize_reconciliation_claim(dominant)
+        if synthesized is None:
+            return []
+        claims.append(synthesized)
+        return [synthesized]
+
+    def _synthesize_reconciliation_claim(self, dominant: dict[str, object] | None):
+        if not dominant:
+            return None
+        from .self_model import NarrativeClaim
+
+        anchors = self._claim_anchor_tokens(dominant)
+        if not anchors:
+            return None
+        claim_key = anchors[0]
+        claim_text = (
+            f"Reconciliation for {claim_key.replace('_', ' ')} remains "
+            f"{str(dominant.get('status', 'active')).replace('_', ' ')} across chapters."
+        )
+        return NarrativeClaim(
+            claim_id=f"claim-reconciliation-{str(dominant.get('thread_id', 'unknown')).replace(':', '-')}",
+            claim_type="reconciliation",
+            text=claim_text,
+            claim_key=claim_key,
+        )
+
+    def _claim_anchor_tokens(self, dominant: dict[str, object] | None) -> list[str]:
+        if not dominant:
+            return []
+        anchors = self._normalized_items(
+            [
+                *dominant.get("linked_commitments", []),
+                *dominant.get("linked_identity_elements", []),
+            ]
+        )
+        signature = str(dominant.get("signature", ""))
+        if signature:
+            anchors = tuple([*anchors, *self._normalized_items(signature.split(":"))])
+        if "adaptive_exploration" in anchors:
+            anchors = tuple([*anchors, "aggressive", "scan", "seek_contact"])
+        if "core_survival" in anchors or "continuity" in anchors:
+            anchors = tuple([*anchors, "survival_priority", "rest", "hide", "exploit_shelter"])
+        return list(dict.fromkeys(item for item in anchors if item))
+
+    def _claim_tokens(self, claim) -> set[str]:
+        return set(
+            self._normalized_items(
+                [
+                    getattr(claim, "claim_key", ""),
+                    getattr(claim, "claim_type", ""),
+                    *getattr(claim, "supported_by", []),
+                    *getattr(claim, "contradicted_by", []),
+                ]
+            )
+        )
+
+    def _claim_matches_reconciliation_thread(self, *, claim, dominant: dict[str, object] | None) -> bool:
+        if not dominant:
+            return False
+        dominant_thread_id = str(dominant.get("thread_id", ""))
+        if dominant_thread_id and str(getattr(claim, "reconciliation_thread_id", "")) == dominant_thread_id:
+            return True
+        synthesized_claim_id = (
+            f"claim-reconciliation-{dominant_thread_id.replace(':', '-')}" if dominant_thread_id else ""
+        )
+        return bool(
+            synthesized_claim_id
+            and str(getattr(claim, "claim_type", "")) == "reconciliation"
+            and str(getattr(claim, "claim_id", "")) == synthesized_claim_id
+        )
+
+    def _claim_reconciliation_evidence_ids(self, dominant: dict[str, object] | None) -> list[str]:
+        if not dominant:
+            return []
+        evidence = [
+            *[str(item) for item in dominant.get("verification_evidence_ids", [])[-4:]],
+            *[str(item) for item in dominant.get("supporting_evidence", [])[-4:]],
+            f"thread:{str(dominant.get('thread_id', ''))}",
+        ]
+        return list(dict.fromkeys(item for item in evidence if item))
+
+    def _recalibrate_commitments_from_claims(
+        self,
+        *,
+        narrative,
+        claim_revisions: list[dict[str, object]],
+        dominant: dict[str, object] | None,
+        tick: int,
+    ) -> None:
+        commitments = getattr(narrative, "commitments", None)
+        claims = getattr(narrative, "claims", None)
+        if not isinstance(commitments, list) or not isinstance(claims, list) or not claim_revisions:
+            return
+        revised_ids = {str(item["claim_id"]) for item in claim_revisions}
+        revised_claims = [claim for claim in claims if str(getattr(claim, "claim_id", "")) in revised_ids]
+        if not revised_claims:
+            return
+        dominant_status = str(dominant.get("status", "")) if dominant else ""
+        dominant_thread_id = str(dominant.get("thread_id", "")) if dominant else ""
+        evidence_ids = self._claim_reconciliation_evidence_ids(dominant)
+        for commitment in commitments:
+            source_claim_ids = {str(item) for item in getattr(commitment, "source_claim_ids", [])}
+            relevant_claims = [
+                claim for claim in revised_claims if str(getattr(claim, "claim_id", "")) in source_claim_ids
+            ]
+            if not relevant_claims:
+                continue
+            mean_confidence = sum(float(getattr(claim, "confidence", 0.0)) for claim in relevant_claims) / len(relevant_claims)
+            any_contested = any(bool(getattr(claim, "reconciliation_contested", False)) for claim in relevant_claims)
+            commitment.confidence = round(_clamp(mean_confidence, low=0.2, high=1.0), 4)
+            if any_contested:
+                commitment.priority = round(_clamp(float(commitment.priority) - 0.05, low=0.2, high=1.0), 4)
+            else:
+                commitment.priority = round(_clamp(float(commitment.priority) + 0.03, low=0.2, high=1.0), 4)
+            commitment.last_reaffirmed_tick = int(tick)
+            commitment.evidence_ids = list(dict.fromkeys([*getattr(commitment, "evidence_ids", []), *evidence_ids]))[-12:]
+            if dominant_thread_id and dominant_thread_id not in commitment.evidence_ids:
+                commitment.evidence_ids.append(dominant_thread_id)
+                commitment.evidence_ids = commitment.evidence_ids[-12:]
+            if dominant_status in {
+                ReconciliationStatus.ACTIVE.value,
+                ReconciliationStatus.REOPENED.value,
+                ReconciliationStatus.SUPPRESSED.value,
+            } and any_contested:
+                commitment.last_violated_tick = int(tick)
 
     def _reconciliation_clause(self, summary: str, dominant: dict[str, object] | None) -> str:
         if dominant is None:
@@ -1096,41 +1429,52 @@ class ReconciliationEngine:
         if relevant:
             derived_signatures.add(self._signature(category, list(relevant)))
 
-        ranked: list[tuple[int, ConflictThread]] = []
+        ranked: list[tuple[int, int, ConflictThread]] = []
         for thread in self.active_unresolved_threads():
             score = 0
             primary_match = False
+            anchor_hits = 0
             if explicit_signature and thread.signature == explicit_signature:
                 score += 120
                 primary_match = True
+                anchor_hits += 2
             if thread.signature in derived_signatures:
                 score += 95
                 primary_match = True
+                anchor_hits += 2
 
             thread_commitments = set(self._normalized_items(thread.linked_commitments))
             commitment_overlap = thread_commitments & set(violated or relevant)
             if commitment_overlap:
                 score += 50 if thread_commitments.issuperset(violated or relevant) else 32
                 primary_match = True
+                anchor_hits += len(commitment_overlap)
 
             thread_identity = set(self._normalized_items(thread.linked_identity_elements))
             identity_overlap = thread_identity & set(repair_targets)
             if identity_overlap:
                 score += 36 if thread_identity.issuperset(repair_targets) else 24
                 primary_match = True
+                anchor_hits += len(identity_overlap)
 
             if thread.source_category == category:
                 score += 8
+                anchor_hits += 1
 
             if primary_match and score > 0:
-                ranked.append((score, thread))
+                ranked.append((score, anchor_hits, thread))
 
         if not ranked:
             return None
-        ranked.sort(key=lambda item: (-item[0], item[1].created_tick, item[1].thread_id))
-        if len(ranked) > 1 and ranked[0][0] == ranked[1][0]:
+        ranked.sort(key=lambda item: (-item[0], -item[1], item[2].created_tick, item[2].thread_id))
+        if ranked[0][1] < 2 and not explicit_signature and not explicit_thread_id:
             return None
-        return ranked[0][1]
+        if len(ranked) > 1 and (
+            ranked[0][0] == ranked[1][0]
+            or (ranked[0][0] - ranked[1][0] < 12 and ranked[0][1] <= ranked[1][1] + 1)
+        ):
+            return None
+        return ranked[0][2]
 
     def _attach_verification_evidence(self, *, tick: int, verification_loop) -> None:
         recent_outcomes = [
@@ -1175,46 +1519,59 @@ class ReconciliationEngine:
             prediction_type=prediction_type,
         )
 
-        ranked: list[tuple[int, ConflictThread]] = []
+        ranked: list[tuple[int, int, ConflictThread]] = []
         for thread in self.active_threads:
             score = 0
             primary_match = False
+            anchor_hits = 0
             if explicit_signature and thread.signature == explicit_signature:
                 score += 120
                 primary_match = True
+                anchor_hits += 2
             if thread.signature in derived_signatures:
                 score += 90
                 primary_match = True
+                anchor_hits += 2
 
             thread_commitments = set(self._normalized_items(thread.linked_commitments))
             commitment_overlap = thread_commitments & set(linked_commitments)
             if commitment_overlap:
                 score += 45 if thread_commitments.issuperset(linked_commitments) else 30
                 primary_match = True
+                anchor_hits += len(commitment_overlap)
 
             thread_identity = set(self._normalized_items(thread.linked_identity_elements))
             identity_overlap = thread_identity & set(linked_identity_anchors)
             if identity_overlap:
                 score += 40 if thread_identity.issuperset(linked_identity_anchors) else 28
                 primary_match = True
+                anchor_hits += len(identity_overlap)
 
             if linked_discrepancy_id and linked_discrepancy_id in thread.supporting_evidence:
                 score += 35
                 primary_match = True
+                anchor_hits += 1
             if prediction_id and any(prediction_id in item for item in thread.supporting_evidence):
                 score += 12
+                anchor_hits += 1
             if target_channels and self._verification_channels_align(thread, target_channels):
                 score += 8
+                anchor_hits += 1
 
             if primary_match and score > 0:
-                ranked.append((score, thread))
+                ranked.append((score, anchor_hits, thread))
 
         if not ranked:
             return None
-        ranked.sort(key=lambda item: (-item[0], item[1].created_tick, item[1].thread_id))
-        if len(ranked) > 1 and ranked[0][0] == ranked[1][0]:
+        ranked.sort(key=lambda item: (-item[0], -item[1], item[2].created_tick, item[2].thread_id))
+        if ranked[0][1] < 2 and not explicit_signature and not explicit_thread_id:
             return None
-        return ranked[0][1]
+        if len(ranked) > 1 and (
+            ranked[0][0] == ranked[1][0]
+            or (ranked[0][0] - ranked[1][0] < 12 and ranked[0][1] <= ranked[1][1] + 1)
+        ):
+            return None
+        return ranked[0][2]
 
     def _verification_outcome_signatures(
         self,
