@@ -41,6 +41,7 @@ from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 STATE_VERSION = "0.6"
 SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.5", "0.4", "0.3", "0.2", "0.1"}
 RESTART_MEMORY_CONTINUITY_WINDOW = 24
+RESTART_REBIND_MIN_CYCLE = 128
 
 
 def format_state(values: dict[str, float]) -> str:
@@ -147,7 +148,7 @@ class SegmentRuntime:
         reset: bool = False,
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
         reset_predictive_precisions: bool = False,
-        enable_restart_rebind: bool = True,
+        enable_restart_rebind: bool = False,
     ) -> SegmentRuntime:
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
@@ -246,14 +247,16 @@ class SegmentRuntime:
             trace_path=resolved_trace_path,
             state_load_status="restored",
         )
+        should_enable_restart_rebind = False
         restart_anchors = payload.get("restart_anchors")
         if isinstance(restart_anchors, dict):
+            should_enable_restart_rebind = bool(enable_restart_rebind or agent.cycle >= RESTART_REBIND_MIN_CYCLE)
             runtime.restart_policy_anchors = dict(restart_anchors)
-            runtime.restart_policy_anchors["policy_rebind_enabled"] = bool(enable_restart_rebind)
-            if enable_restart_rebind:
+            runtime.restart_policy_anchors["policy_rebind_enabled"] = should_enable_restart_rebind
+            if should_enable_restart_rebind:
                 runtime._activate_continuity_rebind()
             runtime.agent.self_model.apply_restart_anchors(runtime.restart_policy_anchors)
-        if enable_restart_rebind:
+        if should_enable_restart_rebind:
             runtime.agent.long_term_memory.activate_restart_continuity_window(
                 current_cycle=runtime.agent.cycle,
                 duration=max(RESTART_MEMORY_CONTINUITY_WINDOW, runtime.continuity_rebind_total_ticks),
