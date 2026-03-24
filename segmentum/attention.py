@@ -131,14 +131,17 @@ class AttentionBottleneck:
 
             if "novel" in channel:
                 score += observed_value * self.novelty_weight
+                score += max(0.0, controllability_prior) * (
+                    0.14 + observed_value * 0.24
+                )
             if channel in THREAT_CHANNELS:
                 score += observed_value * self.threat_weight
-                score += trauma_bias * (0.20 + observed_value * 0.30)
+                score += trauma_bias * (0.38 + observed_value * 0.40)
                 score += chronic_threat_bias * (0.15 + observed_value * 0.20)
             if channel in CONTAMINATION_CHANNELS:
                 score += contamination_sensitivity * observed_value * 0.25
             if channel in SOCIAL_CHANNELS:
-                score += max(0.0, trust_prior) * observed_value * 0.20
+                score += max(0.0, trust_prior) * (0.16 + observed_value * 0.34)
                 score += max(0.0, -trust_prior) * (1.0 - observed_value) * 0.10
             if channel == "shelter":
                 score += max(0.0, -controllability_prior) * (1.0 - observed_value) * 0.10

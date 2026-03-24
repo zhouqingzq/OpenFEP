@@ -47,7 +47,7 @@
     "narrative_priors": {
       "trust_prior": 0.0,
       "controllability_prior": 0.0,
-      "trauma_bias": 0.0,
+      "trauma_bias": 0.264796,
       "contamination_sensitivity": 0.0,
       "meaning_stability": -0.03129
     },

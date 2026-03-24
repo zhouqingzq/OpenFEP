@@ -484,17 +484,53 @@ class NarrativeInitializer:
         )
         beliefs = agent.world_model.beliefs
         if semantic_bias["threat"] >= max(semantic_bias["social"], semantic_bias["exploration"]):
-            beliefs["danger"] = 0.24 - min(0.10, uncertainty_score * 0.05)
-            beliefs["shelter"] = 0.66
-            beliefs["social"] = 0.24
+            priors.trauma_bias = _clamp(
+                max(priors.trauma_bias, 0.42 + semantic_bias["threat"] * 0.18 - uncertainty_score * 0.08),
+                0.0,
+                1.0,
+            )
+            priors.trust_prior = min(priors.trust_prior, 0.05)
+            beliefs["danger"] = _clamp(
+                0.54 + semantic_bias["threat"] * 0.12 - uncertainty_score * 0.04,
+                0.46,
+                0.72,
+            )
+            beliefs["shelter"] = _clamp(0.62 + degradation_ratio * 0.10, 0.58, 0.78)
+            beliefs["social"] = 0.16
+            beliefs["novelty"] = 0.18
         elif semantic_bias["social"] >= max(semantic_bias["threat"], semantic_bias["exploration"]):
-            beliefs["social"] = 0.20
-            beliefs["danger"] = 0.30
-            beliefs["novelty"] = 0.40
+            priors.trust_prior = _clamp(
+                max(
+                    priors.trust_prior,
+                    0.62 + semantic_bias["social"] * 0.18 + max(0.0, trust_signal) * 0.10,
+                )
+                - uncertainty_score * 0.04,
+                -1.0,
+                1.0,
+            )
+            priors.trauma_bias = min(priors.trauma_bias, 0.08)
+            beliefs["social"] = _clamp(
+                0.50 + semantic_bias["social"] * 0.10 + max(0.0, trust_signal) * 0.06,
+                0.44,
+                0.68,
+            )
+            beliefs["danger"] = 0.18
+            beliefs["novelty"] = 0.24
+            beliefs["shelter"] = 0.46
         else:
-            beliefs["novelty"] = 0.16
-            beliefs["food"] = 0.32
-            beliefs["danger"] = 0.28
+            priors.controllability_prior = _clamp(
+                max(priors.controllability_prior, 0.34 + semantic_bias["exploration"] * 0.12),
+                -1.0,
+                1.0,
+            )
+            beliefs["novelty"] = _clamp(
+                0.48 + semantic_bias["exploration"] * 0.16 + degradation_ratio * 0.04,
+                0.42,
+                0.68,
+            )
+            beliefs["food"] = 0.38
+            beliefs["danger"] = 0.18
+            beliefs["social"] = 0.22
 
     def _apply_policy_seed(
         self,

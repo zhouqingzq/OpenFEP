@@ -875,13 +875,6 @@ class LongTermMemory:
                 compressed.append(retained)
                 used.add(index)
                 continue
-            if self._is_restart_protected_payload(payload):
-                retained = dict(payload)
-                retained["consolidated"] = bool(retained.get("consolidated", False))
-                retained["compressed_count"] = int(retained.get("compressed_count", 1))
-                compressed.append(retained)
-                used.add(index)
-                continue
             base_episode = Episode.from_dict(payload)
             base_embedding = base_episode.embedding or self._build_embedding(base_episode.state_vector)
             group = [payload]
@@ -894,8 +887,6 @@ class LongTermMemory:
                     candidate,
                     current_cycle=current_cycle,
                 ):
-                    continue
-                if self._is_restart_protected_payload(candidate):
                     continue
                 if action_name(candidate.get("action_taken", candidate.get("action", ""))) != base_episode.action_taken.name:
                     continue
