@@ -55,6 +55,8 @@ def test_memory_context_changes_prediction_surface() -> None:
     assert trained_diag.prediction_delta
     assert trained_diag.prediction_before_memory != trained_diag.prediction_after_memory
     assert trained_diag.prediction_after_memory != baseline_diag.prediction_after_memory
+    assert "chronic_threat=" in trained_diag.memory_context_summary
+    assert trained_diag.prediction_after_memory["danger"] >= trained_diag.prediction_before_memory["danger"]
 
 
 def test_runtime_failure_event_preserves_self_vs_world_evidence() -> None:

@@ -110,6 +110,7 @@ class MemoryDecision:
     threat_significance: float = 0.0
     redundancy_penalty: float = 0.0
     support_delta: int = 0
+    episode_id: str | None = None
     merged_into_episode_id: str | None = None
     gating_reasons: tuple[str, ...] = ()
 
@@ -131,6 +132,7 @@ class MemoryDecision:
             "threat_significance": self.threat_significance,
             "redundancy_penalty": self.redundancy_penalty,
             "support_delta": self.support_delta,
+            "episode_id": self.episode_id,
             "merged_into_episode_id": self.merged_into_episode_id,
             "gating_reasons": list(self.gating_reasons),
         }
@@ -443,6 +445,7 @@ class LongTermMemory:
                 threat_significance=gate["threat_significance"],
                 redundancy_penalty=gate["redundancy_penalty"],
                 support_delta=1,
+                episode_id=str(merged_payload.get("episode_id", "")) or None,
                 merged_into_episode_id=str(merged_payload.get("episode_id", "")) or None,
                 gating_reasons=tuple(gate["reasons"] + ["merged_into_existing_episode"]),
             )
@@ -467,6 +470,7 @@ class LongTermMemory:
             policy_delta=gate["policy_delta"],
             threat_significance=gate["threat_significance"],
             redundancy_penalty=gate["redundancy_penalty"],
+            episode_id=str(payload.get("episode_id", "")) or None,
             gating_reasons=tuple(gate["reasons"]),
         )
 
@@ -491,7 +495,7 @@ class LongTermMemory:
             current_observation=_coerce_float_dict(current_state.get("observation")),
             current_body_state=_coerce_float_dict(current_state.get("body_state")),
         )
-        scored: list[tuple[float, float, float, Episode]] = []
+        scored: list[tuple[float, float, float, Episode, dict[str, object]]] = []
         for payload in self.episodes:
             episode = Episode.from_dict(payload)
             vector_similarity = _cosine_similarity(
@@ -499,19 +503,45 @@ class LongTermMemory:
                 episode.embedding or self._build_embedding(episode.state_vector),
             )
             recency = 1.0 / (1.0 + abs(self._episode_cycle(payload) - reference_cycle))
+            threat_boost = min(
+                0.35,
+                max(
+                    0.0,
+                    float(payload.get("threat_significance", 0.0)) * 0.35,
+                ),
+            )
+            protected_boost = 0.0
+            if self._is_restart_protected_payload(payload):
+                protected_boost += 0.10
+            if "structural_trace" in {
+                str(tag) for tag in payload.get("continuity_tags", []) if str(tag)
+            }:
+                protected_boost += 0.08
+            support_boost = min(
+                0.18,
+                max(
+                    0.0,
+                    (float(payload.get("support_count", payload.get("support", 1))) - 1.0) * 0.03,
+                ),
+            )
+            weighted_similarity = vector_similarity * recency * (
+                1.0 + threat_boost + protected_boost + support_boost
+            )
             scored.append(
                 (
-                    vector_similarity * recency,
+                    weighted_similarity,
                     vector_similarity,
                     float(episode.timestamp),
                     episode,
+                    payload,
                 )
             )
 
         scored.sort(reverse=True, key=lambda item: (item[0], item[1], item[2]))
         results: list[dict[str, object]] = []
-        for similarity, vector_similarity, _, episode in scored[:k]:
-            item = episode.to_dict()
+        for similarity, vector_similarity, _, episode, payload in scored[:k]:
+            item = dict(payload)
+            item.update(episode.to_dict())
             item["similarity"] = similarity
             item["vector_similarity"] = vector_similarity
             results.append(item)
@@ -1029,6 +1059,54 @@ class LongTermMemory:
             for payload in anchors[:limit]
         ]
 
+    def protect_episode_ids(
+        self,
+        episode_ids: list[str] | tuple[str, ...],
+        *,
+        reason: str,
+        continuity_tag: str = "structural_trace",
+        identity_critical: bool = False,
+    ) -> int:
+        protected = 0
+        target_ids = {str(item) for item in episode_ids if str(item)}
+        if not target_ids:
+            return 0
+        for bucket in (self.episodes, self.archived_episodes):
+            for payload in bucket:
+                episode_id = str(payload.get("episode_id", ""))
+                if episode_id not in target_ids:
+                    continue
+                tags = [str(item) for item in payload.get("continuity_tags", []) if str(item)]
+                if continuity_tag and continuity_tag not in tags:
+                    tags.append(continuity_tag)
+                protection_reasons = [
+                    str(item) for item in payload.get("memory_protection_reasons", []) if str(item)
+                ]
+                if reason and reason not in protection_reasons:
+                    protection_reasons.append(reason)
+                trace_links = [
+                    str(item) for item in payload.get("trace_protection_reasons", []) if str(item)
+                ]
+                if reason and reason not in trace_links:
+                    trace_links.append(reason)
+                payload["continuity_tags"] = tags
+                payload["memory_protection_reasons"] = protection_reasons
+                payload["trace_protection_reasons"] = trace_links
+                payload["restart_protected"] = True
+                if identity_critical:
+                    payload["identity_critical"] = True
+                self._synchronize_continuity_metadata(payload)
+                protected += 1
+        if protected:
+            self.extend_restart_continuity_protection(
+                current_cycle=max(
+                    [self._episode_cycle(payload) for payload in [*self.episodes, *self.archived_episodes]]
+                    or [0]
+                ),
+                duration=64,
+            )
+        return protected
+
     def rehearsal_batch(
         self,
         *,
@@ -1332,12 +1410,16 @@ class LongTermMemory:
         persistent_tags = [
             str(tag)
             for tag in payload.get("continuity_tags", [])
-            if str(tag) and str(tag) not in {"identity", "threat", "commitment", "guard", "maintenance", "recovery"}
+                if str(tag) and str(tag) not in {"identity", "threat", "commitment", "guard", "maintenance", "recovery"}
         ]
+        explicit_protection = bool(payload.get("restart_protected", False))
+        explicit_protection = explicit_protection or bool(payload.get("memory_protection_reasons"))
+        explicit_protection = explicit_protection or bool(payload.get("trace_protection_reasons"))
         payload["continuity_role"] = continuity_role
         payload["continuity_tags"] = list(dict.fromkeys([*persistent_tags, *inferred_tags]))
         payload["restart_protected"] = (
-            bool(payload.get("identity_critical", False))
+            explicit_protection
+            or bool(payload.get("identity_critical", False))
             or bool(commitment_ids)
             or continuity_role == CONTINUITY_ROLE_MAINTENANCE
         )
@@ -1346,6 +1428,17 @@ class LongTermMemory:
         for bucket in (self.episodes, self.archived_episodes):
             for payload in bucket:
                 self._synchronize_continuity_metadata(payload)
+
+    def extend_restart_continuity_protection(
+        self,
+        *,
+        current_cycle: int,
+        duration: int,
+    ) -> None:
+        self.activate_restart_continuity_window(
+            current_cycle=current_cycle,
+            duration=duration,
+        )
 
     def activate_restart_continuity_window(
         self,

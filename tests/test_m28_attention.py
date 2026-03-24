@@ -146,3 +146,34 @@ def test_agent_perceive_records_attention_trace() -> None:
     assert tuple(agent.last_attention_trace.allocation.selected_channels) == ("danger", "novelty")
     assert agent.last_attention_filtered_observation["danger"] == observed["danger"]
     assert agent.last_attention_filtered_observation["food"] != observed["food"]
+
+
+def test_memory_sensitive_pattern_bias_can_promote_threat_channel() -> None:
+    bottleneck = AttentionBottleneck(capacity=1)
+
+    baseline = bottleneck.allocate(
+        observation={"danger": 0.32, "novelty": 0.55, "food": 0.52},
+        prediction={"danger": 0.28, "novelty": 0.30, "food": 0.50},
+        errors={"danger": 0.04, "novelty": 0.25, "food": 0.02},
+        narrative_priors={"trauma_bias": 0.0},
+        tick=1,
+    )
+    biased = bottleneck.allocate(
+        observation={"danger": 0.32, "novelty": 0.55, "food": 0.52},
+        prediction={"danger": 0.28, "novelty": 0.30, "food": 0.50},
+        errors={"danger": 0.04, "novelty": 0.25, "food": 0.02},
+        narrative_priors={"trauma_bias": 0.0},
+        tick=2,
+        memory_context={
+            "aggregate": {
+                "chronic_threat_bias": 0.95,
+                "protected_anchor_bias": 0.85,
+            },
+            "sensitive_channels": ["danger"],
+            "attention_biases": {"danger": 0.25},
+        },
+    )
+
+    assert baseline.allocation.selected_channels == ("novelty",)
+    assert biased.allocation.selected_channels == ("danger",)
+    assert biased.salience_scores["danger"] > baseline.salience_scores["danger"]

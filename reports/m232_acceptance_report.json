@@ -1,0 +1,294 @@
+{
+  "milestone_id": "M2.32",
+  "title": "Threat Trace Protection And Trauma-Like Encoding",
+  "strict": true,
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-03-24T09:39:46+00:00",
+  "seed_set": [
+    232,
+    464
+  ],
+  "artifacts": {
+    "specification": "E:\\workspace\\segments\\reports\\m232_milestone_spec.md",
+    "preparation": "E:\\workspace\\segments\\reports\\m232_strict_audit_preparation.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_stress.json",
+    "report": "E:\\workspace\\segments\\reports\\m232_acceptance_report.json",
+    "summary": "E:\\workspace\\segments\\reports\\m232_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": {
+      "label": "m232-milestone",
+      "paths": [
+        "tests/test_restart_memory_protection.py",
+        "tests/test_m28_attention.py",
+        "tests/test_m2_targeted_repair.py",
+        "tests/test_m232_acceptance.py",
+        "tests/test_m232_audit_preparation.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_restart_memory_protection.py",
+        "tests/test_m28_attention.py",
+        "tests/test_m2_targeted_repair.py",
+        "tests/test_m232_acceptance.py",
+        "tests/test_m232_audit_preparation.py",
+        "-q"
+      ],
+      "stdout": ".....................                                                    [100%]\n21 passed in 9.20s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-24T09:39:29+00:00",
+      "completed_at": "2026-03-24T09:39:41+00:00"
+    },
+    "regressions": {
+      "label": "m232-regression",
+      "paths": [
+        "tests/test_memory.py",
+        "tests/test_threat_profile_learning.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_memory.py",
+        "tests/test_threat_profile_learning.py",
+        "-q"
+      ],
+      "stdout": ".......................                                                  [100%]\n23 passed in 1.09s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-24T09:39:41+00:00",
+      "completed_at": "2026-03-24T09:39:45+00:00"
+    }
+  },
+  "gates": {
+    "schema": {
+      "passed": true,
+      "evidence": [
+        "episode_id",
+        "continuity_tags",
+        "restart_protected"
+      ]
+    },
+    "protection": {
+      "passed": true,
+      "evidence": [
+        "structural_trace",
+        "chronic_threat_trace"
+      ]
+    },
+    "causality": {
+      "passed": true,
+      "evidence": [
+        "danger_prediction_delta",
+        "protected_anchor_survives_restart",
+        "action_ranking_changes_under_full_mechanism"
+      ]
+    },
+    "attention_prediction_influence": {
+      "passed": true,
+      "evidence": [
+        "attention_selected_channels",
+        "prediction_delta"
+      ]
+    },
+    "regression": {
+      "passed": true,
+      "execution": {
+        "label": "m232-regression",
+        "paths": [
+          "tests/test_memory.py",
+          "tests/test_threat_profile_learning.py"
+        ],
+        "executed": true,
+        "passed": true,
+        "returncode": 0,
+        "command": [
+          "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_memory.py",
+          "tests/test_threat_profile_learning.py",
+          "-q"
+        ],
+        "stdout": ".......................                                                  [100%]\n23 passed in 1.09s",
+        "stderr": "",
+        "execution_source": "subprocess",
+        "started_at": "2026-03-24T09:39:41+00:00",
+        "completed_at": "2026-03-24T09:39:45+00:00"
+      }
+    },
+    "artifact_freshness": {
+      "passed": true,
+      "details": {
+        "strict": true,
+        "audit_started_at": "2026-03-24T09:39:29+00:00",
+        "generated_at": "2026-03-24T09:39:46+00:00",
+        "artifact_records": {
+          "specification": {
+            "path": "E:\\workspace\\segments\\reports\\m232_milestone_spec.md",
+            "exists": true,
+            "size_bytes": 2268,
+            "modified_at": "2026-03-24T06:58:11+00:00"
+          },
+          "preparation": {
+            "path": "E:\\workspace\\segments\\reports\\m232_strict_audit_preparation.md",
+            "exists": true,
+            "size_bytes": 1662,
+            "modified_at": "2026-03-24T06:58:26+00:00"
+          },
+          "canonical_trace": {
+            "path": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_trace.jsonl",
+            "exists": true,
+            "size_bytes": 1525,
+            "modified_at": "2026-03-24T09:39:29+00:00"
+          },
+          "ablation": {
+            "path": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_ablation.json",
+            "exists": true,
+            "size_bytes": 1043,
+            "modified_at": "2026-03-24T09:39:29+00:00"
+          },
+          "stress": {
+            "path": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_stress.json",
+            "exists": true,
+            "size_bytes": 840,
+            "modified_at": "2026-03-24T09:39:29+00:00"
+          },
+          "report": {
+            "path": "E:\\workspace\\segments\\reports\\m232_acceptance_report.json",
+            "exists": true,
+            "size_bytes": 7299,
+            "modified_at": "2026-03-24T09:39:46+00:00"
+          },
+          "summary": {
+            "path": "E:\\workspace\\segments\\reports\\m232_acceptance_summary.md",
+            "exists": true,
+            "size_bytes": 204,
+            "modified_at": "2026-03-24T09:39:46+00:00"
+          }
+        },
+        "evidence_times_within_round": true,
+        "report_times_within_round": true,
+        "milestone_execution_authentic": true,
+        "regression_execution_authentic": true,
+        "suite_times_within_round": true,
+        "current_round": true,
+        "git": {
+          "head": "ef668ea351a5b81ef7c202600bf34a28c788b70f",
+          "dirty": true,
+          "dirty_paths": [
+            "M reports/m232_milestone_spec.md",
+            "M reports/m232_strict_audit_preparation.md",
+            "M segmentum/agent.py",
+            "M segmentum/attention.py",
+            "M segmentum/m232_audit.py",
+            "M segmentum/memory.py",
+            "M segmentum/world_model.py",
+            "M tests/test_m232_audit_preparation.py",
+            "M tests/test_m28_attention.py",
+            "M tests/test_m2_targeted_repair.py",
+            "M tests/test_restart_memory_protection.py",
+            "?? artifacts/m232_threat_memory_ablation.json",
+            "?? artifacts/m232_threat_memory_stress.json",
+            "?? artifacts/m232_threat_memory_trace.jsonl",
+            "?? reports/m232_acceptance_report.json",
+            "?? reports/m232_acceptance_summary.md",
+            "?? tests/test_m232_acceptance.py"
+          ]
+        }
+      }
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "strict": true,
+    "audit_started_at": "2026-03-24T09:39:29+00:00",
+    "generated_at": "2026-03-24T09:39:46+00:00",
+    "artifact_records": {
+      "specification": {
+        "path": "E:\\workspace\\segments\\reports\\m232_milestone_spec.md",
+        "exists": true,
+        "size_bytes": 2268,
+        "modified_at": "2026-03-24T06:58:11+00:00"
+      },
+      "preparation": {
+        "path": "E:\\workspace\\segments\\reports\\m232_strict_audit_preparation.md",
+        "exists": true,
+        "size_bytes": 1662,
+        "modified_at": "2026-03-24T06:58:26+00:00"
+      },
+      "canonical_trace": {
+        "path": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_trace.jsonl",
+        "exists": true,
+        "size_bytes": 1525,
+        "modified_at": "2026-03-24T09:39:29+00:00"
+      },
+      "ablation": {
+        "path": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_ablation.json",
+        "exists": true,
+        "size_bytes": 1043,
+        "modified_at": "2026-03-24T09:39:29+00:00"
+      },
+      "stress": {
+        "path": "E:\\workspace\\segments\\artifacts\\m232_threat_memory_stress.json",
+        "exists": true,
+        "size_bytes": 840,
+        "modified_at": "2026-03-24T09:39:29+00:00"
+      },
+      "report": {
+        "path": "E:\\workspace\\segments\\reports\\m232_acceptance_report.json",
+        "exists": true,
+        "size_bytes": 7299,
+        "modified_at": "2026-03-24T09:39:46+00:00"
+      },
+      "summary": {
+        "path": "E:\\workspace\\segments\\reports\\m232_acceptance_summary.md",
+        "exists": true,
+        "size_bytes": 204,
+        "modified_at": "2026-03-24T09:39:46+00:00"
+      }
+    },
+    "evidence_times_within_round": true,
+    "report_times_within_round": true,
+    "milestone_execution_authentic": true,
+    "regression_execution_authentic": true,
+    "suite_times_within_round": true,
+    "current_round": true,
+    "git": {
+      "head": "ef668ea351a5b81ef7c202600bf34a28c788b70f",
+      "dirty": true,
+      "dirty_paths": [
+        "M reports/m232_milestone_spec.md",
+        "M reports/m232_strict_audit_preparation.md",
+        "M segmentum/agent.py",
+        "M segmentum/attention.py",
+        "M segmentum/m232_audit.py",
+        "M segmentum/memory.py",
+        "M segmentum/world_model.py",
+        "M tests/test_m232_audit_preparation.py",
+        "M tests/test_m28_attention.py",
+        "M tests/test_m2_targeted_repair.py",
+        "M tests/test_restart_memory_protection.py",
+        "?? artifacts/m232_threat_memory_ablation.json",
+        "?? artifacts/m232_threat_memory_stress.json",
+        "?? artifacts/m232_threat_memory_trace.jsonl",
+        "?? reports/m232_acceptance_report.json",
+        "?? reports/m232_acceptance_summary.md",
+        "?? tests/test_m232_acceptance.py"
+      ]
+    }
+  }
+}

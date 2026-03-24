@@ -31,10 +31,10 @@ class TestM232AuditPreparation(unittest.TestCase):
         spec_text = Path(M232_SPEC_PATH).read_text(encoding="utf-8")
         prep_text = Path(M232_PREPARATION_PATH).read_text(encoding="utf-8")
 
-        self.assertIn("Claim-Level Narrative Reconciliation", spec_text)
-        self.assertIn("NarrativeClaim", spec_text)
-        self.assertIn("claim-level reconciliation", prep_text.lower())
-        self.assertIn("tests/test_m231_acceptance.py", prep_text)
+        self.assertIn("Threat Trace Protection", spec_text)
+        self.assertIn("protect_episode_ids", spec_text)
+        self.assertIn("threat-trace", prep_text.lower())
+        self.assertIn("tests/test_m2_targeted_repair.py", prep_text)
 
 
 if __name__ == "__main__":

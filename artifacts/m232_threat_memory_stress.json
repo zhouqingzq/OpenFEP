@@ -1,0 +1,28 @@
+{
+  "stress_checks": {
+    "protect_episode_ids_handles_non_identity_anchor": true,
+    "structural_trace_anchor_remains_restart_protected": true,
+    "memory_sensitive_pattern_promotes_threat_channel": true,
+    "prediction_surface_remains_shifted_under_replay": true,
+    "roundtrip_retrieval_preserves_anchor": true
+  },
+  "details": {
+    "seed": 464,
+    "protected_count": 1,
+    "protected_episode_id": "ep-000005-forage",
+    "compress_removed": 3,
+    "restart_anchor_ids": [
+      "ep-000005-forage"
+    ],
+    "retrieved_episode_ids": [
+      "ep-000005-forage",
+      "ep-000004-forage",
+      "ep-000001-forage-merged"
+    ],
+    "retrieved_similarities": {
+      "ep-000005-forage": 0.59,
+      "ep-000004-forage": 0.3333333333333333,
+      "ep-000001-forage-merged": 0.21800000000000003
+    }
+  }
+}

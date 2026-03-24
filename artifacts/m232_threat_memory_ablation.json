@@ -1,0 +1,37 @@
+{
+  "full_mechanism": {
+    "protected_anchor_survives_restart": true,
+    "danger_prediction_delta": 0.6391209787948915,
+    "danger_attention_promoted": true,
+    "top_ranked_actions": [
+      "hide",
+      "exploit_shelter",
+      "rest"
+    ]
+  },
+  "without_structural_trace_protection": {
+    "protected_anchor_survives_restart": false,
+    "danger_prediction_delta": 0.6010211999999999,
+    "danger_attention_promoted": true,
+    "top_ranked_actions": [
+      "hide",
+      "exploit_shelter",
+      "rest"
+    ]
+  },
+  "without_attention_bias": {
+    "danger_attention_promoted": false,
+    "attention_selected_channels": [
+      "novelty"
+    ]
+  },
+  "without_prediction_shaping": {
+    "danger_prediction_delta": 0.0
+  },
+  "degradation_checks": {
+    "protection_degrades_without_anchor_mechanism": true,
+    "prediction_shift_degrades_without_threat_trace": true,
+    "attention_shift_degrades_without_sensitive_pattern_bias": true,
+    "action_ranking_changes_under_full_mechanism": false
+  }
+}

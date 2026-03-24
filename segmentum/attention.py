@@ -99,6 +99,7 @@ class AttentionBottleneck:
         prediction: Mapping[str, float],
         errors: Mapping[str, float],
         narrative_priors: Mapping[str, float],
+        memory_context: Mapping[str, object] | None = None,
     ) -> dict[str, float]:
         scores: dict[str, float] = {}
         trauma_bias = max(0.0, float(narrative_priors.get("trauma_bias", 0.0)))
@@ -108,6 +109,18 @@ class AttentionBottleneck:
         )
         trust_prior = float(narrative_priors.get("trust_prior", 0.0))
         controllability_prior = float(narrative_priors.get("controllability_prior", 0.0))
+        memory_context = memory_context or {}
+        aggregate = memory_context.get("aggregate", {})
+        if not isinstance(aggregate, Mapping):
+            aggregate = {}
+        chronic_threat_bias = max(0.0, float(aggregate.get("chronic_threat_bias", 0.0)))
+        protected_anchor_bias = max(0.0, float(aggregate.get("protected_anchor_bias", 0.0)))
+        sensitive_channels = {
+            str(item) for item in memory_context.get("sensitive_channels", []) if str(item)
+        }
+        attention_biases = memory_context.get("attention_biases", {})
+        if not isinstance(attention_biases, Mapping):
+            attention_biases = {}
 
         all_channels = sorted(set(observation) | set(prediction) | set(errors))
         for channel in all_channels:
@@ -121,6 +134,7 @@ class AttentionBottleneck:
             if channel in THREAT_CHANNELS:
                 score += observed_value * self.threat_weight
                 score += trauma_bias * (0.20 + observed_value * 0.30)
+                score += chronic_threat_bias * (0.15 + observed_value * 0.20)
             if channel in CONTAMINATION_CHANNELS:
                 score += contamination_sensitivity * observed_value * 0.25
             if channel in SOCIAL_CHANNELS:
@@ -128,6 +142,9 @@ class AttentionBottleneck:
                 score += max(0.0, -trust_prior) * (1.0 - observed_value) * 0.10
             if channel == "shelter":
                 score += max(0.0, -controllability_prior) * (1.0 - observed_value) * 0.10
+            if channel in sensitive_channels:
+                score += 0.08 + (protected_anchor_bias * 0.12)
+            score += max(0.0, float(attention_biases.get(channel, 0.0)))
 
             scores[channel] = round(max(0.0, score), 6)
 
@@ -140,12 +157,14 @@ class AttentionBottleneck:
         errors: Mapping[str, float],
         narrative_priors: Mapping[str, float],
         tick: int,
+        memory_context: Mapping[str, object] | None = None,
     ) -> AttentionTrace:
         salience_scores = self.score_channels(
             observation=observation,
             prediction=prediction,
             errors=errors,
             narrative_priors=narrative_priors,
+            memory_context=memory_context,
         )
         ranked_channels = sorted(
             salience_scores,

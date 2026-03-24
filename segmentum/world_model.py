@@ -273,6 +273,11 @@ class GenerativeWorldModel:
         cluster_bias = 0.0
         if cluster_id is not None:
             cluster_bias = float(self.policy_biases.get(str(cluster_id), {}).get(action_key, 0.0))
+        elif self.policy_biases:
+            cluster_bias = sum(
+                float(cluster_map.get(action_key, 0.0))
+                for cluster_map in self.policy_biases.values()
+            ) / max(1, len(self.policy_biases))
         global_cf_bias = float(self.counterfactual_biases.get(action_key, 0.0))
         return cluster_bias + global_cf_bias
 

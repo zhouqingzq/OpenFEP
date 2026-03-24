@@ -993,6 +993,9 @@ class SegmentAgent:
         action_rollups: dict[str, dict[str, object]] = {}
         outcome_totals: dict[str, float] = {}
         retrieved_episode_ids: list[str] = []
+        protected_anchor_weight = 0.0
+        threat_trace_weight = 0.0
+        sensitive_channel_totals: dict[str, float] = {}
 
         for payload in similar_memories:
             weight = max(
@@ -1017,6 +1020,17 @@ class SegmentAgent:
             episode_id = str(payload.get("episode_id", ""))
             if episode_id:
                 retrieved_episode_ids.append(episode_id)
+            continuity_tags = {
+                str(item) for item in payload.get("continuity_tags", []) if str(item)
+            }
+            if bool(payload.get("restart_protected", False)) or "structural_trace" in continuity_tags:
+                protected_anchor_weight += weight
+            if (
+                float(payload.get("threat_significance", 0.0)) >= 0.20
+                or predicted_outcome in {"survival_threat", "integrity_loss"}
+                or str(payload.get("episode_family", "")) == "hazard_response"
+            ):
+                threat_trace_weight += weight
 
             rollup = action_rollups.setdefault(
                 action_key,
@@ -1047,6 +1061,8 @@ class SegmentAgent:
                     (value - baseline_prediction.get(key, 0.0)) * weight
                 )
                 obs_projection[key] = obs_projection.get(key, 0.0) + (value * weight)
+                if abs(value - baseline_prediction.get(key, 0.0)) >= 0.12 or value >= 0.70:
+                    sensitive_channel_totals[key] = sensitive_channel_totals.get(key, 0.0) + weight
             rollup["observation_projection"] = obs_projection
 
             effect_projection = dict(rollup["predicted_effects"])
@@ -1092,6 +1108,31 @@ class SegmentAgent:
         state_delta = {
             key: value / weighted_total for key, value in aggregate_delta.items()
         }
+        chronic_threat_bias = threat_trace_weight / weighted_total
+        protected_anchor_bias = protected_anchor_weight / weighted_total
+        if chronic_threat_bias > 0.0:
+            state_projection["danger"] = max(
+                float(state_projection.get("danger", baseline_prediction.get("danger", 0.0))),
+                min(1.0, float(state_projection.get("danger", 0.0)) + (0.08 * chronic_threat_bias)),
+            )
+            state_delta["danger"] = float(state_delta.get("danger", 0.0)) + (0.12 * chronic_threat_bias)
+        sensitive_channels = [
+            key
+            for key, value in sorted(
+                sensitive_channel_totals.items(),
+                key=lambda item: (-item[1], item[0]),
+            )
+            if value > 0.0
+        ][:3]
+        attention_biases = {
+            key: min(
+                0.30,
+                (float(sensitive_channel_totals.get(key, 0.0)) / weighted_total) * 0.20
+                + (0.12 if key == "danger" and chronic_threat_bias > 0.0 else 0.0)
+                + (0.08 if key in sensitive_channels and protected_anchor_bias > 0.0 else 0.0),
+            )
+            for key in sensitive_channels
+        }
         dominant_outcome = sorted(
             outcome_totals.items(),
             key=lambda item: (-item[1], item[0]),
@@ -1101,7 +1142,8 @@ class SegmentAgent:
             "retrieved_episode_ids": retrieved_episode_ids,
             "summary": (
                 f"{len(similar_memories)} episodic match(es), dominant outcome={dominant_outcome}, "
-                f"risk={aggregate_risk:.3f}, expected_surprise={aggregate_surprise:.3f}"
+                f"risk={aggregate_risk:.3f}, expected_surprise={aggregate_surprise:.3f}, "
+                f"chronic_threat={chronic_threat_bias:.3f}, protected_anchor={protected_anchor_bias:.3f}"
             ),
             "state_projection": state_projection,
             "state_delta": state_delta,
@@ -1110,17 +1152,33 @@ class SegmentAgent:
                 "risk": aggregate_risk,
                 "preferred_probability": aggregate_probability,
                 "expected_surprise": aggregate_surprise,
+                "chronic_threat_bias": chronic_threat_bias,
+                "protected_anchor_bias": protected_anchor_bias,
                 "outcome_distribution": {
                     key: value / weighted_total for key, value in outcome_totals.items()
                 },
             },
             "actions": action_rollups,
-            "prediction_blend": min(0.35, 0.12 + (0.08 * len(similar_memories))),
-            "delta_gain": min(0.45, 0.18 + (0.05 * len(similar_memories))),
+            "prediction_blend": min(
+                0.55,
+                0.12
+                + (0.08 * len(similar_memories))
+                + (0.12 * chronic_threat_bias)
+                + (0.08 * protected_anchor_bias),
+            ),
+            "delta_gain": min(
+                0.60,
+                0.18
+                + (0.05 * len(similar_memories))
+                + (0.15 * chronic_threat_bias)
+                + (0.08 * protected_anchor_bias),
+            ),
             "body_state": self._current_body_state(),
             "observation": dict(observed),
             "prediction_error": compute_prediction_error(observed, baseline_prediction),
             "errors": dict(errors),
+            "sensitive_channels": sensitive_channels,
+            "attention_biases": attention_biases,
         }
         return memory_context
 
@@ -1307,6 +1365,7 @@ class SegmentAgent:
                 errors=raw_errors,
                 narrative_priors=self.self_model.narrative_priors.to_dict(),
                 tick=self.cycle,
+                memory_context=self.last_memory_context,
             )
             filtered_observed = self.attention_bottleneck.filter_observation(
                 observed,
@@ -2656,6 +2715,7 @@ class SegmentAgent:
                     policy_delta=float(payload.get("policy_delta", memory_decision.policy_delta)),
                     threat_significance=float(payload.get("threat_significance", memory_decision.threat_significance)),
                     redundancy_penalty=float(payload.get("redundancy_penalty", memory_decision.redundancy_penalty)),
+                    episode_id=str(payload.get("episode_id", "")) or None,
                     gating_reasons=tuple(list(memory_decision.gating_reasons) + ["action_novelty_trace"]),
                 )
         if memory_decision.episode_created:

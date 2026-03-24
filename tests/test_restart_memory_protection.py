@@ -118,6 +118,25 @@ class TestRestartMemoryProtection(unittest.TestCase):
         self.assertGreaterEqual(len(memory.archived_episodes), 1)
         self.assertNotIn(str(protected["episode_id"]), archived_ids)
 
+    def test_protect_episode_ids_preserves_structural_trace_anchor(self) -> None:
+        memory = LongTermMemory()
+        payload = _store_rest_episode(memory, cycle=4, danger=0.81, temperature=0.62)
+
+        protected = memory.protect_episode_ids(
+            [str(payload["episode_id"])],
+            reason="chronic_threat_trace",
+            continuity_tag="structural_trace",
+        )
+
+        self.assertEqual(protected, 1)
+        anchored = next(item for item in memory.episodes if item["episode_id"] == payload["episode_id"])
+        self.assertTrue(bool(anchored.get("restart_protected", False)))
+        self.assertIn("structural_trace", anchored.get("continuity_tags", []))
+        self.assertIn("chronic_threat_trace", anchored.get("memory_protection_reasons", []))
+        self.assertIn("chronic_threat_trace", anchored.get("trace_protection_reasons", []))
+        restart_ids = {item["episode_id"] for item in memory.restart_anchor_payload()}
+        self.assertIn(str(payload["episode_id"]), restart_ids)
+
 
 if __name__ == "__main__":
     unittest.main()
