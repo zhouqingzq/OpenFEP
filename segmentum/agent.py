@@ -32,6 +32,10 @@ from .preferences import Goal, GoalStack
 from .narrative_compiler import NarrativeCompiler
 from .narrative_uncertainty import UncertaintyDecompositionResult
 from .narrative_experiment import ExperimentDesignResult, NarrativeExperimentDesigner
+from .inquiry_scheduler import (
+    InquiryBudgetScheduler,
+    apply_scheduler_to_experiment_design,
+)
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
@@ -272,6 +276,7 @@ class PolicyEvaluator:
         reconciliation_bias: float = 0.0,
         verification_bias: float = 0.0,
         experiment_bias: float = 0.0,
+        inquiry_scheduler_bias: float = 0.0,
     ) -> str:
         components = [
             ("expected_free_energy", abs(expected_free_energy)),
@@ -289,6 +294,7 @@ class PolicyEvaluator:
             ("reconciliation_bias", abs(reconciliation_bias)),
             ("verification_bias", abs(verification_bias)),
             ("experiment_bias", abs(experiment_bias)),
+            ("inquiry_scheduler_bias", abs(inquiry_scheduler_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
         return components[0][0]
@@ -381,6 +387,11 @@ class PolicyEvaluator:
             reason = (
                 f"experiment_bias ({chosen.experiment_bias:.3f}) dominated, "
                 "so narrative hypothesis testing became the main policy pressure."
+            )
+        elif chosen.dominant_component == "inquiry_scheduler_bias":
+            reason = (
+                f"inquiry_scheduler_bias ({chosen.inquiry_scheduler_bias:.3f}) dominated, "
+                "so bounded inquiry scheduling overruled weaker curiosity pressures."
             )
         elif chosen.dominant_component == "reconciliation_bias":
             reason = (
@@ -481,6 +492,7 @@ class PolicyEvaluator:
             f"reconciliation_bias={chosen.reconciliation_bias:.3f}",
             f"verification_bias={chosen.verification_bias:.3f}",
             f"experiment_bias={chosen.experiment_bias:.3f}",
+            f"inquiry_scheduler_bias={chosen.inquiry_scheduler_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
         workspace_channels = ", ".join(diagnostics.workspace_broadcast_channels)
@@ -522,6 +534,11 @@ class PolicyEvaluator:
         experiment_sentence = ""
         if diagnostics.experiment_summary:
             experiment_sentence = "Experiment design: " + diagnostics.experiment_summary + " "
+        inquiry_scheduler_sentence = ""
+        if diagnostics.inquiry_scheduler_summary:
+            inquiry_scheduler_sentence = (
+                "Inquiry scheduler: " + diagnostics.inquiry_scheduler_summary + " "
+            )
         explanation_text = (
             f"I chose {chosen.choice}. "
             f"This action predicted outcome '{chosen.predicted_outcome}'. "
@@ -535,6 +552,7 @@ class PolicyEvaluator:
             f"{social_sentence}"
             f"{ledger_sentence}"
             f"{experiment_sentence}"
+            f"{inquiry_scheduler_sentence}"
             f"{subject_sentence}"
             f"{consistency_statement}{bias_sentence} "
             f"This aligns with my resource_conservatism="
@@ -576,6 +594,8 @@ class PolicyEvaluator:
             "subject_state_summary": diagnostics.subject_state_summary,
             "subject_status_flags": dict(diagnostics.subject_status_flags),
             "subject_priority_stack": list(diagnostics.subject_priority_stack),
+            "inquiry_scheduler_summary": diagnostics.inquiry_scheduler_summary,
+            "inquiry_scheduler": dict(diagnostics.inquiry_scheduler_payload),
             "text": explanation_text,
         }
 
@@ -690,6 +710,7 @@ class SegmentAgent:
         self.narrative_experiment_designer = NarrativeExperimentDesigner()
         self.latest_narrative_experiment = ExperimentDesignResult()
         self.narrative_experiment_history: list[dict[str, object]] = []
+        self.inquiry_budget_scheduler = InquiryBudgetScheduler()
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -723,6 +744,21 @@ class SegmentAgent:
         if self.last_attention_filtered_observation:
             state["last_filtered_observation"] = dict(self.last_attention_filtered_observation)
         return state
+
+    def _refresh_inquiry_budget(self) -> None:
+        state = self.inquiry_budget_scheduler.schedule(
+            tick=self.cycle,
+            narrative_uncertainty=self.latest_narrative_uncertainty,
+            experiment_design=self.latest_narrative_experiment,
+            prediction_ledger=self.prediction_ledger,
+            verification_loop=self.verification_loop,
+            subject_state=self.subject_state,
+            reconciliation_engine=self.reconciliation_engine,
+        )
+        self.latest_narrative_experiment = apply_scheduler_to_experiment_design(
+            self.latest_narrative_experiment,
+            state,
+        )
 
     def configure_global_workspace(
         self,
@@ -1265,6 +1301,7 @@ class SegmentAgent:
             "social_focus": list(diagnostics.social_focus),
             "social_alerts": list(diagnostics.social_alerts),
             "ledger_summary": diagnostics.ledger_summary,
+            "inquiry_scheduler_summary": diagnostics.inquiry_scheduler_summary,
             "subject_state_summary": diagnostics.subject_state_summary,
             "subject_status_flags": dict(diagnostics.subject_status_flags),
         }
@@ -1327,6 +1364,7 @@ class SegmentAgent:
         details["subject_state"] = self.subject_state.explanation_payload()
         details["narrative_uncertainty"] = self.latest_narrative_uncertainty.explanation_payload()
         details["narrative_experiment"] = self.latest_narrative_experiment.explanation_payload()
+        details["inquiry_scheduler"] = self.inquiry_budget_scheduler.state.explanation_payload()
         details["slow_learning"] = self.slow_variable_learner.explanation_payload()
         return details
 
@@ -1982,6 +2020,7 @@ class SegmentAgent:
             previous_result=self.latest_narrative_experiment,
             verification_loop=self.verification_loop,
         )
+        self._refresh_inquiry_budget()
         if self.latest_narrative_experiment.plans:
             self.narrative_experiment_history.append(self.latest_narrative_experiment.to_dict())
             self.narrative_experiment_history = self.narrative_experiment_history[-64:]
@@ -2011,6 +2050,7 @@ class SegmentAgent:
             subject_state=self.subject_state,
             narrative_uncertainty=self.latest_narrative_uncertainty,
             experiment_design=self.latest_narrative_experiment,
+            inquiry_state=self.inquiry_budget_scheduler.state,
         )
         self.last_workspace_state = self.global_workspace.broadcast(
             tick=self.cycle,
@@ -2019,6 +2059,7 @@ class SegmentAgent:
             errors=errors,
             attention_trace=self.last_attention_trace,
             ledger_focus={
+                **self.inquiry_budget_scheduler.state.workspace_focus(),
                 **self.latest_narrative_experiment.workspace_focus(),
                 **self.prediction_ledger.workspace_focus(),
                 **self.reconciliation_engine.workspace_focus(),
@@ -2081,6 +2122,7 @@ class SegmentAgent:
             reconciliation_bias = self.reconciliation_engine.action_bias(action)
             verification_bias = self.verification_loop.action_bias(action)
             experiment_bias = self.latest_narrative_experiment.action_bias(action)
+            inquiry_scheduler_bias = self.inquiry_budget_scheduler.state.action_bias(action)
             subject_bias = subject_action_bias(self.subject_state, action)
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
@@ -2106,6 +2148,7 @@ class SegmentAgent:
                 + goal_alignment
                 + verification_bias
                 + experiment_bias
+                + inquiry_scheduler_bias
                 - regression_penalty
             )
             dominant_component = self.policy_evaluator.dominant_component(
@@ -2124,6 +2167,7 @@ class SegmentAgent:
                 reconciliation_bias=reconciliation_bias,
                 verification_bias=verification_bias,
                 experiment_bias=experiment_bias,
+                inquiry_scheduler_bias=inquiry_scheduler_bias,
             )
             ranked_options.append(
                 InterventionScore(
@@ -2153,6 +2197,7 @@ class SegmentAgent:
                     reconciliation_bias=reconciliation_bias,
                     verification_bias=verification_bias,
                     experiment_bias=experiment_bias,
+                    inquiry_scheduler_bias=inquiry_scheduler_bias,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
                     predicted_effects=predicted_effects,
@@ -2390,6 +2435,7 @@ class SegmentAgent:
             narrative_uncertainty=self.latest_narrative_uncertainty,
             experiment_design=self.latest_narrative_experiment,
         )
+        self._refresh_inquiry_budget()
         verification_seed = self.verification_loop.refresh_targets(
             tick=self.cycle,
             ledger=self.prediction_ledger,
@@ -2397,6 +2443,7 @@ class SegmentAgent:
             subject_state=self.subject_state,
             narrative_uncertainty=self.latest_narrative_uncertainty,
             experiment_design=self.latest_narrative_experiment,
+            inquiry_state=self.inquiry_budget_scheduler.state,
             workspace_channels=tuple(
                 content.channel for content in self.last_workspace_state.broadcast_contents
             )
@@ -2424,6 +2471,12 @@ class SegmentAgent:
         }
         diagnostics.experiment_summary = str(experiment_payload["summary"])
         diagnostics.experiment_payload = experiment_payload
+        diagnostics.inquiry_scheduler_summary = str(
+            self.inquiry_budget_scheduler.state.explanation_payload()["summary"]
+        )
+        diagnostics.inquiry_scheduler_payload = (
+            self.inquiry_budget_scheduler.state.explanation_payload()
+        )
         diagnostics.reconciliation_payload = self.reconciliation_engine.explanation_payload()
         diagnostics.reconciliation_summary = str(diagnostics.reconciliation_payload["summary"])
         diagnostics.subject_state_summary = self.subject_state.summary_text()
@@ -2435,6 +2488,7 @@ class SegmentAgent:
         diagnostics.structured_explanation["reconciliation"] = diagnostics.reconciliation_payload
         diagnostics.structured_explanation["verification"] = diagnostics.verification_payload
         diagnostics.structured_explanation["experiment_design"] = diagnostics.experiment_payload
+        diagnostics.structured_explanation["inquiry_scheduler"] = diagnostics.inquiry_scheduler_payload
         diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
         diagnostics.structured_explanation["narrative_uncertainty"] = (
             self.latest_narrative_uncertainty.explanation_payload()
@@ -2842,6 +2896,7 @@ class SegmentAgent:
             previous_result=self.latest_narrative_experiment,
             verification_loop=self.verification_loop,
         )
+        self._refresh_inquiry_budget()
         if self.latest_narrative_experiment.plans:
             self.narrative_experiment_history.append(self.latest_narrative_experiment.to_dict())
             self.narrative_experiment_history = self.narrative_experiment_history[-64:]
@@ -3799,6 +3854,7 @@ class SegmentAgent:
             "narrative_uncertainty_history": list(self.narrative_uncertainty_history),
             "latest_narrative_experiment": self.latest_narrative_experiment.to_dict(),
             "narrative_experiment_history": list(self.narrative_experiment_history),
+            "inquiry_budget_scheduler": self.inquiry_budget_scheduler.to_dict(),
             "slow_variable_learner": self.slow_variable_learner.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
@@ -3947,6 +4003,11 @@ class SegmentAgent:
             for entry in payload.get("narrative_experiment_history", [])
             if isinstance(entry, dict)
         ]
+        agent.inquiry_budget_scheduler = InquiryBudgetScheduler.from_dict(
+            payload.get("inquiry_budget_scheduler")
+            if isinstance(payload.get("inquiry_budget_scheduler"), dict)
+            else None
+        )
         agent.slow_variable_learner = SlowVariableLearner.from_dict(
             payload.get("slow_variable_learner")
             if isinstance(payload.get("slow_variable_learner"), dict)

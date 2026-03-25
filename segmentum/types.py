@@ -386,6 +386,7 @@ class InterventionScore:
     commitment_violations: list[str] = field(default_factory=list)
     verification_bias: float = 0.0
     experiment_bias: float = 0.0
+    inquiry_scheduler_bias: float = 0.0
 
     def policy_components(self) -> dict[str, float]:
         return {
@@ -404,6 +405,7 @@ class InterventionScore:
             "goal_alignment": self.goal_alignment,
             "verification_bias": self.verification_bias,
             "experiment_bias": self.experiment_bias,
+            "inquiry_scheduler_bias": self.inquiry_scheduler_bias,
         }
 
 
@@ -464,3 +466,5 @@ class DecisionDiagnostics:
     subject_state_summary: str = ""
     subject_status_flags: dict[str, bool] = field(default_factory=dict)
     subject_priority_stack: list[dict[str, object]] = field(default_factory=list)
+    inquiry_scheduler_summary: str = ""
+    inquiry_scheduler_payload: dict[str, object] = field(default_factory=dict)

@@ -3,9 +3,9 @@
   "title": "Narrative Hypothesis And Experiment Design",
   "schema_version": "m234_audit_v1",
   "strict": true,
-  "status": "FAIL",
-  "recommendation": "BLOCK",
-  "generated_at": "2026-03-25T12:06:31+00:00",
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-03-25T13:23:42+00:00",
   "seed_set": [
     234,
     468
@@ -40,11 +40,11 @@
         "tests/test_m234_audit_preparation.py",
         "-q"
       ],
-      "stdout": "................                                                         [100%]\n16 passed in 1.10s",
+      "stdout": "................                                                         [100%]\n16 passed in 1.01s",
       "stderr": "",
       "execution_source": "subprocess",
-      "started_at": "2026-03-25T12:06:26+00:00",
-      "completed_at": "2026-03-25T12:06:28+00:00"
+      "started_at": "2026-03-25T13:23:37+00:00",
+      "completed_at": "2026-03-25T13:23:39+00:00"
     },
     "regressions": {
       "label": "m234-regression",
@@ -67,11 +67,11 @@
         "tests/test_runtime.py",
         "-q"
       ],
-      "stdout": ".......................                                                  [100%]\n23 passed in 2.12s",
+      "stdout": ".......................                                                  [100%]\n23 passed in 2.07s",
       "stderr": "",
       "execution_source": "subprocess",
-      "started_at": "2026-03-25T12:06:28+00:00",
-      "completed_at": "2026-03-25T12:06:31+00:00"
+      "started_at": "2026-03-25T13:23:39+00:00",
+      "completed_at": "2026-03-25T13:23:42+00:00"
     }
   },
   "gates": {
@@ -161,19 +161,19 @@
           "tests/test_runtime.py",
           "-q"
         ],
-        "stdout": ".......................                                                  [100%]\n23 passed in 2.12s",
+        "stdout": ".......................                                                  [100%]\n23 passed in 2.07s",
         "stderr": "",
         "execution_source": "subprocess",
-        "started_at": "2026-03-25T12:06:28+00:00",
-        "completed_at": "2026-03-25T12:06:31+00:00"
+        "started_at": "2026-03-25T13:23:39+00:00",
+        "completed_at": "2026-03-25T13:23:42+00:00"
       }
     },
     "artifact_freshness": {
-      "passed": false,
+      "passed": true,
       "details": {
         "strict": true,
-        "audit_started_at": "2026-03-25T12:06:26+00:00",
-        "generated_at": "2026-03-25T12:06:31+00:00",
+        "audit_started_at": "2026-03-25T13:23:37+00:00",
+        "generated_at": "2026-03-25T13:23:42+00:00",
         "artifact_records": {
           "specification": {
             "path": "E:\\workspace\\segments\\reports\\m234_milestone_spec.md",
@@ -197,31 +197,31 @@
             "path": "E:\\workspace\\segments\\artifacts\\m234_experiment_trace.jsonl",
             "exists": true,
             "size_bytes": 19994,
-            "modified_at": "2026-03-25T12:06:26+00:00"
+            "modified_at": "2026-03-25T13:23:37+00:00"
           },
           "ablation": {
             "path": "E:\\workspace\\segments\\artifacts\\m234_experiment_ablation.json",
             "exists": true,
             "size_bytes": 1849,
-            "modified_at": "2026-03-25T12:06:26+00:00"
+            "modified_at": "2026-03-25T13:23:37+00:00"
           },
           "stress": {
             "path": "E:\\workspace\\segments\\artifacts\\m234_experiment_stress.json",
             "exists": true,
             "size_bytes": 13690,
-            "modified_at": "2026-03-25T12:06:26+00:00"
+            "modified_at": "2026-03-25T13:23:37+00:00"
           },
           "report": {
             "path": "E:\\workspace\\segments\\reports\\m234_acceptance_report.json",
             "exists": true,
-            "size_bytes": 9234,
-            "modified_at": "2026-03-25T12:06:31+00:00"
+            "size_bytes": 7366,
+            "modified_at": "2026-03-25T13:23:42+00:00"
           },
           "summary": {
             "path": "E:\\workspace\\segments\\reports\\m234_acceptance_summary.md",
             "exists": true,
             "size_bytes": 350,
-            "modified_at": "2026-03-25T12:06:31+00:00"
+            "modified_at": "2026-03-25T13:23:42+00:00"
           }
         },
         "evidence_times_within_round": true,
@@ -229,93 +229,29 @@
         "milestone_execution_authentic": true,
         "regression_execution_authentic": true,
         "suite_times_within_round": true,
-        "baseline_frozen": false,
-        "strict_dirty_findings": [
-          {
-            "severity": "S1",
-            "title": "Strict audit baseline is not frozen",
-            "detail": "Strict M2.34 acceptance cannot rely on a dirty code or specification baseline. Freeze or commit non-artifact changes before claiming strict PASS.",
-            "paths": [
-              "segmentum/__init__.py",
-              "segmentum/agent.py",
-              "segmentum/prediction_ledger.py",
-              "segmentum/subject_state.py",
-              "segmentum/types.py",
-              "segmentum/verification.py",
-              "reports/m234_milestone_spec.md",
-              "reports/m234_parallel_probe_acceptance_rationale.md",
-              "reports/m234_strict_audit_preparation.md",
-              "segmentum/m234_audit.py",
-              "segmentum/narrative_experiment.py",
-              "tests/test_m234_acceptance.py",
-              "tests/test_m234_audit_preparation.py",
-              "tests/test_m234_experiment_design.py"
-            ]
-          }
-        ],
-        "current_round": false,
+        "baseline_frozen": true,
+        "strict_dirty_findings": [],
+        "current_round": true,
         "git": {
-          "head": "b1b126945611bcb81cd8497001514ead18f27d72",
+          "head": "b45156e3391afe7d01c4a2056634ebd786ebb585",
           "dirty": true,
           "dirty_paths": [
-            "M segmentum/__init__.py",
-            "M segmentum/agent.py",
-            "M segmentum/prediction_ledger.py",
-            "M segmentum/subject_state.py",
-            "M segmentum/types.py",
-            "M segmentum/verification.py",
+            "M reports/m234_acceptance_report.json",
             "?? .pytest_m234_acceptance.log",
             "?? .pytest_m234_design.log",
             "?? .pytest_m234_prep.log",
-            "?? .pytest_m234_reg.log",
-            "?? artifacts/m234_experiment_ablation.json",
-            "?? artifacts/m234_experiment_stress.json",
-            "?? artifacts/m234_experiment_trace.jsonl",
-            "?? reports/m234_acceptance_report.json",
-            "?? reports/m234_acceptance_summary.md",
-            "?? reports/m234_milestone_spec.md",
-            "?? reports/m234_parallel_probe_acceptance_rationale.md",
-            "?? reports/m234_strict_audit_preparation.md",
-            "?? segmentum/m234_audit.py",
-            "?? segmentum/narrative_experiment.py",
-            "?? tests/test_m234_acceptance.py",
-            "?? tests/test_m234_audit_preparation.py",
-            "?? tests/test_m234_experiment_design.py"
+            "?? .pytest_m234_reg.log"
           ]
         }
       }
     }
   },
-  "findings": [
-    {
-      "severity": "S1",
-      "title": "Strict audit baseline is not frozen",
-      "detail": "Strict M2.34 acceptance cannot rely on a dirty code or specification baseline. Freeze or commit non-artifact changes before claiming strict PASS.",
-      "paths": [
-        "segmentum/__init__.py",
-        "segmentum/agent.py",
-        "segmentum/prediction_ledger.py",
-        "segmentum/subject_state.py",
-        "segmentum/types.py",
-        "segmentum/verification.py",
-        "reports/m234_milestone_spec.md",
-        "reports/m234_parallel_probe_acceptance_rationale.md",
-        "reports/m234_strict_audit_preparation.md",
-        "segmentum/m234_audit.py",
-        "segmentum/narrative_experiment.py",
-        "tests/test_m234_acceptance.py",
-        "tests/test_m234_audit_preparation.py",
-        "tests/test_m234_experiment_design.py"
-      ]
-    }
-  ],
-  "residual_risks": [
-    "runtime evidence or freshness gate missing"
-  ],
+  "findings": [],
+  "residual_risks": [],
   "freshness": {
     "strict": true,
-    "audit_started_at": "2026-03-25T12:06:26+00:00",
-    "generated_at": "2026-03-25T12:06:31+00:00",
+    "audit_started_at": "2026-03-25T13:23:37+00:00",
+    "generated_at": "2026-03-25T13:23:42+00:00",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m234_milestone_spec.md",
@@ -339,31 +275,31 @@
         "path": "E:\\workspace\\segments\\artifacts\\m234_experiment_trace.jsonl",
         "exists": true,
         "size_bytes": 19994,
-        "modified_at": "2026-03-25T12:06:26+00:00"
+        "modified_at": "2026-03-25T13:23:37+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m234_experiment_ablation.json",
         "exists": true,
         "size_bytes": 1849,
-        "modified_at": "2026-03-25T12:06:26+00:00"
+        "modified_at": "2026-03-25T13:23:37+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m234_experiment_stress.json",
         "exists": true,
         "size_bytes": 13690,
-        "modified_at": "2026-03-25T12:06:26+00:00"
+        "modified_at": "2026-03-25T13:23:37+00:00"
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m234_acceptance_report.json",
         "exists": true,
-        "size_bytes": 9234,
-        "modified_at": "2026-03-25T12:06:31+00:00"
+        "size_bytes": 7366,
+        "modified_at": "2026-03-25T13:23:42+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m234_acceptance_summary.md",
         "exists": true,
         "size_bytes": 350,
-        "modified_at": "2026-03-25T12:06:31+00:00"
+        "modified_at": "2026-03-25T13:23:42+00:00"
       }
     },
     "evidence_times_within_round": true,
@@ -371,58 +307,18 @@
     "milestone_execution_authentic": true,
     "regression_execution_authentic": true,
     "suite_times_within_round": true,
-    "baseline_frozen": false,
-    "strict_dirty_findings": [
-      {
-        "severity": "S1",
-        "title": "Strict audit baseline is not frozen",
-        "detail": "Strict M2.34 acceptance cannot rely on a dirty code or specification baseline. Freeze or commit non-artifact changes before claiming strict PASS.",
-        "paths": [
-          "segmentum/__init__.py",
-          "segmentum/agent.py",
-          "segmentum/prediction_ledger.py",
-          "segmentum/subject_state.py",
-          "segmentum/types.py",
-          "segmentum/verification.py",
-          "reports/m234_milestone_spec.md",
-          "reports/m234_parallel_probe_acceptance_rationale.md",
-          "reports/m234_strict_audit_preparation.md",
-          "segmentum/m234_audit.py",
-          "segmentum/narrative_experiment.py",
-          "tests/test_m234_acceptance.py",
-          "tests/test_m234_audit_preparation.py",
-          "tests/test_m234_experiment_design.py"
-        ]
-      }
-    ],
-    "current_round": false,
+    "baseline_frozen": true,
+    "strict_dirty_findings": [],
+    "current_round": true,
     "git": {
-      "head": "b1b126945611bcb81cd8497001514ead18f27d72",
+      "head": "b45156e3391afe7d01c4a2056634ebd786ebb585",
       "dirty": true,
       "dirty_paths": [
-        "M segmentum/__init__.py",
-        "M segmentum/agent.py",
-        "M segmentum/prediction_ledger.py",
-        "M segmentum/subject_state.py",
-        "M segmentum/types.py",
-        "M segmentum/verification.py",
+        "M reports/m234_acceptance_report.json",
         "?? .pytest_m234_acceptance.log",
         "?? .pytest_m234_design.log",
         "?? .pytest_m234_prep.log",
-        "?? .pytest_m234_reg.log",
-        "?? artifacts/m234_experiment_ablation.json",
-        "?? artifacts/m234_experiment_stress.json",
-        "?? artifacts/m234_experiment_trace.jsonl",
-        "?? reports/m234_acceptance_report.json",
-        "?? reports/m234_acceptance_summary.md",
-        "?? reports/m234_milestone_spec.md",
-        "?? reports/m234_parallel_probe_acceptance_rationale.md",
-        "?? reports/m234_strict_audit_preparation.md",
-        "?? segmentum/m234_audit.py",
-        "?? segmentum/narrative_experiment.py",
-        "?? tests/test_m234_acceptance.py",
-        "?? tests/test_m234_audit_preparation.py",
-        "?? tests/test_m234_experiment_design.py"
+        "?? .pytest_m234_reg.log"
       ]
     }
   }

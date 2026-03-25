@@ -415,8 +415,27 @@ class VerificationLoop:
         subject_state=None,
         narrative_uncertainty=None,
         experiment_design=None,
+        inquiry_state=None,
         workspace_channels: tuple[str, ...] = (),
     ) -> VerificationLoopUpdate:
+        archived_due_to_scheduler: list[str] = []
+        if inquiry_state is not None and self.active_targets:
+            retained_targets: list[VerificationTarget] = []
+            for target in self.active_targets:
+                decision = inquiry_state.decision_for_prediction(target.prediction_id)
+                if decision is not None and decision.decision in {"defer", "suppress", "evict", "cooldown"}:
+                    archived = VerificationTarget(
+                        **{
+                            **target.__dict__,
+                            "status": VerificationTargetStatus.DEFERRED.value,
+                            "outcome": VerificationOutcome.DEFERRED.value,
+                        }
+                    )
+                    self.archived_targets.append(archived)
+                    archived_due_to_scheduler.append(target.target_id)
+                    continue
+                retained_targets.append(target)
+            self.active_targets = retained_targets
         expired_updates = self._expire_missing_targets(tick=tick, ledger=ledger)
         active_prediction_ids = {item.prediction_id for item in self.active_targets}
         created_targets: list[str] = []
@@ -424,6 +443,10 @@ class VerificationLoop:
         for prediction in ledger.active_predictions():
             if not prediction.prediction_id or prediction.prediction_id in active_prediction_ids:
                 continue
+            if inquiry_state is not None:
+                decision = inquiry_state.decision_for_prediction(prediction.prediction_id)
+                if decision is None or decision.decision not in {"promote", "keep_active", "escalate"}:
+                    continue
             score = self._target_score(
                 prediction=prediction,
                 tick=tick,
@@ -471,7 +494,7 @@ class VerificationLoop:
             discharged_discrepancies=tuple(expired_updates["discharged_discrepancies"]),
             escalated_discrepancies=tuple(expired_updates["escalated_discrepancies"]),
             expired_targets=tuple(expired_updates["expired_targets"]),
-            deferred_targets=tuple(expired_updates["deferred_targets"]),
+            deferred_targets=tuple([*expired_updates["deferred_targets"], *archived_due_to_scheduler]),
             summary=summary,
         )
 

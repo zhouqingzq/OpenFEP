@@ -682,6 +682,7 @@ class SegmentRuntime:
             "action_update": verification_action_update.to_dict(),
             "validation_update": verification_validation.to_dict(),
         }
+        details["inquiry_scheduler"] = self.agent.inquiry_budget_scheduler.state.explanation_payload()
         details["subject_state"] = self.subject_state.explanation_payload()
         details["narrative_uncertainty"] = self.agent.latest_narrative_uncertainty.explanation_payload()
         diagnostics.structured_explanation = details
@@ -691,12 +692,16 @@ class SegmentRuntime:
         diagnostics.reconciliation_payload = dict(details["reconciliation"])
         diagnostics.verification_summary = str(details["verification"]["summary"])
         diagnostics.verification_payload = dict(details["verification"])
+        diagnostics.inquiry_scheduler_summary = str(details["inquiry_scheduler"]["summary"])
+        diagnostics.inquiry_scheduler_payload = dict(details["inquiry_scheduler"])
         diagnostics.explanation = (
             str(details["prediction_ledger"]["summary"])
             + " "
             + str(details["reconciliation"]["summary"])
             + " "
             + str(details["verification"].get("verification_motive") or details["verification"]["summary"])
+            + " "
+            + str(details["inquiry_scheduler"]["summary"])
             + " "
             + str(details["subject_state"]["summary"])
             + " "
@@ -1573,6 +1578,7 @@ class SegmentRuntime:
                     "subject_bias": option.subject_bias,
                     "reconciliation_bias": option.reconciliation_bias,
                     "verification_bias": option.verification_bias,
+                    "inquiry_scheduler_bias": option.inquiry_scheduler_bias,
                     "goal_alignment": option.goal_alignment,
                     "value_score": option.value_score,
                     "dominant_component": option.dominant_component,
@@ -1603,6 +1609,7 @@ class SegmentRuntime:
                 "subject_bias": diagnostics.chosen.subject_bias,
                 "reconciliation_bias": diagnostics.chosen.reconciliation_bias,
                 "verification_bias": diagnostics.chosen.verification_bias,
+                "inquiry_scheduler_bias": diagnostics.chosen.inquiry_scheduler_bias,
                 "goal_alignment": diagnostics.chosen.goal_alignment,
                 "active_goal": diagnostics.active_goal,
                 "goal_context": diagnostics.goal_context,
@@ -1646,6 +1653,8 @@ class SegmentRuntime:
                 "ledger_payload": dict(diagnostics.ledger_payload),
                 "verification_summary": diagnostics.verification_summary,
                 "verification_payload": dict(diagnostics.verification_payload),
+                "inquiry_scheduler_summary": diagnostics.inquiry_scheduler_summary,
+                "inquiry_scheduler_payload": dict(diagnostics.inquiry_scheduler_payload),
                 "reconciliation_summary": diagnostics.reconciliation_summary,
                 "reconciliation_payload": dict(diagnostics.reconciliation_payload),
                 "subject_state_summary": diagnostics.subject_state_summary,
@@ -1699,6 +1708,7 @@ class SegmentRuntime:
         trace_record["prediction_ledger"] = self.agent.prediction_ledger.to_dict()
         trace_record["reconciliation"] = self.agent.reconciliation_engine.to_dict()
         trace_record["verification_loop"] = self.agent.verification_loop.to_dict()
+        trace_record["inquiry_scheduler"] = self.agent.inquiry_budget_scheduler.to_dict()
         trace_record["subject_state"] = self.subject_state.to_dict()
         trace_record["narrative_uncertainty"] = self.agent.latest_narrative_uncertainty.to_dict()
         trace_record["slow_learning"] = self.agent.slow_variable_learner.to_dict()
