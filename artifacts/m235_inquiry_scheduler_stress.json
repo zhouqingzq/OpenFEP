@@ -1,0 +1,327 @@
+{
+  "schema_version": "m235_audit_v1",
+  "milestone_id": "M2.35",
+  "stress_checks": {
+    "high_value_outranks_low_value": true,
+    "cooldown_low_yield_prediction": true,
+    "verification_slots_bounded": true,
+    "workspace_slots_bounded": true,
+    "snapshot_roundtrip_preserves_state": true,
+    "trace_contains_scheduler_payload": true,
+    "replay_same_seed_equivalent": true,
+    "replay_multi_seed_equivalent": true
+  },
+  "details": {
+    "determinism_replay_signatures": [
+      {
+        "seed": 235,
+        "active_candidate_ids": [
+          "inquiry:uncertainty:unk:danger",
+          "inquiry:plan:plan:high",
+          "inquiry:prediction:pred:high"
+        ],
+        "verification_assignments": [
+          {
+            "candidate_id": "inquiry:prediction:pred:high",
+            "prediction_id": "pred:high",
+            "slot_index": 0,
+            "decision": "promote",
+            "priority_score": 0.41808
+          }
+        ],
+        "workspace_allocations": [
+          {
+            "candidate_id": "inquiry:uncertainty:unk:danger",
+            "channel": "danger",
+            "weight": 0.564576
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:high",
+            "channel": "danger",
+            "weight": 0.49272
+          },
+          {
+            "candidate_id": "inquiry:prediction:pred:high",
+            "channel": "danger",
+            "weight": 0.430848
+          }
+        ],
+        "action_allocations": [
+          {
+            "candidate_id": "inquiry:plan:plan:high",
+            "action_name": "scan",
+            "budget": 0.48484,
+            "granted": true,
+            "priority_score": 0.5212
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:social",
+            "action_name": "seek_contact",
+            "budget": 0.29444,
+            "granted": false,
+            "priority_score": 0.2492
+          }
+        ],
+        "decisions": [
+          {
+            "candidate_id": "inquiry:uncertainty:unk:danger",
+            "source_subsystem": "narrative_uncertainty",
+            "decision": "promote",
+            "priority_score": 0.64096,
+            "precision_weight": 0.669683,
+            "reasons": [
+              "shared priority surface promoted this candidate"
+            ],
+            "suppression_reason": "",
+            "linked_prediction_id": "",
+            "linked_plan_id": "",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "",
+            "explanation": "shared priority surface promoted this candidate"
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:high",
+            "source_subsystem": "narrative_experiment",
+            "decision": "promote",
+            "priority_score": 0.5212,
+            "precision_weight": 0.559504,
+            "reasons": [
+              "shared priority surface promoted this candidate",
+              "action budget granted"
+            ],
+            "suppression_reason": "",
+            "linked_prediction_id": "",
+            "linked_plan_id": "plan:high",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "scan",
+            "explanation": "shared priority surface promoted this candidate"
+          },
+          {
+            "candidate_id": "inquiry:prediction:pred:high",
+            "source_subsystem": "prediction_ledger",
+            "decision": "promote",
+            "priority_score": 0.41808,
+            "precision_weight": 0.464634,
+            "reasons": [
+              "shared priority surface promoted this candidate"
+            ],
+            "suppression_reason": "",
+            "linked_prediction_id": "pred:high",
+            "linked_plan_id": "plan:high",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "",
+            "explanation": "shared priority surface promoted this candidate"
+          },
+          {
+            "candidate_id": "inquiry:prediction:pred:cooldown",
+            "source_subsystem": "prediction_ledger",
+            "decision": "cooldown",
+            "priority_score": 0.25696,
+            "precision_weight": 0.316403,
+            "reasons": [
+              "repeated inconclusive probing exhausted local budget"
+            ],
+            "suppression_reason": "saturated_low_yield",
+            "linked_prediction_id": "pred:cooldown",
+            "linked_plan_id": "plan:high",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "",
+            "explanation": "repeated inconclusive probing exhausted local budget"
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:social",
+            "source_subsystem": "narrative_experiment",
+            "decision": "defer",
+            "priority_score": 0.2492,
+            "precision_weight": 0.309264,
+            "reasons": [
+              "action budget is exhausted by stronger inquiry"
+            ],
+            "suppression_reason": "budget_exhaustion",
+            "linked_prediction_id": "",
+            "linked_plan_id": "plan:social",
+            "linked_unknown_id": "unk:low-value",
+            "action_name": "seek_contact",
+            "explanation": "action budget is exhausted by stronger inquiry"
+          },
+          {
+            "candidate_id": "inquiry:uncertainty:unk:low-value",
+            "source_subsystem": "narrative_uncertainty",
+            "decision": "defer",
+            "priority_score": 0.1057,
+            "precision_weight": 0.177244,
+            "reasons": [
+              "higher-value inquiries occupy the active budget window"
+            ],
+            "suppression_reason": "overshadowed_by_higher_priority",
+            "linked_prediction_id": "",
+            "linked_plan_id": "",
+            "linked_unknown_id": "unk:low-value",
+            "action_name": "",
+            "explanation": "higher-value inquiries occupy the active budget window"
+          }
+        ]
+      },
+      {
+        "seed": 470,
+        "active_candidate_ids": [
+          "inquiry:uncertainty:unk:danger",
+          "inquiry:plan:plan:high",
+          "inquiry:prediction:pred:high"
+        ],
+        "verification_assignments": [
+          {
+            "candidate_id": "inquiry:prediction:pred:high",
+            "prediction_id": "pred:high",
+            "slot_index": 0,
+            "decision": "promote",
+            "priority_score": 0.41808
+          }
+        ],
+        "workspace_allocations": [
+          {
+            "candidate_id": "inquiry:uncertainty:unk:danger",
+            "channel": "danger",
+            "weight": 0.564576
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:high",
+            "channel": "danger",
+            "weight": 0.49272
+          },
+          {
+            "candidate_id": "inquiry:prediction:pred:high",
+            "channel": "danger",
+            "weight": 0.430848
+          }
+        ],
+        "action_allocations": [
+          {
+            "candidate_id": "inquiry:plan:plan:high",
+            "action_name": "scan",
+            "budget": 0.48484,
+            "granted": true,
+            "priority_score": 0.5212
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:social",
+            "action_name": "seek_contact",
+            "budget": 0.29444,
+            "granted": false,
+            "priority_score": 0.2492
+          }
+        ],
+        "decisions": [
+          {
+            "candidate_id": "inquiry:uncertainty:unk:danger",
+            "source_subsystem": "narrative_uncertainty",
+            "decision": "promote",
+            "priority_score": 0.64096,
+            "precision_weight": 0.669683,
+            "reasons": [
+              "shared priority surface promoted this candidate"
+            ],
+            "suppression_reason": "",
+            "linked_prediction_id": "",
+            "linked_plan_id": "",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "",
+            "explanation": "shared priority surface promoted this candidate"
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:high",
+            "source_subsystem": "narrative_experiment",
+            "decision": "promote",
+            "priority_score": 0.5212,
+            "precision_weight": 0.559504,
+            "reasons": [
+              "shared priority surface promoted this candidate",
+              "action budget granted"
+            ],
+            "suppression_reason": "",
+            "linked_prediction_id": "",
+            "linked_plan_id": "plan:high",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "scan",
+            "explanation": "shared priority surface promoted this candidate"
+          },
+          {
+            "candidate_id": "inquiry:prediction:pred:high",
+            "source_subsystem": "prediction_ledger",
+            "decision": "promote",
+            "priority_score": 0.41808,
+            "precision_weight": 0.464634,
+            "reasons": [
+              "shared priority surface promoted this candidate"
+            ],
+            "suppression_reason": "",
+            "linked_prediction_id": "pred:high",
+            "linked_plan_id": "plan:high",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "",
+            "explanation": "shared priority surface promoted this candidate"
+          },
+          {
+            "candidate_id": "inquiry:prediction:pred:cooldown",
+            "source_subsystem": "prediction_ledger",
+            "decision": "cooldown",
+            "priority_score": 0.25696,
+            "precision_weight": 0.316403,
+            "reasons": [
+              "repeated inconclusive probing exhausted local budget"
+            ],
+            "suppression_reason": "saturated_low_yield",
+            "linked_prediction_id": "pred:cooldown",
+            "linked_plan_id": "plan:high",
+            "linked_unknown_id": "unk:danger",
+            "action_name": "",
+            "explanation": "repeated inconclusive probing exhausted local budget"
+          },
+          {
+            "candidate_id": "inquiry:plan:plan:social",
+            "source_subsystem": "narrative_experiment",
+            "decision": "defer",
+            "priority_score": 0.2492,
+            "precision_weight": 0.309264,
+            "reasons": [
+              "action budget is exhausted by stronger inquiry"
+            ],
+            "suppression_reason": "budget_exhaustion",
+            "linked_prediction_id": "",
+            "linked_plan_id": "plan:social",
+            "linked_unknown_id": "unk:low-value",
+            "action_name": "seek_contact",
+            "explanation": "action budget is exhausted by stronger inquiry"
+          },
+          {
+            "candidate_id": "inquiry:uncertainty:unk:low-value",
+            "source_subsystem": "narrative_uncertainty",
+            "decision": "defer",
+            "priority_score": 0.1057,
+            "precision_weight": 0.177244,
+            "reasons": [
+              "higher-value inquiries occupy the active budget window"
+            ],
+            "suppression_reason": "overshadowed_by_higher_priority",
+            "linked_prediction_id": "",
+            "linked_plan_id": "",
+            "linked_unknown_id": "unk:low-value",
+            "action_name": "",
+            "explanation": "higher-value inquiries occupy the active budget window"
+          }
+        ]
+      }
+    ],
+    "scheduled_plan_statuses": {
+      "plan:high": "active_experiment",
+      "plan:social": "deferred_for_budget"
+    },
+    "runtime_trace_scheduler_summary": "Inquiry scheduler keep actived inquiry:uncertainty:unk:danger because persistence bonus kept this inquiry stable.",
+    "restored_active_candidate_ids": [
+      "inquiry:uncertainty:unk:danger",
+      "inquiry:tension:danger_probe_mismatch",
+      "inquiry:tension:narrative_uncertainty:_threat_persistence",
+      "inquiry:discrepancy:disc:danger_probe:danger"
+    ]
+  }
+}

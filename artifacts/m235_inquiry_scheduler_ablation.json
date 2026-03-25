@@ -1,0 +1,32 @@
+{
+  "schema_version": "m235_audit_v1",
+  "milestone_id": "M2.35",
+  "with_scheduler": {
+    "active_candidate_count": 3,
+    "verification_created_target_count": 1,
+    "workspace_focus": {
+      "danger": 0.564576
+    },
+    "scan_bias": 0.176362,
+    "scheduled_plan_statuses": {
+      "plan:high": "active_experiment",
+      "plan:social": "deferred_for_budget"
+    }
+  },
+  "without_scheduler": {
+    "active_candidate_count": 0,
+    "verification_created_target_count": 0,
+    "workspace_focus": {},
+    "scan_bias": 0.0,
+    "scheduled_plan_statuses": {
+      "plan:high": "queued_experiment",
+      "plan:social": "queued_experiment"
+    }
+  },
+  "degradation_checks": {
+    "verification_loses_scheduler_targeting": true,
+    "workspace_loses_focus": true,
+    "action_scoring_loses_scheduler_bias": true,
+    "experiment_plans_lose_scheduler_status_changes": true
+  }
+}

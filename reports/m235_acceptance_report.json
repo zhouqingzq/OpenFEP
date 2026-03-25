@@ -1,0 +1,294 @@
+{
+  "milestone_id": "M2.35",
+  "title": "Inquiry Budget Scheduler",
+  "schema_version": "m235_audit_v1",
+  "strict": true,
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-03-25T15:13:46+00:00",
+  "seed_set": [
+    235,
+    470
+  ],
+  "artifacts": {
+    "specification": "E:\\workspace\\segments\\reports\\m235_milestone_spec.md",
+    "preparation": "E:\\workspace\\segments\\reports\\m235_strict_audit_preparation.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_stress.json",
+    "report": "E:\\workspace\\segments\\reports\\m235_acceptance_report.json",
+    "summary": "E:\\workspace\\segments\\reports\\m235_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": {
+      "label": "m235-milestone",
+      "paths": [
+        "tests/test_m235_inquiry_scheduler.py",
+        "tests/test_m235_acceptance.py",
+        "tests/test_m235_audit_preparation.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m235_inquiry_scheduler.py",
+        "tests/test_m235_acceptance.py",
+        "tests/test_m235_audit_preparation.py",
+        "-q"
+      ],
+      "stdout": "............                                                             [100%]\n12 passed in 1.11s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-25T15:13:41+00:00",
+      "completed_at": "2026-03-25T15:13:43+00:00"
+    },
+    "regressions": {
+      "label": "m235-regression",
+      "paths": [
+        "tests/test_m234_experiment_design.py",
+        "tests/test_m228_prediction_ledger.py",
+        "tests/test_m229_verification_loop.py",
+        "tests/test_runtime.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m234_experiment_design.py",
+        "tests/test_m228_prediction_ledger.py",
+        "tests/test_m229_verification_loop.py",
+        "tests/test_runtime.py",
+        "-q"
+      ],
+      "stdout": "...............................                                          [100%]\n31 passed in 2.10s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-25T15:13:43+00:00",
+      "completed_at": "2026-03-25T15:13:46+00:00"
+    }
+  },
+  "gates": {
+    "cross_surface_ranking": {
+      "passed": true,
+      "evidence": [
+        "plan:high outranks plan:social",
+        "shared scheduler priority surface"
+      ]
+    },
+    "verification_budgeting": {
+      "passed": true,
+      "evidence": [
+        "verification slot limit",
+        "cooldown",
+        "active prediction retained"
+      ]
+    },
+    "workspace_allocation": {
+      "passed": true,
+      "evidence": [
+        "workspace_focus[danger]",
+        "workspace_allocations"
+      ]
+    },
+    "action_biasing": {
+      "passed": true,
+      "evidence": [
+        "scan bias exceeds forage bias",
+        "scheduler action bias positive"
+      ]
+    },
+    "downstream_causality": {
+      "passed": true,
+      "evidence": [
+        "verification_loses_scheduler_targeting",
+        "workspace_loses_focus",
+        "action_scoring_loses_scheduler_bias",
+        "experiment_plans_lose_scheduler_status_changes"
+      ]
+    },
+    "snapshot_roundtrip": {
+      "passed": true,
+      "evidence": [
+        "snapshot_roundtrip_preserves_state",
+        "trace_contains_scheduler_payload"
+      ]
+    },
+    "regression": {
+      "passed": true,
+      "execution": {
+        "label": "m235-regression",
+        "paths": [
+          "tests/test_m234_experiment_design.py",
+          "tests/test_m228_prediction_ledger.py",
+          "tests/test_m229_verification_loop.py",
+          "tests/test_runtime.py"
+        ],
+        "executed": true,
+        "passed": true,
+        "returncode": 0,
+        "command": [
+          "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_m234_experiment_design.py",
+          "tests/test_m228_prediction_ledger.py",
+          "tests/test_m229_verification_loop.py",
+          "tests/test_runtime.py",
+          "-q"
+        ],
+        "stdout": "...............................                                          [100%]\n31 passed in 2.10s",
+        "stderr": "",
+        "execution_source": "subprocess",
+        "started_at": "2026-03-25T15:13:43+00:00",
+        "completed_at": "2026-03-25T15:13:46+00:00"
+      }
+    },
+    "artifact_freshness": {
+      "passed": true,
+      "details": {
+        "strict": true,
+        "audit_started_at": "2026-03-25T15:13:41+00:00",
+        "generated_at": "2026-03-25T15:13:46+00:00",
+        "artifact_records": {
+          "specification": {
+            "path": "E:\\workspace\\segments\\reports\\m235_milestone_spec.md",
+            "exists": true,
+            "size_bytes": 3203,
+            "modified_at": "2026-03-25T15:08:24+00:00"
+          },
+          "preparation": {
+            "path": "E:\\workspace\\segments\\reports\\m235_strict_audit_preparation.md",
+            "exists": true,
+            "size_bytes": 1432,
+            "modified_at": "2026-03-25T15:08:24+00:00"
+          },
+          "canonical_trace": {
+            "path": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_trace.jsonl",
+            "exists": true,
+            "size_bytes": 3368,
+            "modified_at": "2026-03-25T15:13:41+00:00"
+          },
+          "ablation": {
+            "path": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_ablation.json",
+            "exists": true,
+            "size_bytes": 909,
+            "modified_at": "2026-03-25T15:13:41+00:00"
+          },
+          "stress": {
+            "path": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_stress.json",
+            "exists": true,
+            "size_bytes": 12241,
+            "modified_at": "2026-03-25T15:13:41+00:00"
+          },
+          "report": {
+            "path": "E:\\workspace\\segments\\reports\\m235_acceptance_report.json",
+            "exists": true,
+            "size_bytes": 7099,
+            "modified_at": "2026-03-25T15:13:46+00:00"
+          },
+          "summary": {
+            "path": "E:\\workspace\\segments\\reports\\m235_acceptance_summary.md",
+            "exists": true,
+            "size_bytes": 315,
+            "modified_at": "2026-03-25T15:13:46+00:00"
+          }
+        },
+        "evidence_times_within_round": true,
+        "report_times_within_round": true,
+        "milestone_execution_authentic": true,
+        "regression_execution_authentic": true,
+        "suite_times_within_round": true,
+        "baseline_frozen": true,
+        "strict_dirty_findings": [],
+        "current_round": true,
+        "git": {
+          "head": "ec70cc5a9c373220b84935deb0590ef2492f225a",
+          "dirty": true,
+          "dirty_paths": [
+            "?? artifacts/m235_inquiry_scheduler_ablation.json",
+            "?? artifacts/m235_inquiry_scheduler_stress.json",
+            "?? artifacts/m235_inquiry_scheduler_trace.jsonl",
+            "?? reports/m235_acceptance_report.json",
+            "?? reports/m235_acceptance_summary.md"
+          ]
+        }
+      }
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "strict": true,
+    "audit_started_at": "2026-03-25T15:13:41+00:00",
+    "generated_at": "2026-03-25T15:13:46+00:00",
+    "artifact_records": {
+      "specification": {
+        "path": "E:\\workspace\\segments\\reports\\m235_milestone_spec.md",
+        "exists": true,
+        "size_bytes": 3203,
+        "modified_at": "2026-03-25T15:08:24+00:00"
+      },
+      "preparation": {
+        "path": "E:\\workspace\\segments\\reports\\m235_strict_audit_preparation.md",
+        "exists": true,
+        "size_bytes": 1432,
+        "modified_at": "2026-03-25T15:08:24+00:00"
+      },
+      "canonical_trace": {
+        "path": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_trace.jsonl",
+        "exists": true,
+        "size_bytes": 3368,
+        "modified_at": "2026-03-25T15:13:41+00:00"
+      },
+      "ablation": {
+        "path": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_ablation.json",
+        "exists": true,
+        "size_bytes": 909,
+        "modified_at": "2026-03-25T15:13:41+00:00"
+      },
+      "stress": {
+        "path": "E:\\workspace\\segments\\artifacts\\m235_inquiry_scheduler_stress.json",
+        "exists": true,
+        "size_bytes": 12241,
+        "modified_at": "2026-03-25T15:13:41+00:00"
+      },
+      "report": {
+        "path": "E:\\workspace\\segments\\reports\\m235_acceptance_report.json",
+        "exists": true,
+        "size_bytes": 7099,
+        "modified_at": "2026-03-25T15:13:46+00:00"
+      },
+      "summary": {
+        "path": "E:\\workspace\\segments\\reports\\m235_acceptance_summary.md",
+        "exists": true,
+        "size_bytes": 315,
+        "modified_at": "2026-03-25T15:13:46+00:00"
+      }
+    },
+    "evidence_times_within_round": true,
+    "report_times_within_round": true,
+    "milestone_execution_authentic": true,
+    "regression_execution_authentic": true,
+    "suite_times_within_round": true,
+    "baseline_frozen": true,
+    "strict_dirty_findings": [],
+    "current_round": true,
+    "git": {
+      "head": "ec70cc5a9c373220b84935deb0590ef2492f225a",
+      "dirty": true,
+      "dirty_paths": [
+        "?? artifacts/m235_inquiry_scheduler_ablation.json",
+        "?? artifacts/m235_inquiry_scheduler_stress.json",
+        "?? artifacts/m235_inquiry_scheduler_trace.jsonl",
+        "?? reports/m235_acceptance_report.json",
+        "?? reports/m235_acceptance_summary.md"
+      ]
+    }
+  }
+}
