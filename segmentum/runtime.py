@@ -42,6 +42,7 @@ STATE_VERSION = "0.6"
 SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.5", "0.4", "0.3", "0.2", "0.1"}
 RESTART_MEMORY_CONTINUITY_WINDOW = 24
 RESTART_REBIND_MIN_CYCLE = 128
+MATURE_CONTINUITY_MIN_CYCLE = 400
 
 
 def format_state(values: dict[str, float]) -> str:
@@ -250,7 +251,7 @@ class SegmentRuntime:
         should_enable_restart_rebind = False
         restart_anchors = payload.get("restart_anchors")
         if isinstance(restart_anchors, dict):
-            should_enable_restart_rebind = bool(enable_restart_rebind or agent.cycle >= RESTART_REBIND_MIN_CYCLE)
+            should_enable_restart_rebind = bool(enable_restart_rebind)
             runtime.restart_policy_anchors = dict(restart_anchors)
             runtime.restart_policy_anchors["policy_rebind_enabled"] = should_enable_restart_rebind
             if should_enable_restart_rebind:
@@ -557,6 +558,7 @@ class SegmentRuntime:
         self._enforce_restart_commitment_continuity()
         self._apply_homeostatic_policy_landscape(diagnostics, maintenance_agenda)
         self._apply_continuity_rebind_prior(diagnostics)
+        self._apply_mature_continuity_anchor(diagnostics)
         if maintenance_agenda.interrupt_action:
             self._apply_maintenance_interrupt(diagnostics, maintenance_agenda)
         choice = ActionSchema.from_dict(diagnostics.chosen.action_descriptor)
@@ -1053,7 +1055,7 @@ class SegmentRuntime:
             window += 4
         commitment_snapshot = self.restart_policy_anchors.get("commitment_snapshot")
         if isinstance(commitment_snapshot, list) and commitment_snapshot:
-            window = max(window, 24)
+            window = max(window, 12)
         self.continuity_rebind_ticks_remaining = window
         self.continuity_rebind_total_ticks = window
 
@@ -1303,7 +1305,7 @@ class SegmentRuntime:
         preferred_distribution = self.restart_policy_anchors.get("preferred_policy_distribution")
         if isinstance(preferred_distribution, dict):
             for option in diagnostics.ranked_options:
-                option.policy_score += float(preferred_distribution.get(option.choice, 0.0)) * 1.55 * decay
+                option.policy_score += float(preferred_distribution.get(option.choice, 0.0)) * 1.35 * decay
         dominant_strategy = str(self.restart_policy_anchors.get("dominant_strategy", ""))
         if dominant_strategy and diagnostics.ranked_options:
             chosen_component = diagnostics.ranked_options[0].dominant_component
@@ -1344,25 +1346,25 @@ class SegmentRuntime:
             preferred_rebind_actions.add(maintenance_recommended)
         for option in diagnostics.ranked_options:
             if option.choice in learned_avoidances:
-                option.policy_score -= 0.22 * decay
+                option.policy_score -= 0.18 * decay
             if option.choice in learned_preferences:
-                option.policy_score += 0.22 * decay
+                option.policy_score += 0.18 * decay
             if option.choice in commitment_priors:
-                option.policy_score += 0.46 * decay
-            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.72 * decay
+                option.policy_score += 0.40 * decay
+            option.policy_score += recent_action_weights.get(option.choice, 0.0) * 0.60 * decay
             if option.choice in recent_priority_actions:
-                option.policy_score += 0.52 * decay
+                option.policy_score += 0.42 * decay
             elif recent_action_weights:
-                option.policy_score -= 0.28 * decay
+                option.policy_score -= 0.24 * decay
             if preferred_rebind_actions:
                 if option.choice in preferred_rebind_actions:
-                    option.policy_score += 0.74 * decay
+                    option.policy_score += 0.62 * decay
                 else:
-                    option.policy_score -= 0.48 * decay
+                    option.policy_score -= 0.42 * decay
             if maintenance_recommended and option.choice == maintenance_recommended:
-                option.policy_score += 0.40 * decay
+                option.policy_score += 0.34 * decay
             if option.choice in maintenance_suppressed:
-                option.policy_score -= 0.30 * decay
+                option.policy_score -= 0.26 * decay
         self._resort_diagnostics(diagnostics)
         diagnostics.explanation = (
             f"{diagnostics.explanation} Continuity rebind applied with decay={decay:.2f}."
@@ -1378,6 +1380,40 @@ class SegmentRuntime:
             "maintenance_suppressed_actions": sorted(maintenance_suppressed),
         }
         diagnostics.structured_explanation = details
+
+    def _apply_mature_continuity_anchor(self, diagnostics: DecisionDiagnostics) -> None:
+        if self.agent.cycle < MATURE_CONTINUITY_MIN_CYCLE:
+            return
+        recent_actions = list(self.agent.action_history[-96:])
+        if len(recent_actions) < 48:
+            return
+        counts: dict[str, int] = {}
+        for action in recent_actions:
+            counts[action] = counts.get(action, 0) + 1
+        dominant_action, dominant_count = sorted(
+            counts.items(),
+            key=lambda item: (-item[1], item[0]),
+        )[0]
+        dominant_share = dominant_count / max(1, len(recent_actions))
+        if dominant_share < 0.30:
+            return
+        stable_actions = {"rest", "hide", "exploit_shelter", "thermoregulate"}
+        for option in diagnostics.ranked_options:
+            if option.choice == dominant_action:
+                option.policy_score += 0.42
+            elif option.choice in stable_actions and dominant_action in stable_actions:
+                option.policy_score += 0.14
+            elif option.choice not in {dominant_action, "unstable_workspace_note"}:
+                option.policy_score -= 0.22
+        self._resort_diagnostics(diagnostics)
+        details = dict(diagnostics.structured_explanation)
+        details["mature_continuity_anchor"] = {
+            "cycle": self.agent.cycle,
+            "dominant_action": dominant_action,
+            "dominant_share": round(dominant_share, 6),
+        }
+        diagnostics.structured_explanation = details
+
 
     @classmethod
     def load_world(cls, world_path: str | Path, *, seed: int | None = None) -> NarrativeWorld:
