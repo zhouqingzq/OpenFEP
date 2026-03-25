@@ -56,6 +56,7 @@ class VerificationPlan:
     status: str = VerificationTargetStatus.PENDING.value
     linked_action: str = ""
     attention_channels: tuple[str, ...] = ()
+    linked_experiment_plan_id: str = ""
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -70,6 +71,7 @@ class VerificationPlan:
             "status": self.status,
             "linked_action": self.linked_action,
             "attention_channels": list(self.attention_channels),
+            "linked_experiment_plan_id": self.linked_experiment_plan_id,
         }
 
     @classmethod
@@ -99,6 +101,7 @@ class VerificationPlan:
             status=str(payload.get("status", VerificationTargetStatus.PENDING.value)),
             linked_action=str(payload.get("linked_action", "")),
             attention_channels=tuple(str(item) for item in payload.get("attention_channels", [])),
+            linked_experiment_plan_id=str(payload.get("linked_experiment_plan_id", "")),
         )
 
 
@@ -256,6 +259,7 @@ class VerificationTarget:
     target_channels: tuple[str, ...] = ()
     prediction_type: str = ""
     verification_bias: float = 0.0
+    linked_experiment_plan_id: str = ""
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -278,6 +282,7 @@ class VerificationTarget:
             "target_channels": list(self.target_channels),
             "prediction_type": self.prediction_type,
             "verification_bias": round(self.verification_bias, 6),
+            "linked_experiment_plan_id": self.linked_experiment_plan_id,
         }
 
     @classmethod
@@ -315,6 +320,7 @@ class VerificationTarget:
             target_channels=tuple(str(item) for item in payload.get("target_channels", [])),
             prediction_type=str(payload.get("prediction_type", "")),
             verification_bias=float(payload.get("verification_bias", 0.0)),
+            linked_experiment_plan_id=str(payload.get("linked_experiment_plan_id", "")),
         )
 
 
@@ -408,6 +414,7 @@ class VerificationLoop:
         diagnostics=None,
         subject_state=None,
         narrative_uncertainty=None,
+        experiment_design=None,
         workspace_channels: tuple[str, ...] = (),
     ) -> VerificationLoopUpdate:
         expired_updates = self._expire_missing_targets(tick=tick, ledger=ledger)
@@ -423,6 +430,7 @@ class VerificationLoop:
                 diagnostics=diagnostics,
                 subject_state=subject_state,
                 narrative_uncertainty=narrative_uncertainty,
+                experiment_design=experiment_design,
                 workspace_channels=workspace_channels,
             )
             if score < 0.28:
@@ -436,6 +444,7 @@ class VerificationLoop:
                 tick=tick,
                 diagnostics=diagnostics,
                 subject_state=subject_state,
+                experiment_design=experiment_design,
             )
             target = VerificationTarget(
                 **{
@@ -718,6 +727,8 @@ class VerificationLoop:
                 f"I am currently trying to verify {prioritized.prediction_id} "
                 f"because {prioritized.selected_reason}."
             )
+            if prioritized.linked_experiment_plan_id:
+                summary += " This target came from a narrative experiment plan."
             if chosen_action and chosen_action == prioritized.plan.linked_action:
                 verification_motive = (
                     f"This action is partly verification-seeking: {chosen_action} should gather "
@@ -771,6 +782,7 @@ class VerificationLoop:
         diagnostics=None,
         subject_state=None,
         narrative_uncertainty=None,
+        experiment_design=None,
         workspace_channels: tuple[str, ...],
     ) -> float:
         del narrative_uncertainty
@@ -787,6 +799,16 @@ class VerificationLoop:
             score += 0.08
         if prediction.source_module == "narrative_uncertainty":
             score += 0.08 + min(0.10, prediction.decision_relevance * 0.18)
+        if prediction.source_module == "narrative_experiment":
+            score += 0.14 + min(0.14, prediction.decision_relevance * 0.24)
+        if experiment_design is not None and prediction.linked_experiment_plan_id:
+            active_plan_ids = {
+                item.plan_id
+                for item in getattr(experiment_design, "plans", ())
+                if getattr(item, "status", "") in {"active_experiment", "queued_experiment"}
+            }
+            if prediction.linked_experiment_plan_id in active_plan_ids:
+                score += 0.18
         if "social" in prediction.target_channels or "social" in prediction.prediction_type:
             score += 0.06
         if "danger" in prediction.target_channels or "maintenance" in prediction.target_channels:
@@ -842,6 +864,7 @@ class VerificationLoop:
         tick: int,
         diagnostics=None,
         subject_state=None,
+        experiment_design=None,
     ) -> VerificationTarget:
         del diagnostics, subject_state
         reason_parts: list[str] = []
@@ -853,6 +876,8 @@ class VerificationLoop:
             reason_parts.append("it is identity-relevant")
         if prediction.source_module == "narrative_uncertainty":
             reason_parts.append("it would resolve a narrative ambiguity")
+        if prediction.source_module == "narrative_experiment":
+            reason_parts.append("it is linked to an active experiment plan")
         if "social" in prediction.target_channels or "social" in prediction.prediction_type:
             reason_parts.append("it is socially consequential")
         if prediction.recurrence_count:
@@ -886,6 +911,7 @@ class VerificationLoop:
             status=VerificationTargetStatus.ACTIVE.value,
             linked_action=linked_action,
             attention_channels=attention_channels,
+            linked_experiment_plan_id=prediction.linked_experiment_plan_id,
         )
         return VerificationTarget(
             target_id=f"verify:{prediction.prediction_id}",
@@ -899,9 +925,12 @@ class VerificationLoop:
             linked_identity_anchors=tuple(str(item) for item in prediction.linked_identity_anchors),
             target_channels=tuple(str(item) for item in prediction.target_channels),
             prediction_type=prediction.prediction_type,
+            linked_experiment_plan_id=prediction.linked_experiment_plan_id,
         )
 
     def _linked_action(self, prediction: PredictionHypothesis) -> str:
+        if prediction.source_module == "narrative_experiment" and prediction.maintenance_context:
+            return prediction.maintenance_context
         channels = set(prediction.target_channels)
         if "danger" in channels:
             return "scan"

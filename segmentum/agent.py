@@ -31,6 +31,7 @@ from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_c
 from .preferences import Goal, GoalStack
 from .narrative_compiler import NarrativeCompiler
 from .narrative_uncertainty import UncertaintyDecompositionResult
+from .narrative_experiment import ExperimentDesignResult, NarrativeExperimentDesigner
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
@@ -270,6 +271,7 @@ class PolicyEvaluator:
         goal_alignment: float,
         reconciliation_bias: float = 0.0,
         verification_bias: float = 0.0,
+        experiment_bias: float = 0.0,
     ) -> str:
         components = [
             ("expected_free_energy", abs(expected_free_energy)),
@@ -286,6 +288,7 @@ class PolicyEvaluator:
             ("goal_alignment", abs(goal_alignment)),
             ("reconciliation_bias", abs(reconciliation_bias)),
             ("verification_bias", abs(verification_bias)),
+            ("experiment_bias", abs(experiment_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
         return components[0][0]
@@ -373,6 +376,11 @@ class PolicyEvaluator:
             reason = (
                 f"verification_bias ({chosen.verification_bias:.3f}) dominated, "
                 "so the policy prioritized gathering evidence for an active prediction."
+            )
+        elif chosen.dominant_component == "experiment_bias":
+            reason = (
+                f"experiment_bias ({chosen.experiment_bias:.3f}) dominated, "
+                "so narrative hypothesis testing became the main policy pressure."
             )
         elif chosen.dominant_component == "reconciliation_bias":
             reason = (
@@ -472,6 +480,7 @@ class PolicyEvaluator:
             f"subject_bias={chosen.subject_bias:.3f}",
             f"reconciliation_bias={chosen.reconciliation_bias:.3f}",
             f"verification_bias={chosen.verification_bias:.3f}",
+            f"experiment_bias={chosen.experiment_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
         workspace_channels = ", ".join(diagnostics.workspace_broadcast_channels)
@@ -510,6 +519,9 @@ class PolicyEvaluator:
         ledger_sentence = ""
         if diagnostics.ledger_summary:
             ledger_sentence = diagnostics.ledger_summary + " "
+        experiment_sentence = ""
+        if diagnostics.experiment_summary:
+            experiment_sentence = "Experiment design: " + diagnostics.experiment_summary + " "
         explanation_text = (
             f"I chose {chosen.choice}. "
             f"This action predicted outcome '{chosen.predicted_outcome}'. "
@@ -522,6 +534,7 @@ class PolicyEvaluator:
             f"{commitment_sentence}"
             f"{social_sentence}"
             f"{ledger_sentence}"
+            f"{experiment_sentence}"
             f"{subject_sentence}"
             f"{consistency_statement}{bias_sentence} "
             f"This aligns with my resource_conservatism="
@@ -674,6 +687,9 @@ class SegmentAgent:
         self.subject_state = SubjectState()
         self.latest_narrative_uncertainty = UncertaintyDecompositionResult()
         self.narrative_uncertainty_history: list[dict[str, object]] = []
+        self.narrative_experiment_designer = NarrativeExperimentDesigner()
+        self.latest_narrative_experiment = ExperimentDesignResult()
+        self.narrative_experiment_history: list[dict[str, object]] = []
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -1310,6 +1326,7 @@ class SegmentAgent:
         details["reconciliation"] = self.reconciliation_engine.explanation_payload()
         details["subject_state"] = self.subject_state.explanation_payload()
         details["narrative_uncertainty"] = self.latest_narrative_uncertainty.explanation_payload()
+        details["narrative_experiment"] = self.latest_narrative_experiment.explanation_payload()
         details["slow_learning"] = self.slow_variable_learner.explanation_payload()
         return details
 
@@ -1956,6 +1973,18 @@ class SegmentAgent:
             tick=self.cycle,
         )
         active_goal = Goal[str(goal_context["active_goal"])]
+        self.latest_narrative_experiment = self.narrative_experiment_designer.design(
+            tick=self.cycle,
+            uncertainty=self.latest_narrative_uncertainty,
+            action_registry=self.action_registry,
+            active_goal=str(active_goal),
+            subject_state=self.subject_state,
+            previous_result=self.latest_narrative_experiment,
+            verification_loop=self.verification_loop,
+        )
+        if self.latest_narrative_experiment.plans:
+            self.narrative_experiment_history.append(self.latest_narrative_experiment.to_dict())
+            self.narrative_experiment_history = self.narrative_experiment_history[-64:]
         priors = self.strategic_layer.priors(
             self.energy,
             self.stress,
@@ -1981,6 +2010,7 @@ class SegmentAgent:
             ledger=self.prediction_ledger,
             subject_state=self.subject_state,
             narrative_uncertainty=self.latest_narrative_uncertainty,
+            experiment_design=self.latest_narrative_experiment,
         )
         self.last_workspace_state = self.global_workspace.broadcast(
             tick=self.cycle,
@@ -1989,6 +2019,7 @@ class SegmentAgent:
             errors=errors,
             attention_trace=self.last_attention_trace,
             ledger_focus={
+                **self.latest_narrative_experiment.workspace_focus(),
                 **self.prediction_ledger.workspace_focus(),
                 **self.reconciliation_engine.workspace_focus(),
                 **self.verification_loop.workspace_focus(),
@@ -2049,6 +2080,7 @@ class SegmentAgent:
             ledger_bias = self.prediction_ledger.prediction_action_bias(action)
             reconciliation_bias = self.reconciliation_engine.action_bias(action)
             verification_bias = self.verification_loop.action_bias(action)
+            experiment_bias = self.latest_narrative_experiment.action_bias(action)
             subject_bias = subject_action_bias(self.subject_state, action)
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
@@ -2073,6 +2105,7 @@ class SegmentAgent:
                 + subject_bias
                 + goal_alignment
                 + verification_bias
+                + experiment_bias
                 - regression_penalty
             )
             dominant_component = self.policy_evaluator.dominant_component(
@@ -2090,6 +2123,7 @@ class SegmentAgent:
                 goal_alignment=goal_alignment,
                 reconciliation_bias=reconciliation_bias,
                 verification_bias=verification_bias,
+                experiment_bias=experiment_bias,
             )
             ranked_options.append(
                 InterventionScore(
@@ -2118,6 +2152,7 @@ class SegmentAgent:
                     goal_alignment=goal_alignment,
                     reconciliation_bias=reconciliation_bias,
                     verification_bias=verification_bias,
+                    experiment_bias=experiment_bias,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
                     predicted_effects=predicted_effects,
@@ -2339,6 +2374,8 @@ class SegmentAgent:
             social_snapshot=dict(chosen_social["snapshot"]),
             ledger_summary="",
             ledger_payload=ledger_verification.to_dict(),
+            experiment_summary="",
+            experiment_payload={},
         )
         self.subject_state = derive_subject_state(
             self,
@@ -2351,6 +2388,7 @@ class SegmentAgent:
             prediction=prediction,
             subject_state=self.subject_state,
             narrative_uncertainty=self.latest_narrative_uncertainty,
+            experiment_design=self.latest_narrative_experiment,
         )
         verification_seed = self.verification_loop.refresh_targets(
             tick=self.cycle,
@@ -2358,11 +2396,15 @@ class SegmentAgent:
             diagnostics=diagnostics,
             subject_state=self.subject_state,
             narrative_uncertainty=self.latest_narrative_uncertainty,
+            experiment_design=self.latest_narrative_experiment,
             workspace_channels=tuple(
                 content.channel for content in self.last_workspace_state.broadcast_contents
             )
             if self.last_workspace_state is not None
             else (),
+        )
+        experiment_payload = self.latest_narrative_experiment.explanation_payload(
+            chosen_action=diagnostics.chosen.choice
         )
         ledger_payload = self.prediction_ledger.explanation_payload()
         verification_payload = self.verification_loop.explanation_payload(
@@ -2380,6 +2422,8 @@ class SegmentAgent:
             "seed_update": verification_seed.to_dict(),
             **verification_payload,
         }
+        diagnostics.experiment_summary = str(experiment_payload["summary"])
+        diagnostics.experiment_payload = experiment_payload
         diagnostics.reconciliation_payload = self.reconciliation_engine.explanation_payload()
         diagnostics.reconciliation_summary = str(diagnostics.reconciliation_payload["summary"])
         diagnostics.subject_state_summary = self.subject_state.summary_text()
@@ -2390,6 +2434,7 @@ class SegmentAgent:
         diagnostics.structured_explanation = self.policy_evaluator.explain_structured(diagnostics)
         diagnostics.structured_explanation["reconciliation"] = diagnostics.reconciliation_payload
         diagnostics.structured_explanation["verification"] = diagnostics.verification_payload
+        diagnostics.structured_explanation["experiment_design"] = diagnostics.experiment_payload
         diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
         diagnostics.structured_explanation["narrative_uncertainty"] = (
             self.latest_narrative_uncertainty.explanation_payload()
@@ -2443,6 +2488,8 @@ class SegmentAgent:
                     + self.subject_state.summary_text()
                     + " Verification: "
                     + self.verification_loop.explanation_payload()["summary"]
+                    + " Experiment design: "
+                    + self.latest_narrative_experiment.summary
                     + " Narrative uncertainty: "
                     + self.latest_narrative_uncertainty.summary
                     + " Slow learning: "
@@ -2454,6 +2501,7 @@ class SegmentAgent:
                 "leakage_free": True,
                 "subject_state": self.subject_state.explanation_payload(),
                 "verification": self.verification_loop.explanation_payload(),
+                "narrative_experiment": self.latest_narrative_experiment.explanation_payload(),
                 "narrative_uncertainty": self.latest_narrative_uncertainty.explanation_payload(),
                 "slow_learning": self.slow_variable_learner.explanation_payload(),
             }
@@ -2468,6 +2516,8 @@ class SegmentAgent:
             text += " Carry-over still accessible: " + ", ".join(carry_over_channels) + "."
         text += " Subject state: " + self.subject_state.summary_text()
         text += " Verification: " + self.verification_loop.explanation_payload()["summary"]
+        if self.latest_narrative_experiment.summary:
+            text += " Experiment design: " + self.latest_narrative_experiment.summary
         if self.latest_narrative_uncertainty.summary:
             text += " Narrative uncertainty: " + self.latest_narrative_uncertainty.summary
         if self.slow_variable_learner.state.last_summary:
@@ -2480,6 +2530,7 @@ class SegmentAgent:
             "leakage_free": bool(report_payload["leakage_checked"]),
             "subject_state": self.subject_state.explanation_payload(),
             "verification": self.verification_loop.explanation_payload(),
+            "narrative_experiment": self.latest_narrative_experiment.explanation_payload(),
             "narrative_uncertainty": self.latest_narrative_uncertainty.explanation_payload(),
             "slow_learning": self.slow_variable_learner.explanation_payload(),
         }
@@ -2782,6 +2833,18 @@ class SegmentAgent:
         if uncertainty.episode_id:
             self.narrative_uncertainty_history.append(uncertainty.to_dict())
             self.narrative_uncertainty_history = self.narrative_uncertainty_history[-64:]
+        self.latest_narrative_experiment = self.narrative_experiment_designer.design(
+            tick=embodied_episode.timestamp,
+            uncertainty=uncertainty,
+            action_registry=self.action_registry,
+            active_goal=getattr(self.goal_stack.active_goal, "name", ""),
+            subject_state=self.subject_state,
+            previous_result=self.latest_narrative_experiment,
+            verification_loop=self.verification_loop,
+        )
+        if self.latest_narrative_experiment.plans:
+            self.narrative_experiment_history.append(self.latest_narrative_experiment.to_dict())
+            self.narrative_experiment_history = self.narrative_experiment_history[-64:]
         social_update = self._update_social_memory_from_embodied_episode(embodied_episode)
         observation = dict(embodied_episode.observation)
         prediction = dict(self.world_model.beliefs)
@@ -2842,6 +2905,7 @@ class SegmentAgent:
             )
             target_payload["narrative_provenance"] = dict(embodied_episode.provenance)
             target_payload["uncertainty_decomposition"] = uncertainty.to_dict()
+            target_payload["experiment_design"] = self.latest_narrative_experiment.to_dict()
             if social_update.get("updated"):
                 target_payload["counterpart_id"] = str(social_update.get("counterpart_id", ""))
                 target_payload["social_snapshot"] = dict(social_update.get("snapshot", {}))
@@ -2865,6 +2929,7 @@ class SegmentAgent:
             "compiler_confidence": embodied_episode.compiler_confidence,
             "narrative_tags": list(embodied_episode.narrative_tags),
             "narrative_uncertainty": uncertainty.to_dict(),
+            "narrative_experiment": self.latest_narrative_experiment.to_dict(),
             "social_update": social_update,
         }
         self.narrative_trace.append(trace_payload)
@@ -3732,6 +3797,8 @@ class SegmentAgent:
             "subject_state": self.subject_state.to_dict(),
             "latest_narrative_uncertainty": self.latest_narrative_uncertainty.to_dict(),
             "narrative_uncertainty_history": list(self.narrative_uncertainty_history),
+            "latest_narrative_experiment": self.latest_narrative_experiment.to_dict(),
+            "narrative_experiment_history": list(self.narrative_experiment_history),
             "slow_variable_learner": self.slow_variable_learner.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
@@ -3868,6 +3935,16 @@ class SegmentAgent:
         agent.narrative_uncertainty_history = [
             dict(entry)
             for entry in payload.get("narrative_uncertainty_history", [])
+            if isinstance(entry, dict)
+        ]
+        agent.latest_narrative_experiment = ExperimentDesignResult.from_dict(
+            payload.get("latest_narrative_experiment")
+            if isinstance(payload.get("latest_narrative_experiment"), dict)
+            else None
+        )
+        agent.narrative_experiment_history = [
+            dict(entry)
+            for entry in payload.get("narrative_experiment_history", [])
             if isinstance(entry, dict)
         ]
         agent.slow_variable_learner = SlowVariableLearner.from_dict(

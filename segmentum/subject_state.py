@@ -161,6 +161,39 @@ class NarrativeUncertaintyFocus:
 
 
 @dataclass(frozen=True)
+class InquiryFocus:
+    plan_id: str
+    action: str
+    status: str
+    target_unknown_id: str
+    salience: float
+    summary: str
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "plan_id": self.plan_id,
+            "action": self.action,
+            "status": self.status,
+            "target_unknown_id": self.target_unknown_id,
+            "salience": round(self.salience, 6),
+            "summary": self.summary,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "InquiryFocus":
+        if not payload:
+            return cls(plan_id="", action="", status="", target_unknown_id="", salience=0.0, summary="")
+        return cls(
+            plan_id=str(payload.get("plan_id", "")),
+            action=str(payload.get("action", "")),
+            status=str(payload.get("status", "")),
+            target_unknown_id=str(payload.get("target_unknown_id", "")),
+            salience=float(payload.get("salience", 0.0)),
+            summary=str(payload.get("summary", "")),
+        )
+
+
+@dataclass(frozen=True)
 class SubjectState:
     tick: int = 0
     core_identity_summary: str = ""
@@ -180,6 +213,8 @@ class SubjectState:
     continuity_anchors: tuple[str, ...] = ()
     unresolved_tensions: tuple[ActiveTension, ...] = ()
     narrative_uncertainties: tuple[NarrativeUncertaintyFocus, ...] = ()
+    active_inquiries: tuple[InquiryFocus, ...] = ()
+    deferred_inquiries: tuple[InquiryFocus, ...] = ()
     ambiguity_profile: dict[str, float] = field(default_factory=dict)
     subject_priority_stack: tuple[SubjectPriority, ...] = ()
     slow_biases: dict[str, float] = field(default_factory=dict)
@@ -208,6 +243,8 @@ class SubjectState:
             "continuity_anchors": list(self.continuity_anchors),
             "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions],
             "narrative_uncertainties": [item.to_dict() for item in self.narrative_uncertainties],
+            "active_inquiries": [item.to_dict() for item in self.active_inquiries],
+            "deferred_inquiries": [item.to_dict() for item in self.deferred_inquiries],
             "ambiguity_profile": {
                 str(key): float(value) for key, value in self.ambiguity_profile.items()
             },
@@ -263,6 +300,16 @@ class SubjectState:
                 for item in payload.get("narrative_uncertainties", [])
                 if isinstance(item, Mapping)
             ),
+            active_inquiries=tuple(
+                InquiryFocus.from_dict(item)
+                for item in payload.get("active_inquiries", [])
+                if isinstance(item, Mapping)
+            ),
+            deferred_inquiries=tuple(
+                InquiryFocus.from_dict(item)
+                for item in payload.get("deferred_inquiries", [])
+                if isinstance(item, Mapping)
+            ),
             ambiguity_profile={
                 str(key): float(value)
                 for key, value in dict(payload.get("ambiguity_profile", {})).items()
@@ -293,6 +340,7 @@ class SubjectState:
         flags = [name.replace("_", "-") for name, active in self.status_flags.items() if active]
         tensions = [tension.label for tension in self.unresolved_tensions[:2] if tension.label]
         uncertainties = [item.label for item in self.narrative_uncertainties[:2] if item.label]
+        inquiries = [item.action for item in self.active_inquiries[:2] if item.action]
         parts = [f"My current subject state is {self.current_phase or 'forming'}-dominant."]
         if self.dominant_goal:
             parts.append(f"Primary goal: {self.dominant_goal}.")
@@ -304,6 +352,8 @@ class SubjectState:
             parts.append("Unresolved tensions: " + ", ".join(tensions) + ".")
         if uncertainties:
             parts.append("Narrative uncertainty: " + ", ".join(uncertainties) + ".")
+        if inquiries:
+            parts.append("Active inquiry: " + ", ".join(inquiries) + ".")
         if self.same_subject_basis:
             parts.append(self.same_subject_basis)
         return " ".join(parts)
@@ -323,6 +373,8 @@ class SubjectState:
             "narrative_uncertainties": [
                 item.to_dict() for item in self.narrative_uncertainties[:4]
             ],
+            "active_inquiries": [item.to_dict() for item in self.active_inquiries[:4]],
+            "deferred_inquiries": [item.to_dict() for item in self.deferred_inquiries[:4]],
             "ambiguity_profile": {
                 str(key): float(value) for key, value in self.ambiguity_profile.items()
             },
@@ -377,6 +429,34 @@ def _top_commitments(agent: "SegmentAgent") -> tuple[list[str], list[str], list[
     ]
     commitment_ids = [commitment.commitment_id for commitment in active[:4] if commitment.commitment_id]
     return summaries, target_actions, commitment_ids
+
+
+def _inquiry_focus(agent: "SegmentAgent") -> tuple[tuple[InquiryFocus, ...], tuple[InquiryFocus, ...]]:
+    experiment = getattr(agent, "latest_narrative_experiment", None)
+    if experiment is None:
+        return (), ()
+    active: list[InquiryFocus] = []
+    deferred: list[InquiryFocus] = []
+    for plan in getattr(experiment, "plans", ()):
+        focus = InquiryFocus(
+            plan_id=str(getattr(plan, "plan_id", "")),
+            action=str(getattr(plan, "selected_action", "")),
+            status=str(getattr(plan, "status", "")),
+            target_unknown_id=str(getattr(plan, "target_unknown_id", "")),
+            salience=float(getattr(plan, "informative_value", 0.0)),
+            summary=str(getattr(plan, "selected_reason", "")),
+        )
+        if focus.status == "active_experiment":
+            active.append(focus)
+        elif (
+            focus.status.startswith("deferred")
+            or focus.status.startswith("rejected")
+            or focus.status == "blocked_by_governance"
+        ):
+            deferred.append(focus)
+    active.sort(key=lambda item: (-item.salience, item.plan_id))
+    deferred.sort(key=lambda item: (-item.salience, item.plan_id))
+    return tuple(active[:4]), tuple(deferred[:4])
 
 
 def _dominant_needs(agent: "SegmentAgent", maintenance_agenda: MaintenanceAgenda | None) -> list[DominantNeed]:
@@ -578,6 +658,7 @@ def _priority_stack(
     needs: list[DominantNeed],
     tensions: list[ActiveTension],
     commitment_targets: list[str],
+    active_inquiries: tuple[InquiryFocus, ...],
     status_flags: Mapping[str, bool],
 ) -> list[SubjectPriority]:
     priorities: list[SubjectPriority] = []
@@ -614,6 +695,18 @@ def _priority_stack(
                 preferred_actions=tuple(dict.fromkeys(commitment_targets))[:4],
                 avoid_actions=(),
                 evidence=("active commitments",),
+            )
+        )
+    if active_inquiries:
+        top_inquiry = active_inquiries[0]
+        priorities.append(
+            SubjectPriority(
+                label=f"inquiry:{top_inquiry.target_unknown_id}",
+                weight=min(1.0, 0.44 + top_inquiry.salience * 0.50),
+                priority_type="inquiry",
+                preferred_actions=(top_inquiry.action,) if top_inquiry.action else (),
+                avoid_actions=(),
+                evidence=(top_inquiry.summary,),
             )
         )
     for tension in tensions:
@@ -682,6 +775,7 @@ def derive_subject_state(
     commitment_summaries, commitment_targets, commitment_ids = _top_commitments(agent)
     bindings = _social_bindings(agent)
     narrative_uncertainties = _narrative_uncertainty_focus(agent)
+    active_inquiries, deferred_inquiries = _inquiry_focus(agent)
     active_social_focus = list(
         diagnostics.social_focus if diagnostics is not None else [item.binding_id for item in bindings[:2]]
     )
@@ -752,11 +846,20 @@ def derive_subject_state(
             or float(slow_biases.get("trust_stance", 0.5)) <= 0.34
         ),
         "narrative_ambiguity_active": bool(narrative_uncertainties),
+        "active_inquiry": bool(active_inquiries),
+        "inquiry_deferred": bool(deferred_inquiries),
         "continuity_fragile": continuity_fragile,
         "long_horizon_conflict": unresolved_reconciliation > 0,
     }
     tensions = _tensions(agent, diagnostics, maintenance_agenda, continuity_score)
-    priorities = _priority_stack(active_goal, dominant_needs, tensions, commitment_targets, status_flags)
+    priorities = _priority_stack(
+        active_goal,
+        dominant_needs,
+        tensions,
+        commitment_targets,
+        active_inquiries,
+        status_flags,
+    )
     protected_targets = tuple(
         item.label for item in priorities[:3] if item.priority_type in {"goal", "need", "commitment"}
     )
@@ -798,6 +901,8 @@ def derive_subject_state(
         continuity_anchors=tuple(continuity_anchors),
         unresolved_tensions=tuple(tensions),
         narrative_uncertainties=tuple(narrative_uncertainties),
+        active_inquiries=active_inquiries,
+        deferred_inquiries=deferred_inquiries,
         ambiguity_profile=(
             ambiguity_profile.to_dict() if ambiguity_profile is not None else {}
         ),
@@ -846,6 +951,12 @@ def subject_action_bias(subject_state: SubjectState, action: str) -> float:
             bias += 0.04
         elif action == "forage":
             bias -= 0.03
+    if subject_state.status_flags.get("active_inquiry", False):
+        if any(item.action == action for item in subject_state.active_inquiries[:2]):
+            bias += 0.10
+    if subject_state.status_flags.get("inquiry_deferred", False):
+        if any(item.action == action for item in subject_state.deferred_inquiries[:2]):
+            bias -= 0.06
     caution_bias = float(subject_state.slow_biases.get("caution_bias", 0.5))
     threat_sensitivity = float(subject_state.slow_biases.get("threat_sensitivity", 0.5))
     trust_stance = float(subject_state.slow_biases.get("trust_stance", 0.5))

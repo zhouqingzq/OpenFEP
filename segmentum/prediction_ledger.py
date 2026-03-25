@@ -54,6 +54,7 @@ class PredictionHypothesis:
     linked_identity_anchors: tuple[str, ...] = ()
     linked_unknown_ids: tuple[str, ...] = ()
     linked_hypothesis_ids: tuple[str, ...] = ()
+    linked_experiment_plan_id: str = ""
     linked_goal: str = ""
     maintenance_context: str = ""
     decision_relevance: float = 0.0
@@ -78,6 +79,7 @@ class PredictionHypothesis:
             "linked_identity_anchors": list(self.linked_identity_anchors),
             "linked_unknown_ids": list(self.linked_unknown_ids),
             "linked_hypothesis_ids": list(self.linked_hypothesis_ids),
+            "linked_experiment_plan_id": self.linked_experiment_plan_id,
             "linked_goal": self.linked_goal,
             "maintenance_context": self.maintenance_context,
             "decision_relevance": round(self.decision_relevance, 6),
@@ -124,6 +126,7 @@ class PredictionHypothesis:
             linked_hypothesis_ids=tuple(
                 str(item) for item in payload.get("linked_hypothesis_ids", [])
             ),
+            linked_experiment_plan_id=str(payload.get("linked_experiment_plan_id", "")),
             linked_goal=str(payload.get("linked_goal", "")),
             maintenance_context=str(payload.get("maintenance_context", "")),
             decision_relevance=float(payload.get("decision_relevance", 0.0)),
@@ -382,6 +385,11 @@ class PredictionLedger:
                     bias += 0.04 * max(prediction.confidence, prediction.decision_relevance)
                 elif action == "forage":
                     bias -= 0.03 * max(prediction.confidence, prediction.decision_relevance)
+            if prediction.source_module == "narrative_experiment":
+                if prediction.linked_experiment_plan_id and action == prediction.maintenance_context:
+                    bias += 0.06 * max(prediction.confidence, prediction.decision_relevance)
+                elif action in {"forage"}:
+                    bias -= 0.03 * prediction.confidence
         return round(max(-0.45, min(0.45, bias)), 6)
 
     def workspace_focus(self) -> dict[str, float]:
@@ -396,6 +404,9 @@ class PredictionLedger:
                     focus.get(channel, 0.0),
                     round(prediction.confidence * 0.45, 6),
                 )
+            if prediction.source_module == "narrative_experiment" and prediction.linked_experiment_plan_id:
+                for channel in prediction.target_channels:
+                    focus[channel] = max(focus.get(channel, 0.0), round(prediction.confidence * 0.62, 6))
         return focus
 
     def memory_threshold_delta(self) -> float:
@@ -460,6 +471,11 @@ class PredictionLedger:
                 summary = (
                     f"I am carrying forward narrative uncertainty about {top_pred['prediction_type']}, "
                     "because competing explanations still imply different outcomes."
+                )
+            elif top_pred.get("source_module") == "narrative_experiment":
+                summary = (
+                    f"I am carrying forward an experiment-linked prediction for {top_pred['prediction_type']}, "
+                    "because it is part of the current discrimination plan."
                 )
             else:
                 summary = (
@@ -580,6 +596,7 @@ class PredictionLedger:
         prediction: Mapping[str, float],
         subject_state,
         narrative_uncertainty=None,
+        experiment_design=None,
     ) -> PredictionLedgerUpdate:
         created: list[str] = []
         priorities = sorted(
@@ -713,6 +730,45 @@ class PredictionLedger:
                 )
             )
             created.append(prediction_id)
+        experiment_predictions = (
+            getattr(experiment_design, "predictions", ()) if experiment_design is not None else ()
+        )
+        experiment_plans = getattr(experiment_design, "plans", ()) if experiment_design is not None else ()
+        active_plan_ids = {
+            str(plan.plan_id)
+            for plan in experiment_plans
+            if str(getattr(plan, "status", "")) in {"active_experiment", "queued_experiment"}
+        }
+        for plan in experiment_plans[:4]:
+            if str(plan.plan_id) not in active_plan_ids:
+                continue
+            linked_predictions = [
+                item for item in experiment_predictions if item.prediction_id in getattr(plan, "prediction_ids", ())
+            ]
+            for exp_prediction in linked_predictions[:3]:
+                prediction_id = f"pred:experiment:{exp_prediction.prediction_id}"
+                self._upsert_prediction(
+                    PredictionHypothesis(
+                        prediction_id=prediction_id,
+                        created_tick=tick,
+                        last_updated_tick=tick,
+                        source_module="narrative_experiment",
+                        prediction_type="experiment_discrimination",
+                        target_channels=tuple(exp_prediction.evidence_channels),
+                        expected_state=dict(exp_prediction.expected_state),
+                        confidence=float(exp_prediction.confidence),
+                        expected_horizon=max(1, int(exp_prediction.expected_horizon)),
+                        supporting_evidence=tuple(exp_prediction.support_signals[:2]),
+                        linked_identity_anchors=tuple(subject_state.continuity_anchors[:2]),
+                        linked_unknown_ids=(exp_prediction.parent_unknown_id,),
+                        linked_hypothesis_ids=(exp_prediction.parent_hypothesis_id,),
+                        linked_experiment_plan_id=str(plan.plan_id),
+                        linked_goal=diagnostics.active_goal,
+                        maintenance_context=str(plan.selected_action),
+                        decision_relevance=float(getattr(plan, "informative_value", 0.0)),
+                    )
+                )
+                created.append(prediction_id)
         self._trim()
         self.last_tick = tick
         return PredictionLedgerUpdate(

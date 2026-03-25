@@ -1,0 +1,52 @@
+{
+  "schema_version": "m234_audit_v1",
+  "milestone_id": "M2.34",
+  "full_mechanism": {
+    "experiment_prediction_count": 3,
+    "linked_verification_target_count": 3,
+    "active_inquiry_count": 2,
+    "scan_experiment_bias": 0.204054
+  },
+  "without_experiment_design": {
+    "experiment_prediction_count": 0,
+    "linked_verification_target_count": 0,
+    "active_inquiry_count": 0,
+    "scan_experiment_bias": 0.0,
+    "ledger_seed": {
+      "verified_predictions": [],
+      "falsified_predictions": [],
+      "created_predictions": [
+        "pred:env:danger",
+        "pred:env:novelty",
+        "pred:action:scan",
+        "pred:narrative:m234-audit-threat:unknown:threat_persistence"
+      ],
+      "escalated_discrepancies": [],
+      "discharged_discrepancies": [],
+      "active_prediction_count": 4,
+      "active_discrepancy_count": 0
+    },
+    "verification_seed": {
+      "created_targets": [
+        "verify:pred:narrative:m234-audit-threat:unknown:threat_persistence",
+        "verify:pred:action:scan",
+        "verify:pred:env:danger"
+      ],
+      "prioritized_target_id": "verify:pred:narrative:m234-audit-threat:unknown:threat_persistence",
+      "evidence_ids": [],
+      "outcomes": [],
+      "prediction_updates": [],
+      "discharged_discrepancies": [],
+      "escalated_discrepancies": [],
+      "expired_targets": [],
+      "deferred_targets": [],
+      "summary": "I prioritized verifying pred:narrative:m234-audit-threat:unknown:threat_persistence because it is survival-relevant, it would resolve a narrative ambiguity."
+    }
+  },
+  "degradation_checks": {
+    "ledger_loses_experiment_predictions": true,
+    "verification_loses_experiment_targets": true,
+    "subject_state_loses_active_inquiries": true,
+    "action_scoring_loses_experiment_bias": true
+  }
+}

@@ -1,0 +1,307 @@
+{
+  "schema_version": "m234_audit_v1",
+  "milestone_id": "M2.34",
+  "stress_checks": {
+    "experiment_design_roundtrip": true,
+    "subject_state_roundtrip": true,
+    "bounded_active_plans": true,
+    "queued_or_deferred_exists": true,
+    "noise_does_not_activate_experiment": true,
+    "snapshot_roundtrip_preserves_summary": true,
+    "snapshot_roundtrip_preserves_plans": true,
+    "replay_same_seed_equivalent": true,
+    "replay_multi_seed_equivalent": true
+  },
+  "details": {
+    "stable_plan_statuses": [
+      "active_experiment",
+      "queued_experiment",
+      "queued_experiment"
+    ],
+    "governed_candidate_actions": [
+      "scan",
+      "rest"
+    ],
+    "restored_subject_state": {
+      "tick": 0,
+      "core_identity_summary": "I am an adaptive subject maintaining continuity under uncertainty.",
+      "current_phase": "forming",
+      "current_self_narrative_phase": "forming",
+      "active_commitments": [],
+      "dominant_preferences": [
+        "strategy:expected_free_energy"
+      ],
+      "dominant_goal": "CONTROL",
+      "dominant_needs": [],
+      "dominant_workspace_contents": [],
+      "active_social_focus": [],
+      "socially_salient_bindings": [],
+      "identity_tension_level": 0.0,
+      "self_inconsistency_level": 0.0,
+      "maintenance_pressure": 0.0,
+      "continuity_score": 1.0,
+      "continuity_anchors": [],
+      "unresolved_tensions": [
+        {
+          "label": "narrative uncertainty: threat persistence for shelter-edge",
+          "tension_type": "uncertainty",
+          "intensity": 0.507983,
+          "repair_target": "verify latent cause",
+          "evidence": [
+            "There is a stable threat source that will continue shaping future danger.",
+            "The danger was a local accident rather than a persistent source."
+          ]
+        }
+      ],
+      "narrative_uncertainties": [
+        {
+          "unknown_id": "m234-audit-threat:unknown:threat_persistence",
+          "label": "threat persistence for shelter-edge",
+          "unknown_type": "threat_persistence",
+          "relevance": 0.43731,
+          "linked_entities": [
+            "shelter-edge"
+          ],
+          "hypotheses": [
+            "There is a stable threat source that will continue shaping future danger.",
+            "The danger was a local accident rather than a persistent source.",
+            "Environmental interference or misleading conditions created the danger appearance."
+          ]
+        }
+      ],
+      "active_inquiries": [
+        {
+          "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:scan",
+          "action": "scan",
+          "status": "active_experiment",
+          "target_unknown_id": "m234-audit-threat:unknown:threat_persistence",
+          "salience": 0.695,
+          "summary": "I selected scan because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.70 at risk 0.26 and cost 0.25."
+        },
+        {
+          "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:exploit_shelter",
+          "action": "exploit_shelter",
+          "status": "active_experiment",
+          "target_unknown_id": "m234-audit-threat:unknown:threat_persistence",
+          "salience": 0.535,
+          "summary": "I selected exploit_shelter because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.53 at risk 0.08 and cost 0.29."
+        }
+      ],
+      "deferred_inquiries": [],
+      "ambiguity_profile": {
+        "total_unknown_count": 2.0,
+        "decision_relevant_unknown_count": 1.0,
+        "competing_hypothesis_count": 5.0,
+        "latent_cause_count": 4.0,
+        "surface_cue_count": 1.0,
+        "interpretive_competition": 0.833333,
+        "latent_cause_uncertainty_burden": 0.8,
+        "social_ambiguity_burden": 0.0,
+        "trust_ambiguity_burden": 0.0,
+        "environment_ambiguity_burden": 1.0,
+        "retained_uncertainty_burden": 0.218655
+      },
+      "subject_priority_stack": [
+        {
+          "label": "inquiry:m234-audit-threat:unknown:threat_persistence",
+          "weight": 0.7875,
+          "priority_type": "inquiry",
+          "preferred_actions": [
+            "scan"
+          ],
+          "avoid_actions": [],
+          "evidence": [
+            "I selected scan because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.70 at risk 0.26 and cost 0.25."
+          ]
+        },
+        {
+          "label": "goal:control",
+          "weight": 0.7,
+          "priority_type": "goal",
+          "preferred_actions": [
+            "scan",
+            "hide"
+          ],
+          "avoid_actions": [],
+          "evidence": [
+            "CONTROL"
+          ]
+        },
+        {
+          "label": "narrative uncertainty: threat persistence for shelter-edge",
+          "weight": 0.507983,
+          "priority_type": "uncertainty",
+          "preferred_actions": [
+            "scan",
+            "hide"
+          ],
+          "avoid_actions": [
+            "forage"
+          ],
+          "evidence": [
+            "There is a stable threat source that will continue shaping future danger.",
+            "The danger was a local accident rather than a persistent source."
+          ]
+        }
+      ],
+      "slow_biases": {
+        "caution_bias": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "survival_weight": 0.72,
+        "social_weight": 0.5,
+        "exploration_weight": 0.46,
+        "maintenance_weight": 0.62,
+        "hierarchy_stability": 0.68,
+        "commitment_stability": 0.7,
+        "identity_rigidity": 0.58,
+        "plasticity": 0.42,
+        "continuity_resilience": 0.66
+      },
+      "status_flags": {
+        "threatened": false,
+        "repairing": false,
+        "overloaded": false,
+        "socially_destabilized": false,
+        "narrative_ambiguity_active": true,
+        "active_inquiry": true,
+        "inquiry_deferred": false,
+        "continuity_fragile": false,
+        "long_horizon_conflict": false
+      },
+      "protected_targets": [
+        "goal:control"
+      ],
+      "repair_targets": [
+        "verify latent cause"
+      ],
+      "same_subject_basis": "Current narrative phase: forming. 1 retained narrative uncertainty item(s) still shape policy."
+    },
+    "determinism_replay_signatures": [
+      {
+        "seed": 234,
+        "chosen_action": "hide",
+        "active_goal": "SURVIVAL",
+        "experiment_summary": "The active inquiry is scan, targeting m234-audit-threat:unknown:threat_persistence, because it offers the best bounded discrimination among competing narrative hypotheses.",
+        "plan_statuses": [
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:scan",
+            "action": "scan",
+            "status": "active_experiment",
+            "score": 0.440536
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:exploit_shelter",
+            "action": "exploit_shelter",
+            "status": "active_experiment",
+            "score": 0.370867
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:hide",
+            "action": "hide",
+            "status": "queued_experiment",
+            "score": 0.368979
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:rest",
+            "action": "rest",
+            "status": "queued_experiment",
+            "score": 0.273844
+          }
+        ],
+        "prediction_ids": [
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:accident",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:environment",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:persistent"
+        ],
+        "verification_targets": [
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:accident",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:environment",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:persistent"
+        ],
+        "active_inquiries": [
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:scan",
+            "action": "scan",
+            "status": "active_experiment",
+            "target_unknown_id": "m234-audit-threat:unknown:threat_persistence",
+            "salience": 0.695,
+            "summary": "I selected scan because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.70 at risk 0.26 and cost 0.25."
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:exploit_shelter",
+            "action": "exploit_shelter",
+            "status": "active_experiment",
+            "target_unknown_id": "m234-audit-threat:unknown:threat_persistence",
+            "salience": 0.535,
+            "summary": "I selected exploit_shelter because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.53 at risk 0.08 and cost 0.29."
+          }
+        ],
+        "scan_experiment_bias": 0.204054
+      },
+      {
+        "seed": 468,
+        "chosen_action": "hide",
+        "active_goal": "SURVIVAL",
+        "experiment_summary": "The active inquiry is scan, targeting m234-audit-threat:unknown:threat_persistence, because it offers the best bounded discrimination among competing narrative hypotheses.",
+        "plan_statuses": [
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:scan",
+            "action": "scan",
+            "status": "active_experiment",
+            "score": 0.440536
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:exploit_shelter",
+            "action": "exploit_shelter",
+            "status": "active_experiment",
+            "score": 0.370867
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:hide",
+            "action": "hide",
+            "status": "queued_experiment",
+            "score": 0.368979
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:rest",
+            "action": "rest",
+            "status": "queued_experiment",
+            "score": 0.273844
+          }
+        ],
+        "prediction_ids": [
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:accident",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:environment",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:persistent"
+        ],
+        "verification_targets": [
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:accident",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:environment",
+          "pred:experiment:exp_pred:m234-audit-threat:unknown:threat_persistence:hyp:persistent"
+        ],
+        "active_inquiries": [
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:scan",
+            "action": "scan",
+            "status": "active_experiment",
+            "target_unknown_id": "m234-audit-threat:unknown:threat_persistence",
+            "salience": 0.695,
+            "summary": "I selected scan because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.70 at risk 0.26 and cost 0.25."
+          },
+          {
+            "plan_id": "plan:disc:m234-audit-threat:unknown:threat_persistence:exploit_shelter",
+            "action": "exploit_shelter",
+            "status": "active_experiment",
+            "target_unknown_id": "m234-audit-threat:unknown:threat_persistence",
+            "salience": 0.535,
+            "summary": "I selected exploit_shelter because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m234-audit-threat:unknown:threat_persistence, with information gain 0.53 at risk 0.08 and cost 0.29."
+          }
+        ],
+        "scan_experiment_bias": 0.204054
+      }
+    ]
+  }
+}

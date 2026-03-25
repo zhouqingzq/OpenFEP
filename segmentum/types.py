@@ -385,6 +385,7 @@ class InterventionScore:
     relevant_commitments: list[str] = field(default_factory=list)
     commitment_violations: list[str] = field(default_factory=list)
     verification_bias: float = 0.0
+    experiment_bias: float = 0.0
 
     def policy_components(self) -> dict[str, float]:
         return {
@@ -402,6 +403,7 @@ class InterventionScore:
             "reconciliation_bias": self.reconciliation_bias,
             "goal_alignment": self.goal_alignment,
             "verification_bias": self.verification_bias,
+            "experiment_bias": self.experiment_bias,
         }
 
 
@@ -455,6 +457,8 @@ class DecisionDiagnostics:
     ledger_payload: dict[str, object] = field(default_factory=dict)
     verification_summary: str = ""
     verification_payload: dict[str, object] = field(default_factory=dict)
+    experiment_summary: str = ""
+    experiment_payload: dict[str, object] = field(default_factory=dict)
     reconciliation_summary: str = ""
     reconciliation_payload: dict[str, object] = field(default_factory=dict)
     subject_state_summary: str = ""
