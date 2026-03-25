@@ -13,7 +13,14 @@ from .runtime import SegmentRuntime
 from .homeostasis import HomeostasisScheduler, MaintenanceAgenda
 from .workspace import GlobalWorkspace, GlobalWorkspaceState, WorkspaceContent
 from .social_model import OtherModel, SocialMemory
-from .subject_state import SubjectState, ActiveTension, DominantNeed, SubjectBinding, SubjectPriority
+from .subject_state import (
+    SubjectState,
+    ActiveTension,
+    DominantNeed,
+    NarrativeUncertaintyFocus,
+    SubjectBinding,
+    SubjectPriority,
+)
 from .prediction_ledger import (
     DiscrepancySource,
     LedgerDiscrepancy,
@@ -55,6 +62,19 @@ from .sleep_consolidator import SleepConsolidation
 from .counterfactual import CounterfactualLearning, ReviewFamily
 from .narrative_compiler import NarrativeCompiler
 from .narrative_ingestion import NarrativeIngestionService
+from .narrative_uncertainty import (
+    CompetingHypothesis,
+    DecisionRelevanceMap,
+    HypothesisSupport,
+    LatentCauseCandidate,
+    NarrativeAmbiguityProfile,
+    NarrativeUnknown,
+    NarrativeUnknownType,
+    NarrativeUncertaintyDecomposer,
+    SurfaceCue,
+    SurfaceCueType,
+    UncertaintyDecompositionResult,
+)
 from .narrative_types import (
     AppraisalVector,
     CompiledNarrativeEvent,
@@ -109,6 +129,7 @@ __all__ = [
     "SubjectState",
     "ActiveTension",
     "DominantNeed",
+    "NarrativeUncertaintyFocus",
     "SubjectBinding",
     "SubjectPriority",
     "PredictionLedger",
@@ -149,11 +170,22 @@ __all__ = [
     "SleepConsolidation",
     "CounterfactualLearning",
     "NarrativeCompiler",
+    "NarrativeUncertaintyDecomposer",
     "NarrativeIngestionService",
     "NarrativeEpisode",
     "CompiledNarrativeEvent",
     "AppraisalVector",
     "EmbodiedNarrativeEpisode",
+    "NarrativeUnknownType",
+    "NarrativeUnknown",
+    "CompetingHypothesis",
+    "LatentCauseCandidate",
+    "SurfaceCue",
+    "SurfaceCueType",
+    "DecisionRelevanceMap",
+    "HypothesisSupport",
+    "NarrativeAmbiguityProfile",
+    "UncertaintyDecompositionResult",
     "ReviewFamily",
     "run_daemon",
     "BodySchema",

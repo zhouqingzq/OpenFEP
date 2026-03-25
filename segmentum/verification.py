@@ -407,6 +407,7 @@ class VerificationLoop:
         ledger: PredictionLedger,
         diagnostics=None,
         subject_state=None,
+        narrative_uncertainty=None,
         workspace_channels: tuple[str, ...] = (),
     ) -> VerificationLoopUpdate:
         expired_updates = self._expire_missing_targets(tick=tick, ledger=ledger)
@@ -421,6 +422,7 @@ class VerificationLoop:
                 tick=tick,
                 diagnostics=diagnostics,
                 subject_state=subject_state,
+                narrative_uncertainty=narrative_uncertainty,
                 workspace_channels=workspace_channels,
             )
             if score < 0.28:
@@ -768,8 +770,10 @@ class VerificationLoop:
         tick: int,
         diagnostics=None,
         subject_state=None,
+        narrative_uncertainty=None,
         workspace_channels: tuple[str, ...],
     ) -> float:
+        del narrative_uncertainty
         age = max(0, tick - prediction.created_tick)
         score = 0.18 + prediction.confidence * 0.26
         score += min(0.18, age * 0.05)
@@ -779,6 +783,10 @@ class VerificationLoop:
             score += min(0.14, prediction.recurrence_count * 0.04)
         if prediction.linked_commitments or prediction.linked_identity_anchors:
             score += 0.12
+        if prediction.linked_unknown_ids or prediction.linked_hypothesis_ids:
+            score += 0.08
+        if prediction.source_module == "narrative_uncertainty":
+            score += 0.08 + min(0.10, prediction.decision_relevance * 0.18)
         if "social" in prediction.target_channels or "social" in prediction.prediction_type:
             score += 0.06
         if "danger" in prediction.target_channels or "maintenance" in prediction.target_channels:
@@ -843,6 +851,8 @@ class VerificationLoop:
             reason_parts.append("it affects maintenance stability")
         if prediction.linked_commitments or prediction.linked_identity_anchors:
             reason_parts.append("it is identity-relevant")
+        if prediction.source_module == "narrative_uncertainty":
+            reason_parts.append("it would resolve a narrative ambiguity")
         if "social" in prediction.target_channels or "social" in prediction.prediction_type:
             reason_parts.append("it is socially consequential")
         if prediction.recurrence_count:

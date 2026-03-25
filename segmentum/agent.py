@@ -30,6 +30,7 @@ from .predictive_coding import (
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
 from .preferences import Goal, GoalStack
 from .narrative_compiler import NarrativeCompiler
+from .narrative_uncertainty import UncertaintyDecompositionResult
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
@@ -671,6 +672,8 @@ class SegmentAgent:
         self.reconciliation_engine = ReconciliationEngine()
         self.verification_loop = VerificationLoop()
         self.subject_state = SubjectState()
+        self.latest_narrative_uncertainty = UncertaintyDecompositionResult()
+        self.narrative_uncertainty_history: list[dict[str, object]] = []
 
         self.base_metabolic_rate = 0.015
         self.fatigue_accumulation_rate = 0.08
@@ -1306,6 +1309,7 @@ class SegmentAgent:
         details["prediction_ledger"] = self.prediction_ledger.explanation_payload()
         details["reconciliation"] = self.reconciliation_engine.explanation_payload()
         details["subject_state"] = self.subject_state.explanation_payload()
+        details["narrative_uncertainty"] = self.latest_narrative_uncertainty.explanation_payload()
         details["slow_learning"] = self.slow_variable_learner.explanation_payload()
         return details
 
@@ -1976,6 +1980,7 @@ class SegmentAgent:
             tick=self.cycle,
             ledger=self.prediction_ledger,
             subject_state=self.subject_state,
+            narrative_uncertainty=self.latest_narrative_uncertainty,
         )
         self.last_workspace_state = self.global_workspace.broadcast(
             tick=self.cycle,
@@ -2345,12 +2350,14 @@ class SegmentAgent:
             diagnostics=diagnostics,
             prediction=prediction,
             subject_state=self.subject_state,
+            narrative_uncertainty=self.latest_narrative_uncertainty,
         )
         verification_seed = self.verification_loop.refresh_targets(
             tick=self.cycle,
             ledger=self.prediction_ledger,
             diagnostics=diagnostics,
             subject_state=self.subject_state,
+            narrative_uncertainty=self.latest_narrative_uncertainty,
             workspace_channels=tuple(
                 content.channel for content in self.last_workspace_state.broadcast_contents
             )
@@ -2384,6 +2391,9 @@ class SegmentAgent:
         diagnostics.structured_explanation["reconciliation"] = diagnostics.reconciliation_payload
         diagnostics.structured_explanation["verification"] = diagnostics.verification_payload
         diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
+        diagnostics.structured_explanation["narrative_uncertainty"] = (
+            self.latest_narrative_uncertainty.explanation_payload()
+        )
         workspace_review = self.metacognitive_layer.review_self_consistency(
             chosen_assessment,
             workspace_state=self.last_workspace_state,
@@ -2433,6 +2443,8 @@ class SegmentAgent:
                     + self.subject_state.summary_text()
                     + " Verification: "
                     + self.verification_loop.explanation_payload()["summary"]
+                    + " Narrative uncertainty: "
+                    + self.latest_narrative_uncertainty.summary
                     + " Slow learning: "
                     + self.slow_variable_learner.state.last_summary
                 ),
@@ -2442,6 +2454,7 @@ class SegmentAgent:
                 "leakage_free": True,
                 "subject_state": self.subject_state.explanation_payload(),
                 "verification": self.verification_loop.explanation_payload(),
+                "narrative_uncertainty": self.latest_narrative_uncertainty.explanation_payload(),
                 "slow_learning": self.slow_variable_learner.explanation_payload(),
             }
         report_payload = self.global_workspace.conscious_report_payload(self.last_workspace_state)
@@ -2455,6 +2468,8 @@ class SegmentAgent:
             text += " Carry-over still accessible: " + ", ".join(carry_over_channels) + "."
         text += " Subject state: " + self.subject_state.summary_text()
         text += " Verification: " + self.verification_loop.explanation_payload()["summary"]
+        if self.latest_narrative_uncertainty.summary:
+            text += " Narrative uncertainty: " + self.latest_narrative_uncertainty.summary
         if self.slow_variable_learner.state.last_summary:
             text += " Slow learning: " + self.slow_variable_learner.state.last_summary
         return {
@@ -2465,6 +2480,7 @@ class SegmentAgent:
             "leakage_free": bool(report_payload["leakage_checked"]),
             "subject_state": self.subject_state.explanation_payload(),
             "verification": self.verification_loop.explanation_payload(),
+            "narrative_uncertainty": self.latest_narrative_uncertainty.explanation_payload(),
             "slow_learning": self.slow_variable_learner.explanation_payload(),
         }
 
@@ -2757,6 +2773,15 @@ class SegmentAgent:
         self,
         embodied_episode: EmbodiedNarrativeEpisode,
     ) -> dict[str, object]:
+        uncertainty = UncertaintyDecompositionResult.from_dict(
+            embodied_episode.uncertainty_decomposition
+            if isinstance(embodied_episode.uncertainty_decomposition, dict)
+            else None
+        )
+        self.latest_narrative_uncertainty = uncertainty
+        if uncertainty.episode_id:
+            self.narrative_uncertainty_history.append(uncertainty.to_dict())
+            self.narrative_uncertainty_history = self.narrative_uncertainty_history[-64:]
         social_update = self._update_social_memory_from_embodied_episode(embodied_episode)
         observation = dict(embodied_episode.observation)
         prediction = dict(self.world_model.beliefs)
@@ -2816,6 +2841,7 @@ class SegmentAgent:
                 embodied_episode.provenance.get("source_type", "narrative")
             )
             target_payload["narrative_provenance"] = dict(embodied_episode.provenance)
+            target_payload["uncertainty_decomposition"] = uncertainty.to_dict()
             if social_update.get("updated"):
                 target_payload["counterpart_id"] = str(social_update.get("counterpart_id", ""))
                 target_payload["social_snapshot"] = dict(social_update.get("snapshot", {}))
@@ -2838,6 +2864,7 @@ class SegmentAgent:
             "merged_into_episode_id": memory_decision.merged_into_episode_id,
             "compiler_confidence": embodied_episode.compiler_confidence,
             "narrative_tags": list(embodied_episode.narrative_tags),
+            "narrative_uncertainty": uncertainty.to_dict(),
             "social_update": social_update,
         }
         self.narrative_trace.append(trace_payload)
@@ -3703,6 +3730,8 @@ class SegmentAgent:
             "reconciliation_engine": self.reconciliation_engine.to_dict(),
             "verification_loop": self.verification_loop.to_dict(),
             "subject_state": self.subject_state.to_dict(),
+            "latest_narrative_uncertainty": self.latest_narrative_uncertainty.to_dict(),
+            "narrative_uncertainty_history": list(self.narrative_uncertainty_history),
             "slow_variable_learner": self.slow_variable_learner.to_dict(),
             # M2.7
             "precision_manipulator": self.precision_manipulator.to_dict(),
@@ -3831,6 +3860,16 @@ class SegmentAgent:
             if isinstance(payload.get("subject_state"), dict)
             else None
         )
+        agent.latest_narrative_uncertainty = UncertaintyDecompositionResult.from_dict(
+            payload.get("latest_narrative_uncertainty")
+            if isinstance(payload.get("latest_narrative_uncertainty"), dict)
+            else None
+        )
+        agent.narrative_uncertainty_history = [
+            dict(entry)
+            for entry in payload.get("narrative_uncertainty_history", [])
+            if isinstance(entry, dict)
+        ]
         agent.slow_variable_learner = SlowVariableLearner.from_dict(
             payload.get("slow_variable_learner")
             if isinstance(payload.get("slow_variable_learner"), dict)

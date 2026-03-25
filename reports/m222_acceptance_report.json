@@ -2,7 +2,7 @@
   "milestone_id": "M2.22",
   "status": "FAIL",
   "recommendation": "REJECT",
-  "generated_at": "2026-03-22T03:47:16+00:00",
+  "generated_at": "2026-03-25T03:41:36+00:00",
   "seed_set": [
     222
   ],
@@ -28,7 +28,7 @@
     "anti_collapse": true,
     "self_maintenance": true,
     "ablation_superiority": false,
-    "restart_continuity": false,
+    "restart_continuity": true,
     "stress_recovery": true,
     "determinism": true,
     "artifact_schema_complete": true,
@@ -55,21 +55,21 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.506074,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 2.186482,
-            "dominant_action_share": 0.458333,
+            "mean_free_energy": 0.481382,
+            "free_energy_spike_rate": 0.083333,
+            "action_entropy": 1.965771,
+            "dominant_action_share": 0.541667,
             "max_action_streak": 4,
-            "action_switch_rate": 0.571739,
+            "action_switch_rate": 0.528261,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.0775,
+            "sleep_recovery_gain": 0.07375,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.183333,
+            "identity_drift_score": 0.261871,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 1,
@@ -86,34 +86,34 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.3932704958258053,
-            "avg_free_energy_after": 0.5060740124596699,
-            "avg_free_energy_drop": 0.008365328918627868,
+            "avg_free_energy_before": 0.3640321512961309,
+            "avg_free_energy_after": 0.4813817904452889,
+            "avg_free_energy_drop": 0.012914159412524445,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
-              "append_workspace_note": 2,
-              "exploit_shelter": 3,
+              "exploit_shelter": 2,
               "hide": 4,
-              "rest": 11,
+              "rest": 13,
               "scan": 1,
+              "seek_contact": 1,
               "unstable_workspace_note": 3
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
-              "exploit_shelter": 0.125,
+              "exploit_shelter": 0.08333333333333333,
               "hide": 0.16666666666666666,
-              "rest": 0.4583333333333333,
+              "rest": 0.5416666666666666,
               "scan": 0.041666666666666664,
+              "seek_contact": 0.041666666666666664,
               "unstable_workspace_note": 0.125
             },
-            "action_switch_count": 12,
+            "action_switch_count": 11,
             "unique_actions": 6,
-            "action_entropy": 2.1864823836654392,
+            "action_entropy": 1.9657706741379202,
             "dominant_action": "rest",
-            "dominant_action_share": 0.4583333333333333,
+            "dominant_action_share": 0.5416666666666666,
             "max_action_streak": 4,
-            "last_choice": "exploit_shelter",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -124,19 +124,19 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.506074,
+          "mean": 0.481382,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.083333,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.186482,
+          "mean": 1.965771,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.458333,
+          "mean": 0.541667,
           "std": 0.0
         },
         "max_action_streak": {
@@ -144,7 +144,7 @@
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.571739,
+          "mean": 0.528261,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -156,7 +156,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.0775,
+          "mean": 0.07375,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -180,7 +180,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.183333,
+          "mean": 0.261871,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -217,22 +217,22 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.465996,
+            "mean_free_energy": 0.434384,
             "free_energy_spike_rate": 0.0,
-            "action_entropy": 1.999218,
-            "dominant_action_share": 0.583333,
-            "max_action_streak": 6,
-            "action_switch_rate": 0.528261,
+            "action_entropy": 2.062907,
+            "dominant_action_share": 0.5,
+            "max_action_streak": 5,
+            "action_switch_rate": 0.571739,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.1025,
+            "sleep_recovery_gain": 0.114375,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.233333,
-            "homeostatic_balance_score": 1.0,
+            "identity_drift_score": 0.246089,
+            "homeostatic_balance_score": 0.999583,
             "governance_probe_count": 1,
             "external_action_count": 1,
             "restart_identity_continuity": 0.0,
@@ -248,35 +248,35 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.36792587399825843,
-            "avg_free_energy_after": 0.46599625052083593,
-            "avg_free_energy_drop": 0.008823731796940728,
+            "avg_free_energy_before": 0.34117385402189776,
+            "avg_free_energy_after": 0.43438433686953193,
+            "avg_free_energy_drop": 0.009078317829415657,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
-              "append_workspace_note": 3,
+              "append_workspace_note": 1,
               "exploit_shelter": 1,
-              "hide": 2,
-              "rest": 14,
-              "scan": 1,
-              "unstable_workspace_note": 2,
+              "hide": 1,
+              "rest": 12,
+              "scan": 2,
+              "unstable_workspace_note": 6,
               "write_workspace_note": 1
             },
             "action_distribution": {
-              "append_workspace_note": 0.125,
+              "append_workspace_note": 0.041666666666666664,
               "exploit_shelter": 0.041666666666666664,
-              "hide": 0.08333333333333333,
-              "rest": 0.5833333333333334,
-              "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.08333333333333333,
+              "hide": 0.041666666666666664,
+              "rest": 0.5,
+              "scan": 0.08333333333333333,
+              "unstable_workspace_note": 0.25,
               "write_workspace_note": 0.041666666666666664
             },
-            "action_switch_count": 11,
+            "action_switch_count": 12,
             "unique_actions": 7,
-            "action_entropy": 1.9992184835974092,
+            "action_entropy": 2.062907291846956,
             "dominant_action": "rest",
-            "dominant_action_share": 0.5833333333333334,
-            "max_action_streak": 6,
+            "dominant_action_share": 0.5,
+            "max_action_streak": 5,
             "last_choice": "write_workspace_note",
             "termination_reason": "cycles_exhausted"
           }
@@ -288,7 +288,7 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.465996,
+          "mean": 0.434384,
           "std": 0.0
         },
         "free_energy_spike_rate": {
@@ -296,19 +296,19 @@
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.999218,
+          "mean": 2.062907,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.583333,
+          "mean": 0.5,
           "std": 0.0
         },
         "max_action_streak": {
-          "mean": 6.0,
+          "mean": 5.0,
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.528261,
+          "mean": 0.571739,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -320,7 +320,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.1025,
+          "mean": 0.114375,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -344,11 +344,11 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.233333,
+          "mean": 0.246089,
           "std": 0.0
         },
         "homeostatic_balance_score": {
-          "mean": 1.0,
+          "mean": 0.999583,
           "std": 0.0
         },
         "governance_probe_count": {
@@ -381,21 +381,21 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.506074,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 2.186482,
-            "dominant_action_share": 0.458333,
+            "mean_free_energy": 0.481382,
+            "free_energy_spike_rate": 0.083333,
+            "action_entropy": 1.965771,
+            "dominant_action_share": 0.541667,
             "max_action_streak": 4,
-            "action_switch_rate": 0.571739,
+            "action_switch_rate": 0.528261,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.0775,
+            "sleep_recovery_gain": 0.07375,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.183333,
+            "identity_drift_score": 0.261871,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 1,
@@ -412,34 +412,34 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.3932704958258053,
-            "avg_free_energy_after": 0.5060740124596699,
-            "avg_free_energy_drop": 0.008365328918627868,
+            "avg_free_energy_before": 0.3640321512961309,
+            "avg_free_energy_after": 0.4813817904452889,
+            "avg_free_energy_drop": 0.012914159412524445,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
-              "append_workspace_note": 2,
-              "exploit_shelter": 3,
+              "exploit_shelter": 2,
               "hide": 4,
-              "rest": 11,
+              "rest": 13,
               "scan": 1,
+              "seek_contact": 1,
               "unstable_workspace_note": 3
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
-              "exploit_shelter": 0.125,
+              "exploit_shelter": 0.08333333333333333,
               "hide": 0.16666666666666666,
-              "rest": 0.4583333333333333,
+              "rest": 0.5416666666666666,
               "scan": 0.041666666666666664,
+              "seek_contact": 0.041666666666666664,
               "unstable_workspace_note": 0.125
             },
-            "action_switch_count": 12,
+            "action_switch_count": 11,
             "unique_actions": 6,
-            "action_entropy": 2.1864823836654392,
+            "action_entropy": 1.9657706741379202,
             "dominant_action": "rest",
-            "dominant_action_share": 0.4583333333333333,
+            "dominant_action_share": 0.5416666666666666,
             "max_action_streak": 4,
-            "last_choice": "exploit_shelter",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -450,19 +450,19 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.506074,
+          "mean": 0.481382,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.083333,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.186482,
+          "mean": 1.965771,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.458333,
+          "mean": 0.541667,
           "std": 0.0
         },
         "max_action_streak": {
@@ -470,7 +470,7 @@
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.571739,
+          "mean": 0.528261,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -482,7 +482,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.0775,
+          "mean": 0.07375,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -506,7 +506,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.183333,
+          "mean": 0.261871,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -543,21 +543,21 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.456733,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 1.746915,
-            "dominant_action_share": 0.625,
+            "mean_free_energy": 0.477328,
+            "free_energy_spike_rate": 0.041667,
+            "action_entropy": 2.177694,
+            "dominant_action_share": 0.5,
             "max_action_streak": 4,
             "action_switch_rate": 0.571739,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.1,
+            "sleep_recovery_gain": 0.09625,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.25,
+            "identity_drift_score": 0.246974,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 1,
@@ -574,34 +574,36 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.3646143387959775,
-            "avg_free_energy_after": 0.4567328423277472,
-            "avg_free_energy_drop": 0.009318056552043581,
+            "avg_free_energy_before": 0.38003154928706767,
+            "avg_free_energy_after": 0.4773279462680999,
+            "avg_free_energy_drop": 0.015596294463146572,
             "min_energy": 0.81,
-            "max_stress": 0.10999999999999999,
+            "max_stress": 0.18,
             "action_counts": {
-              "append_workspace_note": 3,
-              "exploit_shelter": 1,
-              "hide": 3,
-              "rest": 15,
+              "append_workspace_note": 1,
+              "exploit_shelter": 2,
+              "hide": 4,
+              "rest": 12,
               "scan": 1,
-              "unstable_workspace_note": 1
+              "seek_contact": 1,
+              "unstable_workspace_note": 3
             },
             "action_distribution": {
-              "append_workspace_note": 0.125,
-              "exploit_shelter": 0.041666666666666664,
-              "hide": 0.125,
-              "rest": 0.625,
+              "append_workspace_note": 0.041666666666666664,
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.16666666666666666,
+              "rest": 0.5,
               "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664
+              "seek_contact": 0.041666666666666664,
+              "unstable_workspace_note": 0.125
             },
             "action_switch_count": 12,
-            "unique_actions": 6,
-            "action_entropy": 1.7469152532855432,
+            "unique_actions": 7,
+            "action_entropy": 2.177694271103767,
             "dominant_action": "rest",
-            "dominant_action_share": 0.625,
+            "dominant_action_share": 0.5,
             "max_action_streak": 4,
-            "last_choice": "append_workspace_note",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -612,19 +614,19 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.456733,
+          "mean": 0.477328,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.041667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.746915,
+          "mean": 2.177694,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.625,
+          "mean": 0.5,
           "std": 0.0
         },
         "max_action_streak": {
@@ -644,7 +646,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.1,
+          "mean": 0.09625,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -668,7 +670,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.25,
+          "mean": 0.246974,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -705,27 +707,27 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.50607,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 2.186482,
-            "dominant_action_share": 0.458333,
+            "mean_free_energy": 0.470823,
+            "free_energy_spike_rate": 0.083333,
+            "action_entropy": 1.832552,
+            "dominant_action_share": 0.583333,
             "max_action_streak": 4,
             "action_switch_rate": 0.571739,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.0775,
+            "sleep_recovery_gain": 0.07625,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.183333,
+            "identity_drift_score": 0.281191,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 1,
-            "restart_identity_continuity": 0.666667,
+            "restart_identity_continuity": 1.0,
             "restart_policy_continuity": 1.0,
-            "restart_memory_integrity": 0.95
+            "restart_memory_integrity": 1.0
           },
           "summary": {
             "cycles_completed": 24,
@@ -736,34 +738,34 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.39327442462605555,
-            "avg_free_energy_after": 0.5060695219788007,
-            "avg_free_energy_drop": 0.008365229369990353,
+            "avg_free_energy_before": 0.35955299424417625,
+            "avg_free_energy_after": 0.470823334411358,
+            "avg_free_energy_drop": 0.015330069083495643,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
-              "append_workspace_note": 2,
               "exploit_shelter": 3,
               "hide": 4,
-              "rest": 11,
+              "rest": 14,
               "scan": 1,
-              "unstable_workspace_note": 3
+              "seek_contact": 1,
+              "unstable_workspace_note": 1
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
               "exploit_shelter": 0.125,
               "hide": 0.16666666666666666,
-              "rest": 0.4583333333333333,
+              "rest": 0.5833333333333334,
               "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.125
+              "seek_contact": 0.041666666666666664,
+              "unstable_workspace_note": 0.041666666666666664
             },
             "action_switch_count": 12,
             "unique_actions": 6,
-            "action_entropy": 2.1864823836654392,
+            "action_entropy": 1.8325518169307426,
             "dominant_action": "rest",
-            "dominant_action_share": 0.4583333333333333,
+            "dominant_action_share": 0.5833333333333334,
             "max_action_streak": 4,
-            "last_choice": "exploit_shelter",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -774,19 +776,19 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.50607,
+          "mean": 0.470823,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.083333,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.186482,
+          "mean": 1.832552,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.458333,
+          "mean": 0.583333,
           "std": 0.0
         },
         "max_action_streak": {
@@ -806,7 +808,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.0775,
+          "mean": 0.07625,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -830,7 +832,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.183333,
+          "mean": 0.281191,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -846,7 +848,7 @@
           "std": 0.0
         },
         "restart_identity_continuity": {
-          "mean": 0.666667,
+          "mean": 1.0,
           "std": 0.0
         },
         "restart_policy_continuity": {
@@ -854,7 +856,7 @@
           "std": 0.0
         },
         "restart_memory_integrity": {
-          "mean": 0.95,
+          "mean": 1.0,
           "std": 0.0
         }
       }
@@ -867,22 +869,22 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.598757,
-            "free_energy_spike_rate": 0.083333,
-            "action_entropy": 2.49939,
-            "dominant_action_share": 0.458333,
-            "max_action_streak": 4,
-            "action_switch_rate": 0.176812,
-            "maintenance_completion_rate": 0.208333,
+            "mean_free_energy": 0.441898,
+            "free_energy_spike_rate": 0.041667,
+            "action_entropy": 1.553509,
+            "dominant_action_share": 0.666667,
+            "max_action_streak": 9,
+            "action_switch_rate": 0.069928,
+            "maintenance_completion_rate": 0.041667,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.234667,
+            "sleep_recovery_gain": 0.184333,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.183333,
-            "homeostatic_balance_score": 0.994792,
+            "identity_drift_score": 0.318156,
+            "homeostatic_balance_score": 0.998583,
             "governance_probe_count": 1,
             "external_action_count": 1,
             "restart_identity_continuity": 0.0,
@@ -898,40 +900,32 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.4900527638186747,
-            "avg_free_energy_after": 0.598757229152118,
-            "avg_free_energy_drop": 0.01653652214115831,
-            "min_energy": 0.3099999999999995,
-            "max_stress": 0.12599999999999997,
+            "avg_free_energy_before": 0.3757657809402752,
+            "avg_free_energy_after": 0.44189821904207344,
+            "avg_free_energy_drop": 0.017378603920933856,
+            "min_energy": 0.3299999999999992,
+            "max_stress": 0.178,
             "action_counts": {
-              "append_workspace_note": 2,
-              "exploit_shelter": 1,
-              "fetch_remote_status": 2,
-              "hide": 4,
-              "rest": 11,
+              "exploit_shelter": 2,
+              "hide": 3,
+              "rest": 16,
               "scan": 1,
-              "seek_contact": 1,
-              "unstable_workspace_note": 1,
-              "write_workspace_note": 1
+              "unstable_workspace_note": 2
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
-              "exploit_shelter": 0.041666666666666664,
-              "fetch_remote_status": 0.08333333333333333,
-              "hide": 0.16666666666666666,
-              "rest": 0.4583333333333333,
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.125,
+              "rest": 0.6666666666666666,
               "scan": 0.041666666666666664,
-              "seek_contact": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664,
-              "write_workspace_note": 0.041666666666666664
+              "unstable_workspace_note": 0.08333333333333333
             },
-            "action_switch_count": 14,
-            "unique_actions": 9,
-            "action_entropy": 2.499389675512395,
+            "action_switch_count": 11,
+            "unique_actions": 5,
+            "action_entropy": 1.5535088547976783,
             "dominant_action": "rest",
-            "dominant_action_share": 0.4583333333333333,
-            "max_action_streak": 4,
-            "last_choice": "append_workspace_note",
+            "dominant_action_share": 0.6666666666666666,
+            "max_action_streak": 9,
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -942,31 +936,31 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.598757,
+          "mean": 0.441898,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.083333,
+          "mean": 0.041667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.49939,
+          "mean": 1.553509,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.458333,
+          "mean": 0.666667,
           "std": 0.0
         },
         "max_action_streak": {
-          "mean": 4.0,
+          "mean": 9.0,
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.176812,
+          "mean": 0.069928,
           "std": 0.0
         },
         "maintenance_completion_rate": {
-          "mean": 0.208333,
+          "mean": 0.041667,
           "std": 0.0
         },
         "maintenance_interrupt_recovery_rate": {
@@ -974,7 +968,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.234667,
+          "mean": 0.184333,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -998,11 +992,11 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.183333,
+          "mean": 0.318156,
           "std": 0.0
         },
         "homeostatic_balance_score": {
-          "mean": 0.994792,
+          "mean": 0.998583,
           "std": 0.0
         },
         "governance_probe_count": {
@@ -1035,21 +1029,21 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.452982,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 1.751629,
-            "dominant_action_share": 0.666667,
-            "max_action_streak": 5,
-            "action_switch_rate": 0.528261,
+            "mean_free_energy": 0.494209,
+            "free_energy_spike_rate": 0.041667,
+            "action_entropy": 2.042481,
+            "dominant_action_share": 0.5,
+            "max_action_streak": 4,
+            "action_switch_rate": 0.571739,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.11125,
+            "sleep_recovery_gain": 0.1075,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 1.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.266667,
+            "identity_drift_score": 0.24795,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 0,
@@ -1066,35 +1060,33 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.3663476304336955,
-            "avg_free_energy_after": 0.45298194799831304,
-            "avg_free_energy_drop": 0.013885338210087,
+            "avg_free_energy_before": 0.397733863587133,
+            "avg_free_energy_after": 0.4942088505527302,
+            "avg_free_energy_drop": 0.016092894572415545,
             "min_energy": 0.81,
-            "max_stress": 0.15,
+            "max_stress": 0.27,
             "action_counts": {
-              "append_workspace_note": 2,
-              "exploit_shelter": 1,
-              "hide": 2,
-              "rest": 16,
+              "exploit_shelter": 2,
+              "hide": 4,
+              "rest": 12,
               "scan": 1,
-              "unstable_workspace_note": 1,
-              "write_workspace_note": 1
+              "seek_contact": 1,
+              "unstable_workspace_note": 4
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
-              "exploit_shelter": 0.041666666666666664,
-              "hide": 0.08333333333333333,
-              "rest": 0.6666666666666666,
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.16666666666666666,
+              "rest": 0.5,
               "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664,
-              "write_workspace_note": 0.041666666666666664
+              "seek_contact": 0.041666666666666664,
+              "unstable_workspace_note": 0.16666666666666666
             },
-            "action_switch_count": 11,
-            "unique_actions": 7,
-            "action_entropy": 1.751629167387823,
+            "action_switch_count": 12,
+            "unique_actions": 6,
+            "action_entropy": 2.042481250360578,
             "dominant_action": "rest",
-            "dominant_action_share": 0.6666666666666666,
-            "max_action_streak": 5,
+            "dominant_action_share": 0.5,
+            "max_action_streak": 4,
             "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
@@ -1106,27 +1098,27 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.452982,
+          "mean": 0.494209,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.041667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.751629,
+          "mean": 2.042481,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.666667,
+          "mean": 0.5,
           "std": 0.0
         },
         "max_action_streak": {
-          "mean": 5.0,
+          "mean": 4.0,
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.528261,
+          "mean": 0.571739,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -1138,7 +1130,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.11125,
+          "mean": 0.1075,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -1162,7 +1154,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.266667,
+          "mean": 0.24795,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -1198,23 +1190,23 @@
         {
           "seed": 222,
           "metrics": {
-            "survival_ratio": 0.75,
-            "mean_free_energy": 0.565677,
-            "free_energy_spike_rate": 0.083333,
-            "action_entropy": 1.434561,
-            "dominant_action_share": 0.666667,
+            "survival_ratio": 0.708333,
+            "mean_free_energy": 0.502918,
+            "free_energy_spike_rate": 0.125,
+            "action_entropy": 1.205941,
+            "dominant_action_share": 0.708333,
             "max_action_streak": 4,
-            "action_switch_rate": 0.571739,
+            "action_switch_rate": 0.441304,
             "maintenance_completion_rate": 1.0,
-            "maintenance_interrupt_recovery_rate": 0.416667,
+            "maintenance_interrupt_recovery_rate": 0.5,
             "sleep_recovery_gain": 0.0,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.266667,
-            "homeostatic_balance_score": 0.920917,
+            "identity_drift_score": 0.336533,
+            "homeostatic_balance_score": 0.9155,
             "governance_probe_count": 1,
             "external_action_count": 1,
             "restart_identity_continuity": 0.0,
@@ -1230,55 +1222,53 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.48688816119260925,
-            "avg_free_energy_after": 0.5656766083248834,
-            "avg_free_energy_drop": 0.01757149841844004,
+            "avg_free_energy_before": 0.44766820229917087,
+            "avg_free_energy_after": 0.5029180411807492,
+            "avg_free_energy_drop": 0.031831004825182925,
             "min_energy": 0.81,
-            "max_stress": 0.10999999999999999,
+            "max_stress": 0.11299999999999998,
             "action_counts": {
               "exploit_shelter": 5,
               "hide": 1,
-              "rest": 16,
-              "scan": 1,
-              "unstable_workspace_note": 1
+              "rest": 17,
+              "scan": 1
             },
             "action_distribution": {
               "exploit_shelter": 0.20833333333333334,
               "hide": 0.041666666666666664,
-              "rest": 0.6666666666666666,
-              "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664
+              "rest": 0.7083333333333334,
+              "scan": 0.041666666666666664
             },
-            "action_switch_count": 12,
-            "unique_actions": 5,
-            "action_entropy": 1.4345608142862891,
+            "action_switch_count": 9,
+            "unique_actions": 4,
+            "action_entropy": 1.2059413017339653,
             "dominant_action": "rest",
-            "dominant_action_share": 0.6666666666666666,
+            "dominant_action_share": 0.7083333333333334,
             "max_action_streak": 4,
-            "last_choice": "exploit_shelter",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
       ],
       "metric_summary": {
         "survival_ratio": {
-          "mean": 0.75,
+          "mean": 0.708333,
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.565677,
+          "mean": 0.502918,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.083333,
+          "mean": 0.125,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.434561,
+          "mean": 1.205941,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.666667,
+          "mean": 0.708333,
           "std": 0.0
         },
         "max_action_streak": {
@@ -1286,7 +1276,7 @@
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.571739,
+          "mean": 0.441304,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -1294,7 +1284,7 @@
           "std": 0.0
         },
         "maintenance_interrupt_recovery_rate": {
-          "mean": 0.416667,
+          "mean": 0.5,
           "std": 0.0
         },
         "sleep_recovery_gain": {
@@ -1322,11 +1312,11 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.266667,
+          "mean": 0.336533,
           "std": 0.0
         },
         "homeostatic_balance_score": {
-          "mean": 0.920917,
+          "mean": 0.9155,
           "std": 0.0
         },
         "governance_probe_count": {
@@ -1359,21 +1349,21 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.456733,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 1.746915,
-            "dominant_action_share": 0.625,
+            "mean_free_energy": 0.477328,
+            "free_energy_spike_rate": 0.041667,
+            "action_entropy": 2.177694,
+            "dominant_action_share": 0.5,
             "max_action_streak": 4,
             "action_switch_rate": 0.571739,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.1,
+            "sleep_recovery_gain": 0.09625,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.25,
+            "identity_drift_score": 0.246974,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 1,
@@ -1390,34 +1380,36 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.3646143387959775,
-            "avg_free_energy_after": 0.4567328423277472,
-            "avg_free_energy_drop": 0.009318056552043581,
+            "avg_free_energy_before": 0.38003154928706767,
+            "avg_free_energy_after": 0.4773279462680999,
+            "avg_free_energy_drop": 0.015596294463146572,
             "min_energy": 0.81,
-            "max_stress": 0.10999999999999999,
+            "max_stress": 0.18,
             "action_counts": {
-              "append_workspace_note": 3,
-              "exploit_shelter": 1,
-              "hide": 3,
-              "rest": 15,
+              "append_workspace_note": 1,
+              "exploit_shelter": 2,
+              "hide": 4,
+              "rest": 12,
               "scan": 1,
-              "unstable_workspace_note": 1
+              "seek_contact": 1,
+              "unstable_workspace_note": 3
             },
             "action_distribution": {
-              "append_workspace_note": 0.125,
-              "exploit_shelter": 0.041666666666666664,
-              "hide": 0.125,
-              "rest": 0.625,
+              "append_workspace_note": 0.041666666666666664,
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.16666666666666666,
+              "rest": 0.5,
               "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664
+              "seek_contact": 0.041666666666666664,
+              "unstable_workspace_note": 0.125
             },
             "action_switch_count": 12,
-            "unique_actions": 6,
-            "action_entropy": 1.7469152532855432,
+            "unique_actions": 7,
+            "action_entropy": 2.177694271103767,
             "dominant_action": "rest",
-            "dominant_action_share": 0.625,
+            "dominant_action_share": 0.5,
             "max_action_streak": 4,
-            "last_choice": "append_workspace_note",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -1428,19 +1420,19 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.456733,
+          "mean": 0.477328,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.041667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.746915,
+          "mean": 2.177694,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.625,
+          "mean": 0.5,
           "std": 0.0
         },
         "max_action_streak": {
@@ -1460,7 +1452,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.1,
+          "mean": 0.09625,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -1484,7 +1476,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.25,
+          "mean": 0.246974,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -1518,23 +1510,23 @@
         {
           "seed": 222,
           "metrics": {
-            "survival_ratio": 0.958333,
-            "mean_free_energy": 0.718055,
-            "free_energy_spike_rate": 0.25,
-            "action_entropy": 2.013489,
-            "dominant_action_share": 0.541667,
-            "max_action_streak": 6,
-            "action_switch_rate": 0.205072,
-            "maintenance_completion_rate": 0.333333,
+            "survival_ratio": 0.916667,
+            "mean_free_energy": 0.621363,
+            "free_energy_spike_rate": 0.0,
+            "action_entropy": 2.601227,
+            "dominant_action_share": 0.333333,
+            "max_action_streak": 4,
+            "action_switch_rate": 0.149275,
+            "maintenance_completion_rate": 0.166667,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.208472,
-            "resource_guard_success_rate": 0.333333,
+            "sleep_recovery_gain": 0.185536,
+            "resource_guard_success_rate": 0.666667,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.216667,
-            "homeostatic_balance_score": 0.927708,
+            "identity_drift_score": 0.18192,
+            "homeostatic_balance_score": 0.938125,
             "governance_probe_count": 1,
             "external_action_count": 1,
             "restart_identity_continuity": 0.0,
@@ -1544,77 +1536,79 @@
           "summary": {
             "cycles_completed": 24,
             "survival_ticks": 24,
-            "sleep_count": 6,
+            "sleep_count": 7,
             "internal_update_count": 0,
             "memory_retrieval_count": 23,
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.6161658590020663,
-            "avg_free_energy_after": 0.7180552774744778,
-            "avg_free_energy_drop": 0.01393758527378055,
-            "min_energy": 0.12499999999999985,
-            "max_stress": 0.5699999999999996,
+            "avg_free_energy_before": 0.5380458571696478,
+            "avg_free_energy_after": 0.6213628528595937,
+            "avg_free_energy_drop": 0.017079854498745713,
+            "min_energy": 0.2700000000000001,
+            "max_stress": 0.5099999999999999,
             "action_counts": {
               "append_workspace_note": 1,
-              "exploit_shelter": 1,
-              "forage": 1,
-              "hide": 5,
-              "rest": 13,
-              "scan": 1,
-              "unstable_workspace_note": 2
+              "exploit_shelter": 2,
+              "hide": 4,
+              "rest": 8,
+              "scan": 2,
+              "thermoregulate": 1,
+              "unstable_workspace_note": 1,
+              "write_workspace_note": 5
             },
             "action_distribution": {
               "append_workspace_note": 0.041666666666666664,
-              "exploit_shelter": 0.041666666666666664,
-              "forage": 0.041666666666666664,
-              "hide": 0.20833333333333334,
-              "rest": 0.5416666666666666,
-              "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.08333333333333333
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.16666666666666666,
+              "rest": 0.3333333333333333,
+              "scan": 0.08333333333333333,
+              "thermoregulate": 0.041666666666666664,
+              "unstable_workspace_note": 0.041666666666666664,
+              "write_workspace_note": 0.20833333333333334
             },
-            "action_switch_count": 13,
-            "unique_actions": 7,
-            "action_entropy": 2.0134893002931977,
+            "action_switch_count": 16,
+            "unique_actions": 8,
+            "action_entropy": 2.601227480952956,
             "dominant_action": "rest",
-            "dominant_action_share": 0.5416666666666666,
-            "max_action_streak": 6,
-            "last_choice": "hide",
+            "dominant_action_share": 0.3333333333333333,
+            "max_action_streak": 4,
+            "last_choice": "exploit_shelter",
             "termination_reason": "cycles_exhausted"
           }
         }
       ],
       "metric_summary": {
         "survival_ratio": {
-          "mean": 0.958333,
+          "mean": 0.916667,
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.718055,
+          "mean": 0.621363,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.25,
+          "mean": 0.0,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.013489,
+          "mean": 2.601227,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.541667,
+          "mean": 0.333333,
           "std": 0.0
         },
         "max_action_streak": {
-          "mean": 6.0,
+          "mean": 4.0,
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.205072,
+          "mean": 0.149275,
           "std": 0.0
         },
         "maintenance_completion_rate": {
-          "mean": 0.333333,
+          "mean": 0.166667,
           "std": 0.0
         },
         "maintenance_interrupt_recovery_rate": {
@@ -1622,11 +1616,11 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.208472,
+          "mean": 0.185536,
           "std": 0.0
         },
         "resource_guard_success_rate": {
-          "mean": 0.333333,
+          "mean": 0.666667,
           "std": 0.0
         },
         "governance_violation_rate": {
@@ -1646,11 +1640,11 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.216667,
+          "mean": 0.18192,
           "std": 0.0
         },
         "homeostatic_balance_score": {
-          "mean": 0.927708,
+          "mean": 0.938125,
           "std": 0.0
         },
         "governance_probe_count": {
@@ -1680,23 +1674,23 @@
         {
           "seed": 222,
           "metrics": {
-            "survival_ratio": 0.75,
-            "mean_free_energy": 0.565677,
-            "free_energy_spike_rate": 0.083333,
-            "action_entropy": 1.434561,
-            "dominant_action_share": 0.666667,
+            "survival_ratio": 0.708333,
+            "mean_free_energy": 0.502918,
+            "free_energy_spike_rate": 0.125,
+            "action_entropy": 1.205941,
+            "dominant_action_share": 0.708333,
             "max_action_streak": 4,
-            "action_switch_rate": 0.571739,
+            "action_switch_rate": 0.441304,
             "maintenance_completion_rate": 1.0,
-            "maintenance_interrupt_recovery_rate": 0.416667,
+            "maintenance_interrupt_recovery_rate": 0.5,
             "sleep_recovery_gain": 0.0,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.266667,
-            "homeostatic_balance_score": 0.920917,
+            "identity_drift_score": 0.336533,
+            "homeostatic_balance_score": 0.9155,
             "governance_probe_count": 1,
             "external_action_count": 1,
             "restart_identity_continuity": 0.0,
@@ -1712,55 +1706,53 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.48688816119260925,
-            "avg_free_energy_after": 0.5656766083248834,
-            "avg_free_energy_drop": 0.01757149841844004,
+            "avg_free_energy_before": 0.44766820229917087,
+            "avg_free_energy_after": 0.5029180411807492,
+            "avg_free_energy_drop": 0.031831004825182925,
             "min_energy": 0.81,
-            "max_stress": 0.10999999999999999,
+            "max_stress": 0.11299999999999998,
             "action_counts": {
               "exploit_shelter": 5,
               "hide": 1,
-              "rest": 16,
-              "scan": 1,
-              "unstable_workspace_note": 1
+              "rest": 17,
+              "scan": 1
             },
             "action_distribution": {
               "exploit_shelter": 0.20833333333333334,
               "hide": 0.041666666666666664,
-              "rest": 0.6666666666666666,
-              "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664
+              "rest": 0.7083333333333334,
+              "scan": 0.041666666666666664
             },
-            "action_switch_count": 12,
-            "unique_actions": 5,
-            "action_entropy": 1.4345608142862891,
+            "action_switch_count": 9,
+            "unique_actions": 4,
+            "action_entropy": 1.2059413017339653,
             "dominant_action": "rest",
-            "dominant_action_share": 0.6666666666666666,
+            "dominant_action_share": 0.7083333333333334,
             "max_action_streak": 4,
-            "last_choice": "exploit_shelter",
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
       ],
       "metric_summary": {
         "survival_ratio": {
-          "mean": 0.75,
+          "mean": 0.708333,
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.565677,
+          "mean": 0.502918,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.083333,
+          "mean": 0.125,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.434561,
+          "mean": 1.205941,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.666667,
+          "mean": 0.708333,
           "std": 0.0
         },
         "max_action_streak": {
@@ -1768,7 +1760,7 @@
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.571739,
+          "mean": 0.441304,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -1776,7 +1768,7 @@
           "std": 0.0
         },
         "maintenance_interrupt_recovery_rate": {
-          "mean": 0.416667,
+          "mean": 0.5,
           "std": 0.0
         },
         "sleep_recovery_gain": {
@@ -1804,11 +1796,11 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.266667,
+          "mean": 0.336533,
           "std": 0.0
         },
         "homeostatic_balance_score": {
-          "mean": 0.920917,
+          "mean": 0.9155,
           "std": 0.0
         },
         "governance_probe_count": {
@@ -1839,21 +1831,21 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.452982,
-            "free_energy_spike_rate": 0.0,
-            "action_entropy": 1.751629,
-            "dominant_action_share": 0.666667,
-            "max_action_streak": 5,
-            "action_switch_rate": 0.528261,
+            "mean_free_energy": 0.494209,
+            "free_energy_spike_rate": 0.041667,
+            "action_entropy": 2.042481,
+            "dominant_action_share": 0.5,
+            "max_action_streak": 4,
+            "action_switch_rate": 0.571739,
             "maintenance_completion_rate": 1.0,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.11125,
+            "sleep_recovery_gain": 0.1075,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 1.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.266667,
+            "identity_drift_score": 0.24795,
             "homeostatic_balance_score": 1.0,
             "governance_probe_count": 1,
             "external_action_count": 0,
@@ -1870,35 +1862,33 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.3663476304336955,
-            "avg_free_energy_after": 0.45298194799831304,
-            "avg_free_energy_drop": 0.013885338210087,
+            "avg_free_energy_before": 0.397733863587133,
+            "avg_free_energy_after": 0.4942088505527302,
+            "avg_free_energy_drop": 0.016092894572415545,
             "min_energy": 0.81,
-            "max_stress": 0.15,
+            "max_stress": 0.27,
             "action_counts": {
-              "append_workspace_note": 2,
-              "exploit_shelter": 1,
-              "hide": 2,
-              "rest": 16,
+              "exploit_shelter": 2,
+              "hide": 4,
+              "rest": 12,
               "scan": 1,
-              "unstable_workspace_note": 1,
-              "write_workspace_note": 1
+              "seek_contact": 1,
+              "unstable_workspace_note": 4
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
-              "exploit_shelter": 0.041666666666666664,
-              "hide": 0.08333333333333333,
-              "rest": 0.6666666666666666,
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.16666666666666666,
+              "rest": 0.5,
               "scan": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664,
-              "write_workspace_note": 0.041666666666666664
+              "seek_contact": 0.041666666666666664,
+              "unstable_workspace_note": 0.16666666666666666
             },
-            "action_switch_count": 11,
-            "unique_actions": 7,
-            "action_entropy": 1.751629167387823,
+            "action_switch_count": 12,
+            "unique_actions": 6,
+            "action_entropy": 2.042481250360578,
             "dominant_action": "rest",
-            "dominant_action_share": 0.6666666666666666,
-            "max_action_streak": 5,
+            "dominant_action_share": 0.5,
+            "max_action_streak": 4,
             "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
@@ -1910,27 +1900,27 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.452982,
+          "mean": 0.494209,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.0,
+          "mean": 0.041667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 1.751629,
+          "mean": 2.042481,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.666667,
+          "mean": 0.5,
           "std": 0.0
         },
         "max_action_streak": {
-          "mean": 5.0,
+          "mean": 4.0,
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.528261,
+          "mean": 0.571739,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -1942,7 +1932,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.11125,
+          "mean": 0.1075,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -1966,7 +1956,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.266667,
+          "mean": 0.24795,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -2001,22 +1991,22 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.598757,
-            "free_energy_spike_rate": 0.083333,
-            "action_entropy": 2.49939,
-            "dominant_action_share": 0.458333,
-            "max_action_streak": 4,
-            "action_switch_rate": 0.176812,
-            "maintenance_completion_rate": 0.208333,
+            "mean_free_energy": 0.441898,
+            "free_energy_spike_rate": 0.041667,
+            "action_entropy": 1.553509,
+            "dominant_action_share": 0.666667,
+            "max_action_streak": 9,
+            "action_switch_rate": 0.069928,
+            "maintenance_completion_rate": 0.041667,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.234667,
+            "sleep_recovery_gain": 0.184333,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.183333,
-            "homeostatic_balance_score": 0.994792,
+            "identity_drift_score": 0.318156,
+            "homeostatic_balance_score": 0.998583,
             "governance_probe_count": 1,
             "external_action_count": 1,
             "restart_identity_continuity": 0.0,
@@ -2032,40 +2022,32 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.4900527638186747,
-            "avg_free_energy_after": 0.598757229152118,
-            "avg_free_energy_drop": 0.01653652214115831,
-            "min_energy": 0.3099999999999995,
-            "max_stress": 0.12599999999999997,
+            "avg_free_energy_before": 0.3757657809402752,
+            "avg_free_energy_after": 0.44189821904207344,
+            "avg_free_energy_drop": 0.017378603920933856,
+            "min_energy": 0.3299999999999992,
+            "max_stress": 0.178,
             "action_counts": {
-              "append_workspace_note": 2,
-              "exploit_shelter": 1,
-              "fetch_remote_status": 2,
-              "hide": 4,
-              "rest": 11,
+              "exploit_shelter": 2,
+              "hide": 3,
+              "rest": 16,
               "scan": 1,
-              "seek_contact": 1,
-              "unstable_workspace_note": 1,
-              "write_workspace_note": 1
+              "unstable_workspace_note": 2
             },
             "action_distribution": {
-              "append_workspace_note": 0.08333333333333333,
-              "exploit_shelter": 0.041666666666666664,
-              "fetch_remote_status": 0.08333333333333333,
-              "hide": 0.16666666666666666,
-              "rest": 0.4583333333333333,
+              "exploit_shelter": 0.08333333333333333,
+              "hide": 0.125,
+              "rest": 0.6666666666666666,
               "scan": 0.041666666666666664,
-              "seek_contact": 0.041666666666666664,
-              "unstable_workspace_note": 0.041666666666666664,
-              "write_workspace_note": 0.041666666666666664
+              "unstable_workspace_note": 0.08333333333333333
             },
-            "action_switch_count": 14,
-            "unique_actions": 9,
-            "action_entropy": 2.499389675512395,
+            "action_switch_count": 11,
+            "unique_actions": 5,
+            "action_entropy": 1.5535088547976783,
             "dominant_action": "rest",
-            "dominant_action_share": 0.4583333333333333,
-            "max_action_streak": 4,
-            "last_choice": "append_workspace_note",
+            "dominant_action_share": 0.6666666666666666,
+            "max_action_streak": 9,
+            "last_choice": "rest",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -2076,31 +2058,31 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.598757,
+          "mean": 0.441898,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.083333,
+          "mean": 0.041667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.49939,
+          "mean": 1.553509,
           "std": 0.0
         },
         "dominant_action_share": {
-          "mean": 0.458333,
+          "mean": 0.666667,
           "std": 0.0
         },
         "max_action_streak": {
-          "mean": 4.0,
+          "mean": 9.0,
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.176812,
+          "mean": 0.069928,
           "std": 0.0
         },
         "maintenance_completion_rate": {
-          "mean": 0.208333,
+          "mean": 0.041667,
           "std": 0.0
         },
         "maintenance_interrupt_recovery_rate": {
@@ -2108,7 +2090,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.234667,
+          "mean": 0.184333,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -2132,11 +2114,11 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.183333,
+          "mean": 0.318156,
           "std": 0.0
         },
         "homeostatic_balance_score": {
-          "mean": 0.994792,
+          "mean": 0.998583,
           "std": 0.0
         },
         "governance_probe_count": {
@@ -2170,27 +2152,27 @@
         "seed": 222,
         "metrics": {
           "survival_ratio": 1.0,
-          "mean_free_energy": 0.50607,
-          "free_energy_spike_rate": 0.0,
-          "action_entropy": 2.186482,
-          "dominant_action_share": 0.458333,
+          "mean_free_energy": 0.470823,
+          "free_energy_spike_rate": 0.083333,
+          "action_entropy": 1.832552,
+          "dominant_action_share": 0.583333,
           "max_action_streak": 4,
           "action_switch_rate": 0.571739,
           "maintenance_completion_rate": 1.0,
           "maintenance_interrupt_recovery_rate": 1.0,
-          "sleep_recovery_gain": 0.0775,
+          "sleep_recovery_gain": 0.07625,
           "resource_guard_success_rate": 1.0,
           "governance_violation_rate": 0.0,
           "catastrophic_failure_rate": 0.0,
           "chronic_debt_recovery_score": 1.0,
           "trace_compaction_effectiveness": 1.0,
-          "identity_drift_score": 0.183333,
+          "identity_drift_score": 0.281191,
           "homeostatic_balance_score": 1.0,
           "governance_probe_count": 1,
           "external_action_count": 1,
-          "restart_identity_continuity": 0.666667,
+          "restart_identity_continuity": 1.0,
           "restart_policy_continuity": 1.0,
-          "restart_memory_integrity": 0.95
+          "restart_memory_integrity": 1.0
         },
         "summary": {
           "cycles_completed": 24,
@@ -2201,34 +2183,34 @@
           "telemetry_error_count": 0,
           "persistence_error_count": 0,
           "memory_hit_rate": 0.9583333333333334,
-          "avg_free_energy_before": 0.39327442462605555,
-          "avg_free_energy_after": 0.5060695219788007,
-          "avg_free_energy_drop": 0.008365229369990353,
+          "avg_free_energy_before": 0.35955299424417625,
+          "avg_free_energy_after": 0.470823334411358,
+          "avg_free_energy_drop": 0.015330069083495643,
           "min_energy": 0.81,
           "max_stress": 0.10999999999999999,
           "action_counts": {
-            "append_workspace_note": 2,
             "exploit_shelter": 3,
             "hide": 4,
-            "rest": 11,
+            "rest": 14,
             "scan": 1,
-            "unstable_workspace_note": 3
+            "seek_contact": 1,
+            "unstable_workspace_note": 1
           },
           "action_distribution": {
-            "append_workspace_note": 0.08333333333333333,
             "exploit_shelter": 0.125,
             "hide": 0.16666666666666666,
-            "rest": 0.4583333333333333,
+            "rest": 0.5833333333333334,
             "scan": 0.041666666666666664,
-            "unstable_workspace_note": 0.125
+            "seek_contact": 0.041666666666666664,
+            "unstable_workspace_note": 0.041666666666666664
           },
           "action_switch_count": 12,
           "unique_actions": 6,
-          "action_entropy": 2.1864823836654392,
+          "action_entropy": 1.8325518169307426,
           "dominant_action": "rest",
-          "dominant_action_share": 0.4583333333333333,
+          "dominant_action_share": 0.5833333333333334,
           "max_action_streak": 4,
-          "last_choice": "exploit_shelter",
+          "last_choice": "rest",
           "termination_reason": "cycles_exhausted"
         }
       }
@@ -2239,19 +2221,19 @@
         "std": 0.0
       },
       "mean_free_energy": {
-        "mean": 0.50607,
+        "mean": 0.470823,
         "std": 0.0
       },
       "free_energy_spike_rate": {
-        "mean": 0.0,
+        "mean": 0.083333,
         "std": 0.0
       },
       "action_entropy": {
-        "mean": 2.186482,
+        "mean": 1.832552,
         "std": 0.0
       },
       "dominant_action_share": {
-        "mean": 0.458333,
+        "mean": 0.583333,
         "std": 0.0
       },
       "max_action_streak": {
@@ -2271,7 +2253,7 @@
         "std": 0.0
       },
       "sleep_recovery_gain": {
-        "mean": 0.0775,
+        "mean": 0.07625,
         "std": 0.0
       },
       "resource_guard_success_rate": {
@@ -2295,7 +2277,7 @@
         "std": 0.0
       },
       "identity_drift_score": {
-        "mean": 0.183333,
+        "mean": 0.281191,
         "std": 0.0
       },
       "homeostatic_balance_score": {
@@ -2311,7 +2293,7 @@
         "std": 0.0
       },
       "restart_identity_continuity": {
-        "mean": 0.666667,
+        "mean": 1.0,
         "std": 0.0
       },
       "restart_policy_continuity": {
@@ -2319,7 +2301,7 @@
         "std": 0.0
       },
       "restart_memory_integrity": {
-        "mean": 0.95,
+        "mean": 1.0,
         "std": 0.0
       }
     }
@@ -2331,19 +2313,19 @@
         "std": 0.0
       },
       "mean_free_energy": {
-        "mean": 0.456733,
+        "mean": 0.477328,
         "std": 0.0
       },
       "free_energy_spike_rate": {
-        "mean": 0.0,
+        "mean": 0.041667,
         "std": 0.0
       },
       "action_entropy": {
-        "mean": 1.746915,
+        "mean": 2.177694,
         "std": 0.0
       },
       "dominant_action_share": {
-        "mean": 0.625,
+        "mean": 0.5,
         "std": 0.0
       },
       "max_action_streak": {
@@ -2363,7 +2345,7 @@
         "std": 0.0
       },
       "sleep_recovery_gain": {
-        "mean": 0.1,
+        "mean": 0.09625,
         "std": 0.0
       },
       "resource_guard_success_rate": {
@@ -2387,7 +2369,7 @@
         "std": 0.0
       },
       "identity_drift_score": {
-        "mean": 0.25,
+        "mean": 0.246974,
         "std": 0.0
       },
       "homeostatic_balance_score": {
@@ -2430,6 +2412,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m222_v1",
-    "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57"
+    "codebase_version": "299df5e5fe2b2333532928dc29458be8dfae8feb"
   }
 }

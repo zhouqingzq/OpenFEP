@@ -8,6 +8,7 @@ from .narrative_types import (
     EmbodiedNarrativeEpisode,
     NarrativeEpisode,
 )
+from .narrative_uncertainty import NarrativeUncertaintyDecomposer
 from .self_model import PersonalitySignal
 
 
@@ -186,16 +187,29 @@ def _match_count(text: str, cues: tuple[str, ...]) -> int:
 class NarrativeCompiler:
     """Deterministic rule-based compiler for seeded and open-text narratives."""
 
+    def __init__(
+        self,
+        *,
+        uncertainty_decomposer: NarrativeUncertaintyDecomposer | None = None,
+    ) -> None:
+        self.uncertainty_decomposer = uncertainty_decomposer or NarrativeUncertaintyDecomposer()
+
     def compile_episode(
         self,
         episode: NarrativeEpisode,
     ) -> EmbodiedNarrativeEpisode:
         compiled_event = self.compile_event(episode)
         appraisal = self.appraise_event(compiled_event)
+        uncertainty = self.uncertainty_decomposer.decompose(
+            episode=episode,
+            compiled_event=compiled_event,
+            appraisal=appraisal,
+        )
         observation = self.compatibility_observation(appraisal)
         confidence = self._confidence_for_event(compiled_event)
         annotations = dict(compiled_event.annotations)
         annotations["compiler_confidence"] = confidence
+        annotations["narrative_ambiguity_profile"] = uncertainty.profile.to_dict()
         provenance = {
             "source_episode_id": episode.episode_id,
             "source_type": episode.source,
@@ -215,6 +229,7 @@ class NarrativeCompiler:
             ),
             "low_signal": bool(annotations.get("low_signal", False)),
             "conflict_cues": list(annotations.get("conflict_cues", [])),
+            "uncertainty_decomposition": uncertainty.to_dict(),
         }
         return EmbodiedNarrativeEpisode(
             episode_id=episode.episode_id,
@@ -224,9 +239,20 @@ class NarrativeCompiler:
             body_state=self._body_state_for_appraisal(appraisal),
             predicted_outcome=compiled_event.outcome_type,
             value_tags=self._value_tags(compiled_event),
-            narrative_tags=sorted(set(episode.tags + [compiled_event.event_type])),
+            narrative_tags=sorted(
+                set(
+                    episode.tags
+                    + [compiled_event.event_type]
+                    + [
+                        f"uncertainty:{item.unknown_type}"
+                        for item in uncertainty.unknowns
+                        if item.action_relevant
+                    ]
+                )
+            ),
             compiler_confidence=confidence,
             provenance=provenance,
+            uncertainty_decomposition=uncertainty.to_dict(),
         )
 
     def compile_event(self, episode: NarrativeEpisode) -> CompiledNarrativeEvent:

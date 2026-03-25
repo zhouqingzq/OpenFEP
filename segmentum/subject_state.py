@@ -128,6 +128,39 @@ class SubjectPriority:
 
 
 @dataclass(frozen=True)
+class NarrativeUncertaintyFocus:
+    unknown_id: str
+    label: str
+    unknown_type: str
+    relevance: float
+    linked_entities: tuple[str, ...] = ()
+    hypotheses: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "unknown_id": self.unknown_id,
+            "label": self.label,
+            "unknown_type": self.unknown_type,
+            "relevance": round(self.relevance, 6),
+            "linked_entities": list(self.linked_entities),
+            "hypotheses": list(self.hypotheses),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "NarrativeUncertaintyFocus":
+        if not payload:
+            return cls(unknown_id="", label="", unknown_type="", relevance=0.0)
+        return cls(
+            unknown_id=str(payload.get("unknown_id", "")),
+            label=str(payload.get("label", "")),
+            unknown_type=str(payload.get("unknown_type", "")),
+            relevance=float(payload.get("relevance", 0.0)),
+            linked_entities=tuple(str(item) for item in payload.get("linked_entities", [])),
+            hypotheses=tuple(str(item) for item in payload.get("hypotheses", [])),
+        )
+
+
+@dataclass(frozen=True)
 class SubjectState:
     tick: int = 0
     core_identity_summary: str = ""
@@ -146,6 +179,8 @@ class SubjectState:
     continuity_score: float = 1.0
     continuity_anchors: tuple[str, ...] = ()
     unresolved_tensions: tuple[ActiveTension, ...] = ()
+    narrative_uncertainties: tuple[NarrativeUncertaintyFocus, ...] = ()
+    ambiguity_profile: dict[str, float] = field(default_factory=dict)
     subject_priority_stack: tuple[SubjectPriority, ...] = ()
     slow_biases: dict[str, float] = field(default_factory=dict)
     status_flags: dict[str, bool] = field(default_factory=dict)
@@ -172,6 +207,10 @@ class SubjectState:
             "continuity_score": round(self.continuity_score, 6),
             "continuity_anchors": list(self.continuity_anchors),
             "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions],
+            "narrative_uncertainties": [item.to_dict() for item in self.narrative_uncertainties],
+            "ambiguity_profile": {
+                str(key): float(value) for key, value in self.ambiguity_profile.items()
+            },
             "subject_priority_stack": [item.to_dict() for item in self.subject_priority_stack],
             "slow_biases": {str(key): float(value) for key, value in self.slow_biases.items()},
             "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
@@ -219,6 +258,16 @@ class SubjectState:
                 for item in payload.get("unresolved_tensions", [])
                 if isinstance(item, Mapping)
             ),
+            narrative_uncertainties=tuple(
+                NarrativeUncertaintyFocus.from_dict(item)
+                for item in payload.get("narrative_uncertainties", [])
+                if isinstance(item, Mapping)
+            ),
+            ambiguity_profile={
+                str(key): float(value)
+                for key, value in dict(payload.get("ambiguity_profile", {})).items()
+                if isinstance(value, (int, float))
+            },
             subject_priority_stack=tuple(
                 SubjectPriority.from_dict(item)
                 for item in payload.get("subject_priority_stack", [])
@@ -243,6 +292,7 @@ class SubjectState:
         labels = [priority.label for priority in self.subject_priority_stack[:2] if priority.label]
         flags = [name.replace("_", "-") for name, active in self.status_flags.items() if active]
         tensions = [tension.label for tension in self.unresolved_tensions[:2] if tension.label]
+        uncertainties = [item.label for item in self.narrative_uncertainties[:2] if item.label]
         parts = [f"My current subject state is {self.current_phase or 'forming'}-dominant."]
         if self.dominant_goal:
             parts.append(f"Primary goal: {self.dominant_goal}.")
@@ -252,6 +302,8 @@ class SubjectState:
             parts.append("Priorities: " + ", ".join(labels) + ".")
         if tensions:
             parts.append("Unresolved tensions: " + ", ".join(tensions) + ".")
+        if uncertainties:
+            parts.append("Narrative uncertainty: " + ", ".join(uncertainties) + ".")
         if self.same_subject_basis:
             parts.append(self.same_subject_basis)
         return " ".join(parts)
@@ -268,6 +320,12 @@ class SubjectState:
             "priority_stack": [item.to_dict() for item in self.subject_priority_stack[:4]],
             "slow_biases": {str(key): float(value) for key, value in self.slow_biases.items()},
             "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions[:4]],
+            "narrative_uncertainties": [
+                item.to_dict() for item in self.narrative_uncertainties[:4]
+            ],
+            "ambiguity_profile": {
+                str(key): float(value) for key, value in self.ambiguity_profile.items()
+            },
             "continuity_score": round(self.continuity_score, 6),
             "continuity_anchors": list(self.continuity_anchors),
         }
@@ -289,6 +347,7 @@ NEED_ACTIONS = {
     "danger": (("hide", "exploit_shelter", "scan"), ("forage", "seek_contact")),
     "continuity": (("rest", "scan", "hide"), ("forage",)),
     "social": (("seek_contact", "scan"), ("hide",)),
+    "uncertainty": (("scan", "hide"), ("forage",)),
 }
 
 
@@ -382,6 +441,38 @@ def _social_bindings(agent: "SegmentAgent") -> list[SubjectBinding]:
     return bindings[:3]
 
 
+def _narrative_uncertainty_focus(agent: "SegmentAgent") -> list[NarrativeUncertaintyFocus]:
+    payload = getattr(agent, "latest_narrative_uncertainty", None)
+    if payload is None:
+        return []
+    unknowns = getattr(payload, "unknowns", ())
+    hypotheses = getattr(payload, "competing_hypotheses", ())
+    focus: list[NarrativeUncertaintyFocus] = []
+    for unknown in unknowns[:4]:
+        if not getattr(unknown, "action_relevant", False):
+            continue
+        linked_hypotheses = [
+            hypothesis.statement
+            for hypothesis in hypotheses
+            if hypothesis.parent_unknown_id == unknown.unknown_id
+        ][:3]
+        label = unknown.unknown_type.replace("_", " ")
+        if unknown.linked_entities:
+            label += f" for {unknown.linked_entities[0]}"
+        focus.append(
+            NarrativeUncertaintyFocus(
+                unknown_id=unknown.unknown_id,
+                label=label,
+                unknown_type=unknown.unknown_type,
+                relevance=float(unknown.decision_relevance.total_score),
+                linked_entities=tuple(unknown.linked_entities[:2]),
+                hypotheses=tuple(linked_hypotheses),
+            )
+        )
+    focus.sort(key=lambda item: (-item.relevance, item.unknown_id))
+    return focus[:3]
+
+
 def _tensions(
     agent: "SegmentAgent",
     diagnostics: "DecisionDiagnostics | None",
@@ -390,6 +481,7 @@ def _tensions(
 ) -> list[ActiveTension]:
     tensions: list[ActiveTension] = []
     prediction_ledger = getattr(agent, "prediction_ledger", None)
+    narrative_uncertainties = _narrative_uncertainty_focus(agent)
     if diagnostics is not None and diagnostics.identity_tension > 0.05:
         tensions.append(
             ActiveTension(
@@ -444,6 +536,16 @@ def _tensions(
                     evidence=(alert,),
                 )
             )
+    for uncertainty in narrative_uncertainties[:2]:
+        tensions.append(
+            ActiveTension(
+                label=f"narrative uncertainty: {uncertainty.label}",
+                tension_type="uncertainty",
+                intensity=min(1.0, 0.18 + uncertainty.relevance * 0.75),
+                repair_target="verify latent cause",
+                evidence=tuple(uncertainty.hypotheses[:2] or (uncertainty.unknown_type,)),
+            )
+        )
     if prediction_ledger is not None:
         for discrepancy in prediction_ledger.top_discrepancies(limit=3):
             tensions.append(
@@ -579,6 +681,7 @@ def derive_subject_state(
         )
     commitment_summaries, commitment_targets, commitment_ids = _top_commitments(agent)
     bindings = _social_bindings(agent)
+    narrative_uncertainties = _narrative_uncertainty_focus(agent)
     active_social_focus = list(
         diagnostics.social_focus if diagnostics is not None else [item.binding_id for item in bindings[:2]]
     )
@@ -648,6 +751,7 @@ def derive_subject_state(
             or any(binding.binding_type == "social_threat" for binding in bindings)
             or float(slow_biases.get("trust_stance", 0.5)) <= 0.34
         ),
+        "narrative_ambiguity_active": bool(narrative_uncertainties),
         "continuity_fragile": continuity_fragile,
         "long_horizon_conflict": unresolved_reconciliation > 0,
     }
@@ -670,6 +774,11 @@ def derive_subject_state(
         same_subject_bits.append(
             f"{unresolved_reconciliation} long-horizon conflict thread(s) still shape continuity."
         )
+    if narrative_uncertainties:
+        same_subject_bits.append(
+            f"{len(narrative_uncertainties)} retained narrative uncertainty item(s) still shape policy."
+        )
+    ambiguity_profile = getattr(getattr(agent, "latest_narrative_uncertainty", None), "profile", None)
     return SubjectState(
         tick=int(agent.cycle),
         core_identity_summary=core_identity_summary,
@@ -688,6 +797,10 @@ def derive_subject_state(
         continuity_score=continuity_score,
         continuity_anchors=tuple(continuity_anchors),
         unresolved_tensions=tuple(tensions),
+        narrative_uncertainties=tuple(narrative_uncertainties),
+        ambiguity_profile=(
+            ambiguity_profile.to_dict() if ambiguity_profile is not None else {}
+        ),
         subject_priority_stack=tuple(priorities),
         slow_biases=slow_biases,
         status_flags=status_flags,
@@ -728,6 +841,11 @@ def subject_action_bias(subject_state: SubjectState, action: str) -> float:
             bias += 0.05
         elif action == "forage":
             bias -= 0.03
+    if subject_state.status_flags.get("narrative_ambiguity_active", False):
+        if action in {"scan", "hide"}:
+            bias += 0.04
+        elif action == "forage":
+            bias -= 0.03
     caution_bias = float(subject_state.slow_biases.get("caution_bias", 0.5))
     threat_sensitivity = float(subject_state.slow_biases.get("threat_sensitivity", 0.5))
     trust_stance = float(subject_state.slow_biases.get("trust_stance", 0.5))
@@ -759,6 +877,8 @@ def subject_memory_threshold_delta(subject_state: SubjectState) -> float:
         delta -= 0.05
     if subject_state.status_flags.get("threatened", False):
         delta -= 0.05
+    if subject_state.status_flags.get("narrative_ambiguity_active", False):
+        delta -= 0.04
     delta -= max(0.0, float(subject_state.slow_biases.get("threat_sensitivity", 0.5)) - 0.5) * 0.07
     delta -= max(0.0, float(subject_state.slow_biases.get("commitment_stability", 0.5)) - 0.5) * 0.05
     delta -= max(0.0, 0.55 - float(subject_state.slow_biases.get("continuity_resilience", 0.5))) * 0.06

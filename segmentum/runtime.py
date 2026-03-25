@@ -683,6 +683,7 @@ class SegmentRuntime:
             "validation_update": verification_validation.to_dict(),
         }
         details["subject_state"] = self.subject_state.explanation_payload()
+        details["narrative_uncertainty"] = self.agent.latest_narrative_uncertainty.explanation_payload()
         diagnostics.structured_explanation = details
         diagnostics.ledger_summary = str(details["prediction_ledger"]["summary"])
         diagnostics.ledger_payload = dict(details["prediction_ledger"])
@@ -1699,6 +1700,7 @@ class SegmentRuntime:
         trace_record["reconciliation"] = self.agent.reconciliation_engine.to_dict()
         trace_record["verification_loop"] = self.agent.verification_loop.to_dict()
         trace_record["subject_state"] = self.subject_state.to_dict()
+        trace_record["narrative_uncertainty"] = self.agent.latest_narrative_uncertainty.to_dict()
         trace_record["slow_learning"] = self.agent.slow_variable_learner.to_dict()
         trace_record["continuity"] = dict(self.last_continuity_report)
         if self.last_error_attribution is not None:

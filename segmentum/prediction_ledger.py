@@ -52,8 +52,11 @@ class PredictionHypothesis:
     supporting_evidence: tuple[str, ...] = ()
     linked_commitments: tuple[str, ...] = ()
     linked_identity_anchors: tuple[str, ...] = ()
+    linked_unknown_ids: tuple[str, ...] = ()
+    linked_hypothesis_ids: tuple[str, ...] = ()
     linked_goal: str = ""
     maintenance_context: str = ""
+    decision_relevance: float = 0.0
     verification_tick: int = 0
     recurrence_count: int = 0
     verification_attempts: int = 0
@@ -73,8 +76,11 @@ class PredictionHypothesis:
             "supporting_evidence": list(self.supporting_evidence),
             "linked_commitments": list(self.linked_commitments),
             "linked_identity_anchors": list(self.linked_identity_anchors),
+            "linked_unknown_ids": list(self.linked_unknown_ids),
+            "linked_hypothesis_ids": list(self.linked_hypothesis_ids),
             "linked_goal": self.linked_goal,
             "maintenance_context": self.maintenance_context,
+            "decision_relevance": round(self.decision_relevance, 6),
             "verification_tick": int(self.verification_tick),
             "recurrence_count": int(self.recurrence_count),
             "verification_attempts": int(self.verification_attempts),
@@ -114,8 +120,13 @@ class PredictionHypothesis:
             linked_identity_anchors=tuple(
                 str(item) for item in payload.get("linked_identity_anchors", [])
             ),
+            linked_unknown_ids=tuple(str(item) for item in payload.get("linked_unknown_ids", [])),
+            linked_hypothesis_ids=tuple(
+                str(item) for item in payload.get("linked_hypothesis_ids", [])
+            ),
             linked_goal=str(payload.get("linked_goal", "")),
             maintenance_context=str(payload.get("maintenance_context", "")),
+            decision_relevance=float(payload.get("decision_relevance", 0.0)),
             verification_tick=int(payload.get("verification_tick", 0)),
             recurrence_count=int(payload.get("recurrence_count", 0)),
             verification_attempts=int(payload.get("verification_attempts", 0)),
@@ -366,6 +377,11 @@ class PredictionLedger:
                 bias += 0.04 * prediction.confidence
             if prediction.prediction_type == "maintenance_recovery" and action == "rest":
                 bias += 0.05 * prediction.confidence
+            if prediction.source_module == "narrative_uncertainty":
+                if action in {"scan", "hide"}:
+                    bias += 0.04 * max(prediction.confidence, prediction.decision_relevance)
+                elif action == "forage":
+                    bias -= 0.03 * max(prediction.confidence, prediction.decision_relevance)
         return round(max(-0.45, min(0.45, bias)), 6)
 
     def workspace_focus(self) -> dict[str, float]:
@@ -440,11 +456,17 @@ class PredictionLedger:
             )
         elif active_predictions:
             top_pred = active_predictions[0]
-            summary = (
-                f"I still expect {top_pred['prediction_type']} on "
-                f"{', '.join(top_pred['target_channels']) or 'current channels'}, "
-                "but it remains unverified."
-            )
+            if top_pred.get("source_module") == "narrative_uncertainty":
+                summary = (
+                    f"I am carrying forward narrative uncertainty about {top_pred['prediction_type']}, "
+                    "because competing explanations still imply different outcomes."
+                )
+            else:
+                summary = (
+                    f"I still expect {top_pred['prediction_type']} on "
+                    f"{', '.join(top_pred['target_channels']) or 'current channels'}, "
+                    "but it remains unverified."
+                )
         return {
             "summary": summary,
             "active_predictions": active_predictions,
@@ -557,6 +579,7 @@ class PredictionLedger:
         diagnostics,
         prediction: Mapping[str, float],
         subject_state,
+        narrative_uncertainty=None,
     ) -> PredictionLedgerUpdate:
         created: list[str] = []
         priorities = sorted(
@@ -632,6 +655,64 @@ class PredictionLedger:
                 )
             )
             created.append(social_prediction_id)
+        uncertainty_unknowns = getattr(narrative_uncertainty, "unknowns", ()) if narrative_uncertainty is not None else ()
+        uncertainty_hypotheses = (
+            getattr(narrative_uncertainty, "competing_hypotheses", ())
+            if narrative_uncertainty is not None
+            else ()
+        )
+        for unknown in uncertainty_unknowns[:2]:
+            if not getattr(unknown, "action_relevant", False):
+                continue
+            hypothesis = next(
+                (
+                    item
+                    for item in uncertainty_hypotheses
+                    if item.parent_unknown_id == unknown.unknown_id
+                ),
+                None,
+            )
+            expected_state = (
+                dict(hypothesis.expected_state_shift)
+                if hypothesis is not None
+                else {
+                    "danger": max(0.35, float(prediction.get("danger", 0.0)))
+                    if unknown.unknown_type == "threat_persistence"
+                    else max(0.35, float(prediction.get("social", 0.0)))
+                }
+            )
+            if not expected_state:
+                continue
+            prediction_id = f"pred:narrative:{unknown.unknown_id}"
+            self._upsert_prediction(
+                PredictionHypothesis(
+                    prediction_id=prediction_id,
+                    created_tick=tick,
+                    last_updated_tick=tick,
+                    source_module="narrative_uncertainty",
+                    prediction_type=f"narrative_{unknown.unknown_type}",
+                    target_channels=tuple(sorted(expected_state)),
+                    expected_state=expected_state,
+                    confidence=_clamp(
+                        0.34
+                        + float(unknown.decision_relevance.verification_urgency) * 0.28
+                        + (float(hypothesis.prior_plausibility) * 0.18 if hypothesis is not None else 0.0)
+                    ),
+                    expected_horizon=2,
+                    supporting_evidence=tuple(
+                        [unknown.unresolved_reason]
+                        + list(getattr(hypothesis, "implied_consequences", ())[:2])
+                    )[:3],
+                    linked_identity_anchors=tuple(subject_state.continuity_anchors[:2]),
+                    linked_unknown_ids=(unknown.unknown_id,),
+                    linked_hypothesis_ids=(
+                        (hypothesis.hypothesis_id,) if hypothesis is not None else ()
+                    ),
+                    linked_goal=diagnostics.active_goal,
+                    decision_relevance=float(unknown.decision_relevance.total_score),
+                )
+            )
+            created.append(prediction_id)
         self._trim()
         self.last_tick = tick
         return PredictionLedgerUpdate(

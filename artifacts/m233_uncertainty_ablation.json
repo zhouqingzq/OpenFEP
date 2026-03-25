@@ -1,0 +1,17 @@
+{
+  "full_mechanism": {
+    "subject_uncertainty_count": 1,
+    "narrative_prediction_count": 1,
+    "verification_target_count": 3
+  },
+  "without_retained_uncertainty": {
+    "subject_uncertainty_count": 0,
+    "narrative_prediction_count": 0,
+    "verification_target_count": 3
+  },
+  "degradation_checks": {
+    "subject_state_loses_uncertainty_surface": true,
+    "ledger_loses_narrative_predictions": true,
+    "verification_loses_uncertainty_targets": true
+  }
+}

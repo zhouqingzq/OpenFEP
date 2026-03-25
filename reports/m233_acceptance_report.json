@@ -1,0 +1,336 @@
+{
+  "milestone_id": "M2.33",
+  "title": "Narrative Uncertainty Decomposition",
+  "strict": true,
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-03-25T04:11:10+00:00",
+  "seed_set": [
+    233,
+    466
+  ],
+  "artifacts": {
+    "specification": "E:\\workspace\\segments\\reports\\m233_milestone_spec.md",
+    "preparation": "E:\\workspace\\segments\\reports\\m233_strict_audit_preparation.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_stress.json",
+    "report": "E:\\workspace\\segments\\reports\\m233_acceptance_report.json",
+    "summary": "E:\\workspace\\segments\\reports\\m233_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": {
+      "label": "m233-milestone",
+      "paths": [
+        "tests/test_m233_uncertainty_decomposition.py",
+        "tests/test_m233_narrative_robustness.py",
+        "tests/test_m233_acceptance.py",
+        "tests/test_m233_audit_preparation.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m233_uncertainty_decomposition.py",
+        "tests/test_m233_narrative_robustness.py",
+        "tests/test_m233_acceptance.py",
+        "tests/test_m233_audit_preparation.py",
+        "-q"
+      ],
+      "stdout": "............                                                             [100%]\n12 passed in 0.86s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-25T04:11:06+00:00",
+      "completed_at": "2026-03-25T04:11:07+00:00"
+    },
+    "regressions": {
+      "label": "m233-regression",
+      "paths": [
+        "tests/test_narrative_compiler.py",
+        "tests/test_m220_narrative_initialization.py",
+        "tests/test_m227_snapshot_roundtrip.py",
+        "tests/test_m228_prediction_ledger.py",
+        "tests/test_runtime.py"
+      ],
+      "executed": true,
+      "passed": true,
+      "returncode": 0,
+      "command": [
+        "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_narrative_compiler.py",
+        "tests/test_m220_narrative_initialization.py",
+        "tests/test_m227_snapshot_roundtrip.py",
+        "tests/test_m228_prediction_ledger.py",
+        "tests/test_runtime.py",
+        "-q"
+      ],
+      "stdout": "...........................                                              [100%]\n27 passed in 2.30s",
+      "stderr": "",
+      "execution_source": "subprocess",
+      "started_at": "2026-03-25T04:11:07+00:00",
+      "completed_at": "2026-03-25T04:11:10+00:00"
+    }
+  },
+  "gates": {
+    "schema": {
+      "passed": true,
+      "evidence": [
+        "unknowns",
+        "profile",
+        "unknown_type"
+      ]
+    },
+    "competition": {
+      "passed": true,
+      "evidence": [
+        "competing_hypotheses"
+      ]
+    },
+    "downstream_causality": {
+      "passed": true,
+      "evidence": [
+        "subject_state_loses_uncertainty_surface",
+        "ledger_loses_narrative_predictions",
+        "verification_loses_uncertainty_targets"
+      ]
+    },
+    "surface_latent_separation": {
+      "passed": true,
+      "evidence": [
+        "surface_only_input_not_promoted",
+        "surface_cues"
+      ]
+    },
+    "snapshot_roundtrip": {
+      "passed": true,
+      "evidence": [
+        "restored_summary",
+        "restored_unknowns"
+      ]
+    },
+    "regression": {
+      "passed": true,
+      "execution": {
+        "label": "m233-regression",
+        "paths": [
+          "tests/test_narrative_compiler.py",
+          "tests/test_m220_narrative_initialization.py",
+          "tests/test_m227_snapshot_roundtrip.py",
+          "tests/test_m228_prediction_ledger.py",
+          "tests/test_runtime.py"
+        ],
+        "executed": true,
+        "passed": true,
+        "returncode": 0,
+        "command": [
+          "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_narrative_compiler.py",
+          "tests/test_m220_narrative_initialization.py",
+          "tests/test_m227_snapshot_roundtrip.py",
+          "tests/test_m228_prediction_ledger.py",
+          "tests/test_runtime.py",
+          "-q"
+        ],
+        "stdout": "...........................                                              [100%]\n27 passed in 2.30s",
+        "stderr": "",
+        "execution_source": "subprocess",
+        "started_at": "2026-03-25T04:11:07+00:00",
+        "completed_at": "2026-03-25T04:11:10+00:00"
+      }
+    },
+    "artifact_freshness": {
+      "passed": true,
+      "details": {
+        "strict": true,
+        "audit_started_at": "2026-03-25T04:11:06+00:00",
+        "generated_at": "2026-03-25T04:11:10+00:00",
+        "artifact_records": {
+          "specification": {
+            "path": "E:\\workspace\\segments\\reports\\m233_milestone_spec.md",
+            "exists": true,
+            "size_bytes": 1090,
+            "modified_at": "2026-03-25T03:43:00+00:00"
+          },
+          "preparation": {
+            "path": "E:\\workspace\\segments\\reports\\m233_strict_audit_preparation.md",
+            "exists": true,
+            "size_bytes": 1224,
+            "modified_at": "2026-03-25T03:43:07+00:00"
+          },
+          "canonical_trace": {
+            "path": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_trace.jsonl",
+            "exists": true,
+            "size_bytes": 8144,
+            "modified_at": "2026-03-25T04:11:06+00:00"
+          },
+          "ablation": {
+            "path": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_ablation.json",
+            "exists": true,
+            "size_bytes": 485,
+            "modified_at": "2026-03-25T04:11:06+00:00"
+          },
+          "stress": {
+            "path": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_stress.json",
+            "exists": true,
+            "size_bytes": 4774,
+            "modified_at": "2026-03-25T04:11:06+00:00"
+          },
+          "report": {
+            "path": "E:\\workspace\\segments\\reports\\m233_acceptance_report.json",
+            "exists": true,
+            "size_bytes": 9299,
+            "modified_at": "2026-03-25T04:11:10+00:00"
+          },
+          "summary": {
+            "path": "E:\\workspace\\segments\\reports\\m233_acceptance_summary.md",
+            "exists": true,
+            "size_bytes": 244,
+            "modified_at": "2026-03-25T04:11:10+00:00"
+          }
+        },
+        "evidence_times_within_round": true,
+        "report_times_within_round": true,
+        "milestone_execution_authentic": true,
+        "regression_execution_authentic": true,
+        "suite_times_within_round": true,
+        "current_round": true,
+        "git": {
+          "head": "299df5e5fe2b2333532928dc29458be8dfae8feb",
+          "dirty": true,
+          "dirty_paths": [
+            "M artifacts/m222_ablation_comparison.json",
+            "M artifacts/m222_long_horizon_summary.json",
+            "M artifacts/m222_mixed_stress_trace.json",
+            "M artifacts/m222_restart_continuity.json",
+            "M reports/m222_acceptance_report.json",
+            "M segmentum/__init__.py",
+            "M segmentum/agent.py",
+            "M segmentum/m220_benchmarks.py",
+            "M segmentum/m221_benchmarks.py",
+            "M segmentum/m222_benchmarks.py",
+            "M segmentum/narrative_compiler.py",
+            "M segmentum/narrative_initialization.py",
+            "M segmentum/narrative_types.py",
+            "M segmentum/prediction_ledger.py",
+            "M segmentum/runtime.py",
+            "M segmentum/subject_state.py",
+            "M segmentum/verification.py",
+            "?? artifacts/m233_uncertainty_ablation.json",
+            "?? artifacts/m233_uncertainty_stress.json",
+            "?? artifacts/m233_uncertainty_trace.jsonl",
+            "?? reports/m233_acceptance_report.json",
+            "?? reports/m233_acceptance_summary.md",
+            "?? reports/m233_milestone_spec.md",
+            "?? reports/m233_strict_audit_preparation.md",
+            "?? segmentum/m233_audit.py",
+            "?? segmentum/narrative_uncertainty.py",
+            "?? tests/test_m233_acceptance.py",
+            "?? tests/test_m233_audit_preparation.py",
+            "?? tests/test_m233_narrative_robustness.py",
+            "?? tests/test_m233_uncertainty_decomposition.py"
+          ]
+        }
+      }
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "strict": true,
+    "audit_started_at": "2026-03-25T04:11:06+00:00",
+    "generated_at": "2026-03-25T04:11:10+00:00",
+    "artifact_records": {
+      "specification": {
+        "path": "E:\\workspace\\segments\\reports\\m233_milestone_spec.md",
+        "exists": true,
+        "size_bytes": 1090,
+        "modified_at": "2026-03-25T03:43:00+00:00"
+      },
+      "preparation": {
+        "path": "E:\\workspace\\segments\\reports\\m233_strict_audit_preparation.md",
+        "exists": true,
+        "size_bytes": 1224,
+        "modified_at": "2026-03-25T03:43:07+00:00"
+      },
+      "canonical_trace": {
+        "path": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_trace.jsonl",
+        "exists": true,
+        "size_bytes": 8144,
+        "modified_at": "2026-03-25T04:11:06+00:00"
+      },
+      "ablation": {
+        "path": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_ablation.json",
+        "exists": true,
+        "size_bytes": 485,
+        "modified_at": "2026-03-25T04:11:06+00:00"
+      },
+      "stress": {
+        "path": "E:\\workspace\\segments\\artifacts\\m233_uncertainty_stress.json",
+        "exists": true,
+        "size_bytes": 4774,
+        "modified_at": "2026-03-25T04:11:06+00:00"
+      },
+      "report": {
+        "path": "E:\\workspace\\segments\\reports\\m233_acceptance_report.json",
+        "exists": true,
+        "size_bytes": 9299,
+        "modified_at": "2026-03-25T04:11:10+00:00"
+      },
+      "summary": {
+        "path": "E:\\workspace\\segments\\reports\\m233_acceptance_summary.md",
+        "exists": true,
+        "size_bytes": 244,
+        "modified_at": "2026-03-25T04:11:10+00:00"
+      }
+    },
+    "evidence_times_within_round": true,
+    "report_times_within_round": true,
+    "milestone_execution_authentic": true,
+    "regression_execution_authentic": true,
+    "suite_times_within_round": true,
+    "current_round": true,
+    "git": {
+      "head": "299df5e5fe2b2333532928dc29458be8dfae8feb",
+      "dirty": true,
+      "dirty_paths": [
+        "M artifacts/m222_ablation_comparison.json",
+        "M artifacts/m222_long_horizon_summary.json",
+        "M artifacts/m222_mixed_stress_trace.json",
+        "M artifacts/m222_restart_continuity.json",
+        "M reports/m222_acceptance_report.json",
+        "M segmentum/__init__.py",
+        "M segmentum/agent.py",
+        "M segmentum/m220_benchmarks.py",
+        "M segmentum/m221_benchmarks.py",
+        "M segmentum/m222_benchmarks.py",
+        "M segmentum/narrative_compiler.py",
+        "M segmentum/narrative_initialization.py",
+        "M segmentum/narrative_types.py",
+        "M segmentum/prediction_ledger.py",
+        "M segmentum/runtime.py",
+        "M segmentum/subject_state.py",
+        "M segmentum/verification.py",
+        "?? artifacts/m233_uncertainty_ablation.json",
+        "?? artifacts/m233_uncertainty_stress.json",
+        "?? artifacts/m233_uncertainty_trace.jsonl",
+        "?? reports/m233_acceptance_report.json",
+        "?? reports/m233_acceptance_summary.md",
+        "?? reports/m233_milestone_spec.md",
+        "?? reports/m233_strict_audit_preparation.md",
+        "?? segmentum/m233_audit.py",
+        "?? segmentum/narrative_uncertainty.py",
+        "?? tests/test_m233_acceptance.py",
+        "?? tests/test_m233_audit_preparation.py",
+        "?? tests/test_m233_narrative_robustness.py",
+        "?? tests/test_m233_uncertainty_decomposition.py"
+      ]
+    }
+  }
+}

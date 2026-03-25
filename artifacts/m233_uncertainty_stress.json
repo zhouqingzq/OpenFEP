@@ -1,0 +1,135 @@
+{
+  "stress_checks": {
+    "multilingual_or_noisy_input_remains_bounded": true,
+    "surface_only_input_not_promoted": true,
+    "snapshot_roundtrip_preserves_uncertainty_summary": true,
+    "snapshot_roundtrip_preserves_unknowns": true
+  },
+  "details": {
+    "restored_summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification.",
+    "restored_subject_state": {
+      "tick": 0,
+      "core_identity_summary": "I am an adaptive subject maintaining continuity under uncertainty.",
+      "current_phase": "forming",
+      "current_self_narrative_phase": "forming",
+      "active_commitments": [],
+      "dominant_preferences": [
+        "strategy:expected_free_energy"
+      ],
+      "dominant_goal": "CONTROL",
+      "dominant_needs": [],
+      "dominant_workspace_contents": [],
+      "active_social_focus": [],
+      "socially_salient_bindings": [],
+      "identity_tension_level": 0.0,
+      "self_inconsistency_level": 0.0,
+      "maintenance_pressure": 0.0,
+      "continuity_score": 1.0,
+      "continuity_anchors": [],
+      "unresolved_tensions": [
+        {
+          "label": "narrative uncertainty: threat persistence for shelter-edge",
+          "tension_type": "uncertainty",
+          "intensity": 0.507983,
+          "repair_target": "verify latent cause",
+          "evidence": [
+            "There is a stable threat source that will continue shaping future danger.",
+            "The danger was a local accident rather than a persistent source."
+          ]
+        }
+      ],
+      "narrative_uncertainties": [
+        {
+          "unknown_id": "m233-audit-threat:unknown:threat_persistence",
+          "label": "threat persistence for shelter-edge",
+          "unknown_type": "threat_persistence",
+          "relevance": 0.43731,
+          "linked_entities": [
+            "shelter-edge"
+          ],
+          "hypotheses": [
+            "There is a stable threat source that will continue shaping future danger.",
+            "The danger was a local accident rather than a persistent source.",
+            "Environmental interference or misleading conditions created the danger appearance."
+          ]
+        }
+      ],
+      "ambiguity_profile": {
+        "total_unknown_count": 2.0,
+        "decision_relevant_unknown_count": 1.0,
+        "competing_hypothesis_count": 5.0,
+        "latent_cause_count": 4.0,
+        "surface_cue_count": 1.0,
+        "interpretive_competition": 0.833333,
+        "latent_cause_uncertainty_burden": 0.8,
+        "social_ambiguity_burden": 0.0,
+        "trust_ambiguity_burden": 0.0,
+        "environment_ambiguity_burden": 1.0,
+        "retained_uncertainty_burden": 0.218655
+      },
+      "subject_priority_stack": [
+        {
+          "label": "goal:control",
+          "weight": 0.7,
+          "priority_type": "goal",
+          "preferred_actions": [
+            "scan",
+            "hide"
+          ],
+          "avoid_actions": [],
+          "evidence": [
+            "CONTROL"
+          ]
+        },
+        {
+          "label": "narrative uncertainty: threat persistence for shelter-edge",
+          "weight": 0.507983,
+          "priority_type": "uncertainty",
+          "preferred_actions": [
+            "scan",
+            "hide"
+          ],
+          "avoid_actions": [
+            "forage"
+          ],
+          "evidence": [
+            "There is a stable threat source that will continue shaping future danger.",
+            "The danger was a local accident rather than a persistent source."
+          ]
+        }
+      ],
+      "slow_biases": {
+        "caution_bias": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "survival_weight": 0.72,
+        "social_weight": 0.5,
+        "exploration_weight": 0.46,
+        "maintenance_weight": 0.62,
+        "hierarchy_stability": 0.68,
+        "commitment_stability": 0.7,
+        "identity_rigidity": 0.58,
+        "plasticity": 0.42,
+        "continuity_resilience": 0.66
+      },
+      "status_flags": {
+        "threatened": false,
+        "repairing": false,
+        "overloaded": false,
+        "socially_destabilized": false,
+        "narrative_ambiguity_active": true,
+        "continuity_fragile": false,
+        "long_horizon_conflict": false
+      },
+      "protected_targets": [
+        "goal:control"
+      ],
+      "repair_targets": [
+        "verify latent cause"
+      ],
+      "same_subject_basis": "Current narrative phase: forming. 1 retained narrative uncertainty item(s) still shape policy."
+    }
+  }
+}

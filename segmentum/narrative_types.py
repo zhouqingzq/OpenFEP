@@ -127,6 +127,7 @@ class EmbodiedNarrativeEpisode:
     narrative_tags: list[str]
     compiler_confidence: float
     provenance: dict[str, object]
+    uncertainty_decomposition: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -140,6 +141,7 @@ class EmbodiedNarrativeEpisode:
             "narrative_tags": list(self.narrative_tags),
             "compiler_confidence": float(self.compiler_confidence),
             "provenance": dict(self.provenance),
+            "uncertainty_decomposition": dict(self.uncertainty_decomposition),
         }
 
     @classmethod
@@ -155,4 +157,7 @@ class EmbodiedNarrativeEpisode:
             narrative_tags=_coerce_str_list(payload.get("narrative_tags")),
             compiler_confidence=float(payload.get("compiler_confidence", 0.0)),
             provenance=_coerce_object_dict(payload.get("provenance")),
+            uncertainty_decomposition=_coerce_object_dict(
+                payload.get("uncertainty_decomposition")
+            ),
         )

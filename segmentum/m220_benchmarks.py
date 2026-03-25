@@ -170,6 +170,8 @@ def _rollout_initialized(
             identity_commitments=[],
             social_snapshot=agent.social_memory.snapshot(),
             evidence_trace={},
+            narrative_uncertainty_profile={},
+            narrative_uncertainty_summary="",
             conflict_score=0.0,
             uncertainty_score=0.0,
             malformed_text_degradation_ratio=0.0,

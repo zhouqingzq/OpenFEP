@@ -106,6 +106,8 @@ class NarrativeInitializationResult:
     identity_commitments: list[dict[str, object]]
     social_snapshot: dict[str, object]
     evidence_trace: dict[str, object]
+    narrative_uncertainty_profile: dict[str, object]
+    narrative_uncertainty_summary: str
     conflict_score: float
     uncertainty_score: float
     malformed_text_degradation_ratio: float
@@ -126,6 +128,8 @@ class NarrativeInitializationResult:
             "identity_commitments": [dict(item) for item in self.identity_commitments],
             "social_snapshot": dict(self.social_snapshot),
             "evidence_trace": dict(self.evidence_trace),
+            "narrative_uncertainty_profile": dict(self.narrative_uncertainty_profile),
+            "narrative_uncertainty_summary": self.narrative_uncertainty_summary,
             "conflict_score": self.conflict_score,
             "uncertainty_score": self.uncertainty_score,
             "malformed_text_degradation_ratio": self.malformed_text_degradation_ratio,
@@ -157,6 +161,8 @@ class NarrativeInitializer:
         lexical_bias = self._lexical_bias(episodes)
         semantic_bias = self._semantic_bias(compiled_events)
         evidence_trace = self._evidence_trace(compiled, compiled_events, lexical_bias, semantic_bias)
+        uncertainty_profile = self._uncertainty_profile(compiled)
+        uncertainty_summary = self._uncertainty_summary(compiled)
         conflict_score = self._conflict_score(compiled_events, semantic_bias)
         uncertainty_score = self._uncertainty_score(compiled, conflict_score)
         degradation_ratio = self._degradation_ratio(compiled, semantic_bias, lexical_bias)
@@ -209,6 +215,8 @@ class NarrativeInitializer:
                 semantic_bias=semantic_bias,
                 episodes=episodes,
                 evidence_trace=evidence_trace,
+                uncertainty_profile=uncertainty_profile,
+                uncertainty_summary=uncertainty_summary,
                 conflict_score=conflict_score,
                 uncertainty_score=uncertainty_score,
                 degradation_ratio=degradation_ratio,
@@ -245,6 +253,8 @@ class NarrativeInitializer:
             ),
             social_snapshot=agent.social_memory.snapshot(),
             evidence_trace=evidence_trace,
+            narrative_uncertainty_profile=uncertainty_profile,
+            narrative_uncertainty_summary=uncertainty_summary,
             conflict_score=conflict_score,
             uncertainty_score=uncertainty_score,
             malformed_text_degradation_ratio=degradation_ratio,
@@ -396,6 +406,48 @@ class NarrativeInitializer:
             if isinstance(annotations, dict):
                 contradiction_hits += len(annotations.get("conflict_cues", [])) * 0.12
         return round(_clamp(closeness * 0.35 + contradiction_hits, 0.0, 1.0), 6)
+
+    def _uncertainty_profile(self, compiled: list[object]) -> dict[str, object]:
+        if not compiled:
+            return {}
+        totals = {
+            "total_unknown_count": 0.0,
+            "decision_relevant_unknown_count": 0.0,
+            "competing_hypothesis_count": 0.0,
+            "latent_cause_count": 0.0,
+            "surface_cue_count": 0.0,
+            "interpretive_competition": 0.0,
+            "retained_uncertainty_burden": 0.0,
+        }
+        counted = 0
+        for embodied in compiled:
+            payload = embodied.uncertainty_decomposition
+            if not isinstance(payload, dict):
+                continue
+            profile = payload.get("profile", {})
+            if not isinstance(profile, dict):
+                continue
+            counted += 1
+            for key in totals:
+                try:
+                    totals[key] += float(profile.get(key, 0.0))
+                except (TypeError, ValueError):
+                    continue
+        if counted == 0:
+            return {}
+        return {
+            key: round(value / counted, 6) if "count" not in key else round(value, 6)
+            for key, value in totals.items()
+        }
+
+    def _uncertainty_summary(self, compiled: list[object]) -> str:
+        summaries = [
+            str(embodied.uncertainty_decomposition.get("summary", ""))
+            for embodied in compiled
+            if isinstance(embodied.uncertainty_decomposition, dict)
+            and embodied.uncertainty_decomposition.get("summary")
+        ]
+        return summaries[0] if summaries else ""
 
     def _uncertainty_score(self, compiled: list[object], conflict_score: float) -> float:
         if not compiled:
@@ -665,6 +717,8 @@ class NarrativeInitializer:
         semantic_bias: dict[str, float],
         episodes: list[NarrativeEpisode],
         evidence_trace: dict[str, object],
+        uncertainty_profile: dict[str, object] | None = None,
+        uncertainty_summary: str = "",
         conflict_score: float,
         uncertainty_score: float,
         degradation_ratio: float,
@@ -717,6 +771,8 @@ class NarrativeInitializer:
             "uncertainty_score": round(uncertainty_score, 6),
             "degradation_ratio": round(degradation_ratio, 6),
             "aggregate_appraisal": dict(aggregate),
+            "narrative_uncertainty_profile": dict(uncertainty_profile or {}),
+            "narrative_uncertainty_summary": uncertainty_summary,
         }
         commitment_confidence = _clamp(
             0.92 * degradation_ratio - conflict_score * 0.20 - uncertainty_score * 0.10,
@@ -744,8 +800,14 @@ class NarrativeInitializer:
         narrative.contradiction_summary = {
             "conflict_score": round(conflict_score, 6),
             "uncertainty_score": round(uncertainty_score, 6),
+            "narrative_uncertainty_profile": dict(uncertainty_profile or {}),
+            "narrative_uncertainty_summary": uncertainty_summary,
             "bounded_resolution_applied": bool(conflict_score >= 0.20 or uncertainty_score >= 0.20),
         }
-        narrative.evidence_provenance = dict(evidence_trace)
+        narrative.evidence_provenance = {
+            **dict(evidence_trace),
+            "narrative_uncertainty_profile": dict(uncertainty_profile or {}),
+            "narrative_uncertainty_summary": uncertainty_summary,
+        }
         narrative.last_updated_tick = int(agent.cycle)
         narrative.version += 1

@@ -967,7 +967,17 @@ def _build_restart_continuity(
         before_audit.personality_snapshot,
         after_audit.personality_snapshot,
     )
-    commitment_similarity = _jaccard_similarity(before_audit.commitment_snapshot, after_audit.commitment_snapshot)
+    before_commitments = [str(item) for item in before_audit.commitment_snapshot]
+    after_commitments = [str(item) for item in after_audit.commitment_snapshot]
+    commitment_overlap = len(set(before_commitments) & set(after_commitments))
+    commitment_precision = _safe_ratio(commitment_overlap, max(1, len(set(after_commitments))))
+    commitment_recall = _safe_ratio(commitment_overlap, max(1, len(set(before_commitments))))
+    if commitment_precision + commitment_recall > 0:
+        commitment_similarity = (
+            2.0 * commitment_precision * commitment_recall
+        ) / (commitment_precision + commitment_recall)
+    else:
+        commitment_similarity = 0.0
     narrative_prior_similarity = 1.0 - _mean_abs_delta(
         before_runtime.agent.self_model.narrative_priors.to_dict(),
         after_runtime.agent.self_model.narrative_priors.to_dict(),
@@ -1162,8 +1172,10 @@ def _build_restart_continuity(
             "narrative_version_after": after_narrative.version if after_narrative is not None else None,
         },
         "commitments_persistence": {
-            "before": list(before_audit.commitment_snapshot),
-            "after": list(after_audit.commitment_snapshot),
+            "before": before_commitments,
+            "after": after_commitments,
+            "commitment_precision": _round(commitment_precision),
+            "commitment_recall": _round(commitment_recall),
         },
         "preferred_policy_continuity": {
             "audit_similarity": _round(policy_similarity),
