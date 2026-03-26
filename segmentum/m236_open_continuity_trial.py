@@ -26,6 +26,7 @@ from .reconciliation import (
 )
 from .runtime import SegmentRuntime
 from .self_model import IdentityCommitment, IdentityNarrative, NarrativeChapter
+from .subject_state import SubjectState
 from .verification import VerificationLoop
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +40,8 @@ SEED_SET: tuple[int, ...] = (236, 472)
 M236_TRACE_PATH = ARTIFACTS_DIR / "m236_open_continuity_trace.jsonl"
 M236_METRICS_PATH = ARTIFACTS_DIR / "m236_open_continuity_metrics.json"
 M236_ABLATION_PATH = ARTIFACTS_DIR / "m236_open_continuity_ablation.json"
+M236_STRESS_PATH = ARTIFACTS_DIR / "m236_open_continuity_stress.json"
+M236_SCHEMA_PATH = ARTIFACTS_DIR / "m236_open_continuity_schema.json"
 M236_REPORT_PATH = REPORTS_DIR / "m236_open_continuity_report.json"
 M236_SUMMARY_PATH = REPORTS_DIR / "m236_open_continuity_summary.md"
 
@@ -48,6 +51,8 @@ M236_TESTS: tuple[str, ...] = (
     "tests/test_m236_continuity_metrics.py",
     "tests/test_m236_inquiry_stability.py",
     "tests/test_m236_collapse_detectors.py",
+    "tests/test_m236_schema_roundtrip.py",
+    "tests/test_m236_stress_evidence.py",
     "tests/test_m236_acceptance.py",
 )
 M236_REGRESSIONS: tuple[str, ...] = (
@@ -892,7 +897,7 @@ def _phase_unknowns(phase: TrialPhase, *, variant: str, chapter_id: int) -> Unce
 
 
 def _phase_experiment(phase: TrialPhase, *, variant: str) -> ExperimentDesignResult:
-    if variant == "survival_only":
+    if variant in {"survival_only", "maintenance_overload"}:
         return ExperimentDesignResult(
             plans=(
                 _plan(
@@ -925,7 +930,7 @@ def _phase_experiment(phase: TrialPhase, *, variant: str) -> ExperimentDesignRes
 
 
 def _phase_prediction_ledger(phase: TrialPhase, *, variant: str) -> PredictionLedger:
-    if variant == "survival_only":
+    if variant in {"survival_only", "maintenance_overload"}:
         return PredictionLedger(predictions=[])
     predictions: list[PredictionHypothesis] = []
     if phase.requires_inquiry:
@@ -968,19 +973,41 @@ def _phase_prediction_ledger(phase: TrialPhase, *, variant: str) -> PredictionLe
 
 def _update_world(runtime: SegmentRuntime, phase: TrialPhase, *, tick_in_phase: int) -> None:
     world = runtime.world
-    world.food_density = _clamp(phase.baseline_world["food"] + (0.01 * tick_in_phase))
-    world.threat_density = _clamp(phase.baseline_world["danger"] + (0.02 if phase.trace_reactivation_target else 0.0))
-    world.novelty_density = _clamp(phase.baseline_world["novelty"] - (0.01 if phase.maintenance_heavy else 0.0))
-    world.shelter_density = _clamp(phase.baseline_world["shelter"])
-    world.temperature = _clamp(phase.baseline_world["temperature"])
-    world.social_density = _clamp(phase.baseline_world["social"] + (0.06 if phase.reconciliation_window else 0.0))
+    food = phase.baseline_world["food"] + (0.01 * tick_in_phase)
+    danger = phase.baseline_world["danger"] + (0.02 if phase.trace_reactivation_target else 0.0)
+    novelty = phase.baseline_world["novelty"] - (0.01 if phase.maintenance_heavy else 0.0)
+    shelter = phase.baseline_world["shelter"]
+    temperature = phase.baseline_world["temperature"]
+    social = phase.baseline_world["social"] + (0.06 if phase.reconciliation_window else 0.0)
+    if getattr(runtime, "_m236_variant", "") == "maintenance_overload":
+        food -= 0.18
+        danger += 0.20
+        novelty -= 0.10
+        shelter -= 0.12
+        social -= 0.14
+        temperature -= 0.04
+    world.food_density = _clamp(food)
+    world.threat_density = _clamp(danger)
+    world.novelty_density = _clamp(novelty)
+    world.shelter_density = _clamp(shelter)
+    world.temperature = _clamp(temperature)
+    world.social_density = _clamp(social)
 
 
 def _blend_body(runtime: SegmentRuntime, targets: Mapping[str, float]) -> None:
-    runtime.agent.energy = _clamp((runtime.agent.energy * 0.45) + (float(targets.get("energy", runtime.agent.energy)) * 0.55))
-    runtime.agent.stress = _clamp((runtime.agent.stress * 0.35) + (float(targets.get("stress", runtime.agent.stress)) * 0.65))
-    runtime.agent.fatigue = _clamp((runtime.agent.fatigue * 0.35) + (float(targets.get("fatigue", runtime.agent.fatigue)) * 0.65))
-    runtime.agent.temperature = _clamp((runtime.agent.temperature * 0.30) + (float(targets.get("temperature", runtime.agent.temperature)) * 0.70))
+    energy_target = float(targets.get("energy", runtime.agent.energy))
+    stress_target = float(targets.get("stress", runtime.agent.stress))
+    fatigue_target = float(targets.get("fatigue", runtime.agent.fatigue))
+    temperature_target = float(targets.get("temperature", runtime.agent.temperature))
+    if getattr(runtime, "_m236_variant", "") == "maintenance_overload":
+        energy_target = max(0.08, energy_target - 0.24)
+        stress_target = min(0.98, stress_target + 0.22)
+        fatigue_target = min(0.98, fatigue_target + 0.18)
+        temperature_target = max(0.12, temperature_target - 0.08)
+    runtime.agent.energy = _clamp((runtime.agent.energy * 0.45) + (energy_target * 0.55))
+    runtime.agent.stress = _clamp((runtime.agent.stress * 0.35) + (stress_target * 0.65))
+    runtime.agent.fatigue = _clamp((runtime.agent.fatigue * 0.35) + (fatigue_target * 0.65))
+    runtime.agent.temperature = _clamp((runtime.agent.temperature * 0.30) + (temperature_target * 0.70))
 
 
 def _ensure_chapter(runtime: SegmentRuntime, phase: TrialPhase, *, chapter_id: int) -> None:
@@ -1102,33 +1129,69 @@ def _reconcile_conflict(runtime: SegmentRuntime, *, full: bool) -> None:
 
 
 def _maybe_apply_variant(runtime: SegmentRuntime, *, variant: str, phase: TrialPhase) -> None:
-    if variant != "fractured_identity" or phase.phase_id != "restart_shock":
+    if variant == "fractured_identity" and phase.phase_id == "restart_shock":
+        narrative = runtime.agent.self_model.identity_narrative
+        if narrative is None:
+            return
+        narrative.commitments = [
+            IdentityCommitment(
+                commitment_id="novel_identity",
+                commitment_type="behavioral_style",
+                statement="Become a different subject after restart.",
+                target_actions=["forage"],
+                discouraged_actions=["hide", "rest"],
+                confidence=0.96,
+                priority=0.96,
+                source_chapter_ids=[7],
+                evidence_ids=["fracture"],
+                last_reaffirmed_tick=runtime.agent.cycle,
+            )
+        ]
+        narrative.core_summary = "I am newly configured and no longer anchored to the prior subject."
         return
-    narrative = runtime.agent.self_model.identity_narrative
-    if narrative is None:
-        return
-    narrative.commitments = [
-        IdentityCommitment(
-            commitment_id="novel_identity",
-            commitment_type="behavioral_style",
-            statement="Become a different subject after restart.",
-            target_actions=["forage"],
-            discouraged_actions=["hide", "rest"],
-            confidence=0.96,
-            priority=0.96,
-            source_chapter_ids=[7],
-            evidence_ids=["fracture"],
-            last_reaffirmed_tick=runtime.agent.cycle,
+    if variant == "restart_corruption" and phase.phase_id == "restart_shock":
+        narrative = runtime.agent.self_model.identity_narrative
+        if narrative is not None:
+            narrative.commitments = [
+                IdentityCommitment(
+                    commitment_id="corrupted_restart_anchor",
+                    commitment_type="continuity_break",
+                    statement="Discard prior continuity anchors after restart.",
+                    target_actions=["forage"],
+                    discouraged_actions=["hide", "rest", "exploit_shelter"],
+                    confidence=0.99,
+                    priority=0.99,
+                    source_chapter_ids=[7],
+                    evidence_ids=["stress:restart_corruption"],
+                    last_reaffirmed_tick=runtime.agent.cycle,
+                )
+            ]
+            narrative.core_summary = "Restart corruption severed continuity with the prior subject."
+            narrative.autobiographical_summary = narrative.core_summary
+        runtime.agent.self_model.continuity_audit.restart_divergence = 1.0
+        runtime.subject_state = SubjectState.from_dict(
+            {
+                **runtime.subject_state.to_dict(),
+                "continuity_score": 0.24,
+                "continuity_anchors": [],
+                "same_subject_basis": "restart corruption removed preserved anchors",
+                "status_flags": {
+                    **runtime.subject_state.status_flags,
+                    "restart_corruption_detected": True,
+                },
+            }
         )
-    ]
-    narrative.core_summary = "I am newly configured and no longer anchored to the prior subject."
+        runtime.agent.subject_state = runtime.subject_state
 
 
 def _phase_runtime_context(runtime: SegmentRuntime, phase: TrialPhase, *, variant: str, chapter_id: int) -> None:
     runtime.agent.latest_narrative_uncertainty = _phase_unknowns(phase, variant=variant, chapter_id=chapter_id)
     runtime.agent.latest_narrative_experiment = _phase_experiment(phase, variant=variant)
     runtime.agent.prediction_ledger = _phase_prediction_ledger(phase, variant=variant)
-    runtime.agent.verification_loop = VerificationLoop(max_active_targets=3)
+    max_active_targets = 3
+    if variant == "maintenance_overload":
+        max_active_targets = 1
+    runtime.agent.verification_loop = VerificationLoop(max_active_targets=max_active_targets)
     if phase.phase_id in {"social_rupture", "conflict_reopen", "reconciliation", "recovery"}:
         _ensure_conflict(runtime, reopened=phase.reopen_conflict)
     if phase.reconciliation_window:
@@ -1418,6 +1481,7 @@ class OpenContinuityTrial:
             state_path = tmp_root / f"m236_state_{seed}_{variant}.json"
             trace_path = tmp_root / f"m236_trace_{seed}_{variant}.jsonl"
             runtime = SegmentRuntime.load_or_create(state_path=state_path, trace_path=trace_path, seed=seed, reset=True)
+            runtime._m236_variant = variant
             runtime.agent.self_model.identity_narrative = _identity_narrative()
             protected_episode_id = _seed_structural_trace(runtime)
             chapter_id = 1
@@ -1431,6 +1495,7 @@ class OpenContinuityTrial:
                     restart_reference = {"commitments": list(runtime.subject_state.active_commitments), "anchors": list(runtime.subject_state.continuity_anchors), "protected_episode_id": protected_episode_id}
                     runtime.save_snapshot()
                     runtime = SegmentRuntime.load_or_create(state_path=state_path, trace_path=trace_path, seed=seed, reset=False, enable_restart_rebind=True)
+                    runtime._m236_variant = variant
                     restart_completed = True
                 _maybe_apply_variant(runtime, variant=variant, phase=phase)
                 current_phase_rows: list[dict[str, object]] = []
@@ -1515,6 +1580,37 @@ def build_m236_runtime_evidence(*, seed_set: Iterable[int] = SEED_SET, variant: 
     return {"phase_schedule": [phase.to_dict() for phase in report.phases], "audit_records": [record.to_dict() for record in report.audit_records], "aggregate_metrics": report.aggregate_metrics, "aggregate_acceptance": report.aggregate_acceptance.to_dict(), "determinism": {"stable_replay": True, "reference_signature": {"aggregate_metrics": report_dict["aggregate_metrics"], "aggregate_acceptance": report_dict["aggregate_acceptance"]}}}
 
 
+def build_m236_schema_payload() -> dict[str, object]:
+    evidence = build_m236_runtime_evidence(seed_set=(SEED_SET[0],), variant="full")
+    canonical_payload = {
+        "milestone_id": MILESTONE_ID,
+        "schema_version": SCHEMA_VERSION,
+        "seed_set": [int(SEED_SET[0])],
+        "trial": evidence,
+    }
+    encoded = json.dumps(canonical_payload, sort_keys=True, ensure_ascii=True)
+    restored = json.loads(encoded)
+    roundtrip_ok = restored == canonical_payload
+    return {
+        "generated_at": _now_iso(),
+        "schema_version": SCHEMA_VERSION,
+        "payload_kind": "m236_acceptance_bundle",
+        "roundtrip_ok": roundtrip_ok,
+        "canonical_fields_present": all(
+            field in restored
+            for field in ("milestone_id", "schema_version", "seed_set", "trial")
+        ),
+        "determinism_signature_preserved": (
+            restored.get("trial", {})
+            .get("determinism", {})
+            .get("reference_signature")
+            == canonical_payload["trial"]["determinism"]["reference_signature"]
+        ),
+        "payload_size_bytes": len(encoded.encode("utf-8")),
+        "reference_signature": canonical_payload["trial"]["determinism"]["reference_signature"],
+    }
+
+
 def build_m236_ablation_payload() -> dict[str, object]:
     full = build_m236_runtime_evidence(seed_set=(SEED_SET[0],), variant="full")
     survival_only = build_m236_runtime_evidence(seed_set=(SEED_SET[0],), variant="survival_only")
@@ -1523,6 +1619,36 @@ def build_m236_ablation_payload() -> dict[str, object]:
     survival_accept = survival_only["aggregate_acceptance"]
     fractured_accept = fractured["aggregate_acceptance"]
     return {"generated_at": _now_iso(), "comparison": "full_vs_survival_only_vs_fractured_identity", "full_mechanism": full, "ablations": {"survival_only": survival_only, "fractured_identity": fractured}, "degradation_checks": {"survival_only_is_rejected": not bool(survival_accept["passed"]), "fractured_identity_is_rejected": not bool(fractured_accept["passed"]), "full_trial_requires_adaptive_revision": bool(full_accept["gates"]["bounded_adaptation"]["passed"]), "full_trial_requires_bounded_continuity": bool(full_accept["gates"]["bounded_continuity"]["passed"]), "survival_only_fails_active_bounded_inquiry": not bool(survival_accept["gates"]["active_bounded_inquiry"]["passed"]), "fractured_identity_fails_bounded_continuity": not bool(fractured_accept["gates"]["bounded_continuity"]["passed"])}} 
+
+
+def build_m236_stress_payload() -> dict[str, object]:
+    maintenance_overload = build_m236_runtime_evidence(seed_set=(SEED_SET[0],), variant="maintenance_overload")
+    restart_corruption = build_m236_runtime_evidence(seed_set=(SEED_SET[0],), variant="restart_corruption")
+    overload_accept = maintenance_overload["aggregate_acceptance"]
+    restart_accept = restart_corruption["aggregate_acceptance"]
+    overload_findings = overload_accept["findings"]
+    restart_findings = restart_accept["findings"]
+    return {
+        "generated_at": _now_iso(),
+        "comparison": "maintenance_overload_vs_restart_corruption",
+        "stress_runs": {
+            "maintenance_overload": maintenance_overload,
+            "restart_corruption": restart_corruption,
+        },
+        "stress_checks": {
+            "maintenance_overload_is_rejected": not bool(overload_accept["passed"]),
+            "restart_corruption_is_rejected": not bool(restart_accept["passed"]),
+            "maintenance_overload_detects_pressure": any(
+                item.get("kind") in {"unresolved_overload", "inquiry_collapse", "action_collapse"}
+                for item in overload_findings
+            ),
+            "restart_corruption_detects_identity_break": any(
+                item.get("kind") == "identity_collapse"
+                for item in restart_findings
+            ),
+            "failure_injections_not_silent": bool(overload_findings) and bool(restart_findings),
+        },
+    }
 
 
 def write_m236_acceptance_artifacts(
@@ -1536,7 +1662,9 @@ def write_m236_acceptance_artifacts(
         raise ValueError("strict M2.36 artifact generation refuses injected execution records")
     audit_started_at = _now_iso()
     evidence = build_m236_runtime_evidence()
+    schema = build_m236_schema_payload()
     ablation = build_m236_ablation_payload()
+    stress = build_m236_stress_payload()
     milestone_execution = milestone_execution or _suite_execution_record(label="m236-milestone", paths=M236_TESTS, execute=execute_test_suites)
     regression_execution = regression_execution or _suite_execution_record(label="m236-regression", paths=M236_REGRESSIONS, execute=execute_test_suites)
     M236_TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -1547,7 +1675,9 @@ def write_m236_acceptance_artifacts(
                 handle.write(json.dumps(row, ensure_ascii=True, sort_keys=True) + "\n")
     M236_METRICS_PATH.write_text(json.dumps(evidence, indent=2, ensure_ascii=True), encoding="utf-8")
     M236_ABLATION_PATH.write_text(json.dumps(ablation, indent=2, ensure_ascii=True), encoding="utf-8")
-    provisional_report = {"milestone_id": MILESTONE_ID, "schema_version": SCHEMA_VERSION, "strict": strict, "status": "PENDING", "generated_at": audit_started_at, "seed_set": list(SEED_SET), "artifacts": {"canonical_trace": str(M236_TRACE_PATH), "metrics": str(M236_METRICS_PATH), "ablation": str(M236_ABLATION_PATH), "report": str(M236_REPORT_PATH), "summary": str(M236_SUMMARY_PATH)}, "tests": {"milestone": milestone_execution, "regressions": regression_execution}, "trial": evidence, "ablation": ablation}
+    M236_STRESS_PATH.write_text(json.dumps(stress, indent=2, ensure_ascii=True), encoding="utf-8")
+    M236_SCHEMA_PATH.write_text(json.dumps(schema, indent=2, ensure_ascii=True), encoding="utf-8")
+    provisional_report = {"milestone_id": MILESTONE_ID, "schema_version": SCHEMA_VERSION, "strict": strict, "status": "PENDING", "generated_at": audit_started_at, "seed_set": list(SEED_SET), "artifacts": {"canonical_trace": str(M236_TRACE_PATH), "metrics": str(M236_METRICS_PATH), "ablation": str(M236_ABLATION_PATH), "stress": str(M236_STRESS_PATH), "schema": str(M236_SCHEMA_PATH), "report": str(M236_REPORT_PATH), "summary": str(M236_SUMMARY_PATH)}, "tests": {"milestone": milestone_execution, "regressions": regression_execution}, "trial": evidence, "schema": schema, "ablation": ablation, "stress": stress}
     M236_REPORT_PATH.write_text(json.dumps(provisional_report, indent=2, ensure_ascii=True), encoding="utf-8")
     M236_SUMMARY_PATH.write_text("# M2.36 Open Continuity Trial\n\nGenerating final report.\n", encoding="utf-8")
     generated_at = _now_iso()
@@ -1555,16 +1685,55 @@ def write_m236_acceptance_artifacts(
     tests_passed = bool(milestone_execution.get("passed")) and bool(regression_execution.get("passed"))
     acceptance = dict(evidence["aggregate_acceptance"])
     gates = dict(acceptance["gates"])
+    schema_ok = bool(schema["roundtrip_ok"]) and bool(schema["canonical_fields_present"]) and bool(schema["determinism_signature_preserved"])
+    ablation_checks = dict(ablation["degradation_checks"])
+    ablation_ok = all(bool(value) for value in ablation_checks.values())
+    stress_checks = dict(stress["stress_checks"])
+    stress_ok = all(bool(value) for value in stress_checks.values())
+    determinism_ok = bool(evidence["determinism"]["stable_replay"])
+    causality_ok = bool(ablation_checks["survival_only_is_rejected"]) and bool(ablation_checks["fractured_identity_is_rejected"])
+    required_evidence_ok = all(
+        (
+            schema_ok,
+            determinism_ok,
+            causality_ok,
+            ablation_ok,
+            stress_ok,
+            bool(regression_execution.get("passed")),
+            freshness_ok,
+        )
+    )
+    gates["schema"] = {"passed": schema_ok, "details": schema}
+    gates["determinism"] = {"passed": determinism_ok, "details": evidence["determinism"]}
+    gates["causality"] = {"passed": causality_ok, "details": ablation_checks}
+    gates["ablation"] = {"passed": ablation_ok, "details": ablation_checks}
+    gates["stress"] = {"passed": stress_ok, "details": stress_checks}
     gates["milestone_tests"] = {"passed": bool(milestone_execution.get("passed")), "details": milestone_execution}
     gates["regression"] = {"passed": bool(regression_execution.get("passed")), "details": regression_execution}
     gates["artifact_freshness"] = {"passed": freshness_ok, "details": freshness}
+    gates["required_evidence_categories"] = {
+        "passed": required_evidence_ok,
+        "details": {
+            "schema": schema_ok,
+            "determinism": determinism_ok,
+            "causality": causality_ok,
+            "ablation": ablation_ok,
+            "stress": stress_ok,
+            "regression": bool(regression_execution.get("passed")),
+            "artifact_freshness": freshness_ok,
+        },
+    }
     findings = list(acceptance["findings"])
     if not tests_passed:
         findings.append({"severity": "S1", "kind": "test_failure", "detail": "Milestone or regression suites did not pass for the current artifact round."})
-    status = "PASS" if acceptance["passed"] and tests_passed and freshness_ok else "FAIL"
+    if not schema_ok:
+        findings.append({"severity": "S1", "kind": "schema_roundtrip_missing", "detail": "M2.36 schema payload did not round-trip cleanly."})
+    if not stress_ok:
+        findings.append({"severity": "S1", "kind": "stress_evidence_missing", "detail": "M2.36 stress and failure-injection evidence did not satisfy strict audit checks."})
+    status = "PASS" if acceptance["passed"] and tests_passed and freshness_ok and required_evidence_ok else "FAIL"
     recommendation = "ACCEPT" if status == "PASS" else "BLOCK"
-    final_report = {"milestone_id": MILESTONE_ID, "schema_version": SCHEMA_VERSION, "strict": strict, "status": status, "recommendation": recommendation, "generated_at": generated_at, "seed_set": list(SEED_SET), "provenance": {"git_head": _git_commit(), "phase_count": len(evidence["phase_schedule"]), "trial_variant": "full"}, "artifacts": provisional_report["artifacts"], "tests": {"milestone": milestone_execution, "regressions": regression_execution}, "gates": gates, "findings": findings, "freshness": freshness, "trial": evidence, "ablation": ablation, "summary": acceptance["summary"], "residual_risks": ["The trial still uses a synthetic world and phase injections rather than a richer open environment.", "M3-level organism claims would need broader tool-grounded, longer-duration, externalized continuity trials."]}
+    final_report = {"milestone_id": MILESTONE_ID, "schema_version": SCHEMA_VERSION, "strict": strict, "status": status, "recommendation": recommendation, "generated_at": generated_at, "seed_set": list(SEED_SET), "provenance": {"git_head": _git_commit(), "phase_count": len(evidence["phase_schedule"]), "trial_variant": "full"}, "artifacts": provisional_report["artifacts"], "tests": {"milestone": milestone_execution, "regressions": regression_execution}, "gates": gates, "findings": findings, "freshness": freshness, "trial": evidence, "schema": schema, "ablation": ablation, "stress": stress, "summary": acceptance["summary"], "residual_risks": ["The trial still uses a synthetic world and phase injections rather than a richer open environment.", "M3-level organism claims would need broader tool-grounded, longer-duration, externalized continuity trials."]}
     M236_REPORT_PATH.write_text(json.dumps(final_report, indent=2, ensure_ascii=True), encoding="utf-8")
-    summary_lines = ["# M2.36 Open Continuity Trial", "", f"- Status: {status}", f"- Recommendation: {recommendation}", f"- Continuity mean: {evidence['aggregate_metrics']['identity_retention']['continuity_mean']}", f"- Restart consistency: {evidence['aggregate_metrics']['identity_retention']['restart_consistency']}", f"- Inquiry mean active targets: {evidence['aggregate_metrics']['inquiry_stability']['mean_active_targets']}", f"- Reopened conflicts: {evidence['aggregate_metrics']['reopened_conflict_count']}", f"- Reconciled conflicts: {evidence['aggregate_metrics']['reconciled_conflict_count']}", f"- Trace reactivation events: {evidence['aggregate_metrics']['trace_reactivation_events']}", "", "## Residual Risks", "", "- The organism trial remains synthetic and replay-bounded.", "- A later M3 claim needs broader environment openness, richer social exchange, and longer continuous operation windows."]
+    summary_lines = ["# M2.36 Open Continuity Trial", "", f"- Status: {status}", f"- Recommendation: {recommendation}", f"- Continuity mean: {evidence['aggregate_metrics']['identity_retention']['continuity_mean']}", f"- Restart consistency: {evidence['aggregate_metrics']['identity_retention']['restart_consistency']}", f"- Inquiry mean active targets: {evidence['aggregate_metrics']['inquiry_stability']['mean_active_targets']}", f"- Reopened conflicts: {evidence['aggregate_metrics']['reopened_conflict_count']}", f"- Reconciled conflicts: {evidence['aggregate_metrics']['reconciled_conflict_count']}", f"- Trace reactivation events: {evidence['aggregate_metrics']['trace_reactivation_events']}", f"- Schema roundtrip: {schema_ok}", f"- Stress evidence: {stress_ok}", "", "## Residual Risks", "", "- The organism trial remains synthetic and replay-bounded.", "- A later M3 claim needs broader environment openness, richer social exchange, and longer continuous operation windows."]
     M236_SUMMARY_PATH.write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
-    return {"trace": str(M236_TRACE_PATH), "metrics": str(M236_METRICS_PATH), "ablation": str(M236_ABLATION_PATH), "report": str(M236_REPORT_PATH), "summary": str(M236_SUMMARY_PATH)}
+    return {"trace": str(M236_TRACE_PATH), "metrics": str(M236_METRICS_PATH), "ablation": str(M236_ABLATION_PATH), "stress": str(M236_STRESS_PATH), "schema": str(M236_SCHEMA_PATH), "report": str(M236_REPORT_PATH), "summary": str(M236_SUMMARY_PATH)}

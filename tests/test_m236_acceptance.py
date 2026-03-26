@@ -37,12 +37,16 @@ def _isolated_outputs():
             "M236_TRACE_PATH": m236_trial.M236_TRACE_PATH,
             "M236_METRICS_PATH": m236_trial.M236_METRICS_PATH,
             "M236_ABLATION_PATH": m236_trial.M236_ABLATION_PATH,
+            "M236_STRESS_PATH": m236_trial.M236_STRESS_PATH,
+            "M236_SCHEMA_PATH": m236_trial.M236_SCHEMA_PATH,
             "M236_REPORT_PATH": m236_trial.M236_REPORT_PATH,
             "M236_SUMMARY_PATH": m236_trial.M236_SUMMARY_PATH,
         }
         m236_trial.M236_TRACE_PATH = artifacts_dir / "m236_trace.jsonl"
         m236_trial.M236_METRICS_PATH = artifacts_dir / "m236_metrics.json"
         m236_trial.M236_ABLATION_PATH = artifacts_dir / "m236_ablation.json"
+        m236_trial.M236_STRESS_PATH = artifacts_dir / "m236_stress.json"
+        m236_trial.M236_SCHEMA_PATH = artifacts_dir / "m236_schema.json"
         m236_trial.M236_REPORT_PATH = reports_dir / "m236_report.json"
         m236_trial.M236_SUMMARY_PATH = reports_dir / "m236_summary.md"
         try:
@@ -61,16 +65,26 @@ def test_acceptance_artifacts_and_report_reflect_trial_outcome() -> None:
         )
         report = json.loads(Path(written["report"]).read_text(encoding="utf-8"))
         ablation = json.loads(Path(written["ablation"]).read_text(encoding="utf-8"))
+        stress = json.loads(Path(written["stress"]).read_text(encoding="utf-8"))
+        schema = json.loads(Path(written["schema"]).read_text(encoding="utf-8"))
         trace_lines = Path(written["trace"]).read_text(encoding="utf-8").strip().splitlines()
 
         assert report["milestone_id"] == "M2.36"
         assert report["schema_version"] == m236_trial.SCHEMA_VERSION
         assert report["gates"]["artifact_freshness"]["passed"] is True
+        assert report["gates"]["schema"]["passed"] is True
+        assert report["gates"]["stress"]["passed"] is True
+        assert report["gates"]["required_evidence_categories"]["passed"] is True
         assert "trial" in report
+        assert "schema" in report
         assert "ablation" in report
+        assert "stress" in report
         assert trace_lines
+        assert schema["roundtrip_ok"] is True
         assert ablation["degradation_checks"]["survival_only_is_rejected"] is True
         assert ablation["degradation_checks"]["fractured_identity_is_rejected"] is True
+        assert stress["stress_checks"]["maintenance_overload_is_rejected"] is True
+        assert stress["stress_checks"]["restart_corruption_is_rejected"] is True
         assert report["trial"]["aggregate_acceptance"]["gates"]["bounded_adaptation"]["passed"] is True
         assert report["trial"]["aggregate_acceptance"]["gates"]["bounded_continuity"]["passed"] is True
 

@@ -12,5 +12,5 @@ from segmentum.m236_open_continuity_trial import write_m236_acceptance_artifacts
 
 
 if __name__ == "__main__":
-    payload = write_m236_acceptance_artifacts(strict=False, execute_test_suites=False)
+    payload = write_m236_acceptance_artifacts(strict=True, execute_test_suites=True)
     print(json.dumps(payload, indent=2, ensure_ascii=False))

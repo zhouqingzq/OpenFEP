@@ -8,6 +8,8 @@
 - Reopened conflicts: 1
 - Reconciled conflicts: 1
 - Trace reactivation events: 35
+- Schema roundtrip: True
+- Stress evidence: True
 
 ## Residual Risks
 
