@@ -132,7 +132,8 @@
               "tags": [
                 "predator",
                 "predator_attack",
-                "threat"
+                "threat",
+                "uncertainty:threat_persistence"
               ]
             }
           },
@@ -247,6 +248,16 @@
             "uncertainty_penalty": 0.365
           }
         },
+        "narrative_uncertainty_profile": {
+          "total_unknown_count": 2.0,
+          "decision_relevant_unknown_count": 1.0,
+          "competing_hypothesis_count": 5.0,
+          "latent_cause_count": 3.0,
+          "surface_cue_count": 1.0,
+          "interpretive_competition": 0.833333,
+          "retained_uncertainty_burden": 0.242777
+        },
+        "narrative_uncertainty_summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification.",
         "conflict_score": 0.12,
         "uncertainty_score": 0.39275,
         "malformed_text_degradation_ratio": 0.584667,
@@ -307,6 +318,8 @@
           "history_size": 0
         },
         "evidence_trace": {},
+        "narrative_uncertainty_profile": {},
+        "narrative_uncertainty_summary": "",
         "conflict_score": 0.0,
         "uncertainty_score": 0.0,
         "malformed_text_degradation_ratio": 0.0,
@@ -317,17 +330,17 @@
         "caution_rate": 0.875,
         "exploration_rate": 0.125,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.03140072450260552,
-        "survival_score": 1.4129166666666664,
-        "danger_attention_rate": 0.5351154280566871,
-        "social_attention_rate": 0.116638613980658,
-        "novelty_attention_rate": 0.23369385597479006,
-        "oracle_regret_rate": 0.625
+        "mean_conditioned_prediction_error": 0.02967746565337889,
+        "survival_score": 1.4091666666666665,
+        "danger_attention_rate": 0.5341840862563743,
+        "social_attention_rate": 0.11733605986052784,
+        "novelty_attention_rate": 0.23384729735499218,
+        "oracle_regret_rate": 0.6666666666666666
       },
       "action_distribution": {
-        "exploit_shelter": 0.041666666666666664,
+        "exploit_shelter": 0.08333333333333333,
         "forage": 0.08333333333333333,
-        "hide": 0.375,
+        "hide": 0.3333333333333333,
         "rest": 0.4583333333333333,
         "scan": 0.041666666666666664
       }
@@ -582,6 +595,16 @@
             "uncertainty_penalty": 0.006875
           }
         },
+        "narrative_uncertainty_profile": {
+          "total_unknown_count": 0.0,
+          "decision_relevant_unknown_count": 0.0,
+          "competing_hypothesis_count": 0.0,
+          "latent_cause_count": 0.0,
+          "surface_cue_count": 0.0,
+          "interpretive_competition": 0.0,
+          "retained_uncertainty_burden": 0.0
+        },
+        "narrative_uncertainty_summary": "The narrative does not currently expose a retained action-relevant uncertainty.",
         "conflict_score": 0.02625,
         "uncertainty_score": 0.012969,
         "malformed_text_degradation_ratio": 0.816018,
@@ -642,6 +665,8 @@
           "history_size": 0
         },
         "evidence_trace": {},
+        "narrative_uncertainty_profile": {},
+        "narrative_uncertainty_summary": "",
         "conflict_score": 0.0,
         "uncertainty_score": 0.0,
         "malformed_text_degradation_ratio": 0.0,
@@ -859,6 +884,16 @@
             "uncertainty_penalty": 0.3
           }
         },
+        "narrative_uncertainty_profile": {
+          "total_unknown_count": 0.0,
+          "decision_relevant_unknown_count": 0.0,
+          "competing_hypothesis_count": 0.0,
+          "latent_cause_count": 0.0,
+          "surface_cue_count": 1.0,
+          "interpretive_competition": 0.0,
+          "retained_uncertainty_burden": 0.0
+        },
+        "narrative_uncertainty_summary": "The narrative does not currently expose a retained action-relevant uncertainty.",
         "conflict_score": 0.033562,
         "uncertainty_score": 0.176747,
         "malformed_text_degradation_ratio": 0.792509,
@@ -919,6 +954,8 @@
           "history_size": 0
         },
         "evidence_trace": {},
+        "narrative_uncertainty_profile": {},
+        "narrative_uncertainty_summary": "",
         "conflict_score": 0.0,
         "uncertainty_score": 0.0,
         "malformed_text_degradation_ratio": 0.0,
@@ -929,8 +966,8 @@
         "caution_rate": 0.9583333333333334,
         "exploration_rate": 0.041666666666666664,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.026112634641035203,
-        "survival_score": 1.600833333333333,
+        "mean_conditioned_prediction_error": 0.02647407365346327,
+        "survival_score": 1.60875,
         "danger_attention_rate": 0.146599054030957,
         "social_attention_rate": 0.011668419205561987,
         "novelty_attention_rate": 0.3303049600068199,
@@ -938,9 +975,9 @@
       },
       "action_distribution": {
         "exploit_shelter": 0.125,
+        "forage": 0.041666666666666664,
         "hide": 0.25,
-        "rest": 0.5833333333333334,
-        "scan": 0.041666666666666664
+        "rest": 0.5833333333333334
       }
     }
   }

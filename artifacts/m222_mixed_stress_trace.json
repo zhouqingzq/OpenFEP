@@ -28,7 +28,7 @@
       "magnitude": 0.18,
       "duration": 1,
       "recovery_window": 12,
-      "recovery_tick": 22,
+      "recovery_tick": 21,
       "recovered": true,
       "result": "recovered"
     }
@@ -49,9 +49,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:novelty",
-            "verify:pred:action:hide",
             "resource_guard"
           ],
           "chronic_debt_pressure": 0.0,
@@ -59,10 +56,10 @@
           "interrupt_action": null,
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.45312300000000005,
+          "policy_shift_strength": 0.26538300000000004,
           "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "hide",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -111,9 +108,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:food",
-            "verify:pred:action:rest",
             "reconcile:conflict:continuity_anchor:continuity:1",
             "reconcile:conflict:continuity_anchor:continuity_instability:1",
             "reconcile:conflict:identity_action:identity_tension:1",
@@ -131,7 +125,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -182,9 +176,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:action:rest",
-            "verify:pred:env:novelty",
-            "verify:pred:env:food",
             "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
@@ -203,7 +194,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -254,9 +245,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:food",
-            "verify:pred:action:rest",
             "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
@@ -275,7 +263,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -326,9 +314,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:food",
-            "verify:pred:action:rest",
             "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
@@ -347,7 +332,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -398,9 +383,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:food",
-            "verify:pred:action:scan",
             "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
@@ -419,7 +401,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -470,9 +452,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:shelter",
-            "verify:pred:env:novelty",
-            "verify:pred:action:rest",
             "reconcile:conflict:self_expectation_falsification:action_consequence_mismatch:6",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
@@ -490,7 +469,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -541,9 +520,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:shelter",
-            "verify:pred:env:novelty",
-            "verify:pred:action:seek_contact",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:continuity:1",
@@ -561,7 +537,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -612,9 +588,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:novelty",
-            "verify:pred:action:rest",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
@@ -632,7 +605,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -683,9 +656,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:novelty",
-            "verify:pred:action:rest",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
             "reconcile:conflict:continuity_anchor:continuity:1",
@@ -703,7 +673,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -754,9 +724,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:novelty",
-            "verify:pred:action:exploit_shelter",
             "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000008-seek_contact:9",
@@ -774,7 +741,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -825,9 +792,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:novelty",
-            "verify:pred:action:exploit_shelter",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000008-seek_contact:9",
             "reconcile:conflict:continuity_anchor:continuity:1",
@@ -845,7 +809,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -896,9 +860,6 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:novelty",
-            "verify:pred:action:hide",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
             "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000008-seek_contact:9",
             "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000008-seek_contact|ep-000010-rest:11",
@@ -916,7 +877,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -967,15 +928,12 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:shelter",
-            "verify:pred:env:novelty",
-            "verify:pred:action:hide",
+            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000008-seek_contact:9",
             "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000008-seek_contact|ep-000010-rest:11",
             "reconcile:conflict:continuity_anchor:continuity:1",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
-            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:13",
             "ledger_continuity_guard",
-            "resource_guard",
+            "thermal_rebalance",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -987,7 +945,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1038,11 +996,8 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:shelter",
-            "verify:pred:env:novelty",
-            "verify:pred:action:rest",
+            "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000008-seek_contact|ep-000010-rest:11",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:13",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "ledger_continuity_guard",
@@ -1058,7 +1013,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1109,10 +1064,7 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:shelter",
-            "verify:pred:env:novelty",
-            "verify:pred:action:rest",
-            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:13",
+            "reconcile:conflict:continuity_anchor:continuity:1",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
@@ -1129,7 +1081,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1180,15 +1132,12 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:shelter",
-            "verify:pred:action:rest",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
             "reconcile:conflict:continuity_anchor:ep-000013-hide|ep-000014-hide|ep-000015-rest:16",
             "ledger_continuity_guard",
-            "shelter_security",
+            "thermal_rebalance",
             "resource_guard",
             "continuity_guard",
             "reconciliation_review"
@@ -1201,7 +1150,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1252,13 +1201,11 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:action:rest",
-            "verify:pred:env:shelter",
             "reconcile:conflict:continuity_anchor:ep-000013-hide|ep-000014-hide|ep-000015-rest:16",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "shelter_security",
             "resource_guard",
@@ -1273,7 +1220,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1324,13 +1271,11 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:shelter",
-            "verify:pred:action:unstable_workspace_note",
+            "reconcile:conflict:continuity_anchor:ep-000013-hide|ep-000014-hide|ep-000015-rest:16",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-rest|ep-000017-rest:18",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "shelter_security",
             "resource_guard",
@@ -1345,7 +1290,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1383,23 +1328,20 @@
     },
     {
       "cycle": 20,
-      "choice": "unstable_workspace_note",
-      "free_energy_after": 0.396969,
+      "choice": "exploit_shelter",
+      "free_energy_after": 0.467996,
       "alive": true,
       "body_state": {
-        "dopamine": 0.032270449392645534,
-        "energy": 1.0,
-        "fatigue": 0.5099999999999999,
-        "stress": 0.18,
-        "temperature": 0.5017437428462328
+        "dopamine": 0.018742621941469945,
+        "energy": 0.99,
+        "fatigue": 0.5399999999999999,
+        "stress": 0.09999999999999999,
+        "temperature": 0.4848792906898363
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:shelter",
-            "verify:pred:action:unstable_workspace_note",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-rest|ep-000017-rest:18",
+            "reconcile:conflict:continuity_anchor:ep-000013-hide|ep-000014-hide|ep-000015-rest:16",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
@@ -1415,9 +1357,9 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": false,
+          "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1455,22 +1397,19 @@
     },
     {
       "cycle": 21,
-      "choice": "unstable_workspace_note",
-      "free_energy_after": 0.358141,
+      "choice": "hide",
+      "free_energy_after": 0.259972,
       "alive": true,
       "body_state": {
-        "dopamine": 0.023234723562704784,
+        "dopamine": 0.06409537563264874,
         "energy": 1.0,
-        "fatigue": 0.5899999999999999,
-        "stress": 0.18,
-        "temperature": 0.5017437428462328
+        "fatigue": 0.2499999999999999,
+        "stress": 0.0,
+        "temperature": 0.4775864836327639
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:novelty",
-            "verify:pred:env:shelter",
-            "verify:pred:action:unstable_workspace_note",
             "reconcile:conflict:continuity_anchor:ep-000013-hide|ep-000014-hide|ep-000015-rest:16",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
@@ -1487,9 +1426,9 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": false,
+          "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1527,28 +1466,25 @@
     },
     {
       "cycle": 22,
-      "choice": "hide",
-      "free_energy_after": 0.380767,
+      "choice": "rest",
+      "free_energy_after": 0.193254,
       "alive": true,
       "body_state": {
-        "dopamine": 0.030404685386287034,
+        "dopamine": 0.051934202916199414,
         "energy": 1.0,
-        "fatigue": 0.2999999999999998,
+        "fatigue": 0.2299999999999999,
         "stress": 0.0,
-        "temperature": 0.49007446557640044
+        "temperature": 0.4775864836327639
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:shelter",
-            "verify:pred:action:hide",
             "reconcile:conflict:continuity_anchor:ep-000013-hide|ep-000014-hide|ep-000015-rest:16",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
             "ledger_continuity_guard",
-            "energy_recovery",
+            "shelter_security",
             "resource_guard",
             "continuity_guard",
             "reconciliation_review"
@@ -1561,7 +1497,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1599,29 +1535,27 @@
     },
     {
       "cycle": 23,
-      "choice": "append_workspace_note",
-      "free_energy_after": 0.425217,
+      "choice": "rest",
+      "free_energy_after": 0.308838,
       "alive": true,
       "body_state": {
-        "dopamine": 0.021891373478126665,
+        "dopamine": 0.037392626099663574,
         "energy": 1.0,
-        "fatigue": 0.37999999999999984,
+        "fatigue": 0.20999999999999988,
         "stress": 0.0,
-        "temperature": 0.49007446557640044
+        "temperature": 0.4775864836327639
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:shelter",
-            "verify:pred:action:append_workspace_note",
             "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
-            "reconcile:conflict:continuity_anchor:ep-000015-rest|ep-000017-rest|ep-000019-unstable_workspace_note:22",
+            "reconcile:conflict:continuity_anchor:ep-000015-rest-merged|ep-000020-exploit_shelter|ep-000021-hide:22",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "shelter_security",
+            "thermal_rebalance",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1631,9 +1565,9 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": false,
+          "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -1672,27 +1606,26 @@
     {
       "cycle": 24,
       "choice": "rest",
-      "free_energy_after": 0.2516,
+      "free_energy_after": 0.274222,
       "alive": true,
       "body_state": {
-        "dopamine": 0.021626730623432896,
+        "dopamine": 0.026922690791757773,
         "energy": 1.0,
-        "fatigue": 0.3599999999999999,
+        "fatigue": 0.18999999999999986,
         "stress": 0.0,
-        "temperature": 0.49007446557640044
+        "temperature": 0.4775864836327639
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:shelter",
-            "verify:pred:action:rest",
+            "reconcile:conflict:continuity_anchor:ep-000008-seek_contact|ep-000010-rest|ep-000011-exploit_shelter-merged:13",
             "reconcile:conflict:continuity_anchor:ep-000010-rest|ep-000011-exploit_shelter-merged|ep-000013-hide:14",
             "reconcile:conflict:continuity_anchor:ep-000011-exploit_shelter-merged|ep-000013-hide|ep-000014-hide:15",
-            "reconcile:conflict:continuity_anchor:ep-000015-rest|ep-000017-rest|ep-000019-unstable_workspace_note:22",
-            "reconcile:conflict:continuity_anchor:ep-000015-rest-merged|ep-000019-unstable_workspace_note-merged|ep-000022-hide:23",
+            "reconcile:conflict:continuity_anchor:ep-000015-rest-merged|ep-000020-exploit_shelter|ep-000021-hide:22",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "shelter_security",
+            "resource_guard",
+            "thermal_rebalance",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1704,7 +1637,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,

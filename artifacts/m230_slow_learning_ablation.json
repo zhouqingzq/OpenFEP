@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T23:21:46+00:00",
+  "generated_at": "2026-03-26T01:17:04+00:00",
   "mechanism": "slow_variable_learning",
   "comparison": "with_sleep_consolidated_slow_learning_vs_ablation",
   "baseline": {
@@ -8,7 +8,7 @@
     "memory_threshold_delta": -0.0172,
     "continuity_score": 1.0,
     "continuity_fragile": false,
-    "verification_priority": 0.6772,
+    "verification_priority": 0.687,
     "refresh_created_targets": true
   },
   "full_mechanism": {
@@ -17,7 +17,7 @@
     "memory_threshold_delta": -0.025,
     "continuity_score": 0.5668,
     "continuity_fragile": false,
-    "verification_priority": 0.6832,
+    "verification_priority": 0.687,
     "refresh_created_targets": true,
     "slow_summary": "Threat sensitivity changed through repeated experience. Continuity resilience remained stable because sleep-cycle drift budget exhausted.",
     "continuity_consistent": true

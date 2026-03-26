@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-22T03:44:32+00:00",
+  "generated_at": "2026-03-26T01:12:01+00:00",
   "seed_set": [
     221,
     240,
@@ -102,7 +102,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.028388,
+            "mean": 0.021828,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -114,8 +114,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9597163333333334,
-            "std": 0.002311690699226202
+            "mean": 0.9377898333333333,
+            "std": 0.016202084911276775
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -143,7 +143,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.239066,
+            "mean": 0.378875,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -155,12 +155,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8146206666666667,
-            "std": 0.008090642571651655
+            "mean": 0.737221,
+            "std": 0.01658518351822896
           },
           "action_metric_retention": {
-            "mean": 0.2555556666666667,
-            "std": 0.09556617269840947
+            "mean": 0.42083349999999997,
+            "std": 0.03640369397808415
           },
           "conflict_uncertainty_score": {
             "mean": 0.277636,
@@ -184,7 +184,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.033207,
+            "mean": 0.015775,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -196,8 +196,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9545601666666667,
-            "std": 0.001568969982362823
+            "mean": 0.9590808333333334,
+            "std": 0.00865175584138209
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -225,7 +225,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.172174,
+            "mean": 0.145988,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -237,12 +237,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8057971666666667,
-            "std": 0.004111947973757564
+            "mean": 0.8277258333333334,
+            "std": 0.018128822469727298
           },
           "action_metric_retention": {
-            "mean": 0.4559026666666667,
-            "std": 0.02049772928616458
+            "mean": 0.44166666666666665,
+            "std": 0.077793367981396
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -309,7 +309,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.009333,
+            "mean": 0.004514,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -321,8 +321,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9615315,
-            "std": 0.0006665755146018234
+            "mean": 0.9754125,
+            "std": 0.04484910771966371
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -350,7 +350,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.020319,
+            "mean": 0.012163,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -362,8 +362,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8920680000000001,
-            "std": 0.001952445901939405
+            "mean": 0.9687765,
+            "std": 0.013012353127573298
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -391,7 +391,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.035519,
+            "mean": 0.022486,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -403,8 +403,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8608775,
-            "std": 0.0017784055358663203
+            "mean": 0.9794431666666666,
+            "std": 0.014682779771063631
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -432,7 +432,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.011312,
+            "mean": 0.005011,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -444,8 +444,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.974228,
-            "std": 0.0016410107657579063
+            "mean": 0.9744113333333333,
+            "std": 0.044310892764144974
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -473,7 +473,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.091677,
+            "mean": 0.046985,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -485,8 +485,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.6931783333333333,
-            "std": 0.005542605755017732
+            "mean": 0.98776,
+            "std": 0.015100818112495331
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -514,7 +514,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.002306,
+            "mean": 0.00118,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -526,8 +526,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9904513333333334,
-            "std": 0.0001683782118393478
+            "mean": 0.998724,
+            "std": 4.473626418614834e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -557,7 +557,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.004713,
+            "mean": 0.005118,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -569,12 +569,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9710388333333333,
-            "std": 0.005269116922112168
+            "mean": 0.9738196666666666,
+            "std": 0.014403275017239042
           },
           "action_metric_retention": {
-            "mean": 1.0344016666666667,
-            "std": 0.08733144603685941
+            "mean": 1.0777778333333332,
+            "std": 0.08314800131976846
           },
           "conflict_uncertainty_score": {
             "mean": 0.1993,
@@ -598,7 +598,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.003768,
+            "mean": 0.005472,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -610,12 +610,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9862475,
-            "std": 0.0026716687512988333
+            "mean": 0.985085,
+            "std": 0.01675753548904691
           },
           "action_metric_retention": {
-            "mean": 1.082265,
-            "std": 0.09625474487698428
+            "mean": 1.109596,
+            "std": 0.08561019786801101
           },
           "conflict_uncertainty_score": {
             "mean": 0.1993,
@@ -639,7 +639,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.066066,
+            "mean": 0.217535,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -651,12 +651,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7417078333333333,
-            "std": 0.006824643859246821
+            "mean": 0.7882931666666667,
+            "std": 0.04752826946641568
           },
           "action_metric_retention": {
-            "mean": 0.4549755,
-            "std": 0.0468987483015272
+            "mean": 0.24657283333333335,
+            "std": 0.15516909646191007
           },
           "conflict_uncertainty_score": {
             "mean": 0.250317,
@@ -680,7 +680,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.011657,
+            "mean": 0.003382,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -692,12 +692,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9905883333333333,
-            "std": 0.0038831368190620596
+            "mean": 0.888497,
+            "std": 0.03113860812560509
           },
           "action_metric_retention": {
-            "mean": 0.9604701666666666,
-            "std": 0.05949416535094477
+            "mean": 1.0166666666666666,
+            "std": 0.09179298367461909
           },
           "conflict_uncertainty_score": {
             "mean": 0.207,
@@ -721,7 +721,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.0582,
+            "mean": 0.151644,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -733,12 +733,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8862733333333334,
-            "std": 0.020699149569218773
+            "mean": 0.7716838333333333,
+            "std": 0.026506046507772954
           },
           "action_metric_retention": {
-            "mean": 0.32365683333333334,
-            "std": 0.1371366292636856
+            "mean": 0.34148616666666665,
+            "std": 0.20120015561575877
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -762,7 +762,7 @@
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.014917,
+            "mean": 0.01267,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
@@ -774,12 +774,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9662305,
-            "std": 0.005226796907922336
+            "mean": 0.968882,
+            "std": 0.014923213483250408
           },
           "action_metric_retention": {
-            "mean": 1.0224968333333333,
-            "std": 0.09567914593302043
+            "mean": 1.0777778333333332,
+            "std": 0.08314800131976846
           },
           "conflict_uncertainty_score": {
             "mean": 0.234417,
@@ -805,8 +805,8 @@
         "std": 0.0036014508496191116
       },
       "narrative_prior_l1_distance": {
-        "mean": 0.0046819999999999995,
-        "std": 0.0038102443491198827
+        "mean": 0.003210666666666667,
+        "std": 0.002283635892363073
       },
       "personality_profile_l1_distance": {
         "mean": 0.0010043333333333334,
@@ -819,12 +819,12 @@
         "std": 0.01613610102293061
       },
       "attention_target_consistency": {
-        "mean": 0.9460106111111112,
-        "std": 0.03971965556824324
+        "mean": 0.9638837777777778,
+        "std": 0.024946398378558148
       },
       "action_metric_retention": {
-        "mean": 1.0274216666666667,
-        "std": 0.06776592734799201
+        "mean": 1.036532,
+        "std": 0.07149971590386447
       }
     },
     "canonical_vs_adversarial_surface": {
@@ -871,8 +871,8 @@
         "std": 0.011478392638150847
       },
       "narrative_prior_l1_distance": {
-        "mean": 0.005741,
-        "std": 0.006556352695414324
+        "mean": 0.0046166666666666665,
+        "std": 0.005714906434540775
       }
     }
   },
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "d8bfb4214de28db2adda3a3588e2c3ee58a8ce57"
+    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933"
   }
 }

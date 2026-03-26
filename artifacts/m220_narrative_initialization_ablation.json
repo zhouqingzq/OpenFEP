@@ -12,14 +12,14 @@
       "oracle_regret_rate": 0.75
     },
     "ablated_mean_metrics": {
-      "caution_rate": 0.7916666666666667,
-      "exploration_rate": 0.16666666666666669,
-      "seek_contact_rate": 0.020833333333333332,
-      "mean_conditioned_prediction_error": 0.030799769057768427,
-      "survival_score": 1.385208333333333,
-      "danger_attention_rate": 0.5276828718537792,
-      "social_attention_rate": 0.08851033414916713,
-      "novelty_attention_rate": 0.25208160434715676,
+      "caution_rate": 0.8333333333333333,
+      "exploration_rate": 0.14583333333333331,
+      "seek_contact_rate": 0.0,
+      "mean_conditioned_prediction_error": 0.030247770901736207,
+      "survival_score": 1.3966666666666665,
+      "danger_attention_rate": 0.5271597110618544,
+      "social_attention_rate": 0.08810216208703638,
+      "novelty_attention_rate": 0.25202607934601506,
       "oracle_regret_rate": 0.625
     },
     "causality_passed": true,
@@ -38,15 +38,15 @@
       "oracle_regret_rate": 0.27083333333333337
     },
     "ablated_mean_metrics": {
-      "caution_rate": 0.9166666666666667,
-      "exploration_rate": 0.041666666666666664,
-      "seek_contact_rate": 0.041666666666666664,
-      "mean_conditioned_prediction_error": 0.023428833841749815,
-      "survival_score": 1.5427083333333331,
-      "danger_attention_rate": 0.2418124977892374,
-      "social_attention_rate": 0.2949018692919303,
-      "novelty_attention_rate": 0.08779407475921874,
-      "oracle_regret_rate": 0.4166666666666667
+      "caution_rate": 0.9375,
+      "exploration_rate": 0.0625,
+      "seek_contact_rate": 0.0,
+      "mean_conditioned_prediction_error": 0.0212944779374512,
+      "survival_score": 1.5431249999999999,
+      "danger_attention_rate": 0.24237735369450142,
+      "social_attention_rate": 0.29234081338976314,
+      "novelty_attention_rate": 0.08969380012944814,
+      "oracle_regret_rate": 0.375
     },
     "causality_passed": true,
     "ablation_passed": true
@@ -67,8 +67,8 @@
       "caution_rate": 0.9791666666666667,
       "exploration_rate": 0.020833333333333332,
       "seek_contact_rate": 0.0,
-      "mean_conditioned_prediction_error": 0.02508964709292054,
-      "survival_score": 1.6018749999999997,
+      "mean_conditioned_prediction_error": 0.025266890380288343,
+      "survival_score": 1.6058333333333332,
       "danger_attention_rate": 0.16389453557025113,
       "social_attention_rate": 0.009570322741043823,
       "novelty_attention_rate": 0.28234129416600484,

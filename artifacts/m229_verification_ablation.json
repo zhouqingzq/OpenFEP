@@ -1,26 +1,16 @@
 {
-  "generated_at": "2026-03-23T23:21:46+00:00",
+  "generated_at": "2026-03-26T01:17:04+00:00",
   "mechanism": "verification_loop",
   "comparison": "with_verification_vs_ablation",
   "baseline": {
     "scan_policy_score": 0.185633,
     "scan_verification_bias": 0.0,
-    "workspace_focus": {
-      "energy": 0.38025,
-      "fatigue": 0.38025,
-      "stress": 0.38025,
-      "temperature": 0.38025,
-      "novelty": 0.34275
-    },
-    "memory_threshold_delta": -0.05535,
+    "workspace_focus": {},
+    "memory_threshold_delta": 0.0,
     "maintenance_signal": {
-      "priority_gain": 0.18774,
-      "active_tasks": [
-        "verify:pred:action:hide",
-        "verify:pred:env:novelty",
-        "verify:pred:env:temperature"
-      ],
-      "recommended_action": "scan",
+      "priority_gain": 0.0,
+      "active_tasks": [],
+      "recommended_action": "",
       "suppressed_actions": []
     }
   },
@@ -28,25 +18,18 @@
     "scan_policy_score": 0.291697,
     "scan_verification_bias": 0.106064,
     "workspace_focus": {
-      "energy": 0.38025,
-      "fatigue": 0.38025,
-      "stress": 0.38025,
-      "temperature": 0.38025,
-      "danger": 0.3504,
-      "novelty": 0.34275
+      "danger": 0.3504
     },
-    "memory_threshold_delta": -0.05535,
+    "memory_threshold_delta": -0.05336,
     "maintenance_signal": {
-      "priority_gain": 0.200368,
+      "priority_gain": 0.065408,
       "active_tasks": [
-        "verify:pred:action:hide",
-        "verify:pred:env:danger",
-        "verify:pred:env:novelty"
+        "verify:pred:env:danger"
       ],
       "recommended_action": "scan",
       "suppressed_actions": []
     },
-    "verification_summary": "I am currently trying to verify pred:action:hide because it is still unresolved."
+    "verification_summary": "I am currently trying to verify pred:env:danger because it is survival-relevant."
   },
   "degradation_checks": {
     "evidence_seeking_removed_without_verification": true,

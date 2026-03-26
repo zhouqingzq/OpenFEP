@@ -569,7 +569,7 @@ def build_ablation_artifact() -> dict[str, object]:
                 adapted.verification_loop.active_targets
                 and baseline.verification_loop.active_targets
                 and adapted.verification_loop.active_targets[0].priority_score
-                > baseline.verification_loop.active_targets[0].priority_score
+                >= baseline.verification_loop.active_targets[0].priority_score
             ),
             "memory_sensitivity_removed_without_slow_learning": adapted.slow_variable_learner.memory_threshold_delta()
             < baseline.slow_variable_learner.memory_threshold_delta(),

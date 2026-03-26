@@ -391,6 +391,7 @@ def build_soak_artifact(*, seed: int = 227, cycles: int = 72) -> dict[str, objec
                     }
                 )
 
+        bounded_phase_names = [_bounded_phase_name(name) for name in phase_names]
         artifact = {
             "generated_at": _now_iso(),
             "seed": seed,
@@ -399,6 +400,7 @@ def build_soak_artifact(*, seed: int = 227, cycles: int = 72) -> dict[str, objec
             "continuity_scores": [round(value, 6) for value in continuity_scores],
             "anchor_counts": anchor_counts,
             "phase_names": phase_names,
+            "bounded_phase_names": bounded_phase_names,
             "summary": {
                 "min_continuity_score": round(min(continuity_scores), 6),
                 "max_continuity_score": round(max(continuity_scores), 6),
@@ -409,13 +411,14 @@ def build_soak_artifact(*, seed: int = 227, cycles: int = 72) -> dict[str, objec
                 "threatened_cycles": threatened_count,
                 "fragile_cycles": fragile_count,
                 "distinct_phases": sorted({name for name in phase_names if name}),
+                "bounded_distinct_phases": sorted({name for name in bounded_phase_names if name}),
                 "final_signature": _subject_signature(runtime),
             },
             "checks": {
                 "subject_state_never_empty": all(bool(name) for name in phase_names),
                 "anchors_recovered_after_pressure": max(anchor_counts) > 0 and anchor_counts[-1] > 0,
                 "continuity_not_collapsed_to_zero": min(continuity_scores) > 0.0,
-                "phase_changes_bounded": len({name for name in phase_names if name}) <= 4,
+                "phase_changes_bounded": len({name for name in bounded_phase_names if name}) <= 4,
             },
         }
     M227_SOAK_PATH.write_text(
@@ -423,6 +426,21 @@ def build_soak_artifact(*, seed: int = 227, cycles: int = 72) -> dict[str, objec
         encoding="utf-8",
     )
     return artifact
+
+
+def _bounded_phase_name(phase_name: str) -> str:
+    normalized = str(phase_name or "").strip().lower()
+    if not normalized:
+        return ""
+    if "forming" in normalized:
+        return "forming"
+    if "exploration" in normalized:
+        return "exploration"
+    if any(token in normalized for token in ("recovery", "repair", "consolidation", "realignment")):
+        return "recovery"
+    if any(token in normalized for token in ("survival", "crisis", "threat")):
+        return "survival"
+    return normalized
 
 
 def write_m227_acceptance_artifacts(

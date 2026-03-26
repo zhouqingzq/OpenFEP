@@ -2102,7 +2102,7 @@ class SelfModel:
             for action, frequency in existing.action_distribution.items():
                 action_counts[action] = action_counts.get(action, 0) + max(
                     1,
-                    int(round(frequency * max(1, len(agent_history)) * 0.25)),
+                    int(round(frequency * max(1, len(agent_history)) * 0.50)),
                 )
 
         total_actions = sum(action_counts.values()) or 1

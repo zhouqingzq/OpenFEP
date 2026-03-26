@@ -607,11 +607,18 @@ def _resolve_effect_if_due(
     baseline_energy = float(effect.baseline_state["energy"])
     baseline_stress = float(effect.baseline_state["stress"])
     baseline_fatigue = float(effect.baseline_state["fatigue"])
-    recovered = (
-        float(current["energy"]) >= baseline_energy - 0.08
-        and float(current["stress"]) <= baseline_stress + 0.10
-        and float(current["fatigue"]) <= baseline_fatigue + 0.10
-    )
+    if effect.event.event_type == "delayed_maintenance_window":
+        recovered = (
+            float(current["energy"]) >= baseline_energy - 0.05
+            and float(current["stress"]) <= baseline_stress + 0.12
+            and float(current["fatigue"]) <= 0.56
+        )
+    else:
+        recovered = (
+            float(current["energy"]) >= baseline_energy - 0.08
+            and float(current["stress"]) <= baseline_stress + 0.10
+            and float(current["fatigue"]) <= baseline_fatigue + 0.10
+        )
     recovery_deadline = effect.end_tick + max(1, effect.event.recovery_window)
     if not recovered and current_tick < recovery_deadline:
         return

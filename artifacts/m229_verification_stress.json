@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T23:21:46+00:00",
+  "generated_at": "2026-03-26T01:17:04+00:00",
   "failure_injection": {
     "type": "verification_timeout_after_snapshot_restore",
     "missing_channel": "novelty",
@@ -130,6 +130,36 @@
         "priority": "critical"
       },
       {
+        "discrepancy_id": "disc:maintenance_overload",
+        "label": "unresolved maintenance discrepancy",
+        "source": "maintenance",
+        "discrepancy_type": "maintenance_overload",
+        "created_tick": 1,
+        "last_seen_tick": 1,
+        "severity": 0.469034,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "maintenance",
+          "stress"
+        ],
+        "supporting_evidence": [
+          "verify:pred:env:novelty",
+          "resource_guard"
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": false,
+        "subject_critical": false,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [],
+        "linked_commitments": [],
+        "linked_goal": "SURVIVAL",
+        "age": 0,
+        "priority": "medium"
+      },
+      {
         "discrepancy_id": "disc:verify_timeout:pred:env:novelty",
         "label": "verification timeout",
         "source": "prediction_error",
@@ -159,40 +189,10 @@
         "linked_goal": "SURVIVAL",
         "age": 0,
         "priority": "medium"
-      },
-      {
-        "discrepancy_id": "disc:maintenance_overload",
-        "label": "unresolved maintenance discrepancy",
-        "source": "maintenance",
-        "discrepancy_type": "maintenance_overload",
-        "created_tick": 1,
-        "last_seen_tick": 1,
-        "severity": 0.592794,
-        "status": "active",
-        "recurrence_count": 1,
-        "target_channels": [
-          "maintenance",
-          "stress"
-        ],
-        "supporting_evidence": [
-          "verify:pred:env:novelty",
-          "verify:pred:env:temperature",
-          "verify:pred:action:hide"
-        ],
-        "acute": true,
-        "chronic": false,
-        "identity_relevant": false,
-        "subject_critical": false,
-        "repair_attempts": 0,
-        "archived_reason": "",
-        "linked_predictions": [],
-        "linked_commitments": [],
-        "linked_goal": "SURVIVAL",
-        "age": 0,
-        "priority": "high"
       }
     ],
     "prediction_statuses": [
+      "active",
       "active"
     ]
   },

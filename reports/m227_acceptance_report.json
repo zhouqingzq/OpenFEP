@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-03-23T03:02:15+00:00",
+  "generated_at": "2026-03-26T01:16:56+00:00",
   "seed_set": [
     227,
     342
@@ -56,6 +56,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": true,
               "long_horizon_conflict": true
             },
@@ -81,6 +84,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": true,
               "long_horizon_conflict": true
             },
@@ -109,6 +115,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": true,
               "long_horizon_conflict": true
             },
@@ -133,6 +142,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": true,
               "long_horizon_conflict": true
             },
@@ -176,6 +188,9 @@
             "repairing": false,
             "overloaded": true,
             "socially_destabilized": false,
+            "narrative_ambiguity_active": false,
+            "active_inquiry": false,
+            "inquiry_deferred": false,
             "continuity_fragile": true,
             "long_horizon_conflict": false
           },
@@ -191,9 +206,9 @@
         "post_restore_alive": true,
         "post_restore_subject_state": {
           "tick": 1,
-          "core_identity_summary": "I am a risk-seeking, survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 1 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.03, 'resource_cost': {'energy': 0.03, 'attention': 0.03}, 'failure_modes': ['opportunity_loss', 'environment_shift'], 'constraints': {'preferred_when_fatigue_above': 0.4}, 'reversible': True} (surprise=1005.06). Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence.",
-          "current_phase": "survival_crisis",
-          "current_self_narrative_phase": "survival_crisis",
+          "core_identity_summary": "I am a risk-seeking agent. Currently in a resource_recovery phase. My dominant strategy remains expected_free_energy. Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
+          "current_phase": "resource_recovery",
+          "current_self_narrative_phase": "resource_recovery",
           "active_commitments": [
             "Protect survival and integrity before opportunistic gain.",
             "When conditions are stable, reduce uncertainty through active exploration."
@@ -231,7 +246,7 @@
           "identity_tension_level": 0.5,
           "self_inconsistency_level": 0.5,
           "maintenance_pressure": 1.0,
-          "continuity_score": 0.167741,
+          "continuity_score": 0.1668,
           "continuity_anchors": [
             "ep-000001-rest",
             "commitment-survival-priority",
@@ -242,11 +257,11 @@
               "label": "maintenance pressure",
               "tension_type": "maintenance",
               "intensity": 1.0,
-              "repair_target": "scan",
+              "repair_target": "hide",
               "evidence": [
-                "verify:pred:action:forage",
-                "verify:pred:env:temperature",
-                "verify:pred:env:food"
+                "thermal_rebalance",
+                "energy_recovery",
+                "stress_relief"
               ]
             },
             {
@@ -264,20 +279,36 @@
               "intensity": 1.0,
               "repair_target": "SURVIVAL",
               "evidence": [
-                "verify:pred:action:forage",
-                "verify:pred:env:temperature"
+                "thermal_rebalance",
+                "energy_recovery"
               ]
             },
             {
               "label": "continuity fragility",
               "tension_type": "continuity",
-              "intensity": 0.832259,
+              "intensity": 0.8332,
               "repair_target": "protect continuity anchors",
               "evidence": [
                 "continuity_score_drop"
               ]
             }
           ],
+          "narrative_uncertainties": [],
+          "active_inquiries": [],
+          "deferred_inquiries": [],
+          "ambiguity_profile": {
+            "total_unknown_count": 0.0,
+            "decision_relevant_unknown_count": 0.0,
+            "competing_hypothesis_count": 0.0,
+            "latent_cause_count": 0.0,
+            "surface_cue_count": 0.0,
+            "interpretive_competition": 0.0,
+            "latent_cause_uncertainty_burden": 0.0,
+            "social_ambiguity_burden": 0.0,
+            "trust_ambiguity_burden": 0.0,
+            "environment_ambiguity_burden": 0.0,
+            "retained_uncertainty_burden": 0.0
+          },
           "subject_priority_stack": [
             {
               "label": "maintenance pressure",
@@ -286,9 +317,9 @@
               "preferred_actions": [],
               "avoid_actions": [],
               "evidence": [
-                "verify:pred:action:forage",
-                "verify:pred:env:temperature",
-                "verify:pred:env:food"
+                "thermal_rebalance",
+                "energy_recovery",
+                "stress_relief"
               ]
             },
             {
@@ -318,13 +349,13 @@
               "preferred_actions": [],
               "avoid_actions": [],
               "evidence": [
-                "verify:pred:action:forage",
-                "verify:pred:env:temperature"
+                "thermal_rebalance",
+                "energy_recovery"
               ]
             },
             {
               "label": "continuity fragility",
-              "weight": 0.832259,
+              "weight": 0.8332,
               "priority_type": "continuity",
               "preferred_actions": [
                 "rest",
@@ -365,7 +396,7 @@
             "social_weight": 0.5,
             "exploration_weight": 0.46,
             "maintenance_weight": 0.62,
-            "hierarchy_stability": 0.689405,
+            "hierarchy_stability": 0.68,
             "commitment_stability": 0.7,
             "identity_rigidity": 0.58,
             "plasticity": 0.42,
@@ -376,6 +407,9 @@
             "repairing": false,
             "overloaded": false,
             "socially_destabilized": false,
+            "narrative_ambiguity_active": false,
+            "active_inquiry": false,
+            "inquiry_deferred": false,
             "continuity_fragile": true,
             "long_horizon_conflict": true
           },
@@ -383,12 +417,12 @@
             "need:maintenance"
           ],
           "repair_targets": [
-            "scan",
+            "hide",
             "critical",
             "SURVIVAL",
             "protect continuity anchors"
           ],
-          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis. 6 long-horizon conflict thread(s) still shape continuity."
+          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity."
         }
       }
     },
@@ -399,43 +433,53 @@
         "anchors_recovered_after_pressure": true,
         "continuity_not_collapsed_to_zero": true,
         "phase_changes_bounded": true,
-        "min_continuity_score": 0.460307,
-        "max_continuity_score": 0.790587,
-        "final_continuity_score": 0.748175,
+        "min_continuity_score": 0.349483,
+        "max_continuity_score": 0.7468,
+        "final_continuity_score": 0.711106,
         "max_anchor_count": 12,
         "final_anchor_count": 12,
         "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 52,
-        "fragile_cycles": 61,
+        "threatened_cycles": 43,
+        "fragile_cycles": 72,
         "distinct_phases": [
+          "consolidation",
+          "exploration_phase",
           "forming",
           "goal_realignment",
-          "survival_crisis"
+          "resource_recovery"
+        ],
+        "bounded_distinct_phases": [
+          "exploration",
+          "forming",
+          "recovery"
         ],
         "final_signature": {
           "cycle": 72,
-          "current_phase": "survival_crisis",
+          "current_phase": "consolidation",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.748175,
+          "continuity_score": 0.711106,
           "continuity_anchors": [
-            "ep-000072-exploit_shelter",
-            "ep-000069-exploit_shelter",
-            "ep-000058-exploit_shelter",
-            "ep-000068-hide",
-            "ep-000065-scan",
-            "ep-000062-hide",
-            "ep-000057-exploit_shelter",
-            "ep-000054-exploit_shelter",
-            "ep-000053-hide",
-            "ep-000052-seek_contact",
-            "ep-000051-hide",
-            "ep-000048-exploit_shelter"
+            "ep-000071-exploit_shelter",
+            "ep-000061-hide-merged",
+            "ep-000059-exploit_shelter-merged",
+            "ep-000049-seek_contact",
+            "ep-000034-rest-merged",
+            "ep-000038-append_workspace_note",
+            "ep-000034-unstable_workspace_note-merged",
+            "ep-000024-hide-merged",
+            "ep-000016-exploit_shelter-merged",
+            "ep-000014-rest-merged",
+            "ep-000011-hide",
+            "ep-000006-scan"
           ],
           "status_flags": {
             "threatened": true,
             "repairing": false,
             "overloaded": true,
             "socially_destabilized": false,
+            "narrative_ambiguity_active": false,
+            "active_inquiry": false,
+            "inquiry_deferred": false,
             "continuity_fragile": true,
             "long_horizon_conflict": true
           },
@@ -443,7 +487,7 @@
             "continuity-relevant tension",
             "maintenance pressure",
             "need:maintenance",
-            "unresolved self inconsistency"
+            "repeated surprise burden"
           ],
           "last_choice": "exploit_shelter"
         }
@@ -463,8 +507,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-23T03:02:15+00:00",
-    "codebase_version": "85a1c432e4212cc90ac2e08d9d265e1b99ea3e12",
+    "generated_at": "2026-03-26T01:16:56+00:00",
+    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -475,32 +519,32 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
-        "size_bytes": 66852,
-        "modified_at": "2026-03-23T03:02:05+00:00"
+        "size_bytes": 78626,
+        "modified_at": "2026-03-26T01:16:50+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1674,
-        "modified_at": "2026-03-23T03:02:05+00:00"
+        "modified_at": "2026-03-26T01:16:50+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
-        "size_bytes": 12838,
-        "modified_at": "2026-03-23T03:02:05+00:00"
+        "size_bytes": 14088,
+        "modified_at": "2026-03-26T01:16:50+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 15943,
-        "modified_at": "2026-03-23T03:02:15+00:00"
+        "size_bytes": 18601,
+        "modified_at": "2026-03-26T01:16:56+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-03-22T06:46:05+00:00"
+        "modified_at": "2026-03-26T00:38:26+00:00"
       }
     }
   },

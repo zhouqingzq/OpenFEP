@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.29",
   "status": "PASS",
-  "generated_at": "2026-03-23T23:21:46+00:00",
+  "generated_at": "2026-03-26T01:17:04+00:00",
   "seed_set": [
     229,
     431
@@ -39,12 +39,9 @@
             "cycle": 2,
             "last_choice": "rest",
             "active_targets": 0,
-            "archived_targets": 6,
-            "evidence_events": 6,
+            "archived_targets": 1,
+            "evidence_events": 1,
             "recent_outcomes": [
-              "confirmed",
-              "partially_supported",
-              "confirmed",
               "confirmed"
             ],
             "prioritized_prediction": "",
@@ -53,6 +50,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": true,
               "long_horizon_conflict": true
             }
@@ -61,12 +61,9 @@
             "cycle": 2,
             "last_choice": "rest",
             "active_targets": 0,
-            "archived_targets": 6,
-            "evidence_events": 6,
+            "archived_targets": 1,
+            "evidence_events": 1,
             "recent_outcomes": [
-              "confirmed",
-              "partially_supported",
-              "confirmed",
               "confirmed"
             ],
             "prioritized_prediction": "",
@@ -75,6 +72,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": true,
               "long_horizon_conflict": true
             }
@@ -87,13 +87,11 @@
             "cycle": 2,
             "last_choice": "hide",
             "active_targets": 0,
-            "archived_targets": 6,
-            "evidence_events": 6,
+            "archived_targets": 2,
+            "evidence_events": 2,
             "recent_outcomes": [
               "confirmed",
-              "partially_supported",
-              "confirmed",
-              "confirmed"
+              "partially_supported"
             ],
             "prioritized_prediction": "",
             "subject_flags": {
@@ -101,6 +99,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": false,
               "long_horizon_conflict": true
             }
@@ -109,13 +110,11 @@
             "cycle": 2,
             "last_choice": "hide",
             "active_targets": 0,
-            "archived_targets": 6,
-            "evidence_events": 6,
+            "archived_targets": 2,
+            "evidence_events": 2,
             "recent_outcomes": [
               "confirmed",
-              "partially_supported",
-              "confirmed",
-              "confirmed"
+              "partially_supported"
             ],
             "prioritized_prediction": "",
             "subject_flags": {
@@ -123,6 +122,9 @@
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": false,
               "long_horizon_conflict": true
             }
@@ -201,8 +203,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-23T23:21:46+00:00",
-    "codebase_version": "7ce5a96b2b3b02c827ea8b9ec48c0826dda4dd90",
+    "generated_at": "2026-03-26T01:17:04+00:00",
+    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
@@ -213,26 +215,26 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
         "exists": true,
-        "size_bytes": 59948,
-        "modified_at": "2026-03-23T23:21:46+00:00"
+        "size_bytes": 21733,
+        "modified_at": "2026-03-26T01:17:04+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
         "exists": true,
-        "size_bytes": 1787,
-        "modified_at": "2026-03-23T23:21:46+00:00"
+        "size_bytes": 1304,
+        "modified_at": "2026-03-26T01:17:04+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
         "exists": true,
-        "size_bytes": 5952,
-        "modified_at": "2026-03-23T23:21:46+00:00"
+        "size_bytes": 5920,
+        "modified_at": "2026-03-26T01:17:04+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md",
         "exists": true,
         "size_bytes": 236,
-        "modified_at": "2026-03-23T23:21:45+00:00"
+        "modified_at": "2026-03-26T01:17:04+00:00"
       }
     }
   },

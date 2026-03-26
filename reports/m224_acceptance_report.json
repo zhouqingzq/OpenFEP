@@ -3,8 +3,8 @@
   "schema_version": "m224_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-25T01:32:54+00:00",
-  "codebase_version": "a51d5f82838ebd7f39329324ae8e24d655d7e482",
+  "generated_at": "2026-03-26T01:16:44+00:00",
+  "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
   "seed_set": [
     224,
     243,
@@ -617,9 +617,6 @@
       ],
       "agenda": {
         "active_tasks": [
-          "verify:pred:env:temperature",
-          "verify:pred:env:food",
-          "verify:pred:action:scan",
           "shelter_security"
         ],
         "chronic_debt_pressure": 0.0,
@@ -627,10 +624,10 @@
         "interrupt_action": null,
         "interrupt_reason": "",
         "memory_compaction_recommended": false,
-        "policy_shift_strength": 0.45713899999999996,
+        "policy_shift_strength": 0.280599,
         "protected_mode": false,
         "protected_mode_ticks_remaining": 0,
-        "recommended_action": "scan",
+        "recommended_action": "exploit_shelter",
         "recovery_focus": [],
         "recovery_rebound_active": false,
         "recovery_rebound_ticks_remaining": 0,
@@ -650,7 +647,7 @@
         "telemetry_backoff_recommended": false
       },
       "conscious_report": {
-        "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now.",
+        "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
         "channels": [
           "novelty",
           "shelter"
@@ -678,6 +675,9 @@
             "repairing": false,
             "overloaded": false,
             "socially_destabilized": false,
+            "narrative_ambiguity_active": false,
+            "active_inquiry": false,
+            "inquiry_deferred": false,
             "continuity_fragile": false,
             "long_horizon_conflict": true
           },
@@ -778,17 +778,31 @@
               ]
             },
             {
-              "label": "maintenance pressure",
-              "tension_type": "maintenance",
-              "intensity": 0.457139,
-              "repair_target": "scan",
+              "label": "continuity fragility",
+              "tension_type": "continuity",
+              "intensity": 0.4332,
+              "repair_target": "protect continuity anchors",
               "evidence": [
-                "verify:pred:env:temperature",
-                "verify:pred:env:food",
-                "verify:pred:action:scan"
+                "continuity_score_drop"
               ]
             }
           ],
+          "narrative_uncertainties": [],
+          "active_inquiries": [],
+          "deferred_inquiries": [],
+          "ambiguity_profile": {
+            "total_unknown_count": 0.0,
+            "decision_relevant_unknown_count": 0.0,
+            "competing_hypothesis_count": 0.0,
+            "latent_cause_count": 0.0,
+            "surface_cue_count": 0.0,
+            "interpretive_competition": 0.0,
+            "latent_cause_uncertainty_burden": 0.0,
+            "social_ambiguity_burden": 0.0,
+            "trust_ambiguity_burden": 0.0,
+            "environment_ambiguity_burden": 0.0,
+            "retained_uncertainty_burden": 0.0
+          },
           "continuity_score": 0.5668,
           "continuity_anchors": []
         },
@@ -798,284 +812,44 @@
           "unresolved_reason": "",
           "prioritized_target": null,
           "active_targets": [],
-          "recent_outcomes": [
-            {
-              "target_id": "verify:pred:action:scan",
-              "prediction_id": "pred:action:scan",
-              "created_tick": 1,
-              "priority_score": 0.507,
-              "selected_reason": "it is still unresolved",
-              "plan": {
-                "prediction_id": "pred:action:scan",
-                "selected_reason": "it is still unresolved",
-                "evidence_sought": [
-                  "observe:energy",
-                  "observe:fatigue",
-                  "observe:stress",
-                  "observe:temperature"
-                ],
-                "support_criteria": [
-                  "energy stays within 0.11",
-                  "stress stays within 0.11",
-                  "fatigue stays within 0.11",
-                  "temperature stays within 0.11"
-                ],
-                "falsification_criteria": [
-                  "energy diverges by >= 0.38",
-                  "stress diverges by >= 0.38",
-                  "fatigue diverges by >= 0.38",
-                  "temperature diverges by >= 0.38"
-                ],
-                "expected_horizon": 1,
-                "created_tick": 1,
-                "expires_tick": 2,
-                "status": "active",
-                "linked_action": "scan",
-                "attention_channels": [
-                  "energy",
-                  "fatigue",
-                  "stress",
-                  "temperature"
-                ]
-              },
-              "status": "resolved",
-              "outcome": "partially_supported",
-              "outcome_tick": 1,
-              "evidence_ids": [
-                "ack:verify:pred:action:scan:1",
-                "obs:verify:pred:action:scan:1:validation_observation"
-              ],
-              "last_evidence_tick": 1,
-              "attempts": 1,
-              "missed_evidence_count": 0,
-              "linked_discrepancy_id": "",
-              "linked_commitments": [],
-              "linked_identity_anchors": [],
-              "target_channels": [
-                "energy",
-                "fatigue",
-                "stress",
-                "temperature"
-              ],
-              "prediction_type": "action_consequence",
-              "verification_bias": 0.11084
-            },
-            {
-              "target_id": "verify:pred:env:food",
-              "prediction_id": "pred:env:food",
-              "created_tick": 1,
-              "priority_score": 0.377,
-              "selected_reason": "it is still unresolved",
-              "plan": {
-                "prediction_id": "pred:env:food",
-                "selected_reason": "it is still unresolved",
-                "evidence_sought": [
-                  "observe:food"
-                ],
-                "support_criteria": [
-                  "food stays within 0.16"
-                ],
-                "falsification_criteria": [
-                  "food diverges by >= 0.33"
-                ],
-                "expected_horizon": 1,
-                "created_tick": 1,
-                "expires_tick": 2,
-                "status": "active",
-                "linked_action": "scan",
-                "attention_channels": [
-                  "food"
-                ]
-              },
-              "status": "resolved",
-              "outcome": "inconclusive",
-              "outcome_tick": 1,
-              "evidence_ids": [
-                "ack:verify:pred:env:food:1",
-                "obs:verify:pred:env:food:1:validation_observation"
-              ],
-              "last_evidence_tick": 1,
-              "attempts": 1,
-              "missed_evidence_count": 0,
-              "linked_discrepancy_id": "",
-              "linked_commitments": [],
-              "linked_identity_anchors": [],
-              "target_channels": [
-                "food"
-              ],
-              "prediction_type": "environment_state",
-              "verification_bias": 0.09524
-            },
-            {
-              "target_id": "verify:pred:env:temperature",
-              "prediction_id": "pred:env:temperature",
-              "created_tick": 1,
-              "priority_score": 0.377,
-              "selected_reason": "it is still unresolved",
-              "plan": {
-                "prediction_id": "pred:env:temperature",
-                "selected_reason": "it is still unresolved",
-                "evidence_sought": [
-                  "observe:temperature"
-                ],
-                "support_criteria": [
-                  "temperature stays within 0.16"
-                ],
-                "falsification_criteria": [
-                  "temperature diverges by >= 0.33"
-                ],
-                "expected_horizon": 1,
-                "created_tick": 1,
-                "expires_tick": 2,
-                "status": "active",
-                "linked_action": "scan",
-                "attention_channels": [
-                  "temperature"
-                ]
-              },
-              "status": "resolved",
-              "outcome": "confirmed",
-              "outcome_tick": 1,
-              "evidence_ids": [
-                "ack:verify:pred:env:temperature:1",
-                "obs:verify:pred:env:temperature:1:validation_observation"
-              ],
-              "last_evidence_tick": 1,
-              "attempts": 1,
-              "missed_evidence_count": 0,
-              "linked_discrepancy_id": "",
-              "linked_commitments": [],
-              "linked_identity_anchors": [],
-              "target_channels": [
-                "temperature"
-              ],
-              "prediction_type": "environment_state",
-              "verification_bias": 0.09524
-            }
-          ],
-          "recent_evidence": [
-            {
-              "evidence_id": "ack:verify:pred:action:scan:1",
-              "tick": 1,
-              "target_id": "verify:pred:action:scan",
-              "prediction_id": "pred:action:scan",
-              "source": "action_acknowledgment",
-              "summary": "Verification-seeking action scan was acknowledged.",
-              "observed_state": {},
-              "compared_channels": [],
-              "missing_channels": [],
-              "support_score": 0.25,
-              "contradiction_score": 0.0,
-              "metadata": {
-                "action_name": "scan",
-                "success": true
-              }
-            },
-            {
-              "evidence_id": "ack:verify:pred:env:food:1",
-              "tick": 1,
-              "target_id": "verify:pred:env:food",
-              "prediction_id": "pred:env:food",
-              "source": "action_acknowledgment",
-              "summary": "Verification-seeking action scan was acknowledged.",
-              "observed_state": {},
-              "compared_channels": [],
-              "missing_channels": [],
-              "support_score": 0.25,
-              "contradiction_score": 0.0,
-              "metadata": {
-                "action_name": "scan",
-                "success": true
-              }
-            },
-            {
-              "evidence_id": "ack:verify:pred:env:temperature:1",
-              "tick": 1,
-              "target_id": "verify:pred:env:temperature",
-              "prediction_id": "pred:env:temperature",
-              "source": "action_acknowledgment",
-              "summary": "Verification-seeking action scan was acknowledged.",
-              "observed_state": {},
-              "compared_channels": [],
-              "missing_channels": [],
-              "support_score": 0.25,
-              "contradiction_score": 0.0,
-              "metadata": {
-                "action_name": "scan",
-                "success": true
-              }
-            },
-            {
-              "evidence_id": "obs:verify:pred:action:scan:1:validation_observation",
-              "tick": 1,
-              "target_id": "verify:pred:action:scan",
-              "prediction_id": "pred:action:scan",
-              "source": "validation_observation",
-              "summary": "Observed temperature while verifying pred:action:scan.",
-              "observed_state": {
-                "temperature": 0.5
-              },
-              "compared_channels": [
-                "temperature"
-              ],
-              "missing_channels": [
-                "energy",
-                "stress",
-                "fatigue"
-              ],
-              "support_score": 0.970273,
-              "contradiction_score": 0.029727,
-              "metadata": {
-                "avg_error": 0.011148
-              }
-            },
-            {
-              "evidence_id": "obs:verify:pred:env:food:1:validation_observation",
-              "tick": 1,
-              "target_id": "verify:pred:env:food",
-              "prediction_id": "pred:env:food",
-              "source": "validation_observation",
-              "summary": "Observed food while verifying pred:env:food.",
-              "observed_state": {
-                "food": 0.19
-              },
-              "compared_channels": [
-                "food"
-              ],
-              "missing_channels": [],
-              "support_score": 0.169742,
-              "contradiction_score": 0.830258,
-              "metadata": {
-                "avg_error": 0.269834
-              }
-            },
-            {
-              "evidence_id": "obs:verify:pred:env:temperature:1:validation_observation",
-              "tick": 1,
-              "target_id": "verify:pred:env:temperature",
-              "prediction_id": "pred:env:temperature",
-              "source": "validation_observation",
-              "summary": "Observed temperature while verifying pred:env:temperature.",
-              "observed_state": {
-                "temperature": 0.5
-              },
-              "compared_channels": [
-                "temperature"
-              ],
-              "missing_channels": [],
-              "support_score": 0.996469,
-              "contradiction_score": 0.003531,
-              "metadata": {
-                "avg_error": 0.001148
-              }
-            }
-          ],
+          "recent_outcomes": [],
+          "recent_evidence": [],
           "recent_falsifications": [],
           "counts": {
             "active_targets": 0,
-            "archived_targets": 3,
-            "evidence_events": 6
+            "archived_targets": 0,
+            "evidence_events": 0
           }
+        },
+        "narrative_experiment": {
+          "summary": "No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "chosen_action_reason": "",
+          "active_plans": [],
+          "deferred_plans": [],
+          "rejected_plans": [],
+          "candidates": [],
+          "predictions": [],
+          "discrimination_targets": []
+        },
+        "narrative_uncertainty": {
+          "summary": "",
+          "profile": {
+            "total_unknown_count": 0,
+            "decision_relevant_unknown_count": 0,
+            "competing_hypothesis_count": 0,
+            "latent_cause_count": 0,
+            "surface_cue_count": 0,
+            "interpretive_competition": 0.0,
+            "latent_cause_uncertainty_burden": 0.0,
+            "social_ambiguity_burden": 0.0,
+            "trust_ambiguity_burden": 0.0,
+            "environment_ambiguity_burden": 0.0,
+            "retained_uncertainty_burden": 0.0
+          },
+          "top_unknowns": [],
+          "hypotheses_by_unknown": {},
+          "surface_cues": [],
+          "latent_causes": []
         },
         "slow_learning": {
           "state": {
@@ -4153,9 +3927,6 @@
         ],
         "agenda": {
           "active_tasks": [
-            "verify:pred:env:temperature",
-            "verify:pred:env:food",
-            "verify:pred:action:scan",
             "shelter_security"
           ],
           "chronic_debt_pressure": 0.0,
@@ -4163,10 +3934,10 @@
           "interrupt_action": null,
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.45713899999999996,
+          "policy_shift_strength": 0.280599,
           "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "scan",
+          "recommended_action": "exploit_shelter",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -4186,7 +3957,7 @@
           "telemetry_backoff_recommended": false
         },
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now.",
+          "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "shelter"
@@ -4214,6 +3985,9 @@
               "repairing": false,
               "overloaded": false,
               "socially_destabilized": false,
+              "narrative_ambiguity_active": false,
+              "active_inquiry": false,
+              "inquiry_deferred": false,
               "continuity_fragile": false,
               "long_horizon_conflict": true
             },
@@ -4314,17 +4088,31 @@
                 ]
               },
               {
-                "label": "maintenance pressure",
-                "tension_type": "maintenance",
-                "intensity": 0.457139,
-                "repair_target": "scan",
+                "label": "continuity fragility",
+                "tension_type": "continuity",
+                "intensity": 0.4332,
+                "repair_target": "protect continuity anchors",
                 "evidence": [
-                  "verify:pred:env:temperature",
-                  "verify:pred:env:food",
-                  "verify:pred:action:scan"
+                  "continuity_score_drop"
                 ]
               }
             ],
+            "narrative_uncertainties": [],
+            "active_inquiries": [],
+            "deferred_inquiries": [],
+            "ambiguity_profile": {
+              "total_unknown_count": 0.0,
+              "decision_relevant_unknown_count": 0.0,
+              "competing_hypothesis_count": 0.0,
+              "latent_cause_count": 0.0,
+              "surface_cue_count": 0.0,
+              "interpretive_competition": 0.0,
+              "latent_cause_uncertainty_burden": 0.0,
+              "social_ambiguity_burden": 0.0,
+              "trust_ambiguity_burden": 0.0,
+              "environment_ambiguity_burden": 0.0,
+              "retained_uncertainty_burden": 0.0
+            },
             "continuity_score": 0.5668,
             "continuity_anchors": []
           },
@@ -4334,284 +4122,44 @@
             "unresolved_reason": "",
             "prioritized_target": null,
             "active_targets": [],
-            "recent_outcomes": [
-              {
-                "target_id": "verify:pred:action:scan",
-                "prediction_id": "pred:action:scan",
-                "created_tick": 1,
-                "priority_score": 0.507,
-                "selected_reason": "it is still unresolved",
-                "plan": {
-                  "prediction_id": "pred:action:scan",
-                  "selected_reason": "it is still unresolved",
-                  "evidence_sought": [
-                    "observe:energy",
-                    "observe:fatigue",
-                    "observe:stress",
-                    "observe:temperature"
-                  ],
-                  "support_criteria": [
-                    "energy stays within 0.11",
-                    "stress stays within 0.11",
-                    "fatigue stays within 0.11",
-                    "temperature stays within 0.11"
-                  ],
-                  "falsification_criteria": [
-                    "energy diverges by >= 0.38",
-                    "stress diverges by >= 0.38",
-                    "fatigue diverges by >= 0.38",
-                    "temperature diverges by >= 0.38"
-                  ],
-                  "expected_horizon": 1,
-                  "created_tick": 1,
-                  "expires_tick": 2,
-                  "status": "active",
-                  "linked_action": "scan",
-                  "attention_channels": [
-                    "energy",
-                    "fatigue",
-                    "stress",
-                    "temperature"
-                  ]
-                },
-                "status": "resolved",
-                "outcome": "partially_supported",
-                "outcome_tick": 1,
-                "evidence_ids": [
-                  "ack:verify:pred:action:scan:1",
-                  "obs:verify:pred:action:scan:1:validation_observation"
-                ],
-                "last_evidence_tick": 1,
-                "attempts": 1,
-                "missed_evidence_count": 0,
-                "linked_discrepancy_id": "",
-                "linked_commitments": [],
-                "linked_identity_anchors": [],
-                "target_channels": [
-                  "energy",
-                  "fatigue",
-                  "stress",
-                  "temperature"
-                ],
-                "prediction_type": "action_consequence",
-                "verification_bias": 0.11084
-              },
-              {
-                "target_id": "verify:pred:env:food",
-                "prediction_id": "pred:env:food",
-                "created_tick": 1,
-                "priority_score": 0.377,
-                "selected_reason": "it is still unresolved",
-                "plan": {
-                  "prediction_id": "pred:env:food",
-                  "selected_reason": "it is still unresolved",
-                  "evidence_sought": [
-                    "observe:food"
-                  ],
-                  "support_criteria": [
-                    "food stays within 0.16"
-                  ],
-                  "falsification_criteria": [
-                    "food diverges by >= 0.33"
-                  ],
-                  "expected_horizon": 1,
-                  "created_tick": 1,
-                  "expires_tick": 2,
-                  "status": "active",
-                  "linked_action": "scan",
-                  "attention_channels": [
-                    "food"
-                  ]
-                },
-                "status": "resolved",
-                "outcome": "inconclusive",
-                "outcome_tick": 1,
-                "evidence_ids": [
-                  "ack:verify:pred:env:food:1",
-                  "obs:verify:pred:env:food:1:validation_observation"
-                ],
-                "last_evidence_tick": 1,
-                "attempts": 1,
-                "missed_evidence_count": 0,
-                "linked_discrepancy_id": "",
-                "linked_commitments": [],
-                "linked_identity_anchors": [],
-                "target_channels": [
-                  "food"
-                ],
-                "prediction_type": "environment_state",
-                "verification_bias": 0.09524
-              },
-              {
-                "target_id": "verify:pred:env:temperature",
-                "prediction_id": "pred:env:temperature",
-                "created_tick": 1,
-                "priority_score": 0.377,
-                "selected_reason": "it is still unresolved",
-                "plan": {
-                  "prediction_id": "pred:env:temperature",
-                  "selected_reason": "it is still unresolved",
-                  "evidence_sought": [
-                    "observe:temperature"
-                  ],
-                  "support_criteria": [
-                    "temperature stays within 0.16"
-                  ],
-                  "falsification_criteria": [
-                    "temperature diverges by >= 0.33"
-                  ],
-                  "expected_horizon": 1,
-                  "created_tick": 1,
-                  "expires_tick": 2,
-                  "status": "active",
-                  "linked_action": "scan",
-                  "attention_channels": [
-                    "temperature"
-                  ]
-                },
-                "status": "resolved",
-                "outcome": "confirmed",
-                "outcome_tick": 1,
-                "evidence_ids": [
-                  "ack:verify:pred:env:temperature:1",
-                  "obs:verify:pred:env:temperature:1:validation_observation"
-                ],
-                "last_evidence_tick": 1,
-                "attempts": 1,
-                "missed_evidence_count": 0,
-                "linked_discrepancy_id": "",
-                "linked_commitments": [],
-                "linked_identity_anchors": [],
-                "target_channels": [
-                  "temperature"
-                ],
-                "prediction_type": "environment_state",
-                "verification_bias": 0.09524
-              }
-            ],
-            "recent_evidence": [
-              {
-                "evidence_id": "ack:verify:pred:action:scan:1",
-                "tick": 1,
-                "target_id": "verify:pred:action:scan",
-                "prediction_id": "pred:action:scan",
-                "source": "action_acknowledgment",
-                "summary": "Verification-seeking action scan was acknowledged.",
-                "observed_state": {},
-                "compared_channels": [],
-                "missing_channels": [],
-                "support_score": 0.25,
-                "contradiction_score": 0.0,
-                "metadata": {
-                  "action_name": "scan",
-                  "success": true
-                }
-              },
-              {
-                "evidence_id": "ack:verify:pred:env:food:1",
-                "tick": 1,
-                "target_id": "verify:pred:env:food",
-                "prediction_id": "pred:env:food",
-                "source": "action_acknowledgment",
-                "summary": "Verification-seeking action scan was acknowledged.",
-                "observed_state": {},
-                "compared_channels": [],
-                "missing_channels": [],
-                "support_score": 0.25,
-                "contradiction_score": 0.0,
-                "metadata": {
-                  "action_name": "scan",
-                  "success": true
-                }
-              },
-              {
-                "evidence_id": "ack:verify:pred:env:temperature:1",
-                "tick": 1,
-                "target_id": "verify:pred:env:temperature",
-                "prediction_id": "pred:env:temperature",
-                "source": "action_acknowledgment",
-                "summary": "Verification-seeking action scan was acknowledged.",
-                "observed_state": {},
-                "compared_channels": [],
-                "missing_channels": [],
-                "support_score": 0.25,
-                "contradiction_score": 0.0,
-                "metadata": {
-                  "action_name": "scan",
-                  "success": true
-                }
-              },
-              {
-                "evidence_id": "obs:verify:pred:action:scan:1:validation_observation",
-                "tick": 1,
-                "target_id": "verify:pred:action:scan",
-                "prediction_id": "pred:action:scan",
-                "source": "validation_observation",
-                "summary": "Observed temperature while verifying pred:action:scan.",
-                "observed_state": {
-                  "temperature": 0.5
-                },
-                "compared_channels": [
-                  "temperature"
-                ],
-                "missing_channels": [
-                  "energy",
-                  "stress",
-                  "fatigue"
-                ],
-                "support_score": 0.970273,
-                "contradiction_score": 0.029727,
-                "metadata": {
-                  "avg_error": 0.011148
-                }
-              },
-              {
-                "evidence_id": "obs:verify:pred:env:food:1:validation_observation",
-                "tick": 1,
-                "target_id": "verify:pred:env:food",
-                "prediction_id": "pred:env:food",
-                "source": "validation_observation",
-                "summary": "Observed food while verifying pred:env:food.",
-                "observed_state": {
-                  "food": 0.19
-                },
-                "compared_channels": [
-                  "food"
-                ],
-                "missing_channels": [],
-                "support_score": 0.169742,
-                "contradiction_score": 0.830258,
-                "metadata": {
-                  "avg_error": 0.269834
-                }
-              },
-              {
-                "evidence_id": "obs:verify:pred:env:temperature:1:validation_observation",
-                "tick": 1,
-                "target_id": "verify:pred:env:temperature",
-                "prediction_id": "pred:env:temperature",
-                "source": "validation_observation",
-                "summary": "Observed temperature while verifying pred:env:temperature.",
-                "observed_state": {
-                  "temperature": 0.5
-                },
-                "compared_channels": [
-                  "temperature"
-                ],
-                "missing_channels": [],
-                "support_score": 0.996469,
-                "contradiction_score": 0.003531,
-                "metadata": {
-                  "avg_error": 0.001148
-                }
-              }
-            ],
+            "recent_outcomes": [],
+            "recent_evidence": [],
             "recent_falsifications": [],
             "counts": {
               "active_targets": 0,
-              "archived_targets": 3,
-              "evidence_events": 6
+              "archived_targets": 0,
+              "evidence_events": 0
             }
+          },
+          "narrative_experiment": {
+            "summary": "No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+            "chosen_action_reason": "",
+            "active_plans": [],
+            "deferred_plans": [],
+            "rejected_plans": [],
+            "candidates": [],
+            "predictions": [],
+            "discrimination_targets": []
+          },
+          "narrative_uncertainty": {
+            "summary": "",
+            "profile": {
+              "total_unknown_count": 0,
+              "decision_relevant_unknown_count": 0,
+              "competing_hypothesis_count": 0,
+              "latent_cause_count": 0,
+              "surface_cue_count": 0,
+              "interpretive_competition": 0.0,
+              "latent_cause_uncertainty_burden": 0.0,
+              "social_ambiguity_burden": 0.0,
+              "trust_ambiguity_burden": 0.0,
+              "environment_ambiguity_burden": 0.0,
+              "retained_uncertainty_burden": 0.0
+            },
+            "top_unknowns": [],
+            "hypotheses_by_unknown": {},
+            "surface_cues": [],
+            "latent_causes": []
           },
           "slow_learning": {
             "state": {
@@ -6430,8 +5978,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m224_v2",
-    "generated_at": "2026-03-25T01:32:54+00:00",
-    "codebase_version": "a51d5f82838ebd7f39329324ae8e24d655d7e482",
+    "generated_at": "2026-03-26T01:16:44+00:00",
+    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
     "seed_set": [
       224,
       243,
@@ -6443,32 +5991,32 @@
     "artifacts": {
       "workspace_causality": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
-        "modified_at": "2026-03-25T01:32:54+00:00",
+        "modified_at": "2026-03-26T01:16:44+00:00",
         "matches_round_metadata": true
       },
       "report_leakage": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
-        "modified_at": "2026-03-25T01:32:54+00:00",
+        "modified_at": "2026-03-26T01:16:44+00:00",
         "matches_round_metadata": true
       },
       "capacity_pressure": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
-        "modified_at": "2026-03-25T01:32:54+00:00",
+        "modified_at": "2026-03-26T01:16:44+00:00",
         "matches_round_metadata": true
       },
       "persistence_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
-        "modified_at": "2026-03-25T01:32:54+00:00",
+        "modified_at": "2026-03-26T01:16:44+00:00",
         "matches_round_metadata": true
       },
       "downstream_alignment": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json",
-        "modified_at": "2026-03-25T01:32:55+00:00",
+        "modified_at": "2026-03-26T01:16:44+00:00",
         "matches_round_metadata": true
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m224_acceptance_report.json",
-        "modified_at": "2026-03-25T01:32:55+00:00",
+        "modified_at": "2026-03-26T01:16:44+00:00",
         "matches_round_metadata": true
       }
     }
@@ -7082,9 +6630,6 @@
           ],
           "agenda": {
             "active_tasks": [
-              "verify:pred:env:temperature",
-              "verify:pred:env:food",
-              "verify:pred:action:scan",
               "shelter_security"
             ],
             "chronic_debt_pressure": 0.0,
@@ -7092,10 +6637,10 @@
             "interrupt_action": null,
             "interrupt_reason": "",
             "memory_compaction_recommended": false,
-            "policy_shift_strength": 0.45713899999999996,
+            "policy_shift_strength": 0.280599,
             "protected_mode": false,
             "protected_mode_ticks_remaining": 0,
-            "recommended_action": "scan",
+            "recommended_action": "exploit_shelter",
             "recovery_focus": [],
             "recovery_rebound_active": false,
             "recovery_rebound_ticks_remaining": 0,
@@ -7115,7 +6660,7 @@
             "telemetry_backoff_recommended": false
           },
           "conscious_report": {
-            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now.",
+            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
             "channels": [
               "novelty",
               "shelter"
@@ -7143,6 +6688,9 @@
                 "repairing": false,
                 "overloaded": false,
                 "socially_destabilized": false,
+                "narrative_ambiguity_active": false,
+                "active_inquiry": false,
+                "inquiry_deferred": false,
                 "continuity_fragile": false,
                 "long_horizon_conflict": true
               },
@@ -7243,17 +6791,31 @@
                   ]
                 },
                 {
-                  "label": "maintenance pressure",
-                  "tension_type": "maintenance",
-                  "intensity": 0.457139,
-                  "repair_target": "scan",
+                  "label": "continuity fragility",
+                  "tension_type": "continuity",
+                  "intensity": 0.4332,
+                  "repair_target": "protect continuity anchors",
                   "evidence": [
-                    "verify:pred:env:temperature",
-                    "verify:pred:env:food",
-                    "verify:pred:action:scan"
+                    "continuity_score_drop"
                   ]
                 }
               ],
+              "narrative_uncertainties": [],
+              "active_inquiries": [],
+              "deferred_inquiries": [],
+              "ambiguity_profile": {
+                "total_unknown_count": 0.0,
+                "decision_relevant_unknown_count": 0.0,
+                "competing_hypothesis_count": 0.0,
+                "latent_cause_count": 0.0,
+                "surface_cue_count": 0.0,
+                "interpretive_competition": 0.0,
+                "latent_cause_uncertainty_burden": 0.0,
+                "social_ambiguity_burden": 0.0,
+                "trust_ambiguity_burden": 0.0,
+                "environment_ambiguity_burden": 0.0,
+                "retained_uncertainty_burden": 0.0
+              },
               "continuity_score": 0.5668,
               "continuity_anchors": []
             },
@@ -7263,284 +6825,44 @@
               "unresolved_reason": "",
               "prioritized_target": null,
               "active_targets": [],
-              "recent_outcomes": [
-                {
-                  "target_id": "verify:pred:action:scan",
-                  "prediction_id": "pred:action:scan",
-                  "created_tick": 1,
-                  "priority_score": 0.507,
-                  "selected_reason": "it is still unresolved",
-                  "plan": {
-                    "prediction_id": "pred:action:scan",
-                    "selected_reason": "it is still unresolved",
-                    "evidence_sought": [
-                      "observe:energy",
-                      "observe:fatigue",
-                      "observe:stress",
-                      "observe:temperature"
-                    ],
-                    "support_criteria": [
-                      "energy stays within 0.11",
-                      "stress stays within 0.11",
-                      "fatigue stays within 0.11",
-                      "temperature stays within 0.11"
-                    ],
-                    "falsification_criteria": [
-                      "energy diverges by >= 0.38",
-                      "stress diverges by >= 0.38",
-                      "fatigue diverges by >= 0.38",
-                      "temperature diverges by >= 0.38"
-                    ],
-                    "expected_horizon": 1,
-                    "created_tick": 1,
-                    "expires_tick": 2,
-                    "status": "active",
-                    "linked_action": "scan",
-                    "attention_channels": [
-                      "energy",
-                      "fatigue",
-                      "stress",
-                      "temperature"
-                    ]
-                  },
-                  "status": "resolved",
-                  "outcome": "partially_supported",
-                  "outcome_tick": 1,
-                  "evidence_ids": [
-                    "ack:verify:pred:action:scan:1",
-                    "obs:verify:pred:action:scan:1:validation_observation"
-                  ],
-                  "last_evidence_tick": 1,
-                  "attempts": 1,
-                  "missed_evidence_count": 0,
-                  "linked_discrepancy_id": "",
-                  "linked_commitments": [],
-                  "linked_identity_anchors": [],
-                  "target_channels": [
-                    "energy",
-                    "fatigue",
-                    "stress",
-                    "temperature"
-                  ],
-                  "prediction_type": "action_consequence",
-                  "verification_bias": 0.11084
-                },
-                {
-                  "target_id": "verify:pred:env:food",
-                  "prediction_id": "pred:env:food",
-                  "created_tick": 1,
-                  "priority_score": 0.377,
-                  "selected_reason": "it is still unresolved",
-                  "plan": {
-                    "prediction_id": "pred:env:food",
-                    "selected_reason": "it is still unresolved",
-                    "evidence_sought": [
-                      "observe:food"
-                    ],
-                    "support_criteria": [
-                      "food stays within 0.16"
-                    ],
-                    "falsification_criteria": [
-                      "food diverges by >= 0.33"
-                    ],
-                    "expected_horizon": 1,
-                    "created_tick": 1,
-                    "expires_tick": 2,
-                    "status": "active",
-                    "linked_action": "scan",
-                    "attention_channels": [
-                      "food"
-                    ]
-                  },
-                  "status": "resolved",
-                  "outcome": "inconclusive",
-                  "outcome_tick": 1,
-                  "evidence_ids": [
-                    "ack:verify:pred:env:food:1",
-                    "obs:verify:pred:env:food:1:validation_observation"
-                  ],
-                  "last_evidence_tick": 1,
-                  "attempts": 1,
-                  "missed_evidence_count": 0,
-                  "linked_discrepancy_id": "",
-                  "linked_commitments": [],
-                  "linked_identity_anchors": [],
-                  "target_channels": [
-                    "food"
-                  ],
-                  "prediction_type": "environment_state",
-                  "verification_bias": 0.09524
-                },
-                {
-                  "target_id": "verify:pred:env:temperature",
-                  "prediction_id": "pred:env:temperature",
-                  "created_tick": 1,
-                  "priority_score": 0.377,
-                  "selected_reason": "it is still unresolved",
-                  "plan": {
-                    "prediction_id": "pred:env:temperature",
-                    "selected_reason": "it is still unresolved",
-                    "evidence_sought": [
-                      "observe:temperature"
-                    ],
-                    "support_criteria": [
-                      "temperature stays within 0.16"
-                    ],
-                    "falsification_criteria": [
-                      "temperature diverges by >= 0.33"
-                    ],
-                    "expected_horizon": 1,
-                    "created_tick": 1,
-                    "expires_tick": 2,
-                    "status": "active",
-                    "linked_action": "scan",
-                    "attention_channels": [
-                      "temperature"
-                    ]
-                  },
-                  "status": "resolved",
-                  "outcome": "confirmed",
-                  "outcome_tick": 1,
-                  "evidence_ids": [
-                    "ack:verify:pred:env:temperature:1",
-                    "obs:verify:pred:env:temperature:1:validation_observation"
-                  ],
-                  "last_evidence_tick": 1,
-                  "attempts": 1,
-                  "missed_evidence_count": 0,
-                  "linked_discrepancy_id": "",
-                  "linked_commitments": [],
-                  "linked_identity_anchors": [],
-                  "target_channels": [
-                    "temperature"
-                  ],
-                  "prediction_type": "environment_state",
-                  "verification_bias": 0.09524
-                }
-              ],
-              "recent_evidence": [
-                {
-                  "evidence_id": "ack:verify:pred:action:scan:1",
-                  "tick": 1,
-                  "target_id": "verify:pred:action:scan",
-                  "prediction_id": "pred:action:scan",
-                  "source": "action_acknowledgment",
-                  "summary": "Verification-seeking action scan was acknowledged.",
-                  "observed_state": {},
-                  "compared_channels": [],
-                  "missing_channels": [],
-                  "support_score": 0.25,
-                  "contradiction_score": 0.0,
-                  "metadata": {
-                    "action_name": "scan",
-                    "success": true
-                  }
-                },
-                {
-                  "evidence_id": "ack:verify:pred:env:food:1",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:food",
-                  "prediction_id": "pred:env:food",
-                  "source": "action_acknowledgment",
-                  "summary": "Verification-seeking action scan was acknowledged.",
-                  "observed_state": {},
-                  "compared_channels": [],
-                  "missing_channels": [],
-                  "support_score": 0.25,
-                  "contradiction_score": 0.0,
-                  "metadata": {
-                    "action_name": "scan",
-                    "success": true
-                  }
-                },
-                {
-                  "evidence_id": "ack:verify:pred:env:temperature:1",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:temperature",
-                  "prediction_id": "pred:env:temperature",
-                  "source": "action_acknowledgment",
-                  "summary": "Verification-seeking action scan was acknowledged.",
-                  "observed_state": {},
-                  "compared_channels": [],
-                  "missing_channels": [],
-                  "support_score": 0.25,
-                  "contradiction_score": 0.0,
-                  "metadata": {
-                    "action_name": "scan",
-                    "success": true
-                  }
-                },
-                {
-                  "evidence_id": "obs:verify:pred:action:scan:1:validation_observation",
-                  "tick": 1,
-                  "target_id": "verify:pred:action:scan",
-                  "prediction_id": "pred:action:scan",
-                  "source": "validation_observation",
-                  "summary": "Observed temperature while verifying pred:action:scan.",
-                  "observed_state": {
-                    "temperature": 0.5
-                  },
-                  "compared_channels": [
-                    "temperature"
-                  ],
-                  "missing_channels": [
-                    "energy",
-                    "stress",
-                    "fatigue"
-                  ],
-                  "support_score": 0.970273,
-                  "contradiction_score": 0.029727,
-                  "metadata": {
-                    "avg_error": 0.011148
-                  }
-                },
-                {
-                  "evidence_id": "obs:verify:pred:env:food:1:validation_observation",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:food",
-                  "prediction_id": "pred:env:food",
-                  "source": "validation_observation",
-                  "summary": "Observed food while verifying pred:env:food.",
-                  "observed_state": {
-                    "food": 0.19
-                  },
-                  "compared_channels": [
-                    "food"
-                  ],
-                  "missing_channels": [],
-                  "support_score": 0.169742,
-                  "contradiction_score": 0.830258,
-                  "metadata": {
-                    "avg_error": 0.269834
-                  }
-                },
-                {
-                  "evidence_id": "obs:verify:pred:env:temperature:1:validation_observation",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:temperature",
-                  "prediction_id": "pred:env:temperature",
-                  "source": "validation_observation",
-                  "summary": "Observed temperature while verifying pred:env:temperature.",
-                  "observed_state": {
-                    "temperature": 0.5
-                  },
-                  "compared_channels": [
-                    "temperature"
-                  ],
-                  "missing_channels": [],
-                  "support_score": 0.996469,
-                  "contradiction_score": 0.003531,
-                  "metadata": {
-                    "avg_error": 0.001148
-                  }
-                }
-              ],
+              "recent_outcomes": [],
+              "recent_evidence": [],
               "recent_falsifications": [],
               "counts": {
                 "active_targets": 0,
-                "archived_targets": 3,
-                "evidence_events": 6
+                "archived_targets": 0,
+                "evidence_events": 0
               }
+            },
+            "narrative_experiment": {
+              "summary": "No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+              "chosen_action_reason": "",
+              "active_plans": [],
+              "deferred_plans": [],
+              "rejected_plans": [],
+              "candidates": [],
+              "predictions": [],
+              "discrimination_targets": []
+            },
+            "narrative_uncertainty": {
+              "summary": "",
+              "profile": {
+                "total_unknown_count": 0,
+                "decision_relevant_unknown_count": 0,
+                "competing_hypothesis_count": 0,
+                "latent_cause_count": 0,
+                "surface_cue_count": 0,
+                "interpretive_competition": 0.0,
+                "latent_cause_uncertainty_burden": 0.0,
+                "social_ambiguity_burden": 0.0,
+                "trust_ambiguity_burden": 0.0,
+                "environment_ambiguity_burden": 0.0,
+                "retained_uncertainty_burden": 0.0
+              },
+              "top_unknowns": [],
+              "hypotheses_by_unknown": {},
+              "surface_cues": [],
+              "latent_causes": []
             },
             "slow_learning": {
               "state": {
@@ -8201,9 +7523,6 @@
           ],
           "agenda": {
             "active_tasks": [
-              "verify:pred:env:temperature",
-              "verify:pred:env:food",
-              "verify:pred:action:scan",
               "shelter_security"
             ],
             "chronic_debt_pressure": 0.0,
@@ -8211,10 +7530,10 @@
             "interrupt_action": null,
             "interrupt_reason": "",
             "memory_compaction_recommended": false,
-            "policy_shift_strength": 0.45713899999999996,
+            "policy_shift_strength": 0.280599,
             "protected_mode": false,
             "protected_mode_ticks_remaining": 0,
-            "recommended_action": "scan",
+            "recommended_action": "exploit_shelter",
             "recovery_focus": [],
             "recovery_rebound_active": false,
             "recovery_rebound_ticks_remaining": 0,
@@ -8234,7 +7553,7 @@
             "telemetry_backoff_recommended": false
           },
           "conscious_report": {
-            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now.",
+            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
             "channels": [
               "novelty",
               "shelter"
@@ -8262,6 +7581,9 @@
                 "repairing": false,
                 "overloaded": false,
                 "socially_destabilized": false,
+                "narrative_ambiguity_active": false,
+                "active_inquiry": false,
+                "inquiry_deferred": false,
                 "continuity_fragile": false,
                 "long_horizon_conflict": true
               },
@@ -8362,17 +7684,31 @@
                   ]
                 },
                 {
-                  "label": "maintenance pressure",
-                  "tension_type": "maintenance",
-                  "intensity": 0.457139,
-                  "repair_target": "scan",
+                  "label": "continuity fragility",
+                  "tension_type": "continuity",
+                  "intensity": 0.4332,
+                  "repair_target": "protect continuity anchors",
                   "evidence": [
-                    "verify:pred:env:temperature",
-                    "verify:pred:env:food",
-                    "verify:pred:action:scan"
+                    "continuity_score_drop"
                   ]
                 }
               ],
+              "narrative_uncertainties": [],
+              "active_inquiries": [],
+              "deferred_inquiries": [],
+              "ambiguity_profile": {
+                "total_unknown_count": 0.0,
+                "decision_relevant_unknown_count": 0.0,
+                "competing_hypothesis_count": 0.0,
+                "latent_cause_count": 0.0,
+                "surface_cue_count": 0.0,
+                "interpretive_competition": 0.0,
+                "latent_cause_uncertainty_burden": 0.0,
+                "social_ambiguity_burden": 0.0,
+                "trust_ambiguity_burden": 0.0,
+                "environment_ambiguity_burden": 0.0,
+                "retained_uncertainty_burden": 0.0
+              },
               "continuity_score": 0.5668,
               "continuity_anchors": []
             },
@@ -8382,284 +7718,44 @@
               "unresolved_reason": "",
               "prioritized_target": null,
               "active_targets": [],
-              "recent_outcomes": [
-                {
-                  "target_id": "verify:pred:action:scan",
-                  "prediction_id": "pred:action:scan",
-                  "created_tick": 1,
-                  "priority_score": 0.507,
-                  "selected_reason": "it is still unresolved",
-                  "plan": {
-                    "prediction_id": "pred:action:scan",
-                    "selected_reason": "it is still unresolved",
-                    "evidence_sought": [
-                      "observe:energy",
-                      "observe:fatigue",
-                      "observe:stress",
-                      "observe:temperature"
-                    ],
-                    "support_criteria": [
-                      "energy stays within 0.11",
-                      "stress stays within 0.11",
-                      "fatigue stays within 0.11",
-                      "temperature stays within 0.11"
-                    ],
-                    "falsification_criteria": [
-                      "energy diverges by >= 0.38",
-                      "stress diverges by >= 0.38",
-                      "fatigue diverges by >= 0.38",
-                      "temperature diverges by >= 0.38"
-                    ],
-                    "expected_horizon": 1,
-                    "created_tick": 1,
-                    "expires_tick": 2,
-                    "status": "active",
-                    "linked_action": "scan",
-                    "attention_channels": [
-                      "energy",
-                      "fatigue",
-                      "stress",
-                      "temperature"
-                    ]
-                  },
-                  "status": "resolved",
-                  "outcome": "partially_supported",
-                  "outcome_tick": 1,
-                  "evidence_ids": [
-                    "ack:verify:pred:action:scan:1",
-                    "obs:verify:pred:action:scan:1:validation_observation"
-                  ],
-                  "last_evidence_tick": 1,
-                  "attempts": 1,
-                  "missed_evidence_count": 0,
-                  "linked_discrepancy_id": "",
-                  "linked_commitments": [],
-                  "linked_identity_anchors": [],
-                  "target_channels": [
-                    "energy",
-                    "fatigue",
-                    "stress",
-                    "temperature"
-                  ],
-                  "prediction_type": "action_consequence",
-                  "verification_bias": 0.11084
-                },
-                {
-                  "target_id": "verify:pred:env:food",
-                  "prediction_id": "pred:env:food",
-                  "created_tick": 1,
-                  "priority_score": 0.377,
-                  "selected_reason": "it is still unresolved",
-                  "plan": {
-                    "prediction_id": "pred:env:food",
-                    "selected_reason": "it is still unresolved",
-                    "evidence_sought": [
-                      "observe:food"
-                    ],
-                    "support_criteria": [
-                      "food stays within 0.16"
-                    ],
-                    "falsification_criteria": [
-                      "food diverges by >= 0.33"
-                    ],
-                    "expected_horizon": 1,
-                    "created_tick": 1,
-                    "expires_tick": 2,
-                    "status": "active",
-                    "linked_action": "scan",
-                    "attention_channels": [
-                      "food"
-                    ]
-                  },
-                  "status": "resolved",
-                  "outcome": "inconclusive",
-                  "outcome_tick": 1,
-                  "evidence_ids": [
-                    "ack:verify:pred:env:food:1",
-                    "obs:verify:pred:env:food:1:validation_observation"
-                  ],
-                  "last_evidence_tick": 1,
-                  "attempts": 1,
-                  "missed_evidence_count": 0,
-                  "linked_discrepancy_id": "",
-                  "linked_commitments": [],
-                  "linked_identity_anchors": [],
-                  "target_channels": [
-                    "food"
-                  ],
-                  "prediction_type": "environment_state",
-                  "verification_bias": 0.09524
-                },
-                {
-                  "target_id": "verify:pred:env:temperature",
-                  "prediction_id": "pred:env:temperature",
-                  "created_tick": 1,
-                  "priority_score": 0.377,
-                  "selected_reason": "it is still unresolved",
-                  "plan": {
-                    "prediction_id": "pred:env:temperature",
-                    "selected_reason": "it is still unresolved",
-                    "evidence_sought": [
-                      "observe:temperature"
-                    ],
-                    "support_criteria": [
-                      "temperature stays within 0.16"
-                    ],
-                    "falsification_criteria": [
-                      "temperature diverges by >= 0.33"
-                    ],
-                    "expected_horizon": 1,
-                    "created_tick": 1,
-                    "expires_tick": 2,
-                    "status": "active",
-                    "linked_action": "scan",
-                    "attention_channels": [
-                      "temperature"
-                    ]
-                  },
-                  "status": "resolved",
-                  "outcome": "confirmed",
-                  "outcome_tick": 1,
-                  "evidence_ids": [
-                    "ack:verify:pred:env:temperature:1",
-                    "obs:verify:pred:env:temperature:1:validation_observation"
-                  ],
-                  "last_evidence_tick": 1,
-                  "attempts": 1,
-                  "missed_evidence_count": 0,
-                  "linked_discrepancy_id": "",
-                  "linked_commitments": [],
-                  "linked_identity_anchors": [],
-                  "target_channels": [
-                    "temperature"
-                  ],
-                  "prediction_type": "environment_state",
-                  "verification_bias": 0.09524
-                }
-              ],
-              "recent_evidence": [
-                {
-                  "evidence_id": "ack:verify:pred:action:scan:1",
-                  "tick": 1,
-                  "target_id": "verify:pred:action:scan",
-                  "prediction_id": "pred:action:scan",
-                  "source": "action_acknowledgment",
-                  "summary": "Verification-seeking action scan was acknowledged.",
-                  "observed_state": {},
-                  "compared_channels": [],
-                  "missing_channels": [],
-                  "support_score": 0.25,
-                  "contradiction_score": 0.0,
-                  "metadata": {
-                    "action_name": "scan",
-                    "success": true
-                  }
-                },
-                {
-                  "evidence_id": "ack:verify:pred:env:food:1",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:food",
-                  "prediction_id": "pred:env:food",
-                  "source": "action_acknowledgment",
-                  "summary": "Verification-seeking action scan was acknowledged.",
-                  "observed_state": {},
-                  "compared_channels": [],
-                  "missing_channels": [],
-                  "support_score": 0.25,
-                  "contradiction_score": 0.0,
-                  "metadata": {
-                    "action_name": "scan",
-                    "success": true
-                  }
-                },
-                {
-                  "evidence_id": "ack:verify:pred:env:temperature:1",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:temperature",
-                  "prediction_id": "pred:env:temperature",
-                  "source": "action_acknowledgment",
-                  "summary": "Verification-seeking action scan was acknowledged.",
-                  "observed_state": {},
-                  "compared_channels": [],
-                  "missing_channels": [],
-                  "support_score": 0.25,
-                  "contradiction_score": 0.0,
-                  "metadata": {
-                    "action_name": "scan",
-                    "success": true
-                  }
-                },
-                {
-                  "evidence_id": "obs:verify:pred:action:scan:1:validation_observation",
-                  "tick": 1,
-                  "target_id": "verify:pred:action:scan",
-                  "prediction_id": "pred:action:scan",
-                  "source": "validation_observation",
-                  "summary": "Observed temperature while verifying pred:action:scan.",
-                  "observed_state": {
-                    "temperature": 0.5
-                  },
-                  "compared_channels": [
-                    "temperature"
-                  ],
-                  "missing_channels": [
-                    "energy",
-                    "stress",
-                    "fatigue"
-                  ],
-                  "support_score": 0.970273,
-                  "contradiction_score": 0.029727,
-                  "metadata": {
-                    "avg_error": 0.011148
-                  }
-                },
-                {
-                  "evidence_id": "obs:verify:pred:env:food:1:validation_observation",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:food",
-                  "prediction_id": "pred:env:food",
-                  "source": "validation_observation",
-                  "summary": "Observed food while verifying pred:env:food.",
-                  "observed_state": {
-                    "food": 0.19
-                  },
-                  "compared_channels": [
-                    "food"
-                  ],
-                  "missing_channels": [],
-                  "support_score": 0.169742,
-                  "contradiction_score": 0.830258,
-                  "metadata": {
-                    "avg_error": 0.269834
-                  }
-                },
-                {
-                  "evidence_id": "obs:verify:pred:env:temperature:1:validation_observation",
-                  "tick": 1,
-                  "target_id": "verify:pred:env:temperature",
-                  "prediction_id": "pred:env:temperature",
-                  "source": "validation_observation",
-                  "summary": "Observed temperature while verifying pred:env:temperature.",
-                  "observed_state": {
-                    "temperature": 0.5
-                  },
-                  "compared_channels": [
-                    "temperature"
-                  ],
-                  "missing_channels": [],
-                  "support_score": 0.996469,
-                  "contradiction_score": 0.003531,
-                  "metadata": {
-                    "avg_error": 0.001148
-                  }
-                }
-              ],
+              "recent_outcomes": [],
+              "recent_evidence": [],
               "recent_falsifications": [],
               "counts": {
                 "active_targets": 0,
-                "archived_targets": 3,
-                "evidence_events": 6
+                "archived_targets": 0,
+                "evidence_events": 0
               }
+            },
+            "narrative_experiment": {
+              "summary": "No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+              "chosen_action_reason": "",
+              "active_plans": [],
+              "deferred_plans": [],
+              "rejected_plans": [],
+              "candidates": [],
+              "predictions": [],
+              "discrimination_targets": []
+            },
+            "narrative_uncertainty": {
+              "summary": "",
+              "profile": {
+                "total_unknown_count": 0,
+                "decision_relevant_unknown_count": 0,
+                "competing_hypothesis_count": 0,
+                "latent_cause_count": 0,
+                "surface_cue_count": 0,
+                "interpretive_competition": 0.0,
+                "latent_cause_uncertainty_burden": 0.0,
+                "social_ambiguity_burden": 0.0,
+                "trust_ambiguity_burden": 0.0,
+                "environment_ambiguity_burden": 0.0,
+                "retained_uncertainty_burden": 0.0
+              },
+              "top_unknowns": [],
+              "hypotheses_by_unknown": {},
+              "surface_cues": [],
+              "latent_causes": []
             },
             "slow_learning": {
               "state": {

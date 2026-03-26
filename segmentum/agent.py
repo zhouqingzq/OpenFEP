@@ -671,7 +671,7 @@ class SegmentAgent:
         self.semantic_memory: list[SemanticMemoryEntry] = []
         self.sleep_history: list[SleepSummary] = []
         self.action_history: list[str] = []
-        self.action_history_limit = 128
+        self.action_history_limit = 256
         self.decision_history: list[dict[str, object]] = []
         self.decision_history_limit = 512
         self.drive_history: list[dict[str, float]] = []
@@ -686,6 +686,8 @@ class SegmentAgent:
             "temperature": self.temperature,
         }
         self.last_decision_diagnostics: DecisionDiagnostics | None = None
+        self.last_decision_choice: str = ""
+        self.last_decision_observation: dict[str, float] = {}
         self.last_memory_context: dict[str, object] = {}
         self._sleeping = False
         self.counterfactual_insights: list[CounterfactualInsight] = []
@@ -2132,6 +2134,7 @@ class SegmentAgent:
                 current_state=current_state_snapshot,
             )
             regression_penalty = self._action_regression_penalty(action)
+            continuity_bonus = self._repeated_observation_action_bonus(action, observed)
             policy_score = (
                 -expected_fe
                 + memory_bias
@@ -2149,6 +2152,7 @@ class SegmentAgent:
                 + verification_bias
                 + experiment_bias
                 + inquiry_scheduler_bias
+                + continuity_bonus
                 - regression_penalty
             )
             dominant_component = self.policy_evaluator.dominant_component(
@@ -2515,6 +2519,8 @@ class SegmentAgent:
         if verification_motive:
             diagnostics.explanation += " " + verification_motive
         self.last_decision_diagnostics = diagnostics
+        self.last_decision_choice = diagnostics.chosen.choice
+        self.last_decision_observation = {str(key): float(value) for key, value in observed.items()}
         self._record_identity_tension(
             chosen_action=diagnostics.chosen.choice,
             commitment_focus=diagnostics.commitment_focus,
@@ -2710,6 +2716,28 @@ class SegmentAgent:
         if action == "internal_update" and repeat_ratio > 0.35:
             penalty += 0.08 + (repeat_ratio - 0.35) * 0.35
         return penalty
+
+    def _repeated_observation_action_bonus(
+        self,
+        action: str,
+        observed: dict[str, float],
+    ) -> float:
+        if not self.last_decision_observation:
+            return 0.0
+        previous_action = self.action_history[-1] if self.action_history else self.last_decision_choice
+        if action != previous_action:
+            return 0.0
+        previous = self.last_decision_observation
+        keys = sorted(set(previous) | set(observed))
+        if not keys:
+            return 0.0
+        deltas = [abs(float(observed.get(key, 0.0)) - float(previous.get(key, 0.0))) for key in keys]
+        mean_delta = sum(deltas) / len(deltas)
+        max_delta = max(deltas)
+        if max_delta > 0.05 or mean_delta > 0.02:
+            return 0.0
+        similarity = max(0.0, 1.0 - (mean_delta / 0.02))
+        return 0.22 * similarity
 
     def apply_internal_update(self, errors: dict[str, float]) -> None:
         """Apply internal model update (high metabolic cost)."""
@@ -3830,6 +3858,8 @@ class SegmentAgent:
             "self_model": self.self_model.to_dict(),
             "identity_traits": asdict(self.identity_traits),
             "last_body_state_snapshot": dict(self.last_body_state_snapshot),
+            "last_decision_choice": self.last_decision_choice,
+            "last_decision_observation": dict(self.last_decision_observation),
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
             "attention_bottleneck": self.attention_bottleneck.to_dict(),
             "last_attention_trace": (
@@ -3860,6 +3890,7 @@ class SegmentAgent:
             "precision_manipulator": self.precision_manipulator.to_dict(),
             "defense_strategy_selector": self.defense_strategy_selector.to_dict(),
             "metacognitive_layer": self.metacognitive_layer.to_dict(),
+            "rng_state": repr(self.rng.getstate()),
         }
 
     @classmethod
@@ -3948,6 +3979,14 @@ class SegmentAgent:
             ).items()
             if isinstance(value, (int, float))
         }
+        agent.last_decision_observation = {
+            str(key): float(value)
+            for key, value in dict(
+                payload.get("last_decision_observation", {})
+            ).items()
+            if isinstance(value, (int, float))
+        }
+        agent.last_decision_choice = str(payload.get("last_decision_choice", ""))
         agent.global_workspace = GlobalWorkspace.from_dict(
             payload.get("global_workspace")
             if isinstance(payload.get("global_workspace"), dict)
@@ -4128,6 +4167,11 @@ class SegmentAgent:
             predictive_hyperparameters,
             reset_precisions=reset_predictive_precisions,
         )
+        rng_state = payload.get("rng_state")
+        if isinstance(rng_state, str):
+            import ast
+
+            agent.rng.setstate(ast.literal_eval(rng_state))
         agent._sync_self_model_body_schema()
         if not agent.subject_state.core_identity_summary and not agent.subject_state.subject_priority_stack:
             agent.subject_state = derive_subject_state(agent, previous_state=agent.subject_state)

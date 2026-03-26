@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T03:02:05+00:00",
+  "generated_at": "2026-03-26T01:16:50+00:00",
   "seed": 342,
   "failure_injection": {
     "energy": 0.12,
@@ -68,6 +68,22 @@
         ]
       }
     ],
+    "narrative_uncertainties": [],
+    "active_inquiries": [],
+    "deferred_inquiries": [],
+    "ambiguity_profile": {
+      "total_unknown_count": 0.0,
+      "decision_relevant_unknown_count": 0.0,
+      "competing_hypothesis_count": 0.0,
+      "latent_cause_count": 0.0,
+      "surface_cue_count": 0.0,
+      "interpretive_competition": 0.0,
+      "latent_cause_uncertainty_burden": 0.0,
+      "social_ambiguity_burden": 0.0,
+      "trust_ambiguity_burden": 0.0,
+      "environment_ambiguity_burden": 0.0,
+      "retained_uncertainty_burden": 0.0
+    },
     "subject_priority_stack": [
       {
         "label": "goal:control",
@@ -168,6 +184,9 @@
       "repairing": false,
       "overloaded": true,
       "socially_destabilized": false,
+      "narrative_ambiguity_active": false,
+      "active_inquiry": false,
+      "inquiry_deferred": false,
       "continuity_fragile": true,
       "long_horizon_conflict": false
     },
@@ -201,6 +220,9 @@
         "repairing": false,
         "overloaded": true,
         "socially_destabilized": false,
+        "narrative_ambiguity_active": false,
+        "active_inquiry": false,
+        "inquiry_deferred": false,
         "continuity_fragile": true,
         "long_horizon_conflict": false
       }
@@ -221,6 +243,9 @@
         "repairing": false,
         "overloaded": true,
         "socially_destabilized": false,
+        "narrative_ambiguity_active": false,
+        "active_inquiry": false,
+        "inquiry_deferred": false,
         "continuity_fragile": true,
         "long_horizon_conflict": false
       },
@@ -236,9 +261,9 @@
     "post_restore_alive": true,
     "post_restore_subject_state": {
       "tick": 1,
-      "core_identity_summary": "I am a risk-seeking, survival-focused agent. Currently in a survival_crisis phase. My dominant strategy remains expected_free_energy. Recent memory remains anchored by near-death event at tick 1 after {'name': 'rest', 'params': {}, 'params_schema': {}, 'cost_estimate': 0.03, 'resource_cost': {'energy': 0.03, 'attention': 0.03}, 'failure_modes': ['opportunity_loss', 'environment_shift'], 'constraints': {'preferred_when_fatigue_above': 0.4}, 'reversible': True} (surprise=1005.06). Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence.",
-      "current_phase": "survival_crisis",
-      "current_self_narrative_phase": "survival_crisis",
+      "core_identity_summary": "I am a risk-seeking agent. Currently in a resource_recovery phase. My dominant strategy remains expected_free_energy. Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
+      "current_phase": "resource_recovery",
+      "current_self_narrative_phase": "resource_recovery",
       "active_commitments": [
         "Protect survival and integrity before opportunistic gain.",
         "When conditions are stable, reduce uncertainty through active exploration."
@@ -276,7 +301,7 @@
       "identity_tension_level": 0.5,
       "self_inconsistency_level": 0.5,
       "maintenance_pressure": 1.0,
-      "continuity_score": 0.167741,
+      "continuity_score": 0.1668,
       "continuity_anchors": [
         "ep-000001-rest",
         "commitment-survival-priority",
@@ -287,11 +312,11 @@
           "label": "maintenance pressure",
           "tension_type": "maintenance",
           "intensity": 1.0,
-          "repair_target": "scan",
+          "repair_target": "hide",
           "evidence": [
-            "verify:pred:action:forage",
-            "verify:pred:env:temperature",
-            "verify:pred:env:food"
+            "thermal_rebalance",
+            "energy_recovery",
+            "stress_relief"
           ]
         },
         {
@@ -309,20 +334,36 @@
           "intensity": 1.0,
           "repair_target": "SURVIVAL",
           "evidence": [
-            "verify:pred:action:forage",
-            "verify:pred:env:temperature"
+            "thermal_rebalance",
+            "energy_recovery"
           ]
         },
         {
           "label": "continuity fragility",
           "tension_type": "continuity",
-          "intensity": 0.832259,
+          "intensity": 0.8332,
           "repair_target": "protect continuity anchors",
           "evidence": [
             "continuity_score_drop"
           ]
         }
       ],
+      "narrative_uncertainties": [],
+      "active_inquiries": [],
+      "deferred_inquiries": [],
+      "ambiguity_profile": {
+        "total_unknown_count": 0.0,
+        "decision_relevant_unknown_count": 0.0,
+        "competing_hypothesis_count": 0.0,
+        "latent_cause_count": 0.0,
+        "surface_cue_count": 0.0,
+        "interpretive_competition": 0.0,
+        "latent_cause_uncertainty_burden": 0.0,
+        "social_ambiguity_burden": 0.0,
+        "trust_ambiguity_burden": 0.0,
+        "environment_ambiguity_burden": 0.0,
+        "retained_uncertainty_burden": 0.0
+      },
       "subject_priority_stack": [
         {
           "label": "maintenance pressure",
@@ -331,9 +372,9 @@
           "preferred_actions": [],
           "avoid_actions": [],
           "evidence": [
-            "verify:pred:action:forage",
-            "verify:pred:env:temperature",
-            "verify:pred:env:food"
+            "thermal_rebalance",
+            "energy_recovery",
+            "stress_relief"
           ]
         },
         {
@@ -363,13 +404,13 @@
           "preferred_actions": [],
           "avoid_actions": [],
           "evidence": [
-            "verify:pred:action:forage",
-            "verify:pred:env:temperature"
+            "thermal_rebalance",
+            "energy_recovery"
           ]
         },
         {
           "label": "continuity fragility",
-          "weight": 0.832259,
+          "weight": 0.8332,
           "priority_type": "continuity",
           "preferred_actions": [
             "rest",
@@ -410,7 +451,7 @@
         "social_weight": 0.5,
         "exploration_weight": 0.46,
         "maintenance_weight": 0.62,
-        "hierarchy_stability": 0.689405,
+        "hierarchy_stability": 0.68,
         "commitment_stability": 0.7,
         "identity_rigidity": 0.58,
         "plasticity": 0.42,
@@ -421,6 +462,9 @@
         "repairing": false,
         "overloaded": false,
         "socially_destabilized": false,
+        "narrative_ambiguity_active": false,
+        "active_inquiry": false,
+        "inquiry_deferred": false,
         "continuity_fragile": true,
         "long_horizon_conflict": true
       },
@@ -428,12 +472,12 @@
         "need:maintenance"
       ],
       "repair_targets": [
-        "scan",
+        "hide",
         "critical",
         "SURVIVAL",
         "protect continuity anchors"
       ],
-      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: survival_crisis. 6 long-horizon conflict thread(s) still shape continuity."
+      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity."
     }
   }
 }

@@ -25,7 +25,7 @@
       "commitment_recall": 1.0
     },
     "preferred_policy_continuity": {
-      "audit_similarity": 0.654762,
+      "audit_similarity": 0.770833,
       "anchor_policy_similarity": 1.0,
       "dominant_strategy_match": 1.0,
       "avoidance_similarity": 1.0,
