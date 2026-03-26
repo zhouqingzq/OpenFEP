@@ -1,0 +1,301 @@
+{
+  "milestone_id": "M2.Total",
+  "schema_version": "m237_m2_total_acceptance_v1",
+  "generated_at": "2026-03-26T07:49:35+00:00",
+  "status": "BLOCKED",
+  "recommendation": "CONTINUE_M2_REMEDIATION",
+  "pillars": [
+    {
+      "pillar_id": "self_model_initialization",
+      "title": "Self-Model Initialization",
+      "dependencies": [
+        {
+          "milestone_id": "M2.20",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        }
+      ],
+      "target_outcomes": [
+        "\u4eba\u683c\u4e0e\u81ea\u6211\u6a21\u578b\u53ef\u7531\u53d9\u4e8b\u6587\u672c\u521d\u59cb\u5316"
+      ],
+      "passed": true,
+      "blockers": [],
+      "next_action": "Keep narrative initialization replay current-round and schema-stable."
+    },
+    {
+      "pillar_id": "autonomous_homeostasis_and_continuity",
+      "title": "Autonomous Homeostasis And Continuity",
+      "dependencies": [
+        {
+          "milestone_id": "M2.22",
+          "status": "FAIL",
+          "recommendation": "REJECT",
+          "passed": false,
+          "current_round": true,
+          "blocking_reason": "milestone_not_passing"
+        },
+        {
+          "milestone_id": "M2.36",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        }
+      ],
+      "target_outcomes": [
+        "\u6301\u7eed\u7684\u81ea\u7ef4\u62a4\u4e0e\u751f\u5b58\u8c03\u5ea6",
+        "\u4e3b\u4f53\u8fde\u7eed\u6027\u5728\u538b\u529b\u4e0e\u91cd\u542f\u4e2d\u4fdd\u6301"
+      ],
+      "passed": false,
+      "blockers": [
+        "M2.22"
+      ],
+      "next_action": "Repair long-horizon autonomy and restart continuity until both organism trials pass together."
+    },
+    {
+      "pillar_id": "functional_conscious_access",
+      "title": "Functional Conscious Access",
+      "dependencies": [
+        {
+          "milestone_id": "M2.24",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        }
+      ],
+      "target_outcomes": [
+        "workspace/broadcast \u771f\u5b9e\u5f71\u54cd\u4e0b\u6e38\u6a21\u5757"
+      ],
+      "passed": true,
+      "blockers": [],
+      "next_action": "Preserve workspace causal evidence as a total-acceptance dependency."
+    },
+    {
+      "pillar_id": "unified_narrative_and_repair",
+      "title": "Unified Narrative And Repair",
+      "dependencies": [
+        {
+          "milestone_id": "M2.23",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        },
+        {
+          "milestone_id": "M2.27",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        },
+        {
+          "milestone_id": "M2.31",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        }
+      ],
+      "target_outcomes": [
+        "\u7edf\u4e00\u81ea\u6211\u53d9\u4e8b",
+        "\u51b2\u7a81\u65f6\u4e00\u81f4\u6027\u4fee\u590d"
+      ],
+      "passed": true,
+      "blockers": [],
+      "next_action": "Hold identity, subject-state, and reconciliation evidence together under one current-round replay set."
+    },
+    {
+      "pillar_id": "slow_learning_and_bounded_inquiry",
+      "title": "Slow Learning And Bounded Inquiry",
+      "dependencies": [
+        {
+          "milestone_id": "M2.29",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        },
+        {
+          "milestone_id": "M2.30",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        },
+        {
+          "milestone_id": "M2.35",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        },
+        {
+          "milestone_id": "M2.36",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        }
+      ],
+      "target_outcomes": [
+        "\u7761\u7720\u4e0e\u6162\u53d8\u91cf\u5b66\u4e60\u6539\u53d8\u957f\u671f\u7b56\u7565",
+        "\u5f00\u653e inquiry \u4fdd\u6301\u6709\u754c\u4e14\u8fde\u7eed"
+      ],
+      "passed": true,
+      "blockers": [],
+      "next_action": "Raise verification yield while preserving bounded inquiry and slow-learning stability."
+    },
+    {
+      "pillar_id": "bounded_transfer_and_identity_preservation",
+      "title": "Bounded Transfer And Identity Preservation",
+      "dependencies": [
+        {
+          "milestone_id": "M2.25",
+          "status": "FAIL",
+          "recommendation": "REJECT",
+          "passed": false,
+          "current_round": true,
+          "blocking_reason": "milestone_not_passing"
+        },
+        {
+          "milestone_id": "M2.36",
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
+          "current_round": true,
+          "blocking_reason": ""
+        }
+      ],
+      "target_outcomes": [
+        "\u8de8\u73af\u5883\u8fc1\u79fb\u65f6\u4fdd\u7559\u6838\u5fc3\u8eab\u4efd\u4e0e\u504f\u597d"
+      ],
+      "passed": false,
+      "blockers": [
+        "M2.25"
+      ],
+      "next_action": "Repair open-world transfer so identity preservation survives beyond the synthetic continuity trial."
+    }
+  ],
+  "summary": {
+    "passed_pillars": 4,
+    "total_pillars": 6,
+    "gap_ratio": 0.333333,
+    "distance_to_acceptance": 0.333333,
+    "blocking_milestones": [
+      "M2.22",
+      "M2.25"
+    ]
+  },
+  "dependency_states": {
+    "M2.20": {
+      "milestone_id": "M2.20",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.22": {
+      "milestone_id": "M2.22",
+      "status": "FAIL",
+      "recommendation": "REJECT",
+      "passed": false,
+      "current_round": true,
+      "blocking_reason": "milestone_not_passing"
+    },
+    "M2.23": {
+      "milestone_id": "M2.23",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.24": {
+      "milestone_id": "M2.24",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.25": {
+      "milestone_id": "M2.25",
+      "status": "FAIL",
+      "recommendation": "REJECT",
+      "passed": false,
+      "current_round": true,
+      "blocking_reason": "milestone_not_passing"
+    },
+    "M2.27": {
+      "milestone_id": "M2.27",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.29": {
+      "milestone_id": "M2.29",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.30": {
+      "milestone_id": "M2.30",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.31": {
+      "milestone_id": "M2.31",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.35": {
+      "milestone_id": "M2.35",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    },
+    "M2.36": {
+      "milestone_id": "M2.36",
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
+      "current_round": true,
+      "blocking_reason": ""
+    }
+  },
+  "residual_risks": [
+    "M2.22 is not passing and blocks total M2 acceptance.",
+    "M2.25 is not passing and blocks total M2 acceptance."
+  ],
+  "artifacts": {
+    "scorecard": "E:\\workspace\\segments\\artifacts\\m237_m2_total_scorecard.json",
+    "report": "E:\\workspace\\segments\\reports\\m237_m2_total_acceptance_report.json",
+    "summary": "E:\\workspace\\segments\\reports\\m237_m2_total_acceptance_summary.md"
+  }
+}

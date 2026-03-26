@@ -1,0 +1,119 @@
+{
+  "milestone_id": "M2.Total",
+  "schema_version": "m237_m2_total_acceptance_v1",
+  "generated_at": "2026-03-26T07:49:35+00:00",
+  "pillar_scorecard": [
+    {
+      "pillar_id": "self_model_initialization",
+      "passed": true,
+      "blockers": []
+    },
+    {
+      "pillar_id": "autonomous_homeostasis_and_continuity",
+      "passed": false,
+      "blockers": [
+        "M2.22"
+      ]
+    },
+    {
+      "pillar_id": "functional_conscious_access",
+      "passed": true,
+      "blockers": []
+    },
+    {
+      "pillar_id": "unified_narrative_and_repair",
+      "passed": true,
+      "blockers": []
+    },
+    {
+      "pillar_id": "slow_learning_and_bounded_inquiry",
+      "passed": true,
+      "blockers": []
+    },
+    {
+      "pillar_id": "bounded_transfer_and_identity_preservation",
+      "passed": false,
+      "blockers": [
+        "M2.25"
+      ]
+    }
+  ],
+  "dependency_artifacts": {
+    "M2.20": {
+      "path": "E:\\workspace\\segments\\reports\\m220_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 6082,
+      "modified_at": "2026-03-26T01:11:39+00:00"
+    },
+    "M2.22": {
+      "path": "E:\\workspace\\segments\\reports\\m222_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 73783,
+      "modified_at": "2026-03-26T01:15:01+00:00"
+    },
+    "M2.23": {
+      "path": "E:\\workspace\\segments\\reports\\m223_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 84089,
+      "modified_at": "2026-03-26T01:16:43+00:00"
+    },
+    "M2.24": {
+      "path": "E:\\workspace\\segments\\reports\\m224_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 243319,
+      "modified_at": "2026-03-26T01:16:45+00:00"
+    },
+    "M2.25": {
+      "path": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 272669,
+      "modified_at": "2026-03-22T03:55:42+00:00"
+    },
+    "M2.27": {
+      "path": "E:\\workspace\\segments\\reports\\m227_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 19166,
+      "modified_at": "2026-03-26T01:16:56+00:00"
+    },
+    "M2.29": {
+      "path": "E:\\workspace\\segments\\reports\\m229_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 8040,
+      "modified_at": "2026-03-26T01:17:04+00:00"
+    },
+    "M2.30": {
+      "path": "E:\\workspace\\segments\\reports\\m230_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 86686,
+      "modified_at": "2026-03-26T01:17:05+00:00"
+    },
+    "M2.31": {
+      "path": "E:\\workspace\\segments\\reports\\m231_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 19944,
+      "modified_at": "2026-03-23T23:21:46+00:00"
+    },
+    "M2.35": {
+      "path": "E:\\workspace\\segments\\reports\\m235_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 10353,
+      "modified_at": "2026-03-25T15:13:46+00:00"
+    },
+    "M2.36": {
+      "path": "E:\\workspace\\segments\\reports\\m236_open_continuity_report.json",
+      "exists": true,
+      "size_bytes": 1096796,
+      "modified_at": "2026-03-26T07:04:30+00:00"
+    }
+  },
+  "summary": {
+    "passed_pillars": 4,
+    "total_pillars": 6,
+    "gap_ratio": 0.333333,
+    "distance_to_acceptance": 0.333333,
+    "blocking_milestones": [
+      "M2.22",
+      "M2.25"
+    ]
+  }
+}
