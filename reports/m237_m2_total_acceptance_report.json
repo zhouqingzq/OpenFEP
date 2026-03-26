@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.Total",
   "schema_version": "m237_m2_total_acceptance_v1",
-  "generated_at": "2026-03-26T07:49:35+00:00",
+  "generated_at": "2026-03-26T10:21:15+00:00",
   "status": "BLOCKED",
   "recommendation": "CONTINUE_M2_REMEDIATION",
   "pillars": [
@@ -164,11 +164,11 @@
       "dependencies": [
         {
           "milestone_id": "M2.25",
-          "status": "FAIL",
-          "recommendation": "REJECT",
-          "passed": false,
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
           "current_round": true,
-          "blocking_reason": "milestone_not_passing"
+          "blocking_reason": ""
         },
         {
           "milestone_id": "M2.36",
@@ -182,21 +182,18 @@
       "target_outcomes": [
         "\u8de8\u73af\u5883\u8fc1\u79fb\u65f6\u4fdd\u7559\u6838\u5fc3\u8eab\u4efd\u4e0e\u504f\u597d"
       ],
-      "passed": false,
-      "blockers": [
-        "M2.25"
-      ],
+      "passed": true,
+      "blockers": [],
       "next_action": "Repair open-world transfer so identity preservation survives beyond the synthetic continuity trial."
     }
   ],
   "summary": {
-    "passed_pillars": 4,
+    "passed_pillars": 5,
     "total_pillars": 6,
-    "gap_ratio": 0.333333,
-    "distance_to_acceptance": 0.333333,
+    "gap_ratio": 0.166667,
+    "distance_to_acceptance": 0.166667,
     "blocking_milestones": [
-      "M2.22",
-      "M2.25"
+      "M2.22"
     ]
   },
   "dependency_states": {
@@ -234,11 +231,11 @@
     },
     "M2.25": {
       "milestone_id": "M2.25",
-      "status": "FAIL",
-      "recommendation": "REJECT",
-      "passed": false,
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
       "current_round": true,
-      "blocking_reason": "milestone_not_passing"
+      "blocking_reason": ""
     },
     "M2.27": {
       "milestone_id": "M2.27",
@@ -290,8 +287,7 @@
     }
   },
   "residual_risks": [
-    "M2.22 is not passing and blocks total M2 acceptance.",
-    "M2.25 is not passing and blocks total M2 acceptance."
+    "M2.22 is not passing and blocks total M2 acceptance."
   ],
   "artifacts": {
     "scorecard": "E:\\workspace\\segments\\artifacts\\m237_m2_total_scorecard.json",

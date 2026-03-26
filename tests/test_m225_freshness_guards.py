@@ -39,3 +39,27 @@ def test_missing_schema_or_freshness_cannot_finalize_to_pass() -> None:
     schema_blocked["gates"]["artifact_schema_complete"] = False
     schema_blocked["artifact_schema_complete"] = {"passed": False, "missing": {"report": ["tests"]}}
     assert _finalize_report_decision(schema_blocked)["status"] != "PASS"
+
+
+def test_irrelevant_failed_pytest_records_do_not_block_acceptance_write() -> None:
+    written = write_m225_acceptance_artifacts(
+        seed_set=list(SEED_SET),
+        pytest_evidence=[
+            {
+                "name": "tests/test_unrelated_suite.py::test_old_failure",
+                "nodeid": "tests/test_unrelated_suite.py::test_old_failure",
+                "status": "failed",
+                "category": "pytest",
+                "details": "stale unrelated failure",
+            }
+        ],
+    )
+    report = json.loads(Path(written["report"]).read_text(encoding="utf-8"))
+
+    assert report["status"] == "PASS"
+    assert report["recommendation"] == "ACCEPT"
+    assert all(
+        not str(item.get("nodeid", "")).startswith("tests/test_unrelated_suite.py")
+        for item in report["pytest_tests"]
+    )
+    assert not any(finding["title"] == "Report includes non-passing pytest evidence" for finding in report["findings"])

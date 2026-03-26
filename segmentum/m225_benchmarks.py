@@ -2112,6 +2112,7 @@ def _collect_pytest_tests(
     *,
     include_persisted: bool = False,
 ) -> list[dict[str, object]]:
+    required_suites = set(_required_pytest_suites())
     persisted = load_m225_test_execution_log() if include_persisted else []
     combined = [
         _normalize_pytest_record(item)
@@ -2120,6 +2121,9 @@ def _collect_pytest_tests(
     ]
     deduped: dict[str, dict[str, object]] = {}
     for item in combined:
+        suite = _suite_from_nodeid(str(item.get("nodeid", "")))
+        if suite not in required_suites:
+            continue
         key = str(item.get("nodeid") or item.get("name"))
         deduped[key] = item
     return list(deduped.values())

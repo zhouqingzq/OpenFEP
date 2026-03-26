@@ -2,9 +2,9 @@
 
 - Status: BLOCKED
 - Recommendation: CONTINUE_M2_REMEDIATION
-- Passed pillars: 4 / 6
-- Distance to acceptance: 0.333333
-- Blocking milestones: M2.22, M2.25
+- Passed pillars: 5 / 6
+- Distance to acceptance: 0.166667
+- Blocking milestones: M2.22
 
 ## Pillars
 
@@ -13,9 +13,8 @@
 - Functional Conscious Access: PASS
 - Unified Narrative And Repair: PASS
 - Slow Learning And Bounded Inquiry: PASS
-- Bounded Transfer And Identity Preservation: BLOCKED (blockers: M2.25)
+- Bounded Transfer And Identity Preservation: PASS
 
 ## Residual Risks
 
 - M2.22 is not passing and blocks total M2 acceptance.
-- M2.25 is not passing and blocks total M2 acceptance.
