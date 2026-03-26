@@ -252,8 +252,67 @@ h1 span { color: var(--accent); }
 }
 .json-view.visible { display: block; }
 
+.gt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.gt-card {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.gt-path {
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 6px;
+  font-family: "Cascadia Code", "Fira Code", monospace;
+  word-break: break-all;
+}
+.gt-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.gt-subtitle {
+  font-size: 0.76rem;
+  color: var(--text2);
+  margin: 8px 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.gt-body {
+  font-size: 0.8rem;
+  color: var(--text2);
+  white-space: pre-wrap;
+}
+.gt-list {
+  list-style: disc;
+  padding-left: 18px;
+  color: var(--text2);
+}
+.gt-list li {
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+.evidence-card {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.evidence-card .excerpt {
+  font-size: 0.84rem;
+  margin-bottom: 8px;
+}
+.evidence-card .meta {
+  font-size: 0.76rem;
+  color: var(--text2);
+}
+
 @media (max-width: 640px) {
   .big-five-grid { grid-template-columns: repeat(3, 1fr); }
+  .gt-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -274,6 +333,7 @@ h1 span { color: var(--accent); }
     <div class="btn-row">
       <button id="analyzeBtn" class="btn btn-primary" onclick="runAnalysis()"></button>
       <button id="exampleBtn" class="btn btn-secondary" onclick="loadExample()"></button>
+      <button id="gtExampleBtn" class="btn btn-secondary" onclick="loadGroundTruthExample()"></button>
       <span id="status" class="status"></span>
     </div>
   </div>
@@ -294,6 +354,7 @@ const I = {
     hint: 'Each non-empty line is treated as one material segment. More segments = higher confidence.',
     analyze: 'Analyze',
     example: 'Load Example',
+    gtExample: 'Load Ground Truth Example',
     analyzing: (n) => `Analyzing ${n} segment(s)...`,
     done: 'Done.',
     error: (m) => `Error: ${m}`,
@@ -315,7 +376,11 @@ const I = {
     secPred: 'Behavioral Predictions',
     secUnc: 'Uncertainty & Gaps',
     secVia: 'VIA Character Strengths',
+    secEvidence: 'Evidence Trace',
+    secGT: 'Ground Truth View',
     secViaTag: '24 strengths',
+    secEvidenceTag: 'source materials',
+    secGTTag: 'confidence / evidence / reasoning',
     toggleJson: 'Toggle Raw JSON',
     // sub labels
     detected: 'detected',
@@ -331,6 +396,13 @@ const I = {
     baselineArousal: 'Baseline Arousal',
     recoverySpeed: 'Recovery Speed',
     emotionWeights: 'Emotion Channel Weights',
+    evidence: 'Evidence',
+    reasoning: 'Reasoning',
+    sourceIndex: 'Source',
+    category: 'Category',
+    appraisal: 'Appraisal',
+    noEvidence: 'No evidence attached.',
+    noGroundTruth: 'No ConfidenceRated outputs available.',
     // Big Five
     traitOpenness: 'Openness',
     traitConsc: 'Consc.',
@@ -505,6 +577,7 @@ function applyLang() {
   document.getElementById('hintText').textContent = t('hint');
   document.getElementById('analyzeBtn').textContent = t('analyze');
   document.getElementById('exampleBtn').textContent = t('example');
+  document.getElementById('gtExampleBtn').textContent = t('gtExample');
 }
 applyLang();
 
@@ -516,8 +589,18 @@ I was excluded from the group. They rejected me and I felt abandoned and humilia
 \\u7b2c\\u4e8c\\u5929\\uff0cagent\\u6628\\u5929\\u8def\\u8fc7\\u6cb3\\u8fb9\\uff0c\\u88ab\\u4e00\\u53ea\\u9cc4\\u9c7c\\u653b\\u51fb\\u4e86\\uff0c\\u53d7\\u4f24\\u4e86\\u3002
 I found berries and shared a meal with my group. Safe resources.`;
 
+const GROUND_TRUTH_EXAMPLE_TEXT = `Morgan spent the entire weekend building a detailed spreadsheet
+to track every household expense down to the cent. When a friend
+suggested a spontaneous road trip, Morgan declined, saying they
+needed to finish organizing the garage according to a color-coded
+system they had designed.`;
+
 function loadExample() {
   document.getElementById('materials').value = EXAMPLE_TEXT;
+}
+
+function loadGroundTruthExample() {
+  document.getElementById('materials').value = GROUND_TRUTH_EXAMPLE_TEXT;
 }
 
 async function runAnalysis() {
@@ -571,6 +654,15 @@ function fmtVal(v) {
   if (typeof v === 'number') return v.toFixed(3);
   if (typeof v === 'object') return JSON.stringify(v);
   return String(v);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function traitColor(v) {
@@ -728,6 +820,98 @@ function renderPredictions(preds) {
   return h + '</div>';
 }
 
+function renderEvidenceList(items) {
+  if (!items || !items.length) return `<p style="color:var(--text2)">${t('insufficientData')}</p>`;
+  let h = '';
+  for (const item of items) {
+    const appraisal = Object.entries(item.appraisal_relevance || {})
+      .map(([k, v]) => `${escapeHtml(k)}=${fmtVal(v)}`)
+      .join(', ');
+    h += `<div class="evidence-card">
+      <div class="excerpt">${escapeHtml(item.excerpt || '')}</div>
+      <div class="meta">${t('sourceIndex')}: ${item.source_index ?? 0} | ${t('category')}: ${escapeHtml(item.category || '')}</div>
+      <div class="meta">${t('appraisal')}: ${escapeHtml(appraisal || '-')}</div>
+    </div>`;
+  }
+  return h;
+}
+
+function pushCREntry(entries, path, value) {
+  if (!value || typeof value !== 'object') return;
+  if (!Object.prototype.hasOwnProperty.call(value, 'confidence')) return;
+  entries.push({ path, value });
+}
+
+function collectGroundTruthEntries(data) {
+  const entries = [];
+
+  const cp = data.core_priors || {};
+  for (const [k, v] of Object.entries(cp)) pushCREntry(entries, `core_priors.${k}`, v);
+
+  const vh = (data.value_hierarchy || {}).ranked_values || [];
+  for (const item of vh) pushCREntry(entries, `value_hierarchy.${item.name}`, item);
+
+  const cs = data.cognitive_style || {};
+  for (const [k, v] of Object.entries(cs)) pushCREntry(entries, `cognitive_style.${k}`, v);
+
+  const pa = data.precision_allocation || {};
+  for (const item of (pa.hypersensitive_channels || [])) pushCREntry(entries, 'precision_allocation.hypersensitive_channels', item);
+  for (const item of (pa.blind_spots || [])) pushCREntry(entries, 'precision_allocation.blind_spots', item);
+  pushCREntry(entries, 'precision_allocation.internal_vs_external', pa.internal_vs_external);
+  pushCREntry(entries, 'precision_allocation.immediate_vs_narrative', pa.immediate_vs_narrative);
+
+  const ad = data.affective_dynamics || {};
+  pushCREntry(entries, 'affective_dynamics.baseline_arousal', ad.baseline_arousal);
+  pushCREntry(entries, 'affective_dynamics.recovery_speed', ad.recovery_speed);
+  for (const item of (ad.dominant_emotions || [])) pushCREntry(entries, 'affective_dynamics.dominant_emotions', item);
+
+  const so = (data.social_orientation || {}).orientation_weights || {};
+  for (const [k, v] of Object.entries(so)) pushCREntry(entries, `social_orientation.${k}`, v);
+
+  const sm = data.self_model_profile || {};
+  pushCREntry(entries, 'self_model_profile.self_narrative', sm.self_narrative);
+  for (const item of (sm.identity_consistency_needs || [])) pushCREntry(entries, 'self_model_profile.identity_consistency_needs', item);
+  for (const item of (sm.identity_threats || [])) pushCREntry(entries, 'self_model_profile.identity_threats', item);
+
+  const om = data.other_model_profile || {};
+  for (const [k, v] of Object.entries(om)) pushCREntry(entries, `other_model_profile.${k}`, v);
+
+  const ts = data.temporal_structure || {};
+  for (const [k, v] of Object.entries(ts)) pushCREntry(entries, `temporal_structure.${k}`, v);
+
+  const sp = data.strategy_profile || {};
+  for (const item of (sp.preferred_strategies || [])) pushCREntry(entries, 'strategy_profile.preferred_strategies', item);
+  for (const [k, v] of Object.entries(sp.cost_analysis || {})) pushCREntry(entries, `strategy_profile.cost_analysis.${k}`, v);
+  for (const item of (sp.blocked_strategies || [])) pushCREntry(entries, 'strategy_profile.blocked_strategies', item);
+
+  for (const item of (data.developmental_inferences || [])) pushCREntry(entries, 'developmental_inferences', item);
+  for (const item of (data.stable_core || [])) pushCREntry(entries, 'stable_core', item);
+  for (const item of (data.fragile_points || [])) pushCREntry(entries, 'fragile_points', item);
+  for (const item of (data.plastic_points || [])) pushCREntry(entries, 'plastic_points', item);
+
+  return entries;
+}
+
+function renderGroundTruth(entries) {
+  if (!entries.length) return `<p style="color:var(--text2)">${t('noGroundTruth')}</p>`;
+  let h = '<div class="gt-grid">';
+  for (const entry of entries) {
+    const cr = entry.value || {};
+    const evidenceItems = (cr.evidence || []).length
+      ? '<ul class="gt-list">' + cr.evidence.map(item => `<li>${escapeHtml(item)}</li>`).join('') + '</ul>'
+      : `<div class="gt-body">${t('noEvidence')}</div>`;
+    h += `<div class="gt-card">
+      <div class="gt-path">${escapeHtml(entry.path)}</div>
+      <div class="gt-value">${escapeHtml(fmtVal(cr.value))} <span class="confidence-badge ${confClass(cr.confidence)}">${escapeHtml(cr.confidence || 'low')}</span></div>
+      <div class="gt-subtitle">${t('reasoning')}</div>
+      <div class="gt-body">${escapeHtml(cr.reasoning || '')}</div>
+      <div class="gt-subtitle">${t('evidence')}</div>
+      ${evidenceItems}
+    </div>`;
+  }
+  return h + '</div>';
+}
+
 function renderResults(data) {
   const el = document.getElementById('results');
   let h = '';
@@ -740,6 +924,7 @@ function renderResults(data) {
   </div>`;
 
   h += section('b5', t('secBigFive'), null, renderBigFive(data.big_five || {}));
+  h += section('evidence', t('secEvidence'), t('secEvidenceTag'), renderEvidenceList(data.evidence_list || []));
   h += section('priors', t('secPriors'), t('secPriorsTag'), renderCorePriors(data.core_priors || {}));
   h += section('values', t('secValues'), t('secValuesTag'), renderValueHierarchy(data.value_hierarchy || {}));
   h += section('cog', t('secCog'), null, renderCogStyle(data.cognitive_style || {}));
@@ -780,6 +965,7 @@ function renderResults(data) {
   }
   viaHtml += '</div>';
   h += section('via', t('secVia'), t('secViaTag'), viaHtml);
+  h += section('gt', t('secGT'), t('secGTTag'), renderGroundTruth(collectGroundTruthEntries(data)));
 
   h += `<div class="json-toggle" style="display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="generateReport()">${t('genReport')}</button>
@@ -1177,6 +1363,44 @@ def analyze_personality(request: AnalysisRequest) -> dict[str, Any]:
     analyzer = _build_analyzer(request)
     result = analyzer.analyze(request.materials, metadata=request.metadata)
     return result.to_dict()
+
+
+@app.post("/analyze/ground-truth")
+def analyze_ground_truth(request: AnalysisRequest) -> dict[str, Any]:
+    """Ground-truth oriented view for benchmark generation workflows."""
+    analyzer = _build_analyzer(request)
+    result = analyzer.analyze(request.materials, metadata=request.metadata)
+    payload = result.to_dict()
+
+    def _collect_confidence_rated(value: Any, path: str) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        if isinstance(value, dict):
+            if "confidence" in value and "value" in value:
+                items.append({
+                    "path": path,
+                    "value": value.get("value"),
+                    "confidence": value.get("confidence"),
+                    "evidence": list(value.get("evidence", [])),
+                    "reasoning": value.get("reasoning", ""),
+                })
+            else:
+                for key, nested in value.items():
+                    child_path = f"{path}.{key}" if path else str(key)
+                    items.extend(_collect_confidence_rated(nested, child_path))
+        elif isinstance(value, list):
+            for idx, nested in enumerate(value):
+                child_path = f"{path}[{idx}]"
+                items.extend(_collect_confidence_rated(nested, child_path))
+        return items
+
+    return {
+        "materials": list(request.materials),
+        "analysis_confidence": payload.get("analysis_confidence", 0.0),
+        "ground_truth": _collect_confidence_rated(payload, ""),
+        "missing_evidence": list(payload.get("missing_evidence", [])),
+        "unresolvable_questions": list(payload.get("unresolvable_questions", [])),
+        "raw_analysis": payload,
+    }
 
 
 @app.post("/analyze/evidence")
