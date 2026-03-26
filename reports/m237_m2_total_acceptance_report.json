@@ -1,9 +1,9 @@
 {
   "milestone_id": "M2.Total",
   "schema_version": "m237_m2_total_acceptance_v1",
-  "generated_at": "2026-03-26T10:21:15+00:00",
-  "status": "BLOCKED",
-  "recommendation": "CONTINUE_M2_REMEDIATION",
+  "generated_at": "2026-03-26T11:09:41+00:00",
+  "status": "PASS",
+  "recommendation": "ACCEPT",
   "pillars": [
     {
       "pillar_id": "self_model_initialization",
@@ -31,11 +31,11 @@
       "dependencies": [
         {
           "milestone_id": "M2.22",
-          "status": "FAIL",
-          "recommendation": "REJECT",
-          "passed": false,
+          "status": "PASS",
+          "recommendation": "ACCEPT",
+          "passed": true,
           "current_round": true,
-          "blocking_reason": "milestone_not_passing"
+          "blocking_reason": ""
         },
         {
           "milestone_id": "M2.36",
@@ -50,10 +50,8 @@
         "\u6301\u7eed\u7684\u81ea\u7ef4\u62a4\u4e0e\u751f\u5b58\u8c03\u5ea6",
         "\u4e3b\u4f53\u8fde\u7eed\u6027\u5728\u538b\u529b\u4e0e\u91cd\u542f\u4e2d\u4fdd\u6301"
       ],
-      "passed": false,
-      "blockers": [
-        "M2.22"
-      ],
+      "passed": true,
+      "blockers": [],
       "next_action": "Repair long-horizon autonomy and restart continuity until both organism trials pass together."
     },
     {
@@ -188,13 +186,11 @@
     }
   ],
   "summary": {
-    "passed_pillars": 5,
+    "passed_pillars": 6,
     "total_pillars": 6,
-    "gap_ratio": 0.166667,
-    "distance_to_acceptance": 0.166667,
-    "blocking_milestones": [
-      "M2.22"
-    ]
+    "gap_ratio": 0.0,
+    "distance_to_acceptance": 0.0,
+    "blocking_milestones": []
   },
   "dependency_states": {
     "M2.20": {
@@ -207,11 +203,11 @@
     },
     "M2.22": {
       "milestone_id": "M2.22",
-      "status": "FAIL",
-      "recommendation": "REJECT",
-      "passed": false,
+      "status": "PASS",
+      "recommendation": "ACCEPT",
+      "passed": true,
       "current_round": true,
-      "blocking_reason": "milestone_not_passing"
+      "blocking_reason": ""
     },
     "M2.23": {
       "milestone_id": "M2.23",
@@ -286,9 +282,7 @@
       "blocking_reason": ""
     }
   },
-  "residual_risks": [
-    "M2.22 is not passing and blocks total M2 acceptance."
-  ],
+  "residual_risks": [],
   "artifacts": {
     "scorecard": "E:\\workspace\\segments\\artifacts\\m237_m2_total_scorecard.json",
     "report": "E:\\workspace\\segments\\reports\\m237_m2_total_acceptance_report.json",

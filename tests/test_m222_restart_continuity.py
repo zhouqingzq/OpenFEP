@@ -121,6 +121,19 @@ class TestM222RestartContinuity(unittest.TestCase):
             self.assertSetEqual(protected_before, protected_after)
             self.assertSetEqual(critical_before, critical_after)
 
+    def test_restart_memory_integrity_survives_post_restart_runtime(self) -> None:
+        protocol = build_m222_protocols(
+            long_run_cycles=72,
+            restart_pre_cycles=24,
+            restart_post_cycles=48,
+        )["restart_continuity"]
+        result = run_m222_protocol(protocol, seed=222, system_variant="full_system")
+
+        self.assertGreaterEqual(float(result.metrics["restart_memory_integrity"]), 0.95)
+        memory = result.restart["long_term_memory_integrity"]
+        self.assertGreaterEqual(float(memory["protected_memory_integrity"]), 0.95)
+        self.assertGreaterEqual(float(memory["critical_memory_integrity"]), 0.95)
+
 
 if __name__ == "__main__":
     unittest.main()

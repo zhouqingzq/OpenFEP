@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.Total",
   "schema_version": "m237_m2_total_acceptance_v1",
-  "generated_at": "2026-03-26T10:21:15+00:00",
+  "generated_at": "2026-03-26T11:09:41+00:00",
   "pillar_scorecard": [
     {
       "pillar_id": "self_model_initialization",
@@ -10,10 +10,8 @@
     },
     {
       "pillar_id": "autonomous_homeostasis_and_continuity",
-      "passed": false,
-      "blockers": [
-        "M2.22"
-      ]
+      "passed": true,
+      "blockers": []
     },
     {
       "pillar_id": "functional_conscious_access",
@@ -46,8 +44,8 @@
     "M2.22": {
       "path": "E:\\workspace\\segments\\reports\\m222_acceptance_report.json",
       "exists": true,
-      "size_bytes": 73783,
-      "modified_at": "2026-03-26T09:54:12+00:00"
+      "size_bytes": 75710,
+      "modified_at": "2026-03-26T11:09:17+00:00"
     },
     "M2.23": {
       "path": "E:\\workspace\\segments\\reports\\m223_acceptance_report.json",
@@ -64,8 +62,8 @@
     "M2.25": {
       "path": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json",
       "exists": true,
-      "size_bytes": 126738,
-      "modified_at": "2026-03-26T10:20:03+00:00"
+      "size_bytes": 127796,
+      "modified_at": "2026-03-26T10:40:14+00:00"
     },
     "M2.27": {
       "path": "E:\\workspace\\segments\\reports\\m227_acceptance_report.json",
@@ -105,12 +103,10 @@
     }
   },
   "summary": {
-    "passed_pillars": 5,
+    "passed_pillars": 6,
     "total_pillars": 6,
-    "gap_ratio": 0.166667,
-    "distance_to_acceptance": 0.166667,
-    "blocking_milestones": [
-      "M2.22"
-    ]
+    "gap_ratio": 0.0,
+    "distance_to_acceptance": 0.0,
+    "blocking_milestones": []
   }
 }

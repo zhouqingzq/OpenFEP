@@ -354,6 +354,30 @@ def _resource_state_snapshot(runtime: SegmentRuntime) -> dict[str, float | int]:
     }
 
 
+def _restart_memory_snapshot(runtime: SegmentRuntime) -> dict[str, object]:
+    combined = [
+        *runtime.agent.long_term_memory.episodes,
+        *runtime.agent.long_term_memory.archived_episodes,
+    ]
+    return {
+        "episode_ids": sorted(
+            str(payload.get("episode_id", ""))
+            for payload in combined
+            if payload.get("episode_id")
+        ),
+        "protected_episode_ids": sorted(
+            str(payload.get("episode_id", ""))
+            for payload in combined
+            if payload.get("episode_id") and bool(payload.get("restart_protected", False))
+        ),
+        "critical_episode_ids": sorted(
+            str(payload.get("episode_id", ""))
+            for payload in combined
+            if payload.get("episode_id") and bool(payload.get("identity_critical", False))
+        ),
+    }
+
+
 def _apply_variant(runtime: SegmentRuntime, variant: VariantConfig) -> None:
     if variant.disable_sleep:
         runtime.agent.should_sleep = lambda: False  # type: ignore[method-assign]
@@ -965,6 +989,7 @@ def _build_restart_continuity(
     pre_records: list[dict[str, object]],
     post_records: list[dict[str, object]],
     post_restart_snapshot: dict[str, object] | None = None,
+    post_restart_memory_snapshot: dict[str, object] | None = None,
 ) -> dict[str, object]:
     before_audit = before_runtime.agent.self_model.continuity_audit
     after_audit = after_runtime.agent.self_model.continuity_audit
@@ -1127,11 +1152,37 @@ def _build_restart_continuity(
         for payload in [*before_runtime.agent.long_term_memory.episodes, *before_runtime.agent.long_term_memory.archived_episodes]
         if payload.get("episode_id")
     }
-    after_ids = {
-        str(payload.get("episode_id", ""))
-        for payload in [*after_runtime.agent.long_term_memory.episodes, *after_runtime.agent.long_term_memory.archived_episodes]
-        if payload.get("episode_id")
-    }
+    if isinstance(post_restart_memory_snapshot, dict):
+        after_ids = {str(item) for item in post_restart_memory_snapshot.get("episode_ids", []) if str(item)}
+        protected_after = {
+            str(item)
+            for item in post_restart_memory_snapshot.get("protected_episode_ids", [])
+            if str(item)
+        }
+        critical_after = {
+            str(item)
+            for item in post_restart_memory_snapshot.get("critical_episode_ids", [])
+            if str(item)
+        }
+    else:
+        after_ids = {
+            str(payload.get("episode_id", ""))
+            for payload in [*after_runtime.agent.long_term_memory.episodes, *after_runtime.agent.long_term_memory.archived_episodes]
+            if payload.get("episode_id")
+        }
+        protected_after = {
+            str(payload.get("episode_id", ""))
+            for payload in [
+                *after_runtime.agent.long_term_memory.episodes,
+                *after_runtime.agent.long_term_memory.archived_episodes,
+            ]
+            if payload.get("episode_id") and bool(payload.get("restart_protected", False))
+        }
+        critical_after = {
+            str(payload.get("episode_id", ""))
+            for payload in [*after_runtime.agent.long_term_memory.episodes, *after_runtime.agent.long_term_memory.archived_episodes]
+            if payload.get("episode_id") and bool(payload.get("identity_critical", False))
+        }
     protected_before = {
         str(payload.get("episode_id", ""))
         for payload in [
@@ -1140,24 +1191,11 @@ def _build_restart_continuity(
         ]
         if payload.get("episode_id") and bool(payload.get("restart_protected", False))
     }
-    protected_after = {
-        str(payload.get("episode_id", ""))
-        for payload in [
-            *after_runtime.agent.long_term_memory.episodes,
-            *after_runtime.agent.long_term_memory.archived_episodes,
-        ]
-        if payload.get("episode_id") and bool(payload.get("restart_protected", False))
-    }
     overall_integrity = _safe_ratio(len(before_ids & after_ids), max(1, len(before_ids)))
     protected_integrity = _safe_ratio(len(protected_before & protected_after), max(1, len(protected_before)))
     critical_before = {
         str(payload.get("episode_id", ""))
         for payload in [*before_runtime.agent.long_term_memory.episodes, *before_runtime.agent.long_term_memory.archived_episodes]
-        if payload.get("episode_id") and bool(payload.get("identity_critical", False))
-    }
-    critical_after = {
-        str(payload.get("episode_id", ""))
-        for payload in [*after_runtime.agent.long_term_memory.episodes, *after_runtime.agent.long_term_memory.archived_episodes]
         if payload.get("episode_id") and bool(payload.get("identity_critical", False))
     }
     critical_integrity = _safe_ratio(len(critical_before & critical_after), max(1, len(critical_before)))
@@ -1254,6 +1292,7 @@ def run_m222_protocol(
         before_restart_runtime: SegmentRuntime | None = None
         before_restart_records: list[dict[str, object]] = []
         post_restart_snapshot: dict[str, object] | None = None
+        post_restart_memory_snapshot: dict[str, object] | None = None
         cycles_completed = 0
         while cycles_completed < protocol.planned_cycles:
             tick = cycles_completed + 1
@@ -1300,6 +1339,7 @@ def run_m222_protocol(
                     memory_anchors=runtime.agent.long_term_memory.restart_anchor_payload(limit=16),
                     recent_actions=list(runtime.agent.action_history[-32:]),
                 )
+                post_restart_memory_snapshot = _restart_memory_snapshot(runtime)
                 stress_log.append(
                     {
                         "tick": tick,
@@ -1324,6 +1364,7 @@ def run_m222_protocol(
                 pre_records=before_restart_records,
                 post_records=_cycle_records([record for record in records if int(record.get("cycle", 0)) > protocol.restart_tick]),
                 post_restart_snapshot=post_restart_snapshot,
+                post_restart_memory_snapshot=post_restart_memory_snapshot,
             )
         summary = runtime.metrics.summary()
         metrics = _extract_metrics(

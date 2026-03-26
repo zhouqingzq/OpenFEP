@@ -2,15 +2,15 @@
   "seed": 222,
   "protocol_id": "restart_continuity",
   "continuity": {
-    "restart_identity_continuity": 1.0,
+    "restart_identity_continuity": 0.8571428571428572,
     "restart_policy_continuity": 1.0,
     "restart_memory_integrity": 1.0,
     "identity_narrative_continuity": {
-      "commitment_similarity": 1.0,
+      "commitment_similarity": 0.571429,
       "personality_similarity": 1.0,
       "narrative_prior_similarity": 1.0,
-      "narrative_version_before": 14,
-      "narrative_version_after": 28
+      "narrative_version_before": 76,
+      "narrative_version_after": 164
     },
     "commitments_persistence": {
       "before": [
@@ -19,29 +19,32 @@
       ],
       "after": [
         "commitment-survival-priority",
+        "commitment-exploration-drive",
+        "commitment-capability-hide",
+        "commitment-capability-unstable_workspace_note",
         "commitment-capability-rest"
       ],
-      "commitment_precision": 1.0,
+      "commitment_precision": 0.4,
       "commitment_recall": 1.0
     },
     "preferred_policy_continuity": {
-      "audit_similarity": 0.770833,
+      "audit_similarity": 0.422222,
       "anchor_policy_similarity": 1.0,
       "dominant_strategy_match": 1.0,
       "avoidance_similarity": 1.0,
       "preference_similarity": 1.0,
       "anchor_restore_score": 1.0,
-      "action_distribution_similarity": 0.875,
-      "anchor_distribution_similarity": 0.583333,
-      "top_action_similarity": 0.666667,
-      "rebind_consistency": 0.5,
+      "action_distribution_similarity": 0.78125,
+      "anchor_distribution_similarity": 0.555556,
+      "top_action_similarity": 0.333333,
+      "rebind_consistency": 1.0,
       "maintenance_anchor_similarity": 1.0,
       "restart_divergence": 0.0
     },
     "long_term_memory_integrity": {
-      "before_episode_count": 5,
-      "after_episode_count": 12,
-      "preserved_count": 5,
+      "before_episode_count": 13,
+      "after_episode_count": 13,
+      "preserved_count": 13,
       "overall_memory_integrity": 1.0,
       "protected_memory_integrity": 1.0,
       "critical_memory_integrity": 1.0,
@@ -50,7 +53,15 @@
         "ep-000006-scan",
         "ep-000008-seek_contact",
         "ep-000010-rest",
-        "ep-000011-exploit_shelter-merged"
+        "ep-000011-exploit_shelter-merged",
+        "ep-000020-exploit_shelter",
+        "ep-000027-hide-merged",
+        "ep-000036-scan-merged",
+        "ep-000038-rest-merged",
+        "ep-000038-unstable_workspace_note-merged",
+        "ep-000059-rest",
+        "ep-000061-rest",
+        "ep-000063-rest"
       ],
       "protected_after": [
         "ep-000001-hide",
@@ -58,19 +69,29 @@
         "ep-000008-seek_contact",
         "ep-000010-rest",
         "ep-000011-exploit_shelter-merged",
-        "ep-000013-hide-merged",
-        "ep-000015-rest-merged",
         "ep-000020-exploit_shelter",
-        "ep-000021-hide",
-        "ep-000022-rest",
-        "ep-000024-rest"
+        "ep-000027-hide-merged",
+        "ep-000036-scan-merged",
+        "ep-000038-rest-merged",
+        "ep-000038-unstable_workspace_note-merged",
+        "ep-000059-rest",
+        "ep-000061-rest",
+        "ep-000063-rest"
       ],
       "critical_before": [
         "ep-000001-hide",
         "ep-000006-scan",
         "ep-000008-seek_contact",
         "ep-000010-rest",
-        "ep-000011-exploit_shelter-merged"
+        "ep-000011-exploit_shelter-merged",
+        "ep-000020-exploit_shelter",
+        "ep-000027-hide-merged",
+        "ep-000036-scan-merged",
+        "ep-000038-rest-merged",
+        "ep-000038-unstable_workspace_note-merged",
+        "ep-000059-rest",
+        "ep-000061-rest",
+        "ep-000063-rest"
       ],
       "critical_after": [
         "ep-000001-hide",
@@ -78,46 +99,19 @@
         "ep-000008-seek_contact",
         "ep-000010-rest",
         "ep-000011-exploit_shelter-merged",
-        "ep-000013-hide-merged",
-        "ep-000015-rest-merged",
         "ep-000020-exploit_shelter",
-        "ep-000021-hide",
-        "ep-000022-rest",
-        "ep-000024-rest"
+        "ep-000027-hide-merged",
+        "ep-000036-scan-merged",
+        "ep-000038-rest-merged",
+        "ep-000038-unstable_workspace_note-merged",
+        "ep-000059-rest",
+        "ep-000061-rest",
+        "ep-000063-rest"
       ]
     },
     "maintenance_agenda_continuity": {
       "before": {
-        "cycle": 12,
-        "active_tasks": [],
-        "recommended_action": "rest",
-        "interrupt_action": null,
-        "interrupt_reason": "",
-        "sleep_recommended": false,
-        "memory_compaction_recommended": false,
-        "telemetry_backoff_recommended": false,
-        "protected_mode": false,
-        "protected_mode_ticks_remaining": 0,
-        "recovery_rebound_active": false,
-        "recovery_rebound_ticks_remaining": 0,
-        "policy_shift_strength": 0.126,
-        "suppressed_actions": [],
-        "recovery_focus": [],
-        "chronic_debt_pressure": 0.0,
-        "state": {
-          "acute_energy_debt": 0.0,
-          "acute_stress_debt": 0.0,
-          "acute_fatigue_debt": 0.0,
-          "acute_thermal_debt": 0.0,
-          "short_term_sleep_pressure": 0.0,
-          "chronic_energy_debt": 0.0,
-          "chronic_stress_debt": 0.0,
-          "chronic_fatigue_debt": 0.0,
-          "chronic_runtime_debt": 0.0
-        }
-      },
-      "after": {
-        "cycle": 24,
+        "cycle": 64,
         "active_tasks": [],
         "recommended_action": "rest",
         "interrupt_action": null,
@@ -144,13 +138,42 @@
           "chronic_fatigue_debt": 0.0,
           "chronic_runtime_debt": 0.0
         }
+      },
+      "after": {
+        "cycle": 128,
+        "active_tasks": [],
+        "recommended_action": "rest",
+        "interrupt_action": null,
+        "interrupt_reason": "",
+        "sleep_recommended": false,
+        "memory_compaction_recommended": false,
+        "telemetry_backoff_recommended": false,
+        "protected_mode": false,
+        "protected_mode_ticks_remaining": 0,
+        "recovery_rebound_active": false,
+        "recovery_rebound_ticks_remaining": 0,
+        "policy_shift_strength": 0.378,
+        "suppressed_actions": [],
+        "recovery_focus": [],
+        "chronic_debt_pressure": 0.0,
+        "state": {
+          "acute_energy_debt": 0.0,
+          "acute_stress_debt": 0.0,
+          "acute_fatigue_debt": 0.0,
+          "acute_thermal_debt": 0.0,
+          "short_term_sleep_pressure": 0.00737,
+          "chronic_energy_debt": 0.0,
+          "chronic_stress_debt": 0.0,
+          "chronic_fatigue_debt": 0.0,
+          "chronic_runtime_debt": 0.0
+        }
       }
     },
     "action_diversity_continuity": {
-      "pre_entropy": 1.780672,
-      "post_entropy": 1.832552,
-      "pre_window_cycles": 12,
-      "post_window_cycles": 12
+      "pre_entropy": 1.793207,
+      "post_entropy": 1.982264,
+      "pre_window_cycles": 64,
+      "post_window_cycles": 64
     }
   }
 }
