@@ -1,0 +1,72 @@
+{
+  "prediction": {
+    "prediction_id": "pred:m33",
+    "created_tick": 1,
+    "last_updated_tick": 1,
+    "source_module": "m33",
+    "prediction_type": "environment_state",
+    "target_channels": [
+      "danger"
+    ],
+    "expected_state": {
+      "danger": 0.4
+    },
+    "confidence": 0.7,
+    "expected_horizon": 1,
+    "status": "active",
+    "supporting_evidence": [],
+    "linked_commitments": [],
+    "linked_identity_anchors": [],
+    "linked_unknown_ids": [],
+    "linked_hypothesis_ids": [],
+    "linked_schema_ids": [
+      "schema:predator_attack-exploration"
+    ],
+    "linked_experiment_plan_id": "",
+    "linked_goal": "",
+    "maintenance_context": "",
+    "decision_relevance": 0.0,
+    "semantic_provenance": {
+      "motifs": [
+        "predator_attack",
+        "exploration"
+      ]
+    },
+    "verification_tick": 0,
+    "recurrence_count": 0,
+    "verification_attempts": 0
+  },
+  "discrepancy": {
+    "discrepancy_id": "disc:m33",
+    "label": "semantic mismatch",
+    "source": "prediction_error",
+    "discrepancy_type": "semantic_uncertainty",
+    "created_tick": 1,
+    "last_seen_tick": 2,
+    "severity": 0.6,
+    "status": "active",
+    "recurrence_count": 1,
+    "target_channels": [],
+    "supporting_evidence": [],
+    "acute": true,
+    "chronic": false,
+    "identity_relevant": false,
+    "subject_critical": false,
+    "repair_attempts": 0,
+    "archived_reason": "",
+    "linked_predictions": [],
+    "linked_schema_ids": [
+      "schema:predator_attack-exploration"
+    ],
+    "linked_commitments": [],
+    "linked_goal": "",
+    "semantic_provenance": {
+      "motifs": [
+        "predator_attack",
+        "exploration"
+      ]
+    },
+    "age": 2,
+    "priority": "high"
+  }
+}

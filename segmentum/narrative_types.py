@@ -116,6 +116,103 @@ class AppraisalVector:
 
 
 @dataclass(slots=True)
+class SemanticEvidence:
+    evidence_id: str
+    source_type: str
+    label: str
+    strength: float
+    matched_text: list[str] = field(default_factory=list)
+    direction: str = ""
+    metadata: dict[str, object] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "evidence_id": self.evidence_id,
+            "source_type": self.source_type,
+            "label": self.label,
+            "strength": float(self.strength),
+            "matched_text": list(self.matched_text),
+            "direction": self.direction,
+            "metadata": dict(self.metadata),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "SemanticEvidence":
+        if not payload:
+            return cls(evidence_id="", source_type="", label="", strength=0.0)
+        return cls(
+            evidence_id=str(payload.get("evidence_id", "")),
+            source_type=str(payload.get("source_type", "")),
+            label=str(payload.get("label", "")),
+            strength=float(payload.get("strength", 0.0)),
+            matched_text=_coerce_str_list(payload.get("matched_text")),
+            direction=str(payload.get("direction", "")),
+            metadata=_coerce_object_dict(payload.get("metadata")),
+        )
+
+
+@dataclass(slots=True)
+class SemanticGrounding:
+    episode_id: str
+    motifs: list[str] = field(default_factory=list)
+    evidence: list[SemanticEvidence] = field(default_factory=list)
+    semantic_direction_scores: dict[str, float] = field(default_factory=dict)
+    lexical_surface_hits: dict[str, int] = field(default_factory=dict)
+    paraphrase_hits: dict[str, int] = field(default_factory=dict)
+    implicit_hits: dict[str, int] = field(default_factory=dict)
+    supporting_segments: list[str] = field(default_factory=list)
+    provenance: dict[str, object] = field(default_factory=dict)
+    low_signal: bool = False
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "episode_id": self.episode_id,
+            "motifs": list(self.motifs),
+            "evidence": [item.to_dict() for item in self.evidence],
+            "semantic_direction_scores": dict(self.semantic_direction_scores),
+            "lexical_surface_hits": dict(self.lexical_surface_hits),
+            "paraphrase_hits": dict(self.paraphrase_hits),
+            "implicit_hits": dict(self.implicit_hits),
+            "supporting_segments": list(self.supporting_segments),
+            "provenance": dict(self.provenance),
+            "low_signal": bool(self.low_signal),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "SemanticGrounding":
+        if not payload:
+            return cls(episode_id="")
+        return cls(
+            episode_id=str(payload.get("episode_id", "")),
+            motifs=_coerce_str_list(payload.get("motifs")),
+            evidence=[
+                SemanticEvidence.from_dict(item)
+                for item in payload.get("evidence", [])
+                if isinstance(item, dict)
+            ],
+            semantic_direction_scores=_coerce_float_dict(payload.get("semantic_direction_scores")),
+            lexical_surface_hits={
+                str(key): int(value)
+                for key, value in dict(payload.get("lexical_surface_hits", {})).items()
+                if isinstance(value, (int, float))
+            },
+            paraphrase_hits={
+                str(key): int(value)
+                for key, value in dict(payload.get("paraphrase_hits", {})).items()
+                if isinstance(value, (int, float))
+            },
+            implicit_hits={
+                str(key): int(value)
+                for key, value in dict(payload.get("implicit_hits", {})).items()
+                if isinstance(value, (int, float))
+            },
+            supporting_segments=_coerce_str_list(payload.get("supporting_segments")),
+            provenance=_coerce_object_dict(payload.get("provenance")),
+            low_signal=bool(payload.get("low_signal", False)),
+        )
+
+
+@dataclass(slots=True)
 class EmbodiedNarrativeEpisode:
     episode_id: str
     timestamp: int
@@ -128,6 +225,7 @@ class EmbodiedNarrativeEpisode:
     compiler_confidence: float
     provenance: dict[str, object]
     uncertainty_decomposition: dict[str, object] = field(default_factory=dict)
+    semantic_grounding: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -142,6 +240,7 @@ class EmbodiedNarrativeEpisode:
             "compiler_confidence": float(self.compiler_confidence),
             "provenance": dict(self.provenance),
             "uncertainty_decomposition": dict(self.uncertainty_decomposition),
+            "semantic_grounding": dict(self.semantic_grounding),
         }
 
     @classmethod
@@ -160,4 +259,5 @@ class EmbodiedNarrativeEpisode:
             uncertainty_decomposition=_coerce_object_dict(
                 payload.get("uncertainty_decomposition")
             ),
+            semantic_grounding=_coerce_object_dict(payload.get("semantic_grounding")),
         )

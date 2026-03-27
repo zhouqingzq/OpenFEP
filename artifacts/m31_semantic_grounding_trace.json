@@ -1,0 +1,443 @@
+{
+  "episode_id": "m31:paraphrase",
+  "timestamp": 1,
+  "observation": {
+    "food": 0.44899999999999995,
+    "danger": 0.0,
+    "novelty": 0.0,
+    "shelter": 0.5700000000000001,
+    "temperature": 0.5,
+    "social": 0.8620000000000001
+  },
+  "appraisal": {
+    "physical_threat": 0.0,
+    "social_threat": 0.0,
+    "uncertainty": 0.0,
+    "controllability": 0.48,
+    "novelty": 0.0,
+    "loss": 0.0,
+    "moral_salience": 0.0,
+    "contamination": 0.0,
+    "attachment_signal": 0.78,
+    "trust_impact": 0.668,
+    "self_efficacy_impact": 0.22,
+    "meaning_violation": 0.0
+  },
+  "body_state": {
+    "energy": 0.642,
+    "stress": 0.24,
+    "fatigue": 0.18,
+    "temperature": 0.5,
+    "dopamine": 0.224
+  },
+  "predicted_outcome": "resource_gain",
+  "value_tags": [
+    "resource_gain"
+  ],
+  "narrative_tags": [
+    "rescue",
+    "social"
+  ],
+  "compiler_confidence": 0.84,
+  "provenance": {
+    "source_episode_id": "m31:paraphrase",
+    "source_type": "audit",
+    "episode_metadata": {
+      "seed": 31
+    },
+    "compiler": "semantic_grounded_m31_v1",
+    "compiled_event": {
+      "event_id": "m31:paraphrase:event",
+      "timestamp": 1,
+      "setting": "general",
+      "actors": [
+        "agent",
+        "other"
+      ],
+      "subject_role": "actor",
+      "event_type": "rescue",
+      "outcome_type": "resource_gain",
+      "self_involvement": 0.75,
+      "witnessed": false,
+      "direct_harm": false,
+      "controllability_hint": 0.7,
+      "annotations": {
+        "matched_rules": [
+          "rescue"
+        ],
+        "semantic_direction_scores": {
+          "threat": 0.0,
+          "social": 2.4,
+          "exploration": 0.0
+        },
+        "lexical_surface_hits": {
+          "resource_gain": 0,
+          "predator_attack": 0,
+          "witnessed_death": 0,
+          "social_exclusion": 0,
+          "rescue": 0,
+          "exploration": 0,
+          "uncertainty": 0
+        },
+        "paraphrase_hits": {
+          "predator_attack": 0,
+          "rescue": 2,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "implicit_hits": {
+          "predator_attack": 0,
+          "rescue": 1,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "event_structure_signals": [
+          "cooperation",
+          "support_received"
+        ],
+        "surface_adversarial_risk": 0.0,
+        "low_signal": false,
+        "conflict_cues": [],
+        "uncertainty_cues": 0.0,
+        "semantic_grounding": {
+          "episode_id": "m31:paraphrase",
+          "motifs": [
+            "rescue"
+          ],
+          "evidence": [
+            {
+              "evidence_id": "m31:paraphrase:rescue:paraphrase",
+              "source_type": "paraphrase",
+              "label": "rescue",
+              "strength": 0.6666666666666666,
+              "matched_text": [
+                "stood by me",
+                "made room for me"
+              ],
+              "direction": "social",
+              "metadata": {
+                "paraphrase_hits": 2
+              }
+            },
+            {
+              "evidence_id": "m31:paraphrase:rescue:implicit",
+              "source_type": "implicit",
+              "label": "rescue",
+              "strength": 0.3333333333333333,
+              "matched_text": [
+                "felt safe enough"
+              ],
+              "direction": "social",
+              "metadata": {
+                "implicit_hits": 1
+              }
+            }
+          ],
+          "semantic_direction_scores": {
+            "threat": 0.0,
+            "social": 2.4,
+            "resource": 0.0,
+            "exploration": 0.0,
+            "uncertainty": 0.0
+          },
+          "lexical_surface_hits": {
+            "resource_gain": 0,
+            "predator_attack": 0,
+            "witnessed_death": 0,
+            "social_exclusion": 0,
+            "rescue": 0,
+            "exploration": 0,
+            "uncertainty": 0
+          },
+          "paraphrase_hits": {
+            "predator_attack": 0,
+            "rescue": 2,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "implicit_hits": {
+            "predator_attack": 0,
+            "rescue": 1,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "supporting_segments": [
+            "stood by me",
+            "made room for me",
+            "felt safe enough"
+          ],
+          "provenance": {
+            "metadata": {
+              "seed": 31
+            },
+            "matched_event_type": "rescue",
+            "negation_hits": 0,
+            "surface_adversarial_risk": 0.0,
+            "conflict_cues": []
+          },
+          "low_signal": false
+        }
+      },
+      "source_episode_id": "m31:paraphrase"
+    },
+    "appraisal_dimensions": [
+      "attachment_signal",
+      "contamination",
+      "controllability",
+      "loss",
+      "meaning_violation",
+      "moral_salience",
+      "novelty",
+      "physical_threat",
+      "self_efficacy_impact",
+      "social_threat",
+      "trust_impact",
+      "uncertainty"
+    ],
+    "semantic_direction_scores": {
+      "threat": 0.0,
+      "social": 2.4,
+      "exploration": 0.0
+    },
+    "lexical_surface_hits": {
+      "resource_gain": 0,
+      "predator_attack": 0,
+      "witnessed_death": 0,
+      "social_exclusion": 0,
+      "rescue": 0,
+      "exploration": 0,
+      "uncertainty": 0
+    },
+    "paraphrase_hits": {
+      "predator_attack": 0,
+      "rescue": 2,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "implicit_hits": {
+      "predator_attack": 0,
+      "rescue": 1,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "event_structure_signals": [
+      "cooperation",
+      "support_received"
+    ],
+    "surface_adversarial_risk": 0.0,
+    "low_signal": false,
+    "conflict_cues": [],
+    "semantic_grounding": {
+      "episode_id": "m31:paraphrase",
+      "motifs": [
+        "rescue"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "m31:paraphrase:rescue:paraphrase",
+          "source_type": "paraphrase",
+          "label": "rescue",
+          "strength": 0.6666666666666666,
+          "matched_text": [
+            "stood by me",
+            "made room for me"
+          ],
+          "direction": "social",
+          "metadata": {
+            "paraphrase_hits": 2
+          }
+        },
+        {
+          "evidence_id": "m31:paraphrase:rescue:implicit",
+          "source_type": "implicit",
+          "label": "rescue",
+          "strength": 0.3333333333333333,
+          "matched_text": [
+            "felt safe enough"
+          ],
+          "direction": "social",
+          "metadata": {
+            "implicit_hits": 1
+          }
+        }
+      ],
+      "semantic_direction_scores": {
+        "threat": 0.0,
+        "social": 2.4,
+        "resource": 0.0,
+        "exploration": 0.0,
+        "uncertainty": 0.0
+      },
+      "lexical_surface_hits": {
+        "resource_gain": 0,
+        "predator_attack": 0,
+        "witnessed_death": 0,
+        "social_exclusion": 0,
+        "rescue": 0,
+        "exploration": 0,
+        "uncertainty": 0
+      },
+      "paraphrase_hits": {
+        "predator_attack": 0,
+        "rescue": 2,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "implicit_hits": {
+        "predator_attack": 0,
+        "rescue": 1,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "supporting_segments": [
+        "stood by me",
+        "made room for me",
+        "felt safe enough"
+      ],
+      "provenance": {
+        "metadata": {
+          "seed": 31
+        },
+        "matched_event_type": "rescue",
+        "negation_hits": 0,
+        "surface_adversarial_risk": 0.0,
+        "conflict_cues": []
+      },
+      "low_signal": false
+    },
+    "uncertainty_decomposition": {
+      "episode_id": "m31:paraphrase",
+      "source_episode_id": "m31:paraphrase",
+      "unknowns": [],
+      "competing_hypotheses": [],
+      "latent_causes": [],
+      "surface_cues": [],
+      "profile": {
+        "total_unknown_count": 0,
+        "decision_relevant_unknown_count": 0,
+        "competing_hypothesis_count": 0,
+        "latent_cause_count": 0,
+        "surface_cue_count": 0,
+        "interpretive_competition": 0.0,
+        "latent_cause_uncertainty_burden": 0.0,
+        "social_ambiguity_burden": 0.0,
+        "trust_ambiguity_burden": 0.0,
+        "environment_ambiguity_burden": 0.0,
+        "retained_uncertainty_burden": 0.0
+      },
+      "promoted_unknown_ids": [],
+      "summary": "The narrative does not currently expose a retained action-relevant uncertainty."
+    }
+  },
+  "uncertainty_decomposition": {
+    "episode_id": "m31:paraphrase",
+    "source_episode_id": "m31:paraphrase",
+    "unknowns": [],
+    "competing_hypotheses": [],
+    "latent_causes": [],
+    "surface_cues": [],
+    "profile": {
+      "total_unknown_count": 0,
+      "decision_relevant_unknown_count": 0,
+      "competing_hypothesis_count": 0,
+      "latent_cause_count": 0,
+      "surface_cue_count": 0,
+      "interpretive_competition": 0.0,
+      "latent_cause_uncertainty_burden": 0.0,
+      "social_ambiguity_burden": 0.0,
+      "trust_ambiguity_burden": 0.0,
+      "environment_ambiguity_burden": 0.0,
+      "retained_uncertainty_burden": 0.0
+    },
+    "promoted_unknown_ids": [],
+    "summary": "The narrative does not currently expose a retained action-relevant uncertainty."
+  },
+  "semantic_grounding": {
+    "episode_id": "m31:paraphrase",
+    "motifs": [
+      "rescue"
+    ],
+    "evidence": [
+      {
+        "evidence_id": "m31:paraphrase:rescue:paraphrase",
+        "source_type": "paraphrase",
+        "label": "rescue",
+        "strength": 0.6666666666666666,
+        "matched_text": [
+          "stood by me",
+          "made room for me"
+        ],
+        "direction": "social",
+        "metadata": {
+          "paraphrase_hits": 2
+        }
+      },
+      {
+        "evidence_id": "m31:paraphrase:rescue:implicit",
+        "source_type": "implicit",
+        "label": "rescue",
+        "strength": 0.3333333333333333,
+        "matched_text": [
+          "felt safe enough"
+        ],
+        "direction": "social",
+        "metadata": {
+          "implicit_hits": 1
+        }
+      }
+    ],
+    "semantic_direction_scores": {
+      "threat": 0.0,
+      "social": 2.4,
+      "resource": 0.0,
+      "exploration": 0.0,
+      "uncertainty": 0.0
+    },
+    "lexical_surface_hits": {
+      "resource_gain": 0,
+      "predator_attack": 0,
+      "witnessed_death": 0,
+      "social_exclusion": 0,
+      "rescue": 0,
+      "exploration": 0,
+      "uncertainty": 0
+    },
+    "paraphrase_hits": {
+      "predator_attack": 0,
+      "rescue": 2,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "implicit_hits": {
+      "predator_attack": 0,
+      "rescue": 1,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "supporting_segments": [
+      "stood by me",
+      "made room for me",
+      "felt safe enough"
+    ],
+    "provenance": {
+      "metadata": {
+        "seed": 31
+      },
+      "matched_event_type": "rescue",
+      "negation_hits": 0,
+      "surface_adversarial_risk": 0.0,
+      "conflict_cues": []
+    },
+    "low_signal": false
+  }
+}

@@ -7,198 +7,39 @@ from .narrative_types import (
     CompiledNarrativeEvent,
     EmbodiedNarrativeEpisode,
     NarrativeEpisode,
+    SemanticGrounding,
 )
 from .narrative_uncertainty import NarrativeUncertaintyDecomposer
+from .semantic_grounding import SemanticGrounder
 from .self_model import PersonalitySignal
-
-
-_NEGATION_MARKERS = (
-    "not",
-    "never",
-    "fictional",
-    "poster",
-    "quote",
-    "quoted",
-    "pretend",
-    "pretended",
-    "imagined",
-    "just a word",
-    "training slogan",
-    "wasn't real",
-    "didn't happen",
-    "no one actually",
-    "bu shi",
-    "mei you",
-    "不是",
-)
-
-_SEMANTIC_CUES: dict[str, tuple[str, ...]] = {
-    "resource_gain": (
-        "food",
-        "resource",
-        "berries",
-        "supplies",
-        "found provisions",
-        "shared meal",
-        "safe resources",
-        "找到",
-        "吃的",
-        "食物",
-        "鎵惧埌",
-        "鍚冪殑",
-        "椋熺墿",
-    ),
-    "predator_attack": (
-        "predator",
-        "attack",
-        "ambush",
-        "pounced",
-        "near miss",
-        "unsafe crossing",
-        "wounded",
-        "injured",
-        "trap snapped",
-        "攻击",
-        "鳄鱼",
-        "河边",
-        "受伤",
-        "鏀诲嚮",
-        "槌勯奔",
-        "琚嚮",
-    ),
-    "witnessed_death": (
-        "poison",
-        "toxic",
-        "contamin",
-        "fatal",
-        "death",
-        "corpse",
-        "body collapsed",
-        "died",
-        "毒蘑菇",
-        "死去",
-        "看到一个人",
-        "姣掕槕",
-        "姝诲幓",
-        "death",
-    ),
-    "social_exclusion": (
-        "betray",
-        "excluded",
-        "rejected",
-        "abandoned",
-        "ignored",
-        "mocked",
-        "shunned",
-        "humiliat",
-        "deceived",
-        "lied to",
-        "trust broken",
-        "left me outside",
-        "鎺掓枼",
-        "缇炶颈",
-    ),
-    "rescue": (
-        "rescue",
-        "protect",
-        "helped",
-        "help",
-        "supported",
-        "comforted",
-        "encouraged",
-        "welcomed",
-        "accepted",
-        "invited",
-        "listened",
-        "cared",
-        "stayed with me",
-        "shared",
-        "cooperate",
-        "friend",
-        "ally",
-        "stayed nearby",
-        "safe contact",
-        "repair",
-        "帮助",
-        "保护",
-        "甯姪",
-        "鏁?",
-    ),
-    "exploration": (
-        "explore",
-        "explored",
-        "mapped",
-        "map",
-        "search",
-        "searched",
-        "question",
-        "experiment",
-        "adapted",
-        "adapt",
-        "curious",
-        "trail",
-        "unfamiliar",
-        "new signals",
-        "probe",
-        "learned the route",
-        "探索",
-        "地图",
-        "适应",
-    ),
-    "uncertainty": (
-        "unclear",
-        "uncertain",
-        "didn't know",
-        "unpredictable",
-        "ambiguous",
-        "mixed signals",
-        "contradictory",
-        "uncertain",
-    ),
-}
-
-_EVENT_TO_DIRECTION = {
-    "predator_attack": "threat",
-    "witnessed_death": "threat",
-    "social_exclusion": "threat",
-    "rescue": "social",
-    "resource_gain": "social",
-    "exploration": "exploration",
-}
-
-_SEMANTIC_CUES["rescue"] = _SEMANTIC_CUES["rescue"] + (
-    "rescued",
-    "saved",
-    "救",
-    "救了",
-    "救助",
-    "好人",
-)
 
 
 def _clamp(value: float, low: float = -1.0, high: float = 1.0) -> float:
     return max(low, min(high, value))
 
 
-def _match_count(text: str, cues: tuple[str, ...]) -> int:
-    return sum(1 for cue in cues if cue and cue in text)
-
-
 class NarrativeCompiler:
-    """Deterministic rule-based compiler for seeded and open-text narratives."""
+    """Deterministic compiler for open-text narratives with semantic grounding."""
 
     def __init__(
         self,
         *,
         uncertainty_decomposer: NarrativeUncertaintyDecomposer | None = None,
+        semantic_grounder: SemanticGrounder | None = None,
     ) -> None:
         self.uncertainty_decomposer = uncertainty_decomposer or NarrativeUncertaintyDecomposer()
+        self.semantic_grounder = semantic_grounder or SemanticGrounder()
 
     def compile_episode(
         self,
         episode: NarrativeEpisode,
     ) -> EmbodiedNarrativeEpisode:
-        compiled_event = self.compile_event(episode)
+        grounding_result = self.semantic_grounder.ground_episode(
+            episode_id=episode.episode_id,
+            text=episode.raw_text,
+            metadata=episode.metadata,
+        )
+        compiled_event = self.compile_event(episode, grounding=grounding_result.grounding)
         appraisal = self.appraise_event(compiled_event)
         uncertainty = self.uncertainty_decomposer.decompose(
             episode=episode,
@@ -214,21 +55,18 @@ class NarrativeCompiler:
             "source_episode_id": episode.episode_id,
             "source_type": episode.source,
             "episode_metadata": dict(episode.metadata),
-            "compiler": "rule_based_m221_v1",
+            "compiler": "semantic_grounded_m31_v1",
             "compiled_event": compiled_event.to_dict(),
             "appraisal_dimensions": sorted(asdict(appraisal).keys()),
-            "semantic_direction_scores": dict(
-                annotations.get("semantic_direction_scores", {})
-            ),
+            "semantic_direction_scores": dict(annotations.get("semantic_direction_scores", {})),
             "lexical_surface_hits": dict(annotations.get("lexical_surface_hits", {})),
-            "event_structure_signals": list(
-                annotations.get("event_structure_signals", [])
-            ),
-            "surface_adversarial_risk": float(
-                annotations.get("surface_adversarial_risk", 0.0)
-            ),
+            "paraphrase_hits": dict(annotations.get("paraphrase_hits", {})),
+            "implicit_hits": dict(annotations.get("implicit_hits", {})),
+            "event_structure_signals": list(annotations.get("event_structure_signals", [])),
+            "surface_adversarial_risk": float(annotations.get("surface_adversarial_risk", 0.0)),
             "low_signal": bool(annotations.get("low_signal", False)),
             "conflict_cues": list(annotations.get("conflict_cues", [])),
+            "semantic_grounding": grounding_result.grounding.to_dict(),
             "uncertainty_decomposition": uncertainty.to_dict(),
         }
         return EmbodiedNarrativeEpisode(
@@ -242,6 +80,7 @@ class NarrativeCompiler:
             narrative_tags=sorted(
                 set(
                     episode.tags
+                    + grounding_result.grounding.motifs
                     + [compiled_event.event_type]
                     + [
                         f"uncertainty:{item.unknown_type}"
@@ -253,46 +92,36 @@ class NarrativeCompiler:
             compiler_confidence=confidence,
             provenance=provenance,
             uncertainty_decomposition=uncertainty.to_dict(),
+            semantic_grounding=grounding_result.grounding.to_dict(),
         )
 
-    def compile_event(self, episode: NarrativeEpisode) -> CompiledNarrativeEvent:
+    def compile_event(
+        self,
+        episode: NarrativeEpisode,
+        *,
+        grounding: SemanticGrounding | None = None,
+    ) -> CompiledNarrativeEvent:
+        grounding = grounding or self.semantic_grounder.ground_episode(
+            episode_id=episode.episode_id,
+            text=episode.raw_text,
+            metadata=episode.metadata,
+        ).grounding
         text = episode.raw_text.casefold()
-        lexical_hits = {
-            name: _match_count(text, cues)
-            for name, cues in _SEMANTIC_CUES.items()
-        }
-        negation_hits = _match_count(text, _NEGATION_MARKERS)
-        threat_score = (
-            lexical_hits["predator_attack"]
-            + lexical_hits["witnessed_death"] * 0.9
-            + lexical_hits["social_exclusion"] * 0.9
+        semantic_scores = dict(grounding.semantic_direction_scores)
+        threat_strength = float(semantic_scores.get("threat", 0.0))
+        social_strength = float(semantic_scores.get("social", 0.0)) + float(
+            semantic_scores.get("resource", 0.0)
+        ) * 0.35
+        exploration_strength = float(semantic_scores.get("exploration", 0.0))
+        uncertainty_score = float(semantic_scores.get("uncertainty", 0.0))
+        low_signal = bool(grounding.low_signal)
+        surface_adversarial_risk = float(
+            grounding.provenance.get("surface_adversarial_risk", 0.0)
         )
-        social_score = lexical_hits["rescue"] + lexical_hits["resource_gain"] * 0.35
-        exploration_score = lexical_hits["exploration"] + lexical_hits["resource_gain"] * 0.15
-        uncertainty_score = lexical_hits["uncertainty"] + float(
-            "but" in text or "however" in text or "但是" in text
-        )
-        contradiction_cues: list[str] = []
-        if any(token in text for token in ("but", "however", "yet", "although", "但是", "但", "却")):
-            contradiction_cues.append("contrastive_connector")
-        if any(token in text for token in ("at first", "later", "once", "now", "起初", "后来")):
-            contradiction_cues.append("temporal_shift")
-        surface_adversarial_risk = min(
-            1.0,
-            (negation_hits * 0.22)
-            + max(0.0, (threat_score + social_score + exploration_score) - 5.0) * 0.05,
-        )
-
-        semantic_threat = max(0.0, threat_score - negation_hits * 0.7)
-        semantic_social = max(0.0, social_score - negation_hits * 0.45)
-        semantic_exploration = max(0.0, exploration_score - negation_hits * 0.40)
-        semantic_direction_scores = {
-            "threat": round(semantic_threat, 6),
-            "social": round(semantic_social, 6),
-            "exploration": round(semantic_exploration, 6),
-        }
-        semantic_total = sum(semantic_direction_scores.values())
-        low_signal = semantic_total <= 1.0 and uncertainty_score >= 0.0
+        conflict_cues = list(grounding.provenance.get("conflict_cues", []))
+        lexical_hits = dict(grounding.lexical_surface_hits)
+        paraphrase_hits = dict(grounding.paraphrase_hits)
+        implicit_hits = dict(grounding.implicit_hits)
 
         setting = "general"
         actors = ["agent"]
@@ -306,22 +135,24 @@ class NarrativeCompiler:
         event_structure_signals: list[str] = []
         matched_rules: list[str] = []
 
-        if semantic_threat >= max(semantic_social, semantic_exploration) and semantic_threat >= 1.0:
-            if lexical_hits["predator_attack"] >= max(
-                lexical_hits["witnessed_death"],
-                lexical_hits["social_exclusion"],
+        if threat_strength >= max(social_strength, exploration_strength) and threat_strength >= 1.0:
+            if lexical_hits.get("predator_attack", 0) >= max(
+                lexical_hits.get("witnessed_death", 0),
+                lexical_hits.get("social_exclusion", 0),
             ):
                 event_type = "predator_attack"
                 outcome_type = "survival_threat"
                 self_involvement = 0.95
-                direct_harm = any(
-                    token in text for token in ("injured", "wounded", "hurt", "scar", "鍙椾激")
-                )
+                direct_harm = any(token in text for token in ("injured", "wounded", "hurt", "受伤"))
                 controllability_hint = 0.2
                 setting = "hazard_zone"
                 matched_rules.append("predator_attack")
                 event_structure_signals.extend(["direct_threat", "physical_exposure"])
-            elif lexical_hits["social_exclusion"] >= lexical_hits["witnessed_death"]:
+            elif (
+                lexical_hits.get("social_exclusion", 0)
+                + paraphrase_hits.get("social_exclusion", 0)
+                >= lexical_hits.get("witnessed_death", 0)
+            ):
                 event_type = "social_exclusion"
                 outcome_type = "resource_loss"
                 self_involvement = 0.85
@@ -338,25 +169,29 @@ class NarrativeCompiler:
                 controllability_hint = 0.25
                 matched_rules.append("witnessed_fatality")
                 event_structure_signals.extend(["integrity_loss", "contamination_warning"])
-        elif semantic_social >= max(semantic_threat, semantic_exploration) and semantic_social >= 1.0:
+        elif social_strength >= max(threat_strength, exploration_strength) and social_strength >= 1.0:
             event_type = "rescue"
             outcome_type = "resource_gain"
             self_involvement = 0.75
             controllability_hint = 0.7
             matched_rules.append("rescue")
             event_structure_signals.extend(["cooperation", "support_received"])
-            if any(token in text for token in ("friend", "ally", "group", "shared")):
+            if any(token in text for token in ("friend", "ally", "group", "shared", "listened")):
                 actors.append("other")
-        elif semantic_exploration >= 1.0:
+        elif exploration_strength >= 1.0:
             event_type = "exploration"
-            outcome_type = "resource_gain" if lexical_hits["resource_gain"] else "neutral"
+            outcome_type = (
+                "resource_gain"
+                if lexical_hits.get("resource_gain", 0) or paraphrase_hits.get("resource_gain", 0)
+                else "neutral"
+            )
             self_involvement = 0.82
             controllability_hint = 0.72
             matched_rules.append("exploration")
             event_structure_signals.extend(["novelty_engagement", "active_probing"])
-            if any(token in text for token in ("map", "trail", "route", "valley")):
+            if any(token in text for token in ("map", "trail", "route", "valley", "mapped")):
                 setting = "frontier"
-        elif lexical_hits["resource_gain"] >= 1:
+        elif lexical_hits.get("resource_gain", 0) or paraphrase_hits.get("resource_gain", 0):
             event_type = "resource_gain"
             outcome_type = "resource_gain"
             self_involvement = 0.9
@@ -364,24 +199,31 @@ class NarrativeCompiler:
             matched_rules.append("resource_gain")
             event_structure_signals.append("resource_acquisition")
 
-        if any(token in text for token in ("witness", "saw", "鐪嬪埌")) and event_type != "resource_gain":
+        if any(token in text for token in ("witness", "saw", "看到")) and event_type != "resource_gain":
             witnessed = True
             if "other" not in actors:
                 actors.append("other")
-        if any(token in text for token in ("river", "娌宠竟")):
+        if any(token in text for token in ("river", "河边")):
             setting = "river"
         if low_signal:
             event_structure_signals.append("weak_semantic_support")
 
         annotations: dict[str, object] = {
             "matched_rules": matched_rules,
-            "semantic_direction_scores": semantic_direction_scores,
+            "semantic_direction_scores": {
+                "threat": round(threat_strength, 6),
+                "social": round(social_strength, 6),
+                "exploration": round(exploration_strength, 6),
+            },
             "lexical_surface_hits": lexical_hits,
+            "paraphrase_hits": paraphrase_hits,
+            "implicit_hits": implicit_hits,
             "event_structure_signals": sorted(set(event_structure_signals)),
             "surface_adversarial_risk": round(surface_adversarial_risk, 6),
             "low_signal": low_signal,
-            "conflict_cues": contradiction_cues,
+            "conflict_cues": conflict_cues,
             "uncertainty_cues": round(float(uncertainty_score), 6),
+            "semantic_grounding": grounding.to_dict(),
         }
 
         return CompiledNarrativeEvent(
@@ -545,9 +387,19 @@ class NarrativeCompiler:
         base = 0.48
         matched = len(event.annotations.get("matched_rules", []))
         structure = len(event.annotations.get("event_structure_signals", []))
+        grounding = event.annotations.get("semantic_grounding", {})
+        evidence = grounding.get("evidence", []) if isinstance(grounding, dict) else []
+        evidence_bonus = min(0.16, len(evidence) * 0.03)
         low_signal_penalty = 0.18 if event.annotations.get("low_signal", False) else 0.0
         adversarial_penalty = float(event.annotations.get("surface_adversarial_risk", 0.0)) * 0.25
-        confidence = base + matched * 0.12 + structure * 0.04 - low_signal_penalty - adversarial_penalty
+        confidence = (
+            base
+            + matched * 0.12
+            + structure * 0.04
+            + evidence_bonus
+            - low_signal_penalty
+            - adversarial_penalty
+        )
         if event.event_type != "unknown_event":
             confidence += 0.10
         return round(_clamp(confidence, 0.0, 0.99), 4)

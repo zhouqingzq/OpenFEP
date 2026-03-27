@@ -1,0 +1,18 @@
+{
+  "with_schema_conditioning": {
+    "food": 0.5,
+    "danger": 0.48039999999999994,
+    "novelty": 0.5,
+    "shelter": 0.418,
+    "temperature": 0.5,
+    "social": 0.3
+  },
+  "without_schema_conditioning": {
+    "food": 0.5,
+    "danger": 0.3,
+    "novelty": 0.5,
+    "shelter": 0.5,
+    "temperature": 0.5,
+    "social": 0.3
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "created_schema_ids": [
+    "schema:exploration-predator_attack",
+    "schema:rescue"
+  ],
+  "strengthened_schema_ids": [
+    "schema:rescue"
+  ],
+  "weakened_schema_ids": [],
+  "split_schema_ids": [
+    "schema:exploration-predator_attack"
+  ],
+  "archived_schema_ids": []
+}

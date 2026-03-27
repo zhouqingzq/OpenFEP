@@ -1,0 +1,53 @@
+{
+  "milestone_id": "M3.1",
+  "status": "PASS",
+  "generated_at": "2026-03-27T15:51:58+00:00",
+  "seed_set": [
+    31,
+    131
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m31_semantic_grounding_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m31_semantic_grounding_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m31_semantic_grounding_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m31_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m31_episodic_semantic_grounding.py",
+      "tests/test_m31_grounding_causality.py",
+      "tests/test_m31_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_narrative_compiler.py",
+      "tests/test_m233_narrative_robustness.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-27T15:51:58+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "schema_id": "schema:exploration-predator_attack",
+    "label": "exploration",
+    "motif_signature": [
+      "exploration",
+      "predator_attack"
+    ],
+    "dominant_direction": "threat",
+    "confidence": 0.863333,
+    "support_count": 3,
+    "applicable_contexts": [
+      "exploration",
+      "predator_attack"
+    ],
+    "protected_anchors": [],
+    "support": [
+      {
+        "episode_id": "ep-1",
+        "source_type": "narrative",
+        "confidence": 0.75,
+        "motifs": [
+          "exploration",
+          "predator_attack"
+        ],
+        "contexts": [
+          "exploration",
+          "predator_attack"
+        ]
+      },
+      {
+        "episode_id": "ep-2",
+        "source_type": "narrative",
+        "confidence": 0.82,
+        "motifs": [
+          "exploration",
+          "predator_attack"
+        ],
+        "contexts": [
+          "exploration",
+          "predator_attack"
+        ]
+      },
+      {
+        "episode_id": "ep-3",
+        "source_type": "narrative",
+        "confidence": 0.66,
+        "motifs": [
+          "exploration",
+          "predator_attack"
+        ],
+        "contexts": [
+          "exploration",
+          "predator_attack"
+        ]
+      }
+    ],
+    "conflict_history": [
+      {
+        "schema_id": "schema:exploration-predator_attack",
+        "conflicting_episode_id": "ep-3",
+        "reason": "divergent_outcomes",
+        "severity": 0.55,
+        "outcome": "split"
+      }
+    ],
+    "split_from_schema_id": "schema:exploration-predator_attack",
+    "active": true
+  },
+  {
+    "schema_id": "schema:rescue",
+    "label": "rescue",
+    "motif_signature": [
+      "rescue"
+    ],
+    "dominant_direction": "social",
+    "confidence": 0.79,
+    "support_count": 1,
+    "applicable_contexts": [
+      "rescue"
+    ],
+    "protected_anchors": [],
+    "support": [
+      {
+        "episode_id": "ep-4",
+        "source_type": "narrative",
+        "confidence": 0.75,
+        "motifs": [
+          "rescue"
+        ],
+        "contexts": [
+          "rescue"
+        ]
+      }
+    ],
+    "conflict_history": [],
+    "split_from_schema_id": "",
+    "active": true
+  }
+]

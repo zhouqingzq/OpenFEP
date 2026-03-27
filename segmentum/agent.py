@@ -24,6 +24,7 @@ from .predictive_coding import (
     HierarchicalInference,
     InteroceptiveLayer,
     PredictiveCodingHyperparameters,
+    apply_schema_conditioned_prediction,
     compose_upstream_observation,
     default_predictive_coding_hyperparameters,
 )
@@ -35,6 +36,7 @@ from .narrative_experiment import ExperimentDesignResult, NarrativeExperimentDes
 from .inquiry_scheduler import (
     InquiryBudgetScheduler,
     apply_scheduler_to_experiment_design,
+    semantic_uncertainty_priority_bonus,
 )
 from .social_model import SocialMemory
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
@@ -42,6 +44,7 @@ from .prediction_ledger import PredictionLedger
 from .reconciliation import ReconciliationEngine
 from .slow_learning import SlowVariableLearner
 from .verification import VerificationLoop
+from .verification import semantic_priority_adjustment
 from .self_model import (
     CapabilityModel,
     NarrativePriors,
@@ -2930,7 +2933,11 @@ class SegmentAgent:
             self.narrative_experiment_history = self.narrative_experiment_history[-64:]
         social_update = self._update_social_memory_from_embodied_episode(embodied_episode)
         observation = dict(embodied_episode.observation)
-        prediction = dict(self.world_model.beliefs)
+        prediction, semantic_prediction = apply_schema_conditioned_prediction(
+            dict(self.world_model.beliefs),
+            semantic_schemas=self.long_term_memory.semantic_schemas,
+            semantic_grounding=embodied_episode.semantic_grounding,
+        )
         errors = {
             key: observation.get(key, 0.0) - prediction.get(key, 0.0)
             for key in sorted(set(observation) | set(prediction))
@@ -2980,6 +2987,7 @@ class SegmentAgent:
             target_payload["appraisal"] = dict(embodied_episode.appraisal)
             target_payload["narrative_tags"] = list(embodied_episode.narrative_tags)
             target_payload["compiler_confidence"] = float(embodied_episode.compiler_confidence)
+            target_payload["semantic_grounding"] = dict(embodied_episode.semantic_grounding)
             target_payload["source_episode_id"] = str(
                 embodied_episode.provenance.get("source_episode_id", embodied_episode.episode_id)
             )
@@ -3003,6 +3011,7 @@ class SegmentAgent:
             "appraisal": dict(embodied_episode.appraisal),
             "compatibility_observation": dict(observation),
             "prediction_before_ingestion": dict(prediction),
+            "semantic_prediction": dict(semantic_prediction),
             "prediction_error": memory_decision.prediction_error,
             "total_surprise": memory_decision.total_surprise,
             "value_score": memory_decision.value_score,
@@ -3011,9 +3020,20 @@ class SegmentAgent:
             "merged_into_episode_id": memory_decision.merged_into_episode_id,
             "compiler_confidence": embodied_episode.compiler_confidence,
             "narrative_tags": list(embodied_episode.narrative_tags),
+            "semantic_grounding": dict(embodied_episode.semantic_grounding),
             "narrative_uncertainty": uncertainty.to_dict(),
             "narrative_experiment": self.latest_narrative_experiment.to_dict(),
             "social_update": social_update,
+            "semantic_schemas": list(self.long_term_memory.semantic_schemas[-6:]),
+            "semantic_priority_bonus": semantic_uncertainty_priority_bonus(
+                semantic_grounding=embodied_episode.semantic_grounding,
+                semantic_schemas=self.long_term_memory.semantic_schemas,
+            ),
+            "verification_semantic_priority": semantic_priority_adjustment(
+                prediction_id=f"narrative:{embodied_episode.episode_id}",
+                semantic_grounding=embodied_episode.semantic_grounding,
+                semantic_schemas=self.long_term_memory.semantic_schemas,
+            ),
         }
         self.narrative_trace.append(trace_payload)
         self.narrative_trace = self.narrative_trace[-128:]
@@ -3808,6 +3828,8 @@ class SegmentAgent:
                 "verification_sleep": verification_sleep.to_dict(),
                 "reconciliation_sleep": reconciliation_sleep,
                 "rule_ids": [rule.rule_id for rule in consolidation.rules],
+                "semantic_schemas": list(self.long_term_memory.semantic_schemas),
+                "semantic_schema_update": dict(self.long_term_memory.latest_schema_update),
                 "slow_learning": slow_learning_audit.to_dict(),
             }
         )

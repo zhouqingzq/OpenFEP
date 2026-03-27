@@ -1,0 +1,53 @@
+{
+  "milestone_id": "M3.3",
+  "status": "PASS",
+  "generated_at": "2026-03-27T15:51:59+00:00",
+  "seed_set": [
+    33,
+    133
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m33_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m33_semantic_prediction_expansion.py",
+      "tests/test_m33_semantic_prediction_ablation.py",
+      "tests/test_m33_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m228_prediction_ledger.py",
+      "tests/test_m229_verification_loop.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-27T15:51:59+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

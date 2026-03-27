@@ -54,10 +54,12 @@ class PredictionHypothesis:
     linked_identity_anchors: tuple[str, ...] = ()
     linked_unknown_ids: tuple[str, ...] = ()
     linked_hypothesis_ids: tuple[str, ...] = ()
+    linked_schema_ids: tuple[str, ...] = ()
     linked_experiment_plan_id: str = ""
     linked_goal: str = ""
     maintenance_context: str = ""
     decision_relevance: float = 0.0
+    semantic_provenance: dict[str, object] = field(default_factory=dict)
     verification_tick: int = 0
     recurrence_count: int = 0
     verification_attempts: int = 0
@@ -79,10 +81,12 @@ class PredictionHypothesis:
             "linked_identity_anchors": list(self.linked_identity_anchors),
             "linked_unknown_ids": list(self.linked_unknown_ids),
             "linked_hypothesis_ids": list(self.linked_hypothesis_ids),
+            "linked_schema_ids": list(self.linked_schema_ids),
             "linked_experiment_plan_id": self.linked_experiment_plan_id,
             "linked_goal": self.linked_goal,
             "maintenance_context": self.maintenance_context,
             "decision_relevance": round(self.decision_relevance, 6),
+            "semantic_provenance": dict(self.semantic_provenance),
             "verification_tick": int(self.verification_tick),
             "recurrence_count": int(self.recurrence_count),
             "verification_attempts": int(self.verification_attempts),
@@ -126,10 +130,14 @@ class PredictionHypothesis:
             linked_hypothesis_ids=tuple(
                 str(item) for item in payload.get("linked_hypothesis_ids", [])
             ),
+            linked_schema_ids=tuple(str(item) for item in payload.get("linked_schema_ids", [])),
             linked_experiment_plan_id=str(payload.get("linked_experiment_plan_id", "")),
             linked_goal=str(payload.get("linked_goal", "")),
             maintenance_context=str(payload.get("maintenance_context", "")),
             decision_relevance=float(payload.get("decision_relevance", 0.0)),
+            semantic_provenance=dict(payload.get("semantic_provenance", {}))
+            if isinstance(payload.get("semantic_provenance"), dict)
+            else {},
             verification_tick=int(payload.get("verification_tick", 0)),
             recurrence_count=int(payload.get("recurrence_count", 0)),
             verification_attempts=int(payload.get("verification_attempts", 0)),
@@ -156,8 +164,10 @@ class LedgerDiscrepancy:
     repair_attempts: int = 0
     archived_reason: str = ""
     linked_predictions: tuple[str, ...] = ()
+    linked_schema_ids: tuple[str, ...] = ()
     linked_commitments: tuple[str, ...] = ()
     linked_goal: str = ""
+    semantic_provenance: dict[str, object] = field(default_factory=dict)
 
     def age_at(self, tick: int | None = None) -> int:
         if tick is None:
@@ -203,8 +213,10 @@ class LedgerDiscrepancy:
             "repair_attempts": int(self.repair_attempts),
             "archived_reason": self.archived_reason,
             "linked_predictions": list(self.linked_predictions),
+            "linked_schema_ids": list(self.linked_schema_ids),
             "linked_commitments": list(self.linked_commitments),
             "linked_goal": self.linked_goal,
+            "semantic_provenance": dict(self.semantic_provenance),
             "age": int(self.age_at(reference_tick)),
             "priority": self.priority,
         }
@@ -240,8 +252,12 @@ class LedgerDiscrepancy:
             repair_attempts=int(payload.get("repair_attempts", 0)),
             archived_reason=str(payload.get("archived_reason", "")),
             linked_predictions=tuple(str(item) for item in payload.get("linked_predictions", [])),
+            linked_schema_ids=tuple(str(item) for item in payload.get("linked_schema_ids", [])),
             linked_commitments=tuple(str(item) for item in payload.get("linked_commitments", [])),
             linked_goal=str(payload.get("linked_goal", "")),
+            semantic_provenance=dict(payload.get("semantic_provenance", {}))
+            if isinstance(payload.get("semantic_provenance"), dict)
+            else {},
         )
 
 

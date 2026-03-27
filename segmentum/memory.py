@@ -7,6 +7,7 @@ from statistics import mean
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .preferences import PreferenceModel, ValueHierarchy
+from .semantic_schema import SemanticSchemaStore
 
 
 @dataclass
@@ -301,6 +302,7 @@ class LongTermMemory:
 
     episodes: list[dict] = field(default_factory=list)
     semantic_patterns: list[dict] = field(default_factory=list)
+    semantic_schemas: list[dict] = field(default_factory=list)
     max_episodes: int = 1024
     surprise_threshold: float = 0.40
     duplicate_similarity_threshold: float = 0.999
@@ -324,6 +326,7 @@ class LongTermMemory:
     preference_model: PreferenceModel = field(default_factory=PreferenceModel)
     restart_continuity_until_cycle: int = 0
     restart_continuity_anchor_ids: list[str] = field(default_factory=list)
+    latest_schema_update: dict[str, object] = field(default_factory=dict)
 
     @property
     def value_hierarchy(self) -> PreferenceModel:
@@ -495,13 +498,23 @@ class LongTermMemory:
             current_observation=_coerce_float_dict(current_state.get("observation")),
             current_body_state=_coerce_float_dict(current_state.get("body_state")),
         )
-        scored: list[tuple[float, float, float, Episode, dict[str, object]]] = []
+        scored: list[tuple[float, float, float, float, Episode, dict[str, object]]] = []
         for payload in self.episodes:
             episode = Episode.from_dict(payload)
             vector_similarity = _cosine_similarity(
                 current_embedding,
                 episode.embedding or self._build_embedding(episode.state_vector),
             )
+            schema_overlap = 0.0
+            current_grounding = current_state.get("semantic_grounding")
+            payload_grounding = payload.get("semantic_grounding")
+            if isinstance(current_grounding, dict) and isinstance(payload_grounding, dict):
+                current_motifs = {str(item) for item in current_grounding.get("motifs", []) if str(item)}
+                payload_motifs = {str(item) for item in payload_grounding.get("motifs", []) if str(item)}
+                if current_motifs and payload_motifs:
+                    schema_overlap = len(current_motifs & payload_motifs) / max(
+                        1.0, len(current_motifs | payload_motifs)
+                    )
             recency = 1.0 / (1.0 + abs(self._episode_cycle(payload) - reference_cycle))
             threat_boost = min(
                 0.35,
@@ -525,12 +538,13 @@ class LongTermMemory:
                 ),
             )
             weighted_similarity = vector_similarity * recency * (
-                1.0 + threat_boost + protected_boost + support_boost
+                1.0 + threat_boost + protected_boost + support_boost + schema_overlap * 0.30
             )
             scored.append(
                 (
                     weighted_similarity,
                     vector_similarity,
+                    schema_overlap,
                     float(episode.timestamp),
                     episode,
                     payload,
@@ -539,11 +553,12 @@ class LongTermMemory:
 
         scored.sort(reverse=True, key=lambda item: (item[0], item[1], item[2]))
         results: list[dict[str, object]] = []
-        for similarity, vector_similarity, _, episode, payload in scored[:k]:
+        for similarity, vector_similarity, schema_overlap, _, episode, payload in scored[:k]:
             item = dict(payload)
             item.update(episode.to_dict())
             item["similarity"] = similarity
             item["vector_similarity"] = vector_similarity
+            item["schema_overlap"] = schema_overlap
             results.append(item)
         return results
 
@@ -1208,6 +1223,7 @@ class LongTermMemory:
         return {
             "episodes": list(self.episodes),
             "semantic_patterns": list(self.semantic_patterns),
+            "semantic_schemas": list(self.semantic_schemas),
             "max_episodes": self.max_episodes,
             "surprise_threshold": self.surprise_threshold,
             "duplicate_similarity_threshold": self.duplicate_similarity_threshold,
@@ -1232,6 +1248,7 @@ class LongTermMemory:
             "value_hierarchy": self.preference_model.legacy_value_hierarchy_dict(),
             "restart_continuity_until_cycle": self.restart_continuity_until_cycle,
             "restart_continuity_anchor_ids": list(self.restart_continuity_anchor_ids),
+            "latest_schema_update": dict(self.latest_schema_update),
         }
 
     @classmethod
@@ -1248,6 +1265,7 @@ class LongTermMemory:
         memory = cls(
             episodes=list(payload.get("episodes", [])),
             semantic_patterns=list(payload.get("semantic_patterns", [])),
+            semantic_schemas=list(payload.get("semantic_schemas", [])),
             max_episodes=int(payload.get("max_episodes", 1024)),
             surprise_threshold=float(payload.get("surprise_threshold", 0.40)),
             duplicate_similarity_threshold=float(
@@ -1287,6 +1305,9 @@ class LongTermMemory:
             restart_continuity_anchor_ids=[
                 str(value) for value in payload.get("restart_continuity_anchor_ids", []) if str(value)
             ],
+            latest_schema_update=dict(payload.get("latest_schema_update", {}))
+            if isinstance(payload.get("latest_schema_update"), dict)
+            else {},
         )
         memory._rehydrate_continuity_payloads()
         return memory
@@ -1910,6 +1931,10 @@ class LongTermMemory:
                 }
             )
         self.semantic_patterns = patterns
+        schema_store = SemanticSchemaStore()
+        schemas, update = schema_store.build_from_groundings(self.episodes)
+        self.semantic_schemas = [schema.to_dict() for schema in schemas]
+        self.latest_schema_update = update.to_dict()
 
     def _episode_observation(self, episode: dict[str, object]) -> dict[str, float]:
         direct = _coerce_float_dict(episode.get("observation"))

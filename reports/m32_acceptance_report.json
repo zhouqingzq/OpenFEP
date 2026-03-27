@@ -1,0 +1,53 @@
+{
+  "milestone_id": "M3.2",
+  "status": "PASS",
+  "generated_at": "2026-03-27T15:51:59+00:00",
+  "seed_set": [
+    32,
+    132
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m32_semantic_schema_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m32_semantic_schema_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m32_semantic_schema_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m32_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m32_semantic_schema_growth.py",
+      "tests/test_m32_schema_conflict_resolution.py",
+      "tests/test_m32_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_memory.py",
+      "tests/test_narrative_sleep_consolidation.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-27T15:51:59+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

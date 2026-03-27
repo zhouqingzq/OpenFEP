@@ -1206,3 +1206,24 @@ def apply_scheduler_to_experiment_design(experiment_design, inquiry_state: Inqui
         plans=tuple(updated_plans),
         summary=summary,
     )
+
+
+def semantic_uncertainty_priority_bonus(
+    *,
+    semantic_grounding: dict[str, object] | None = None,
+    semantic_schemas: list[dict[str, object]] | None = None,
+) -> float:
+    grounding = dict(semantic_grounding or {})
+    schemas = list(semantic_schemas or ())
+    scores = grounding.get("semantic_direction_scores", {})
+    uncertainty_hits = float(scores.get("uncertainty", 0.0)) if isinstance(scores, dict) else 0.0
+    active_motifs = {str(item) for item in grounding.get("motifs", []) if str(item)}
+    schema_overlap = 0.0
+    for schema in schemas:
+        motif_signature = {str(item) for item in schema.get("motif_signature", []) if str(item)}
+        if motif_signature:
+            schema_overlap = max(
+                schema_overlap,
+                len(active_motifs & motif_signature) / max(1.0, len(active_motifs | motif_signature)),
+            )
+    return _clamp((uncertainty_hits * 0.18) + (schema_overlap * 0.22))

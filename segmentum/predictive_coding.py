@@ -665,3 +665,54 @@ class SensorimotorLayer:
     @classmethod
     def from_dict(cls, payload: dict | None) -> SensorimotorLayer:
         return cls(belief_state=SensorimotorBeliefState.from_dict(payload))
+
+
+def apply_schema_conditioned_prediction(
+    baseline_prediction: dict[str, float],
+    *,
+    semantic_schemas: list[dict[str, object]] | None = None,
+    semantic_grounding: dict[str, object] | None = None,
+) -> tuple[dict[str, float], dict[str, object]]:
+    """Bias modality predictions using memory-derived semantic schemas."""
+
+    conditioned = dict(baseline_prediction)
+    schemas = list(semantic_schemas or ())
+    grounding = dict(semantic_grounding or {})
+    active_motifs = {str(item) for item in grounding.get("motifs", []) if str(item)}
+    applied_schema_ids: list[str] = []
+    if not active_motifs:
+        return conditioned, {"applied_schema_ids": [], "adjustments": {}, "match_strength": 0.0}
+
+    total_match = 0.0
+    adjustments = {key: 0.0 for key in conditioned}
+    for schema in schemas:
+        motif_signature = {str(item) for item in schema.get("motif_signature", []) if str(item)}
+        if not motif_signature:
+            continue
+        overlap = len(active_motifs & motif_signature) / max(1.0, len(active_motifs | motif_signature))
+        if overlap <= 0.0:
+            continue
+        confidence = float(schema.get("confidence", 0.0))
+        strength = overlap * confidence
+        total_match += strength
+        applied_schema_ids.append(str(schema.get("schema_id", "")))
+        direction = str(schema.get("dominant_direction", ""))
+        if direction == "threat":
+            adjustments["danger"] += 0.22 * strength
+            adjustments["shelter"] -= 0.10 * strength
+        elif direction == "social":
+            adjustments["social"] += 0.22 * strength
+            adjustments["danger"] -= 0.08 * strength
+        elif direction == "resource":
+            adjustments["food"] += 0.18 * strength
+        elif direction == "exploration":
+            adjustments["novelty"] += 0.20 * strength
+            adjustments["danger"] += 0.05 * strength
+
+    for key, delta in adjustments.items():
+        conditioned[key] = clamp(conditioned.get(key, 0.5) + delta)
+    return conditioned, {
+        "applied_schema_ids": [item for item in applied_schema_ids if item],
+        "adjustments": {key: round(value, 6) for key, value in adjustments.items() if abs(value) > 1e-9},
+        "match_strength": round(total_match, 6),
+    }

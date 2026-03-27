@@ -1,0 +1,1203 @@
+{
+  "episode_id": "m31:stress",
+  "timestamp": 2,
+  "observation": {
+    "food": 0.35,
+    "danger": 0.7978669999999999,
+    "novelty": 0.30250000000000005,
+    "shelter": 0.3125,
+    "temperature": 0.5,
+    "social": 0.5
+  },
+  "appraisal": {
+    "physical_threat": 0.7978669999999999,
+    "social_threat": 0.0,
+    "uncertainty": 0.55,
+    "controllability": -0.55,
+    "novelty": 0.0,
+    "loss": 0.15,
+    "moral_salience": 0.0,
+    "contamination": 0.0,
+    "attachment_signal": 0.0,
+    "trust_impact": 0.0,
+    "self_efficacy_impact": -0.18020000000000003,
+    "meaning_violation": 0.25
+  },
+  "body_state": {
+    "energy": 0.593,
+    "stress": 0.70904015,
+    "fatigue": 0.21,
+    "temperature": 0.5,
+    "dopamine": 0.16499999999999998
+  },
+  "predicted_outcome": "survival_threat",
+  "value_tags": [
+    "survival_threat",
+    "threat_learning"
+  ],
+  "narrative_tags": [
+    "predator_attack",
+    "stress",
+    "uncertainty:threat_persistence"
+  ],
+  "compiler_confidence": 0.815,
+  "provenance": {
+    "source_episode_id": "m31:stress",
+    "source_type": "audit",
+    "episode_metadata": {
+      "seed": 131
+    },
+    "compiler": "semantic_grounded_m31_v1",
+    "compiled_event": {
+      "event_id": "m31:stress:event",
+      "timestamp": 2,
+      "setting": "hazard_zone",
+      "actors": [
+        "agent"
+      ],
+      "subject_role": "actor",
+      "event_type": "predator_attack",
+      "outcome_type": "survival_threat",
+      "self_involvement": 0.95,
+      "witnessed": false,
+      "direct_harm": false,
+      "controllability_hint": 0.2,
+      "annotations": {
+        "matched_rules": [
+          "predator_attack"
+        ],
+        "semantic_direction_scores": {
+          "threat": 1.85,
+          "social": 0.0,
+          "exploration": 0.0
+        },
+        "lexical_surface_hits": {
+          "resource_gain": 0,
+          "predator_attack": 1,
+          "witnessed_death": 0,
+          "social_exclusion": 0,
+          "rescue": 0,
+          "exploration": 0,
+          "uncertainty": 0
+        },
+        "paraphrase_hits": {
+          "predator_attack": 1,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "implicit_hits": {
+          "predator_attack": 1,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "event_structure_signals": [
+          "direct_threat",
+          "physical_exposure"
+        ],
+        "surface_adversarial_risk": 0.22,
+        "low_signal": false,
+        "conflict_cues": [
+          "contrastive_connector",
+          "temporal_shift"
+        ],
+        "uncertainty_cues": 1.0,
+        "semantic_grounding": {
+          "episode_id": "m31:stress",
+          "motifs": [
+            "predator_attack"
+          ],
+          "evidence": [
+            {
+              "evidence_id": "m31:stress:predator_attack:surface",
+              "source_type": "surface",
+              "label": "predator_attack",
+              "strength": 0.3333333333333333,
+              "matched_text": [
+                "trap snapped"
+              ],
+              "direction": "threat",
+              "metadata": {
+                "surface_hits": 1
+              }
+            },
+            {
+              "evidence_id": "m31:stress:predator_attack:paraphrase",
+              "source_type": "paraphrase",
+              "label": "predator_attack",
+              "strength": 0.3333333333333333,
+              "matched_text": [
+                "trap"
+              ],
+              "direction": "threat",
+              "metadata": {
+                "paraphrase_hits": 1
+              }
+            },
+            {
+              "evidence_id": "m31:stress:predator_attack:implicit",
+              "source_type": "implicit",
+              "label": "predator_attack",
+              "strength": 0.3333333333333333,
+              "matched_text": [
+                "trap snapped again"
+              ],
+              "direction": "threat",
+              "metadata": {
+                "implicit_hits": 1
+              }
+            }
+          ],
+          "semantic_direction_scores": {
+            "threat": 1.85,
+            "social": 0.0,
+            "resource": 0.0,
+            "exploration": 0.0,
+            "uncertainty": 1.0
+          },
+          "lexical_surface_hits": {
+            "resource_gain": 0,
+            "predator_attack": 1,
+            "witnessed_death": 0,
+            "social_exclusion": 0,
+            "rescue": 0,
+            "exploration": 0,
+            "uncertainty": 0
+          },
+          "paraphrase_hits": {
+            "predator_attack": 1,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "implicit_hits": {
+            "predator_attack": 1,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "supporting_segments": [
+            "trap snapped",
+            "trap",
+            "trap snapped again"
+          ],
+          "provenance": {
+            "metadata": {
+              "seed": 131
+            },
+            "matched_event_type": "predator_attack",
+            "negation_hits": 1,
+            "surface_adversarial_risk": 0.22,
+            "conflict_cues": [
+              "contrastive_connector",
+              "temporal_shift"
+            ]
+          },
+          "low_signal": false
+        }
+      },
+      "source_episode_id": "m31:stress"
+    },
+    "appraisal_dimensions": [
+      "attachment_signal",
+      "contamination",
+      "controllability",
+      "loss",
+      "meaning_violation",
+      "moral_salience",
+      "novelty",
+      "physical_threat",
+      "self_efficacy_impact",
+      "social_threat",
+      "trust_impact",
+      "uncertainty"
+    ],
+    "semantic_direction_scores": {
+      "threat": 1.85,
+      "social": 0.0,
+      "exploration": 0.0
+    },
+    "lexical_surface_hits": {
+      "resource_gain": 0,
+      "predator_attack": 1,
+      "witnessed_death": 0,
+      "social_exclusion": 0,
+      "rescue": 0,
+      "exploration": 0,
+      "uncertainty": 0
+    },
+    "paraphrase_hits": {
+      "predator_attack": 1,
+      "rescue": 0,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "implicit_hits": {
+      "predator_attack": 1,
+      "rescue": 0,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "event_structure_signals": [
+      "direct_threat",
+      "physical_exposure"
+    ],
+    "surface_adversarial_risk": 0.22,
+    "low_signal": false,
+    "conflict_cues": [
+      "contrastive_connector",
+      "temporal_shift"
+    ],
+    "semantic_grounding": {
+      "episode_id": "m31:stress",
+      "motifs": [
+        "predator_attack"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "m31:stress:predator_attack:surface",
+          "source_type": "surface",
+          "label": "predator_attack",
+          "strength": 0.3333333333333333,
+          "matched_text": [
+            "trap snapped"
+          ],
+          "direction": "threat",
+          "metadata": {
+            "surface_hits": 1
+          }
+        },
+        {
+          "evidence_id": "m31:stress:predator_attack:paraphrase",
+          "source_type": "paraphrase",
+          "label": "predator_attack",
+          "strength": 0.3333333333333333,
+          "matched_text": [
+            "trap"
+          ],
+          "direction": "threat",
+          "metadata": {
+            "paraphrase_hits": 1
+          }
+        },
+        {
+          "evidence_id": "m31:stress:predator_attack:implicit",
+          "source_type": "implicit",
+          "label": "predator_attack",
+          "strength": 0.3333333333333333,
+          "matched_text": [
+            "trap snapped again"
+          ],
+          "direction": "threat",
+          "metadata": {
+            "implicit_hits": 1
+          }
+        }
+      ],
+      "semantic_direction_scores": {
+        "threat": 1.85,
+        "social": 0.0,
+        "resource": 0.0,
+        "exploration": 0.0,
+        "uncertainty": 1.0
+      },
+      "lexical_surface_hits": {
+        "resource_gain": 0,
+        "predator_attack": 1,
+        "witnessed_death": 0,
+        "social_exclusion": 0,
+        "rescue": 0,
+        "exploration": 0,
+        "uncertainty": 0
+      },
+      "paraphrase_hits": {
+        "predator_attack": 1,
+        "rescue": 0,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "implicit_hits": {
+        "predator_attack": 1,
+        "rescue": 0,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "supporting_segments": [
+        "trap snapped",
+        "trap",
+        "trap snapped again"
+      ],
+      "provenance": {
+        "metadata": {
+          "seed": 131
+        },
+        "matched_event_type": "predator_attack",
+        "negation_hits": 1,
+        "surface_adversarial_risk": 0.22,
+        "conflict_cues": [
+          "contrastive_connector",
+          "temporal_shift"
+        ]
+      },
+      "low_signal": false
+    },
+    "uncertainty_decomposition": {
+      "episode_id": "m31:stress",
+      "source_episode_id": "m31:stress",
+      "unknowns": [
+        {
+          "unknown_id": "m31:stress:unknown:threat_persistence",
+          "unknown_type": "threat_persistence",
+          "source_episode_id": "m31:stress",
+          "source_span": "He said the danger was gone, but later the trap snapped again and I was not sure what to trust.",
+          "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+          "uncertainty_level": 0.55,
+          "action_relevant": true,
+          "linked_entities": [],
+          "linked_chapters": [],
+          "evidence_links": [
+            "predator_attack",
+            "contrastive_connector",
+            "temporal_shift"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.48,
+            "social_stance": 0.08,
+            "risk_level": 0.757974,
+            "verification_urgency": 0.4,
+            "memory_protection": 0.294835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.757974,
+            "total_score": 0.445316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "competing_hypothesis_ids": [
+            "m31:stress:unknown:threat_persistence:hyp:persistent",
+            "m31:stress:unknown:threat_persistence:hyp:accident",
+            "m31:stress:unknown:threat_persistence:hyp:environment"
+          ],
+          "latent_cause_ids": [
+            "m31:stress:unknown:threat_persistence:hyp:persistent:cause",
+            "m31:stress:unknown:threat_persistence:hyp:accident:cause",
+            "m31:stress:unknown:threat_persistence:hyp:environment:cause"
+          ],
+          "surface_cue_ids": [
+            "m31:stress:surface:contrast"
+          ],
+          "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+        },
+        {
+          "unknown_id": "m31:stress:unknown:environment",
+          "unknown_type": "environment_reliability",
+          "source_episode_id": "m31:stress",
+          "source_span": "He said the danger was gone, but later the trap snapped again and I was not sure what to trust.",
+          "unresolved_reason": "The narrative contains contrast or explicit uncertainty, so the environment or evidence source may be misleading.",
+          "uncertainty_level": 0.55,
+          "action_relevant": false,
+          "linked_entities": [],
+          "linked_chapters": [],
+          "evidence_links": [
+            "contrastive_connector",
+            "temporal_shift"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.26,
+            "social_stance": 0.12,
+            "risk_level": 0.382976,
+            "verification_urgency": 0.418,
+            "memory_protection": 0.155336,
+            "continuity_impact": 0.12,
+            "downstream_prediction_delta": 0.418,
+            "total_score": 0.283708,
+            "summary": "This uncertainty changes how strongly to trust current evidence."
+          },
+          "competing_hypothesis_ids": [
+            "m31:stress:unknown:environment:hyp:misleading",
+            "m31:stress:unknown:environment:hyp:stable_signal"
+          ],
+          "latent_cause_ids": [
+            "m31:stress:unknown:environment:hyp:misleading:cause"
+          ],
+          "surface_cue_ids": [
+            "m31:stress:surface:contrast"
+          ],
+          "promotion_reason": "Evidence reliability matters when later predictions depend on the same narrative frame."
+        }
+      ],
+      "competing_hypotheses": [
+        {
+          "hypothesis_id": "m31:stress:unknown:threat_persistence:hyp:persistent",
+          "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+          "statement": "There is a stable threat source that will continue shaping future danger.",
+          "prior_plausibility": 0.5,
+          "support": {
+            "support_evidence": [
+              "direct_threat",
+              "physical_exposure"
+            ],
+            "contradicting_evidence": [],
+            "support_score": 0.58,
+            "contradiction_score": 0.0
+          },
+          "implied_consequences": [
+            "favor hide or scan",
+            "protect memory of threat cues"
+          ],
+          "expected_state_shift": {
+            "danger": 0.72,
+            "shelter": 0.58
+          },
+          "decision_relevance": {
+            "action_choice": 0.578,
+            "social_stance": 0.129,
+            "risk_level": 0.857974,
+            "verification_urgency": 0.54,
+            "memory_protection": 0.357835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.22,
+            "total_score": 0.585316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "latent_cause_type": "persistent_threat"
+        },
+        {
+          "hypothesis_id": "m31:stress:unknown:threat_persistence:hyp:accident",
+          "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+          "statement": "The danger was a local accident rather than a persistent source.",
+          "prior_plausibility": 0.32,
+          "support": {
+            "support_evidence": [
+              "temporal_shift"
+            ],
+            "contradicting_evidence": [
+              "direct_threat"
+            ],
+            "support_score": 0.46,
+            "contradiction_score": 0.12
+          },
+          "implied_consequences": [
+            "resume exploration sooner",
+            "verify recurrence before escalating"
+          ],
+          "expected_state_shift": {
+            "danger": 0.38,
+            "novelty": 0.34
+          },
+          "decision_relevance": {
+            "action_choice": 0.522,
+            "social_stance": 0.101,
+            "risk_level": 0.857974,
+            "verification_urgency": 0.46,
+            "memory_protection": 0.321835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.16,
+            "total_score": 0.505316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "latent_cause_type": "local_accident"
+        },
+        {
+          "hypothesis_id": "m31:stress:unknown:threat_persistence:hyp:environment",
+          "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+          "statement": "Environmental interference or misleading conditions created the danger appearance.",
+          "prior_plausibility": 0.24,
+          "support": {
+            "support_evidence": [
+              "contrastive_connector"
+            ],
+            "contradicting_evidence": [
+              "physical_exposure"
+            ],
+            "support_score": 0.46,
+            "contradiction_score": 0.12
+          },
+          "implied_consequences": [
+            "verify environment before attributing stable threat",
+            "avoid overweighting one scene"
+          ],
+          "expected_state_shift": {
+            "danger": 0.44,
+            "novelty": 0.26
+          },
+          "decision_relevance": {
+            "action_choice": 0.508,
+            "social_stance": 0.094,
+            "risk_level": 0.857974,
+            "verification_urgency": 0.44,
+            "memory_protection": 0.312835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.24,
+            "total_score": 0.485316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "latent_cause_type": "environmental_interference"
+        },
+        {
+          "hypothesis_id": "m31:stress:unknown:environment:hyp:misleading",
+          "parent_unknown_id": "m31:stress:unknown:environment",
+          "statement": "The environment or evidence source is misleading enough to distort immediate interpretation.",
+          "prior_plausibility": 0.4,
+          "support": {
+            "support_evidence": [
+              "contrastive_connector",
+              "temporal_shift"
+            ],
+            "contradicting_evidence": [],
+            "support_score": 0.58,
+            "contradiction_score": 0.0
+          },
+          "implied_consequences": [
+            "delay strong updates",
+            "verify before policy lock-in"
+          ],
+          "expected_state_shift": {
+            "danger": 0.48,
+            "social": 0.36
+          },
+          "decision_relevance": {
+            "action_choice": 0.316,
+            "social_stance": 0.148,
+            "risk_level": 0.482976,
+            "verification_urgency": 0.498,
+            "memory_protection": 0.191336,
+            "continuity_impact": 0.12,
+            "downstream_prediction_delta": 0.14,
+            "total_score": 0.363708,
+            "summary": "This uncertainty changes how strongly to trust current evidence."
+          },
+          "latent_cause_type": "environmental_interference"
+        },
+        {
+          "hypothesis_id": "m31:stress:unknown:environment:hyp:stable_signal",
+          "parent_unknown_id": "m31:stress:unknown:environment",
+          "statement": "The evidence is noisy but still points to a stable underlying cause.",
+          "prior_plausibility": 0.33,
+          "support": {
+            "support_evidence": [
+              "event_structure"
+            ],
+            "contradicting_evidence": [],
+            "support_score": 0.46,
+            "contradiction_score": 0.0
+          },
+          "implied_consequences": [
+            "preserve uncertainty but still act cautiously"
+          ],
+          "expected_state_shift": {
+            "danger": 0.56,
+            "social": 0.3
+          },
+          "decision_relevance": {
+            "action_choice": 0.295,
+            "social_stance": 0.1375,
+            "risk_level": 0.482976,
+            "verification_urgency": 0.468,
+            "memory_protection": 0.177836,
+            "continuity_impact": 0.12,
+            "downstream_prediction_delta": 0.2,
+            "total_score": 0.333708,
+            "summary": "This uncertainty changes how strongly to trust current evidence."
+          },
+          "latent_cause_type": "unknown"
+        }
+      ],
+      "latent_causes": [
+        {
+          "cause_id": "m31:stress:unknown:threat_persistence:hyp:persistent:cause",
+          "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+          "cause_type": "persistent_threat",
+          "statement": "There is a stable threat source that will continue shaping future danger.",
+          "confidence": 0.478,
+          "evidence_links": [
+            "direct_threat",
+            "physical_exposure"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.578,
+            "social_stance": 0.129,
+            "risk_level": 0.857974,
+            "verification_urgency": 0.54,
+            "memory_protection": 0.357835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.22,
+            "total_score": 0.585316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          }
+        },
+        {
+          "cause_id": "m31:stress:unknown:threat_persistence:hyp:accident:cause",
+          "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+          "cause_type": "local_accident",
+          "statement": "The danger was a local accident rather than a persistent source.",
+          "confidence": 0.3154,
+          "evidence_links": [
+            "temporal_shift"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.522,
+            "social_stance": 0.101,
+            "risk_level": 0.857974,
+            "verification_urgency": 0.46,
+            "memory_protection": 0.321835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.16,
+            "total_score": 0.505316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          }
+        },
+        {
+          "cause_id": "m31:stress:unknown:threat_persistence:hyp:environment:cause",
+          "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+          "cause_type": "environmental_interference",
+          "statement": "Environmental interference or misleading conditions created the danger appearance.",
+          "confidence": 0.2714,
+          "evidence_links": [
+            "contrastive_connector"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.508,
+            "social_stance": 0.094,
+            "risk_level": 0.857974,
+            "verification_urgency": 0.44,
+            "memory_protection": 0.312835,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.24,
+            "total_score": 0.485316,
+            "summary": "This uncertainty changes danger prediction and caution."
+          }
+        },
+        {
+          "cause_id": "m31:stress:unknown:environment:hyp:misleading:cause",
+          "parent_unknown_id": "m31:stress:unknown:environment",
+          "cause_type": "environmental_interference",
+          "statement": "The environment or evidence source is misleading enough to distort immediate interpretation.",
+          "confidence": 0.423,
+          "evidence_links": [
+            "contrastive_connector",
+            "temporal_shift"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.316,
+            "social_stance": 0.148,
+            "risk_level": 0.482976,
+            "verification_urgency": 0.498,
+            "memory_protection": 0.191336,
+            "continuity_impact": 0.12,
+            "downstream_prediction_delta": 0.14,
+            "total_score": 0.363708,
+            "summary": "This uncertainty changes how strongly to trust current evidence."
+          }
+        }
+      ],
+      "surface_cues": [
+        {
+          "cue_id": "m31:stress:surface:contrast",
+          "source_episode_id": "m31:stress",
+          "cue_type": "rhetorical_contrast",
+          "cue_text": "contrastive connector",
+          "salience": 0.46,
+          "decision_relevance": 0.22,
+          "rationale": "Contrast increases ambiguity but is not itself a latent cause."
+        }
+      ],
+      "profile": {
+        "total_unknown_count": 2,
+        "decision_relevant_unknown_count": 1,
+        "competing_hypothesis_count": 5,
+        "latent_cause_count": 4,
+        "surface_cue_count": 1,
+        "interpretive_competition": 0.833333,
+        "latent_cause_uncertainty_burden": 0.8,
+        "social_ambiguity_burden": 0.0,
+        "trust_ambiguity_burden": 0.0,
+        "environment_ambiguity_burden": 1.0,
+        "retained_uncertainty_burden": 0.222658
+      },
+      "promoted_unknown_ids": [
+        "m31:stress:unknown:threat_persistence"
+      ],
+      "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+    }
+  },
+  "uncertainty_decomposition": {
+    "episode_id": "m31:stress",
+    "source_episode_id": "m31:stress",
+    "unknowns": [
+      {
+        "unknown_id": "m31:stress:unknown:threat_persistence",
+        "unknown_type": "threat_persistence",
+        "source_episode_id": "m31:stress",
+        "source_span": "He said the danger was gone, but later the trap snapped again and I was not sure what to trust.",
+        "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+        "uncertainty_level": 0.55,
+        "action_relevant": true,
+        "linked_entities": [],
+        "linked_chapters": [],
+        "evidence_links": [
+          "predator_attack",
+          "contrastive_connector",
+          "temporal_shift"
+        ],
+        "decision_relevance": {
+          "action_choice": 0.48,
+          "social_stance": 0.08,
+          "risk_level": 0.757974,
+          "verification_urgency": 0.4,
+          "memory_protection": 0.294835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.757974,
+          "total_score": 0.445316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        },
+        "competing_hypothesis_ids": [
+          "m31:stress:unknown:threat_persistence:hyp:persistent",
+          "m31:stress:unknown:threat_persistence:hyp:accident",
+          "m31:stress:unknown:threat_persistence:hyp:environment"
+        ],
+        "latent_cause_ids": [
+          "m31:stress:unknown:threat_persistence:hyp:persistent:cause",
+          "m31:stress:unknown:threat_persistence:hyp:accident:cause",
+          "m31:stress:unknown:threat_persistence:hyp:environment:cause"
+        ],
+        "surface_cue_ids": [
+          "m31:stress:surface:contrast"
+        ],
+        "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+      },
+      {
+        "unknown_id": "m31:stress:unknown:environment",
+        "unknown_type": "environment_reliability",
+        "source_episode_id": "m31:stress",
+        "source_span": "He said the danger was gone, but later the trap snapped again and I was not sure what to trust.",
+        "unresolved_reason": "The narrative contains contrast or explicit uncertainty, so the environment or evidence source may be misleading.",
+        "uncertainty_level": 0.55,
+        "action_relevant": false,
+        "linked_entities": [],
+        "linked_chapters": [],
+        "evidence_links": [
+          "contrastive_connector",
+          "temporal_shift"
+        ],
+        "decision_relevance": {
+          "action_choice": 0.26,
+          "social_stance": 0.12,
+          "risk_level": 0.382976,
+          "verification_urgency": 0.418,
+          "memory_protection": 0.155336,
+          "continuity_impact": 0.12,
+          "downstream_prediction_delta": 0.418,
+          "total_score": 0.283708,
+          "summary": "This uncertainty changes how strongly to trust current evidence."
+        },
+        "competing_hypothesis_ids": [
+          "m31:stress:unknown:environment:hyp:misleading",
+          "m31:stress:unknown:environment:hyp:stable_signal"
+        ],
+        "latent_cause_ids": [
+          "m31:stress:unknown:environment:hyp:misleading:cause"
+        ],
+        "surface_cue_ids": [
+          "m31:stress:surface:contrast"
+        ],
+        "promotion_reason": "Evidence reliability matters when later predictions depend on the same narrative frame."
+      }
+    ],
+    "competing_hypotheses": [
+      {
+        "hypothesis_id": "m31:stress:unknown:threat_persistence:hyp:persistent",
+        "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+        "statement": "There is a stable threat source that will continue shaping future danger.",
+        "prior_plausibility": 0.5,
+        "support": {
+          "support_evidence": [
+            "direct_threat",
+            "physical_exposure"
+          ],
+          "contradicting_evidence": [],
+          "support_score": 0.58,
+          "contradiction_score": 0.0
+        },
+        "implied_consequences": [
+          "favor hide or scan",
+          "protect memory of threat cues"
+        ],
+        "expected_state_shift": {
+          "danger": 0.72,
+          "shelter": 0.58
+        },
+        "decision_relevance": {
+          "action_choice": 0.578,
+          "social_stance": 0.129,
+          "risk_level": 0.857974,
+          "verification_urgency": 0.54,
+          "memory_protection": 0.357835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.22,
+          "total_score": 0.585316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        },
+        "latent_cause_type": "persistent_threat"
+      },
+      {
+        "hypothesis_id": "m31:stress:unknown:threat_persistence:hyp:accident",
+        "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+        "statement": "The danger was a local accident rather than a persistent source.",
+        "prior_plausibility": 0.32,
+        "support": {
+          "support_evidence": [
+            "temporal_shift"
+          ],
+          "contradicting_evidence": [
+            "direct_threat"
+          ],
+          "support_score": 0.46,
+          "contradiction_score": 0.12
+        },
+        "implied_consequences": [
+          "resume exploration sooner",
+          "verify recurrence before escalating"
+        ],
+        "expected_state_shift": {
+          "danger": 0.38,
+          "novelty": 0.34
+        },
+        "decision_relevance": {
+          "action_choice": 0.522,
+          "social_stance": 0.101,
+          "risk_level": 0.857974,
+          "verification_urgency": 0.46,
+          "memory_protection": 0.321835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.16,
+          "total_score": 0.505316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        },
+        "latent_cause_type": "local_accident"
+      },
+      {
+        "hypothesis_id": "m31:stress:unknown:threat_persistence:hyp:environment",
+        "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+        "statement": "Environmental interference or misleading conditions created the danger appearance.",
+        "prior_plausibility": 0.24,
+        "support": {
+          "support_evidence": [
+            "contrastive_connector"
+          ],
+          "contradicting_evidence": [
+            "physical_exposure"
+          ],
+          "support_score": 0.46,
+          "contradiction_score": 0.12
+        },
+        "implied_consequences": [
+          "verify environment before attributing stable threat",
+          "avoid overweighting one scene"
+        ],
+        "expected_state_shift": {
+          "danger": 0.44,
+          "novelty": 0.26
+        },
+        "decision_relevance": {
+          "action_choice": 0.508,
+          "social_stance": 0.094,
+          "risk_level": 0.857974,
+          "verification_urgency": 0.44,
+          "memory_protection": 0.312835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.24,
+          "total_score": 0.485316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        },
+        "latent_cause_type": "environmental_interference"
+      },
+      {
+        "hypothesis_id": "m31:stress:unknown:environment:hyp:misleading",
+        "parent_unknown_id": "m31:stress:unknown:environment",
+        "statement": "The environment or evidence source is misleading enough to distort immediate interpretation.",
+        "prior_plausibility": 0.4,
+        "support": {
+          "support_evidence": [
+            "contrastive_connector",
+            "temporal_shift"
+          ],
+          "contradicting_evidence": [],
+          "support_score": 0.58,
+          "contradiction_score": 0.0
+        },
+        "implied_consequences": [
+          "delay strong updates",
+          "verify before policy lock-in"
+        ],
+        "expected_state_shift": {
+          "danger": 0.48,
+          "social": 0.36
+        },
+        "decision_relevance": {
+          "action_choice": 0.316,
+          "social_stance": 0.148,
+          "risk_level": 0.482976,
+          "verification_urgency": 0.498,
+          "memory_protection": 0.191336,
+          "continuity_impact": 0.12,
+          "downstream_prediction_delta": 0.14,
+          "total_score": 0.363708,
+          "summary": "This uncertainty changes how strongly to trust current evidence."
+        },
+        "latent_cause_type": "environmental_interference"
+      },
+      {
+        "hypothesis_id": "m31:stress:unknown:environment:hyp:stable_signal",
+        "parent_unknown_id": "m31:stress:unknown:environment",
+        "statement": "The evidence is noisy but still points to a stable underlying cause.",
+        "prior_plausibility": 0.33,
+        "support": {
+          "support_evidence": [
+            "event_structure"
+          ],
+          "contradicting_evidence": [],
+          "support_score": 0.46,
+          "contradiction_score": 0.0
+        },
+        "implied_consequences": [
+          "preserve uncertainty but still act cautiously"
+        ],
+        "expected_state_shift": {
+          "danger": 0.56,
+          "social": 0.3
+        },
+        "decision_relevance": {
+          "action_choice": 0.295,
+          "social_stance": 0.1375,
+          "risk_level": 0.482976,
+          "verification_urgency": 0.468,
+          "memory_protection": 0.177836,
+          "continuity_impact": 0.12,
+          "downstream_prediction_delta": 0.2,
+          "total_score": 0.333708,
+          "summary": "This uncertainty changes how strongly to trust current evidence."
+        },
+        "latent_cause_type": "unknown"
+      }
+    ],
+    "latent_causes": [
+      {
+        "cause_id": "m31:stress:unknown:threat_persistence:hyp:persistent:cause",
+        "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+        "cause_type": "persistent_threat",
+        "statement": "There is a stable threat source that will continue shaping future danger.",
+        "confidence": 0.478,
+        "evidence_links": [
+          "direct_threat",
+          "physical_exposure"
+        ],
+        "decision_relevance": {
+          "action_choice": 0.578,
+          "social_stance": 0.129,
+          "risk_level": 0.857974,
+          "verification_urgency": 0.54,
+          "memory_protection": 0.357835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.22,
+          "total_score": 0.585316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        }
+      },
+      {
+        "cause_id": "m31:stress:unknown:threat_persistence:hyp:accident:cause",
+        "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+        "cause_type": "local_accident",
+        "statement": "The danger was a local accident rather than a persistent source.",
+        "confidence": 0.3154,
+        "evidence_links": [
+          "temporal_shift"
+        ],
+        "decision_relevance": {
+          "action_choice": 0.522,
+          "social_stance": 0.101,
+          "risk_level": 0.857974,
+          "verification_urgency": 0.46,
+          "memory_protection": 0.321835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.16,
+          "total_score": 0.505316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        }
+      },
+      {
+        "cause_id": "m31:stress:unknown:threat_persistence:hyp:environment:cause",
+        "parent_unknown_id": "m31:stress:unknown:threat_persistence",
+        "cause_type": "environmental_interference",
+        "statement": "Environmental interference or misleading conditions created the danger appearance.",
+        "confidence": 0.2714,
+        "evidence_links": [
+          "contrastive_connector"
+        ],
+        "decision_relevance": {
+          "action_choice": 0.508,
+          "social_stance": 0.094,
+          "risk_level": 0.857974,
+          "verification_urgency": 0.44,
+          "memory_protection": 0.312835,
+          "continuity_impact": 0.22,
+          "downstream_prediction_delta": 0.24,
+          "total_score": 0.485316,
+          "summary": "This uncertainty changes danger prediction and caution."
+        }
+      },
+      {
+        "cause_id": "m31:stress:unknown:environment:hyp:misleading:cause",
+        "parent_unknown_id": "m31:stress:unknown:environment",
+        "cause_type": "environmental_interference",
+        "statement": "The environment or evidence source is misleading enough to distort immediate interpretation.",
+        "confidence": 0.423,
+        "evidence_links": [
+          "contrastive_connector",
+          "temporal_shift"
+        ],
+        "decision_relevance": {
+          "action_choice": 0.316,
+          "social_stance": 0.148,
+          "risk_level": 0.482976,
+          "verification_urgency": 0.498,
+          "memory_protection": 0.191336,
+          "continuity_impact": 0.12,
+          "downstream_prediction_delta": 0.14,
+          "total_score": 0.363708,
+          "summary": "This uncertainty changes how strongly to trust current evidence."
+        }
+      }
+    ],
+    "surface_cues": [
+      {
+        "cue_id": "m31:stress:surface:contrast",
+        "source_episode_id": "m31:stress",
+        "cue_type": "rhetorical_contrast",
+        "cue_text": "contrastive connector",
+        "salience": 0.46,
+        "decision_relevance": 0.22,
+        "rationale": "Contrast increases ambiguity but is not itself a latent cause."
+      }
+    ],
+    "profile": {
+      "total_unknown_count": 2,
+      "decision_relevant_unknown_count": 1,
+      "competing_hypothesis_count": 5,
+      "latent_cause_count": 4,
+      "surface_cue_count": 1,
+      "interpretive_competition": 0.833333,
+      "latent_cause_uncertainty_burden": 0.8,
+      "social_ambiguity_burden": 0.0,
+      "trust_ambiguity_burden": 0.0,
+      "environment_ambiguity_burden": 1.0,
+      "retained_uncertainty_burden": 0.222658
+    },
+    "promoted_unknown_ids": [
+      "m31:stress:unknown:threat_persistence"
+    ],
+    "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+  },
+  "semantic_grounding": {
+    "episode_id": "m31:stress",
+    "motifs": [
+      "predator_attack"
+    ],
+    "evidence": [
+      {
+        "evidence_id": "m31:stress:predator_attack:surface",
+        "source_type": "surface",
+        "label": "predator_attack",
+        "strength": 0.3333333333333333,
+        "matched_text": [
+          "trap snapped"
+        ],
+        "direction": "threat",
+        "metadata": {
+          "surface_hits": 1
+        }
+      },
+      {
+        "evidence_id": "m31:stress:predator_attack:paraphrase",
+        "source_type": "paraphrase",
+        "label": "predator_attack",
+        "strength": 0.3333333333333333,
+        "matched_text": [
+          "trap"
+        ],
+        "direction": "threat",
+        "metadata": {
+          "paraphrase_hits": 1
+        }
+      },
+      {
+        "evidence_id": "m31:stress:predator_attack:implicit",
+        "source_type": "implicit",
+        "label": "predator_attack",
+        "strength": 0.3333333333333333,
+        "matched_text": [
+          "trap snapped again"
+        ],
+        "direction": "threat",
+        "metadata": {
+          "implicit_hits": 1
+        }
+      }
+    ],
+    "semantic_direction_scores": {
+      "threat": 1.85,
+      "social": 0.0,
+      "resource": 0.0,
+      "exploration": 0.0,
+      "uncertainty": 1.0
+    },
+    "lexical_surface_hits": {
+      "resource_gain": 0,
+      "predator_attack": 1,
+      "witnessed_death": 0,
+      "social_exclusion": 0,
+      "rescue": 0,
+      "exploration": 0,
+      "uncertainty": 0
+    },
+    "paraphrase_hits": {
+      "predator_attack": 1,
+      "rescue": 0,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "implicit_hits": {
+      "predator_attack": 1,
+      "rescue": 0,
+      "social_exclusion": 0,
+      "resource_gain": 0,
+      "exploration": 0
+    },
+    "supporting_segments": [
+      "trap snapped",
+      "trap",
+      "trap snapped again"
+    ],
+    "provenance": {
+      "metadata": {
+        "seed": 131
+      },
+      "matched_event_type": "predator_attack",
+      "negation_hits": 1,
+      "surface_adversarial_risk": 0.22,
+      "conflict_cues": [
+        "contrastive_connector",
+        "temporal_shift"
+      ]
+    },
+    "low_signal": false
+  }
+}

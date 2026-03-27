@@ -1304,3 +1304,32 @@ class VerificationLoop:
         self.archived_targets = self.archived_targets[-self.archive_limit :]
         self.evidence_history = self.evidence_history[-self.evidence_history_limit :]
         self.falsification_history = self.falsification_history[-self.archive_limit :]
+
+
+def semantic_priority_adjustment(
+    *,
+    prediction_id: str,
+    semantic_grounding: dict[str, object] | None = None,
+    semantic_schemas: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
+    grounding = dict(semantic_grounding or {})
+    schemas = list(semantic_schemas or ())
+    motifs = {str(item) for item in grounding.get("motifs", []) if str(item)}
+    matched_schema_ids: list[str] = []
+    uncertainty_bonus = float(
+        grounding.get("semantic_direction_scores", {}).get("uncertainty", 0.0)
+    ) * 0.12 if isinstance(grounding.get("semantic_direction_scores", {}), dict) else 0.0
+    schema_bonus = 0.0
+    for schema in schemas:
+        signature = {str(item) for item in schema.get("motif_signature", []) if str(item)}
+        if not signature:
+            continue
+        overlap = len(motifs & signature) / max(1.0, len(motifs | signature))
+        if overlap > 0.0:
+            matched_schema_ids.append(str(schema.get("schema_id", "")))
+            schema_bonus = max(schema_bonus, overlap * float(schema.get("confidence", 0.0)) * 0.25)
+    return {
+        "prediction_id": prediction_id,
+        "matched_schema_ids": [item for item in matched_schema_ids if item],
+        "priority_delta": _clamp(uncertainty_bonus + schema_bonus),
+    }

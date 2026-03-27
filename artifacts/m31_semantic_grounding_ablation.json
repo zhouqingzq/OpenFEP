@@ -1,0 +1,31 @@
+{
+  "with_grounding": {
+    "physical_threat": 0.0,
+    "social_threat": 0.0,
+    "uncertainty": 0.0,
+    "controllability": 0.48,
+    "novelty": 0.0,
+    "loss": 0.0,
+    "moral_salience": 0.0,
+    "contamination": 0.0,
+    "attachment_signal": 0.78,
+    "trust_impact": 0.668,
+    "self_efficacy_impact": 0.22,
+    "meaning_violation": 0.0
+  },
+  "without_grounding": {
+    "physical_threat": 0.0,
+    "social_threat": 0.0,
+    "uncertainty": 0.18,
+    "controllability": 0.0,
+    "novelty": 0.0,
+    "loss": 0.0,
+    "moral_salience": 0.0,
+    "contamination": 0.0,
+    "attachment_signal": 0.0,
+    "trust_impact": 0.0,
+    "self_efficacy_impact": 0.0,
+    "meaning_violation": 0.0
+  },
+  "trust_gain_delta": 0.668
+}
