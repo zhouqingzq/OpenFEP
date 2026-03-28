@@ -1381,6 +1381,7 @@ def analyze_ground_truth(request: AnalysisRequest) -> dict[str, Any]:
                     "value": value.get("value"),
                     "confidence": value.get("confidence"),
                     "evidence": list(value.get("evidence", [])),
+                    "evidence_details": list(value.get("evidence_details", [])),
                     "reasoning": value.get("reasoning", ""),
                 })
             else:
@@ -1407,7 +1408,7 @@ def analyze_ground_truth(request: AnalysisRequest) -> dict[str, Any]:
 def extract_evidence(request: AnalysisRequest) -> dict[str, Any]:
     """Step 1 only: evidence extraction from materials."""
     analyzer = _build_analyzer(request)
-    evidence, _, appraisals, signals = analyzer._extract_evidence(request.materials)
+    evidence, _, appraisals, signals, semantic_schemas = analyzer._extract_evidence(request.materials)
     agg = analyzer._aggregate_appraisals(appraisals)
     big_five = analyzer._aggregate_big_five(signals)
     return {
@@ -1415,6 +1416,7 @@ def extract_evidence(request: AnalysisRequest) -> dict[str, Any]:
         "aggregate_appraisal": agg,
         "big_five": big_five,
         "evidence_count": len(evidence),
+        "semantic_schemas": semantic_schemas,
     }
 
 
@@ -1422,22 +1424,23 @@ def extract_evidence(request: AnalysisRequest) -> dict[str, Any]:
 def infer_parameters(request: AnalysisRequest) -> dict[str, Any]:
     """Steps 1-3: evidence + hypothesis + parameter space."""
     analyzer = _build_analyzer(request)
-    evidence, _, appraisals, signals = analyzer._extract_evidence(request.materials)
+    evidence, _, appraisals, signals, semantic_schemas = analyzer._extract_evidence(request.materials)
     agg = analyzer._aggregate_appraisals(appraisals)
     big_five = analyzer._aggregate_big_five(signals)
     conf = "medium" if len(request.materials) >= 2 else "low"
-    hypothesis = analyzer._build_predictive_hypothesis(evidence, agg, big_five)
-    core_priors = analyzer._infer_core_priors(agg, big_five, conf)
-    cognitive_style = analyzer._infer_cognitive_style(agg, big_five, conf)
-    affective = analyzer._infer_affective_dynamics(agg, big_five, conf)
-    social = analyzer._infer_social_orientation(big_five, conf)
-    precision = analyzer._infer_precision_allocation(agg, big_five, conf)
-    temporal = analyzer._infer_temporal_structure(agg, big_five, conf)
-    value_hierarchy = analyzer._infer_value_hierarchy(agg, big_five, conf)
+    hypothesis = analyzer._build_predictive_hypothesis(evidence, agg, big_five, semantic_schemas)
+    core_priors = analyzer._infer_core_priors(agg, big_five, conf, evidence, semantic_schemas)
+    cognitive_style = analyzer._infer_cognitive_style(agg, big_five, conf, evidence, semantic_schemas)
+    affective = analyzer._infer_affective_dynamics(agg, big_five, conf, evidence, semantic_schemas)
+    social = analyzer._infer_social_orientation(big_five, conf, evidence, semantic_schemas)
+    precision = analyzer._infer_precision_allocation(agg, big_five, conf, evidence, semantic_schemas)
+    temporal = analyzer._infer_temporal_structure(agg, big_five, conf, evidence, semantic_schemas)
+    value_hierarchy = analyzer._infer_value_hierarchy(agg, big_five, conf, evidence, semantic_schemas)
 
     return {
         "evidence_count": len(evidence),
         "big_five": big_five,
+        "semantic_schemas": semantic_schemas,
         "hypothesis": hypothesis.to_dict(),
         "core_priors": core_priors.to_dict(),
         "cognitive_style": cognitive_style.to_dict(),

@@ -41,6 +41,7 @@ from .analysis_types import (
 )
 from .narrative_compiler import NarrativeCompiler
 from .narrative_types import AppraisalVector, NarrativeEpisode
+from .semantic_schema import SemanticSchemaStore
 from .self_model import PersonalitySignal
 from .via_projection import VIAProjection
 
@@ -59,6 +60,9 @@ def _confidence_from_count(n: int) -> str:
     if n >= 2:
         return "medium"
     return "low"
+
+
+_ANALYZER_SCHEMA_MIN_SUPPORT = 2
 
 
 # ---------------------------------------------------------------------------
@@ -223,7 +227,7 @@ class PersonalityAnalyzer:
         metadata = metadata or {}
 
         # Step 1: Evidence extraction
-        evidence, episodes, appraisals, personality_signals = self._extract_evidence(materials)
+        evidence, episodes, appraisals, personality_signals, semantic_schemas = self._extract_evidence(materials)
 
         # Aggregate appraisals and Big Five
         agg_appraisal = self._aggregate_appraisals(appraisals)
@@ -231,16 +235,32 @@ class PersonalityAnalyzer:
         confidence_level = _confidence_from_count(len(materials))
 
         # Step 2: Predictive hypothesis
-        hypothesis = self._build_predictive_hypothesis(evidence, agg_appraisal, big_five)
+        hypothesis = self._build_predictive_hypothesis(
+            evidence, agg_appraisal, big_five, semantic_schemas
+        )
 
         # Step 3: Parameter space modeling
-        core_priors = self._infer_core_priors(agg_appraisal, big_five, confidence_level)
-        cognitive_style = self._infer_cognitive_style(agg_appraisal, big_five, confidence_level)
-        affective = self._infer_affective_dynamics(agg_appraisal, big_five, confidence_level)
-        social = self._infer_social_orientation(big_five, confidence_level)
-        precision = self._infer_precision_allocation(agg_appraisal, big_five, confidence_level)
-        temporal = self._infer_temporal_structure(agg_appraisal, big_five, confidence_level)
-        value_hierarchy = self._infer_value_hierarchy(agg_appraisal, big_five, confidence_level)
+        core_priors = self._infer_core_priors(
+            agg_appraisal, big_five, confidence_level, evidence, semantic_schemas
+        )
+        cognitive_style = self._infer_cognitive_style(
+            agg_appraisal, big_five, confidence_level, evidence, semantic_schemas
+        )
+        affective = self._infer_affective_dynamics(
+            agg_appraisal, big_five, confidence_level, evidence, semantic_schemas
+        )
+        social = self._infer_social_orientation(
+            big_five, confidence_level, evidence, semantic_schemas
+        )
+        precision = self._infer_precision_allocation(
+            agg_appraisal, big_five, confidence_level, evidence, semantic_schemas
+        )
+        temporal = self._infer_temporal_structure(
+            agg_appraisal, big_five, confidence_level, evidence, semantic_schemas
+        )
+        value_hierarchy = self._infer_value_hierarchy(
+            agg_appraisal, big_five, confidence_level, evidence, semantic_schemas
+        )
 
         # Step 4: Defense mechanism analysis
         defenses = self._analyze_defenses(big_five, agg_appraisal)
@@ -252,7 +272,9 @@ class PersonalityAnalyzer:
         loops = self._build_feedback_loops(core_priors, defenses, strategies, big_five)
 
         # Step 7: Development history inference
-        dev_inferences = self._infer_development(evidence, agg_appraisal, big_five, defenses)
+        dev_inferences = self._infer_development(
+            evidence, agg_appraisal, big_five, defenses, semantic_schemas
+        )
 
         # Step 8: Stability analysis
         stability = self._analyze_stability(big_five, defenses, agg_appraisal)
@@ -261,9 +283,15 @@ class PersonalityAnalyzer:
         predictions = self._predict_behaviors(big_five, strategies, loops, agg_appraisal)
 
         # Self/Other/Relational models
-        self_model_profile = self._infer_self_model(big_five, core_priors, confidence_level)
-        other_model_profile = self._infer_other_model(big_five, agg_appraisal, confidence_level)
-        relational = self._infer_relational_templates(big_five, social, confidence_level)
+        self_model_profile = self._infer_self_model(
+            big_five, core_priors, confidence_level, evidence, semantic_schemas
+        )
+        other_model_profile = self._infer_other_model(
+            big_five, agg_appraisal, confidence_level, evidence, semantic_schemas
+        )
+        relational = self._infer_relational_templates(
+            big_five, social, confidence_level, evidence, semantic_schemas
+        )
 
         # VIA strengths
         via_profile = self.via.project(
@@ -324,11 +352,13 @@ class PersonalityAnalyzer:
         list[NarrativeEpisode],
         list[AppraisalVector],
         list[PersonalitySignal],
+        list[dict[str, object]],
     ]:
         evidence: list[EvidenceItem] = []
         episodes: list[NarrativeEpisode] = []
         appraisals: list[AppraisalVector] = []
         signals: list[PersonalitySignal] = []
+        embodied_payloads: list[dict[str, object]] = []
 
         for idx, text in enumerate(materials):
             episode = NarrativeEpisode(
@@ -340,14 +370,29 @@ class PersonalityAnalyzer:
             )
             episodes.append(episode)
 
-            compiled_event = self.compiler.compile_event(episode)
-            appraisal = self.compiler.appraise_event(compiled_event)
+            embodied = self.compiler.compile_episode(episode)
+            compiled_event = embodied.provenance.get("compiled_event", {})
+            event_type = str(compiled_event.get("event_type", "unknown_event"))
+            appraisal = AppraisalVector.from_dict(embodied.appraisal)
             appraisals.append(appraisal)
             signal = self.compiler.extract_personality_signal(appraisal)
             signals.append(signal)
+            embodied_payloads.append(
+                {
+                    "episode_id": embodied.episode_id,
+                    "predicted_outcome": embodied.predicted_outcome,
+                    "compiler_confidence": embodied.compiler_confidence,
+                    "semantic_grounding": dict(embodied.semantic_grounding),
+                    "narrative_tags": list(embodied.narrative_tags),
+                    "source_type": episode.source,
+                    "continuity_tags": [],
+                    "identity_critical": False,
+                    "restart_protected": False,
+                }
+            )
 
             # Determine evidence category from event type
-            category = self._categorize_event(compiled_event.event_type)
+            category = self._categorize_event(event_type)
 
             appraisal_dict = appraisal.to_dict()
             # Find the top relevant appraisal dimensions
@@ -356,19 +401,205 @@ class PersonalityAnalyzer:
             )[:4]
             relevance = {k: round(v, 3) for k, v in top_dims if abs(v) > 0.05}
 
-            tags = [compiled_event.event_type, compiled_event.outcome_type]
-            if compiled_event.annotations.get("low_signal"):
+            tags = [event_type, embodied.predicted_outcome]
+            if embodied.semantic_grounding.get("low_signal"):
                 tags.append("low_signal")
 
-            evidence.append(EvidenceItem(
-                excerpt=text[:500],  # truncate very long texts
-                source_index=idx,
-                category=category,
-                appraisal_relevance=relevance,
-                tags=tags,
-            ))
+            evidence.append(
+                EvidenceItem(
+                    excerpt=text[:500],  # truncate very long texts
+                    source_index=idx,
+                    category=category,
+                    appraisal_relevance=relevance,
+                    tags=tags,
+                    source_episode_id=episode.episode_id,
+                    compiled_event_type=event_type,
+                    predicted_outcome=embodied.predicted_outcome,
+                    compiler_confidence=embodied.compiler_confidence,
+                    supporting_segments=list(
+                        embodied.semantic_grounding.get("supporting_segments", [])
+                    )[:8],
+                    semantic_grounding=dict(embodied.semantic_grounding),
+                )
+            )
 
-        return evidence, episodes, appraisals, signals
+        schema_store = SemanticSchemaStore()
+        semantic_schemas, _ = schema_store.build_from_groundings(embodied_payloads)
+        schema_payloads = [
+            schema.to_dict()
+            for schema in semantic_schemas
+            if schema.support_count >= _ANALYZER_SCHEMA_MIN_SUPPORT
+        ]
+
+        for item in evidence:
+            motifs = {
+                str(value)
+                for value in item.semantic_grounding.get("motifs", [])
+                if str(value)
+            }
+            matched_schema_ids: list[str] = []
+            for schema in schema_payloads:
+                signature = {
+                    str(value)
+                    for value in schema.get("motif_signature", [])
+                    if str(value)
+                }
+                if motifs and signature and motifs & signature:
+                    matched_schema_ids.append(str(schema.get("schema_id", "")))
+            item.matched_schema_ids = [schema_id for schema_id in matched_schema_ids if schema_id]
+
+        return evidence, episodes, appraisals, signals, schema_payloads
+
+    def _schema_index(self, semantic_schemas: list[dict[str, object]]) -> dict[str, dict[str, object]]:
+        return {
+            str(schema.get("schema_id", "")): schema
+            for schema in semantic_schemas
+            if str(schema.get("schema_id", ""))
+        }
+
+    def _format_evidence_reference(self, item: EvidenceItem) -> str:
+        segments = ", ".join(item.supporting_segments[:3]) or item.excerpt[:96]
+        schema_part = f" schemas={','.join(item.matched_schema_ids[:2])}" if item.matched_schema_ids else ""
+        return (
+            f"material[{item.source_index}] {item.compiled_event_type}/{item.predicted_outcome} "
+            f"segments=[{segments}]{schema_part}"
+        )
+
+    def _format_schema_reference(self, schema: dict[str, object]) -> str:
+        return (
+            f"{schema.get('schema_id', 'schema:?')} support={int(schema.get('support_count', 0))} "
+            f"direction={schema.get('dominant_direction', '')} motifs={','.join(str(v) for v in schema.get('motif_signature', []))}"
+        )
+
+    def _evidence_detail_reference(self, item: EvidenceItem) -> dict[str, object]:
+        return {
+            "kind": "episode",
+            "source_index": item.source_index,
+            "episode_id": item.source_episode_id,
+            "category": item.category,
+            "compiled_event_type": item.compiled_event_type,
+            "predicted_outcome": item.predicted_outcome,
+            "compiler_confidence": round(float(item.compiler_confidence), 4),
+            "supporting_segments": list(item.supporting_segments[:4]),
+            "matched_schema_ids": list(item.matched_schema_ids[:3]),
+            "appraisal_relevance": dict(item.appraisal_relevance),
+        }
+
+    def _schema_detail_reference(self, schema: dict[str, object]) -> dict[str, object]:
+        return {
+            "kind": "schema",
+            "schema_id": str(schema.get("schema_id", "")),
+            "support_count": int(schema.get("support_count", 0)),
+            "dominant_direction": str(schema.get("dominant_direction", "")),
+            "motif_signature": [str(v) for v in schema.get("motif_signature", [])],
+            "supporting_episode_ids": [str(v) for v in schema.get("supporting_episode_ids", [])[:6]],
+            "conflict_count": len(schema.get("conflicts", [])) if isinstance(schema.get("conflicts", []), list) else 0,
+        }
+
+    def _select_supporting_evidence(
+        self,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
+        *,
+        appraisal_keys: tuple[str, ...] = (),
+        categories: tuple[str, ...] = (),
+        tags: tuple[str, ...] = (),
+        schema_directions: tuple[str, ...] = (),
+        top_n: int = 3,
+    ) -> tuple[list[EvidenceItem], list[dict[str, object]]]:
+        selected_items: list[EvidenceItem] = []
+        for item in evidence:
+            score = 0.0
+            if categories and item.category in categories:
+                score += 1.0
+            if tags and any(tag in item.tags for tag in tags):
+                score += 1.0
+            if appraisal_keys:
+                score += sum(abs(float(item.appraisal_relevance.get(key, 0.0))) for key in appraisal_keys)
+            if score > 0.0:
+                selected_items.append(item)
+        selected_items.sort(
+            key=lambda item: (
+                sum(abs(float(item.appraisal_relevance.get(key, 0.0))) for key in appraisal_keys),
+                item.compiler_confidence,
+                len(item.supporting_segments),
+            ),
+            reverse=True,
+        )
+        selected_items = selected_items[:top_n]
+
+        schema_index = self._schema_index(semantic_schemas)
+        selected_schemas: list[dict[str, object]] = []
+        seen_schema_ids: set[str] = set()
+        for item in selected_items:
+            for schema_id in item.matched_schema_ids:
+                schema = schema_index.get(schema_id)
+                if schema is None:
+                    continue
+                if schema_directions and str(schema.get("dominant_direction", "")) not in schema_directions:
+                    continue
+                if schema_id not in seen_schema_ids:
+                    selected_schemas.append(schema)
+                    seen_schema_ids.add(schema_id)
+        if schema_directions and not selected_schemas:
+            for schema in semantic_schemas:
+                if str(schema.get("dominant_direction", "")) in schema_directions:
+                    schema_id = str(schema.get("schema_id", ""))
+                    if schema_id and schema_id not in seen_schema_ids:
+                        selected_schemas.append(schema)
+                        seen_schema_ids.add(schema_id)
+                if len(selected_schemas) >= top_n:
+                    break
+
+        return selected_items, selected_schemas[:top_n]
+
+    def _evidence_bundle(
+        self,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
+        *,
+        appraisal_keys: tuple[str, ...] = (),
+        categories: tuple[str, ...] = (),
+        tags: tuple[str, ...] = (),
+        schema_directions: tuple[str, ...] = (),
+        top_n: int = 3,
+    ) -> list[str]:
+        selected_items, selected_schemas = self._select_supporting_evidence(
+            evidence,
+            semantic_schemas,
+            appraisal_keys=appraisal_keys,
+            categories=categories,
+            tags=tags,
+            schema_directions=schema_directions,
+            top_n=top_n,
+        )
+        bundle = [self._format_evidence_reference(item) for item in selected_items]
+        bundle.extend(self._format_schema_reference(schema) for schema in selected_schemas[:top_n])
+        return bundle[:top_n + 2]
+
+    def _evidence_detail_bundle(
+        self,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
+        *,
+        appraisal_keys: tuple[str, ...] = (),
+        categories: tuple[str, ...] = (),
+        tags: tuple[str, ...] = (),
+        schema_directions: tuple[str, ...] = (),
+        top_n: int = 3,
+    ) -> list[dict[str, object]]:
+        selected_items, selected_schemas = self._select_supporting_evidence(
+            evidence,
+            semantic_schemas,
+            appraisal_keys=appraisal_keys,
+            categories=categories,
+            tags=tags,
+            schema_directions=schema_directions,
+            top_n=top_n,
+        )
+        details = [self._evidence_detail_reference(item) for item in selected_items]
+        details.extend(self._schema_detail_reference(schema) for schema in selected_schemas[:top_n])
+        return details[:top_n + 2]
 
     def _categorize_event(self, event_type: str) -> str:
         mapping = {
@@ -415,6 +646,7 @@ class PersonalityAnalyzer:
         evidence: list[EvidenceItem],
         agg: dict[str, float],
         big_five: dict[str, float],
+        semantic_schemas: list[dict[str, object]],
     ) -> PredictiveHypothesis:
         # Determine dominant drives from appraisal pattern
         drives: list[str] = []
@@ -467,7 +699,12 @@ class PersonalityAnalyzer:
     # ------------------------------------------------------------------
 
     def _infer_core_priors(
-        self, agg: dict[str, float], b5: dict[str, float], conf: str,
+        self,
+        agg: dict[str, float],
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> CorePriors:
         self_worth = _clamp(
             0.5
@@ -506,20 +743,86 @@ class PersonalityAnalyzer:
             - agg.get("social_threat", 0) * 0.15
         )
 
-        def _cr(val: float, reasoning: str) -> ConfidenceRated:
-            return ConfidenceRated(round(val, 4), conf, [], reasoning)
+        def _cr(
+            val: float,
+            reasoning: str,
+            *,
+            appraisal_keys: tuple[str, ...] = (),
+            categories: tuple[str, ...] = (),
+            schema_directions: tuple[str, ...] = (),
+        ) -> ConfidenceRated:
+            return ConfidenceRated(
+                round(val, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=appraisal_keys,
+                    categories=categories,
+                    schema_directions=schema_directions,
+                ),
+                reasoning,
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=appraisal_keys,
+                    categories=categories,
+                    schema_directions=schema_directions,
+                ),
+            )
 
         return CorePriors(
-            self_worth=_cr(self_worth, "derived from self_efficacy_impact + attachment - social_threat"),
-            self_efficacy=_cr(self_efficacy, "derived from self_efficacy_impact + controllability - uncertainty"),
-            other_reliability=_cr(other_reliability, "derived from trust_impact + attachment - social_threat"),
-            other_predictability=_cr(other_pred, "derived from trust_impact - uncertainty + controllability"),
-            world_safety=_cr(world_safety, "derived from -physical_threat - uncertainty + controllability"),
-            world_fairness=_cr(world_fairness, "derived from -meaning_violation + controllability - social_threat"),
+            self_worth=_cr(
+                self_worth,
+                "derived from self_efficacy_impact + attachment - social_threat",
+                appraisal_keys=("self_efficacy_impact", "attachment_signal", "social_threat"),
+                categories=("relational", "behavioral"),
+                schema_directions=("social",),
+            ),
+            self_efficacy=_cr(
+                self_efficacy,
+                "derived from self_efficacy_impact + controllability - uncertainty",
+                appraisal_keys=("self_efficacy_impact", "controllability", "uncertainty"),
+                categories=("behavioral", "cognitive"),
+                schema_directions=("goal", "world"),
+            ),
+            other_reliability=_cr(
+                other_reliability,
+                "derived from trust_impact + attachment - social_threat",
+                appraisal_keys=("trust_impact", "attachment_signal", "social_threat"),
+                categories=("relational",),
+                schema_directions=("social",),
+            ),
+            other_predictability=_cr(
+                other_pred,
+                "derived from trust_impact - uncertainty + controllability",
+                appraisal_keys=("trust_impact", "uncertainty", "controllability"),
+                categories=("relational", "behavioral"),
+                schema_directions=("social", "world"),
+            ),
+            world_safety=_cr(
+                world_safety,
+                "derived from -physical_threat - uncertainty + controllability",
+                appraisal_keys=("physical_threat", "uncertainty", "controllability"),
+                categories=("behavioral", "emotional"),
+                schema_directions=("threat", "world"),
+            ),
+            world_fairness=_cr(
+                world_fairness,
+                "derived from -meaning_violation + controllability - social_threat",
+                appraisal_keys=("meaning_violation", "controllability", "social_threat"),
+                categories=("relational", "behavioral"),
+                schema_directions=("social", "world"),
+            ),
         )
 
     def _infer_cognitive_style(
-        self, agg: dict[str, float], b5: dict[str, float], conf: str,
+        self,
+        agg: dict[str, float],
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> CognitiveStyle:
         o, c, n = b5["openness"], b5["conscientiousness"], b5["neuroticism"]
         mv = agg.get("meaning_violation", 0)
@@ -541,20 +844,87 @@ class PersonalityAnalyzer:
         else:
             attribution = "balanced"
 
-        def _cr(val: Any, reasoning: str) -> ConfidenceRated:
-            return ConfidenceRated(round(val, 4) if isinstance(val, float) else val, conf, [], reasoning)
+        def _cr(
+            val: Any,
+            reasoning: str,
+            *,
+            appraisal_keys: tuple[str, ...] = (),
+            categories: tuple[str, ...] = (),
+            schema_directions: tuple[str, ...] = (),
+        ) -> ConfidenceRated:
+            normalized = round(val, 4) if isinstance(val, float) else val
+            return ConfidenceRated(
+                normalized,
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=appraisal_keys,
+                    categories=categories,
+                    schema_directions=schema_directions,
+                ),
+                reasoning,
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=appraisal_keys,
+                    categories=categories,
+                    schema_directions=schema_directions,
+                ),
+            )
 
         return CognitiveStyle(
-            abstract_vs_concrete=_cr(abstract_vs_concrete, "openness*0.6 + meaning_violation*0.15"),
-            global_vs_detail=_cr(global_vs_detail, "(openness - conscientiousness)*0.5"),
-            causal_attribution_tendency=_cr(attribution, "from self_efficacy_impact vs controllability"),
-            reflective_depth=_cr(reflective_depth, "openness*0.35 + conscientiousness*0.25"),
-            coherence_need=_cr(coherence_need, "conscientiousness*0.4 + (1-openness)*0.3"),
-            ambiguity_tolerance=_cr(ambiguity_tol, "openness*0.4 - neuroticism*0.3 + (1-uncertainty)*0.2"),
+            abstract_vs_concrete=_cr(
+                abstract_vs_concrete,
+                "openness*0.6 + meaning_violation*0.15",
+                appraisal_keys=("meaning_violation", "novelty"),
+                categories=("cognitive",),
+                schema_directions=("meaning", "world"),
+            ),
+            global_vs_detail=_cr(
+                global_vs_detail,
+                "(openness - conscientiousness)*0.5",
+                appraisal_keys=("novelty", "controllability"),
+                categories=("cognitive", "behavioral"),
+                schema_directions=("goal", "world"),
+            ),
+            causal_attribution_tendency=_cr(
+                attribution,
+                "from self_efficacy_impact vs controllability",
+                appraisal_keys=("self_efficacy_impact", "controllability"),
+                categories=("behavioral", "cognitive"),
+                schema_directions=("goal", "world"),
+            ),
+            reflective_depth=_cr(
+                reflective_depth,
+                "openness*0.35 + conscientiousness*0.25",
+                appraisal_keys=("novelty", "controllability"),
+                categories=("cognitive",),
+                schema_directions=("meaning", "goal"),
+            ),
+            coherence_need=_cr(
+                coherence_need,
+                "conscientiousness*0.4 + (1-openness)*0.3",
+                appraisal_keys=("controllability", "uncertainty"),
+                categories=("behavioral", "cognitive"),
+                schema_directions=("goal", "world"),
+            ),
+            ambiguity_tolerance=_cr(
+                ambiguity_tol,
+                "openness*0.4 - neuroticism*0.3 + (1-uncertainty)*0.2",
+                appraisal_keys=("novelty", "uncertainty"),
+                categories=("cognitive", "behavioral"),
+                schema_directions=("world",),
+            ),
         )
 
     def _infer_affective_dynamics(
-        self, agg: dict[str, float], b5: dict[str, float], conf: str,
+        self,
+        agg: dict[str, float],
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> AffectiveDynamics:
         n = b5["neuroticism"]
         pt = agg.get("physical_threat", 0)
@@ -585,20 +955,78 @@ class PersonalityAnalyzer:
         # Top dominant emotions
         sorted_emotions = sorted(weights.items(), key=lambda kv: -kv[1])
         dominant = [
-            ConfidenceRated(name, conf, [], f"weight={w:.3f}")
+            ConfidenceRated(
+                name,
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=(name if name != "void" else "meaning_violation",),
+                    categories=("emotional", "behavioral", "relational"),
+                    schema_directions=("threat", "social", "meaning"),
+                ),
+                f"weight={w:.3f}",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=(name if name != "void" else "meaning_violation",),
+                    categories=("emotional", "behavioral", "relational"),
+                    schema_directions=("threat", "social", "meaning"),
+                ),
+            )
             for name, w in sorted_emotions[:3]
             if w > 0.1
         ]
 
         return AffectiveDynamics(
-            baseline_arousal=ConfidenceRated(round(arousal, 4), conf, [], "neuroticism*0.4 + mean_threat*0.3"),
-            recovery_speed=ConfidenceRated(round(recovery, 4), conf, [], "(1-N)*0.4 + SE*0.3 + ctrl*0.2"),
+            baseline_arousal=ConfidenceRated(
+                round(arousal, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("physical_threat", "social_threat", "uncertainty"),
+                    categories=("emotional", "behavioral"),
+                    schema_directions=("threat",),
+                ),
+                "neuroticism*0.4 + mean_threat*0.3",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("physical_threat", "social_threat", "uncertainty"),
+                    categories=("emotional", "behavioral"),
+                    schema_directions=("threat",),
+                ),
+            ),
+            recovery_speed=ConfidenceRated(
+                round(recovery, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "controllability", "attachment_signal"),
+                    categories=("behavioral", "relational"),
+                    schema_directions=("goal", "social"),
+                ),
+                "(1-N)*0.4 + SE*0.3 + ctrl*0.2",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "controllability", "attachment_signal"),
+                    categories=("behavioral", "relational"),
+                    schema_directions=("goal", "social"),
+                ),
+            ),
             dominant_emotions=dominant,
             emotion_channel_weights=weights,
         )
 
     def _infer_social_orientation(
-        self, b5: dict[str, float], conf: str,
+        self,
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> SocialOrientation:
         o = b5["openness"]
         c = b5["conscientiousness"]
@@ -618,13 +1046,36 @@ class PersonalityAnalyzer:
 
         return SocialOrientation(
             orientation_weights={
-                k: ConfidenceRated(round(v, 4), conf, [], f"Big Five projection")
+                k: ConfidenceRated(
+                    round(v, 4),
+                    conf,
+                    self._evidence_bundle(
+                        evidence,
+                        semantic_schemas,
+                        categories=("relational", "behavioral"),
+                        schema_directions=("social",),
+                        tags=(k,),
+                    ),
+                    "Big Five projection",
+                    self._evidence_detail_bundle(
+                        evidence,
+                        semantic_schemas,
+                        categories=("relational", "behavioral"),
+                        schema_directions=("social",),
+                        tags=(k,),
+                    ),
+                )
                 for k, v in orientations.items()
             }
         )
 
     def _infer_precision_allocation(
-        self, agg: dict[str, float], b5: dict[str, float], conf: str,
+        self,
+        agg: dict[str, float],
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> PrecisionAllocation:
         n = b5["neuroticism"]
         e = b5["extraversion"]
@@ -632,20 +1083,116 @@ class PersonalityAnalyzer:
         # Hypersensitive channels: high appraisal values
         hyper: list[ConfidenceRated] = []
         if agg.get("physical_threat", 0) > 0.3:
-            hyper.append(ConfidenceRated("danger", conf, [], "high physical_threat appraisal"))
+            hyper.append(ConfidenceRated(
+                "danger",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("physical_threat",),
+                    categories=("behavioral", "emotional"),
+                    schema_directions=("threat",),
+                ),
+                "high physical_threat appraisal",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("physical_threat",),
+                    categories=("behavioral", "emotional"),
+                    schema_directions=("threat",),
+                ),
+            ))
         if agg.get("social_threat", 0) > 0.3:
-            hyper.append(ConfidenceRated("social_rejection", conf, [], "high social_threat appraisal"))
+            hyper.append(ConfidenceRated(
+                "social_rejection",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat",),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "high social_threat appraisal",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat",),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+            ))
         if agg.get("attachment_signal", 0) > 0.3:
-            hyper.append(ConfidenceRated("attachment", conf, [], "high attachment_signal"))
+            hyper.append(ConfidenceRated(
+                "attachment",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "high attachment_signal",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+            ))
         if n > 0.6:
-            hyper.append(ConfidenceRated("threat_general", conf, [], "high neuroticism"))
+            hyper.append(ConfidenceRated(
+                "threat_general",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("physical_threat", "social_threat", "uncertainty"),
+                    categories=("behavioral", "emotional", "relational"),
+                    schema_directions=("threat", "social"),
+                ),
+                "high neuroticism",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("physical_threat", "social_threat", "uncertainty"),
+                    categories=("behavioral", "emotional", "relational"),
+                    schema_directions=("threat", "social"),
+                ),
+            ))
 
         # Blind spots: suppressed channels
         blind: list[ConfidenceRated] = []
         if agg.get("novelty", 0) < 0.1 and b5["openness"] < 0.4:
-            blind.append(ConfidenceRated("novelty", conf, [], "low novelty + low openness"))
+            blind.append(ConfidenceRated(
+                "novelty",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("novelty",),
+                    categories=("cognitive",),
+                    schema_directions=("world", "meaning"),
+                ),
+                "low novelty + low openness",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("novelty",),
+                    categories=("cognitive",),
+                    schema_directions=("world", "meaning"),
+                ),
+            ))
         if agg.get("attachment_signal", 0) < -0.1:
-            blind.append(ConfidenceRated("attachment", conf, [], "negative attachment signal"))
+            blind.append(ConfidenceRated(
+                "attachment",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "social_threat"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "negative attachment signal",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "social_threat"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+            ))
 
         # Internal vs external balance
         int_ext = _clamp((1 - e) * 0.4 + n * 0.2 - e * 0.2, -1, 1)
@@ -660,12 +1207,49 @@ class PersonalityAnalyzer:
         return PrecisionAllocation(
             hypersensitive_channels=hyper,
             blind_spots=blind,
-            internal_vs_external=ConfidenceRated(round(int_ext, 4), conf, [], "introversion bias"),
-            immediate_vs_narrative=ConfidenceRated(round(imm_nar, 4), conf, [], "present vs story focus"),
+            internal_vs_external=ConfidenceRated(
+                round(int_ext, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "self_efficacy_impact"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social", "goal"),
+                ),
+                "introversion bias",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "self_efficacy_impact"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social", "goal"),
+                ),
+            ),
+            immediate_vs_narrative=ConfidenceRated(
+                round(imm_nar, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("uncertainty", "meaning_violation", "novelty"),
+                    categories=("cognitive", "emotional"),
+                    schema_directions=("meaning", "world"),
+                ),
+                "present vs story focus",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("uncertainty", "meaning_violation", "novelty"),
+                    categories=("cognitive", "emotional"),
+                    schema_directions=("meaning", "world"),
+                ),
+            ),
         )
 
     def _infer_temporal_structure(
-        self, agg: dict[str, float], b5: dict[str, float], conf: str,
+        self,
+        agg: dict[str, float],
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> TemporalStructure:
         loss = agg.get("loss", 0)
         ctrl = agg.get("controllability", 0)
@@ -686,13 +1270,66 @@ class PersonalityAnalyzer:
             past = present = future = 1 / 3
 
         return TemporalStructure(
-            past_trauma_weight=ConfidenceRated(round(past, 4), conf, [], "loss*0.4 + (1-ctrl)*0.2"),
-            present_pressure_weight=ConfidenceRated(round(present, 4), conf, [], "threat*0.3 + uncertainty*0.3"),
-            future_imagination_weight=ConfidenceRated(round(future, 4), conf, [], "ctrl*0.3 + SE*0.3"),
+            past_trauma_weight=ConfidenceRated(
+                round(past, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("loss", "controllability"),
+                    categories=("emotional", "behavioral"),
+                    schema_directions=("threat", "world"),
+                ),
+                "loss*0.4 + (1-ctrl)*0.2",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("loss", "controllability"),
+                    categories=("emotional", "behavioral"),
+                    schema_directions=("threat", "world"),
+                ),
+            ),
+            present_pressure_weight=ConfidenceRated(
+                round(present, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("physical_threat", "uncertainty"),
+                    categories=("behavioral", "emotional"),
+                    schema_directions=("threat",),
+                ),
+                "threat*0.3 + uncertainty*0.3",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("physical_threat", "uncertainty"),
+                    categories=("behavioral", "emotional"),
+                    schema_directions=("threat",),
+                ),
+            ),
+            future_imagination_weight=ConfidenceRated(
+                round(future, 4),
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("controllability", "self_efficacy_impact", "novelty"),
+                    categories=("cognitive", "behavioral"),
+                    schema_directions=("goal", "world"),
+                ),
+                "ctrl*0.3 + SE*0.3",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("controllability", "self_efficacy_impact", "novelty"),
+                    categories=("cognitive", "behavioral"),
+                    schema_directions=("goal", "world"),
+                ),
+            ),
         )
 
     def _infer_value_hierarchy(
-        self, agg: dict[str, float], b5: dict[str, float], conf: str,
+        self,
+        agg: dict[str, float],
+        b5: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> AnalysisValueHierarchy:
         o, c, e, a, n = b5["openness"], b5["conscientiousness"], b5["extraversion"], b5["agreeableness"], b5["neuroticism"]
         pt = agg.get("physical_threat", 0)
@@ -716,7 +1353,86 @@ class PersonalityAnalyzer:
         ranked = sorted(scores.items(), key=lambda kv: -kv[1])
         return AnalysisValueHierarchy(
             ranked_values=[
-                (name, ConfidenceRated(round(score, 4), conf, [], "Big Five + appraisal projection"))
+                (
+                    name,
+                    ConfidenceRated(
+                        round(score, 4),
+                        conf,
+                        self._evidence_bundle(
+                            evidence,
+                            semantic_schemas,
+                            appraisal_keys={
+                                "survival": ("physical_threat",),
+                                "safety": ("physical_threat", "uncertainty"),
+                                "control": ("controllability", "self_efficacy_impact"),
+                                "dignity": ("social_threat",),
+                                "relation": ("attachment_signal", "trust_impact"),
+                                "achievement": ("self_efficacy_impact", "controllability"),
+                                "freedom": ("novelty",),
+                                "truth": ("novelty", "meaning_violation"),
+                                "meaning": ("meaning_violation", "novelty"),
+                                "contribution": ("attachment_signal", "trust_impact"),
+                            }.get(name, ()),
+                            categories={
+                                "relation": ("relational",),
+                                "contribution": ("relational", "behavioral"),
+                                "achievement": ("behavioral", "cognitive"),
+                                "freedom": ("cognitive",),
+                                "truth": ("cognitive",),
+                                "meaning": ("cognitive", "emotional"),
+                            }.get(name, ("behavioral", "relational")),
+                            schema_directions={
+                                "survival": ("threat",),
+                                "safety": ("threat", "world"),
+                                "control": ("goal", "world"),
+                                "dignity": ("social",),
+                                "relation": ("social",),
+                                "achievement": ("goal",),
+                                "freedom": ("world", "meaning"),
+                                "truth": ("meaning", "world"),
+                                "meaning": ("meaning",),
+                                "contribution": ("social", "goal"),
+                            }.get(name, ()),
+                        ),
+                        "Big Five + appraisal projection",
+                        self._evidence_detail_bundle(
+                            evidence,
+                            semantic_schemas,
+                            appraisal_keys={
+                                "survival": ("physical_threat",),
+                                "safety": ("physical_threat", "uncertainty"),
+                                "control": ("controllability", "self_efficacy_impact"),
+                                "dignity": ("social_threat",),
+                                "relation": ("attachment_signal", "trust_impact"),
+                                "achievement": ("self_efficacy_impact", "controllability"),
+                                "freedom": ("novelty",),
+                                "truth": ("novelty", "meaning_violation"),
+                                "meaning": ("meaning_violation", "novelty"),
+                                "contribution": ("attachment_signal", "trust_impact"),
+                            }.get(name, ()),
+                            categories={
+                                "relation": ("relational",),
+                                "contribution": ("relational", "behavioral"),
+                                "achievement": ("behavioral", "cognitive"),
+                                "freedom": ("cognitive",),
+                                "truth": ("cognitive",),
+                                "meaning": ("cognitive", "emotional"),
+                            }.get(name, ("behavioral", "relational")),
+                            schema_directions={
+                                "survival": ("threat",),
+                                "safety": ("threat", "world"),
+                                "control": ("goal", "world"),
+                                "dignity": ("social",),
+                                "relation": ("social",),
+                                "achievement": ("goal",),
+                                "freedom": ("world", "meaning"),
+                                "truth": ("meaning", "world"),
+                                "meaning": ("meaning",),
+                                "contribution": ("social", "goal"),
+                            }.get(name, ()),
+                        ),
+                    ),
+                )
                 for name, score in ranked
             ]
         )
@@ -906,6 +1622,7 @@ class PersonalityAnalyzer:
         agg: dict[str, float],
         b5: dict[str, float],
         defenses: DefenseMechanismProfile,
+        semantic_schemas: list[dict[str, object]],
     ) -> list[ConfidenceRated]:
         inferences: list[ConfidenceRated] = []
 
@@ -914,7 +1631,22 @@ class PersonalityAnalyzer:
             inferences.append(ConfidenceRated(
                 "Possible early experiences of social rejection or exclusion shaped "
                 "heightened sensitivity to social threat signals.",
-                "low", [], "inferred from elevated social_threat appraisal",
+                "low",
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("social_threat", "loss"),
+                    categories=("relational", "emotional"),
+                    schema_directions=("social",),
+                ),
+                "inferred from elevated social_threat appraisal",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("social_threat", "loss"),
+                    categories=("relational", "emotional"),
+                    schema_directions=("social",),
+                ),
             ))
 
         # High attachment + trust → secure base experience
@@ -922,7 +1654,22 @@ class PersonalityAnalyzer:
             inferences.append(ConfidenceRated(
                 "Evidence of positive attachment experiences; likely had at least one "
                 "reliable caregiver or close relationship.",
-                "medium", [], "inferred from positive attachment + trust signals",
+                "medium",
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "inferred from positive attachment + trust signals",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
             ))
 
         # High contamination/moral salience → possible exposure to moral injury
@@ -930,7 +1677,22 @@ class PersonalityAnalyzer:
             inferences.append(ConfidenceRated(
                 "Exposure to morally distressing events may have shaped heightened "
                 "contamination sensitivity and moral vigilance.",
-                "low", [], "inferred from contamination/moral_salience signals",
+                "low",
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("contamination", "moral_salience"),
+                    categories=("emotional", "behavioral"),
+                    schema_directions=("meaning", "threat"),
+                ),
+                "inferred from contamination/moral_salience signals",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("contamination", "moral_salience"),
+                    categories=("emotional", "behavioral"),
+                    schema_directions=("meaning", "threat"),
+                ),
             ))
 
         # Many suppress-type defenses → possible environment that punished expression
@@ -942,7 +1704,22 @@ class PersonalityAnalyzer:
             inferences.append(ConfidenceRated(
                 "Reliance on suppression-class defenses suggests an environment where "
                 "emotional expression was discouraged or punished.",
-                "low", [], f"{suppress_count} suppression-type defenses active",
+                "low",
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("uncertainty", "social_threat"),
+                    categories=("emotional", "relational"),
+                    schema_directions=("threat", "social"),
+                ),
+                f"{suppress_count} suppression-type defenses active",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("uncertainty", "social_threat"),
+                    categories=("emotional", "relational"),
+                    schema_directions=("threat", "social"),
+                ),
             ))
 
         # High exploration + low threat → enriched environment
@@ -950,13 +1727,31 @@ class PersonalityAnalyzer:
             inferences.append(ConfidenceRated(
                 "Pattern suggests access to a relatively safe, stimulating environment "
                 "that encouraged exploration.",
-                "low", [], "high novelty + low physical threat",
+                "low",
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("novelty", "physical_threat"),
+                    categories=("cognitive", "behavioral"),
+                    schema_directions=("world", "goal"),
+                ),
+                "high novelty + low physical threat",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("novelty", "physical_threat"),
+                    categories=("cognitive", "behavioral"),
+                    schema_directions=("world", "goal"),
+                ),
             ))
 
         if not inferences:
             inferences.append(ConfidenceRated(
                 "Insufficient evidence for developmental inferences.",
-                "low", [], "limited material",
+                "low",
+                self._evidence_bundle(evidence, semantic_schemas),
+                "limited material",
+                self._evidence_detail_bundle(evidence, semantic_schemas),
             ))
 
         return inferences
@@ -1099,7 +1894,12 @@ class PersonalityAnalyzer:
     # ------------------------------------------------------------------
 
     def _infer_self_model(
-        self, b5: dict[str, float], priors: CorePriors, conf: str,
+        self,
+        b5: dict[str, float],
+        priors: CorePriors,
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> SelfModelProfile:
         # Self-narrative from dominant traits
         dominant = max(b5.items(), key=lambda kv: abs(kv[1] - 0.5))
@@ -1107,73 +1907,370 @@ class PersonalityAnalyzer:
 
         threats: list[ConfidenceRated] = []
         if priors.self_worth.value < 0.4:  # type: ignore[operator]
-            threats.append(ConfidenceRated("worthlessness", conf, [], "low self_worth prior"))
+            threats.append(ConfidenceRated(
+                "worthlessness",
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("social_threat", "self_efficacy_impact"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social",),
+                ),
+                "low self_worth prior",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("social_threat", "self_efficacy_impact"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social",),
+                ),
+            ))
         if priors.self_efficacy.value < 0.4:  # type: ignore[operator]
-            threats.append(ConfidenceRated("incompetence", conf, [], "low self_efficacy prior"))
+            threats.append(ConfidenceRated(
+                "incompetence",
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "controllability"),
+                    categories=("behavioral", "cognitive"),
+                    schema_directions=("goal", "world"),
+                ),
+                "low self_efficacy prior",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "controllability"),
+                    categories=("behavioral", "cognitive"),
+                    schema_directions=("goal", "world"),
+                ),
+            ))
 
         consistency: list[ConfidenceRated] = []
         if b5["conscientiousness"] > 0.6:
-            consistency.append(ConfidenceRated("moral consistency", conf, [], "high conscientiousness"))
+            consistency.append(ConfidenceRated(
+                "moral consistency",
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("controllability", "moral_salience"),
+                    categories=("behavioral", "cognitive"),
+                    schema_directions=("goal", "meaning"),
+                ),
+                "high conscientiousness",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("controllability", "moral_salience"),
+                    categories=("behavioral", "cognitive"),
+                    schema_directions=("goal", "meaning"),
+                ),
+            ))
         if b5["openness"] < 0.4:
-            consistency.append(ConfidenceRated("tradition / stability", conf, [], "low openness"))
+            consistency.append(ConfidenceRated(
+                "tradition / stability",
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("novelty", "uncertainty"),
+                    categories=("cognitive", "behavioral"),
+                    schema_directions=("world",),
+                ),
+                "low openness",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("novelty", "uncertainty"),
+                    categories=("cognitive", "behavioral"),
+                    schema_directions=("world",),
+                ),
+            ))
 
         return SelfModelProfile(
-            self_narrative=ConfidenceRated(narrative, conf, [], "from dominant Big Five trait"),
+            self_narrative=ConfidenceRated(
+                narrative,
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "attachment_signal", "novelty"),
+                    categories=("behavioral", "relational", "cognitive"),
+                    schema_directions=("goal", "social", "world"),
+                ),
+                "from dominant Big Five trait",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "attachment_signal", "novelty"),
+                    categories=("behavioral", "relational", "cognitive"),
+                    schema_directions=("goal", "social", "world"),
+                ),
+            ),
             identity_consistency_needs=consistency,
             identity_threats=threats,
         )
 
     def _infer_other_model(
-        self, b5: dict[str, float], agg: dict[str, float], conf: str,
+        self,
+        b5: dict[str, float],
+        agg: dict[str, float],
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> OtherModelProfile:
         trust_base = agg.get("trust_impact", 0)
         attachment = agg.get("attachment_signal", 0)
 
-        def _model(label: str, trust_mod: float, pred_mod: float) -> ConfidenceRated:
+        def _model(
+            label: str,
+            trust_mod: float,
+            pred_mod: float,
+            *,
+            appraisal_keys: tuple[str, ...],
+            categories: tuple[str, ...] = ("relational",),
+            schema_directions: tuple[str, ...] = ("social",),
+        ) -> ConfidenceRated:
             t = _clamp(0.5 + trust_base * 0.3 + trust_mod)
             p = _clamp(0.5 + pred_mod)
             return ConfidenceRated(
                 {"trust": round(t, 3), "predictability": round(p, 3)},
-                conf, [],
+                conf,
+                self._evidence_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=appraisal_keys,
+                    categories=categories,
+                    schema_directions=schema_directions,
+                ),
                 f"{label} template from appraisal + Big Five",
+                self._evidence_detail_bundle(
+                    evidence,
+                    semantic_schemas,
+                    appraisal_keys=appraisal_keys,
+                    categories=categories,
+                    schema_directions=schema_directions,
+                ),
             )
 
         return OtherModelProfile(
-            intimate_model=_model("intimate", attachment * 0.2, b5["agreeableness"] * 0.15),
-            authority_model=_model("authority", -b5["neuroticism"] * 0.1, b5["conscientiousness"] * 0.1),
-            peer_model=_model("peer", b5["agreeableness"] * 0.1, 0.0),
-            weaker_model=_model("weaker", b5["agreeableness"] * 0.15, 0.05),
-            stranger_model=_model("stranger", -0.1, -b5["neuroticism"] * 0.1),
+            intimate_model=_model(
+                "intimate",
+                attachment * 0.2,
+                b5["agreeableness"] * 0.15,
+                appraisal_keys=("trust_impact", "attachment_signal"),
+            ),
+            authority_model=_model(
+                "authority",
+                -b5["neuroticism"] * 0.1,
+                b5["conscientiousness"] * 0.1,
+                appraisal_keys=("controllability", "social_threat"),
+                categories=("behavioral", "relational"),
+                schema_directions=("goal", "social"),
+            ),
+            peer_model=_model(
+                "peer",
+                b5["agreeableness"] * 0.1,
+                0.0,
+                appraisal_keys=("trust_impact", "attachment_signal"),
+            ),
+            weaker_model=_model(
+                "weaker",
+                b5["agreeableness"] * 0.15,
+                0.05,
+                appraisal_keys=("trust_impact", "self_efficacy_impact"),
+                categories=("relational", "behavioral"),
+                schema_directions=("social", "goal"),
+            ),
+            stranger_model=_model(
+                "stranger",
+                -0.1,
+                -b5["neuroticism"] * 0.1,
+                appraisal_keys=("uncertainty", "social_threat"),
+                categories=("relational", "behavioral"),
+                schema_directions=("social", "world"),
+            ),
         )
 
     def _infer_relational_templates(
-        self, b5: dict[str, float], social: SocialOrientation, conf: str,
+        self,
+        b5: dict[str, float],
+        social: SocialOrientation,
+        conf: str,
+        evidence: list[EvidenceItem],
+        semantic_schemas: list[dict[str, object]],
     ) -> RelationalTemplates:
         intimate: list[ConfidenceRated] = []
         coop: list[ConfidenceRated] = []
         power: list[ConfidenceRated] = []
 
         if b5["agreeableness"] > 0.6:
-            intimate.append(ConfidenceRated("warm, accommodating in close relationships", conf, [], "high A"))
-            coop.append(ConfidenceRated("strong team player, consensus-seeking", conf, [], "high A"))
+            intimate.append(ConfidenceRated(
+                "warm, accommodating in close relationships",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "high A",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+            ))
+            coop.append(ConfidenceRated(
+                "strong team player, consensus-seeking",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social", "goal"),
+                ),
+                "high A",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social", "goal"),
+                ),
+            ))
         elif b5["agreeableness"] < 0.4:
-            intimate.append(ConfidenceRated("maintains emotional distance, values autonomy", conf, [], "low A"))
-            coop.append(ConfidenceRated("independent operator, may resist group norms", conf, [], "low A"))
+            intimate.append(ConfidenceRated(
+                "maintains emotional distance, values autonomy",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "attachment_signal"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "low A",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "attachment_signal"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+            ))
+            coop.append(ConfidenceRated(
+                "independent operator, may resist group norms",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "controllability"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social", "goal"),
+                ),
+                "low A",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "controllability"),
+                    categories=("relational", "behavioral"),
+                    schema_directions=("social", "goal"),
+                ),
+            ))
 
         if b5["extraversion"] > 0.6:
-            intimate.append(ConfidenceRated("seeks frequent contact, expressive", conf, [], "high E"))
-            power.append(ConfidenceRated("naturally assumes leadership roles", conf, [], "high E"))
+            intimate.append(ConfidenceRated(
+                "seeks frequent contact, expressive",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+                "high E",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("attachment_signal", "trust_impact"),
+                    categories=("relational",),
+                    schema_directions=("social",),
+                ),
+            ))
+            power.append(ConfidenceRated(
+                "naturally assumes leadership roles",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "controllability"),
+                    categories=("behavioral", "relational"),
+                    schema_directions=("goal", "social"),
+                ),
+                "high E",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("self_efficacy_impact", "controllability"),
+                    categories=("behavioral", "relational"),
+                    schema_directions=("goal", "social"),
+                ),
+            ))
         elif b5["extraversion"] < 0.4:
-            intimate.append(ConfidenceRated("needs space, selective sharing", conf, [], "low E"))
-            power.append(ConfidenceRated("prefers advisory over directive roles", conf, [], "low E"))
+            intimate.append(ConfidenceRated(
+                "needs space, selective sharing",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("uncertainty", "attachment_signal"),
+                    categories=("relational", "cognitive"),
+                    schema_directions=("social", "world"),
+                ),
+                "low E",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("uncertainty", "attachment_signal"),
+                    categories=("relational", "cognitive"),
+                    schema_directions=("social", "world"),
+                ),
+            ))
+            power.append(ConfidenceRated(
+                "prefers advisory over directive roles",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("controllability", "self_efficacy_impact"),
+                    categories=("behavioral",),
+                    schema_directions=("goal",),
+                ),
+                "low E",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("controllability", "self_efficacy_impact"),
+                    categories=("behavioral",),
+                    schema_directions=("goal",),
+                ),
+            ))
 
         if b5["neuroticism"] > 0.6:
-            intimate.append(ConfidenceRated("anxious attachment patterns possible", conf, [], "high N"))
+            intimate.append(ConfidenceRated(
+                "anxious attachment patterns possible",
+                conf,
+                self._evidence_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "attachment_signal", "uncertainty"),
+                    categories=("relational", "emotional"),
+                    schema_directions=("social", "threat"),
+                ),
+                "high N",
+                self._evidence_detail_bundle(
+                    evidence, semantic_schemas,
+                    appraisal_keys=("social_threat", "attachment_signal", "uncertainty"),
+                    categories=("relational", "emotional"),
+                    schema_directions=("social", "threat"),
+                ),
+            ))
 
         return RelationalTemplates(
-            intimate_patterns=intimate or [ConfidenceRated("insufficient data", "low", [], "")],
-            cooperative_patterns=coop or [ConfidenceRated("insufficient data", "low", [], "")],
-            power_patterns=power or [ConfidenceRated("insufficient data", "low", [], "")],
+            intimate_patterns=intimate or [ConfidenceRated("insufficient data", "low", self._evidence_bundle(evidence, semantic_schemas), "", self._evidence_detail_bundle(evidence, semantic_schemas))],
+            cooperative_patterns=coop or [ConfidenceRated("insufficient data", "low", self._evidence_bundle(evidence, semantic_schemas), "", self._evidence_detail_bundle(evidence, semantic_schemas))],
+            power_patterns=power or [ConfidenceRated("insufficient data", "low", self._evidence_bundle(evidence, semantic_schemas), "", self._evidence_detail_bundle(evidence, semantic_schemas))],
         )
 
     # ------------------------------------------------------------------

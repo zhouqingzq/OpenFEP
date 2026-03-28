@@ -22,12 +22,14 @@ class ConfidenceRated:
     confidence: Literal["high", "medium", "low"] = "low"
     evidence: list[str] = field(default_factory=list)
     reasoning: str = ""
+    evidence_details: list[dict[str, object]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         return {
             "value": self.value,
             "confidence": self.confidence,
             "evidence": list(self.evidence),
+            "evidence_details": [dict(item) for item in self.evidence_details],
             "reasoning": self.reasoning,
         }
 
@@ -37,6 +39,7 @@ class ConfidenceRated:
             value=payload.get("value"),
             confidence=str(payload.get("confidence", "low")),  # type: ignore[arg-type]
             evidence=list(payload.get("evidence", [])),  # type: ignore[arg-type]
+            evidence_details=[dict(item) for item in payload.get("evidence_details", [])],  # type: ignore[arg-type]
             reasoning=str(payload.get("reasoning", "")),
         )
 
@@ -53,6 +56,13 @@ class EvidenceItem:
     category: str  # "behavioral", "emotional", "cognitive", "relational", "value"
     appraisal_relevance: dict[str, float] = field(default_factory=dict)
     tags: list[str] = field(default_factory=list)
+    source_episode_id: str = ""
+    compiled_event_type: str = ""
+    predicted_outcome: str = ""
+    compiler_confidence: float = 0.0
+    supporting_segments: list[str] = field(default_factory=list)
+    semantic_grounding: dict[str, object] = field(default_factory=dict)
+    matched_schema_ids: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -65,6 +75,13 @@ class EvidenceItem:
             category=str(payload.get("category", "behavioral")),
             appraisal_relevance=dict(payload.get("appraisal_relevance", {})),  # type: ignore[arg-type]
             tags=list(payload.get("tags", [])),  # type: ignore[arg-type]
+            source_episode_id=str(payload.get("source_episode_id", "")),
+            compiled_event_type=str(payload.get("compiled_event_type", "")),
+            predicted_outcome=str(payload.get("predicted_outcome", "")),
+            compiler_confidence=float(payload.get("compiler_confidence", 0.0)),
+            supporting_segments=list(payload.get("supporting_segments", [])),  # type: ignore[arg-type]
+            semantic_grounding=dict(payload.get("semantic_grounding", {})),  # type: ignore[arg-type]
+            matched_schema_ids=list(payload.get("matched_schema_ids", [])),  # type: ignore[arg-type]
         )
 
 

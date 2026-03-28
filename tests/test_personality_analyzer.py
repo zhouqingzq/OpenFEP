@@ -37,6 +37,12 @@ EXCLUSION_MATERIAL = (
     "abandoned and humiliated. Trust was broken."
 )
 
+SCHEMA_MATERIALS = [
+    "A close friend found me when I was lost, stayed nearby, and shared food until I felt safe again.",
+    "Another ally welcomed me back, made room for me, and remained beside me until I calmed down.",
+    "When I froze, my companion reassured me, kept watch, and helped me reconnect with the group.",
+]
+
 MIXED_MATERIALS = [
     THREAT_MATERIAL,
     SOCIAL_MATERIAL,
@@ -86,6 +92,14 @@ class TestPersonalityAnalyzer(unittest.TestCase):
         self.assertIn("cognitive_style", d)
         self.assertIn("evidence_list", d)
 
+    def test_evidence_roundtrip_preserves_grounding_fields(self) -> None:
+        result = self.analyzer.analyze([SOCIAL_MATERIAL])
+        payload = result.to_dict()["evidence_list"][0]
+        restored = EvidenceItem.from_dict(payload)
+        self.assertTrue(restored.source_episode_id)
+        self.assertTrue(restored.supporting_segments)
+        self.assertTrue(restored.semantic_grounding)
+
     # ------------------------------------------------------------------
     # Evidence extraction
     # ------------------------------------------------------------------
@@ -103,6 +117,18 @@ class TestPersonalityAnalyzer(unittest.TestCase):
         result = self.analyzer.analyze([SOCIAL_MATERIAL])
         self.assertEqual(len(result.evidence_list), 1)
         self.assertTrue(result.summary)
+
+    def test_evidence_items_include_semantic_grounding(self) -> None:
+        result = self.analyzer.analyze([SOCIAL_MATERIAL])
+        item = result.evidence_list[0]
+        self.assertTrue(item.source_episode_id)
+        self.assertTrue(item.supporting_segments)
+        self.assertTrue(item.semantic_grounding)
+        self.assertTrue(item.compiled_event_type)
+
+    def test_repeated_materials_link_to_compressed_schema(self) -> None:
+        result = self.analyzer.analyze(SCHEMA_MATERIALS)
+        self.assertTrue(any(item.matched_schema_ids for item in result.evidence_list))
 
     # ------------------------------------------------------------------
     # Core priors inference
@@ -122,6 +148,17 @@ class TestPersonalityAnalyzer(unittest.TestCase):
         self.assertGreater(
             social_result.core_priors.other_reliability.value,
             exclusion_result.core_priors.other_reliability.value,
+        )
+
+    def test_core_priors_include_episode_or_schema_evidence(self) -> None:
+        result = self.analyzer.analyze(SCHEMA_MATERIALS)
+        self.assertTrue(result.core_priors.other_reliability.evidence)
+        self.assertTrue(result.core_priors.other_reliability.evidence_details)
+        self.assertTrue(
+            any("material[" in entry or "schema:" in entry for entry in result.core_priors.other_reliability.evidence)
+        )
+        self.assertTrue(
+            any(detail.get("kind") in {"episode", "schema"} for detail in result.core_priors.other_reliability.evidence_details)
         )
 
     # ------------------------------------------------------------------
@@ -244,13 +281,20 @@ class TestConfidenceRated(unittest.TestCase):
     """Tests for the ConfidenceRated data structure."""
 
     def test_to_dict_roundtrip(self) -> None:
-        cr = ConfidenceRated(0.75, "high", ["excerpt1"], "test reasoning")
+        cr = ConfidenceRated(
+            0.75,
+            "high",
+            ["excerpt1"],
+            "test reasoning",
+            [{"kind": "episode", "episode_id": "mat-0001"}],
+        )
         d = cr.to_dict()
         restored = ConfidenceRated.from_dict(d)
         self.assertEqual(restored.value, 0.75)
         self.assertEqual(restored.confidence, "high")
         self.assertEqual(restored.evidence, ["excerpt1"])
         self.assertEqual(restored.reasoning, "test reasoning")
+        self.assertEqual(restored.evidence_details[0]["kind"], "episode")
 
 
 if __name__ == "__main__":
