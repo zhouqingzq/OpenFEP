@@ -1,0 +1,6 @@
+{
+  "with_history_bias": 0.0832,
+  "without_history_bias": 0.056,
+  "with_history_label": "efficient_selective_explorer",
+  "without_history_label": "balanced_adaptive"
+}

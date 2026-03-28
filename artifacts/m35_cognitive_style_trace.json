@@ -1,0 +1,180 @@
+{
+  "snapshots": {
+    "selective": {
+      "label": "efficient_selective_explorer",
+      "continuity": 0.5,
+      "known_task_compute": 0.2,
+      "unknown_task_compute": 0.74,
+      "selective_gap": 0.54,
+      "style_surface": {
+        "compute_conservatism": 0.54,
+        "process_attraction_decay": 0.46,
+        "compression_preference": 0.54,
+        "uncertainty_tolerance": 0.62
+      },
+      "evidence": [
+        "known tasks were handled with lower compute than unknown tasks",
+        "uncertainty tolerance stayed elevated",
+        "process attraction decayed slowly"
+      ]
+    },
+    "explorer": {
+      "label": "high_investment_explorer",
+      "continuity": 0.833333,
+      "known_task_compute": 0.0,
+      "unknown_task_compute": 0.78,
+      "selective_gap": 0.78,
+      "style_surface": {
+        "compute_conservatism": 0.41,
+        "process_attraction_decay": 0.35,
+        "compression_preference": 0.41,
+        "uncertainty_tolerance": 0.68
+      },
+      "evidence": [
+        "unknown tasks kept attracting sustained compute",
+        "uncertainty tolerance stayed elevated",
+        "process attraction decayed slowly"
+      ]
+    },
+    "compressor": {
+      "label": "balanced_adaptive",
+      "continuity": 1.0,
+      "known_task_compute": 0.22,
+      "unknown_task_compute": 0.0,
+      "selective_gap": -0.22,
+      "style_surface": {
+        "compute_conservatism": 0.65,
+        "process_attraction_decay": 0.59,
+        "compression_preference": 0.65,
+        "uncertainty_tolerance": 0.5
+      },
+      "evidence": [
+        "style remains balanced across compute, compression, and uncertainty"
+      ]
+    },
+    "baseline": {
+      "label": "balanced_adaptive",
+      "continuity": 0.0,
+      "known_task_compute": 0.0,
+      "unknown_task_compute": 0.0,
+      "selective_gap": 0.0,
+      "style_surface": {
+        "compute_conservatism": 0.5,
+        "process_attraction_decay": 0.5,
+        "compression_preference": 0.5,
+        "uncertainty_tolerance": 0.5
+      },
+      "evidence": [
+        "style remains balanced across compute, compression, and uncertainty"
+      ]
+    }
+  },
+  "style_history": {
+    "selective": [
+      {
+        "tick": 35,
+        "label": "balanced_adaptive",
+        "continuity": 0.0
+      },
+      {
+        "tick": 36,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 37,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 38,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 45,
+        "label": "efficient_selective_explorer",
+        "continuity": 0.0
+      },
+      {
+        "tick": 46,
+        "label": "efficient_selective_explorer",
+        "continuity": 0.2
+      },
+      {
+        "tick": 47,
+        "label": "efficient_selective_explorer",
+        "continuity": 0.333333
+      },
+      {
+        "tick": 48,
+        "label": "efficient_selective_explorer",
+        "continuity": 0.428571
+      }
+    ],
+    "explorer": [
+      {
+        "tick": 135,
+        "label": "balanced_adaptive",
+        "continuity": 0.0
+      },
+      {
+        "tick": 136,
+        "label": "high_investment_explorer",
+        "continuity": 0.0
+      },
+      {
+        "tick": 137,
+        "label": "high_investment_explorer",
+        "continuity": 0.5
+      },
+      {
+        "tick": 138,
+        "label": "high_investment_explorer",
+        "continuity": 0.666667
+      },
+      {
+        "tick": 139,
+        "label": "high_investment_explorer",
+        "continuity": 0.75
+      },
+      {
+        "tick": 140,
+        "label": "high_investment_explorer",
+        "continuity": 0.8
+      }
+    ],
+    "compressor": [
+      {
+        "tick": 235,
+        "label": "balanced_adaptive",
+        "continuity": 0.0
+      },
+      {
+        "tick": 236,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 237,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 238,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 239,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      },
+      {
+        "tick": 240,
+        "label": "balanced_adaptive",
+        "continuity": 1.0
+      }
+    ]
+  }
+}

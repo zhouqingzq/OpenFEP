@@ -8,6 +8,51 @@ from .types import Drive
 
 
 @dataclass
+class ProcessValenceState:
+    active_focus_id: str = ""
+    recent_closed_focus_id: str = ""
+    unresolved_tension: float = 0.0
+    closure_satisfaction: float = 0.0
+    post_closure_decay: float = 0.0
+    boredom_pressure: float = 0.0
+    process_reward: float = 0.0
+    focus_persistence_ticks: int = 0
+    closure_events: int = 0
+    active_phase: str = "idle"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "active_focus_id": self.active_focus_id,
+            "recent_closed_focus_id": self.recent_closed_focus_id,
+            "unresolved_tension": clamp(self.unresolved_tension),
+            "closure_satisfaction": clamp(self.closure_satisfaction),
+            "post_closure_decay": clamp(self.post_closure_decay),
+            "boredom_pressure": clamp(self.boredom_pressure),
+            "process_reward": clamp(self.process_reward),
+            "focus_persistence_ticks": int(self.focus_persistence_ticks),
+            "closure_events": int(self.closure_events),
+            "active_phase": self.active_phase,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "ProcessValenceState":
+        if not payload:
+            return cls()
+        return cls(
+            active_focus_id=str(payload.get("active_focus_id", "")),
+            recent_closed_focus_id=str(payload.get("recent_closed_focus_id", "")),
+            unresolved_tension=float(payload.get("unresolved_tension", 0.0)),
+            closure_satisfaction=float(payload.get("closure_satisfaction", 0.0)),
+            post_closure_decay=float(payload.get("post_closure_decay", 0.0)),
+            boredom_pressure=float(payload.get("boredom_pressure", 0.0)),
+            process_reward=float(payload.get("process_reward", 0.0)),
+            focus_persistence_ticks=int(payload.get("focus_persistence_ticks", 0)),
+            closure_events=int(payload.get("closure_events", 0)),
+            active_phase=str(payload.get("active_phase", "idle")),
+        )
+
+
+@dataclass
 class DriveSystem:
     """Manages competing drives that create internal pressure."""
 
@@ -21,6 +66,7 @@ class DriveSystem:
             Drive("social", 0.0, 0.7, "social"),
         ]
     )
+    process_valence: ProcessValenceState = field(default_factory=ProcessValenceState)
 
     def update_urgencies(
         self,
@@ -58,6 +104,157 @@ class DriveSystem:
         if modality in ["danger", "temperature"]:
             return clamp(base_prior - modulation)
         return clamp(base_prior + modulation)
+
+    def update_process_valence(
+        self,
+        *,
+        current_focus_id: str = "",
+        unresolved_targets: set[str] | None = None,
+        focus_strength: float = 0.0,
+        maintenance_pressure: float = 0.0,
+        closure_signal: float = 0.0,
+    ) -> ProcessValenceState:
+        previous = self.process_valence
+        unresolved_targets = {str(item) for item in (unresolved_targets or set()) if str(item)}
+        current_focus_id = str(current_focus_id or "")
+        focus_strength = clamp(focus_strength)
+        maintenance_pressure = clamp(maintenance_pressure)
+        closure_signal = clamp(closure_signal)
+
+        if current_focus_id and current_focus_id in unresolved_targets:
+            persistence = (
+                previous.focus_persistence_ticks + 1
+                if previous.active_focus_id == current_focus_id
+                else 1
+            )
+            unresolved_tension = clamp(
+                max(previous.unresolved_tension * 0.76, focus_strength * 0.92)
+                + 0.04
+                + min(0.18, max(0, len(unresolved_targets) - 1) * 0.06)
+            )
+            closure_satisfaction = clamp(previous.closure_satisfaction * 0.55)
+            post_closure_decay = clamp(previous.post_closure_decay * 0.58)
+            boredom_pressure = clamp(
+                previous.boredom_pressure * 0.45
+                - unresolved_tension * 0.18
+                - focus_strength * 0.08
+                - maintenance_pressure * 0.05
+            )
+            active_phase = (
+                "reorientation"
+                if previous.boredom_pressure >= 0.42 and previous.active_focus_id != current_focus_id
+                else "wanting"
+            )
+            self.process_valence = ProcessValenceState(
+                active_focus_id=current_focus_id,
+                recent_closed_focus_id=(
+                    ""
+                    if previous.recent_closed_focus_id == current_focus_id
+                    else previous.recent_closed_focus_id
+                ),
+                unresolved_tension=unresolved_tension,
+                closure_satisfaction=closure_satisfaction,
+                post_closure_decay=post_closure_decay,
+                boredom_pressure=boredom_pressure,
+                process_reward=clamp(unresolved_tension * 0.62 + focus_strength * 0.18),
+                focus_persistence_ticks=persistence,
+                closure_events=previous.closure_events,
+                active_phase=active_phase,
+            )
+            return self.process_valence
+
+        if previous.active_focus_id and previous.active_focus_id not in unresolved_targets:
+            closure_satisfaction = clamp(
+                0.42 + previous.unresolved_tension * 0.46 + closure_signal * 0.20
+            )
+            self.process_valence = ProcessValenceState(
+                active_focus_id="",
+                recent_closed_focus_id=previous.active_focus_id,
+                unresolved_tension=0.0,
+                closure_satisfaction=closure_satisfaction,
+                post_closure_decay=1.0,
+                boredom_pressure=clamp(previous.boredom_pressure * 0.30),
+                process_reward=clamp(closure_satisfaction * 0.30),
+                focus_persistence_ticks=0,
+                closure_events=previous.closure_events + 1,
+                active_phase="closure",
+            )
+            return self.process_valence
+
+        closure_satisfaction = clamp(previous.closure_satisfaction * 0.65)
+        post_closure_decay = clamp(max(0.0, previous.post_closure_decay * 0.78 - 0.10))
+        boredom_pressure = clamp(
+            previous.boredom_pressure * 0.82
+            + 0.18
+            - closure_satisfaction * 0.06
+            - maintenance_pressure * 0.10
+        )
+        if closure_satisfaction > 0.18 or post_closure_decay > 0.18:
+            phase = "satiation"
+        elif boredom_pressure >= 0.40:
+            phase = "boredom"
+        else:
+            phase = "idle"
+        self.process_valence = ProcessValenceState(
+            active_focus_id="",
+            recent_closed_focus_id=previous.recent_closed_focus_id,
+            unresolved_tension=0.0,
+            closure_satisfaction=closure_satisfaction,
+            post_closure_decay=post_closure_decay,
+            boredom_pressure=boredom_pressure,
+            process_reward=clamp(boredom_pressure * 0.24),
+            focus_persistence_ticks=0,
+            closure_events=previous.closure_events,
+            active_phase=phase,
+        )
+        return self.process_valence
+
+    def process_action_bias(self, action: str) -> float:
+        state = self.process_valence
+        bias = 0.0
+        if state.active_phase in {"wanting", "reorientation"}:
+            if action in {"scan", "seek_contact"}:
+                bias += state.unresolved_tension * 0.24 + state.boredom_pressure * 0.10
+            if action in {"rest", "hide"}:
+                bias -= state.unresolved_tension * 0.08
+        if state.active_phase in {"closure", "satiation"}:
+            if action in {"scan", "seek_contact"}:
+                bias -= state.closure_satisfaction * 0.18 + state.post_closure_decay * 0.08
+            if action in {"rest", "exploit_shelter"}:
+                bias += state.closure_satisfaction * 0.10
+        if state.active_phase == "boredom":
+            if action in {"scan", "seek_contact"}:
+                bias += state.boredom_pressure * 0.22
+            if action in {"rest", "hide"}:
+                bias -= state.boredom_pressure * 0.06
+        return max(-0.28, min(0.28, round(bias, 6)))
+
+    def inquiry_focus_bonus(self, target_id: str, *, is_novel: bool = False) -> float:
+        state = self.process_valence
+        target_id = str(target_id or "")
+        if not target_id:
+            return round(max(0.0, min(0.12, state.boredom_pressure * 0.10)), 6)
+        if target_id == state.active_focus_id:
+            return round(
+                min(
+                    0.28,
+                    0.08
+                    + state.unresolved_tension * 0.20
+                    + min(0.10, state.focus_persistence_ticks * 0.025),
+                ),
+                6,
+            )
+        if target_id == state.recent_closed_focus_id:
+            return round(
+                -min(
+                    0.24,
+                    state.closure_satisfaction * 0.18 + state.post_closure_decay * 0.16,
+                ),
+                6,
+            )
+        if is_novel and state.boredom_pressure >= 0.42:
+            return round(min(0.16, state.boredom_pressure * 0.18), 6)
+        return 0.0
 
 
 @dataclass

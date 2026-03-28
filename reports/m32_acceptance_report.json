@@ -1,7 +1,7 @@
 {
   "milestone_id": "M3.2",
   "status": "PASS",
-  "generated_at": "2026-03-27T15:51:59+00:00",
+  "generated_at": "2026-03-28T12:38:42+00:00",
   "seed_set": [
     32,
     132
@@ -47,7 +47,7 @@
   "residual_risks": [],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-03-27T15:51:59+00:00"
+    "round_started_at": "2026-03-28T12:38:42+00:00"
   },
   "recommendation": "ACCEPT"
 }

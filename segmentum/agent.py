@@ -9,7 +9,7 @@ from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .action_registry import ActionRegistry, build_default_action_registry
 from .attention import AttentionBottleneck, AttentionTrace
 from .constants import ACTION_BODY_EFFECTS, ACTION_COSTS
-from .drives import DriveSystem, StrategicLayer
+from .drives import DriveSystem, ProcessValenceState, StrategicLayer
 from .environment import Observation, clamp
 from .memory import (
     AutobiographicalMemory,
@@ -751,6 +751,7 @@ class SegmentAgent:
         return state
 
     def _refresh_inquiry_budget(self) -> None:
+        self._refresh_process_valence()
         state = self.inquiry_budget_scheduler.schedule(
             tick=self.cycle,
             narrative_uncertainty=self.latest_narrative_uncertainty,
@@ -759,10 +760,120 @@ class SegmentAgent:
             verification_loop=self.verification_loop,
             subject_state=self.subject_state,
             reconciliation_engine=self.reconciliation_engine,
+            process_valence_state=self.drive_system.process_valence,
         )
         self.latest_narrative_experiment = apply_scheduler_to_experiment_design(
             self.latest_narrative_experiment,
             state,
+        )
+
+    def _refresh_process_valence(self) -> None:
+        unresolved_targets: set[str] = set()
+        focus_id = ""
+        focus_strength = 0.0
+        if getattr(self.latest_narrative_experiment, "plans", ()):
+            top_plan = None
+            for plan in self.latest_narrative_experiment.plans:
+                plan_status = str(getattr(plan, "status", ""))
+                if plan_status in {"active_experiment", "queued_experiment", "deferred_for_budget"}:
+                    top_plan = plan
+                    break
+            if top_plan is not None:
+                focus_id = str(
+                    getattr(top_plan, "target_unknown_id", "")
+                    or getattr(top_plan, "plan_id", "")
+                )
+                focus_strength = max(
+                    focus_strength,
+                    float(getattr(top_plan, "informative_value", 0.0)),
+                    float(getattr(top_plan, "score", 0.0)),
+                )
+        for item in getattr(self.latest_narrative_uncertainty, "unknowns", ()):
+            if not getattr(item, "action_relevant", False):
+                continue
+            unknown_id = str(getattr(item, "unknown_id", ""))
+            if unknown_id:
+                unresolved_targets.add(unknown_id)
+            if not focus_id and unknown_id:
+                focus_id = unknown_id
+                focus_strength = max(
+                    focus_strength,
+                    float(getattr(item, "uncertainty_level", 0.0)),
+                    float(getattr(getattr(item, "decision_relevance", None), "total_score", 0.0)),
+                )
+        for item in getattr(self.subject_state, "active_inquiries", ()):
+            target_unknown_id = str(getattr(item, "target_unknown_id", ""))
+            if target_unknown_id:
+                unresolved_targets.add(target_unknown_id)
+                if not focus_id:
+                    focus_id = target_unknown_id
+                    focus_strength = max(focus_strength, float(getattr(item, "salience", 0.0)))
+        for tension in getattr(self.subject_state, "unresolved_tensions", ()):
+            label = str(getattr(tension, "label", ""))
+            if label:
+                unresolved_targets.add(label)
+                if not focus_id:
+                    focus_id = label
+                    focus_strength = max(
+                        focus_strength,
+                        float(getattr(tension, "intensity", 0.0)),
+                    )
+        self.drive_system.update_process_valence(
+            current_focus_id=focus_id,
+            unresolved_targets=unresolved_targets,
+            focus_strength=focus_strength,
+            maintenance_pressure=float(getattr(self.subject_state, "maintenance_pressure", 0.0)),
+            closure_signal=min(1.0, float(len(unresolved_targets) == 0)),
+        )
+
+    def _is_known_task(self, action: str) -> bool:
+        recent_actions = self.action_history[-12:]
+        repeated = recent_actions.count(action) >= 2
+        preferred = bool(
+            self.self_model.preferred_policies is not None
+            and action in self.self_model.preferred_policies.learned_preferences
+        )
+        return repeated or preferred
+
+    def _action_compute_spend(self, action: str) -> float:
+        mapping = {
+            "rest": 0.18,
+            "hide": 0.24,
+            "exploit_shelter": 0.26,
+            "thermoregulate": 0.28,
+            "forage": 0.48,
+            "scan": 0.66,
+            "seek_contact": 0.62,
+        }
+        return float(mapping.get(action, 0.40))
+
+    def _record_effort_allocation(self, action: str, observation: dict[str, float]) -> None:
+        uncertainty_load = max(
+            float(observation.get("novelty", 0.0)),
+            float(observation.get("danger", 0.0)) * 0.65,
+            max(
+                (
+                    float(getattr(item, "uncertainty_level", 0.0))
+                    for item in getattr(self.latest_narrative_uncertainty, "unknowns", ())
+                ),
+                default=0.0,
+            ),
+        )
+        compression_pressure = max(
+            0.0,
+            min(
+                1.0,
+                1.0 - float(self.self_model.resource_state.memory_free) / 1024.0,
+            ),
+        )
+        self.slow_variable_learner.record_effort_allocation(
+            tick=self.cycle,
+            action=action,
+            known_task=self._is_known_task(action),
+            compute_spend=self._action_compute_spend(action),
+            uncertainty_load=uncertainty_load,
+            compression_pressure=compression_pressure,
+            process_pull=float(self.drive_system.process_valence.process_reward),
         )
 
     def configure_global_workspace(
@@ -1309,14 +1420,24 @@ class SegmentAgent:
             "inquiry_scheduler_summary": diagnostics.inquiry_scheduler_summary,
             "subject_state_summary": diagnostics.subject_state_summary,
             "subject_status_flags": dict(diagnostics.subject_status_flags),
+            "process_valence": self.drive_system.process_valence.to_dict(),
+            "cognitive_style": self.slow_variable_learner.style_snapshot(),
         }
         self.decision_history.append(record)
         if len(self.decision_history) > self.decision_history_limit:
             self.decision_history = self.decision_history[-self.decision_history_limit :]
+        self._record_effort_allocation(record["action"], observed)
 
         drive_snapshot = {
             drive.name: float(drive.urgency) for drive in self.drive_system.drives
         }
+        drive_snapshot.update(
+            {
+                "process_tension": float(self.drive_system.process_valence.unresolved_tension),
+                "closure_satisfaction": float(self.drive_system.process_valence.closure_satisfaction),
+                "boredom_pressure": float(self.drive_system.process_valence.boredom_pressure),
+            }
+        )
         self.drive_history.append(drive_snapshot)
         if len(self.drive_history) > self.drive_history_limit:
             self.drive_history = self.drive_history[-self.drive_history_limit :]
@@ -1371,6 +1492,7 @@ class SegmentAgent:
         details["narrative_experiment"] = self.latest_narrative_experiment.explanation_payload()
         details["inquiry_scheduler"] = self.inquiry_budget_scheduler.state.explanation_payload()
         details["slow_learning"] = self.slow_variable_learner.explanation_payload()
+        details["process_valence"] = self.drive_system.process_valence.to_dict()
         return details
 
     def should_sleep(self) -> bool:
@@ -2129,6 +2251,16 @@ class SegmentAgent:
             experiment_bias = self.latest_narrative_experiment.action_bias(action)
             inquiry_scheduler_bias = self.inquiry_budget_scheduler.state.action_bias(action)
             subject_bias = subject_action_bias(self.subject_state, action)
+            subject_bias += self.drive_system.process_action_bias(action)
+            subject_bias += self.slow_variable_learner.cognitive_style_bias(
+                action=action,
+                uncertainty_level=max(
+                    float(observed.get("novelty", 0.0)),
+                    float(observed.get("danger", 0.0)) * 0.55,
+                ),
+                known_task=self._is_known_task(action),
+                process_tension=float(self.drive_system.process_valence.unresolved_tension),
+            )
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
                 action=action,
@@ -3856,6 +3988,7 @@ class SegmentAgent:
             "drive_urgencies": {
                 drive.name: drive.urgency for drive in self.drive_system.drives
             },
+            "process_valence": self.drive_system.process_valence.to_dict(),
             "world_model": self.world_model.to_dict(),
             "action_registry": self.action_registry.to_dict(),
             "interoceptive_layer": self.interoceptive_layer.to_dict(),
@@ -4178,6 +4311,11 @@ class SegmentAgent:
             for drive in agent.drive_system.drives:
                 if drive.name in drive_urgencies:
                     drive.urgency = float(drive_urgencies[drive.name])
+        agent.drive_system.process_valence = ProcessValenceState.from_dict(
+            payload.get("process_valence")
+            if isinstance(payload.get("process_valence"), dict)
+            else None
+        )
 
         if predictive_hyperparameters is None:
             predictive_hyperparameters = PredictiveCodingHyperparameters.from_dict(

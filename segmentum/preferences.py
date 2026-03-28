@@ -49,6 +49,22 @@ class PreferenceEvaluation:
 
 
 @dataclass(frozen=True)
+class ProcessRewardEvaluation:
+    outcome_value: float
+    process_value: float
+    combined_value: float
+    phase: str
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "outcome_value": float(self.outcome_value),
+            "process_value": float(self.process_value),
+            "combined_value": float(self.combined_value),
+            "phase": self.phase,
+        }
+
+
+@dataclass(frozen=True)
 class PreferenceModel:
     """Probabilistic C-matrix style preferences over discrete outcomes."""
 
@@ -294,6 +310,43 @@ class PreferenceModel:
             state_snapshot=state_snapshot,
             outcome=outcome,
         )[2]
+
+    def evaluate_process_reward(
+        self,
+        *,
+        outcome_label: str,
+        wanting: float,
+        closure: float,
+        boredom: float,
+        decay: float,
+    ) -> ProcessRewardEvaluation:
+        outcome_value = self.normalized_score(outcome_label)
+        process_value = max(
+            -1.0,
+            min(
+                1.0,
+                wanting * 0.55
+                + boredom * 0.20
+                + closure * 0.12
+                - decay * 0.25,
+            ),
+        )
+        phase = "idle"
+        if wanting >= max(closure, boredom, decay):
+            phase = "wanting"
+        elif closure >= max(boredom, decay):
+            phase = "closure"
+        elif decay > 0.12:
+            phase = "satiation"
+        elif boredom > 0.12:
+            phase = "boredom"
+        combined = max(-1.0, min(1.0, outcome_value * 0.72 + process_value * 0.28))
+        return ProcessRewardEvaluation(
+            outcome_value=round(outcome_value, 6),
+            process_value=round(process_value, 6),
+            combined_value=round(combined, 6),
+            phase=phase,
+        )
 
 
 ValueHierarchy = PreferenceModel

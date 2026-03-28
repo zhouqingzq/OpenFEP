@@ -131,10 +131,12 @@ class InquiryPriorityScore:
     base_value: float = 0.0
     persistence_bonus: float = 0.0
     hysteresis_bonus: float = 0.0
+    process_bonus: float = 0.0
     saturation_penalty: float = 0.0
     maintenance_penalty: float = 0.0
     risk_penalty: float = 0.0
     cost_penalty: float = 0.0
+    closure_penalty: float = 0.0
     total: float = 0.0
 
     def to_dict(self) -> dict[str, object]:
@@ -143,10 +145,12 @@ class InquiryPriorityScore:
             "base_value": round(self.base_value, 6),
             "persistence_bonus": round(self.persistence_bonus, 6),
             "hysteresis_bonus": round(self.hysteresis_bonus, 6),
+            "process_bonus": round(self.process_bonus, 6),
             "saturation_penalty": round(self.saturation_penalty, 6),
             "maintenance_penalty": round(self.maintenance_penalty, 6),
             "risk_penalty": round(self.risk_penalty, 6),
             "cost_penalty": round(self.cost_penalty, 6),
+            "closure_penalty": round(self.closure_penalty, 6),
             "total": round(self.total, 6),
         }
 
@@ -159,10 +163,12 @@ class InquiryPriorityScore:
             base_value=float(payload.get("base_value", 0.0)),
             persistence_bonus=float(payload.get("persistence_bonus", 0.0)),
             hysteresis_bonus=float(payload.get("hysteresis_bonus", 0.0)),
+            process_bonus=float(payload.get("process_bonus", 0.0)),
             saturation_penalty=float(payload.get("saturation_penalty", 0.0)),
             maintenance_penalty=float(payload.get("maintenance_penalty", 0.0)),
             risk_penalty=float(payload.get("risk_penalty", 0.0)),
             cost_penalty=float(payload.get("cost_penalty", 0.0)),
+            closure_penalty=float(payload.get("closure_penalty", 0.0)),
             total=float(payload.get("total", 0.0)),
         )
 
@@ -566,6 +572,7 @@ class InquiryBudgetScheduler:
         verification_loop=None,
         subject_state=None,
         reconciliation_engine=None,
+        process_valence_state=None,
     ) -> InquiryBudgetState:
         candidates = self._collect_candidates(
             narrative_uncertainty=narrative_uncertainty,
@@ -596,6 +603,7 @@ class InquiryBudgetScheduler:
                 maintenance_pressure=maintenance_pressure,
                 continuity_fragile=continuity_fragile,
                 tick=tick,
+                process_valence_state=process_valence_state,
             )
             priority_scores.append(score)
             precision = _clamp(0.08 + score.total * 0.92)
@@ -971,6 +979,7 @@ class InquiryBudgetScheduler:
         maintenance_pressure: float,
         continuity_fragile: bool,
         tick: int,
+        process_valence_state=None,
     ) -> InquiryPriorityScore:
         del tick
         base = (
@@ -990,6 +999,10 @@ class InquiryBudgetScheduler:
             InquirySchedulingDecision.KEEP_ACTIVE.value,
             InquirySchedulingDecision.ESCALATE.value,
         } else 0.0
+        process_bonus, closure_penalty = _process_valence_priority_adjustment(
+            candidate=candidate,
+            process_valence_state=process_valence_state,
+        )
         saturation_penalty = min(
             0.28,
             (float(previous.cumulative_budget) * 0.05 if previous is not None else 0.0)
@@ -1005,20 +1018,24 @@ class InquiryBudgetScheduler:
             base
             + persistence_bonus
             + hysteresis_bonus
+            + process_bonus
             - saturation_penalty
             - maintenance_penalty
             - risk_penalty
             - cost_penalty
+            - closure_penalty
         )
         return InquiryPriorityScore(
             candidate_id=candidate.candidate_id,
             base_value=base,
             persistence_bonus=persistence_bonus,
             hysteresis_bonus=hysteresis_bonus,
+            process_bonus=process_bonus,
             saturation_penalty=saturation_penalty,
             maintenance_penalty=maintenance_penalty,
             risk_penalty=risk_penalty,
             cost_penalty=cost_penalty,
+            closure_penalty=closure_penalty,
             total=total,
         )
 
@@ -1227,3 +1244,67 @@ def semantic_uncertainty_priority_bonus(
                 len(active_motifs & motif_signature) / max(1.0, len(active_motifs | motif_signature)),
             )
     return _clamp((uncertainty_hits * 0.18) + (schema_overlap * 0.22))
+
+
+def _process_valence_priority_adjustment(
+    *,
+    candidate: InquiryCandidate,
+    process_valence_state,
+) -> tuple[float, float]:
+    if process_valence_state is None:
+        return 0.0, 0.0
+    if isinstance(process_valence_state, Mapping):
+        active_focus_id = str(process_valence_state.get("active_focus_id", ""))
+        recent_closed_focus_id = str(process_valence_state.get("recent_closed_focus_id", ""))
+        unresolved_tension = _clamp(float(process_valence_state.get("unresolved_tension", 0.0)))
+        closure_satisfaction = _clamp(float(process_valence_state.get("closure_satisfaction", 0.0)))
+        post_closure_decay = _clamp(float(process_valence_state.get("post_closure_decay", 0.0)))
+        boredom_pressure = _clamp(float(process_valence_state.get("boredom_pressure", 0.0)))
+        persistence_ticks = int(process_valence_state.get("focus_persistence_ticks", 0))
+    else:
+        active_focus_id = str(getattr(process_valence_state, "active_focus_id", ""))
+        recent_closed_focus_id = str(getattr(process_valence_state, "recent_closed_focus_id", ""))
+        unresolved_tension = _clamp(float(getattr(process_valence_state, "unresolved_tension", 0.0)))
+        closure_satisfaction = _clamp(float(getattr(process_valence_state, "closure_satisfaction", 0.0)))
+        post_closure_decay = _clamp(float(getattr(process_valence_state, "post_closure_decay", 0.0)))
+        boredom_pressure = _clamp(float(getattr(process_valence_state, "boredom_pressure", 0.0)))
+        persistence_ticks = int(getattr(process_valence_state, "focus_persistence_ticks", 0))
+
+    target_id = (
+        str(candidate.linked_unknown_id)
+        or str(candidate.linked_target_id)
+        or str(candidate.linked_tension)
+        or str(candidate.candidate_id)
+    )
+    process_bonus = 0.0
+    closure_penalty = 0.0
+    if active_focus_id and target_id == active_focus_id:
+        process_bonus += min(
+            0.24,
+            0.08 + unresolved_tension * 0.18 + min(0.08, persistence_ticks * 0.02),
+        )
+    elif recent_closed_focus_id and target_id == recent_closed_focus_id:
+        closure_penalty += min(
+            0.24,
+            closure_satisfaction * 0.18 + post_closure_decay * 0.14,
+        )
+    elif boredom_pressure >= 0.42 and candidate.expected_information_gain >= 0.24:
+        process_bonus += min(0.14, boredom_pressure * 0.16)
+    if candidate.active and unresolved_tension >= 0.24:
+        process_bonus += 0.03
+    return round(process_bonus, 6), round(closure_penalty, 6)
+
+
+def process_valence_priority_adjustment(
+    *,
+    candidate: InquiryCandidate,
+    process_valence_state,
+) -> dict[str, float]:
+    process_bonus, closure_penalty = _process_valence_priority_adjustment(
+        candidate=candidate,
+        process_valence_state=process_valence_state,
+    )
+    return {
+        "process_bonus": process_bonus,
+        "closure_penalty": closure_penalty,
+    }

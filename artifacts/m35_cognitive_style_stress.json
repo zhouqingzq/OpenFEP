@@ -1,0 +1,27 @@
+{
+  "roundtrip_snapshot": {
+    "label": "efficient_selective_explorer",
+    "continuity": 0.5,
+    "known_task_compute": 0.2,
+    "unknown_task_compute": 0.74,
+    "selective_gap": 0.54,
+    "style_surface": {
+      "compute_conservatism": 0.54,
+      "process_attraction_decay": 0.46,
+      "compression_preference": 0.54,
+      "uncertainty_tolerance": 0.62
+    },
+    "evidence": [
+      "known tasks were handled with lower compute than unknown tasks",
+      "uncertainty tolerance stayed elevated",
+      "process attraction decayed slowly"
+    ]
+  },
+  "style_surface": {
+    "compute_conservatism": 0.54,
+    "process_attraction_decay": 0.46,
+    "compression_preference": 0.54,
+    "uncertainty_tolerance": 0.62
+  },
+  "no_lazy_drive_present": true
+}

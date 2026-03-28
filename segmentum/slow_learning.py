@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from statistics import mean
 from typing import Mapping
 
 
@@ -100,6 +101,77 @@ class IdentityStabilityState:
 
 
 @dataclass(slots=True)
+class StyleSurface:
+    compute_conservatism: float = 0.5
+    process_attraction_decay: float = 0.5
+    compression_preference: float = 0.5
+    uncertainty_tolerance: float = 0.5
+
+    def to_dict(self) -> dict[str, float]:
+        return {
+            "compute_conservatism": _rounded(self.compute_conservatism),
+            "process_attraction_decay": _rounded(self.process_attraction_decay),
+            "compression_preference": _rounded(self.compression_preference),
+            "uncertainty_tolerance": _rounded(self.uncertainty_tolerance),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "StyleSurface":
+        if not payload:
+            return cls()
+        return cls(
+            compute_conservatism=float(payload.get("compute_conservatism", 0.5)),
+            process_attraction_decay=float(payload.get("process_attraction_decay", 0.5)),
+            compression_preference=float(payload.get("compression_preference", 0.5)),
+            uncertainty_tolerance=float(payload.get("uncertainty_tolerance", 0.5)),
+        )
+
+
+@dataclass(slots=True)
+class EffortAllocationRecord:
+    tick: int
+    action: str
+    known_task: bool
+    compute_spend: float
+    uncertainty_load: float
+    compression_pressure: float
+    process_pull: float
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "tick": int(self.tick),
+            "action": self.action,
+            "known_task": bool(self.known_task),
+            "compute_spend": _rounded(self.compute_spend),
+            "uncertainty_load": _rounded(self.uncertainty_load),
+            "compression_pressure": _rounded(self.compression_pressure),
+            "process_pull": _rounded(self.process_pull),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, object] | None) -> "EffortAllocationRecord":
+        if not payload:
+            return cls(
+                tick=0,
+                action="",
+                known_task=False,
+                compute_spend=0.0,
+                uncertainty_load=0.0,
+                compression_pressure=0.0,
+                process_pull=0.0,
+            )
+        return cls(
+            tick=int(payload.get("tick", 0)),
+            action=str(payload.get("action", "")),
+            known_task=bool(payload.get("known_task", False)),
+            compute_spend=float(payload.get("compute_spend", 0.0)),
+            uncertainty_load=float(payload.get("uncertainty_load", 0.0)),
+            compression_pressure=float(payload.get("compression_pressure", 0.0)),
+            process_pull=float(payload.get("process_pull", 0.0)),
+        )
+
+
+@dataclass(slots=True)
 class DriftBudget:
     max_total_delta_per_cycle: float = 0.18
     per_variable_budget: dict[str, float] = field(
@@ -118,6 +190,10 @@ class DriftBudget:
             "identity.identity_rigidity": 0.03,
             "identity.plasticity": 0.03,
             "identity.continuity_resilience": 0.04,
+            "style.compute_conservatism": 0.04,
+            "style.process_attraction_decay": 0.04,
+            "style.compression_preference": 0.04,
+            "style.uncertainty_tolerance": 0.04,
         }
     )
     max_divergent_updates: int = 7
@@ -347,6 +423,9 @@ class SlowLearningState:
     traits: SlowTraitState = field(default_factory=SlowTraitState)
     values: ValueStabilityState = field(default_factory=ValueStabilityState)
     identity: IdentityStabilityState = field(default_factory=IdentityStabilityState)
+    style: StyleSurface = field(default_factory=StyleSurface)
+    effort_allocation_history: list[EffortAllocationRecord] = field(default_factory=list)
+    style_history: list[dict[str, object]] = field(default_factory=list)
     last_processed_tick: int = 0
     sleep_cycles: int = 0
     last_summary: str = ""
@@ -356,6 +435,11 @@ class SlowLearningState:
             "traits": self.traits.to_dict(),
             "values": self.values.to_dict(),
             "identity": self.identity.to_dict(),
+            "style": self.style.to_dict(),
+            "effort_allocation_history": [
+                item.to_dict() for item in self.effort_allocation_history[-96:]
+            ],
+            "style_history": [dict(item) for item in self.style_history[-32:]],
             "last_processed_tick": int(self.last_processed_tick),
             "sleep_cycles": int(self.sleep_cycles),
             "last_summary": self.last_summary,
@@ -375,6 +459,19 @@ class SlowLearningState:
             identity=IdentityStabilityState.from_dict(
                 payload.get("identity") if isinstance(payload.get("identity"), Mapping) else None
             ),
+            style=StyleSurface.from_dict(
+                payload.get("style") if isinstance(payload.get("style"), Mapping) else None
+            ),
+            effort_allocation_history=[
+                EffortAllocationRecord.from_dict(item)
+                for item in payload.get("effort_allocation_history", [])
+                if isinstance(item, Mapping)
+            ],
+            style_history=[
+                dict(item)
+                for item in payload.get("style_history", [])
+                if isinstance(item, Mapping)
+            ],
             last_processed_tick=int(payload.get("last_processed_tick", 0)),
             sleep_cycles=int(payload.get("sleep_cycles", 0)),
             last_summary=str(payload.get("last_summary", "")),
@@ -396,6 +493,10 @@ class SlowLearningState:
             "identity.identity_rigidity": self.identity.identity_rigidity,
             "identity.plasticity": self.identity.plasticity,
             "identity.continuity_resilience": self.identity.continuity_resilience,
+            "style.compute_conservatism": self.style.compute_conservatism,
+            "style.process_attraction_decay": self.style.process_attraction_decay,
+            "style.compression_preference": self.style.compression_preference,
+            "style.uncertainty_tolerance": self.style.uncertainty_tolerance,
         }
 
     def set_value(self, variable_path: str, value: float) -> None:
@@ -412,6 +513,7 @@ class SlowLearningState:
             **self.traits.to_dict(),
             **self.values.to_dict(),
             **self.identity.to_dict(),
+            **self.style.to_dict(),
         }
 
 
@@ -431,6 +533,10 @@ def _window_map() -> dict[str, PlasticityWindow]:
         PlasticityWindow("identity.identity_rigidity", learning_rate=0.22, evidence_threshold=4, resistance=0.5),
         PlasticityWindow("identity.plasticity", learning_rate=0.24, evidence_threshold=3, resistance=0.35),
         PlasticityWindow("identity.continuity_resilience", learning_rate=0.32, evidence_threshold=3, resistance=0.4),
+        PlasticityWindow("style.compute_conservatism", learning_rate=0.34, evidence_threshold=3, resistance=0.22),
+        PlasticityWindow("style.process_attraction_decay", learning_rate=0.32, evidence_threshold=3, resistance=0.20),
+        PlasticityWindow("style.compression_preference", learning_rate=0.36, evidence_threshold=2, resistance=0.18),
+        PlasticityWindow("style.uncertainty_tolerance", learning_rate=0.32, evidence_threshold=3, resistance=0.20),
     ]
     return {item.variable_path: item for item in items}
 
@@ -469,6 +575,14 @@ def _anchor_list() -> list[ProtectedAnchor]:
             required_evidence=2,
             anchor_strength=0.65,
         ),
+        ProtectedAnchor(
+            variable_path="style.uncertainty_tolerance",
+            label="bounded-uncertainty-tolerance",
+            min_value=0.22,
+            max_value=0.88,
+            required_evidence=3,
+            anchor_strength=0.72,
+        ),
     ]
 
 
@@ -488,6 +602,10 @@ def _human_label(variable_path: str) -> str:
         "identity.identity_rigidity": "Identity rigidity",
         "identity.plasticity": "Plasticity",
         "identity.continuity_resilience": "Continuity resilience",
+        "style.compute_conservatism": "Compute conservatism",
+        "style.process_attraction_decay": "Process-attraction decay",
+        "style.compression_preference": "Compression preference",
+        "style.uncertainty_tolerance": "Uncertainty tolerance",
     }
     return labels.get(variable_path, variable_path.replace(".", " "))
 
@@ -573,12 +691,14 @@ class SlowVariableLearner:
             "state": self.state.to_dict(),
             "latest_audit": audit.to_dict() if audit is not None else None,
             "recent_explanations": self.recent_explanations(),
+            "style_snapshot": self.style_snapshot(),
         }
 
     def action_bias(self, action: str) -> float:
         traits = self.state.traits
         values = self.state.values
         identity = self.state.identity
+        style = self.state.style
         bias = 0.0
         if action in {"hide", "rest", "exploit_shelter", "thermoregulate"}:
             bias += (traits.caution_bias - 0.5) * 0.35
@@ -597,7 +717,40 @@ class SlowVariableLearner:
             bias -= (traits.caution_bias - 0.5) * 0.20
             bias -= (values.survival_weight - 0.5) * 0.18
             bias -= (identity.commitment_stability - 0.5) * 0.10
+        if action in {"rest", "hide", "exploit_shelter"}:
+            bias += (style.compute_conservatism - 0.5) * 0.12
+            bias += (style.compression_preference - 0.5) * 0.08
+        if action in {"scan", "seek_contact"}:
+            bias -= (style.compute_conservatism - 0.5) * 0.10
+            bias += (0.5 - style.process_attraction_decay) * 0.12
         return max(-0.32, min(0.32, round(bias, 6)))
+
+    def cognitive_style_bias(
+        self,
+        *,
+        action: str,
+        uncertainty_level: float,
+        known_task: bool,
+        process_tension: float = 0.0,
+    ) -> float:
+        style = self.state.style
+        uncertainty_level = _clamp(uncertainty_level)
+        process_tension = _clamp(process_tension)
+        bias = 0.0
+        if known_task:
+            if action in {"rest", "hide", "exploit_shelter"}:
+                bias += (style.compute_conservatism - 0.5) * 0.16
+                bias += (style.compression_preference - 0.5) * 0.10
+            if action in {"scan", "seek_contact"}:
+                bias -= (style.compute_conservatism - 0.5) * 0.12
+        else:
+            if action in {"scan", "seek_contact"}:
+                bias += max(0.0, style.uncertainty_tolerance - 0.5) * 0.18
+                bias += max(0.0, 0.5 - style.process_attraction_decay) * 0.14
+                bias += process_tension * 0.08
+            if action in {"rest", "hide"}:
+                bias -= max(0.0, style.uncertainty_tolerance - 0.5) * 0.10
+        return max(-0.24, min(0.24, round(bias, 6)))
 
     def memory_threshold_delta(self) -> float:
         traits = self.state.traits
@@ -621,6 +774,112 @@ class SlowVariableLearner:
             - max(0.0, identity.plasticity - 0.62) * 0.08
         )
         return round(max(-0.12, min(0.12, modifier)), 6)
+
+    def record_effort_allocation(
+        self,
+        *,
+        tick: int,
+        action: str,
+        known_task: bool,
+        compute_spend: float,
+        uncertainty_load: float,
+        compression_pressure: float,
+        process_pull: float,
+    ) -> EffortAllocationRecord:
+        record = EffortAllocationRecord(
+            tick=int(tick),
+            action=str(action),
+            known_task=bool(known_task),
+            compute_spend=_clamp(compute_spend),
+            uncertainty_load=_clamp(uncertainty_load),
+            compression_pressure=_clamp(compression_pressure),
+            process_pull=_clamp(process_pull),
+        )
+        self.state.effort_allocation_history.append(record)
+        self.state.effort_allocation_history = self.state.effort_allocation_history[-96:]
+
+        style = self.state.style
+        if record.known_task and record.compute_spend <= 0.40:
+            style.compute_conservatism = _clamp(style.compute_conservatism + 0.025)
+        elif (not record.known_task) and record.compute_spend >= 0.58:
+            style.compute_conservatism = _clamp(style.compute_conservatism - 0.015)
+
+        if (not record.known_task) and record.process_pull >= 0.45:
+            style.process_attraction_decay = _clamp(style.process_attraction_decay - 0.025)
+        elif record.known_task and record.compute_spend <= 0.34:
+            style.process_attraction_decay = _clamp(style.process_attraction_decay + 0.015)
+
+        if record.compression_pressure >= 0.55:
+            style.compression_preference = _clamp(style.compression_preference + 0.025)
+        elif record.compute_spend >= 0.65 and record.action in {"scan", "seek_contact"}:
+            style.compression_preference = _clamp(style.compression_preference - 0.015)
+
+        if (not record.known_task) and record.compute_spend >= 0.50 and record.uncertainty_load >= 0.45:
+            style.uncertainty_tolerance = _clamp(style.uncertainty_tolerance + 0.03)
+        elif (not record.known_task) and record.compute_spend <= 0.28 and record.uncertainty_load >= 0.55:
+            style.uncertainty_tolerance = _clamp(style.uncertainty_tolerance - 0.02)
+
+        snapshot = self.style_snapshot()
+        self.state.style_history.append(
+            {
+                "tick": int(tick),
+                "label": snapshot["label"],
+                "continuity": float(snapshot["continuity"]),
+            }
+        )
+        self.state.style_history = self.state.style_history[-32:]
+        return record
+
+    def style_snapshot(self) -> dict[str, object]:
+        records = list(self.state.effort_allocation_history[-24:])
+        known_records = [item for item in records if item.known_task]
+        unknown_records = [item for item in records if not item.known_task]
+        known_compute = mean([item.compute_spend for item in known_records]) if known_records else 0.0
+        unknown_compute = mean([item.compute_spend for item in unknown_records]) if unknown_records else 0.0
+        selective_gap = unknown_compute - known_compute
+        style = self.state.style
+        label = "balanced_adaptive"
+        evidence: list[str] = []
+        if (
+            style.compute_conservatism >= 0.54
+            and style.compression_preference >= 0.54
+            and selective_gap >= 0.12
+        ):
+            label = "efficient_selective_explorer"
+            evidence.append("known tasks were handled with lower compute than unknown tasks")
+        elif unknown_compute >= 0.56 and style.process_attraction_decay <= 0.46:
+            label = "high_investment_explorer"
+            evidence.append("unknown tasks kept attracting sustained compute")
+        elif (
+            style.compression_preference >= 0.58
+            and style.compute_conservatism >= 0.56
+            and style.uncertainty_tolerance < 0.50
+        ):
+            label = "low_cost_compressor"
+            evidence.append("compression and low-cost policies dominated recent allocation")
+        else:
+            evidence.append("style remains balanced across compute, compression, and uncertainty")
+        if style.uncertainty_tolerance >= 0.56:
+            evidence.append("uncertainty tolerance stayed elevated")
+        if style.process_attraction_decay <= 0.46:
+            evidence.append("process attraction decayed slowly")
+        recent_labels = [
+            str(item.get("label", ""))
+            for item in self.state.style_history[-8:]
+            if str(item.get("label", ""))
+        ]
+        continuity = 0.0
+        if recent_labels:
+            continuity = sum(1 for item in recent_labels if item == label) / len(recent_labels)
+        return {
+            "label": label,
+            "continuity": round(continuity, 6),
+            "known_task_compute": round(known_compute, 6),
+            "unknown_task_compute": round(unknown_compute, 6),
+            "selective_gap": round(selective_gap, 6),
+            "style_surface": self.state.style.to_dict(),
+            "evidence": evidence[:4],
+        }
 
     def verification_priority_delta(
         self,
@@ -765,6 +1024,34 @@ class SlowVariableLearner:
         if float(body_state.get("stress", 0.0)) >= 0.72 or float(body_state.get("fatigue", 0.0)) >= 0.72:
             overload_count += 1
         continuity_strain = len(tensions) + len(inconsistency_events)
+        effort_records = [
+            item
+            for item in self.state.effort_allocation_history
+            if int(item.tick) > cutoff
+        ]
+        known_low_compute = sum(
+            1 for item in effort_records if item.known_task and item.compute_spend <= 0.40
+        )
+        unknown_high_compute = sum(
+            1
+            for item in effort_records
+            if (not item.known_task) and item.compute_spend >= 0.52
+        )
+        compression_votes = sum(
+            1 for item in effort_records if item.compression_pressure >= 0.55
+        )
+        process_persistence = sum(
+            1
+            for item in effort_records
+            if (not item.known_task) and item.process_pull >= 0.45
+        )
+        uncertainty_avoidance = sum(
+            1
+            for item in effort_records
+            if (not item.known_task)
+            and item.uncertainty_load >= 0.55
+            and item.compute_spend <= 0.30
+        )
         danger_discrepancies = sum(
             1
             for item in discrepancies
@@ -805,6 +1092,10 @@ class SlowVariableLearner:
             self._pressure("identity.identity_rigidity", (active_commitments * 0.02) + (confirmations * 0.02) - (falsification_count * 0.04) - (exploratory_successes * 0.02), active_commitments + confirmations + falsification_count + exploratory_successes, "identity_anchor_pressure", rationale="identity rigidity responds slowly to repeated support and contradiction"),
             self._pressure("identity.plasticity", (exploratory_successes * 0.03) + (repair_count * 0.02) - (threat_events * 0.04) - (active_commitments * 0.01), exploratory_successes + repair_count + threat_events + active_commitments, "plasticity_window", rationale="plasticity widens only under repeated adaptive evidence and narrows under repeated threat"),
             self._pressure("identity.continuity_resilience", (safe_repairs * 0.05) + (confirmations * 0.04) - (continuity_strain * 0.06) - (overload_count * 0.03), safe_repairs + confirmations + continuity_strain + overload_count, "continuity_repair", rationale="continuity resilience was shaped by repeated repair versus chronic strain"),
+            self._pressure("style.compute_conservatism", (known_low_compute * 0.07) - (unknown_high_compute * 0.04), known_low_compute + unknown_high_compute, "effort_history", rationale="known tasks repeatedly consumed less compute than unknown tasks"),
+            self._pressure("style.process_attraction_decay", (known_low_compute * 0.04) - (process_persistence * 0.08), known_low_compute + process_persistence, "process_valence_history", rationale="persistent unresolved attraction slowed process-attraction decay"),
+            self._pressure("style.compression_preference", (compression_votes * 0.08) - (unknown_high_compute * 0.03), compression_votes + unknown_high_compute, "compression_pressure", rationale="repeated compression pressure shifted long-horizon compression preference"),
+            self._pressure("style.uncertainty_tolerance", (unknown_high_compute * 0.07) - (uncertainty_avoidance * 0.08), unknown_high_compute + uncertainty_avoidance, "uncertainty_history", rationale="uncertain tasks changed tolerance depending on whether compute was invested or avoided"),
         ]
         del tick
         return [item for item in pressures if item is not None]
@@ -892,6 +1183,8 @@ class SlowVariableLearner:
                 summary_bits.append("Trust became more fragile after repeated social rupture.")
             elif strongest.variable_path == "values.maintenance_weight":
                 summary_bits.append("Chronic maintenance pressure changed my long-horizon priorities.")
+            elif strongest.variable_path.startswith("style."):
+                summary_bits.append(f"{_human_label(strongest.variable_path)} shifted through repeated effort allocation.")
             else:
                 summary_bits.append(f"{_human_label(strongest.variable_path)} changed through repeated experience.")
         blocked = next((item for item in rejected if "drift budget" in item.clipped_reason or "protected anchor" in item.clipped_reason), None)

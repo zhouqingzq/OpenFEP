@@ -218,6 +218,10 @@ class SubjectState:
     ambiguity_profile: dict[str, float] = field(default_factory=dict)
     subject_priority_stack: tuple[SubjectPriority, ...] = ()
     slow_biases: dict[str, float] = field(default_factory=dict)
+    cognitive_style_label: str = ""
+    cognitive_style_evidence: tuple[str, ...] = ()
+    cognitive_style_continuity: float = 0.0
+    cognitive_style_history: tuple[str, ...] = ()
     status_flags: dict[str, bool] = field(default_factory=dict)
     protected_targets: tuple[str, ...] = ()
     repair_targets: tuple[str, ...] = ()
@@ -250,6 +254,10 @@ class SubjectState:
             },
             "subject_priority_stack": [item.to_dict() for item in self.subject_priority_stack],
             "slow_biases": {str(key): float(value) for key, value in self.slow_biases.items()},
+            "cognitive_style_label": self.cognitive_style_label,
+            "cognitive_style_evidence": list(self.cognitive_style_evidence),
+            "cognitive_style_continuity": round(self.cognitive_style_continuity, 6),
+            "cognitive_style_history": list(self.cognitive_style_history),
             "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
             "protected_targets": list(self.protected_targets),
             "repair_targets": list(self.repair_targets),
@@ -325,6 +333,14 @@ class SubjectState:
                 for key, value in dict(payload.get("slow_biases", {})).items()
                 if isinstance(value, (int, float))
             },
+            cognitive_style_label=str(payload.get("cognitive_style_label", "")),
+            cognitive_style_evidence=tuple(
+                str(item) for item in payload.get("cognitive_style_evidence", [])
+            ),
+            cognitive_style_continuity=float(payload.get("cognitive_style_continuity", 0.0)),
+            cognitive_style_history=tuple(
+                str(item) for item in payload.get("cognitive_style_history", [])
+            ),
             status_flags=(
                 {str(key): bool(value) for key, value in status_flags.items()}
                 if isinstance(status_flags, Mapping)
@@ -354,6 +370,8 @@ class SubjectState:
             parts.append("Narrative uncertainty: " + ", ".join(uncertainties) + ".")
         if inquiries:
             parts.append("Active inquiry: " + ", ".join(inquiries) + ".")
+        if self.cognitive_style_label:
+            parts.append(f"Current style: {self.cognitive_style_label.replace('_', ' ')}.")
         if self.same_subject_basis:
             parts.append(self.same_subject_basis)
         return " ".join(parts)
@@ -369,6 +387,10 @@ class SubjectState:
             "status_flags": {str(key): bool(value) for key, value in self.status_flags.items()},
             "priority_stack": [item.to_dict() for item in self.subject_priority_stack[:4]],
             "slow_biases": {str(key): float(value) for key, value in self.slow_biases.items()},
+            "cognitive_style_label": self.cognitive_style_label,
+            "cognitive_style_evidence": list(self.cognitive_style_evidence),
+            "cognitive_style_continuity": round(self.cognitive_style_continuity, 6),
+            "cognitive_style_history": list(self.cognitive_style_history),
             "unresolved_tensions": [item.to_dict() for item in self.unresolved_tensions[:4]],
             "narrative_uncertainties": [
                 item.to_dict() for item in self.narrative_uncertainties[:4]
@@ -735,6 +757,7 @@ def derive_subject_state(
     restart_anchors: Mapping[str, object] | None = None,
 ) -> SubjectState:
     slow_biases = agent.slow_variable_learner.state.bias_payload()
+    style_snapshot = agent.slow_variable_learner.style_snapshot()
     narrative = agent.self_model.identity_narrative
     current_chapter = narrative.current_chapter if narrative is not None else None
     core_identity_summary = (
@@ -881,6 +904,10 @@ def derive_subject_state(
         same_subject_bits.append(
             f"{len(narrative_uncertainties)} retained narrative uncertainty item(s) still shape policy."
         )
+    if style_snapshot.get("label"):
+        same_subject_bits.append(
+            f"Style remains {str(style_snapshot['label']).replace('_', ' ')} with continuity {float(style_snapshot.get('continuity', 0.0)):.2f}."
+        )
     ambiguity_profile = getattr(getattr(agent, "latest_narrative_uncertainty", None), "profile", None)
     return SubjectState(
         tick=int(agent.cycle),
@@ -908,6 +935,16 @@ def derive_subject_state(
         ),
         subject_priority_stack=tuple(priorities),
         slow_biases=slow_biases,
+        cognitive_style_label=str(style_snapshot.get("label", "")),
+        cognitive_style_evidence=tuple(
+            str(item) for item in style_snapshot.get("evidence", [])
+        ),
+        cognitive_style_continuity=float(style_snapshot.get("continuity", 0.0)),
+        cognitive_style_history=tuple(
+            str(item.get("label", ""))
+            for item in agent.slow_variable_learner.state.style_history[-6:]
+            if str(item.get("label", ""))
+        ),
         status_flags=status_flags,
         protected_targets=protected_targets,
         repair_targets=repair_targets,
