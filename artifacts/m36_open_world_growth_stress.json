@@ -1,0 +1,63 @@
+{
+  "stress_summary": {
+    "subject_count": 3,
+    "style_label_diversity": 2,
+    "schema_count_mean": 4.0,
+    "schema_count_max": 4,
+    "style_continuity_mean": 0.791667,
+    "process_observability": true,
+    "restart_continuity": true,
+    "narrative_diversity": 4,
+    "task_diversity": 12
+  },
+  "stress_subjects": {
+    "anchor": {
+      "final_schema_count": 4,
+      "schema_count_delta": 3,
+      "style_label": "high_investment_explorer",
+      "style_continuity": 0.375,
+      "restart_style_match": true,
+      "restart_schema_match": true,
+      "phase_counts": {
+        "wanting": 6,
+        "closure": 3,
+        "satiation": 3
+      },
+      "narratives_seen": 4,
+      "tasks_seen": 12,
+      "focus_count": 3
+    },
+    "seeker": {
+      "final_schema_count": 4,
+      "schema_count_delta": 3,
+      "style_label": "high_investment_explorer",
+      "style_continuity": 1.0,
+      "restart_style_match": true,
+      "restart_schema_match": true,
+      "phase_counts": {
+        "wanting": 6,
+        "closure": 3,
+        "satiation": 3
+      },
+      "narratives_seen": 4,
+      "tasks_seen": 12,
+      "focus_count": 3
+    },
+    "compressor": {
+      "final_schema_count": 4,
+      "schema_count_delta": 3,
+      "style_label": "low_cost_compressor",
+      "style_continuity": 1.0,
+      "restart_style_match": true,
+      "restart_schema_match": true,
+      "phase_counts": {
+        "wanting": 6,
+        "closure": 3,
+        "satiation": 3
+      },
+      "narratives_seen": 4,
+      "tasks_seen": 12,
+      "focus_count": 3
+    }
+  }
+}

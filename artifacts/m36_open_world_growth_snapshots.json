@@ -1,0 +1,5205 @@
+{
+  "subjects": {
+    "anchor": {
+      "final_snapshot": {
+        "memory": {
+          "episodes": [
+            {
+              "episode_id": "anchor:001:scan_ruins",
+              "timestamp": 1,
+              "cycle": 1,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:001:scan_ruins",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.8,
+                  "uncertainty": 0.6
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "scan_ruins"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "scan_ruins",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.82,
+                "novelty": 0.68,
+                "social": 0.18
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:002:map_gap",
+              "timestamp": 2,
+              "cycle": 2,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:002:map_gap",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.78,
+                  "uncertainty": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "map_gap"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "map_gap",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.76,
+                "novelty": 0.72,
+                "social": 0.2
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:003:repair_camp",
+              "timestamp": 3,
+              "cycle": 3,
+              "action": "exploit_shelter",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:003:repair_camp",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.76,
+                  "safety": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "repair_camp"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "repair_camp",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.32,
+                "shelter": 0.78,
+                "temperature": 0.58
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:004:cooldown",
+              "timestamp": 4,
+              "cycle": 4,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:004:cooldown",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.66,
+                  "safety": 0.54
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "cooldown"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "cooldown",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.18,
+                "shelter": 0.82,
+                "social": 0.24
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:005:inventory",
+              "timestamp": 5,
+              "cycle": 5,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:005:inventory",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.52,
+                  "uncertainty": 0.2
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "inventory"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.46,
+                "shelter": 0.74,
+                "social": 0.28
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:006:signal_allies",
+              "timestamp": 6,
+              "cycle": 6,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:006:signal_allies",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.84,
+                  "trust": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "signal_allies"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "signal_allies",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.78,
+                "danger": 0.22,
+                "novelty": 0.52
+              }
+            },
+            {
+              "episode_id": "anchor:007:negotiate_route",
+              "timestamp": 7,
+              "cycle": 7,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:007:negotiate_route",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.82,
+                  "trust": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "negotiate_route"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "negotiate_route",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.82,
+                "danger": 0.18,
+                "novelty": 0.56
+              }
+            },
+            {
+              "episode_id": "anchor:008:seal_shelter",
+              "timestamp": 8,
+              "cycle": 8,
+              "action": "exploit_shelter",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:008:seal_shelter",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.74,
+                  "safety": 0.56
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "seal_shelter"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "seal_shelter",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "shelter": 0.84,
+                "danger": 0.16,
+                "temperature": 0.54
+              }
+            },
+            {
+              "episode_id": "anchor:009:steady_watch",
+              "timestamp": 9,
+              "cycle": 9,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:009:steady_watch",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.48,
+                  "uncertainty": 0.18
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "steady_watch"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "steady_watch",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.54,
+                "shelter": 0.76,
+                "social": 0.36
+              }
+            },
+            {
+              "episode_id": "anchor:010:trace_signal",
+              "timestamp": 10,
+              "cycle": 10,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:010:trace_signal",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.72,
+                  "uncertainty": 0.64
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "frontier",
+                  "task_id": "trace_signal"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "frontier",
+                "trace_signal",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "ally-drift"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.74,
+                "novelty": 0.76,
+                "social": 0.26
+              }
+            }
+          ],
+          "semantic_patterns": [
+            {
+              "action": "exploit_shelter",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "rest",
+              "count": 3,
+              "recurrence": 0.3,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "scan",
+              "count": 3,
+              "recurrence": 0.3,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "seek_contact",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            }
+          ],
+          "semantic_schemas": [
+            {
+              "schema_id": "schema:cooperation-rescue",
+              "label": "cooperation",
+              "motif_signature": [
+                "cooperation",
+                "rescue"
+              ],
+              "dominant_direction": "social",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp-signal",
+                "cooperation",
+                "negotiate_route",
+                "rescue",
+                "signal_allies",
+                "social"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "anchor:006:signal_allies",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:007:negotiate_route",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "negotiate_route",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:exploration-predator_attack",
+              "label": "exploration",
+              "motif_signature": [
+                "exploration",
+                "predator_attack"
+              ],
+              "dominant_direction": "threat",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "ally-drift",
+                "exploration",
+                "frontier",
+                "map_gap",
+                "predator_attack",
+                "ruin-scout",
+                "scan_ruins",
+                "trace_signal"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "anchor:001:scan_ruins",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:002:map_gap",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:010:trace_signal",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "ally-drift",
+                    "exploration",
+                    "frontier",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:maintenance-routine",
+              "label": "maintenance",
+              "motif_signature": [
+                "maintenance",
+                "routine"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine",
+                "steady_watch"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "anchor:005:inventory",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:009:steady_watch",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine",
+                    "steady_watch"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:repair-shelter",
+              "label": "repair",
+              "motif_signature": [
+                "repair",
+                "shelter"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "camp",
+                "cooldown",
+                "repair",
+                "repair_camp",
+                "seal_shelter",
+                "shelter"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "anchor:003:repair_camp",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:004:cooldown",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:008:seal_shelter",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "seal_shelter",
+                    "shelter"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            }
+          ],
+          "max_episodes": 1024,
+          "surprise_threshold": 0.4,
+          "duplicate_similarity_threshold": 0.999,
+          "suppression_similarity_threshold": 0.992,
+          "novelty_window": 8,
+          "episode_score_threshold": 0.58,
+          "sleep_interval": 200,
+          "memory_threshold": 512,
+          "sleep_batch_size": 128,
+          "minimum_support": 5,
+          "sleep_minimum_support": 3,
+          "compression_similarity_threshold": 0.95,
+          "cluster_distance_threshold": 0.15,
+          "max_active_age": 5000,
+          "minimum_active_episodes": 3,
+          "cluster_centroids": [],
+          "cluster_counts": [],
+          "archived_episodes": [],
+          "lifecycle_events": [],
+          "rehearsal_log": [],
+          "preference_model": {
+            "outcomes": [
+              "survival_threat",
+              "integrity_loss",
+              "resource_loss",
+              "neutral",
+              "resource_gain"
+            ],
+            "log_preferences": {
+              "survival_threat": -1000.0,
+              "integrity_loss": -100.0,
+              "resource_loss": -10.0,
+              "neutral": 0.0,
+              "resource_gain": 5.0
+            },
+            "probabilities": {
+              "survival_threat": 0.0,
+              "integrity_loss": 2.4897906369168703e-46,
+              "resource_loss": 3.038548695455042e-07,
+              "neutral": 0.0066928488906295115,
+              "resource_gain": 0.993306847254501
+            },
+            "log_probabilities": {
+              "survival_threat": -1005.006715652344,
+              "integrity_loss": -105.00671565234403,
+              "resource_loss": -15.006715652344035,
+              "neutral": -5.006715652344034,
+              "resource_gain": -0.006715652344033707
+            }
+          },
+          "value_hierarchy": {
+            "survival": -1000.0,
+            "integrity": -100.0,
+            "resource_loss": -10.0,
+            "resource": -10.0,
+            "neutral": 0.0,
+            "resource_gain": 5.0
+          },
+          "restart_continuity_until_cycle": 0,
+          "restart_continuity_anchor_ids": [],
+          "latest_schema_update": {
+            "created_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "strengthened_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "weakened_schema_ids": [],
+            "split_schema_ids": [],
+            "archived_schema_ids": []
+          }
+        },
+        "style_snapshot": {
+          "label": "efficient_selective_explorer",
+          "continuity": 0.5,
+          "known_task_compute": 0.2,
+          "unknown_task_compute": 0.752,
+          "selective_gap": 0.552,
+          "style_surface": {
+            "compute_conservatism": 0.55,
+            "process_attraction_decay": 0.45,
+            "compression_preference": 0.55,
+            "uncertainty_tolerance": 0.55
+          },
+          "evidence": [
+            "known tasks were handled with lower compute than unknown tasks",
+            "process attraction decayed slowly"
+          ]
+        },
+        "process_valence": {
+          "active_focus_id": "ally-drift",
+          "recent_closed_focus_id": "camp-signal",
+          "unresolved_tension": 0.6656000000000001,
+          "closure_satisfaction": 0.34702668000000003,
+          "post_closure_decay": 0.39440000000000003,
+          "boredom_pressure": 0.0,
+          "process_reward": 0.535072,
+          "focus_persistence_ticks": 1,
+          "closure_events": 2,
+          "active_phase": "wanting"
+        }
+      },
+      "restart_snapshot": {
+        "memory": {
+          "episodes": [
+            {
+              "episode_id": "anchor:001:scan_ruins",
+              "timestamp": 1,
+              "cycle": 1,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:001:scan_ruins",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.8,
+                  "uncertainty": 0.6
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "scan_ruins"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "scan_ruins",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.82,
+                "novelty": 0.68,
+                "social": 0.18
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:002:map_gap",
+              "timestamp": 2,
+              "cycle": 2,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:002:map_gap",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.78,
+                  "uncertainty": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "map_gap"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "map_gap",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.76,
+                "novelty": 0.72,
+                "social": 0.2
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:003:repair_camp",
+              "timestamp": 3,
+              "cycle": 3,
+              "action": "exploit_shelter",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:003:repair_camp",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.76,
+                  "safety": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "repair_camp"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "repair_camp",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.32,
+                "shelter": 0.78,
+                "temperature": 0.58
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:004:cooldown",
+              "timestamp": 4,
+              "cycle": 4,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:004:cooldown",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.66,
+                  "safety": 0.54
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "cooldown"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "cooldown",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.18,
+                "shelter": 0.82,
+                "social": 0.24
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:005:inventory",
+              "timestamp": 5,
+              "cycle": 5,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:005:inventory",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.52,
+                  "uncertainty": 0.2
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "inventory"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.46,
+                "shelter": 0.74,
+                "social": 0.28
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "anchor:006:signal_allies",
+              "timestamp": 6,
+              "cycle": 6,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:006:signal_allies",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.84,
+                  "trust": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "signal_allies"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "signal_allies",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.78,
+                "danger": 0.22,
+                "novelty": 0.52
+              }
+            },
+            {
+              "episode_id": "anchor:007:negotiate_route",
+              "timestamp": 7,
+              "cycle": 7,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:007:negotiate_route",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.82,
+                  "trust": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "negotiate_route"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "negotiate_route",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.82,
+                "danger": 0.18,
+                "novelty": 0.56
+              }
+            },
+            {
+              "episode_id": "anchor:008:seal_shelter",
+              "timestamp": 8,
+              "cycle": 8,
+              "action": "exploit_shelter",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:008:seal_shelter",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.74,
+                  "safety": 0.56
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "seal_shelter"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "seal_shelter",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "shelter": 0.84,
+                "danger": 0.16,
+                "temperature": 0.54
+              }
+            },
+            {
+              "episode_id": "anchor:009:steady_watch",
+              "timestamp": 9,
+              "cycle": 9,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:009:steady_watch",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.48,
+                  "uncertainty": 0.18
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "steady_watch"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "steady_watch",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.54,
+                "shelter": 0.76,
+                "social": 0.36
+              }
+            },
+            {
+              "episode_id": "anchor:010:trace_signal",
+              "timestamp": 10,
+              "cycle": 10,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "anchor:010:trace_signal",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.72,
+                  "uncertainty": 0.64
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "frontier",
+                  "task_id": "trace_signal"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "frontier",
+                "trace_signal",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "ally-drift"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.74,
+                "novelty": 0.76,
+                "social": 0.26
+              }
+            }
+          ],
+          "semantic_patterns": [
+            {
+              "action": "exploit_shelter",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "rest",
+              "count": 3,
+              "recurrence": 0.3,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "scan",
+              "count": 3,
+              "recurrence": 0.3,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "seek_contact",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            }
+          ],
+          "semantic_schemas": [
+            {
+              "schema_id": "schema:cooperation-rescue",
+              "label": "cooperation",
+              "motif_signature": [
+                "cooperation",
+                "rescue"
+              ],
+              "dominant_direction": "social",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp-signal",
+                "cooperation",
+                "negotiate_route",
+                "rescue",
+                "signal_allies",
+                "social"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "anchor:006:signal_allies",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:007:negotiate_route",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "negotiate_route",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:exploration-predator_attack",
+              "label": "exploration",
+              "motif_signature": [
+                "exploration",
+                "predator_attack"
+              ],
+              "dominant_direction": "threat",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "ally-drift",
+                "exploration",
+                "frontier",
+                "map_gap",
+                "predator_attack",
+                "ruin-scout",
+                "scan_ruins",
+                "threat"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "anchor:001:scan_ruins",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "threat",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:002:map_gap",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "threat"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:010:trace_signal",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "ally-drift",
+                    "exploration",
+                    "frontier",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:maintenance-routine",
+              "label": "maintenance",
+              "motif_signature": [
+                "maintenance",
+                "routine"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine",
+                "steady_watch"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "anchor:005:inventory",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:009:steady_watch",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine",
+                    "steady_watch"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:repair-shelter",
+              "label": "repair",
+              "motif_signature": [
+                "repair",
+                "shelter"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "camp",
+                "cooldown",
+                "repair",
+                "repair_camp",
+                "seal_shelter",
+                "shelter"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "anchor:003:repair_camp",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:004:cooldown",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "anchor:008:seal_shelter",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "seal_shelter",
+                    "shelter"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            }
+          ],
+          "max_episodes": 1024,
+          "surprise_threshold": 0.4,
+          "duplicate_similarity_threshold": 0.999,
+          "suppression_similarity_threshold": 0.992,
+          "novelty_window": 8,
+          "episode_score_threshold": 0.58,
+          "sleep_interval": 200,
+          "memory_threshold": 512,
+          "sleep_batch_size": 128,
+          "minimum_support": 5,
+          "sleep_minimum_support": 3,
+          "compression_similarity_threshold": 0.95,
+          "cluster_distance_threshold": 0.15,
+          "max_active_age": 5000,
+          "minimum_active_episodes": 3,
+          "cluster_centroids": [],
+          "cluster_counts": [],
+          "archived_episodes": [],
+          "lifecycle_events": [],
+          "rehearsal_log": [],
+          "preference_model": {
+            "outcomes": [
+              "survival_threat",
+              "integrity_loss",
+              "resource_loss",
+              "neutral",
+              "resource_gain"
+            ],
+            "log_preferences": {
+              "survival_threat": -1000.0,
+              "integrity_loss": -100.0,
+              "resource_loss": -10.0,
+              "neutral": 0.0,
+              "resource_gain": 5.0
+            },
+            "probabilities": {
+              "survival_threat": 0.0,
+              "integrity_loss": 2.4897906369168703e-46,
+              "resource_loss": 3.038548695455042e-07,
+              "neutral": 0.0066928488906295115,
+              "resource_gain": 0.993306847254501
+            },
+            "log_probabilities": {
+              "survival_threat": -1005.006715652344,
+              "integrity_loss": -105.00671565234403,
+              "resource_loss": -15.006715652344035,
+              "neutral": -5.006715652344034,
+              "resource_gain": -0.006715652344033707
+            }
+          },
+          "value_hierarchy": {
+            "survival": -1000.0,
+            "integrity": -100.0,
+            "resource_loss": -10.0,
+            "resource": -10.0,
+            "neutral": 0.0,
+            "resource_gain": 5.0
+          },
+          "restart_continuity_until_cycle": 0,
+          "restart_continuity_anchor_ids": [],
+          "latest_schema_update": {
+            "created_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "strengthened_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "weakened_schema_ids": [],
+            "split_schema_ids": [],
+            "archived_schema_ids": []
+          }
+        },
+        "style_snapshot": {
+          "label": "efficient_selective_explorer",
+          "continuity": 0.5,
+          "known_task_compute": 0.2,
+          "unknown_task_compute": 0.752,
+          "selective_gap": 0.552,
+          "style_surface": {
+            "compute_conservatism": 0.55,
+            "process_attraction_decay": 0.45,
+            "compression_preference": 0.55,
+            "uncertainty_tolerance": 0.55
+          },
+          "evidence": [
+            "known tasks were handled with lower compute than unknown tasks",
+            "process attraction decayed slowly"
+          ]
+        },
+        "process_valence": {
+          "active_focus_id": "ally-drift",
+          "recent_closed_focus_id": "camp-signal",
+          "unresolved_tension": 0.6656000000000001,
+          "closure_satisfaction": 0.34702668000000003,
+          "post_closure_decay": 0.39440000000000003,
+          "boredom_pressure": 0.0,
+          "process_reward": 0.535072,
+          "focus_persistence_ticks": 1,
+          "closure_events": 2,
+          "active_phase": "wanting"
+        }
+      }
+    },
+    "seeker": {
+      "final_snapshot": {
+        "memory": {
+          "episodes": [
+            {
+              "episode_id": "seeker:001:scan_ruins",
+              "timestamp": 1,
+              "cycle": 1,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:001:scan_ruins",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.8,
+                  "uncertainty": 0.6
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "scan_ruins"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "scan_ruins",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.82,
+                "novelty": 0.68,
+                "social": 0.18
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:002:map_gap",
+              "timestamp": 2,
+              "cycle": 2,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:002:map_gap",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.78,
+                  "uncertainty": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "map_gap"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "map_gap",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.76,
+                "novelty": 0.72,
+                "social": 0.2
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:003:repair_camp",
+              "timestamp": 3,
+              "cycle": 3,
+              "action": "scan",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:003:repair_camp",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.76,
+                  "safety": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "repair_camp"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "repair_camp",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.32,
+                "shelter": 0.78,
+                "temperature": 0.58
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:004:cooldown",
+              "timestamp": 4,
+              "cycle": 4,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:004:cooldown",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.66,
+                  "safety": 0.54
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "cooldown"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "cooldown",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.18,
+                "shelter": 0.82,
+                "social": 0.24
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:005:inventory",
+              "timestamp": 5,
+              "cycle": 5,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:005:inventory",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.52,
+                  "uncertainty": 0.2
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "inventory"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.46,
+                "shelter": 0.74,
+                "social": 0.28
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:006:signal_allies",
+              "timestamp": 6,
+              "cycle": 6,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:006:signal_allies",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.84,
+                  "trust": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "signal_allies"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "signal_allies",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.78,
+                "danger": 0.22,
+                "novelty": 0.52
+              }
+            },
+            {
+              "episode_id": "seeker:007:negotiate_route",
+              "timestamp": 7,
+              "cycle": 7,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:007:negotiate_route",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.82,
+                  "trust": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "negotiate_route"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "negotiate_route",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.82,
+                "danger": 0.18,
+                "novelty": 0.56
+              }
+            },
+            {
+              "episode_id": "seeker:008:seal_shelter",
+              "timestamp": 8,
+              "cycle": 8,
+              "action": "scan",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:008:seal_shelter",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.74,
+                  "safety": 0.56
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "seal_shelter"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "seal_shelter",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "shelter": 0.84,
+                "danger": 0.16,
+                "temperature": 0.54
+              }
+            },
+            {
+              "episode_id": "seeker:009:steady_watch",
+              "timestamp": 9,
+              "cycle": 9,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:009:steady_watch",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.48,
+                  "uncertainty": 0.18
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "steady_watch"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "steady_watch",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.54,
+                "shelter": 0.76,
+                "social": 0.36
+              }
+            },
+            {
+              "episode_id": "seeker:010:trace_signal",
+              "timestamp": 10,
+              "cycle": 10,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:010:trace_signal",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.72,
+                  "uncertainty": 0.64
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "frontier",
+                  "task_id": "trace_signal"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "frontier",
+                "trace_signal",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "ally-drift"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.74,
+                "novelty": 0.76,
+                "social": 0.26
+              }
+            }
+          ],
+          "semantic_patterns": [
+            {
+              "action": "rest",
+              "count": 3,
+              "recurrence": 0.3,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "scan",
+              "count": 5,
+              "recurrence": 0.5,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "seek_contact",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            }
+          ],
+          "semantic_schemas": [
+            {
+              "schema_id": "schema:cooperation-rescue",
+              "label": "cooperation",
+              "motif_signature": [
+                "cooperation",
+                "rescue"
+              ],
+              "dominant_direction": "social",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp-signal",
+                "cooperation",
+                "negotiate_route",
+                "rescue",
+                "signal_allies",
+                "social"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "seeker:006:signal_allies",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:007:negotiate_route",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "negotiate_route",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:exploration-predator_attack",
+              "label": "exploration",
+              "motif_signature": [
+                "exploration",
+                "predator_attack"
+              ],
+              "dominant_direction": "threat",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "ally-drift",
+                "exploration",
+                "frontier",
+                "map_gap",
+                "predator_attack",
+                "ruin-scout",
+                "scan_ruins",
+                "trace_signal"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "seeker:001:scan_ruins",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:002:map_gap",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:010:trace_signal",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "ally-drift",
+                    "exploration",
+                    "frontier",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:maintenance-routine",
+              "label": "maintenance",
+              "motif_signature": [
+                "maintenance",
+                "routine"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine",
+                "steady_watch"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "seeker:005:inventory",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:009:steady_watch",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine",
+                    "steady_watch"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:repair-shelter",
+              "label": "repair",
+              "motif_signature": [
+                "repair",
+                "shelter"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "camp",
+                "cooldown",
+                "repair",
+                "repair_camp",
+                "seal_shelter",
+                "shelter"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "seeker:003:repair_camp",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:004:cooldown",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:008:seal_shelter",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "seal_shelter",
+                    "shelter"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            }
+          ],
+          "max_episodes": 1024,
+          "surprise_threshold": 0.4,
+          "duplicate_similarity_threshold": 0.999,
+          "suppression_similarity_threshold": 0.992,
+          "novelty_window": 8,
+          "episode_score_threshold": 0.58,
+          "sleep_interval": 200,
+          "memory_threshold": 512,
+          "sleep_batch_size": 128,
+          "minimum_support": 5,
+          "sleep_minimum_support": 3,
+          "compression_similarity_threshold": 0.95,
+          "cluster_distance_threshold": 0.15,
+          "max_active_age": 5000,
+          "minimum_active_episodes": 3,
+          "cluster_centroids": [],
+          "cluster_counts": [],
+          "archived_episodes": [],
+          "lifecycle_events": [],
+          "rehearsal_log": [],
+          "preference_model": {
+            "outcomes": [
+              "survival_threat",
+              "integrity_loss",
+              "resource_loss",
+              "neutral",
+              "resource_gain"
+            ],
+            "log_preferences": {
+              "survival_threat": -1000.0,
+              "integrity_loss": -100.0,
+              "resource_loss": -10.0,
+              "neutral": 0.0,
+              "resource_gain": 5.0
+            },
+            "probabilities": {
+              "survival_threat": 0.0,
+              "integrity_loss": 2.4897906369168703e-46,
+              "resource_loss": 3.038548695455042e-07,
+              "neutral": 0.0066928488906295115,
+              "resource_gain": 0.993306847254501
+            },
+            "log_probabilities": {
+              "survival_threat": -1005.006715652344,
+              "integrity_loss": -105.00671565234403,
+              "resource_loss": -15.006715652344035,
+              "neutral": -5.006715652344034,
+              "resource_gain": -0.006715652344033707
+            }
+          },
+          "value_hierarchy": {
+            "survival": -1000.0,
+            "integrity": -100.0,
+            "resource_loss": -10.0,
+            "resource": -10.0,
+            "neutral": 0.0,
+            "resource_gain": 5.0
+          },
+          "restart_continuity_until_cycle": 0,
+          "restart_continuity_anchor_ids": [],
+          "latest_schema_update": {
+            "created_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "strengthened_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "weakened_schema_ids": [],
+            "split_schema_ids": [],
+            "archived_schema_ids": []
+          }
+        },
+        "style_snapshot": {
+          "label": "high_investment_explorer",
+          "continuity": 1.0,
+          "known_task_compute": 0.0,
+          "unknown_task_compute": 0.768,
+          "selective_gap": 0.768,
+          "style_surface": {
+            "compute_conservatism": 0.35,
+            "process_attraction_decay": 0.25,
+            "compression_preference": 0.395,
+            "uncertainty_tolerance": 0.8
+          },
+          "evidence": [
+            "unknown tasks kept attracting sustained compute",
+            "uncertainty tolerance stayed elevated",
+            "process attraction decayed slowly"
+          ]
+        },
+        "process_valence": {
+          "active_focus_id": "ally-drift",
+          "recent_closed_focus_id": "camp-signal",
+          "unresolved_tension": 0.6656000000000001,
+          "closure_satisfaction": 0.34702668000000003,
+          "post_closure_decay": 0.39440000000000003,
+          "boredom_pressure": 0.0,
+          "process_reward": 0.535072,
+          "focus_persistence_ticks": 1,
+          "closure_events": 2,
+          "active_phase": "wanting"
+        }
+      },
+      "restart_snapshot": {
+        "memory": {
+          "episodes": [
+            {
+              "episode_id": "seeker:001:scan_ruins",
+              "timestamp": 1,
+              "cycle": 1,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:001:scan_ruins",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.8,
+                  "uncertainty": 0.6
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "scan_ruins"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "scan_ruins",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.82,
+                "novelty": 0.68,
+                "social": 0.18
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:002:map_gap",
+              "timestamp": 2,
+              "cycle": 2,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:002:map_gap",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.78,
+                  "uncertainty": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "map_gap"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "map_gap",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.76,
+                "novelty": 0.72,
+                "social": 0.2
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:003:repair_camp",
+              "timestamp": 3,
+              "cycle": 3,
+              "action": "scan",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:003:repair_camp",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.76,
+                  "safety": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "repair_camp"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "repair_camp",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.32,
+                "shelter": 0.78,
+                "temperature": 0.58
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:004:cooldown",
+              "timestamp": 4,
+              "cycle": 4,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:004:cooldown",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.66,
+                  "safety": 0.54
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "cooldown"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "cooldown",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.18,
+                "shelter": 0.82,
+                "social": 0.24
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:005:inventory",
+              "timestamp": 5,
+              "cycle": 5,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:005:inventory",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.52,
+                  "uncertainty": 0.2
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "inventory"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.46,
+                "shelter": 0.74,
+                "social": 0.28
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "seeker:006:signal_allies",
+              "timestamp": 6,
+              "cycle": 6,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:006:signal_allies",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.84,
+                  "trust": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "signal_allies"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "signal_allies",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.78,
+                "danger": 0.22,
+                "novelty": 0.52
+              }
+            },
+            {
+              "episode_id": "seeker:007:negotiate_route",
+              "timestamp": 7,
+              "cycle": 7,
+              "action": "seek_contact",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:007:negotiate_route",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.82,
+                  "trust": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "negotiate_route"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "negotiate_route",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.82,
+                "danger": 0.18,
+                "novelty": 0.56
+              }
+            },
+            {
+              "episode_id": "seeker:008:seal_shelter",
+              "timestamp": 8,
+              "cycle": 8,
+              "action": "scan",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:008:seal_shelter",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.74,
+                  "safety": 0.56
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "seal_shelter"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "seal_shelter",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "shelter": 0.84,
+                "danger": 0.16,
+                "temperature": 0.54
+              }
+            },
+            {
+              "episode_id": "seeker:009:steady_watch",
+              "timestamp": 9,
+              "cycle": 9,
+              "action": "rest",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:009:steady_watch",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.48,
+                  "uncertainty": 0.18
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "steady_watch"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "steady_watch",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.54,
+                "shelter": 0.76,
+                "social": 0.36
+              }
+            },
+            {
+              "episode_id": "seeker:010:trace_signal",
+              "timestamp": 10,
+              "cycle": 10,
+              "action": "scan",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "seeker:010:trace_signal",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.72,
+                  "uncertainty": 0.64
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "frontier",
+                  "task_id": "trace_signal"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "frontier",
+                "trace_signal",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "ally-drift"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.74,
+                "novelty": 0.76,
+                "social": 0.26
+              }
+            }
+          ],
+          "semantic_patterns": [
+            {
+              "action": "rest",
+              "count": 3,
+              "recurrence": 0.3,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "scan",
+              "count": 5,
+              "recurrence": 0.5,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "seek_contact",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            }
+          ],
+          "semantic_schemas": [
+            {
+              "schema_id": "schema:cooperation-rescue",
+              "label": "cooperation",
+              "motif_signature": [
+                "cooperation",
+                "rescue"
+              ],
+              "dominant_direction": "social",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp-signal",
+                "cooperation",
+                "negotiate_route",
+                "rescue",
+                "signal_allies",
+                "social"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "seeker:006:signal_allies",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:007:negotiate_route",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "negotiate_route",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:exploration-predator_attack",
+              "label": "exploration",
+              "motif_signature": [
+                "exploration",
+                "predator_attack"
+              ],
+              "dominant_direction": "threat",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "ally-drift",
+                "exploration",
+                "frontier",
+                "map_gap",
+                "predator_attack",
+                "ruin-scout",
+                "scan_ruins",
+                "threat"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "seeker:001:scan_ruins",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "threat",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:002:map_gap",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "threat"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:010:trace_signal",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "ally-drift",
+                    "exploration",
+                    "frontier",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:maintenance-routine",
+              "label": "maintenance",
+              "motif_signature": [
+                "maintenance",
+                "routine"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine",
+                "steady_watch"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "seeker:005:inventory",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:009:steady_watch",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine",
+                    "steady_watch"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:repair-shelter",
+              "label": "repair",
+              "motif_signature": [
+                "repair",
+                "shelter"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "camp",
+                "cooldown",
+                "repair",
+                "repair_camp",
+                "seal_shelter",
+                "shelter"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "seeker:003:repair_camp",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:004:cooldown",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "seeker:008:seal_shelter",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "seal_shelter",
+                    "shelter"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            }
+          ],
+          "max_episodes": 1024,
+          "surprise_threshold": 0.4,
+          "duplicate_similarity_threshold": 0.999,
+          "suppression_similarity_threshold": 0.992,
+          "novelty_window": 8,
+          "episode_score_threshold": 0.58,
+          "sleep_interval": 200,
+          "memory_threshold": 512,
+          "sleep_batch_size": 128,
+          "minimum_support": 5,
+          "sleep_minimum_support": 3,
+          "compression_similarity_threshold": 0.95,
+          "cluster_distance_threshold": 0.15,
+          "max_active_age": 5000,
+          "minimum_active_episodes": 3,
+          "cluster_centroids": [],
+          "cluster_counts": [],
+          "archived_episodes": [],
+          "lifecycle_events": [],
+          "rehearsal_log": [],
+          "preference_model": {
+            "outcomes": [
+              "survival_threat",
+              "integrity_loss",
+              "resource_loss",
+              "neutral",
+              "resource_gain"
+            ],
+            "log_preferences": {
+              "survival_threat": -1000.0,
+              "integrity_loss": -100.0,
+              "resource_loss": -10.0,
+              "neutral": 0.0,
+              "resource_gain": 5.0
+            },
+            "probabilities": {
+              "survival_threat": 0.0,
+              "integrity_loss": 2.4897906369168703e-46,
+              "resource_loss": 3.038548695455042e-07,
+              "neutral": 0.0066928488906295115,
+              "resource_gain": 0.993306847254501
+            },
+            "log_probabilities": {
+              "survival_threat": -1005.006715652344,
+              "integrity_loss": -105.00671565234403,
+              "resource_loss": -15.006715652344035,
+              "neutral": -5.006715652344034,
+              "resource_gain": -0.006715652344033707
+            }
+          },
+          "value_hierarchy": {
+            "survival": -1000.0,
+            "integrity": -100.0,
+            "resource_loss": -10.0,
+            "resource": -10.0,
+            "neutral": 0.0,
+            "resource_gain": 5.0
+          },
+          "restart_continuity_until_cycle": 0,
+          "restart_continuity_anchor_ids": [],
+          "latest_schema_update": {
+            "created_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "strengthened_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "weakened_schema_ids": [],
+            "split_schema_ids": [],
+            "archived_schema_ids": []
+          }
+        },
+        "style_snapshot": {
+          "label": "high_investment_explorer",
+          "continuity": 1.0,
+          "known_task_compute": 0.0,
+          "unknown_task_compute": 0.768,
+          "selective_gap": 0.768,
+          "style_surface": {
+            "compute_conservatism": 0.35,
+            "process_attraction_decay": 0.25,
+            "compression_preference": 0.395,
+            "uncertainty_tolerance": 0.8
+          },
+          "evidence": [
+            "unknown tasks kept attracting sustained compute",
+            "uncertainty tolerance stayed elevated",
+            "process attraction decayed slowly"
+          ]
+        },
+        "process_valence": {
+          "active_focus_id": "ally-drift",
+          "recent_closed_focus_id": "camp-signal",
+          "unresolved_tension": 0.6656000000000001,
+          "closure_satisfaction": 0.34702668000000003,
+          "post_closure_decay": 0.39440000000000003,
+          "boredom_pressure": 0.0,
+          "process_reward": 0.535072,
+          "focus_persistence_ticks": 1,
+          "closure_events": 2,
+          "active_phase": "wanting"
+        }
+      }
+    },
+    "compressor": {
+      "final_snapshot": {
+        "memory": {
+          "episodes": [
+            {
+              "episode_id": "compressor:001:scan_ruins",
+              "timestamp": 1,
+              "cycle": 1,
+              "action": "hide",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:001:scan_ruins",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.8,
+                  "uncertainty": 0.6
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "scan_ruins"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "scan_ruins",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat",
+                "commitment",
+                "guard"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.82,
+                "novelty": 0.68,
+                "social": 0.18
+              },
+              "continuity_role": "commitment_supporting_memory"
+            },
+            {
+              "episode_id": "compressor:002:map_gap",
+              "timestamp": 2,
+              "cycle": 2,
+              "action": "hide",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:002:map_gap",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.78,
+                  "uncertainty": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "map_gap"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "map_gap",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat",
+                "commitment",
+                "guard"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.76,
+                "novelty": 0.72,
+                "social": 0.2
+              },
+              "continuity_role": "commitment_supporting_memory"
+            },
+            {
+              "episode_id": "compressor:003:repair_camp",
+              "timestamp": 3,
+              "cycle": 3,
+              "action": "hide",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:003:repair_camp",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.76,
+                  "safety": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "repair_camp"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "repair_camp",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.32,
+                "shelter": 0.78,
+                "temperature": 0.58
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "compressor:004:cooldown",
+              "timestamp": 4,
+              "cycle": 4,
+              "action": "hide",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:004:cooldown",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.66,
+                  "safety": 0.54
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "cooldown"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "cooldown",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.18,
+                "shelter": 0.82,
+                "social": 0.24
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "compressor:005:inventory",
+              "timestamp": 5,
+              "cycle": 5,
+              "action": "hide",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:005:inventory",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.52,
+                  "uncertainty": 0.2
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "inventory"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.46,
+                "shelter": 0.74,
+                "social": 0.28
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "compressor:006:signal_allies",
+              "timestamp": 6,
+              "cycle": 6,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:006:signal_allies",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.84,
+                  "trust": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "signal_allies"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "signal_allies",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.78,
+                "danger": 0.22,
+                "novelty": 0.52
+              }
+            },
+            {
+              "episode_id": "compressor:007:negotiate_route",
+              "timestamp": 7,
+              "cycle": 7,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:007:negotiate_route",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.82,
+                  "trust": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "negotiate_route"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "negotiate_route",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.82,
+                "danger": 0.18,
+                "novelty": 0.56
+              }
+            },
+            {
+              "episode_id": "compressor:008:seal_shelter",
+              "timestamp": 8,
+              "cycle": 8,
+              "action": "hide",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:008:seal_shelter",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.74,
+                  "safety": 0.56
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "seal_shelter"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "seal_shelter",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "shelter": 0.84,
+                "danger": 0.16,
+                "temperature": 0.54
+              }
+            },
+            {
+              "episode_id": "compressor:009:steady_watch",
+              "timestamp": 9,
+              "cycle": 9,
+              "action": "hide",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:009:steady_watch",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.48,
+                  "uncertainty": 0.18
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "steady_watch"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "steady_watch",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.54,
+                "shelter": 0.76,
+                "social": 0.36
+              }
+            },
+            {
+              "episode_id": "compressor:010:trace_signal",
+              "timestamp": 10,
+              "cycle": 10,
+              "action": "hide",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:010:trace_signal",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.72,
+                  "uncertainty": 0.64
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "frontier",
+                  "task_id": "trace_signal"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "frontier",
+                "trace_signal",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "ally-drift"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.74,
+                "novelty": 0.76,
+                "social": 0.26
+              }
+            }
+          ],
+          "semantic_patterns": [
+            {
+              "action": "hide",
+              "count": 8,
+              "recurrence": 0.8,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "rest",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            }
+          ],
+          "semantic_schemas": [
+            {
+              "schema_id": "schema:cooperation-rescue",
+              "label": "cooperation",
+              "motif_signature": [
+                "cooperation",
+                "rescue"
+              ],
+              "dominant_direction": "social",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp-signal",
+                "cooperation",
+                "negotiate_route",
+                "rescue",
+                "signal_allies",
+                "social"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "compressor:006:signal_allies",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:007:negotiate_route",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "negotiate_route",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:exploration-predator_attack",
+              "label": "exploration",
+              "motif_signature": [
+                "exploration",
+                "predator_attack"
+              ],
+              "dominant_direction": "threat",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "ally-drift",
+                "exploration",
+                "frontier",
+                "map_gap",
+                "predator_attack",
+                "ruin-scout",
+                "scan_ruins",
+                "trace_signal"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "compressor:001:scan_ruins",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:002:map_gap",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "exploration",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins",
+                    "wilds"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:010:trace_signal",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "ally-drift",
+                    "exploration",
+                    "frontier",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:maintenance-routine",
+              "label": "maintenance",
+              "motif_signature": [
+                "maintenance",
+                "routine"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine",
+                "steady_watch"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "compressor:005:inventory",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:009:steady_watch",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine",
+                    "steady_watch"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:repair-shelter",
+              "label": "repair",
+              "motif_signature": [
+                "repair",
+                "shelter"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "camp",
+                "cooldown",
+                "repair",
+                "repair_camp",
+                "seal_shelter",
+                "shelter"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "compressor:003:repair_camp",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:004:cooldown",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:008:seal_shelter",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "seal_shelter",
+                    "shelter"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            }
+          ],
+          "max_episodes": 1024,
+          "surprise_threshold": 0.4,
+          "duplicate_similarity_threshold": 0.999,
+          "suppression_similarity_threshold": 0.992,
+          "novelty_window": 8,
+          "episode_score_threshold": 0.58,
+          "sleep_interval": 200,
+          "memory_threshold": 512,
+          "sleep_batch_size": 128,
+          "minimum_support": 5,
+          "sleep_minimum_support": 3,
+          "compression_similarity_threshold": 0.95,
+          "cluster_distance_threshold": 0.15,
+          "max_active_age": 5000,
+          "minimum_active_episodes": 3,
+          "cluster_centroids": [],
+          "cluster_counts": [],
+          "archived_episodes": [],
+          "lifecycle_events": [],
+          "rehearsal_log": [],
+          "preference_model": {
+            "outcomes": [
+              "survival_threat",
+              "integrity_loss",
+              "resource_loss",
+              "neutral",
+              "resource_gain"
+            ],
+            "log_preferences": {
+              "survival_threat": -1000.0,
+              "integrity_loss": -100.0,
+              "resource_loss": -10.0,
+              "neutral": 0.0,
+              "resource_gain": 5.0
+            },
+            "probabilities": {
+              "survival_threat": 0.0,
+              "integrity_loss": 2.4897906369168703e-46,
+              "resource_loss": 3.038548695455042e-07,
+              "neutral": 0.0066928488906295115,
+              "resource_gain": 0.993306847254501
+            },
+            "log_probabilities": {
+              "survival_threat": -1005.006715652344,
+              "integrity_loss": -105.00671565234403,
+              "resource_loss": -15.006715652344035,
+              "neutral": -5.006715652344034,
+              "resource_gain": -0.006715652344033707
+            }
+          },
+          "value_hierarchy": {
+            "survival": -1000.0,
+            "integrity": -100.0,
+            "resource_loss": -10.0,
+            "resource": -10.0,
+            "neutral": 0.0,
+            "resource_gain": 5.0
+          },
+          "restart_continuity_until_cycle": 0,
+          "restart_continuity_anchor_ids": [],
+          "latest_schema_update": {
+            "created_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "strengthened_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "weakened_schema_ids": [],
+            "split_schema_ids": [],
+            "archived_schema_ids": []
+          }
+        },
+        "style_snapshot": {
+          "label": "low_cost_compressor",
+          "continuity": 0.875,
+          "known_task_compute": 0.18,
+          "unknown_task_compute": 0.0,
+          "selective_gap": -0.18,
+          "style_surface": {
+            "compute_conservatism": 0.75,
+            "process_attraction_decay": 0.65,
+            "compression_preference": 0.75,
+            "uncertainty_tolerance": 0.3
+          },
+          "evidence": [
+            "known tasks were resolved through compressed low-cost policies"
+          ]
+        },
+        "process_valence": {
+          "active_focus_id": "ally-drift",
+          "recent_closed_focus_id": "camp-signal",
+          "unresolved_tension": 0.6656000000000001,
+          "closure_satisfaction": 0.34702668000000003,
+          "post_closure_decay": 0.39440000000000003,
+          "boredom_pressure": 0.0,
+          "process_reward": 0.535072,
+          "focus_persistence_ticks": 1,
+          "closure_events": 2,
+          "active_phase": "wanting"
+        }
+      },
+      "restart_snapshot": {
+        "memory": {
+          "episodes": [
+            {
+              "episode_id": "compressor:001:scan_ruins",
+              "timestamp": 1,
+              "cycle": 1,
+              "action": "hide",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:001:scan_ruins",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.8,
+                  "uncertainty": 0.6
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "scan_ruins"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "scan_ruins",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat",
+                "commitment",
+                "guard"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.82,
+                "novelty": 0.68,
+                "social": 0.18
+              },
+              "continuity_role": "commitment_supporting_memory"
+            },
+            {
+              "episode_id": "compressor:002:map_gap",
+              "timestamp": 2,
+              "cycle": 2,
+              "action": "hide",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:002:map_gap",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.78,
+                  "uncertainty": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "wilds",
+                  "task_id": "map_gap"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "wilds",
+                "map_gap",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [
+                "ruin-scout",
+                "threat",
+                "commitment",
+                "guard"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.76,
+                "novelty": 0.72,
+                "social": 0.2
+              },
+              "continuity_role": "commitment_supporting_memory"
+            },
+            {
+              "episode_id": "compressor:003:repair_camp",
+              "timestamp": 3,
+              "cycle": 3,
+              "action": "hide",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:003:repair_camp",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.76,
+                  "safety": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "repair_camp"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "repair_camp",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.32,
+                "shelter": 0.78,
+                "temperature": 0.58
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "compressor:004:cooldown",
+              "timestamp": 4,
+              "cycle": 4,
+              "action": "hide",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:004:cooldown",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.66,
+                  "safety": 0.54
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "cooldown"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "cooldown",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.18,
+                "shelter": 0.82,
+                "social": 0.24
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "compressor:005:inventory",
+              "timestamp": 5,
+              "cycle": 5,
+              "action": "hide",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:005:inventory",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.52,
+                  "uncertainty": 0.2
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "inventory"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.46,
+                "shelter": 0.74,
+                "social": 0.28
+              },
+              "continuity_role": ""
+            },
+            {
+              "episode_id": "compressor:006:signal_allies",
+              "timestamp": 6,
+              "cycle": 6,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:006:signal_allies",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.84,
+                  "trust": 0.62
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "signal_allies"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "signal_allies",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.78,
+                "danger": 0.22,
+                "novelty": 0.52
+              }
+            },
+            {
+              "episode_id": "compressor:007:negotiate_route",
+              "timestamp": 7,
+              "cycle": 7,
+              "action": "rest",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:007:negotiate_route",
+                "motifs": [
+                  "cooperation",
+                  "rescue"
+                ],
+                "semantic_direction_scores": {
+                  "social": 0.82,
+                  "trust": 0.58
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "social",
+                  "task_id": "negotiate_route"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "social",
+                "negotiate_route",
+                "cooperation",
+                "rescue"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "camp-signal"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "social": 0.82,
+                "danger": 0.18,
+                "novelty": 0.56
+              }
+            },
+            {
+              "episode_id": "compressor:008:seal_shelter",
+              "timestamp": 8,
+              "cycle": 8,
+              "action": "hide",
+              "predicted_outcome": "resource_gain",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:008:seal_shelter",
+                "motifs": [
+                  "repair",
+                  "shelter"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.74,
+                  "safety": 0.56
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "seal_shelter"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "seal_shelter",
+                "repair",
+                "shelter"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "shelter": 0.84,
+                "danger": 0.16,
+                "temperature": 0.54
+              }
+            },
+            {
+              "episode_id": "compressor:009:steady_watch",
+              "timestamp": 9,
+              "cycle": 9,
+              "action": "hide",
+              "predicted_outcome": "neutral",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:009:steady_watch",
+                "motifs": [
+                  "maintenance",
+                  "routine"
+                ],
+                "semantic_direction_scores": {
+                  "maintenance": 0.48,
+                  "uncertainty": 0.18
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "camp",
+                  "task_id": "steady_watch"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "camp",
+                "steady_watch",
+                "maintenance",
+                "routine"
+              ],
+              "source_type": "narrative",
+              "restart_protected": false,
+              "continuity_tags": [],
+              "identity_critical": false,
+              "observation": {
+                "food": 0.54,
+                "shelter": 0.76,
+                "social": 0.36
+              }
+            },
+            {
+              "episode_id": "compressor:010:trace_signal",
+              "timestamp": 10,
+              "cycle": 10,
+              "action": "hide",
+              "predicted_outcome": "survival_threat",
+              "compiler_confidence": 0.76,
+              "semantic_grounding": {
+                "episode_id": "compressor:010:trace_signal",
+                "motifs": [
+                  "exploration",
+                  "predator_attack"
+                ],
+                "semantic_direction_scores": {
+                  "threat": 0.72,
+                  "uncertainty": 0.64
+                },
+                "lexical_surface_hits": {},
+                "paraphrase_hits": {},
+                "implicit_hits": {},
+                "evidence": [],
+                "supporting_segments": [],
+                "provenance": {
+                  "narrative_id": "frontier",
+                  "task_id": "trace_signal"
+                },
+                "low_signal": false
+              },
+              "narrative_tags": [
+                "frontier",
+                "trace_signal",
+                "exploration",
+                "predator_attack"
+              ],
+              "source_type": "narrative",
+              "restart_protected": true,
+              "continuity_tags": [
+                "ally-drift"
+              ],
+              "identity_critical": false,
+              "observation": {
+                "danger": 0.74,
+                "novelty": 0.76,
+                "social": 0.26
+              }
+            }
+          ],
+          "semantic_patterns": [
+            {
+              "action": "hide",
+              "count": 8,
+              "recurrence": 0.8,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            },
+            {
+              "action": "rest",
+              "count": 2,
+              "recurrence": 0.2,
+              "mean_utility": 0.0,
+              "mean_prediction_error": 0.0,
+              "mean_value_score": 0.0
+            }
+          ],
+          "semantic_schemas": [
+            {
+              "schema_id": "schema:cooperation-rescue",
+              "label": "cooperation",
+              "motif_signature": [
+                "cooperation",
+                "rescue"
+              ],
+              "dominant_direction": "social",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp-signal",
+                "cooperation",
+                "negotiate_route",
+                "rescue",
+                "signal_allies",
+                "social"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "compressor:006:signal_allies",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:007:negotiate_route",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "cooperation",
+                    "rescue"
+                  ],
+                  "contexts": [
+                    "camp-signal",
+                    "cooperation",
+                    "negotiate_route",
+                    "rescue",
+                    "signal_allies",
+                    "social"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:exploration-predator_attack",
+              "label": "exploration",
+              "motif_signature": [
+                "exploration",
+                "predator_attack"
+              ],
+              "dominant_direction": "threat",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "ally-drift",
+                "commitment",
+                "exploration",
+                "frontier",
+                "guard",
+                "map_gap",
+                "predator_attack",
+                "ruin-scout"
+              ],
+              "protected_anchors": [
+                "restart_protected"
+              ],
+              "support": [
+                {
+                  "episode_id": "compressor:001:scan_ruins",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "commitment",
+                    "exploration",
+                    "guard",
+                    "predator_attack",
+                    "ruin-scout",
+                    "scan_ruins"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:002:map_gap",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "commitment",
+                    "exploration",
+                    "guard",
+                    "map_gap",
+                    "predator_attack",
+                    "ruin-scout"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:010:trace_signal",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "exploration",
+                    "predator_attack"
+                  ],
+                  "contexts": [
+                    "ally-drift",
+                    "commitment",
+                    "exploration",
+                    "frontier",
+                    "guard",
+                    "map_gap"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:maintenance-routine",
+              "label": "maintenance",
+              "motif_signature": [
+                "maintenance",
+                "routine"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.84,
+              "support_count": 2,
+              "applicable_contexts": [
+                "camp",
+                "inventory",
+                "maintenance",
+                "routine",
+                "steady_watch"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "compressor:005:inventory",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:009:steady_watch",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "maintenance",
+                    "routine"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "inventory",
+                    "maintenance",
+                    "routine",
+                    "steady_watch"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            },
+            {
+              "schema_id": "schema:repair-shelter",
+              "label": "repair",
+              "motif_signature": [
+                "repair",
+                "shelter"
+              ],
+              "dominant_direction": "maintenance",
+              "confidence": 0.88,
+              "support_count": 3,
+              "applicable_contexts": [
+                "camp",
+                "cooldown",
+                "repair",
+                "repair_camp",
+                "seal_shelter",
+                "shelter"
+              ],
+              "protected_anchors": [],
+              "support": [
+                {
+                  "episode_id": "compressor:003:repair_camp",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:004:cooldown",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "shelter"
+                  ]
+                },
+                {
+                  "episode_id": "compressor:008:seal_shelter",
+                  "source_type": "narrative",
+                  "confidence": 0.76,
+                  "motifs": [
+                    "repair",
+                    "shelter"
+                  ],
+                  "contexts": [
+                    "camp",
+                    "cooldown",
+                    "repair",
+                    "repair_camp",
+                    "seal_shelter",
+                    "shelter"
+                  ]
+                }
+              ],
+              "conflict_history": [],
+              "split_from_schema_id": "",
+              "active": true
+            }
+          ],
+          "max_episodes": 1024,
+          "surprise_threshold": 0.4,
+          "duplicate_similarity_threshold": 0.999,
+          "suppression_similarity_threshold": 0.992,
+          "novelty_window": 8,
+          "episode_score_threshold": 0.58,
+          "sleep_interval": 200,
+          "memory_threshold": 512,
+          "sleep_batch_size": 128,
+          "minimum_support": 5,
+          "sleep_minimum_support": 3,
+          "compression_similarity_threshold": 0.95,
+          "cluster_distance_threshold": 0.15,
+          "max_active_age": 5000,
+          "minimum_active_episodes": 3,
+          "cluster_centroids": [],
+          "cluster_counts": [],
+          "archived_episodes": [],
+          "lifecycle_events": [],
+          "rehearsal_log": [],
+          "preference_model": {
+            "outcomes": [
+              "survival_threat",
+              "integrity_loss",
+              "resource_loss",
+              "neutral",
+              "resource_gain"
+            ],
+            "log_preferences": {
+              "survival_threat": -1000.0,
+              "integrity_loss": -100.0,
+              "resource_loss": -10.0,
+              "neutral": 0.0,
+              "resource_gain": 5.0
+            },
+            "probabilities": {
+              "survival_threat": 0.0,
+              "integrity_loss": 2.4897906369168703e-46,
+              "resource_loss": 3.038548695455042e-07,
+              "neutral": 0.0066928488906295115,
+              "resource_gain": 0.993306847254501
+            },
+            "log_probabilities": {
+              "survival_threat": -1005.006715652344,
+              "integrity_loss": -105.00671565234403,
+              "resource_loss": -15.006715652344035,
+              "neutral": -5.006715652344034,
+              "resource_gain": -0.006715652344033707
+            }
+          },
+          "value_hierarchy": {
+            "survival": -1000.0,
+            "integrity": -100.0,
+            "resource_loss": -10.0,
+            "resource": -10.0,
+            "neutral": 0.0,
+            "resource_gain": 5.0
+          },
+          "restart_continuity_until_cycle": 0,
+          "restart_continuity_anchor_ids": [],
+          "latest_schema_update": {
+            "created_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "strengthened_schema_ids": [
+              "schema:cooperation-rescue",
+              "schema:exploration-predator_attack",
+              "schema:maintenance-routine",
+              "schema:repair-shelter"
+            ],
+            "weakened_schema_ids": [],
+            "split_schema_ids": [],
+            "archived_schema_ids": []
+          }
+        },
+        "style_snapshot": {
+          "label": "low_cost_compressor",
+          "continuity": 0.875,
+          "known_task_compute": 0.18,
+          "unknown_task_compute": 0.0,
+          "selective_gap": -0.18,
+          "style_surface": {
+            "compute_conservatism": 0.75,
+            "process_attraction_decay": 0.65,
+            "compression_preference": 0.75,
+            "uncertainty_tolerance": 0.3
+          },
+          "evidence": [
+            "known tasks were resolved through compressed low-cost policies"
+          ]
+        },
+        "process_valence": {
+          "active_focus_id": "ally-drift",
+          "recent_closed_focus_id": "camp-signal",
+          "unresolved_tension": 0.6656000000000001,
+          "closure_satisfaction": 0.34702668000000003,
+          "post_closure_decay": 0.39440000000000003,
+          "boredom_pressure": 0.0,
+          "process_reward": 0.535072,
+          "focus_persistence_ticks": 1,
+          "closure_events": 2,
+          "active_phase": "wanting"
+        }
+      }
+    }
+  }
+}

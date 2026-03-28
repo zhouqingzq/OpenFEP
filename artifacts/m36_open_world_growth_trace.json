@@ -1,0 +1,572 @@
+{
+  "summary": {
+    "subject_count": 3,
+    "style_label_diversity": 3,
+    "schema_count_mean": 4.0,
+    "schema_count_max": 4,
+    "style_continuity_mean": 0.791667,
+    "process_observability": true,
+    "restart_continuity": true,
+    "narrative_diversity": 4,
+    "task_diversity": 10
+  },
+  "catalog": {
+    "narratives": [
+      "camp",
+      "frontier",
+      "social",
+      "wilds"
+    ],
+    "tasks": [
+      "cooldown",
+      "inventory",
+      "map_gap",
+      "negotiate_route",
+      "repair_camp",
+      "scan_ruins",
+      "seal_shelter",
+      "signal_allies",
+      "steady_watch",
+      "trace_signal"
+    ]
+  },
+  "subjects": {
+    "anchor": {
+      "trace": [
+        {
+          "tick": 1,
+          "narrative_id": "wilds",
+          "task_id": "scan_ruins",
+          "focus_id": "ruin-scout",
+          "schema_count": 1,
+          "schema_ids": [
+            "schema:exploration-predator_attack"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7624
+        },
+        {
+          "tick": 2,
+          "narrative_id": "wilds",
+          "task_id": "map_gap",
+          "focus_id": "ruin-scout",
+          "schema_count": 1,
+          "schema_ids": [
+            "schema:exploration-predator_attack"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7808
+        },
+        {
+          "tick": 3,
+          "narrative_id": "camp",
+          "task_id": "repair_camp",
+          "focus_id": "",
+          "schema_count": 2,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:repair-shelter"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "closure",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 4,
+          "narrative_id": "camp",
+          "task_id": "cooldown",
+          "focus_id": "",
+          "schema_count": 2,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:repair-shelter"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.131812,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 5,
+          "narrative_id": "camp",
+          "task_id": "inventory",
+          "focus_id": "",
+          "schema_count": 3,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "efficient_selective_explorer",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.255264,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 6,
+          "narrative_id": "social",
+          "task_id": "signal_allies",
+          "focus_id": "camp-signal",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.744
+        },
+        {
+          "tick": 7,
+          "narrative_id": "social",
+          "task_id": "negotiate_route",
+          "focus_id": "camp-signal",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7624
+        },
+        {
+          "tick": 8,
+          "narrative_id": "camp",
+          "task_id": "seal_shelter",
+          "focus_id": "",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "efficient_selective_explorer",
+          "process_phase": "closure",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 9,
+          "narrative_id": "camp",
+          "task_id": "steady_watch",
+          "focus_id": "",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "efficient_selective_explorer",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.134143,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 10,
+          "narrative_id": "frontier",
+          "task_id": "trace_signal",
+          "focus_id": "ally-drift",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "efficient_selective_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.6656
+        }
+      ],
+      "metrics": {
+        "final_schema_count": 4,
+        "schema_count_delta": 3,
+        "style_label": "efficient_selective_explorer",
+        "style_continuity": 0.5,
+        "restart_style_match": true,
+        "restart_schema_match": true,
+        "phase_counts": {
+          "wanting": 5,
+          "closure": 2,
+          "satiation": 3
+        },
+        "narratives_seen": 4,
+        "tasks_seen": 10,
+        "focus_count": 3
+      }
+    },
+    "seeker": {
+      "trace": [
+        {
+          "tick": 1,
+          "narrative_id": "wilds",
+          "task_id": "scan_ruins",
+          "focus_id": "ruin-scout",
+          "schema_count": 1,
+          "schema_ids": [
+            "schema:exploration-predator_attack"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7624
+        },
+        {
+          "tick": 2,
+          "narrative_id": "wilds",
+          "task_id": "map_gap",
+          "focus_id": "ruin-scout",
+          "schema_count": 1,
+          "schema_ids": [
+            "schema:exploration-predator_attack"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7808
+        },
+        {
+          "tick": 3,
+          "narrative_id": "camp",
+          "task_id": "repair_camp",
+          "focus_id": "",
+          "schema_count": 2,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "closure",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 4,
+          "narrative_id": "camp",
+          "task_id": "cooldown",
+          "focus_id": "",
+          "schema_count": 2,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.131812,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 5,
+          "narrative_id": "camp",
+          "task_id": "inventory",
+          "focus_id": "",
+          "schema_count": 3,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.255264,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 6,
+          "narrative_id": "social",
+          "task_id": "signal_allies",
+          "focus_id": "camp-signal",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.744
+        },
+        {
+          "tick": 7,
+          "narrative_id": "social",
+          "task_id": "negotiate_route",
+          "focus_id": "camp-signal",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7624
+        },
+        {
+          "tick": 8,
+          "narrative_id": "camp",
+          "task_id": "seal_shelter",
+          "focus_id": "",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "closure",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 9,
+          "narrative_id": "camp",
+          "task_id": "steady_watch",
+          "focus_id": "",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.134143,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 10,
+          "narrative_id": "frontier",
+          "task_id": "trace_signal",
+          "focus_id": "ally-drift",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "high_investment_explorer",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.6656
+        }
+      ],
+      "metrics": {
+        "final_schema_count": 4,
+        "schema_count_delta": 3,
+        "style_label": "high_investment_explorer",
+        "style_continuity": 1.0,
+        "restart_style_match": true,
+        "restart_schema_match": true,
+        "phase_counts": {
+          "wanting": 5,
+          "closure": 2,
+          "satiation": 3
+        },
+        "narratives_seen": 4,
+        "tasks_seen": 10,
+        "focus_count": 3
+      }
+    },
+    "compressor": {
+      "trace": [
+        {
+          "tick": 1,
+          "narrative_id": "wilds",
+          "task_id": "scan_ruins",
+          "focus_id": "ruin-scout",
+          "schema_count": 1,
+          "schema_ids": [
+            "schema:exploration-predator_attack"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7624
+        },
+        {
+          "tick": 2,
+          "narrative_id": "wilds",
+          "task_id": "map_gap",
+          "focus_id": "ruin-scout",
+          "schema_count": 1,
+          "schema_ids": [
+            "schema:exploration-predator_attack"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7808
+        },
+        {
+          "tick": 3,
+          "narrative_id": "camp",
+          "task_id": "repair_camp",
+          "focus_id": "",
+          "schema_count": 2,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:repair-shelter"
+          ],
+          "style_label": "balanced_adaptive",
+          "process_phase": "closure",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 4,
+          "narrative_id": "camp",
+          "task_id": "cooldown",
+          "focus_id": "",
+          "schema_count": 2,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.131812,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 5,
+          "narrative_id": "camp",
+          "task_id": "inventory",
+          "focus_id": "",
+          "schema_count": 3,
+          "schema_ids": [
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.255264,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 6,
+          "narrative_id": "social",
+          "task_id": "signal_allies",
+          "focus_id": "camp-signal",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.744
+        },
+        {
+          "tick": 7,
+          "narrative_id": "social",
+          "task_id": "negotiate_route",
+          "focus_id": "camp-signal",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.7624
+        },
+        {
+          "tick": 8,
+          "narrative_id": "camp",
+          "task_id": "seal_shelter",
+          "focus_id": "",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "closure",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 9,
+          "narrative_id": "camp",
+          "task_id": "steady_watch",
+          "focus_id": "",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "satiation",
+          "boredom_pressure": 0.134143,
+          "unresolved_tension": 0.0
+        },
+        {
+          "tick": 10,
+          "narrative_id": "frontier",
+          "task_id": "trace_signal",
+          "focus_id": "ally-drift",
+          "schema_count": 4,
+          "schema_ids": [
+            "schema:cooperation-rescue",
+            "schema:exploration-predator_attack",
+            "schema:maintenance-routine",
+            "schema:repair-shelter"
+          ],
+          "style_label": "low_cost_compressor",
+          "process_phase": "wanting",
+          "boredom_pressure": 0.0,
+          "unresolved_tension": 0.6656
+        }
+      ],
+      "metrics": {
+        "final_schema_count": 4,
+        "schema_count_delta": 3,
+        "style_label": "low_cost_compressor",
+        "style_continuity": 0.875,
+        "restart_style_match": true,
+        "restart_schema_match": true,
+        "phase_counts": {
+          "wanting": 5,
+          "closure": 2,
+          "satiation": 3
+        },
+        "narratives_seen": 4,
+        "tasks_seen": 10,
+        "focus_count": 3
+      }
+    }
+  }
+}
