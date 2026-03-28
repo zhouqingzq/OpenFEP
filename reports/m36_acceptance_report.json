@@ -1,0 +1,133 @@
+{
+  "milestone_id": "M3.6",
+  "status": "PASS",
+  "generated_at": "2026-03-28T15:09:41+00:00",
+  "seed_set": [
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    136
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_stress.json",
+    "snapshots": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_snapshots.json",
+    "summary": "E:\\workspace\\segments\\reports\\m36_acceptance_summary.md",
+    "prior_round": {
+      "m31": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m31_semantic_grounding_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m31_semantic_grounding_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m31_semantic_grounding_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m31_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m31_acceptance_summary.md"
+      },
+      "m32": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m32_semantic_schema_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m32_semantic_schema_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m32_semantic_schema_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m32_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m32_acceptance_summary.md"
+      },
+      "m33": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m33_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m33_acceptance_summary.md"
+      },
+      "m34": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m34_process_valence_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m34_process_valence_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m34_process_valence_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m34_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m34_acceptance_summary.md"
+      },
+      "m35": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m35_cognitive_style_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m35_cognitive_style_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m35_cognitive_style_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m35_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m35_acceptance_summary.md"
+      },
+      "m345": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m345_process_benchmark_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m345_process_benchmark_ablation.json",
+        "report": "E:\\workspace\\segments\\reports\\m345_process_benchmark_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m345_process_benchmark_summary.md"
+      }
+    }
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m36_open_world_growth.py",
+      "tests/test_m36_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m31_acceptance.py",
+      "tests/test_m32_acceptance.py",
+      "tests/test_m33_acceptance.py",
+      "tests/test_m34_acceptance.py",
+      "tests/test_m35_acceptance.py",
+      "tests/test_m345_process_benchmark.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    },
+    "semantic_growth_controlled": {
+      "passed": true,
+      "schema_count_mean": 4.0,
+      "schema_count_max": 4
+    },
+    "process_motivation_observable": {
+      "passed": true,
+      "benchmark_focus_bonus_gain": 0.27
+    },
+    "style_diversity_and_stability": {
+      "passed": true,
+      "style_label_diversity": 3,
+      "style_continuity_mean": 0.791667
+    },
+    "restart_continuity": {
+      "passed": true,
+      "restart_continuity": true
+    },
+    "open_world_non_scripted": {
+      "passed": true,
+      "narrative_diversity": 4,
+      "task_diversity": 10
+    },
+    "bounded_growth_under_stress": {
+      "passed": true,
+      "stress_schema_count_max": 4,
+      "stress_style_continuity_mean": 0.791667
+    }
+  },
+  "findings": [],
+  "residual_risks": [],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-28T15:09:41+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

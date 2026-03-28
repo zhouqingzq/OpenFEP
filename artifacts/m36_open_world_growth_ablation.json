@@ -1,0 +1,27 @@
+{
+  "full_trial": {
+    "subject_count": 3,
+    "style_label_diversity": 3,
+    "schema_count_mean": 4.0,
+    "schema_count_max": 4,
+    "style_continuity_mean": 0.791667,
+    "process_observability": true,
+    "restart_continuity": true,
+    "narrative_diversity": 4,
+    "task_diversity": 10
+  },
+  "flattened_trial": {
+    "subject_count": 3,
+    "style_label_diversity": 1,
+    "schema_count_mean": 1.0,
+    "schema_count_max": 1,
+    "style_continuity_mean": 1.0,
+    "process_observability": false,
+    "restart_continuity": true,
+    "narrative_diversity": 4,
+    "task_diversity": 10
+  },
+  "semantic_schema_delta": 3.0,
+  "style_diversity_delta": 2,
+  "process_observability_drop": true
+}
