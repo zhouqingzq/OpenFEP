@@ -9,11 +9,10 @@
       "compute_conservatism": 0.54,
       "process_attraction_decay": 0.46,
       "compression_preference": 0.54,
-      "uncertainty_tolerance": 0.62
+      "uncertainty_tolerance": 0.54
     },
     "evidence": [
       "known tasks were handled with lower compute than unknown tasks",
-      "uncertainty tolerance stayed elevated",
       "process attraction decayed slowly"
     ]
   },
@@ -21,7 +20,7 @@
     "compute_conservatism": 0.54,
     "process_attraction_decay": 0.46,
     "compression_preference": 0.54,
-    "uncertainty_tolerance": 0.62
+    "uncertainty_tolerance": 0.54
   },
   "no_lazy_drive_present": true
 }

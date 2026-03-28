@@ -38,6 +38,22 @@ class TestM35EmergentCognitiveStyles(unittest.TestCase):
         self.assertNotIn("lazy_drive", payload["state"])
         self.assertNotIn("lazy_drive", payload["state"]["style"])
 
+    def test_low_cost_compressor_style_emerges_from_repeated_known_tasks(self) -> None:
+        learner = SlowVariableLearner()
+        for index in range(6):
+            learner.record_effort_allocation(
+                tick=20 + index,
+                action="hide",
+                known_task=True,
+                compute_spend=0.22,
+                uncertainty_load=0.26,
+                compression_pressure=0.74,
+                process_pull=0.12,
+            )
+        snapshot = learner.style_snapshot()
+        self.assertEqual(snapshot["label"], "low_cost_compressor")
+        self.assertLess(snapshot["selective_gap"], -0.10)
+
 
 if __name__ == "__main__":
     unittest.main()

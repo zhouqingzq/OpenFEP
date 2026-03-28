@@ -10,11 +10,10 @@
         "compute_conservatism": 0.54,
         "process_attraction_decay": 0.46,
         "compression_preference": 0.54,
-        "uncertainty_tolerance": 0.62
+        "uncertainty_tolerance": 0.54
       },
       "evidence": [
         "known tasks were handled with lower compute than unknown tasks",
-        "uncertainty tolerance stayed elevated",
         "process attraction decayed slowly"
       ]
     },
@@ -37,8 +36,8 @@
       ]
     },
     "compressor": {
-      "label": "balanced_adaptive",
-      "continuity": 1.0,
+      "label": "low_cost_compressor",
+      "continuity": 0.5,
       "known_task_compute": 0.22,
       "unknown_task_compute": 0.0,
       "selective_gap": -0.22,
@@ -46,10 +45,10 @@
         "compute_conservatism": 0.65,
         "process_attraction_decay": 0.59,
         "compression_preference": 0.65,
-        "uncertainty_tolerance": 0.5
+        "uncertainty_tolerance": 0.38
       },
       "evidence": [
-        "style remains balanced across compute, compression, and uncertainty"
+        "known tasks were resolved through compressed low-cost policies"
       ]
     },
     "baseline": {
@@ -88,8 +87,8 @@
       },
       {
         "tick": 38,
-        "label": "balanced_adaptive",
-        "continuity": 1.0
+        "label": "low_cost_compressor",
+        "continuity": 0.0
       },
       {
         "tick": 45,
@@ -162,18 +161,18 @@
       },
       {
         "tick": 238,
-        "label": "balanced_adaptive",
-        "continuity": 1.0
+        "label": "low_cost_compressor",
+        "continuity": 0.0
       },
       {
         "tick": 239,
-        "label": "balanced_adaptive",
-        "continuity": 1.0
+        "label": "low_cost_compressor",
+        "continuity": 0.25
       },
       {
         "tick": 240,
-        "label": "balanced_adaptive",
-        "continuity": 1.0
+        "label": "low_cost_compressor",
+        "continuity": 0.4
       }
     ]
   }

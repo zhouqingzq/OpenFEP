@@ -1,0 +1,153 @@
+{
+  "process_trace": {
+    "wanting": {
+      "active_focus_id": "unknown:m345-focus",
+      "recent_closed_focus_id": "",
+      "unresolved_tension": 0.7208000000000001,
+      "closure_satisfaction": 0.0,
+      "post_closure_decay": 0.0,
+      "boredom_pressure": 0.0,
+      "process_reward": 0.5800960000000001,
+      "focus_persistence_ticks": 3,
+      "closure_events": 0,
+      "active_phase": "wanting"
+    },
+    "closure": {
+      "active_focus_id": "",
+      "recent_closed_focus_id": "unknown:m345-focus",
+      "unresolved_tension": 0.0,
+      "closure_satisfaction": 0.951568,
+      "post_closure_decay": 1.0,
+      "boredom_pressure": 0.0,
+      "process_reward": 0.28547039999999996,
+      "focus_persistence_ticks": 0,
+      "closure_events": 1,
+      "active_phase": "closure"
+    },
+    "boredom": {
+      "active_focus_id": "",
+      "recent_closed_focus_id": "unknown:m345-focus",
+      "unresolved_tension": 0.0,
+      "closure_satisfaction": 0.16986083530000004,
+      "post_closure_decay": 0.0838553600000001,
+      "boredom_pressure": 0.4637975855225439,
+      "process_reward": 0.11131142052541053,
+      "focus_persistence_ticks": 0,
+      "closure_events": 1,
+      "active_phase": "boredom"
+    },
+    "focus_with": {
+      "process_bonus": 0.27,
+      "closure_penalty": 0.0
+    },
+    "focus_without": {
+      "process_bonus": 0.0,
+      "closure_penalty": 0.0
+    },
+    "closure_with": {
+      "process_bonus": 0.0,
+      "closure_penalty": 0.24
+    },
+    "closure_without": {
+      "process_bonus": 0.0,
+      "closure_penalty": 0.0
+    },
+    "boredom_with": {
+      "process_bonus": 0.074208,
+      "closure_penalty": 0.0
+    },
+    "boredom_without": {
+      "process_bonus": 0.0,
+      "closure_penalty": 0.0
+    }
+  },
+  "style_trace": {
+    "snapshots": {
+      "baseline": {
+        "label": "balanced_adaptive",
+        "continuity": 0.0,
+        "known_task_compute": 0.0,
+        "unknown_task_compute": 0.0,
+        "selective_gap": 0.0,
+        "style_surface": {
+          "compute_conservatism": 0.5,
+          "process_attraction_decay": 0.5,
+          "compression_preference": 0.5,
+          "uncertainty_tolerance": 0.5
+        },
+        "evidence": [
+          "style remains balanced across compute, compression, and uncertainty"
+        ]
+      },
+      "selective": {
+        "label": "efficient_selective_explorer",
+        "continuity": 0.5,
+        "known_task_compute": 0.2,
+        "unknown_task_compute": 0.74,
+        "selective_gap": 0.54,
+        "style_surface": {
+          "compute_conservatism": 0.54,
+          "process_attraction_decay": 0.46,
+          "compression_preference": 0.54,
+          "uncertainty_tolerance": 0.54
+        },
+        "evidence": [
+          "known tasks were handled with lower compute than unknown tasks",
+          "process attraction decayed slowly"
+        ]
+      },
+      "explorer": {
+        "label": "high_investment_explorer",
+        "continuity": 0.833333,
+        "known_task_compute": 0.0,
+        "unknown_task_compute": 0.78,
+        "selective_gap": 0.78,
+        "style_surface": {
+          "compute_conservatism": 0.41,
+          "process_attraction_decay": 0.35,
+          "compression_preference": 0.41,
+          "uncertainty_tolerance": 0.68
+        },
+        "evidence": [
+          "unknown tasks kept attracting sustained compute",
+          "uncertainty tolerance stayed elevated",
+          "process attraction decayed slowly"
+        ]
+      },
+      "compressor": {
+        "label": "low_cost_compressor",
+        "continuity": 0.5,
+        "known_task_compute": 0.22,
+        "unknown_task_compute": 0.0,
+        "selective_gap": -0.22,
+        "style_surface": {
+          "compute_conservatism": 0.65,
+          "process_attraction_decay": 0.59,
+          "compression_preference": 0.65,
+          "uncertainty_tolerance": 0.38
+        },
+        "evidence": [
+          "known tasks were resolved through compressed low-cost policies"
+        ]
+      }
+    },
+    "bias_probe": {
+      "baseline_unknown_scan": 0.056,
+      "selective_unknown_scan": 0.0688,
+      "explorer_unknown_scan": 0.1126,
+      "baseline_known_rest": 0.0,
+      "compressor_known_rest": 0.039
+    }
+  },
+  "metrics": {
+    "focus_bonus_gain": 0.27,
+    "closure_penalty_gain": 0.24,
+    "boredom_bonus_gain": 0.074208,
+    "scan_reorientation_gain": 0.353317,
+    "style_label_diversity": 4,
+    "selective_unknown_scan_gain": 0.0128,
+    "explorer_unknown_scan_gain": 0.0566,
+    "compressor_known_rest_gain": 0.039,
+    "style_continuity_mean": 0.611111
+  }
+}

@@ -8,11 +8,12 @@ Requires the ``api`` optional dependency group::
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 try:
     from fastapi import FastAPI, HTTPException
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import HTMLResponse, PlainTextResponse
     from pydantic import BaseModel, Field
 except ImportError as exc:
     raise ImportError(
@@ -295,6 +296,46 @@ h1 span { color: var(--accent); }
   font-size: 0.8rem;
   margin-bottom: 4px;
 }
+.gt-provenance {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.prov-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+}
+.prov-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.prov-kind {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  font-family: "Cascadia Code", "Fira Code", monospace;
+}
+.prov-id {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-all;
+}
+.prov-meta,
+.prov-segments,
+.prov-motifs {
+  font-size: 0.76rem;
+  color: var(--text2);
+  margin-top: 3px;
+  word-break: break-word;
+}
 .evidence-card {
   background: var(--surface2);
   border-radius: 6px;
@@ -334,6 +375,7 @@ h1 span { color: var(--accent); }
       <button id="analyzeBtn" class="btn btn-primary" onclick="runAnalysis()"></button>
       <button id="exampleBtn" class="btn btn-secondary" onclick="loadExample()"></button>
       <button id="gtExampleBtn" class="btn btn-secondary" onclick="loadGroundTruthExample()"></button>
+      <button id="exportBtn" class="btn btn-secondary" onclick="exportGroundTruthJsonl()"></button>
       <span id="status" class="status"></span>
     </div>
   </div>
@@ -355,6 +397,7 @@ const I = {
     analyze: 'Analyze',
     example: 'Load Example',
     gtExample: 'Load Ground Truth Example',
+    exportJsonl: 'Export JSONL',
     analyzing: (n) => `Analyzing ${n} segment(s)...`,
     done: 'Done.',
     error: (m) => `Error: ${m}`,
@@ -398,6 +441,11 @@ const I = {
     emotionWeights: 'Emotion Channel Weights',
     evidence: 'Evidence',
     reasoning: 'Reasoning',
+    provenance: 'Provenance',
+    sourceSegments: 'Segments',
+    motifs: 'Motifs',
+    supportCount: 'Support',
+    schemaLinks: 'Schemas',
     sourceIndex: 'Source',
     category: 'Category',
     appraisal: 'Appraisal',
@@ -578,6 +626,7 @@ function applyLang() {
   document.getElementById('analyzeBtn').textContent = t('analyze');
   document.getElementById('exampleBtn').textContent = t('example');
   document.getElementById('gtExampleBtn').textContent = t('gtExample');
+  document.getElementById('exportBtn').textContent = t('exportJsonl');
 }
 applyLang();
 
@@ -627,6 +676,34 @@ async function runAnalysis() {
     status.textContent = t('error')(e.message);
   } finally {
     btn.disabled = false;
+  }
+}
+
+async function exportGroundTruthJsonl() {
+  const raw = document.getElementById('materials').value.trim();
+  if (!raw) { alert(t('alertEmpty')); return; }
+  const materials = raw.split('\\n').map(s => s.trim()).filter(Boolean);
+  const status = document.getElementById('status');
+  status.textContent = t('analyzing')(materials.length);
+  try {
+    const res = await fetch('/analyze/ground-truth/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ materials })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `segmentum-ground-truth-${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.jsonl`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    status.textContent = t('done');
+  } catch (err) {
+    status.textContent = t('error')(String(err));
   }
 }
 
@@ -894,12 +971,47 @@ function collectGroundTruthEntries(data) {
 
 function renderGroundTruth(entries) {
   if (!entries.length) return `<p style="color:var(--text2)">${t('noGroundTruth')}</p>`;
+  const renderProvenance = (details) => {
+    if (!details || !details.length) return '';
+    const cards = details.map((detail) => {
+      if (detail.kind === 'schema') {
+        const motifs = (detail.motif_signature || []).map(item => escapeHtml(String(item))).join(', ');
+        const episodeIds = (detail.supporting_episode_ids || []).map(item => escapeHtml(String(item))).join(', ');
+        return `<div class="prov-card">
+          <div class="prov-head">
+            <div class="prov-kind">schema</div>
+            <div class="prov-id">${escapeHtml(detail.schema_id || '')}</div>
+          </div>
+          <div class="prov-meta">${t('supportCount')}: ${escapeHtml(fmtVal(detail.support_count ?? 0))} | direction: ${escapeHtml(detail.dominant_direction || '-')}</div>
+          <div class="prov-motifs">${t('motifs')}: ${motifs || '-'}</div>
+          <div class="prov-segments">episodes: ${episodeIds || '-'}</div>
+        </div>`;
+      }
+      const segments = (detail.supporting_segments || []).map(item => escapeHtml(String(item))).join(' | ');
+      const schemas = (detail.matched_schema_ids || []).map(item => escapeHtml(String(item))).join(', ');
+      const appraisal = Object.entries(detail.appraisal_relevance || {})
+        .map(([k, v]) => `${escapeHtml(k)}=${escapeHtml(fmtVal(v))}`)
+        .join(', ');
+      return `<div class="prov-card">
+        <div class="prov-head">
+          <div class="prov-kind">episode</div>
+          <div class="prov-id">${escapeHtml(detail.episode_id || '')}</div>
+        </div>
+        <div class="prov-meta">${t('category')}: ${escapeHtml(detail.category || '-')} | event: ${escapeHtml(detail.compiled_event_type || '-')} | outcome: ${escapeHtml(detail.predicted_outcome || '-')}</div>
+        <div class="prov-meta">${t('sourceIndex')}: ${escapeHtml(fmtVal(detail.source_index ?? 0))} | confidence: ${escapeHtml(fmtVal(detail.compiler_confidence ?? 0))}</div>
+        <div class="prov-segments">${t('sourceSegments')}: ${segments || '-'}</div>
+        <div class="prov-motifs">${t('schemaLinks')}: ${schemas || '-'}${appraisal ? ' | ' + t('appraisal') + ': ' + appraisal : ''}</div>
+      </div>`;
+    }).join('');
+    return `<div class="gt-subtitle">${t('provenance')}</div><div class="gt-provenance">${cards}</div>`;
+  };
   let h = '<div class="gt-grid">';
   for (const entry of entries) {
     const cr = entry.value || {};
     const evidenceItems = (cr.evidence || []).length
       ? '<ul class="gt-list">' + cr.evidence.map(item => `<li>${escapeHtml(item)}</li>`).join('') + '</ul>'
       : `<div class="gt-body">${t('noEvidence')}</div>`;
+    const provenanceItems = renderProvenance(cr.evidence_details || []);
     h += `<div class="gt-card">
       <div class="gt-path">${escapeHtml(entry.path)}</div>
       <div class="gt-value">${escapeHtml(fmtVal(cr.value))} <span class="confidence-badge ${confClass(cr.confidence)}">${escapeHtml(cr.confidence || 'low')}</span></div>
@@ -907,6 +1019,7 @@ function renderGroundTruth(entries) {
       <div class="gt-body">${escapeHtml(cr.reasoning || '')}</div>
       <div class="gt-subtitle">${t('evidence')}</div>
       ${evidenceItems}
+      ${provenanceItems}
     </div>`;
   }
   return h + '</div>';
@@ -1357,17 +1470,7 @@ def _build_analyzer(request: AnalysisRequest) -> PersonalityAnalyzer:
     return PersonalityAnalyzer(llm_config=llm_cfg)
 
 
-@app.post("/analyze")
-def analyze_personality(request: AnalysisRequest) -> dict[str, Any]:
-    """Full 10-step personality analysis from text materials."""
-    analyzer = _build_analyzer(request)
-    result = analyzer.analyze(request.materials, metadata=request.metadata)
-    return result.to_dict()
-
-
-@app.post("/analyze/ground-truth")
-def analyze_ground_truth(request: AnalysisRequest) -> dict[str, Any]:
-    """Ground-truth oriented view for benchmark generation workflows."""
+def _build_ground_truth_payload(request: AnalysisRequest) -> dict[str, Any]:
     analyzer = _build_analyzer(request)
     result = analyzer.analyze(request.materials, metadata=request.metadata)
     payload = result.to_dict()
@@ -1402,6 +1505,35 @@ def analyze_ground_truth(request: AnalysisRequest) -> dict[str, Any]:
         "unresolvable_questions": list(payload.get("unresolvable_questions", [])),
         "raw_analysis": payload,
     }
+
+
+@app.post("/analyze")
+def analyze_personality(request: AnalysisRequest) -> dict[str, Any]:
+    """Full 10-step personality analysis from text materials."""
+    analyzer = _build_analyzer(request)
+    result = analyzer.analyze(request.materials, metadata=request.metadata)
+    return result.to_dict()
+
+
+@app.post("/analyze/ground-truth")
+def analyze_ground_truth(request: AnalysisRequest) -> dict[str, Any]:
+    """Ground-truth oriented view for benchmark generation workflows."""
+    return _build_ground_truth_payload(request)
+
+
+@app.post("/analyze/ground-truth/export", response_class=PlainTextResponse)
+def export_ground_truth_jsonl(request: AnalysisRequest) -> str:
+    """Export benchmark-ready ground truth as a single JSONL record."""
+    payload = _build_ground_truth_payload(request)
+    export_record = {
+        "materials": payload["materials"],
+        "analysis_confidence": payload["analysis_confidence"],
+        "ground_truth": payload["ground_truth"],
+        "missing_evidence": payload["missing_evidence"],
+        "unresolvable_questions": payload["unresolvable_questions"],
+        "raw_analysis": payload["raw_analysis"],
+    }
+    return json.dumps(export_record, ensure_ascii=False) + "\n"
 
 
 @app.post("/analyze/evidence")

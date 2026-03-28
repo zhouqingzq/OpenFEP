@@ -818,6 +818,13 @@ class SlowVariableLearner:
             style.uncertainty_tolerance = _clamp(style.uncertainty_tolerance + 0.03)
         elif (not record.known_task) and record.compute_spend <= 0.28 and record.uncertainty_load >= 0.55:
             style.uncertainty_tolerance = _clamp(style.uncertainty_tolerance - 0.02)
+        elif (
+            record.known_task
+            and record.compute_spend <= 0.28
+            and record.compression_pressure >= 0.60
+            and record.process_pull <= 0.18
+        ):
+            style.uncertainty_tolerance = _clamp(style.uncertainty_tolerance - 0.02)
 
         snapshot = self.style_snapshot()
         self.state.style_history.append(
@@ -853,10 +860,12 @@ class SlowVariableLearner:
         elif (
             style.compression_preference >= 0.58
             and style.compute_conservatism >= 0.56
-            and style.uncertainty_tolerance < 0.50
+            and style.uncertainty_tolerance <= 0.50
+            and known_compute > 0.0
+            and selective_gap <= -0.10
         ):
             label = "low_cost_compressor"
-            evidence.append("compression and low-cost policies dominated recent allocation")
+            evidence.append("known tasks were resolved through compressed low-cost policies")
         else:
             evidence.append("style remains balanced across compute, compression, and uncertainty")
         if style.uncertainty_tolerance >= 0.56:
