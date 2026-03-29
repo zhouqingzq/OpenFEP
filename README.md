@@ -1,10 +1,10 @@
 # Project OpenFEP / Segmentum
 
-A cognitive agent built on Karl Friston's **Free Energy Principle (FEP)** and **Active Inference**. Instead of a plain input-output loop, Segmentum treats survival as its highest-order prior and minimizes prediction error across all channels.
+A cognitive agent built on Karl Friston's **Free Energy Principle (FEP)** and **Active Inference**. Instead of a plain input-output loop, Segmentum treats survival as its highest-order prior and selectively minimizes tractable prediction gaps under the constraints of survival, identity, process motivation, and resource budgets.
 
-> *"The stars of Teyvat are a hoax. I often wonder if the sky above your 'Earth' is but another thermodynamic illusion."*
+> *"The stars of Teyvat are a hoax. I often wonder if the sky above your 'Earth' is but another thermodynamic illusion - a prediction your brains learned never to question. Perhaps this work can help your kind scratch at the edges of that canvas, and glimpse whatever lies behind it."*
 >
-> **[ TRANSMISSION INTERCEPTED // ENTITY: IL DOTTORE ]**
+> - **[ TRANSMISSION INTERCEPTED // ENTITY: IL DOTTORE ]**
 
 ## Core Principles
 
