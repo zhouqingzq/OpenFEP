@@ -1392,6 +1392,7 @@ class SegmentAgent:
     def _record_decision_history(
         self,
         diagnostics: DecisionDiagnostics,
+        observed: dict[str, float],
     ) -> None:
         record = {
             "tick": self.cycle,
@@ -2664,7 +2665,7 @@ class SegmentAgent:
             repair_policy=diagnostics.identity_repair_policy,
         )
         self.goal_stack.note_action_choice(self.cycle, diagnostics.chosen.choice)
-        self._record_decision_history(diagnostics)
+        self._record_decision_history(diagnostics, observed)
         return {
             "observed": observed,
             "prediction": prediction,
