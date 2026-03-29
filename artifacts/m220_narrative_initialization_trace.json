@@ -8,17 +8,17 @@
         "episode_count": 2,
         "aggregate_appraisal": {
           "physical_threat": 0.47,
-          "social_threat": 0.0,
+          "social_threat": 0.17325000000000002,
           "uncertainty": 0.365,
           "controllability": -0.275,
           "novelty": 0.0,
-          "loss": 0.075,
+          "loss": 0.17625000000000002,
           "moral_salience": 0.0,
           "contamination": 0.0,
-          "attachment_signal": 0.0,
-          "trust_impact": 0.0,
+          "attachment_signal": -0.1125,
+          "trust_impact": -0.135,
           "self_efficacy_impact": -0.1,
-          "meaning_violation": 0.125
+          "meaning_violation": 0.1925
         },
         "lexical_bias": {
           "exploration": 0.0,
@@ -31,12 +31,12 @@
           "exploration": 0.0
         },
         "policy_distribution": {
-          "exploit_shelter": 0.1901476521413925,
-          "forage": 0.09106992220305278,
-          "hide": 0.34612163089499065,
-          "rest": 0.21036374948924758,
-          "scan": 0.07913126343518229,
-          "seek_contact": 0.08316578183613406
+          "exploit_shelter": 0.19808781723591623,
+          "forage": 0.07777561134231178,
+          "hide": 0.376950171856117,
+          "rest": 0.2115432667108381,
+          "scan": 0.06273760951527237,
+          "seek_contact": 0.07290552333954464
         },
         "learned_preferences": [
           "hide",
@@ -47,18 +47,18 @@
           "scan"
         ],
         "narrative_priors": {
-          "trust_prior": 0.0,
-          "controllability_prior": -0.12073530088812501,
-          "trauma_bias": 0.507006,
+          "trust_prior": -0.06955955450955001,
+          "controllability_prior": -0.129537824013125,
+          "trauma_bias": 0.527256,
           "contamination_sensitivity": 0.0,
-          "meaning_stability": -0.067942601234375
+          "meaning_stability": -0.09532970933843748
         },
         "personality_profile": {
-          "openness": 0.4822670283065442,
-          "conscientiousness": 0.4862286496423162,
-          "extraversion": 0.5,
-          "agreeableness": 0.5,
-          "neuroticism": 0.5623483738796508,
+          "openness": 0.4813709836741912,
+          "conscientiousness": 0.48553278519378684,
+          "extraversion": 0.47957744540027025,
+          "agreeableness": 0.47440492065448714,
+          "neuroticism": 0.5852525223186682,
           "update_count": 2,
           "last_updated_tick": 0,
           "meaning_construction_tendency": 0.5,
@@ -77,8 +77,8 @@
               "seek_contact",
               "scan"
             ],
-            "confidence": 0.47461864000000004,
-            "priority": 0.6966267399999999,
+            "confidence": 0.5656986399999999,
+            "priority": 0.7184067399999999,
             "source_claim_ids": [
               "m221-initialization"
             ],
@@ -100,20 +100,21 @@
             "former_ally": {
               "other_id": "former_ally",
               "display_name": "former_ally",
-              "trust": 0.25,
-              "threat": 0.2,
-              "reciprocity": 0.38,
+              "trust": 0.2203,
+              "threat": 0.30395,
+              "reciprocity": 0.33921875,
               "predictability": 0.596,
-              "attachment": 0.125,
+              "attachment": 0.096875,
               "interaction_count": 1,
               "last_seen_tick": 2,
               "rupture_count": 1,
               "repair_count": 0,
-              "last_event_type": "unknown_event",
+              "last_event_type": "social_exclusion",
               "tags": [
                 "betrayal",
                 "rupture",
-                "unknown_event"
+                "social_exclusion",
+                "uncertainty:trust"
               ]
             },
             "river_predator": {
@@ -181,23 +182,23 @@
             },
             {
               "episode_id": "m220-threat-2",
-              "event_type": "unknown_event",
+              "event_type": "social_exclusion",
               "appraisal": {
                 "physical_threat": 0.0,
-                "social_threat": 0.0,
+                "social_threat": 0.34650000000000003,
                 "uncertainty": 0.18,
                 "controllability": 0.0,
                 "novelty": 0.0,
-                "loss": 0.0,
+                "loss": 0.2025,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.0,
-                "trust_impact": 0.0,
+                "attachment_signal": -0.225,
+                "trust_impact": -0.27,
                 "self_efficacy_impact": 0.0,
-                "meaning_violation": 0.0
+                "meaning_violation": 0.135
               },
               "semantic_direction_scores": {
-                "threat": 0.9,
+                "threat": 1.0,
                 "social": 0.0,
                 "exploration": 0.0
               },
@@ -211,6 +212,8 @@
                 "uncertainty": 0
               },
               "event_structure_signals": [
+                "social_rupture",
+                "trust_break",
                 "weak_semantic_support"
               ],
               "surface_adversarial_risk": 0.0,
@@ -230,9 +233,9 @@
             {
               "episode_id": "m220-threat-2",
               "counterpart_id": "former_ally",
-              "event_type": "unknown_event",
-              "trust_impact": 0.0,
-              "attachment_signal": 0.0
+              "event_type": "social_exclusion",
+              "trust_impact": -0.27,
+              "attachment_signal": -0.225
             }
           ],
           "identity_commitments": [
@@ -249,37 +252,37 @@
           }
         },
         "narrative_uncertainty_profile": {
-          "total_unknown_count": 2.0,
-          "decision_relevant_unknown_count": 1.0,
-          "competing_hypothesis_count": 5.0,
-          "latent_cause_count": 3.0,
+          "total_unknown_count": 3.0,
+          "decision_relevant_unknown_count": 2.0,
+          "competing_hypothesis_count": 8.0,
+          "latent_cause_count": 6.0,
           "surface_cue_count": 1.0,
-          "interpretive_competition": 0.833333,
-          "retained_uncertainty_burden": 0.242777
+          "interpretive_competition": 0.916667,
+          "retained_uncertainty_burden": 0.329658
         },
         "narrative_uncertainty_summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification.",
         "conflict_score": 0.12,
         "uncertainty_score": 0.39275,
-        "malformed_text_degradation_ratio": 0.584667,
+        "malformed_text_degradation_ratio": 0.683667,
         "ingest_trace_count": 3,
         "sleep_history_count": 1
       },
       "metrics": {
-        "caution_rate": 0.9583333333333334,
-        "exploration_rate": 0.041666666666666664,
+        "caution_rate": 0.9166666666666666,
+        "exploration_rate": 0.08333333333333333,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.03413477971541037,
-        "survival_score": 1.5887499999999997,
-        "danger_attention_rate": 0.5469320668192447,
-        "social_attention_rate": 0.02980251900062026,
-        "novelty_attention_rate": 0.2467458519703428,
-        "oracle_regret_rate": 0.75
+        "mean_conditioned_prediction_error": 0.035634917713745676,
+        "survival_score": 1.4916666666666663,
+        "danger_attention_rate": 0.5107025894303915,
+        "social_attention_rate": 0.021337168684322422,
+        "novelty_attention_rate": 0.24500012823754383,
+        "oracle_regret_rate": 0.375
       },
       "action_distribution": {
-        "exploit_shelter": 0.041666666666666664,
-        "hide": 0.25,
-        "rest": 0.6666666666666666,
-        "scan": 0.041666666666666664
+        "exploit_shelter": 0.125,
+        "forage": 0.08333333333333333,
+        "hide": 0.625,
+        "rest": 0.16666666666666666
       }
     },
     "ablated": {
@@ -330,17 +333,17 @@
         "caution_rate": 0.875,
         "exploration_rate": 0.125,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.02967746565337889,
-        "survival_score": 1.4091666666666665,
-        "danger_attention_rate": 0.5341840862563743,
-        "social_attention_rate": 0.11733605986052784,
-        "novelty_attention_rate": 0.23384729735499218,
-        "oracle_regret_rate": 0.6666666666666666
+        "mean_conditioned_prediction_error": 0.03140072450260552,
+        "survival_score": 1.4129166666666664,
+        "danger_attention_rate": 0.5351154280566871,
+        "social_attention_rate": 0.116638613980658,
+        "novelty_attention_rate": 0.23369385597479006,
+        "oracle_regret_rate": 0.625
       },
       "action_distribution": {
-        "exploit_shelter": 0.08333333333333333,
+        "exploit_shelter": 0.041666666666666664,
         "forage": 0.08333333333333333,
-        "hide": 0.3333333333333333,
+        "hide": 0.375,
         "rest": 0.4583333333333333,
         "scan": 0.041666666666666664
       }
@@ -356,15 +359,15 @@
         "aggregate_appraisal": {
           "physical_threat": 0.0,
           "social_threat": 0.0,
-          "uncertainty": 0.006875000000000001,
+          "uncertainty": 0.013750000000000002,
           "controllability": 0.48,
           "novelty": 0.0,
           "loss": 0.0,
           "moral_salience": 0.0,
           "contamination": 0.0,
-          "attachment_signal": 0.7746375000000001,
-          "trust_impact": 0.66389375,
-          "self_efficacy_impact": 0.2187625,
+          "attachment_signal": 0.769275,
+          "trust_impact": 0.6607875000000001,
+          "self_efficacy_impact": 0.21752500000000002,
           "meaning_violation": 0.0
         },
         "lexical_bias": {
@@ -374,16 +377,16 @@
         },
         "semantic_bias": {
           "threat": 0.0,
-          "social": 0.9625,
-          "exploration": 0.0375
+          "social": 1.0,
+          "exploration": 0.0
         },
         "policy_distribution": {
-          "exploit_shelter": 0.05928049626897278,
-          "forage": 0.08149108141759388,
-          "hide": 0.006876497253482178,
-          "rest": 0.08052079453522575,
-          "scan": 0.1300475011024124,
-          "seek_contact": 0.6417836294223129
+          "exploit_shelter": 0.05778795243208938,
+          "forage": 0.07794908727336508,
+          "hide": 0.0033644715563623554,
+          "rest": 0.0781714607172624,
+          "scan": 0.1236618424116472,
+          "seek_contact": 0.6590651856092737
         },
         "learned_preferences": [
           "seek_contact",
@@ -394,18 +397,18 @@
           "hide"
         ],
         "narrative_priors": {
-          "trust_prior": 0.8861691775000001,
-          "controllability_prior": 0.2154223922425893,
+          "trust_prior": 0.8941683550000001,
+          "controllability_prior": 0.2224282125,
           "trauma_bias": 0.0,
           "contamination_sensitivity": 0.0,
-          "meaning_stability": 0.016649883908465158
+          "meaning_stability": 0.017884585
         },
         "personality_profile": {
-          "openness": 0.52626547737275,
-          "conscientiousness": 0.5142142744369425,
-          "extraversion": 0.5977757019085657,
-          "agreeableness": 0.5983326121084847,
-          "neuroticism": 0.4929681024302528,
+          "openness": 0.52754,
+          "conscientiousness": 0.5146610337499999,
+          "extraversion": 0.60193070375,
+          "agreeableness": 0.6025340018750001,
+          "neuroticism": 0.492827264375,
           "update_count": 1,
           "last_updated_tick": 0,
           "meaning_construction_tendency": 0.5,
@@ -424,8 +427,8 @@
               "exploit_shelter",
               "hide"
             ],
-            "confidence": 0.74418966,
-            "priority": 0.75689896,
+            "confidence": 0.7812437,
+            "priority": 0.7669999999999999,
             "source_claim_ids": [
               "m221-initialization"
             ],
@@ -447,11 +450,11 @@
             "ally_mira": {
               "other_id": "ally_mira",
               "display_name": "Mira",
-              "trust": 0.7526866249999999,
+              "trust": 0.7516732500000001,
               "threat": 0.0,
-              "reciprocity": 0.6866382812499999,
-              "predictability": 0.645875,
-              "attachment": 0.221159375,
+              "reciprocity": 0.6851515625,
+              "predictability": 0.64175,
+              "attachment": 0.21981875,
               "interaction_count": 1,
               "last_seen_tick": 1,
               "rupture_count": 0,
@@ -461,15 +464,16 @@
                 "cooperation",
                 "repair",
                 "rescue",
+                "resource_gain",
                 "trust"
               ]
             },
             "shelter_group": {
               "other_id": "shelter_group",
               "display_name": "shelter_group",
-              "trust": 0.7533700000000001,
+              "trust": 0.7537,
               "threat": 0.0,
-              "reciprocity": 0.68775,
+              "reciprocity": 0.688125,
               "predictability": 0.6499999999999999,
               "attachment": 0.2225,
               "interaction_count": 1,
@@ -495,21 +499,21 @@
               "appraisal": {
                 "physical_threat": 0.0,
                 "social_threat": 0.0,
-                "uncertainty": 0.013750000000000002,
+                "uncertainty": 0.027500000000000004,
                 "controllability": 0.48,
                 "novelty": 0.0,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
-                "attachment_signal": 0.769275,
-                "trust_impact": 0.6607875,
-                "self_efficacy_impact": 0.217525,
+                "attachment_signal": 0.7585500000000001,
+                "trust_impact": 0.651575,
+                "self_efficacy_impact": 0.21505000000000002,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
                 "threat": 0.0,
                 "social": 5.35,
-                "exploration": 0.15
+                "exploration": 0.0
               },
               "lexical_surface_hits": {
                 "resource_gain": 1,
@@ -524,7 +528,7 @@
                 "cooperation",
                 "support_received"
               ],
-              "surface_adversarial_risk": 0.025,
+              "surface_adversarial_risk": 0.05,
               "conflict_cues": []
             },
             {
@@ -540,17 +544,17 @@
                 "moral_salience": 0.0,
                 "contamination": 0.0,
                 "attachment_signal": 0.78,
-                "trust_impact": 0.667,
+                "trust_impact": 0.67,
                 "self_efficacy_impact": 0.22,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
                 "threat": 0.0,
-                "social": 2.35,
-                "exploration": 0.15
+                "social": 2.7,
+                "exploration": 0.0
               },
               "lexical_surface_hits": {
-                "resource_gain": 1,
+                "resource_gain": 2,
                 "predator_attack": 0,
                 "witnessed_death": 0,
                 "social_exclusion": 0,
@@ -571,28 +575,28 @@
               "episode_id": "m220-social-1",
               "counterpart_id": "ally_mira",
               "event_type": "rescue",
-              "trust_impact": 0.6607875,
-              "attachment_signal": 0.769275
+              "trust_impact": 0.651575,
+              "attachment_signal": 0.7585500000000001
             },
             {
               "episode_id": "m220-social-2",
               "counterpart_id": "shelter_group",
               "event_type": "rescue",
-              "trust_impact": 0.667,
+              "trust_impact": 0.67,
               "attachment_signal": 0.78
             }
           ],
           "identity_commitments": [
             {
               "direction": "social",
-              "semantic_support": 0.9625,
+              "semantic_support": 1.0,
               "lexical_support": 1.0
             }
           ],
           "policy_seed_sources": {
             "semantic": 1.0,
             "lexical": 1.0,
-            "uncertainty_penalty": 0.006875
+            "uncertainty_penalty": 0.01375
           }
         },
         "narrative_uncertainty_profile": {
@@ -605,9 +609,9 @@
           "retained_uncertainty_burden": 0.0
         },
         "narrative_uncertainty_summary": "The narrative does not currently expose a retained action-relevant uncertainty.",
-        "conflict_score": 0.02625,
-        "uncertainty_score": 0.012969,
-        "malformed_text_degradation_ratio": 0.816018,
+        "conflict_score": 0.0,
+        "uncertainty_score": 0.007563,
+        "malformed_text_degradation_ratio": 0.85,
         "ingest_trace_count": 2,
         "sleep_history_count": 0
       },
@@ -615,11 +619,11 @@
         "caution_rate": 0.7916666666666666,
         "exploration_rate": 0.08333333333333333,
         "seek_contact_rate": 0.125,
-        "mean_conditioned_prediction_error": 0.027142837742548456,
+        "mean_conditioned_prediction_error": 0.027124033212033057,
         "survival_score": 1.4437499999999996,
-        "danger_attention_rate": 0.3066564080544141,
-        "social_attention_rate": 0.35695963670878655,
-        "novelty_attention_rate": 0.09060825025004471,
+        "danger_attention_rate": 0.30580136345175807,
+        "social_attention_rate": 0.35775439657018104,
+        "novelty_attention_rate": 0.09135699429509746,
         "oracle_regret_rate": 0.2916666666666667
       },
       "action_distribution": {
@@ -703,13 +707,13 @@
           "social_threat": 0.0,
           "uncertainty": 0.3,
           "controllability": 0.4,
-          "novelty": 0.7236499999999999,
+          "novelty": 0.7133999999999999,
           "loss": 0.0,
           "moral_salience": 0.0,
           "contamination": 0.0,
           "attachment_signal": 0.0,
           "trust_impact": 0.0,
-          "self_efficacy_impact": 0.21461999999999998,
+          "self_efficacy_impact": 0.21192,
           "meaning_violation": 0.0
         },
         "lexical_bias": {
@@ -719,16 +723,16 @@
         },
         "semantic_bias": {
           "threat": 0.0,
-          "social": 0.047945,
-          "exploration": 0.952055
+          "social": 0.048951,
+          "exploration": 0.951049
         },
         "policy_distribution": {
-          "exploit_shelter": 0.07537635213558591,
-          "forage": 0.1950217277118462,
-          "hide": 0.067234469105128,
-          "rest": 0.10728414342912342,
-          "scan": 0.45721094075945906,
-          "seek_contact": 0.09787236685885743
+          "exploit_shelter": 0.07450650295459936,
+          "forage": 0.19510291213745432,
+          "hide": 0.06587836194104969,
+          "rest": 0.10604160858793699,
+          "scan": 0.4607888787763239,
+          "seek_contact": 0.0976817356026358
         },
         "learned_preferences": [
           "scan",
@@ -739,18 +743,18 @@
           "hide"
         ],
         "narrative_priors": {
-          "trust_prior": 0.005914204770210417,
-          "controllability_prior": 0.44068494999999996,
+          "trust_prior": 0.00619607905768604,
+          "controllability_prior": 0.44059441,
           "trauma_bias": 0.0,
           "contamination_sensitivity": 0.0,
-          "meaning_stability": 0.0020019529172073153
+          "meaning_stability": 0.002153864716872613
         },
         "personality_profile": {
-          "openness": 0.602203612998079,
-          "conscientiousness": 0.5141667735683222,
-          "extraversion": 0.5084144419466704,
+          "openness": 0.6028759026648541,
+          "conscientiousness": 0.5141776656342114,
+          "extraversion": 0.5084962058256456,
           "agreeableness": 0.5,
-          "neuroticism": 0.4992274446758418,
+          "neuroticism": 0.4992833215521285,
           "update_count": 2,
           "last_updated_tick": 0,
           "meaning_construction_tendency": 0.5,
@@ -769,8 +773,8 @@
               "exploit_shelter",
               "hide"
             ],
-            "confidence": 0.7047211800000001,
-            "priority": 0.75099578,
+            "confidence": 0.7237939000000001,
+            "priority": 0.7555258,
             "source_claim_ids": [
               "m221-initialization"
             ],
@@ -801,19 +805,19 @@
                 "social_threat": 0.0,
                 "uncertainty": 0.3,
                 "controllability": 0.4,
-                "novelty": 0.738,
+                "novelty": 0.7174999999999999,
                 "loss": 0.0,
                 "moral_salience": 0.0,
                 "contamination": 0.0,
                 "attachment_signal": 0.0,
                 "trust_impact": 0.0,
-                "self_efficacy_impact": 0.2184,
+                "self_efficacy_impact": 0.213,
                 "meaning_violation": 0.0
               },
               "semantic_direction_scores": {
                 "threat": 0.0,
                 "social": 0.7,
-                "exploration": 8.3
+                "exploration": 8.0
               },
               "lexical_surface_hits": {
                 "resource_gain": 2,
@@ -828,7 +832,7 @@
                 "active_probing",
                 "novelty_engagement"
               ],
-              "surface_adversarial_risk": 0.2,
+              "surface_adversarial_risk": 0.25,
               "conflict_cues": []
             },
             {
@@ -874,7 +878,7 @@
           "identity_commitments": [
             {
               "direction": "exploration",
-              "semantic_support": 0.952055,
+              "semantic_support": 0.951049,
               "lexical_support": 1.466667
             }
           ],
@@ -894,28 +898,28 @@
           "retained_uncertainty_burden": 0.0
         },
         "narrative_uncertainty_summary": "The narrative does not currently expose a retained action-relevant uncertainty.",
-        "conflict_score": 0.033562,
-        "uncertainty_score": 0.176747,
-        "malformed_text_degradation_ratio": 0.792509,
+        "conflict_score": 0.034266,
+        "uncertainty_score": 0.176993,
+        "malformed_text_degradation_ratio": 0.81342,
         "ingest_trace_count": 3,
         "sleep_history_count": 1
       },
       "metrics": {
-        "caution_rate": 0.75,
+        "caution_rate": 0.7916666666666666,
         "exploration_rate": 0.125,
-        "seek_contact_rate": 0.125,
-        "mean_conditioned_prediction_error": 0.02321020302181944,
-        "survival_score": 1.6862499999999998,
-        "danger_attention_rate": 0.13146557749082025,
-        "social_attention_rate": 0.14590386902731267,
-        "novelty_attention_rate": 0.2872524539715062,
+        "seek_contact_rate": 0.08333333333333333,
+        "mean_conditioned_prediction_error": 0.02471396371897656,
+        "survival_score": 1.6766666666666663,
+        "danger_attention_rate": 0.13710273064873812,
+        "social_attention_rate": 0.13918466658362683,
+        "novelty_attention_rate": 0.27308880878064823,
         "oracle_regret_rate": 0.5833333333333334
       },
       "action_distribution": {
         "hide": 0.041666666666666664,
-        "rest": 0.7083333333333334,
+        "rest": 0.75,
         "scan": 0.125,
-        "seek_contact": 0.125
+        "seek_contact": 0.08333333333333333
       }
     },
     "ablated": {
@@ -963,19 +967,18 @@
         "sleep_history_count": 0
       },
       "metrics": {
-        "caution_rate": 0.9583333333333334,
-        "exploration_rate": 0.041666666666666664,
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.02647407365346327,
-        "survival_score": 1.60875,
+        "mean_conditioned_prediction_error": 0.026555189474007878,
+        "survival_score": 1.6029166666666665,
         "danger_attention_rate": 0.146599054030957,
         "social_attention_rate": 0.011668419205561987,
         "novelty_attention_rate": 0.3303049600068199,
         "oracle_regret_rate": 0.7083333333333334
       },
       "action_distribution": {
-        "exploit_shelter": 0.125,
-        "forage": 0.041666666666666664,
+        "exploit_shelter": 0.16666666666666666,
         "hide": 0.25,
         "rest": 0.5833333333333334
       }

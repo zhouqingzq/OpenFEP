@@ -11,15 +11,47 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from pydantic import BaseModel, Field
+
+FASTAPI_IMPORT_ERROR: ImportError | None = None
+
 try:
     from fastapi import FastAPI, HTTPException
     from fastapi.responses import HTMLResponse, PlainTextResponse
-    from pydantic import BaseModel, Field
 except ImportError as exc:
-    raise ImportError(
+    FASTAPI_IMPORT_ERROR = ImportError(
         "FastAPI is required for the API layer.  "
         "Install with: pip install segmentum[api]"
-    ) from exc
+    )
+
+    class HTTPException(Exception):
+        def __init__(self, status_code: int, detail: str) -> None:
+            self.status_code = status_code
+            self.detail = detail
+            super().__init__(detail)
+
+    class HTMLResponse(str):
+        pass
+
+    class PlainTextResponse(str):
+        pass
+
+    class FastAPI:  # type: ignore[no-redef]
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            self.args = args
+            self.kwargs = kwargs
+
+        def get(self, *args: Any, **kwargs: Any):
+            def decorator(func):
+                return func
+
+            return decorator
+
+        def post(self, *args: Any, **kwargs: Any):
+            def decorator(func):
+                return func
+
+            return decorator
 
 from .personality_analyzer import PersonalityAnalyzer
 

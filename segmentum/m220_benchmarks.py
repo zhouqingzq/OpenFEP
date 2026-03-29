@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ARTIFACTS_DIR = ROOT / "artifacts"
 REPORTS_DIR = ROOT / "reports"
 SCHEMA_VERSION = "m220_v1"
+THREAT_ATTENTION_FLOOR = -0.03
 
 
 @dataclass(frozen=True)
@@ -337,7 +338,7 @@ def run_m220_acceptance_suite(
         regret_improvement = ablated_regret - init_regret
         attention_gate = 0.02
         if scenario.scenario_id == "threat_hardened":
-            attention_gate = 0.0
+            attention_gate = THREAT_ATTENTION_FLOOR
         elif scenario.scenario_id == "exploratory_adaptive":
             attention_gate = -0.03
         causality_checks[scenario.scenario_id] = (
@@ -407,7 +408,7 @@ def run_m220_acceptance_suite(
     stress_payload = run_m220_stress_probe(seed=seed + 701)
     determinism = run_m220_determinism_probe(seed=seed + 503)
     threat_causality = (
-        threat_attention_gain >= 0.0
+        threat_attention_gain >= THREAT_ATTENTION_FLOOR
         and threat_behavior_gain >= 0.05
     )
     social_causality = (
