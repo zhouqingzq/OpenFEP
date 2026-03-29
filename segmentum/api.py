@@ -9,11 +9,79 @@ Requires the ``api`` optional dependency group::
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 FASTAPI_IMPORT_ERROR: ImportError | None = None
+PYDANTIC_IMPORT_ERROR: ImportError | None = None
+
+try:
+    from pydantic import BaseModel, Field
+except ImportError as exc:
+    PYDANTIC_IMPORT_ERROR = ImportError(
+        "Pydantic is required for the typed API request models.  "
+        "Install with: pip install segmentum[api]"
+    )
+
+    class _FieldSpec:
+        def __init__(
+            self,
+            default: Any = ...,
+            *,
+            default_factory: Any | None = None,
+            min_length: int | None = None,
+            **_: Any,
+        ) -> None:
+            self.default = default
+            self.default_factory = default_factory
+            self.min_length = min_length
+
+    def Field(
+        default: Any = ...,
+        *,
+        default_factory: Any | None = None,
+        min_length: int | None = None,
+        **kwargs: Any,
+    ) -> _FieldSpec:
+        return _FieldSpec(
+            default,
+            default_factory=default_factory,
+            min_length=min_length,
+            **kwargs,
+        )
+
+    class BaseModel:
+        def __init__(self, **kwargs: Any) -> None:
+            for name in self.__annotations__:
+                spec = getattr(type(self), name, ...)
+                if name in kwargs:
+                    value = kwargs[name]
+                elif isinstance(spec, _FieldSpec):
+                    if spec.default_factory is not None:
+                        value = spec.default_factory()
+                    elif spec.default is not ...:
+                        value = deepcopy(spec.default)
+                    else:
+                        raise TypeError(f"Missing required field: {name}")
+                elif spec is not ...:
+                    value = deepcopy(spec)
+                else:
+                    raise TypeError(f"Missing required field: {name}")
+                if isinstance(spec, _FieldSpec) and spec.min_length is not None:
+                    if len(value) < spec.min_length:
+                        raise ValueError(
+                            f"Field '{name}' must contain at least {spec.min_length} items"
+                        )
+                setattr(self, name, value)
+
+        def model_dump(self) -> dict[str, Any]:
+            return {
+                name: deepcopy(getattr(self, name))
+                for name in self.__annotations__
+            }
+
+        def dict(self) -> dict[str, Any]:
+            return self.model_dump()
 
 try:
     from fastapi import FastAPI, HTTPException
