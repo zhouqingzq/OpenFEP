@@ -1,7 +1,7 @@
 {
   "milestone_id": "M3.6",
   "status": "PASS",
-  "generated_at": "2026-03-28T15:09:41+00:00",
+  "generated_at": "2026-03-29T03:46:29+00:00",
   "seed_set": [
     31,
     32,
@@ -16,6 +16,7 @@
     "ablation": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_ablation.json",
     "stress": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_stress.json",
     "snapshots": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_snapshots.json",
+    "failure_audit": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_failure_audit.json",
     "summary": "E:\\workspace\\segments\\reports\\m36_acceptance_summary.md",
     "prior_round": {
       "m31": {
@@ -112,7 +113,7 @@
       "passed": true,
       "restart_continuity": true
     },
-    "open_world_non_scripted": {
+    "open_world_compositional_diversity": {
       "passed": true,
       "narrative_diversity": 4,
       "task_diversity": 10
@@ -120,14 +121,17 @@
     "bounded_growth_under_stress": {
       "passed": true,
       "stress_schema_count_max": 4,
-      "stress_style_continuity_mean": 0.791667
+      "stress_style_continuity_mean": 0.916667,
+      "stress_style_continuity_min": 0.75
     }
   },
   "findings": [],
-  "residual_risks": [],
+  "residual_risks": [
+    "The trial remains deterministic and hand-authored; it demonstrates compositional diversity, not unscripted open-world autonomy."
+  ],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-03-28T15:09:41+00:00"
+    "round_started_at": "2026-03-29T03:46:29+00:00"
   },
   "recommendation": "ACCEPT"
 }

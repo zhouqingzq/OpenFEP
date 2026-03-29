@@ -6,3 +6,4 @@
 - Style diversity: 3
 - Restart continuity: True
 - Stress schema max: 4
+- Stress style continuity min: 0.75

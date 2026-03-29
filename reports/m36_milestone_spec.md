@@ -8,7 +8,7 @@
 
 - Add a deterministic long-horizon open-world trial that composes semantic growth, process motivation, cognitive style, and bounded maintenance evidence.
 - Run multi-subject, multi-narrative, multi-task trajectories with restart continuity checks.
-- Produce a strict acceptance bundle with trace, ablation, stress, snapshot, report, and summary artifacts.
+- Produce a strict acceptance bundle with trace, ablation, stress, snapshot, failure-audit, report, and summary artifacts.
 
 ## Non-Goals
 
@@ -39,5 +39,6 @@
 - `artifacts/m36_open_world_growth_ablation.json`
 - `artifacts/m36_open_world_growth_stress.json`
 - `artifacts/m36_open_world_growth_snapshots.json`
+- `artifacts/m36_open_world_growth_failure_audit.json`
 - `reports/m36_acceptance_report.json`
 - `reports/m36_acceptance_summary.md`

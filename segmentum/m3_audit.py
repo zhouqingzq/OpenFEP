@@ -20,6 +20,7 @@ M36_TRACE_PATH = ARTIFACTS_DIR / "m36_open_world_growth_trace.json"
 M36_ABLATION_PATH = ARTIFACTS_DIR / "m36_open_world_growth_ablation.json"
 M36_STRESS_PATH = ARTIFACTS_DIR / "m36_open_world_growth_stress.json"
 M36_SNAPSHOT_PATH = ARTIFACTS_DIR / "m36_open_world_growth_snapshots.json"
+M36_FAILURE_AUDIT_PATH = ARTIFACTS_DIR / "m36_open_world_growth_failure_audit.json"
 M36_REPORT_PATH = REPORTS_DIR / "m36_acceptance_report.json"
 M36_SUMMARY_PATH = REPORTS_DIR / "m36_acceptance_summary.md"
 
@@ -116,6 +117,15 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         encoding="utf-8",
     )
 
+    stress_subject_metrics = {
+        subject_id: payload["metrics"]
+        for subject_id, payload in stress["subjects"].items()
+    }
+    stress_style_continuities = [
+        float(metrics["style_continuity"])
+        for metrics in stress_subject_metrics.values()
+    ]
+    stress_style_continuity_min = min(stress_style_continuities)
     semantic_growth_passed = (
         trial["summary"]["schema_count_mean"] >= 3.0
         and trial["summary"]["schema_count_max"] <= 5
@@ -132,16 +142,20 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
     continuity_passed = bool(trial["summary"]["restart_continuity"]) and all(
         float(payload["metrics"]["style_continuity"]) >= 0.5 for payload in trial["subjects"].values()
     )
-    open_world_passed = trial["summary"]["narrative_diversity"] >= 4 and trial["summary"]["task_diversity"] >= 8
-    bounded_growth_passed = stress["summary"]["schema_count_max"] <= 5 and stress["summary"]["style_continuity_mean"] >= 0.5
+    compositional_diversity_passed = trial["summary"]["narrative_diversity"] >= 4 and trial["summary"]["task_diversity"] >= 8
+    bounded_growth_passed = (
+        stress["summary"]["schema_count_max"] <= 5
+        and stress["summary"]["style_continuity_mean"] >= 0.5
+        and stress_style_continuity_min >= 0.5
+    )
 
     findings: list[dict[str, object]] = []
-    if not open_world_passed:
+    if not compositional_diversity_passed:
         findings.append(
             {
                 "severity": "S1",
-                "label": "insufficient_open_world_diversity",
-                "detail": "The trial did not span enough narratives or tasks to support the open-world claim.",
+                "label": "insufficient_compositional_diversity",
+                "detail": "The trial did not span enough narratives or tasks to support the compositional diversity claim.",
             }
         )
     if not bounded_growth_passed:
@@ -149,9 +163,39 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
             {
                 "severity": "S1",
                 "label": "unbounded_growth_under_stress",
-                "detail": "Stress replay produced unstable schema growth or style continuity loss.",
+                "detail": "Stress replay produced unstable schema growth or subject-level style continuity loss.",
             }
         )
+
+    failure_audit = {
+        "milestone_id": "M3.6",
+        "artifact_family": "failure_audit",
+        "generated_at": _now_iso(),
+        "status": "CLEAR" if not findings else "ISSUES_FOUND",
+        "blocking_findings": findings,
+        "evaluated_gates": {
+            "semantic_growth_controlled": semantic_growth_passed,
+            "process_motivation_observable": process_motivation_passed,
+            "style_diversity_and_stability": style_stability_passed,
+            "restart_continuity": continuity_passed,
+            "open_world_compositional_diversity": compositional_diversity_passed,
+            "bounded_growth_under_stress": bounded_growth_passed,
+        },
+        "stress_subject_metrics": stress_subject_metrics,
+        "ablation_deltas": {
+            "semantic_schema_delta": _round(
+                float(trial["summary"]["schema_count_mean"]) - float(ablation["summary"]["schema_count_mean"])
+            ),
+            "style_diversity_delta": int(trial["summary"]["style_label_diversity"])
+            - int(ablation["summary"]["style_label_diversity"]),
+            "process_observability_drop": bool(trial["summary"]["process_observability"])
+            and not bool(ablation["summary"]["process_observability"]),
+        },
+        "residual_risks": [
+            "The trial remains deterministic and hand-authored; it demonstrates compositional diversity, not unscripted open-world autonomy."
+        ],
+    }
+    M36_FAILURE_AUDIT_PATH.write_text(json.dumps(failure_audit, indent=2, ensure_ascii=False), encoding="utf-8")
 
     status = "PASS"
     recommendation = "ACCEPT"
@@ -169,6 +213,7 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
             "ablation": str(M36_ABLATION_PATH),
             "stress": str(M36_STRESS_PATH),
             "snapshots": str(M36_SNAPSHOT_PATH),
+            "failure_audit": str(M36_FAILURE_AUDIT_PATH),
             "summary": str(M36_SUMMARY_PATH),
             "prior_round": prior_round["artifacts"],
         },
@@ -211,8 +256,8 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
                 "passed": continuity_passed,
                 "restart_continuity": trial["summary"]["restart_continuity"],
             },
-            "open_world_non_scripted": {
-                "passed": open_world_passed,
+            "open_world_compositional_diversity": {
+                "passed": compositional_diversity_passed,
                 "narrative_diversity": trial["summary"]["narrative_diversity"],
                 "task_diversity": trial["summary"]["task_diversity"],
             },
@@ -220,12 +265,16 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
                 "passed": bounded_growth_passed,
                 "stress_schema_count_max": stress["summary"]["schema_count_max"],
                 "stress_style_continuity_mean": stress["summary"]["style_continuity_mean"],
+                "stress_style_continuity_min": _round(stress_style_continuity_min),
             },
         },
         "findings": findings,
-        "residual_risks": []
+        "residual_risks": list(failure_audit["residual_risks"])
         if status == "PASS"
-        else ["Open-world growth trial must be rerun after resolving the blocking findings."],
+        else [
+            "Open-world growth trial must be rerun after resolving the blocking findings.",
+            *failure_audit["residual_risks"],
+        ],
         "freshness": {"generated_this_round": True, "round_started_at": started_at},
         "recommendation": recommendation,
     }
@@ -238,7 +287,8 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         f"- Schema count mean: {trial['summary']['schema_count_mean']}\n"
         f"- Style diversity: {trial['summary']['style_label_diversity']}\n"
         f"- Restart continuity: {trial['summary']['restart_continuity']}\n"
-        f"- Stress schema max: {stress['summary']['schema_count_max']}\n",
+        f"- Stress schema max: {stress['summary']['schema_count_max']}\n"
+        f"- Stress style continuity min: {_round(stress_style_continuity_min)}\n",
         encoding="utf-8",
     )
     return {
@@ -246,6 +296,7 @@ def write_m36_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         "ablation": str(M36_ABLATION_PATH),
         "stress": str(M36_STRESS_PATH),
         "snapshots": str(M36_SNAPSHOT_PATH),
+        "failure_audit": str(M36_FAILURE_AUDIT_PATH),
         "report": str(M36_REPORT_PATH),
         "summary": str(M36_SUMMARY_PATH),
     }

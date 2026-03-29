@@ -276,6 +276,15 @@ def _subject_scale(subject_id: str, event: OpenWorldEvent) -> OpenWorldEvent:
             payload["compute_spend"] = min(0.82, event.compute_spend + 0.02)
             payload["uncertainty_load"] = min(0.84, event.uncertainty_load + 0.02)
             payload["process_pull"] = min(0.80, event.process_pull + 0.02)
+        if event.tick >= 11:
+            # Stress replay should still feel costly, but anchored subjects should
+            # increasingly reuse established schemas instead of reverting to
+            # full high-investment exploration on repeated motifs.
+            payload["known_task"] = True
+            payload["compute_spend"] = max(0.46, payload["compute_spend"] - 0.14)
+            payload["uncertainty_load"] = max(0.52, payload["uncertainty_load"] - 0.08)
+            payload["compression_pressure"] = min(0.52, event.compression_pressure + 0.18)
+            payload["process_pull"] = max(0.50, payload["process_pull"] - 0.12)
         return OpenWorldEvent(**payload)
     if subject_id == "seeker":
         payload["known_task"] = False

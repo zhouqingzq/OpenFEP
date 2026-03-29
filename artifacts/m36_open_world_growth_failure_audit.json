@@ -1,16 +1,18 @@
 {
-  "stress_summary": {
-    "subject_count": 3,
-    "style_label_diversity": 3,
-    "schema_count_mean": 4.0,
-    "schema_count_max": 4,
-    "style_continuity_mean": 0.916667,
-    "process_observability": true,
+  "milestone_id": "M3.6",
+  "artifact_family": "failure_audit",
+  "generated_at": "2026-03-29T03:46:29+00:00",
+  "status": "CLEAR",
+  "blocking_findings": [],
+  "evaluated_gates": {
+    "semantic_growth_controlled": true,
+    "process_motivation_observable": true,
+    "style_diversity_and_stability": true,
     "restart_continuity": true,
-    "narrative_diversity": 4,
-    "task_diversity": 12
+    "open_world_compositional_diversity": true,
+    "bounded_growth_under_stress": true
   },
-  "stress_subjects": {
+  "stress_subject_metrics": {
     "anchor": {
       "final_schema_count": 4,
       "schema_count_delta": 3,
@@ -59,5 +61,13 @@
       "tasks_seen": 12,
       "focus_count": 3
     }
-  }
+  },
+  "ablation_deltas": {
+    "semantic_schema_delta": 3.0,
+    "style_diversity_delta": 2,
+    "process_observability_drop": true
+  },
+  "residual_risks": [
+    "The trial remains deterministic and hand-authored; it demonstrates compositional diversity, not unscripted open-world autonomy."
+  ]
 }
