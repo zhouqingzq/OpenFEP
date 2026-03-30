@@ -1,20 +1,24 @@
 # Project OpenFEP / Segmentum
 
-A cognitive agent built on Karl Friston's **Free Energy Principle (FEP)** and **Active Inference**. Instead of a plain input-output loop, Segmentum treats survival as its highest-order prior and selectively minimizes tractable prediction gaps under the constraints of survival, identity, process motivation, and resource budgets.
+OpenFEP is a cognitive agent: a digital simulation of personality. Inspired by Karl Friston's **Free Energy Principle (FEP)** and **Active Inference**, it models cognition not as a plain input-output loop, but as a survival-oriented process. Under the constraints of survival, identity, process motivation, and limited resource budgets, OpenFEP selectively minimizes tractable prediction gaps rather than attempting to eliminate uncertainty wholesale.
+
+Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Genshin Impact*: a character associated with experimentation, fractured identity, and the uneasy boundary between mind, selfhood, and constructed intelligence.
 
 > *"The stars of Teyvat are a hoax. I often wonder if the sky above your 'Earth' is but another thermodynamic illusion - a prediction your brains learned never to question. Perhaps this work can help your kind scratch at the edges of that canvas, and glimpse whatever lies behind it."*
 >
 > - **[ TRANSMISSION INTERCEPTED // ENTITY: IL DOTTORE ]**
 
+FEP remains relatively marginal in mainstream AGI engineering. The dominant practical path has centered on scaling laws, RLHF, and architecture search rather than FEP, not only because FEP is often criticized as difficult to falsify, but because it has not yet produced a system that surpasses Transformers on standard benchmarks. In its conventional form, FEP explains how a system maintains its own existence; it does not, by itself, explain the core powers of language such as compositionality, recursion, and pragmatic reasoning across contexts. Language matters because it acts as an offline simulator: it lets an agent construct situations it has never directly experienced and still reason within them. A sentence like "fire will burn you" can build an internal model of pain and avoidance without requiring actual injury. In that sense, language allows one mind's history of prediction-error correction to be encoded into symbols, transmitted to another, and re-instantiated there as simulated prediction-error signals through partially overlapping embodied circuits. This is also why human advantage appears to come less from radically superior neural hardware than from cumulative culture, intergenerational knowledge transfer, and shared experience mediated by language. From that perspective, **personality** is a more natural target for FEP than intelligence itself. If personality is understood as a stable structure of prior preferences formed through long-term interaction with the environment, then FEP offers a compelling account of how personality emerges, stabilizes, and self-reinforces. On this view, personality has two layers: **temperament**, the pre-linguistic prediction-preference structure shaped through embodied interaction, and **characterological personality**, the linguistically mediated self-concept through which a person interprets, narrates, reinforces, or revises those deeper dispositions.
+
 ## Core Principles
 
-- **Free energy minimization** — prediction error + internal pressure from low energy, high stress, fatigue, and thermal imbalance.
-- **Top-down prediction** — strategic priors shaped by competing drives generate expected sensory streams.
-- **Bottom-up error** — only the mismatch between reality and prediction is propagated upward.
-- **Active inference** — either update the internal model (high metabolic cost) or act on the world (lower cost).
-- **Sleep consolidation** — compress episodic memory, smooth beliefs, replay dreams for offline learning.
-- **Defense mechanisms** — four-pathway EFE-driven strategy selection (accommodate / assimilate / suppress / redirect) with precision manipulation.
-- **Metacognition** — observes internal precision patterns and generates cognitive dissociation signals to break vicious cycles.
+- **Free energy minimization** - prediction error plus internal pressure from low energy, high stress, fatigue, and thermal imbalance.
+- **Top-down prediction** - strategic priors shaped by competing drives generate expected sensory streams.
+- **Bottom-up error** - only the mismatch between reality and prediction is propagated upward.
+- **Active inference** - the agent either updates its internal model (high metabolic cost) or acts on the world (lower cost).
+- **Sleep consolidation** - episodic memory is compressed, beliefs are smoothed, and dreams are replayed for offline learning.
+- **Defense mechanisms** - a four-pathway, EFE-driven strategy selector chooses between accommodate / assimilate / suppress / redirect with precision manipulation.
+- **Metacognition** - monitors internal precision patterns and generates cognitive dissociation signals to break vicious cycles.
 
 ## Architecture
 
@@ -28,9 +32,9 @@ A cognitive agent built on Karl Friston's **Free Energy Principle (FEP)** and **
 | Metacognition | `metacognitive.py` | Internal pattern observation, dissociation signals |
 | Sleep | `sleep_consolidator.py` | Rule extraction, episode compression, prediction flattening |
 | Counterfactual | `counterfactual.py` | Virtual sandbox reasoning over untaken actions |
-| Narrative | `narrative_compiler.py` | Text → appraisal → embodied episode compilation |
-| Personality Analysis | `personality_analyzer.py` | **Inverse inference** from text to personality generative model |
-| VIA Projection | `via_projection.py` | Big Five → 24 character strengths diagnostic |
+| Narrative | `narrative_compiler.py` | Text -> appraisal -> embodied episode compilation |
+| Personality Analysis | `personality_analyzer.py` | **Inverse inference** from text to a personality generative model |
+| VIA Projection | `via_projection.py` | Big Five -> 24 character strengths diagnostic |
 | Web UI / API | `api.py`, `api_cli.py` | Browser-based personality analysis interface |
 
 ## Install
@@ -68,7 +72,7 @@ State persists to `data/segment_v0_1_state.json`; structured JSONL trace beside 
 
 ## Personality Analysis
 
-The `PersonalityAnalyzer` performs **inverse inference**: given text/behavioral materials, it builds a full personality generative model using the FEP infrastructure in reverse — a 10-step pipeline from raw text to structured personality report.
+The `PersonalityAnalyzer` performs **inverse inference**: given text or behavioral materials, it builds a full personality generative model by running the FEP infrastructure in reverse - a 10-step pipeline from raw text to a structured personality report.
 
 ### Web UI
 
@@ -124,7 +128,7 @@ for orient, cr in result.social_orientation.orientation_weights.items():
 
 # Behavioral predictions
 for pred in result.behavioral_predictions:
-    print(f"  IF {pred.scenario} → {pred.predicted_behavior}")
+    print(f"  IF {pred.scenario} -> {pred.predicted_behavior}")
 
 # Feedback loops (self-reinforcing dynamics)
 for loop in result.feedback_loops:
