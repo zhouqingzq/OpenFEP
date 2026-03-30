@@ -1,0 +1,149 @@
+{
+  "manifest": {
+    "benchmark_id": "confidence_database",
+    "benchmark_slice": "repo_curated_sample",
+    "description": "Curated confidence-judgment benchmark slice aligned to Confidence Database-style trial fields for deterministic repository evaluation.",
+    "record_count": 12,
+    "fields": [
+      "trial_id",
+      "subject_id",
+      "stimulus_strength",
+      "correct_choice",
+      "human_choice",
+      "human_confidence",
+      "rt_ms"
+    ],
+    "splits": {
+      "train": 6,
+      "validation": 3,
+      "heldout": 3
+    },
+    "notes": [
+      "This repository slice is intentionally small and deterministic.",
+      "It is used to validate adapter, logging, and audit infrastructure rather than make publication-grade claims."
+    ]
+  },
+  "trials": [
+    {
+      "trial_id": "cd_001",
+      "subject_id": "s01",
+      "stimulus_strength": 0.92,
+      "correct_choice": "right",
+      "human_choice": "right",
+      "human_confidence": 0.93,
+      "rt_ms": 710,
+      "split": "train"
+    },
+    {
+      "trial_id": "cd_002",
+      "subject_id": "s01",
+      "stimulus_strength": 0.34,
+      "correct_choice": "right",
+      "human_choice": "right",
+      "human_confidence": 0.66,
+      "rt_ms": 905,
+      "split": "train"
+    },
+    {
+      "trial_id": "cd_003",
+      "subject_id": "s01",
+      "stimulus_strength": -0.29,
+      "correct_choice": "left",
+      "human_choice": "left",
+      "human_confidence": 0.61,
+      "rt_ms": 990,
+      "split": "train"
+    },
+    {
+      "trial_id": "cd_004",
+      "subject_id": "s01",
+      "stimulus_strength": -0.83,
+      "correct_choice": "left",
+      "human_choice": "left",
+      "human_confidence": 0.89,
+      "rt_ms": 748,
+      "split": "train"
+    },
+    {
+      "trial_id": "cd_005",
+      "subject_id": "s02",
+      "stimulus_strength": 0.11,
+      "correct_choice": "right",
+      "human_choice": "right",
+      "human_confidence": 0.56,
+      "rt_ms": 1140,
+      "split": "train"
+    },
+    {
+      "trial_id": "cd_006",
+      "subject_id": "s02",
+      "stimulus_strength": -0.18,
+      "correct_choice": "left",
+      "human_choice": "left",
+      "human_confidence": 0.58,
+      "rt_ms": 1125,
+      "split": "train"
+    },
+    {
+      "trial_id": "cd_007",
+      "subject_id": "s02",
+      "stimulus_strength": 0.77,
+      "correct_choice": "right",
+      "human_choice": "right",
+      "human_confidence": 0.84,
+      "rt_ms": 802,
+      "split": "validation"
+    },
+    {
+      "trial_id": "cd_008",
+      "subject_id": "s02",
+      "stimulus_strength": -0.71,
+      "correct_choice": "left",
+      "human_choice": "left",
+      "human_confidence": 0.82,
+      "rt_ms": 818,
+      "split": "validation"
+    },
+    {
+      "trial_id": "cd_009",
+      "subject_id": "s03",
+      "stimulus_strength": 0.46,
+      "correct_choice": "right",
+      "human_choice": "right",
+      "human_confidence": 0.71,
+      "rt_ms": 936,
+      "split": "validation"
+    },
+    {
+      "trial_id": "cd_010",
+      "subject_id": "s03",
+      "stimulus_strength": -0.41,
+      "correct_choice": "left",
+      "human_choice": "left",
+      "human_confidence": 0.69,
+      "rt_ms": 952,
+      "split": "heldout"
+    },
+    {
+      "trial_id": "cd_011",
+      "subject_id": "s03",
+      "stimulus_strength": 0.62,
+      "correct_choice": "right",
+      "human_choice": "right",
+      "human_confidence": 0.79,
+      "rt_ms": 845,
+      "split": "heldout"
+    },
+    {
+      "trial_id": "cd_012",
+      "subject_id": "s03",
+      "stimulus_strength": -0.57,
+      "correct_choice": "left",
+      "human_choice": "left",
+      "human_confidence": 0.75,
+      "rt_ms": 868,
+      "split": "heldout"
+    }
+  ],
+  "skipped_records": 0
+}

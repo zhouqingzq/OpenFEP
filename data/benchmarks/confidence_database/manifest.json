@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "confidence_database",
+  "benchmark_slice": "repo_curated_sample",
+  "description": "Curated confidence-judgment benchmark slice aligned to Confidence Database-style trial fields for deterministic repository evaluation.",
+  "record_count": 12,
+  "fields": [
+    "trial_id",
+    "subject_id",
+    "stimulus_strength",
+    "correct_choice",
+    "human_choice",
+    "human_confidence",
+    "rt_ms"
+  ],
+  "splits": {
+    "train": 6,
+    "validation": 3,
+    "heldout": 3
+  },
+  "notes": [
+    "This repository slice is intentionally small and deterministic.",
+    "It is used to validate adapter, logging, and audit infrastructure rather than make publication-grade claims."
+  ]
+}

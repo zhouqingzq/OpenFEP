@@ -1,0 +1,82 @@
+{
+  "milestone_id": "M4.2",
+  "status": "PASS",
+  "generated_at": "2026-03-30T10:19:25+00:00",
+  "seed_set": [
+    42
+  ],
+  "artifacts": {
+    "preprocess": "E:\\workspace\\segments\\artifacts\\m42_confidence_preprocess.json",
+    "protocol": "E:\\workspace\\segments\\artifacts\\m42_benchmark_protocol.json",
+    "trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m42_confidence_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m42_confidence_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md",
+    "regressions": {
+      "m41": {
+        "schema": "E:\\workspace\\segments\\artifacts\\m41_cognitive_schema.json",
+        "trace": "E:\\workspace\\segments\\artifacts\\m41_cognitive_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m41_cognitive_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m41_cognitive_stress.json",
+        "mapping": "E:\\workspace\\segments\\artifacts\\m41_behavior_mapping.json",
+        "report": "E:\\workspace\\segments\\reports\\m41_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m41_acceptance_summary.md"
+      },
+      "m36": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_stress.json",
+        "snapshots": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_snapshots.json",
+        "failure_audit": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_failure_audit.json",
+        "report": "E:\\workspace\\segments\\reports\\m36_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m36_acceptance_summary.md"
+      }
+    }
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m42_benchmark_adapter.py",
+      "tests/test_m42_confidence_benchmark.py",
+      "tests/test_m42_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m41_acceptance.py",
+      "tests/test_m36_acceptance.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    },
+    "artifact_freshness": {
+      "passed": true
+    },
+    "benchmark_closed_loop": {
+      "passed": true
+    }
+  },
+  "findings": [],
+  "residual_risks": [
+    "M4.2 ships a deterministic benchmark slice and adapter scaffold; larger external benchmark ingestion remains future work."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-30T10:19:25+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

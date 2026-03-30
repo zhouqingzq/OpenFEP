@@ -135,6 +135,20 @@ from .analysis_types import (
     PersonalityAnalysisResult,
 )
 from .personality_analyzer import PersonalityAnalyzer
+from .m4_cognitive_style import (
+    CognitiveStyleParameters,
+    CognitiveParameterBridge,
+    DecisionLogRecord,
+    ResourceSnapshot as M4ResourceSnapshot,
+)
+from .m4_benchmarks import (
+    BenchmarkPrediction,
+    BenchmarkTrial,
+    ConfidenceDatabaseAdapter,
+    IowaGamblingTaskAdapter,
+    preprocess_confidence_database,
+    run_confidence_database_benchmark,
+)
 
 __all__ = [
     "AgentState",
@@ -268,4 +282,14 @@ __all__ = [
     "ConfidenceRated",
     "PersonalityAnalysisResult",
     "PersonalityAnalyzer",
+    "CognitiveStyleParameters",
+    "CognitiveParameterBridge",
+    "DecisionLogRecord",
+    "M4ResourceSnapshot",
+    "BenchmarkTrial",
+    "BenchmarkPrediction",
+    "ConfidenceDatabaseAdapter",
+    "IowaGamblingTaskAdapter",
+    "preprocess_confidence_database",
+    "run_confidence_database_benchmark",
 ]

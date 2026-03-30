@@ -1,0 +1,50 @@
+{
+  "full": {
+    "selected_actions": [
+      "scan",
+      "commit",
+      "rest",
+      "rest"
+    ],
+    "mean_confidence": 0.428295,
+    "mean_update_magnitude": 0.157594,
+    "pattern_count": 3
+  },
+  "ablated": {
+    "selected_actions": [
+      "scan",
+      "commit",
+      "scan",
+      "scan"
+    ],
+    "mean_confidence": 0.428295,
+    "mean_update_magnitude": 0.157594,
+    "pattern_count": 2
+  },
+  "full_patterns": [
+    {
+      "label": "directed_exploration",
+      "evidence": "scan selected during high uncertainty"
+    },
+    {
+      "label": "resource_conservation",
+      "evidence": "rest selected under elevated resource pressure"
+    },
+    {
+      "label": "confidence_sharpening",
+      "evidence": "commit selected with high confidence and bounded update"
+    }
+  ],
+  "ablated_patterns": [
+    {
+      "label": "directed_exploration",
+      "evidence": "scan selected during high uncertainty"
+    },
+    {
+      "label": "confidence_sharpening",
+      "evidence": "commit selected with high confidence and bounded update"
+    }
+  ],
+  "resource_defensive_present": true,
+  "resource_defensive_missing_after_ablation": true
+}

@@ -1,0 +1,40 @@
+{
+  "confidence_database": {
+    "benchmark_id": "confidence_database",
+    "trial_fields": [
+      "trial_id",
+      "subject_id",
+      "stimulus_strength",
+      "correct_choice",
+      "human_choice",
+      "human_confidence",
+      "rt_ms",
+      "split"
+    ],
+    "observation_fields": [
+      "stimulus_strength",
+      "ambiguity",
+      "evidence_strength"
+    ],
+    "action_fields": [
+      "choose_left",
+      "choose_right"
+    ],
+    "feedback_fields": [
+      "correct",
+      "human_choice_match",
+      "predicted_confidence"
+    ]
+  },
+  "iowa_gambling_task": {
+    "benchmark_id": "iowa_gambling_task",
+    "status": "adapter_skeleton_only",
+    "trial_fields": [
+      "trial_id",
+      "deck",
+      "reward",
+      "penalty",
+      "net_outcome"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "stress_metrics": {
+    "accuracy": 1.0,
+    "calibration_error": 0.328014,
+    "brier_score": 0.1283,
+    "heldout_likelihood": -0.161661,
+    "confidence_bias": -0.063847
+  },
+  "skipped_malformed": 2,
+  "contained_without_crash": true
+}

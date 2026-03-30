@@ -1,0 +1,77 @@
+{
+  "milestone_id": "M4.1",
+  "status": "PASS",
+  "generated_at": "2026-03-30T10:19:25+00:00",
+  "seed_set": [
+    41
+  ],
+  "artifacts": {
+    "schema": "E:\\workspace\\segments\\artifacts\\m41_cognitive_schema.json",
+    "trace": "E:\\workspace\\segments\\artifacts\\m41_cognitive_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m41_cognitive_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m41_cognitive_stress.json",
+    "mapping": "E:\\workspace\\segments\\artifacts\\m41_behavior_mapping.json",
+    "summary": "E:\\workspace\\segments\\reports\\m41_acceptance_summary.md",
+    "regressions": {
+      "m35": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m35_cognitive_style_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m35_cognitive_style_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m35_cognitive_style_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m35_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m35_acceptance_summary.md"
+      },
+      "m36": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_stress.json",
+        "snapshots": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_snapshots.json",
+        "failure_audit": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_failure_audit.json",
+        "report": "E:\\workspace\\segments\\reports\\m36_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m36_acceptance_summary.md"
+      }
+    }
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m41_cognitive_parameters.py",
+      "tests/test_m41_decision_logging.py",
+      "tests/test_m41_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m35_acceptance.py",
+      "tests/test_m36_acceptance.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    },
+    "artifact_freshness": {
+      "passed": true
+    }
+  },
+  "findings": [],
+  "residual_risks": [
+    "M4.1 validates a reusable parameter and logging layer but does not yet prove human-task fit."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-30T10:19:25+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

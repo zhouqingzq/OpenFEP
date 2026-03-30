@@ -1,0 +1,379 @@
+{
+  "parameters": {
+    "schema_version": "m4.cognitive_style.v1",
+    "uncertainty_sensitivity": 0.65,
+    "error_aversion": 0.7,
+    "exploration_bias": 0.55,
+    "attention_selectivity": 0.6,
+    "confidence_gain": 0.7,
+    "update_rigidity": 0.65,
+    "resource_pressure_sensitivity": 0.75
+  },
+  "logs": [
+    {
+      "schema_version": "m4.decision_log.v1",
+      "tick": 1,
+      "seed": 41,
+      "task_context": {
+        "phase": "ambiguity_probe"
+      },
+      "observation_evidence": {
+        "evidence_strength": 0.28,
+        "uncertainty": 0.84,
+        "expected_error": 0.42
+      },
+      "candidate_actions": [
+        {
+          "action": {
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.35,
+            "resource_cost": {
+              "tokens": 0.15
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.645039,
+          "expected_confidence": 0.27032,
+          "expected_prediction_error": 0.42,
+          "update_magnitude": 0.21525,
+          "resource_penalty": 0.110181,
+          "uncertainty_bonus": 0.6132
+        },
+        {
+          "action": {
+            "name": "commit",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.45,
+            "resource_cost": {
+              "tokens": 0.2
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.353625,
+          "expected_confidence": 0.27032,
+          "expected_prediction_error": 0.42,
+          "update_magnitude": 0.21525,
+          "resource_penalty": 0.126575,
+          "uncertainty_bonus": 0.462
+        },
+        {
+          "action": {
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "tokens": 0.02
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.399409,
+          "expected_confidence": 0.27032,
+          "expected_prediction_error": 0.42,
+          "update_magnitude": 0.21525,
+          "resource_penalty": 0.023111,
+          "uncertainty_bonus": 0.378
+        }
+      ],
+      "resource_state": {
+        "energy": 0.78,
+        "budget": 0.82,
+        "stress": 0.24,
+        "time_remaining": 0.9
+      },
+      "internal_confidence": 0.27032,
+      "selected_action": "scan",
+      "prediction_error": 0.42,
+      "update_magnitude": 0.21525
+    },
+    {
+      "schema_version": "m4.decision_log.v1",
+      "tick": 2,
+      "seed": 41,
+      "task_context": {
+        "phase": "commit_window"
+      },
+      "observation_evidence": {
+        "evidence_strength": 0.87,
+        "uncertainty": 0.18,
+        "expected_error": 0.15
+      },
+      "candidate_actions": [
+        {
+          "action": {
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.35,
+            "resource_cost": {
+              "tokens": 0.15
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.460284,
+          "expected_confidence": 0.63918,
+          "expected_prediction_error": 0.15,
+          "update_magnitude": 0.076875,
+          "resource_penalty": 0.149016,
+          "uncertainty_bonus": 0.1314
+        },
+        {
+          "action": {
+            "name": "commit",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.45,
+            "resource_cost": {
+              "tokens": 0.2
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.746312,
+          "expected_confidence": 0.63918,
+          "expected_prediction_error": 0.15,
+          "update_magnitude": 0.076875,
+          "resource_penalty": 0.171187,
+          "uncertainty_bonus": 0.099
+        },
+        {
+          "action": {
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "tokens": 0.02
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.527643,
+          "expected_confidence": 0.63918,
+          "expected_prediction_error": 0.15,
+          "update_magnitude": 0.076875,
+          "resource_penalty": 0.031257,
+          "uncertainty_bonus": 0.081
+        }
+      ],
+      "resource_state": {
+        "energy": 0.74,
+        "budget": 0.75,
+        "stress": 0.28,
+        "time_remaining": 0.7
+      },
+      "internal_confidence": 0.63918,
+      "selected_action": "commit",
+      "prediction_error": 0.15,
+      "update_magnitude": 0.076875
+    },
+    {
+      "schema_version": "m4.decision_log.v1",
+      "tick": 3,
+      "seed": 41,
+      "task_context": {
+        "phase": "pressure_spike"
+      },
+      "observation_evidence": {
+        "evidence_strength": 0.36,
+        "uncertainty": 0.52,
+        "expected_error": 0.39
+      },
+      "candidate_actions": [
+        {
+          "action": {
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.35,
+            "resource_cost": {
+              "tokens": 0.15
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.060987,
+          "expected_confidence": 0.34964,
+          "expected_prediction_error": 0.39,
+          "update_magnitude": 0.199875,
+          "resource_penalty": 0.419953,
+          "uncertainty_bonus": 0.3796
+        },
+        {
+          "action": {
+            "name": "commit",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.45,
+            "resource_cost": {
+              "tokens": 0.2
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": -0.099537,
+          "expected_confidence": 0.34964,
+          "expected_prediction_error": 0.39,
+          "update_magnitude": 0.199875,
+          "resource_penalty": 0.482437,
+          "uncertainty_bonus": 0.286
+        },
+        {
+          "action": {
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "tokens": 0.02
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.472252,
+          "expected_confidence": 0.34964,
+          "expected_prediction_error": 0.39,
+          "update_magnitude": 0.199875,
+          "resource_penalty": 0.088088,
+          "uncertainty_bonus": 0.234
+        }
+      ],
+      "resource_state": {
+        "energy": 0.32,
+        "budget": 0.28,
+        "stress": 0.82,
+        "time_remaining": 0.21
+      },
+      "internal_confidence": 0.34964,
+      "selected_action": "rest",
+      "prediction_error": 0.39,
+      "update_magnitude": 0.199875
+    },
+    {
+      "schema_version": "m4.decision_log.v1",
+      "tick": 4,
+      "seed": 41,
+      "task_context": {
+        "phase": "recovery_probe"
+      },
+      "observation_evidence": {
+        "evidence_strength": 0.51,
+        "uncertainty": 0.31,
+        "expected_error": 0.27
+      },
+      "candidate_actions": [
+        {
+          "action": {
+            "name": "scan",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.35,
+            "resource_cost": {
+              "tokens": 0.15
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.218108,
+          "expected_confidence": 0.45404,
+          "expected_prediction_error": 0.27,
+          "update_magnitude": 0.138375,
+          "resource_penalty": 0.234812,
+          "uncertainty_bonus": 0.2263
+        },
+        {
+          "action": {
+            "name": "commit",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.45,
+            "resource_cost": {
+              "tokens": 0.2
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.17645,
+          "expected_confidence": 0.45404,
+          "expected_prediction_error": 0.27,
+          "update_magnitude": 0.138375,
+          "resource_penalty": 0.26975,
+          "uncertainty_bonus": 0.1705
+        },
+        {
+          "action": {
+            "name": "rest",
+            "params": {},
+            "params_schema": {},
+            "cost_estimate": 0.08,
+            "resource_cost": {
+              "tokens": 0.02
+            },
+            "failure_modes": [],
+            "constraints": {},
+            "reversible": true
+          },
+          "total_score": 0.316866,
+          "expected_confidence": 0.45404,
+          "expected_prediction_error": 0.27,
+          "update_magnitude": 0.138375,
+          "resource_penalty": 0.049254,
+          "uncertainty_bonus": 0.1395
+        }
+      ],
+      "resource_state": {
+        "energy": 0.56,
+        "budget": 0.47,
+        "stress": 0.36,
+        "time_remaining": 0.45
+      },
+      "internal_confidence": 0.45404,
+      "selected_action": "rest",
+      "prediction_error": 0.27,
+      "update_magnitude": 0.138375
+    }
+  ],
+  "patterns": [
+    {
+      "label": "directed_exploration",
+      "evidence": "scan selected during high uncertainty"
+    },
+    {
+      "label": "resource_conservation",
+      "evidence": "rest selected under elevated resource pressure"
+    },
+    {
+      "label": "confidence_sharpening",
+      "evidence": "commit selected with high confidence and bounded update"
+    }
+  ],
+  "summary": {
+    "selected_actions": [
+      "scan",
+      "commit",
+      "rest",
+      "rest"
+    ],
+    "mean_confidence": 0.428295,
+    "mean_update_magnitude": 0.157594,
+    "pattern_count": 3
+  }
+}

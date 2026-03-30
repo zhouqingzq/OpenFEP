@@ -1,0 +1,117 @@
+{
+  "parameter_schema": {
+    "schema_version": "m4.cognitive_style.v1",
+    "type": "object",
+    "required": [
+      "schema_version",
+      "uncertainty_sensitivity",
+      "error_aversion",
+      "exploration_bias",
+      "attention_selectivity",
+      "confidence_gain",
+      "update_rigidity",
+      "resource_pressure_sensitivity"
+    ],
+    "properties": {
+      "schema_version": {
+        "type": "string"
+      },
+      "uncertainty_sensitivity": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "error_aversion": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "exploration_bias": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "attention_selectivity": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "confidence_gain": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "update_rigidity": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "resource_pressure_sensitivity": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    }
+  },
+  "decision_log_schema": {
+    "schema_version": "m4.decision_log.v1",
+    "type": "object",
+    "required": [
+      "schema_version",
+      "tick",
+      "seed",
+      "task_context",
+      "observation_evidence",
+      "candidate_actions",
+      "resource_state",
+      "internal_confidence",
+      "selected_action",
+      "prediction_error",
+      "update_magnitude"
+    ]
+  },
+  "canonical_actions": [
+    {
+      "name": "scan",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.35,
+      "resource_cost": {
+        "tokens": 0.15
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    },
+    {
+      "name": "commit",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.45,
+      "resource_cost": {
+        "tokens": 0.2
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    },
+    {
+      "name": "rest",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.08,
+      "resource_cost": {
+        "tokens": 0.02
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    }
+  ],
+  "resource_schema_fields": [
+    "energy",
+    "budget",
+    "stress",
+    "time_remaining"
+  ]
+}

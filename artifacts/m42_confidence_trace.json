@@ -1,0 +1,365 @@
+{
+  "canonical_run": {
+    "benchmark_id": "confidence_database",
+    "parameters": {
+      "schema_version": "m4.cognitive_style.v1",
+      "uncertainty_sensitivity": 0.65,
+      "error_aversion": 0.7,
+      "exploration_bias": 0.55,
+      "attention_selectivity": 0.6,
+      "confidence_gain": 0.7,
+      "update_rigidity": 0.65,
+      "resource_pressure_sensitivity": 0.75
+    },
+    "trial_count": 12,
+    "split": "all",
+    "metrics": {
+      "accuracy": 1.0,
+      "calibration_error": 0.328014,
+      "brier_score": 0.1283,
+      "heldout_likelihood": -0.161661,
+      "confidence_bias": -0.063847
+    },
+    "predictions": [
+      {
+        "trial_id": "cd_001",
+        "split": "train",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.91932,
+        "predicted_probability_right": 0.97947,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.93
+      },
+      {
+        "trial_id": "cd_002",
+        "split": "train",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.5836899999999999,
+        "predicted_probability_right": 0.805941,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.66
+      },
+      {
+        "trial_id": "cd_003",
+        "split": "train",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.5520149999999999,
+        "predicted_probability_right": 0.226637,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.61
+      },
+      {
+        "trial_id": "cd_004",
+        "split": "train",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.8587049999999999,
+        "predicted_probability_right": 0.029294,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.89
+      },
+      {
+        "trial_id": "cd_005",
+        "split": "train",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.442785,
+        "predicted_probability_right": 0.608759,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.56
+      },
+      {
+        "trial_id": "cd_006",
+        "split": "train",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.47993,
+        "predicted_probability_right": 0.314072,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.58
+      },
+      {
+        "trial_id": "cd_007",
+        "split": "validation",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.8152949999999999,
+        "predicted_probability_right": 0.96097,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.84
+      },
+      {
+        "trial_id": "cd_008",
+        "split": "validation",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.7778849999999999,
+        "predicted_probability_right": 0.046635,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.82
+      },
+      {
+        "trial_id": "cd_009",
+        "split": "validation",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.63151,
+        "predicted_probability_right": 0.868881,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.71
+      },
+      {
+        "trial_id": "cd_010",
+        "split": "heldout",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.5998349999999999,
+        "predicted_probability_right": 0.145773,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.69
+      },
+      {
+        "trial_id": "cd_011",
+        "split": "heldout",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.7172700000000001,
+        "predicted_probability_right": 0.927748,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.79
+      },
+      {
+        "trial_id": "cd_012",
+        "split": "heldout",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.6855950000000001,
+        "predicted_probability_right": 0.079391,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.75
+      }
+    ],
+    "resources": [
+      {
+        "energy": 0.82,
+        "budget": 0.88,
+        "stress": 0.18,
+        "time_remaining": 0.95
+      },
+      {
+        "energy": 0.7799999999999999,
+        "budget": 0.85,
+        "stress": 0.22999999999999998,
+        "time_remaining": 0.9099999999999999
+      },
+      {
+        "energy": 0.74,
+        "budget": 0.8200000000000001,
+        "stress": 0.28,
+        "time_remaining": 0.87
+      },
+      {
+        "energy": 0.7,
+        "budget": 0.79,
+        "stress": 0.33,
+        "time_remaining": 0.83
+      },
+      {
+        "energy": 0.6599999999999999,
+        "budget": 0.76,
+        "stress": 0.38,
+        "time_remaining": 0.7899999999999999
+      },
+      {
+        "energy": 0.6199999999999999,
+        "budget": 0.73,
+        "stress": 0.43,
+        "time_remaining": 0.75
+      },
+      {
+        "energy": 0.58,
+        "budget": 0.7,
+        "stress": 0.48000000000000004,
+        "time_remaining": 0.71
+      },
+      {
+        "energy": 0.5399999999999999,
+        "budget": 0.67,
+        "stress": 0.53,
+        "time_remaining": 0.6699999999999999
+      },
+      {
+        "energy": 0.49999999999999994,
+        "budget": 0.64,
+        "stress": 0.5800000000000001,
+        "time_remaining": 0.6299999999999999
+      },
+      {
+        "energy": 0.45999999999999996,
+        "budget": 0.61,
+        "stress": 0.63,
+        "time_remaining": 0.59
+      },
+      {
+        "energy": 0.41999999999999993,
+        "budget": 0.5800000000000001,
+        "stress": 0.6799999999999999,
+        "time_remaining": 0.5499999999999999
+      },
+      {
+        "energy": 0.37999999999999995,
+        "budget": 0.55,
+        "stress": 0.73,
+        "time_remaining": 0.51
+      }
+    ],
+    "schema": {
+      "benchmark_id": "confidence_database",
+      "trial_fields": [
+        "trial_id",
+        "subject_id",
+        "stimulus_strength",
+        "correct_choice",
+        "human_choice",
+        "human_confidence",
+        "rt_ms",
+        "split"
+      ],
+      "observation_fields": [
+        "stimulus_strength",
+        "ambiguity",
+        "evidence_strength"
+      ],
+      "action_fields": [
+        "choose_left",
+        "choose_right"
+      ],
+      "feedback_fields": [
+        "correct",
+        "human_choice_match",
+        "predicted_confidence"
+      ]
+    },
+    "skipped_malformed": 0
+  },
+  "heldout_run": {
+    "benchmark_id": "confidence_database",
+    "parameters": {
+      "schema_version": "m4.cognitive_style.v1",
+      "uncertainty_sensitivity": 0.65,
+      "error_aversion": 0.7,
+      "exploration_bias": 0.55,
+      "attention_selectivity": 0.6,
+      "confidence_gain": 0.7,
+      "update_rigidity": 0.65,
+      "resource_pressure_sensitivity": 0.75
+    },
+    "trial_count": 3,
+    "split": "heldout",
+    "metrics": {
+      "accuracy": 1.0,
+      "calibration_error": 0.305433,
+      "brier_score": 0.095751,
+      "heldout_likelihood": -0.107598,
+      "confidence_bias": -0.048767
+    },
+    "predictions": [
+      {
+        "trial_id": "cd_010",
+        "split": "heldout",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.6268349999999999,
+        "predicted_probability_right": 0.151755,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.69
+      },
+      {
+        "trial_id": "cd_011",
+        "split": "heldout",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.74427,
+        "predicted_probability_right": 0.930852,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.79
+      },
+      {
+        "trial_id": "cd_012",
+        "split": "heldout",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.712595,
+        "predicted_probability_right": 0.082914,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.75
+      }
+    ],
+    "resources": [
+      {
+        "energy": 0.82,
+        "budget": 0.88,
+        "stress": 0.18,
+        "time_remaining": 0.95
+      },
+      {
+        "energy": 0.7799999999999999,
+        "budget": 0.85,
+        "stress": 0.22999999999999998,
+        "time_remaining": 0.9099999999999999
+      },
+      {
+        "energy": 0.74,
+        "budget": 0.8200000000000001,
+        "stress": 0.28,
+        "time_remaining": 0.87
+      }
+    ],
+    "schema": {
+      "benchmark_id": "confidence_database",
+      "trial_fields": [
+        "trial_id",
+        "subject_id",
+        "stimulus_strength",
+        "correct_choice",
+        "human_choice",
+        "human_confidence",
+        "rt_ms",
+        "split"
+      ],
+      "observation_fields": [
+        "stimulus_strength",
+        "ambiguity",
+        "evidence_strength"
+      ],
+      "action_fields": [
+        "choose_left",
+        "choose_right"
+      ],
+      "feedback_fields": [
+        "correct",
+        "human_choice_match",
+        "predicted_confidence"
+      ]
+    },
+    "skipped_malformed": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "resource_conservation": {
+    "primary_parameter": "resource_pressure_sensitivity",
+    "observable": "shift toward low-cost actions under high pressure"
+  },
+  "directed_exploration": {
+    "primary_parameter": "exploration_bias",
+    "observable": "scan or inspect wins more often under elevated uncertainty"
+  },
+  "confidence_sharpening": {
+    "primary_parameter": "confidence_gain",
+    "observable": "confidence increases with stronger evidence separation"
+  },
+  "update_rigidity": {
+    "primary_parameter": "update_rigidity",
+    "observable": "prediction error produces smaller update magnitudes"
+  },
+  "attention_selectivity": {
+    "primary_parameter": "attention_selectivity",
+    "observable": "evidence-weighted actions outscore distractor actions"
+  },
+  "error_avoidance": {
+    "primary_parameter": "error_aversion",
+    "observable": "high-risk actions are penalized after expected error increases"
+  }
+}
