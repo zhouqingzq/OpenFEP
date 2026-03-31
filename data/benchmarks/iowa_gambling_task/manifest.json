@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "iowa_gambling_task",
+  "version": "1.0.0",
+  "status": "repo_smoke_fixture",
+  "benchmark_slice": "repo_curated_sample",
+  "source_type": "repo_curated_sample",
+  "source_label": "local_repo_bundle",
+  "grouping_fields": [
+    "subject_id"
+  ],
+  "default_split_unit": "subject_id",
+  "external_bundle_preferred": true,
+  "acceptance_requires_external_bundle": true,
+  "smoke_test_only": true,
+  "is_synthetic": false,
+  "data_file": "igt_sample.jsonl",
+  "description": "Frozen repository slice aligned to Iowa Gambling Task style deck-choice records for deterministic cross-task evaluation.",
+  "record_count": 16,
+  "fields": [
+    "trial_id",
+    "subject_id",
+    "deck",
+    "reward",
+    "penalty",
+    "net_outcome",
+    "advantageous",
+    "trial_index",
+    "split"
+  ],
+  "splits": {
+    "train": 8,
+    "validation": 4,
+    "heldout": 4
+  },
+  "source_notes": [
+    "This is a repository-frozen evaluation slice shaped after Iowa Gambling Task deck outcomes.",
+    "It supports deterministic adapter and cross-task stability evaluation rather than publication-grade behavioral fitting.",
+    "Acceptance-grade IGT evaluation requires importing a real external bundle into the active benchmark registry."
+  ]
+}

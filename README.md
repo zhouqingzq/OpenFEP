@@ -10,6 +10,8 @@ Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Gen
 
 ## Summary
 
+M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while the M4.5/M4.6 open-world and longitudinal flows remain synthetic probes with only partial live integration.
+
 FEP remains relatively marginal in mainstream AGI engineering. The dominant practical path has centered on scaling laws, RLHF, and architecture search rather than FEP, not only because FEP is often criticized as difficult to falsify, but because it has not yet produced a system that surpasses Transformers on standard benchmarks. In its conventional form, FEP explains how a system maintains its own existence; it does not, by itself, explain the core powers of language such as compositionality, recursion, and pragmatic reasoning across contexts.
 
 Language matters because it acts as an offline simulator: it lets an agent construct situations it has never directly experienced and still reason within them. A sentence like "fire will burn you" can build an internal model of pain and avoidance without requiring actual injury. In that sense, language allows one mind's history of prediction-error correction to be encoded into symbols, transmitted to another, and re-instantiated there as simulated prediction-error signals through partially overlapping embodied circuits. This is also why human advantage appears to come less from radically superior neural hardware than from cumulative culture, intergenerational knowledge transfer, and shared experience mediated by language.
@@ -177,3 +179,23 @@ python -m pytest
 # Personality analyzer only
 python -m pytest tests/test_personality_analyzer.py -v
 ```
+
+## M4.2 Benchmark Status
+
+The M4.2 benchmark pipeline in this repository is intentionally honest about the difference between repo smoke fixtures and acceptance-grade external data.
+
+- `data/benchmarks/confidence_database/` is a smoke fixture, not an acceptance-ready benchmark bundle.
+- `data/benchmarks/iowa_gambling_task/` is a smoke fixture, not an acceptance-ready benchmark bundle.
+- Formal M4.2 acceptance remains blocked until real external bundles are imported for both benchmarks.
+
+External bundles should be imported into the active benchmark registry, either under the default `data/benchmarks/<benchmark_id>/` layout or under a separate root referenced by `SEGMENTUM_BENCHMARK_ROOT`.
+
+For a local raw Confidence Database directory placed at the repo root, you can build a git-ignored external bundle with:
+
+```bash
+py -3.11 scripts/build_confidence_external_bundle.py
+```
+
+This writes to `external_benchmark_registry/confidence_database/` by default.
+
+Detailed requirements and re-validation steps are documented in [reports/m42_benchmark_data_requirements.md](/E:/workspace/segments/reports/m42_benchmark_data_requirements.md).

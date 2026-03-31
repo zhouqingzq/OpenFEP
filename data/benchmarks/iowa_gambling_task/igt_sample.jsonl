@@ -1,0 +1,16 @@
+{"trial_id":"igt_001","subject_id":"p01","deck":"A","reward":100,"penalty":-250,"net_outcome":-150,"advantageous":false,"trial_index":1,"split":"train"}
+{"trial_id":"igt_002","subject_id":"p01","deck":"B","reward":100,"penalty":-150,"net_outcome":-50,"advantageous":false,"trial_index":2,"split":"train"}
+{"trial_id":"igt_003","subject_id":"p01","deck":"C","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":3,"split":"train"}
+{"trial_id":"igt_004","subject_id":"p01","deck":"D","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":4,"split":"train"}
+{"trial_id":"igt_005","subject_id":"p01","deck":"C","reward":50,"penalty":-25,"net_outcome":25,"advantageous":true,"trial_index":5,"split":"train"}
+{"trial_id":"igt_006","subject_id":"p01","deck":"D","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":6,"split":"train"}
+{"trial_id":"igt_007","subject_id":"p02","deck":"A","reward":100,"penalty":-300,"net_outcome":-200,"advantageous":false,"trial_index":7,"split":"train"}
+{"trial_id":"igt_008","subject_id":"p02","deck":"C","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":8,"split":"train"}
+{"trial_id":"igt_009","subject_id":"p02","deck":"D","reward":50,"penalty":-25,"net_outcome":25,"advantageous":true,"trial_index":9,"split":"validation"}
+{"trial_id":"igt_010","subject_id":"p02","deck":"C","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":10,"split":"validation"}
+{"trial_id":"igt_011","subject_id":"p02","deck":"B","reward":100,"penalty":-200,"net_outcome":-100,"advantageous":false,"trial_index":11,"split":"validation"}
+{"trial_id":"igt_012","subject_id":"p03","deck":"D","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":12,"split":"validation"}
+{"trial_id":"igt_013","subject_id":"p03","deck":"C","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":13,"split":"heldout"}
+{"trial_id":"igt_014","subject_id":"p03","deck":"D","reward":50,"penalty":-25,"net_outcome":25,"advantageous":true,"trial_index":14,"split":"heldout"}
+{"trial_id":"igt_015","subject_id":"p03","deck":"A","reward":100,"penalty":-250,"net_outcome":-150,"advantageous":false,"trial_index":15,"split":"heldout"}
+{"trial_id":"igt_016","subject_id":"p03","deck":"C","reward":50,"penalty":0,"net_outcome":50,"advantageous":true,"trial_index":16,"split":"heldout"}
