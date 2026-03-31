@@ -2,11 +2,12 @@
 
 ## Goal
 
-Turn digital personality and cognitive style into a measurable, serializable, cross-task parameter interface that can be injected into action selection and exported through a unified decision log.
+Turn digital personality and cognitive style into a measurable, serializable, cross-task parameter interface that can be injected into action selection and exported through a unified decision log for internal toy-benchmark use.
 
 ## Non-Goals
 
 - Fitting real human datasets in this milestone
+- Claiming that real cognitive styles have already been identified or externally validated
 - Introducing task-specific parameter explosions
 - Rewriting the existing M3 agent core
 
@@ -49,4 +50,4 @@ Turn digital personality and cognitive style into a measurable, serializable, cr
 
 ## Exit Condition
 
-The M4.1 acceptance report is `PASS`, the parameter and log schemas round-trip, action selection changes under parameter ablation, source-trust effects are behaviorally observable, stress replay avoids silent corruption, and M3.5-M3.6 acceptance remains intact.
+The milestone produces a coherent internal toy-benchmark bundle: schemas round-trip, action selection changes under parameter ablation, source-trust effects are behaviorally observable inside the synthetic setup, stress replay avoids silent corruption, and M3.5-M3.6 acceptance remains intact. This exit condition does not imply external validation or real-world identification of cognitive style.

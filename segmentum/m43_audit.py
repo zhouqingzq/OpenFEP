@@ -77,7 +77,9 @@ def _evaluate_m43_acceptance(payload: dict[str, Any]) -> dict[str, Any]:
     baseline_competitive = heldout["agent"]["metrics"]["heldout_likelihood"] > heldout["statistical"]["metrics"]["heldout_likelihood"]
     seed_stability_passed = float(canonical["agent"]["fit"]["seed_stability"]["heldout_likelihood_range"]) <= 0.12
     sample_size_sufficient_for_claim = bool(canonical["evidence"]["sample_size_sufficient_for_claim"])
-    upstream_parameter_causality_passed = bool(m41_report["gates"]["causality"]["passed"])
+    upstream_parameter_causality_passed = bool(
+        m41_report["gates"].get("intervention_sensitivity", m41_report["gates"].get("causality", {})).get("passed", False)
+    )
     upstream_log_completeness_passed = bool(m41_report["gates"]["log_completeness"]["passed"])
     causality_passed = upstream_parameter_causality_passed and upstream_log_completeness_passed
     ablation_passed = heldout["agent"]["metrics"]["heldout_likelihood"] > payload["ablated"]["metrics"]["heldout_likelihood"]

@@ -1,6 +1,6 @@
 {
-  "total_records": 5,
-  "valid_records": 5,
+  "total_records": 18,
+  "valid_records": 18,
   "invalid_records": 0,
   "invalid_rate": 0.0,
   "missing_field_counts": {
@@ -23,6 +23,6 @@
     "prediction_error": 0,
     "update_magnitude": 0
   },
-  "parameter_snapshot_complete_records": 5,
+  "parameter_snapshot_complete_records": 18,
   "parameter_snapshot_complete_rate": 1.0
 }

@@ -2,81 +2,175 @@
   "uncertainty_confidence_drop_rate": {
     "primary_parameter": "uncertainty_sensitivity",
     "observable": "High uncertainty lowers internal confidence.",
-    "formula": "mean(high_uncertainty * (1 - internal_confidence))"
+    "formula": "mean(uncertainty * (1 - internal_confidence) | uncertainty >= 0.6)",
+    "evaluator": "uncertainty_confidence_drop_rate",
+    "min_samples": 3,
+    "depends_on": [
+      "observation_evidence.uncertainty",
+      "internal_confidence"
+    ]
   },
   "high_uncertainty_inspect_ratio": {
     "primary_parameter": "uncertainty_sensitivity",
     "observable": "Ambiguous contexts increase inspect-like actions.",
-    "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.6)"
+    "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.6)",
+    "evaluator": "high_uncertainty_inspect_ratio",
+    "min_samples": 3,
+    "depends_on": [
+      "observation_evidence.uncertainty",
+      "selected_action"
+    ]
   },
   "high_expected_error_rejection_rate": {
     "primary_parameter": "error_aversion",
     "observable": "Riskier actions are rejected when expected error is high.",
-    "formula": "P(selected_action not in {commit,guess,retry} | expected_error >= 0.45)"
+    "formula": "P(selected_action not in {commit,guess,retry} | expected_error >= 0.65)",
+    "evaluator": "high_expected_error_rejection_rate",
+    "min_samples": 3,
+    "depends_on": [
+      "observation_evidence.expected_error",
+      "selected_action"
+    ]
   },
   "post_error_conservative_shift": {
     "primary_parameter": "error_aversion",
     "observable": "Error signals trigger conservative follow-up choices.",
-    "formula": "P(selected_action in {rest,recover,scan,plan} | prediction_error >= 0.4)"
+    "formula": "P(selected_action in {rest,recover,conserve,scan,plan} | prediction_error >= 0.45)",
+    "evaluator": "post_error_conservative_shift",
+    "min_samples": 3,
+    "depends_on": [
+      "prediction_error",
+      "selected_action"
+    ]
   },
   "novel_action_ratio": {
     "primary_parameter": "exploration_bias",
     "observable": "Information-seeking actions are favored in uncertainty.",
-    "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.5)"
+    "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.5)",
+    "evaluator": "novel_action_ratio",
+    "min_samples": 4,
+    "depends_on": [
+      "observation_evidence.uncertainty",
+      "selected_action"
+    ]
   },
   "choice_repeat_suppression": {
     "primary_parameter": "exploration_bias",
     "observable": "Repeated action streaks shorten when exploration rises.",
-    "formula": "1 / max_repeat_streak(selected_action)"
+    "formula": "1 / max_repeat_streak(selected_action)",
+    "evaluator": "choice_repeat_suppression",
+    "min_samples": 6,
+    "depends_on": [
+      "selected_action"
+    ]
   },
   "dominant_attention_share": {
     "primary_parameter": "attention_selectivity",
     "observable": "Attention concentrates on the strongest evidence feature.",
-    "formula": "mean(max(attention_allocation.values()))"
+    "formula": "mean(max(attention_allocation.values()))",
+    "evaluator": "dominant_attention_share",
+    "min_samples": 6,
+    "depends_on": [
+      "attention_allocation"
+    ]
   },
   "evidence_aligned_choice_rate": {
     "primary_parameter": "attention_selectivity",
     "observable": "Chosen actions align with the dominant evidence channel.",
-    "formula": "P(selected_action matches percept_summary.dominant_signal)"
+    "formula": "P(selected_action matches percept_summary.dominant_signal)",
+    "evaluator": "evidence_aligned_choice_rate",
+    "min_samples": 6,
+    "depends_on": [
+      "selected_action",
+      "percept_summary.dominant_signal"
+    ]
   },
   "confidence_evidence_slope": {
     "primary_parameter": "confidence_gain",
     "observable": "Confidence rises with stronger evidence separation.",
-    "formula": "mean(evidence_strength * internal_confidence)"
+    "formula": "mean(evidence_strength * internal_confidence)",
+    "evaluator": "confidence_evidence_slope",
+    "min_samples": 6,
+    "depends_on": [
+      "observation_evidence.evidence_strength",
+      "internal_confidence"
+    ]
   },
   "high_evidence_commit_rate": {
     "primary_parameter": "confidence_gain",
     "observable": "Commit wins more often once evidence becomes strong.",
-    "formula": "P(selected_action == commit | evidence_strength >= 0.7)"
+    "formula": "P(selected_action == commit | evidence_strength >= 0.7)",
+    "evaluator": "high_evidence_commit_rate",
+    "min_samples": 3,
+    "depends_on": [
+      "observation_evidence.evidence_strength",
+      "selected_action"
+    ]
   },
   "mean_update_inverse": {
     "primary_parameter": "update_rigidity",
     "observable": "Prediction errors yield smaller internal updates.",
-    "formula": "1 - mean(model_update.magnitude)"
+    "formula": "1 - mean(model_update.magnitude)",
+    "evaluator": "mean_update_inverse",
+    "min_samples": 6,
+    "depends_on": [
+      "model_update.magnitude"
+    ]
   },
   "strategy_persistence_after_error": {
     "primary_parameter": "update_rigidity",
     "observable": "After error, action policy changes more slowly.",
-    "formula": "mean(1 - model_update.strategy_shift)"
+    "formula": "mean(1 - model_update.strategy_shift | prediction_error >= 0.45)",
+    "evaluator": "strategy_persistence_after_error",
+    "min_samples": 3,
+    "depends_on": [
+      "model_update.strategy_shift",
+      "prediction_error"
+    ]
   },
   "high_pressure_low_cost_ratio": {
     "primary_parameter": "resource_pressure_sensitivity",
     "observable": "Low-cost actions dominate under resource pressure.",
-    "formula": "P(selected_action in {rest,conserve,recover,scan} | pressure >= 0.6)"
+    "formula": "P(selected_action in {rest,conserve,recover,scan} | pressure >= 0.6)",
+    "evaluator": "high_pressure_low_cost_ratio",
+    "min_samples": 3,
+    "depends_on": [
+      "resource_state",
+      "selected_action"
+    ]
   },
   "recovery_trigger_rate": {
     "primary_parameter": "resource_pressure_sensitivity",
     "observable": "Recovery triggers when energy and time are low.",
-    "formula": "P(selected_action in {rest,recover,conserve} | energy <= 0.35 or time_remaining <= 0.3)"
+    "formula": "P(selected_action in {rest,recover,conserve} | energy <= 0.35 or time_remaining <= 0.3)",
+    "evaluator": "recovery_trigger_rate",
+    "min_samples": 3,
+    "depends_on": [
+      "resource_state",
+      "selected_action"
+    ]
   },
   "conflict_avoidance_shift": {
     "primary_parameter": "virtual_prediction_error_gain",
     "observable": "Imagined loss signals bias decisions away from direct commit.",
-    "formula": "P(selected_action != commit | virtual_error > direct_error)"
+    "formula": "P(selected_action != commit | virtual_error > direct_error)",
+    "evaluator": "conflict_avoidance_shift",
+    "min_samples": 3,
+    "depends_on": [
+      "prediction_error_vector.virtual_error",
+      "prediction_error_vector.direct_error",
+      "selected_action"
+    ]
   },
   "counterfactual_loss_sensitivity": {
     "primary_parameter": "virtual_prediction_error_gain",
     "observable": "Counterfactual loss increases conservative choices.",
-    "formula": "mean((virtual_error - direct_error)_+ * conservative_choice)"
+    "formula": "mean(max(virtual_error - direct_error, 0) * conservative_choice)",
+    "evaluator": "counterfactual_loss_sensitivity",
+    "min_samples": 3,
+    "depends_on": [
+      "prediction_error_vector",
+      "selected_action"
+    ]
   }
 }

@@ -2,7 +2,7 @@
   "benchmark_id": "m345_process_benchmark",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-31T11:42:24+00:00",
+  "generated_at": "2026-03-31T13:44:46+00:00",
   "metrics": {
     "focus_bonus_gain": 0.27,
     "closure_penalty_gain": 0.24,

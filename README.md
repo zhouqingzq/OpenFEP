@@ -174,7 +174,7 @@ Every inferred parameter is wrapped in `ConfidenceRated(value, confidence, evide
 
 The current M4 roadmap aims to turn cognitive style from a narrative description into a measurable, serializable, cross-context behavioral interface.
 
-- `M4.1` defines the parameter family and decision-log protocol, including explicit source-trust terms for indirect information.
+- `M4.1` should currently be read as an internal toy benchmark / simulator with executable decision logic and structured logs, not as a stage where cognitive style has been genuinely identified, externally validated, or fully explained as a real behavioral system.
 - `M4.2` connects those parameters to benchmark task adapters and reproducible evaluation flows.
 - `M4.3` tests whether the architecture beats weak baselines and stays competitive with stronger metacognitive baselines on single-task behavioral fit.
 - `M4.4` checks whether shared parameters remain credible across confidence and Iowa Gambling Task slices.

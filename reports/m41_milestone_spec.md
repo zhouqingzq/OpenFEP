@@ -2,12 +2,12 @@
 
 ## Title
 
-`M4.1: Cognitive Variable Operationalization and Unified Parameter Interface`
+`M4.1: Toy Cognitive-Style Benchmark With Falsifiable Gates`
 
 ## Scope
 
-- Introduce a stable eight-parameter cognitive-style family for style-sensitive control.
-- The canonical parameter family is:
+- Introduce a stable eight-parameter cognitive-style family for toy decision experiments.
+- Keep the canonical parameter family:
   - `uncertainty_sensitivity`
   - `error_aversion`
   - `exploration_bias`
@@ -16,30 +16,51 @@
   - `update_rigidity`
   - `resource_pressure_sensitivity`
   - `virtual_prediction_error_gain`
-- Add a versioned decision-log schema for trial or episode reconstruction.
-- Add a bridge that maps cognitive parameters into action-schema scoring.
-- Add an observability registry with at least two indirect behavioral metrics per parameter.
-- Add a blind classification experiment across at least three canonical profiles.
-- Produce schema, trace, ablation, stress, observability, blind-classification, and acceptance artifacts.
+- Produce decision logs that are rich enough to reconstruct indirect behavioral metrics.
+- Sample trial episodes from a scenario family pool so seed changes affect behavior traces.
+- Validate intervention sensitivity, observability, blind profile separability, and log completeness.
+
+## Current Interpretation
+
+M4.1 should currently be interpreted as an executable toy benchmark / internal simulator layer.
+
+It is useful for:
+
+- testing whether parameter changes alter behavior inside a controlled generator family
+- checking whether logs are rich enough to support indirect observables
+- probing whether internally defined profiles are distinguishable under the same synthetic setup
+
+It should not be read as evidence that:
+
+- real cognitive styles have been identified in the wild
+- those styles have been externally validated across independent tasks or datasets
+- the underlying behavioral mechanism has been fully explained
 
 ## Non-Goals
 
-- Real benchmark fitting
-- Cross-task stability claims
+- Scientific causal inference claims
+- Real-world benchmark fitting
+- Cross-task generalization claims
 - Replacing the existing M3 runtime
+
+## Acceptance Definition
+
+M4.1 passes only if the current round demonstrates all of the following:
+
+1. Parameter changes produce measurable shifts in behavioral distributions.
+2. Logged behavior is sufficient to compute executable indirect observables.
+3. Canonical profiles can be separated in a blind experiment using only behavior-derived metrics.
 
 ## Acceptance Gates
 
-- `schema`
-- `determinism`
-- `causality`
-- `ablation`
+- `schema_integrity`
+- `trial_variation`
 - `observability`
-- `distinguishability`
+- `intervention_sensitivity`
+- `blind_distinguishability`
 - `log_completeness`
-- `stress`
+- `stress_behavior`
 - `regression`
-- `artifact_freshness`
 
 ## Canonical Files
 

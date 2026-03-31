@@ -6,7 +6,8 @@ from segmentum.m4_cognitive_style import (
     CognitiveStyleParameters,
     PARAMETER_REFERENCE,
     audit_decision_log,
-    parameter_causality_matrix,
+    compute_trial_variation,
+    parameter_intervention_sensitivity_matrix,
     reconstruct_behavior_patterns,
     run_cognitive_style_trial,
 )
@@ -22,10 +23,17 @@ class TestM41DecisionLogging(unittest.TestCase):
         self.assertIn("confidence_sharpening", labels)
         self.assertIn("counterfactual_avoidance", labels)
 
-    def test_resource_ablation_changes_action_sequence(self) -> None:
-        full = run_cognitive_style_trial(CognitiveStyleParameters())
-        ablated = run_cognitive_style_trial(CognitiveStyleParameters(), ablate_resource_pressure=True)
-        self.assertNotEqual(full["summary"]["selected_actions"], ablated["summary"]["selected_actions"])
+    def test_resource_ablation_changes_behavior_distribution(self) -> None:
+        full = run_cognitive_style_trial(CognitiveStyleParameters(), seed=41)
+        ablated = run_cognitive_style_trial(CognitiveStyleParameters(), seed=41, ablate_resource_pressure=True)
+        variation = compute_trial_variation(full, ablated)
+        self.assertTrue(variation["varies"], msg=variation)
+
+    def test_seed_changes_trial_behavior(self) -> None:
+        first = run_cognitive_style_trial(CognitiveStyleParameters(), seed=41)
+        second = run_cognitive_style_trial(CognitiveStyleParameters(), seed=42)
+        variation = compute_trial_variation(first, second)
+        self.assertTrue(variation["varies"], msg=variation)
 
     def test_parameter_snapshot_is_present_for_each_record(self) -> None:
         payload = run_cognitive_style_trial(CognitiveStyleParameters())
@@ -41,11 +49,12 @@ class TestM41DecisionLogging(unittest.TestCase):
         self.assertLess(audit["parameter_snapshot_complete_rate"], 1.0)
         self.assertGreater(audit["invalid_rate"], 0.0)
 
-    def test_all_eight_parameters_have_independent_causal_probes(self) -> None:
-        matrix = parameter_causality_matrix()
+    def test_all_eight_parameters_have_independent_intervention_probes(self) -> None:
+        matrix = parameter_intervention_sensitivity_matrix()
         self.assertEqual(set(matrix.keys()), set(PARAMETER_REFERENCE.keys()))
         for parameter_name, probe in matrix.items():
             with self.subTest(parameter=parameter_name):
+                self.assertEqual(probe["analysis_type"], "intervention_sensitivity")
                 self.assertTrue(probe["identifiable"], msg=probe)
 
     def test_decision_log_completeness_is_within_threshold(self) -> None:

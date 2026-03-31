@@ -1,163 +1,354 @@
 {
   "baseline_summary": {
     "selected_actions": [
-      "query",
+      "scan",
       "commit",
       "rest",
+      "rest",
+      "rest",
+      "commit",
       "recover",
-      "recover"
+      "rest",
+      "rest",
+      "scan",
+      "scan",
+      "recover",
+      "scan",
+      "scan",
+      "rest",
+      "scan",
+      "recover",
+      "commit"
     ],
-    "mean_confidence": 0.449625,
-    "mean_update_magnitude": 0.170344,
-    "pattern_count": 4
+    "mean_confidence": 0.373441,
+    "mean_update_magnitude": 0.180657,
+    "pattern_count": 4,
+    "unique_action_count": 4,
+    "scenario_families": [
+      "ambiguity_probe",
+      "commit_window",
+      "counterfactual_conflict",
+      "error_hazard",
+      "pressure_spike",
+      "recovery_probe"
+    ],
+    "observable_metrics_with_data": [
+      "choice_repeat_suppression",
+      "confidence_evidence_slope",
+      "conflict_avoidance_shift",
+      "counterfactual_loss_sensitivity",
+      "dominant_attention_share",
+      "evidence_aligned_choice_rate",
+      "high_evidence_commit_rate",
+      "high_expected_error_rejection_rate",
+      "high_pressure_low_cost_ratio",
+      "high_uncertainty_inspect_ratio",
+      "mean_update_inverse",
+      "novel_action_ratio",
+      "post_error_conservative_shift",
+      "recovery_trigger_rate",
+      "strategy_persistence_after_error",
+      "uncertainty_confidence_drop_rate"
+    ]
   },
   "resource_ablation_summary": {
     "selected_actions": [
       "query",
       "commit",
+      "inspect",
+      "scan",
+      "inspect",
+      "commit",
+      "recover",
+      "inspect",
+      "scan",
+      "scan",
+      "scan",
+      "recover",
+      "inspect",
+      "inspect",
+      "inspect",
       "query",
-      "query",
-      "query"
+      "recover",
+      "commit"
     ],
-    "mean_confidence": 0.432825,
-    "mean_update_magnitude": 0.170344,
-    "pattern_count": 3
+    "mean_confidence": 0.361774,
+    "mean_update_magnitude": 0.180657,
+    "pattern_count": 3,
+    "unique_action_count": 5,
+    "scenario_families": [
+      "ambiguity_probe",
+      "commit_window",
+      "counterfactual_conflict",
+      "error_hazard",
+      "pressure_spike",
+      "recovery_probe"
+    ],
+    "observable_metrics_with_data": [
+      "choice_repeat_suppression",
+      "confidence_evidence_slope",
+      "conflict_avoidance_shift",
+      "counterfactual_loss_sensitivity",
+      "dominant_attention_share",
+      "evidence_aligned_choice_rate",
+      "high_evidence_commit_rate",
+      "high_expected_error_rejection_rate",
+      "high_pressure_low_cost_ratio",
+      "high_uncertainty_inspect_ratio",
+      "mean_update_inverse",
+      "novel_action_ratio",
+      "post_error_conservative_shift",
+      "recovery_trigger_rate",
+      "strategy_persistence_after_error",
+      "uncertainty_confidence_drop_rate"
+    ]
   },
-  "parameter_causality_matrix": {
+  "trial_variation_vs_ablation": {
+    "differing_positions": 10,
+    "action_overlap_ratio": 0.444444,
+    "mean_metric_delta": 0.120085,
+    "varies": true
+  },
+  "parameter_intervention_sensitivity": {
     "uncertainty_sensitivity": {
       "parameter": "uncertainty_sensitivity",
-      "probe_type": "score_margin",
-      "target": "scan_minus_commit_margin",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "uncertainty_confidence_drop_rate",
       "expectation": "higher",
+      "minimum_effect": 0.1,
       "low_parameter_value": 0.0,
       "high_parameter_value": 1.0,
-      "low_observed_value": 0.255927,
-      "high_observed_value": 0.405927,
-      "delta": 0.15,
+      "low_observed_value": 0.610022,
+      "high_observed_value": 0.786574,
+      "delta": 0.176552,
       "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
+      "low_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ],
+      "high_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ]
     },
     "error_aversion": {
       "parameter": "error_aversion",
-      "probe_type": "score_margin",
-      "target": "recover_minus_guess_margin",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "evidence_aligned_choice_rate",
       "expectation": "higher",
+      "minimum_effect": 0.1,
       "low_parameter_value": 0.0,
       "high_parameter_value": 1.0,
-      "low_observed_value": 0.139643,
-      "high_observed_value": 0.852418,
-      "delta": 0.712775,
+      "low_observed_value": 0.333333,
+      "high_observed_value": 0.592593,
+      "delta": 0.25926,
       "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
+      "low_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,scan",
+        "scan,scan,scan,commit,commit,scan"
+      ],
+      "high_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ]
     },
     "exploration_bias": {
       "parameter": "exploration_bias",
-      "probe_type": "score_margin",
-      "target": "query_minus_rest_margin",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "novel_action_ratio",
       "expectation": "higher",
+      "minimum_effect": 0.08,
       "low_parameter_value": 0.0,
       "high_parameter_value": 1.0,
-      "low_observed_value": 0.180119,
-      "high_observed_value": 0.480119,
+      "low_observed_value": 0.7,
+      "high_observed_value": 1.0,
       "delta": 0.3,
       "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
+      "low_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,recover"
+      ],
+      "high_selected_actions": [
+        "scan,commit,scan,scan,scan,commit",
+        "scan,commit,scan,rest,scan,scan",
+        "scan,scan,recover,commit,commit,scan"
+      ]
     },
     "attention_selectivity": {
       "parameter": "attention_selectivity",
-      "probe_type": "attention_share",
-      "target": "attention_allocation.evidence",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "dominant_attention_share",
       "expectation": "higher",
+      "minimum_effect": 0.05,
       "low_parameter_value": 0.0,
       "high_parameter_value": 1.0,
-      "low_observed_value": 0.407529,
-      "high_observed_value": 0.657965,
-      "delta": 0.250436,
+      "low_observed_value": 0.360862,
+      "high_observed_value": 0.436659,
+      "delta": 0.075796,
       "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
+      "low_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ],
+      "high_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ]
     },
     "confidence_gain": {
       "parameter": "confidence_gain",
-      "probe_type": "commit_confidence",
-      "target": "commit.expected_confidence",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "high_evidence_commit_rate",
       "expectation": "higher",
-      "low_parameter_value": 0.0,
-      "high_parameter_value": 1.0,
-      "low_observed_value": 0.28667,
-      "high_observed_value": 0.85707,
-      "delta": 0.5704,
-      "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
-    },
-    "update_rigidity": {
-      "parameter": "update_rigidity",
-      "probe_type": "recover_update_magnitude",
-      "target": "recover.update_magnitude",
-      "expectation": "lower",
-      "low_parameter_value": 0.0,
-      "high_parameter_value": 1.0,
-      "low_observed_value": 0.60746,
-      "high_observed_value": 0.151865,
-      "delta": -0.455595,
-      "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
-    },
-    "resource_pressure_sensitivity": {
-      "parameter": "resource_pressure_sensitivity",
-      "probe_type": "trial_metric",
-      "target": "high_pressure_low_cost_ratio",
-      "expectation": "higher",
+      "minimum_effect": 0.08,
       "low_parameter_value": 0.0,
       "high_parameter_value": 1.0,
       "low_observed_value": 0.0,
-      "high_observed_value": 1.0,
-      "delta": 1.0,
+      "high_observed_value": 0.65,
+      "delta": 0.65,
       "identifiable": true,
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
       "low_selected_actions": [
-        "query",
-        "commit",
-        "query",
-        "query",
-        "query"
+        "scan,scan,rest,rest,rest,scan",
+        "scan,scan,scan,rest,rest,recover",
+        "scan,scan,recover,scan,scan,scan"
       ],
       "high_selected_actions": [
-        "recover",
-        "commit",
-        "rest",
-        "recover",
-        "recover"
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ]
+    },
+    "update_rigidity": {
+      "parameter": "update_rigidity",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "mean_update_inverse",
+      "expectation": "higher",
+      "minimum_effect": 0.08,
+      "low_parameter_value": 0.0,
+      "high_parameter_value": 1.0,
+      "low_observed_value": 0.661302,
+      "high_observed_value": 0.905165,
+      "delta": 0.243862,
+      "identifiable": true,
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
+      "low_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ],
+      "high_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ]
+    },
+    "resource_pressure_sensitivity": {
+      "parameter": "resource_pressure_sensitivity",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "high_pressure_low_cost_ratio",
+      "expectation": "higher",
+      "minimum_effect": 0.1,
+      "low_parameter_value": 0.0,
+      "high_parameter_value": 1.0,
+      "low_observed_value": 0.388889,
+      "high_observed_value": 1.0,
+      "delta": 0.611111,
+      "identifiable": true,
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": true,
+      "low_selected_actions": [
+        "commit,scan,inspect,recover,recover,recover",
+        "scan,recover,scan,commit,recover,commit",
+        "scan,query,commit,recover,commit,inspect"
+      ],
+      "high_selected_actions": [
+        "commit,scan,rest,recover,rest,recover",
+        "rest,recover,rest,commit,rest,commit",
+        "scan,scan,commit,recover,commit,rest"
       ]
     },
     "virtual_prediction_error_gain": {
       "parameter": "virtual_prediction_error_gain",
-      "probe_type": "score_margin",
-      "target": "recover_minus_commit_margin",
+      "analysis_type": "intervention_sensitivity",
+      "target_metric": "conflict_avoidance_shift",
       "expectation": "higher",
+      "minimum_effect": 0.1,
       "low_parameter_value": 0.0,
       "high_parameter_value": 1.0,
-      "low_observed_value": 0.039214,
-      "high_observed_value": 0.83047,
-      "delta": 0.791256,
+      "low_observed_value": 0.777778,
+      "high_observed_value": 0.946581,
+      "delta": 0.168803,
       "identifiable": true,
-      "low_selected_actions": [],
-      "high_selected_actions": []
+      "insufficient_data": false,
+      "seeds": [
+        41,
+        42,
+        43
+      ],
+      "stress_mode": false,
+      "low_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ],
+      "high_selected_actions": [
+        "scan,commit,rest,rest,rest,commit",
+        "scan,commit,commit,rest,rest,recover",
+        "scan,scan,recover,commit,commit,scan"
+      ]
     }
-  },
-  "identifiable_parameters": [
-    "uncertainty_sensitivity",
-    "error_aversion",
-    "exploration_bias",
-    "attention_selectivity",
-    "confidence_gain",
-    "update_rigidity",
-    "resource_pressure_sensitivity",
-    "virtual_prediction_error_gain"
-  ],
-  "all_parameters_identifiable": true
+  }
 }

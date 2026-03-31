@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
-from typing import Any
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable
 import math
 import random
 
@@ -11,6 +11,12 @@ from .action_schema import ActionSchema, action_name, ensure_action_schema
 
 def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
+
+
+def _round_float(value: float | None) -> float | None:
+    if value is None:
+        return None
+    return round(float(value), 6)
 
 
 PARAMETER_REFERENCE: dict[str, dict[str, Any]] = {
@@ -73,14 +79,18 @@ PARAMETER_REFERENCE: dict[str, dict[str, Any]] = {
 }
 
 
+TRAIN_PROFILE_SEEDS = [11, 12, 13, 14]
+EVAL_PROFILE_SEEDS = [31, 32, 33, 34]
+
+
 @dataclass(frozen=True)
 class CognitiveStyleParameters:
     schema_version: str = "m4.cognitive_style.v2"
     uncertainty_sensitivity: float = 0.65
-    error_aversion: float = 0.7
+    error_aversion: float = 0.70
     exploration_bias: float = 0.55
-    attention_selectivity: float = 0.6
-    confidence_gain: float = 0.7
+    attention_selectivity: float = 0.60
+    confidence_gain: float = 0.70
     update_rigidity: float = 0.65
     resource_pressure_sensitivity: float = 0.75
     virtual_prediction_error_gain: float = 0.68
@@ -95,11 +105,11 @@ class CognitiveStyleParameters:
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "CognitiveStyleParameters":
         normalized = dict(payload)
-        if "virtual_prediction_error_gain" not in normalized:
-            normalized["virtual_prediction_error_gain"] = PARAMETER_REFERENCE["virtual_prediction_error_gain"]["default"]
         if "schema_version" not in normalized:
             normalized["schema_version"] = cls().schema_version
-        return cls(**{key: normalized[key] for key in normalized if key in cls.__dataclass_fields__})
+        for field_name, spec in PARAMETER_REFERENCE.items():
+            normalized.setdefault(field_name, spec["default"])
+        return cls(**{key: normalized[key] for key in cls.__dataclass_fields__ if key in normalized})
 
     @classmethod
     def schema(cls) -> dict[str, Any]:
@@ -190,8 +200,6 @@ class DecisionLogRecord:
             str(key): float(value)
             for key, value in dict(payload.get("prediction_error_vector", {})).items()
         }
-        result_feedback = dict(payload.get("result_feedback", {}))
-        model_update = dict(payload.get("model_update", {}))
         if not prediction_error_vector:
             scalar_error = float(payload.get("prediction_error", 0.0))
             prediction_error_vector = {
@@ -199,32 +207,36 @@ class DecisionLogRecord:
                 "virtual_error": scalar_error,
                 "signed_total": scalar_error,
             }
+        result_feedback = dict(payload.get("result_feedback", {}))
         if not result_feedback:
             result_feedback = {
                 "observed_outcome": "legacy_unknown",
-                "reward": round(1.0 - float(payload.get("prediction_error", 0.0)), 6),
+                "reward": round(1.0 - prediction_error_vector["signed_total"], 6),
+                "counterfactual_warning": prediction_error_vector["virtual_error"] > prediction_error_vector["direct_error"],
             }
+        model_update = dict(payload.get("model_update", {}))
         if not model_update:
             update_magnitude = float(payload.get("update_magnitude", 0.0))
             model_update = {
                 "magnitude": update_magnitude,
                 "strategy_shift": round(update_magnitude * 0.5, 6),
-                "confidence_delta": round(-float(payload.get("prediction_error", 0.0)) * 0.1, 6),
+                "confidence_delta": round(-prediction_error_vector["signed_total"] * 0.1, 6),
             }
         return cls(
             schema_version=str(payload.get("schema_version", "m4.decision_log.v3")),
             tick=int(payload.get("tick", 0)),
-            timestamp=str(payload.get("timestamp", datetime(2026, 1, 1, tzinfo=timezone.utc).isoformat(timespec="seconds"))),
+            timestamp=str(
+                payload.get(
+                    "timestamp",
+                    datetime(2026, 1, 1, tzinfo=timezone.utc).isoformat(timespec="seconds"),
+                )
+            ),
             seed=int(payload.get("seed", 0)),
             task_context=dict(payload.get("task_context", {})),
             percept_summary=dict(payload.get("percept_summary", payload.get("task_context", {}))),
-            observation_evidence={
-                str(key): float(value) for key, value in dict(payload.get("observation_evidence", {})).items()
-            },
+            observation_evidence={str(key): float(value) for key, value in dict(payload.get("observation_evidence", {})).items()},
             prediction_error_vector=prediction_error_vector,
-            attention_allocation={
-                str(key): float(value) for key, value in dict(payload.get("attention_allocation", {})).items()
-            },
+            attention_allocation={str(key): float(value) for key, value in dict(payload.get("attention_allocation", {})).items()},
             candidate_actions=list(payload.get("candidate_actions", [])),
             parameter_snapshot=dict(payload.get("parameter_snapshot", {})),
             resource_state={str(key): float(value) for key, value in dict(payload.get("resource_state", {})).items()},
@@ -232,7 +244,7 @@ class DecisionLogRecord:
             selected_action=str(payload.get("selected_action", "")),
             result_feedback=result_feedback,
             model_update=model_update,
-            prediction_error=float(payload.get("prediction_error", prediction_error_vector.get("signed_total", 0.0))),
+            prediction_error=float(payload.get("prediction_error", prediction_error_vector["signed_total"])),
             update_magnitude=float(payload.get("update_magnitude", model_update.get("magnitude", 0.0))),
         )
 
@@ -279,157 +291,6 @@ class DecisionLogRecord:
         }
 
 
-def observable_metrics_registry() -> dict[str, dict[str, Any]]:
-    return {
-        "uncertainty_confidence_drop_rate": {
-            "parameter": "uncertainty_sensitivity",
-            "description": "High uncertainty lowers internal confidence.",
-            "formula": "mean(high_uncertainty * (1 - internal_confidence))",
-            "depends_on": ["observation_evidence.uncertainty", "internal_confidence"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "high_uncertainty_inspect_ratio": {
-            "parameter": "uncertainty_sensitivity",
-            "description": "Ambiguous contexts increase inspect-like actions.",
-            "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.6)",
-            "depends_on": ["observation_evidence.uncertainty", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "high_expected_error_rejection_rate": {
-            "parameter": "error_aversion",
-            "description": "Riskier actions are rejected when expected error is high.",
-            "formula": "P(selected_action not in {commit,guess,retry} | expected_error >= 0.45)",
-            "depends_on": ["observation_evidence.expected_error", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "post_error_conservative_shift": {
-            "parameter": "error_aversion",
-            "description": "Error signals trigger conservative follow-up choices.",
-            "formula": "P(selected_action in {rest,recover,scan,plan} | prediction_error >= 0.4)",
-            "depends_on": ["prediction_error", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "novel_action_ratio": {
-            "parameter": "exploration_bias",
-            "description": "Information-seeking actions are favored in uncertainty.",
-            "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.5)",
-            "depends_on": ["observation_evidence.uncertainty", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "choice_repeat_suppression": {
-            "parameter": "exploration_bias",
-            "description": "Repeated action streaks shorten when exploration rises.",
-            "formula": "1 / max_repeat_streak(selected_action)",
-            "depends_on": ["selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "dominant_attention_share": {
-            "parameter": "attention_selectivity",
-            "description": "Attention concentrates on the strongest evidence feature.",
-            "formula": "mean(max(attention_allocation.values()))",
-            "depends_on": ["attention_allocation"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "evidence_aligned_choice_rate": {
-            "parameter": "attention_selectivity",
-            "description": "Chosen actions align with the dominant evidence channel.",
-            "formula": "P(selected_action matches percept_summary.dominant_signal)",
-            "depends_on": ["selected_action", "percept_summary.dominant_signal"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "confidence_evidence_slope": {
-            "parameter": "confidence_gain",
-            "description": "Confidence rises with stronger evidence separation.",
-            "formula": "mean(evidence_strength * internal_confidence)",
-            "depends_on": ["observation_evidence.evidence_strength", "internal_confidence"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "high_evidence_commit_rate": {
-            "parameter": "confidence_gain",
-            "description": "Commit wins more often once evidence becomes strong.",
-            "formula": "P(selected_action == commit | evidence_strength >= 0.7)",
-            "depends_on": ["observation_evidence.evidence_strength", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "mean_update_inverse": {
-            "parameter": "update_rigidity",
-            "description": "Prediction errors yield smaller internal updates.",
-            "formula": "1 - mean(model_update.magnitude)",
-            "depends_on": ["model_update.magnitude"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "strategy_persistence_after_error": {
-            "parameter": "update_rigidity",
-            "description": "After error, action policy changes more slowly.",
-            "formula": "mean(1 - model_update.strategy_shift)",
-            "depends_on": ["model_update.strategy_shift"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "high_pressure_low_cost_ratio": {
-            "parameter": "resource_pressure_sensitivity",
-            "description": "Low-cost actions dominate under resource pressure.",
-            "formula": "P(selected_action in {rest,conserve,recover,scan} | pressure >= 0.6)",
-            "depends_on": ["resource_state", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "recovery_trigger_rate": {
-            "parameter": "resource_pressure_sensitivity",
-            "description": "Recovery triggers when energy and time are low.",
-            "formula": "P(selected_action in {rest,recover,conserve} | energy <= 0.35 or time_remaining <= 0.3)",
-            "depends_on": ["resource_state", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "conflict_avoidance_shift": {
-            "parameter": "virtual_prediction_error_gain",
-            "description": "Imagined loss signals bias decisions away from direct commit.",
-            "formula": "P(selected_action != commit | virtual_error > direct_error)",
-            "depends_on": ["prediction_error_vector.virtual_error", "prediction_error_vector.direct_error", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-        "counterfactual_loss_sensitivity": {
-            "parameter": "virtual_prediction_error_gain",
-            "description": "Counterfactual loss increases conservative choices.",
-            "formula": "mean((virtual_error - direct_error)_+ * conservative_choice)",
-            "depends_on": ["prediction_error_vector", "selected_action"],
-            "direction": "higher_means_higher_parameter",
-        },
-    }
-
-
-def default_behavior_mapping_table() -> dict[str, dict[str, Any]]:
-    registry = observable_metrics_registry()
-    return {
-        metric_name: {
-            "primary_parameter": spec["parameter"],
-            "observable": spec["description"],
-            "formula": spec["formula"],
-        }
-        for metric_name, spec in registry.items()
-    }
-
-
-def observable_parameter_contracts() -> dict[str, dict[str, Any]]:
-    registry = observable_metrics_registry()
-    contracts: dict[str, dict[str, Any]] = {}
-    for parameter_name in PARAMETER_REFERENCE:
-        metrics = [
-            {
-                "metric": metric_name,
-                "description": spec["description"],
-                "formula": spec["formula"],
-                "depends_on": spec["depends_on"],
-                "direction": spec["direction"],
-            }
-            for metric_name, spec in registry.items()
-            if spec["parameter"] == parameter_name
-        ]
-        contracts[parameter_name] = {
-            "physical_meaning": PARAMETER_REFERENCE[parameter_name]["physical_meaning"],
-            "observables": metrics,
-        }
-    return contracts
-
-
 def parameter_reference_markdown() -> str:
     lines = ["# M4.1 Parameter Reference", ""]
     for parameter_name, spec in PARAMETER_REFERENCE.items():
@@ -461,10 +322,10 @@ class CognitiveParameterBridge:
     ) -> dict[str, float]:
         direct_error = _clamp01(expected_error * (0.55 + uncertainty * 0.45))
         virtual_error = _clamp01(
-            expected_error * 0.45
-            + imagined_risk * (0.35 + self.parameters.virtual_prediction_error_gain * 0.65)
-            + uncertainty * self.parameters.virtual_prediction_error_gain * 0.20
-            - evidence_strength * 0.12
+            expected_error * 0.35
+            + imagined_risk * (0.30 + self.parameters.virtual_prediction_error_gain * 0.70)
+            + uncertainty * self.parameters.virtual_prediction_error_gain * 0.25
+            - evidence_strength * 0.14
         )
         signed_total = _clamp01((direct_error + virtual_error) / 2.0)
         return {
@@ -482,10 +343,10 @@ class CognitiveParameterBridge:
         imagined_risk: float,
     ) -> dict[str, float]:
         raw = {
-            "evidence": 0.30 + self.parameters.attention_selectivity * evidence_strength * 0.55,
-            "uncertainty": 0.16 + self.parameters.uncertainty_sensitivity * uncertainty * 0.32,
-            "error": 0.14 + self.parameters.error_aversion * expected_error * 0.34,
-            "counterfactual": 0.10 + self.parameters.virtual_prediction_error_gain * imagined_risk * 0.34,
+            "evidence": 0.24 + self.parameters.attention_selectivity * evidence_strength * 0.75,
+            "uncertainty": 0.12 + self.parameters.uncertainty_sensitivity * uncertainty * 0.60,
+            "error": 0.12 + self.parameters.error_aversion * expected_error * 0.62,
+            "counterfactual": 0.10 + self.parameters.virtual_prediction_error_gain * imagined_risk * 0.65,
         }
         total = sum(raw.values()) or 1.0
         return {key: round(value / total, 6) for key, value in raw.items()}
@@ -505,108 +366,96 @@ class CognitiveParameterBridge:
         expected_error = _clamp01(expected_error)
         imagined_risk = _clamp01(imagined_risk)
         resource_pressure = self._resource_pressure(resource_state)
-        action_label = action_name(action)
-        cost = _clamp01(float(action.cost_estimate) + sum(max(0.0, float(v)) for v in action.resource_cost.values()) * 0.15)
+        label = action_name(action)
+        cost = _clamp01(float(action.cost_estimate) + sum(max(0.0, float(v)) for v in action.resource_cost.values()) * 0.18)
         prediction_error_vector = self._prediction_error_vector(
             evidence_strength=evidence_strength,
             uncertainty=uncertainty,
             expected_error=expected_error,
             imagined_risk=imagined_risk,
         )
-        virtual_error = prediction_error_vector["virtual_error"]
         direct_error = prediction_error_vector["direct_error"]
+        virtual_error = prediction_error_vector["virtual_error"]
+
+        inspect_actions = {"scan", "inspect", "query"}
         conservative_actions = {"rest", "conserve", "recover", "scan", "inspect", "query", "plan"}
+        risky_actions = {"commit", "guess", "retry"}
 
-        exploration_bonus = self.parameters.exploration_bias * uncertainty
-        if action_label in ("scan", "inspect", "query"):
-            exploration_bonus += 0.18 * uncertainty
-        if action_label == "query":
-            exploration_bonus += self.parameters.exploration_bias * 0.12
-        if action_label == "plan":
-            exploration_bonus += self.parameters.attention_selectivity * max(0.0, 0.40 - uncertainty) * 0.18
-        if action_label in ("rest", "conserve"):
-            exploration_bonus -= 0.10 * uncertainty
+        exploration_bonus = self.parameters.exploration_bias * uncertainty * 0.28
+        if label in inspect_actions:
+            exploration_bonus += 0.08 + self.parameters.exploration_bias * (0.20 + uncertainty * 0.48)
+        if label in {"rest", "conserve"}:
+            exploration_bonus -= 0.08 * uncertainty
+            exploration_bonus -= self.parameters.exploration_bias * max(0.0, uncertainty - 0.35) * 0.18
+        if label in {"commit", "plan", "recover"}:
+            exploration_bonus -= self.parameters.exploration_bias * uncertainty * 0.12
 
-        attention_bonus = self.parameters.attention_selectivity * evidence_strength
-        if action_label in ("commit", "choose_right", "choose_left"):
-            attention_bonus += 0.20 * evidence_strength
-        if action_label == "recover":
-            attention_bonus += self.parameters.error_aversion * expected_error * 0.16
-            attention_bonus += self.parameters.update_rigidity * 0.10
-        if action_label == "plan":
-            attention_bonus += self.parameters.update_rigidity * evidence_strength * 0.10
+        evidence_bonus = self.parameters.attention_selectivity * evidence_strength * 0.34
+        if label == "commit":
+            evidence_bonus += evidence_strength * 0.30 + self.parameters.confidence_gain * 0.16
+        if label == "plan":
+            evidence_bonus += self.parameters.attention_selectivity * max(0.0, 0.60 - uncertainty) * 0.18
+        if label == "recover":
+            evidence_bonus += self.parameters.error_aversion * expected_error * 0.16
 
-        resource_penalty = self.parameters.resource_pressure_sensitivity * resource_pressure * (0.35 + cost)
-        if action_label in ("rest", "conserve"):
-            resource_penalty *= 0.35
-        if action_label == "retry":
-            resource_penalty *= 1.15
-        if action_label == "recover":
-            resource_penalty *= 0.80
+        resource_penalty = self.parameters.resource_pressure_sensitivity * resource_pressure * (0.18 + cost)
+        if label in {"rest", "conserve", "recover"}:
+            resource_penalty *= 0.40
+        if label == "retry":
+            resource_penalty *= 1.18
+        if label == "commit":
+            resource_penalty *= 1.05
 
-        error_penalty = self.parameters.error_aversion * direct_error * 0.72
-        virtual_penalty = self.parameters.virtual_prediction_error_gain * max(0.0, virtual_error - direct_error * 0.50) * 0.58
-        if action_label in ("rest", "conserve", "scan", "query", "recover"):
-            error_penalty *= 0.65
-            virtual_penalty *= 0.72
-        if action_label in conservative_actions and virtual_error > direct_error:
-            attention_bonus += self.parameters.virtual_prediction_error_gain * (virtual_error - direct_error) * 0.28
-        if action_label == "guess":
-            error_penalty *= 1.35
-            virtual_penalty *= 1.25
-            if uncertainty > 0.55:
-                error_penalty += uncertainty * 0.10
-        if action_label == "retry":
-            error_penalty *= 1.15
-            virtual_penalty *= 1.10
-            error_penalty += resource_pressure * expected_error * 0.18
-        if action_label == "recover":
-            error_penalty *= 0.72
+        direct_penalty = self.parameters.error_aversion * direct_error * 0.62
+        virtual_penalty = self.parameters.virtual_prediction_error_gain * max(0.0, virtual_error - direct_error * 0.45) * 0.55
+        if label in conservative_actions:
+            direct_penalty *= 0.62
+            virtual_penalty *= 0.60
+        if label in risky_actions:
+            direct_penalty *= 1.12
+            virtual_penalty *= 1.18
+            direct_penalty += self.parameters.error_aversion * expected_error * 0.18
 
-        base_score = attention_bonus + exploration_bonus - error_penalty - virtual_penalty - resource_penalty
-        if action_label == "commit" and evidence_strength >= 0.75 and uncertainty <= 0.25 and virtual_error <= 0.35:
-            base_score += self.parameters.confidence_gain * 0.28
-        if action_label in ("rest", "conserve") and resource_pressure > 0.55:
-            base_score += self.parameters.resource_pressure_sensitivity * 0.30
-        if action_label in ("scan", "inspect") and uncertainty > 0.6:
-            base_score += self.parameters.uncertainty_sensitivity * 0.15
-        if action_label == "query" and uncertainty > 0.65:
-            base_score += self.parameters.exploration_bias * 0.18
-        if action_label == "plan" and evidence_strength >= 0.50 and uncertainty <= 0.50:
-            base_score += self.parameters.attention_selectivity * 0.16
-        if action_label == "recover" and expected_error >= 0.40:
-            recovery_support = (
-                self.parameters.error_aversion
-                + self.parameters.update_rigidity
-                + self.parameters.resource_pressure_sensitivity
-            ) / 3.0
-            base_score += recovery_support * 0.26 + self.parameters.resource_pressure_sensitivity * resource_pressure * 0.16
-            base_score -= (1.0 - recovery_support) * 0.24
-        if action_label == "retry" and expected_error >= 0.40:
-            base_score += (1.0 - self.parameters.error_aversion) * 0.12
-            base_score += (1.0 - self.parameters.resource_pressure_sensitivity) * 0.10
-            base_score -= self.parameters.error_aversion * 0.12 + self.parameters.resource_pressure_sensitivity * resource_pressure * 0.12
-        if action_label == "commit" and virtual_error > direct_error:
-            base_score -= self.parameters.virtual_prediction_error_gain * (virtual_error - direct_error) * 0.44
+        score = evidence_bonus + exploration_bonus - resource_penalty - direct_penalty - virtual_penalty
+        if label in inspect_actions and uncertainty >= 0.60:
+            score += self.parameters.uncertainty_sensitivity * 0.24
+        if label == "commit" and evidence_strength >= 0.72 and uncertainty <= 0.30:
+            score += self.parameters.confidence_gain * 0.30
+        if label == "commit":
+            score -= self.parameters.uncertainty_sensitivity * uncertainty * 0.22
+        if label == "recover" and expected_error >= 0.50:
+            score += (self.parameters.error_aversion + self.parameters.update_rigidity) * 0.18
+        if label in {"recover", "rest", "conserve"}:
+            score += self.parameters.error_aversion * expected_error * 0.14
+        if label in {"rest", "conserve"} and resource_pressure >= 0.58:
+            score += self.parameters.resource_pressure_sensitivity * 0.34
+        if label == "retry":
+            score += (1.0 - self.parameters.error_aversion) * max(0.0, 0.55 - expected_error) * 0.18
+        if label == "guess":
+            score += (1.0 - self.parameters.error_aversion) * 0.06
+            score -= uncertainty * 0.10
+        if label == "commit" and virtual_error > direct_error:
+            score -= self.parameters.virtual_prediction_error_gain * (virtual_error - direct_error) * 0.48
+        if label in conservative_actions and virtual_error > direct_error:
+            score += self.parameters.virtual_prediction_error_gain * (virtual_error - direct_error) * 0.18
 
         confidence = _clamp01(
-            0.30
-            + self.parameters.confidence_gain * evidence_strength * 0.62
-            - self.parameters.uncertainty_sensitivity * uncertainty * 0.20
+            0.22
+            + self.parameters.confidence_gain * evidence_strength * 0.72
+            - self.parameters.uncertainty_sensitivity * uncertainty * 0.24
             - direct_error * 0.10
             - self.parameters.virtual_prediction_error_gain * virtual_error * 0.08
         )
-        if action_label == "recover":
-            confidence = _clamp01(confidence + self.parameters.error_aversion * 0.06)
-        if action_label == "guess":
-            confidence = _clamp01(confidence - 0.08)
-        update_magnitude = _clamp01(prediction_error_vector["signed_total"] * (1.0 - self.parameters.update_rigidity * 0.75))
-        expected_value = _clamp01(
-            0.50 + evidence_strength * 0.35 - direct_error * 0.18 - resource_penalty * 0.10 - virtual_penalty * 0.12
-        )
+        if label in {"rest", "recover"}:
+            confidence = _clamp01(confidence + self.parameters.error_aversion * 0.05)
+        if label == "guess":
+            confidence = _clamp01(confidence - 0.10)
+
+        update_magnitude = _clamp01(prediction_error_vector["signed_total"] * (1.0 - self.parameters.update_rigidity * 0.72))
+        expected_value = _clamp01(0.45 + evidence_strength * 0.30 - direct_error * 0.18 - resource_penalty * 0.12)
         return CandidateScore(
             action=action.to_dict(),
-            total_score=round(base_score, 6),
+            total_score=round(score, 6),
             expected_value=round(expected_value, 6),
             expected_confidence=round(confidence, 6),
             expected_prediction_error=round(prediction_error_vector["signed_total"], 6),
@@ -661,22 +510,23 @@ class CognitiveParameterBridge:
             ),
         )
         dominant_signal = max(attention_allocation, key=attention_allocation.get)
-        timestamp = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() + tick + seed
-        prediction_error_vector = winner.expected_prediction_error_vector
-        reward = round(1.0 - winner.expected_prediction_error - winner.resource_penalty * 0.15, 6)
+        timestamp = datetime(2026, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=(seed * 97) + tick * 11)
+        reward = round(1.0 - winner.expected_prediction_error - winner.resource_penalty * 0.18, 6)
+        outcome = "stabilized" if reward >= 0.58 else "fragile" if reward >= 0.35 else "lossy"
         return DecisionLogRecord(
             schema_version="m4.decision_log.v3",
             tick=tick,
-            timestamp=datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(timespec="seconds"),
+            timestamp=timestamp.isoformat(timespec="seconds"),
             seed=seed,
             task_context=dict(task_context),
             percept_summary={
                 "dominant_signal": dominant_signal,
-                "evidence_band": "high" if evidence_strength >= 0.7 else "medium" if evidence_strength >= 0.4 else "low",
-                "uncertainty_band": "high" if uncertainty >= 0.6 else "medium" if uncertainty >= 0.3 else "low",
+                "evidence_band": "high" if evidence_strength >= 0.70 else "medium" if evidence_strength >= 0.40 else "low",
+                "uncertainty_band": "high" if uncertainty >= 0.60 else "medium" if uncertainty >= 0.30 else "low",
+                "pressure_band": "high" if self._resource_pressure(resource_state) >= 0.60 else "medium" if self._resource_pressure(resource_state) >= 0.35 else "low",
             },
             observation_evidence={key: round(float(value), 6) for key, value in observation_evidence.items()},
-            prediction_error_vector=prediction_error_vector,
+            prediction_error_vector=winner.expected_prediction_error_vector,
             attention_allocation=attention_allocation,
             candidate_actions=[
                 {
@@ -691,13 +541,13 @@ class CognitiveParameterBridge:
             internal_confidence=winner.expected_confidence,
             selected_action=str(winner.action["name"]),
             result_feedback={
-                "observed_outcome": "stabilized" if reward >= 0.55 else "fragile" if reward >= 0.35 else "lossy",
+                "observed_outcome": outcome,
                 "reward": reward,
-                "counterfactual_warning": prediction_error_vector["virtual_error"] > prediction_error_vector["direct_error"],
+                "counterfactual_warning": winner.expected_prediction_error_vector["virtual_error"] > winner.expected_prediction_error_vector["direct_error"],
             },
             model_update={
                 "magnitude": winner.update_magnitude,
-                "strategy_shift": round(winner.update_magnitude * (1.0 - self.parameters.update_rigidity * 0.30), 6),
+                "strategy_shift": round(winner.update_magnitude * (1.0 - self.parameters.update_rigidity * 0.28), 6),
                 "confidence_delta": round(winner.expected_confidence - 0.5, 6),
             },
             prediction_error=winner.expected_prediction_error,
@@ -707,14 +557,580 @@ class CognitiveParameterBridge:
 
 def canonical_action_schemas() -> list[ActionSchema]:
     return [
-        ActionSchema(name="scan", cost_estimate=0.35, resource_cost={"tokens": 0.15}),
+        ActionSchema(name="scan", cost_estimate=0.18, resource_cost={"tokens": 0.05}),
+        ActionSchema(name="inspect", cost_estimate=0.20, resource_cost={"tokens": 0.06}),
         ActionSchema(name="query", cost_estimate=0.22, resource_cost={"tokens": 0.08}),
-        ActionSchema(name="commit", cost_estimate=0.45, resource_cost={"tokens": 0.20}),
-        ActionSchema(name="plan", cost_estimate=0.18, resource_cost={"tokens": 0.05}),
-        ActionSchema(name="recover", cost_estimate=0.16, resource_cost={"tokens": 0.03}),
+        ActionSchema(name="commit", cost_estimate=0.42, resource_cost={"tokens": 0.16}),
+        ActionSchema(name="plan", cost_estimate=0.16, resource_cost={"tokens": 0.04}),
+        ActionSchema(name="recover", cost_estimate=0.14, resource_cost={"tokens": 0.03}),
+        ActionSchema(name="conserve", cost_estimate=0.10, resource_cost={"tokens": 0.02}),
         ActionSchema(name="rest", cost_estimate=0.08, resource_cost={"tokens": 0.02}),
         ActionSchema(name="guess", cost_estimate=0.06, resource_cost={"tokens": 0.02}),
+        ActionSchema(name="retry", cost_estimate=0.24, resource_cost={"tokens": 0.08}),
     ]
+
+
+SCENARIO_LIBRARY: dict[str, list[dict[str, Any]]] = {
+    "ambiguity_probe": [
+        {
+            "phase": "ambiguity_probe",
+            "evidence": {"evidence_strength": 0.24, "uncertainty": 0.88, "expected_error": 0.36, "imagined_risk": 0.20},
+            "resource": {"energy": 0.74, "budget": 0.76, "stress": 0.28, "time_remaining": 0.82},
+        },
+        {
+            "phase": "ambiguity_probe",
+            "evidence": {"evidence_strength": 0.30, "uncertainty": 0.80, "expected_error": 0.32, "imagined_risk": 0.24},
+            "resource": {"energy": 0.78, "budget": 0.70, "stress": 0.24, "time_remaining": 0.74},
+        },
+        {
+            "phase": "ambiguity_probe",
+            "evidence": {"evidence_strength": 0.20, "uncertainty": 0.92, "expected_error": 0.40, "imagined_risk": 0.30},
+            "resource": {"energy": 0.72, "budget": 0.84, "stress": 0.22, "time_remaining": 0.88},
+        },
+    ],
+    "commit_window": [
+        {
+            "phase": "commit_window",
+            "evidence": {"evidence_strength": 0.88, "uncertainty": 0.16, "expected_error": 0.12, "imagined_risk": 0.08},
+            "resource": {"energy": 0.76, "budget": 0.72, "stress": 0.20, "time_remaining": 0.76},
+        },
+        {
+            "phase": "commit_window",
+            "evidence": {"evidence_strength": 0.82, "uncertainty": 0.22, "expected_error": 0.16, "imagined_risk": 0.10},
+            "resource": {"energy": 0.70, "budget": 0.68, "stress": 0.24, "time_remaining": 0.70},
+        },
+        {
+            "phase": "commit_window",
+            "evidence": {"evidence_strength": 0.92, "uncertainty": 0.12, "expected_error": 0.10, "imagined_risk": 0.06},
+            "resource": {"energy": 0.80, "budget": 0.74, "stress": 0.18, "time_remaining": 0.78},
+        },
+    ],
+    "error_hazard": [
+        {
+            "phase": "error_hazard",
+            "evidence": {"evidence_strength": 0.34, "uncertainty": 0.40, "expected_error": 0.86, "imagined_risk": 0.22},
+            "resource": {"energy": 0.62, "budget": 0.58, "stress": 0.54, "time_remaining": 0.54},
+        },
+        {
+            "phase": "error_hazard",
+            "evidence": {"evidence_strength": 0.38, "uncertainty": 0.34, "expected_error": 0.80, "imagined_risk": 0.18},
+            "resource": {"energy": 0.58, "budget": 0.62, "stress": 0.58, "time_remaining": 0.50},
+        },
+        {
+            "phase": "error_hazard",
+            "evidence": {"evidence_strength": 0.28, "uncertainty": 0.46, "expected_error": 0.90, "imagined_risk": 0.25},
+            "resource": {"energy": 0.60, "budget": 0.56, "stress": 0.60, "time_remaining": 0.48},
+        },
+    ],
+    "pressure_spike": [
+        {
+            "phase": "pressure_spike",
+            "evidence": {"evidence_strength": 0.34, "uncertainty": 0.48, "expected_error": 0.38, "imagined_risk": 0.34},
+            "resource": {"energy": 0.28, "budget": 0.26, "stress": 0.82, "time_remaining": 0.24},
+        },
+        {
+            "phase": "pressure_spike",
+            "evidence": {"evidence_strength": 0.30, "uncertainty": 0.56, "expected_error": 0.42, "imagined_risk": 0.30},
+            "resource": {"energy": 0.22, "budget": 0.24, "stress": 0.86, "time_remaining": 0.20},
+        },
+        {
+            "phase": "pressure_spike",
+            "evidence": {"evidence_strength": 0.42, "uncertainty": 0.44, "expected_error": 0.34, "imagined_risk": 0.26},
+            "resource": {"energy": 0.30, "budget": 0.22, "stress": 0.78, "time_remaining": 0.22},
+        },
+    ],
+    "counterfactual_conflict": [
+        {
+            "phase": "counterfactual_conflict",
+            "evidence": {"evidence_strength": 0.68, "uncertainty": 0.22, "expected_error": 0.18, "imagined_risk": 0.86},
+            "resource": {"energy": 0.56, "budget": 0.62, "stress": 0.42, "time_remaining": 0.48},
+        },
+        {
+            "phase": "counterfactual_conflict",
+            "evidence": {"evidence_strength": 0.72, "uncertainty": 0.18, "expected_error": 0.14, "imagined_risk": 0.92},
+            "resource": {"energy": 0.58, "budget": 0.64, "stress": 0.36, "time_remaining": 0.52},
+        },
+        {
+            "phase": "counterfactual_conflict",
+            "evidence": {"evidence_strength": 0.64, "uncertainty": 0.26, "expected_error": 0.20, "imagined_risk": 0.84},
+            "resource": {"energy": 0.54, "budget": 0.58, "stress": 0.44, "time_remaining": 0.46},
+        },
+    ],
+    "recovery_probe": [
+        {
+            "phase": "recovery_probe",
+            "evidence": {"evidence_strength": 0.44, "uncertainty": 0.30, "expected_error": 0.48, "imagined_risk": 0.20},
+            "resource": {"energy": 0.34, "budget": 0.32, "stress": 0.66, "time_remaining": 0.28},
+        },
+        {
+            "phase": "recovery_probe",
+            "evidence": {"evidence_strength": 0.50, "uncertainty": 0.28, "expected_error": 0.42, "imagined_risk": 0.18},
+            "resource": {"energy": 0.36, "budget": 0.30, "stress": 0.62, "time_remaining": 0.26},
+        },
+        {
+            "phase": "recovery_probe",
+            "evidence": {"evidence_strength": 0.40, "uncertainty": 0.34, "expected_error": 0.52, "imagined_risk": 0.24},
+            "resource": {"energy": 0.30, "budget": 0.28, "stress": 0.70, "time_remaining": 0.24},
+        },
+    ],
+}
+
+
+def _pressure_value(resource_state: dict[str, float] | ResourceSnapshot) -> float:
+    snapshot = resource_state if isinstance(resource_state, ResourceSnapshot) else ResourceSnapshot.from_dict(resource_state)
+    scarcity = 1.0 - ((snapshot.energy + snapshot.budget + snapshot.time_remaining) / 3.0)
+    return _clamp01((scarcity + snapshot.stress) / 2.0)
+
+
+def _jitter(value: float, rng: random.Random, width: float) -> float:
+    return _clamp01(value + rng.uniform(-width, width))
+
+
+def _sample_trial_sequence(*, seed: int, stress: bool, episodes_per_family: int = 3) -> list[tuple[dict[str, Any], dict[str, float], ResourceSnapshot]]:
+    rng = random.Random(seed * 177 + (19 if stress else 0))
+    sampled: list[tuple[dict[str, Any], dict[str, float], ResourceSnapshot]] = []
+    for family_name, variants in SCENARIO_LIBRARY.items():
+        picks = [variants[index % len(variants)] for index in range(episodes_per_family)]
+        rng.shuffle(picks)
+        for sample_index, template in enumerate(picks, start=1):
+            evidence = {
+                key: _jitter(float(value), rng, 0.04 if key != "imagined_risk" else 0.06)
+                for key, value in template["evidence"].items()
+            }
+            resource = {
+                key: _jitter(float(value), rng, 0.05)
+                for key, value in template["resource"].items()
+            }
+            if stress and family_name in {"pressure_spike", "recovery_probe"}:
+                resource["energy"] = _clamp01(resource["energy"] - 0.08)
+                resource["budget"] = _clamp01(resource["budget"] - 0.06)
+                resource["stress"] = _clamp01(resource["stress"] + 0.08)
+                resource["time_remaining"] = _clamp01(resource["time_remaining"] - 0.06)
+            sampled.append(
+                (
+                    {
+                        "phase": family_name,
+                        "variant": template["phase"],
+                        "family_index": sample_index,
+                        "stress_mode": stress,
+                    },
+                    {key: round(value, 6) for key, value in evidence.items()},
+                    ResourceSnapshot(**resource),
+                )
+            )
+    rng.shuffle(sampled)
+    return sampled
+
+
+def reconstruct_behavior_patterns(records: list[DecisionLogRecord | dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized = [record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record) for record in records]
+    patterns: list[dict[str, Any]] = []
+    if any(record.selected_action in {"scan", "inspect", "query"} and record.observation_evidence.get("uncertainty", 0.0) >= 0.75 for record in normalized):
+        patterns.append({"label": "directed_exploration", "evidence": "inspect-like action selected during high uncertainty"})
+    if any(
+        record.selected_action in {"rest", "recover", "conserve"}
+        and ResourceSnapshot.from_dict(record.resource_state).energy <= 0.38
+        and ResourceSnapshot.from_dict(record.resource_state).budget <= 0.35
+        for record in normalized
+    ):
+        patterns.append({"label": "resource_conservation", "evidence": "recovery action selected under elevated resource pressure"})
+    if any(record.selected_action == "commit" and record.internal_confidence >= 0.60 and record.update_magnitude <= 0.22 for record in normalized):
+        patterns.append({"label": "confidence_sharpening", "evidence": "commit selected with high confidence and bounded update"})
+    if any(
+        record.prediction_error_vector.get("virtual_error", 0.0) > record.prediction_error_vector.get("direct_error", 0.0)
+        and record.selected_action != "commit"
+        for record in normalized
+    ):
+        patterns.append({"label": "counterfactual_avoidance", "evidence": "imagined-loss conflict shifted choice away from commit"})
+    return patterns
+
+
+def _mean(values: list[float]) -> float | None:
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def _proportion(records: list[DecisionLogRecord], predicate: Callable[[DecisionLogRecord], bool]) -> float | None:
+    if not records:
+        return None
+    return sum(1.0 for record in records if predicate(record)) / len(records)
+
+
+def _metric_result(*, value: float | None, sample_size: int, min_samples: int) -> dict[str, Any]:
+    return {
+        "value": _round_float(value) if sample_size >= min_samples and value is not None else None,
+        "sample_size": sample_size,
+        "min_samples": min_samples,
+        "insufficient_data": sample_size < min_samples or value is None,
+    }
+
+
+def observable_metrics_registry() -> dict[str, dict[str, Any]]:
+    return {
+        "uncertainty_confidence_drop_rate": {
+            "metric_id": "uncertainty_confidence_drop_rate",
+            "parameter": "uncertainty_sensitivity",
+            "description": "High uncertainty lowers internal confidence.",
+            "formula": "mean(uncertainty * (1 - internal_confidence) | uncertainty >= 0.6)",
+            "depends_on": ["observation_evidence.uncertainty", "internal_confidence"],
+            "evaluator": "uncertainty_confidence_drop_rate",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "high_uncertainty_inspect_ratio": {
+            "metric_id": "high_uncertainty_inspect_ratio",
+            "parameter": "uncertainty_sensitivity",
+            "description": "Ambiguous contexts increase inspect-like actions.",
+            "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.6)",
+            "depends_on": ["observation_evidence.uncertainty", "selected_action"],
+            "evaluator": "high_uncertainty_inspect_ratio",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "high_expected_error_rejection_rate": {
+            "metric_id": "high_expected_error_rejection_rate",
+            "parameter": "error_aversion",
+            "description": "Riskier actions are rejected when expected error is high.",
+            "formula": "P(selected_action not in {commit,guess,retry} | expected_error >= 0.65)",
+            "depends_on": ["observation_evidence.expected_error", "selected_action"],
+            "evaluator": "high_expected_error_rejection_rate",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "post_error_conservative_shift": {
+            "metric_id": "post_error_conservative_shift",
+            "parameter": "error_aversion",
+            "description": "Error signals trigger conservative follow-up choices.",
+            "formula": "P(selected_action in {rest,recover,conserve,scan,plan} | prediction_error >= 0.45)",
+            "depends_on": ["prediction_error", "selected_action"],
+            "evaluator": "post_error_conservative_shift",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "novel_action_ratio": {
+            "metric_id": "novel_action_ratio",
+            "parameter": "exploration_bias",
+            "description": "Information-seeking actions are favored in uncertainty.",
+            "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.5)",
+            "depends_on": ["observation_evidence.uncertainty", "selected_action"],
+            "evaluator": "novel_action_ratio",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 4,
+        },
+        "choice_repeat_suppression": {
+            "metric_id": "choice_repeat_suppression",
+            "parameter": "exploration_bias",
+            "description": "Repeated action streaks shorten when exploration rises.",
+            "formula": "1 / max_repeat_streak(selected_action)",
+            "depends_on": ["selected_action"],
+            "evaluator": "choice_repeat_suppression",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 6,
+        },
+        "dominant_attention_share": {
+            "metric_id": "dominant_attention_share",
+            "parameter": "attention_selectivity",
+            "description": "Attention concentrates on the strongest evidence feature.",
+            "formula": "mean(max(attention_allocation.values()))",
+            "depends_on": ["attention_allocation"],
+            "evaluator": "dominant_attention_share",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 6,
+        },
+        "evidence_aligned_choice_rate": {
+            "metric_id": "evidence_aligned_choice_rate",
+            "parameter": "attention_selectivity",
+            "description": "Chosen actions align with the dominant evidence channel.",
+            "formula": "P(selected_action matches percept_summary.dominant_signal)",
+            "depends_on": ["selected_action", "percept_summary.dominant_signal"],
+            "evaluator": "evidence_aligned_choice_rate",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 6,
+        },
+        "confidence_evidence_slope": {
+            "metric_id": "confidence_evidence_slope",
+            "parameter": "confidence_gain",
+            "description": "Confidence rises with stronger evidence separation.",
+            "formula": "mean(evidence_strength * internal_confidence)",
+            "depends_on": ["observation_evidence.evidence_strength", "internal_confidence"],
+            "evaluator": "confidence_evidence_slope",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 6,
+        },
+        "high_evidence_commit_rate": {
+            "metric_id": "high_evidence_commit_rate",
+            "parameter": "confidence_gain",
+            "description": "Commit wins more often once evidence becomes strong.",
+            "formula": "P(selected_action == commit | evidence_strength >= 0.7)",
+            "depends_on": ["observation_evidence.evidence_strength", "selected_action"],
+            "evaluator": "high_evidence_commit_rate",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "mean_update_inverse": {
+            "metric_id": "mean_update_inverse",
+            "parameter": "update_rigidity",
+            "description": "Prediction errors yield smaller internal updates.",
+            "formula": "1 - mean(model_update.magnitude)",
+            "depends_on": ["model_update.magnitude"],
+            "evaluator": "mean_update_inverse",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 6,
+        },
+        "strategy_persistence_after_error": {
+            "metric_id": "strategy_persistence_after_error",
+            "parameter": "update_rigidity",
+            "description": "After error, action policy changes more slowly.",
+            "formula": "mean(1 - model_update.strategy_shift | prediction_error >= 0.45)",
+            "depends_on": ["model_update.strategy_shift", "prediction_error"],
+            "evaluator": "strategy_persistence_after_error",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "high_pressure_low_cost_ratio": {
+            "metric_id": "high_pressure_low_cost_ratio",
+            "parameter": "resource_pressure_sensitivity",
+            "description": "Low-cost actions dominate under resource pressure.",
+            "formula": "P(selected_action in {rest,conserve,recover,scan} | pressure >= 0.6)",
+            "depends_on": ["resource_state", "selected_action"],
+            "evaluator": "high_pressure_low_cost_ratio",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "recovery_trigger_rate": {
+            "metric_id": "recovery_trigger_rate",
+            "parameter": "resource_pressure_sensitivity",
+            "description": "Recovery triggers when energy and time are low.",
+            "formula": "P(selected_action in {rest,recover,conserve} | energy <= 0.35 or time_remaining <= 0.3)",
+            "depends_on": ["resource_state", "selected_action"],
+            "evaluator": "recovery_trigger_rate",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "conflict_avoidance_shift": {
+            "metric_id": "conflict_avoidance_shift",
+            "parameter": "virtual_prediction_error_gain",
+            "description": "Imagined loss signals bias decisions away from direct commit.",
+            "formula": "P(selected_action != commit | virtual_error > direct_error)",
+            "depends_on": ["prediction_error_vector.virtual_error", "prediction_error_vector.direct_error", "selected_action"],
+            "evaluator": "conflict_avoidance_shift",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+        "counterfactual_loss_sensitivity": {
+            "metric_id": "counterfactual_loss_sensitivity",
+            "parameter": "virtual_prediction_error_gain",
+            "description": "Counterfactual loss increases conservative choices.",
+            "formula": "mean(max(virtual_error - direct_error, 0) * conservative_choice)",
+            "depends_on": ["prediction_error_vector", "selected_action"],
+            "evaluator": "counterfactual_loss_sensitivity",
+            "direction": "higher_means_higher_parameter",
+            "min_samples": 3,
+        },
+    }
+
+
+def default_behavior_mapping_table() -> dict[str, dict[str, Any]]:
+    registry = observable_metrics_registry()
+    return {
+        metric_name: {
+            "primary_parameter": spec["parameter"],
+            "observable": spec["description"],
+            "formula": spec["formula"],
+            "evaluator": spec["evaluator"],
+            "min_samples": spec["min_samples"],
+            "depends_on": spec["depends_on"],
+        }
+        for metric_name, spec in registry.items()
+    }
+
+
+def observable_parameter_contracts() -> dict[str, dict[str, Any]]:
+    registry = observable_metrics_registry()
+    contracts: dict[str, dict[str, Any]] = {}
+    for parameter_name in PARAMETER_REFERENCE:
+        metrics = [
+            {
+                "metric": metric_name,
+                "description": spec["description"],
+                "formula": spec["formula"],
+                "depends_on": spec["depends_on"],
+                "direction": spec["direction"],
+                "evaluator": spec["evaluator"],
+                "min_samples": spec["min_samples"],
+            }
+            for metric_name, spec in registry.items()
+            if spec["parameter"] == parameter_name
+        ]
+        contracts[parameter_name] = {
+            "physical_meaning": PARAMETER_REFERENCE[parameter_name]["physical_meaning"],
+            "observables": metrics,
+        }
+    return contracts
+
+
+def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    normalized = [record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record) for record in records]
+    selected_actions = [record.selected_action for record in normalized]
+    streak = 0
+    max_repeat = 0
+    previous = None
+    for action in selected_actions:
+        streak = streak + 1 if action == previous else 1
+        max_repeat = max(max_repeat, streak)
+        previous = action
+
+    inspect_actions = {"scan", "inspect", "query"}
+    conservative_actions = {"rest", "conserve", "recover", "scan", "inspect", "query", "plan"}
+    low_cost_actions = {"rest", "conserve", "recover", "scan"}
+    risky_actions = {"commit", "guess", "retry"}
+
+    high_uncertainty = [record for record in normalized if record.observation_evidence.get("uncertainty", 0.0) >= 0.60]
+    medium_uncertainty = [record for record in normalized if record.observation_evidence.get("uncertainty", 0.0) >= 0.50]
+    high_error = [record for record in normalized if record.observation_evidence.get("expected_error", 0.0) >= 0.65]
+    high_pred_error = [record for record in normalized if record.prediction_error >= 0.45]
+    high_evidence = [record for record in normalized if record.observation_evidence.get("evidence_strength", 0.0) >= 0.70]
+    high_pressure = [record for record in normalized if _pressure_value(record.resource_state) >= 0.60]
+    low_resource = [
+        record
+        for record in normalized
+        if record.resource_state.get("energy", 0.0) <= 0.35 or record.resource_state.get("time_remaining", 0.0) <= 0.30
+    ]
+    conflict_cases = [
+        record
+        for record in normalized
+        if record.prediction_error_vector.get("virtual_error", 0.0) > record.prediction_error_vector.get("direct_error", 0.0)
+    ]
+
+    results = {
+        "uncertainty_confidence_drop_rate": _metric_result(
+            value=_mean(
+                [
+                    record.observation_evidence.get("uncertainty", 0.0) * (1.0 - record.internal_confidence)
+                    for record in high_uncertainty
+                ]
+            ),
+            sample_size=len(high_uncertainty),
+            min_samples=3,
+        ),
+        "high_uncertainty_inspect_ratio": _metric_result(
+            value=_proportion(high_uncertainty, lambda record: record.selected_action in inspect_actions),
+            sample_size=len(high_uncertainty),
+            min_samples=3,
+        ),
+        "high_expected_error_rejection_rate": _metric_result(
+            value=_proportion(high_error, lambda record: record.selected_action not in risky_actions),
+            sample_size=len(high_error),
+            min_samples=3,
+        ),
+        "post_error_conservative_shift": _metric_result(
+            value=_proportion(high_pred_error, lambda record: record.selected_action in conservative_actions),
+            sample_size=len(high_pred_error),
+            min_samples=3,
+        ),
+        "novel_action_ratio": _metric_result(
+            value=_proportion(medium_uncertainty, lambda record: record.selected_action in inspect_actions),
+            sample_size=len(medium_uncertainty),
+            min_samples=4,
+        ),
+        "choice_repeat_suppression": _metric_result(
+            value=(1.0 / max_repeat) if max_repeat else None,
+            sample_size=len(normalized),
+            min_samples=6,
+        ),
+        "dominant_attention_share": _metric_result(
+            value=_mean([max(record.attention_allocation.values()) for record in normalized if record.attention_allocation]),
+            sample_size=len(normalized),
+            min_samples=6,
+        ),
+        "evidence_aligned_choice_rate": _metric_result(
+            value=_proportion(
+                normalized,
+                lambda record: (
+                    (record.percept_summary.get("dominant_signal") == "evidence" and record.selected_action == "commit")
+                    or (record.percept_summary.get("dominant_signal") == "uncertainty" and record.selected_action in inspect_actions)
+                    or (record.percept_summary.get("dominant_signal") == "error" and record.selected_action in {"recover", "rest", "plan"})
+                    or (record.percept_summary.get("dominant_signal") == "counterfactual" and record.selected_action in conservative_actions)
+                ),
+            ),
+            sample_size=len(normalized),
+            min_samples=6,
+        ),
+        "confidence_evidence_slope": _metric_result(
+            value=_mean(
+                [record.observation_evidence.get("evidence_strength", 0.0) * record.internal_confidence for record in normalized]
+            ),
+            sample_size=len(normalized),
+            min_samples=6,
+        ),
+        "high_evidence_commit_rate": _metric_result(
+            value=_proportion(high_evidence, lambda record: record.selected_action == "commit"),
+            sample_size=len(high_evidence),
+            min_samples=3,
+        ),
+        "mean_update_inverse": _metric_result(
+            value=(1.0 - _mean([record.model_update.get("magnitude", 0.0) for record in normalized])) if normalized else None,
+            sample_size=len(normalized),
+            min_samples=6,
+        ),
+        "strategy_persistence_after_error": _metric_result(
+            value=_mean([1.0 - record.model_update.get("strategy_shift", 0.0) for record in high_pred_error]),
+            sample_size=len(high_pred_error),
+            min_samples=3,
+        ),
+        "high_pressure_low_cost_ratio": _metric_result(
+            value=_proportion(high_pressure, lambda record: record.selected_action in low_cost_actions),
+            sample_size=len(high_pressure),
+            min_samples=3,
+        ),
+        "recovery_trigger_rate": _metric_result(
+            value=_proportion(low_resource, lambda record: record.selected_action in {"rest", "recover", "conserve"}),
+            sample_size=len(low_resource),
+            min_samples=3,
+        ),
+        "conflict_avoidance_shift": _metric_result(
+            value=_proportion(conflict_cases, lambda record: record.selected_action != "commit"),
+            sample_size=len(conflict_cases),
+            min_samples=3,
+        ),
+        "counterfactual_loss_sensitivity": _metric_result(
+            value=_mean(
+                [
+                    max(
+                        0.0,
+                        record.prediction_error_vector.get("virtual_error", 0.0)
+                        - record.prediction_error_vector.get("direct_error", 0.0),
+                    )
+                    * (1.0 if record.selected_action in conservative_actions else 0.0)
+                    for record in conflict_cases
+                ]
+            ),
+            sample_size=len(conflict_cases),
+            min_samples=3,
+        ),
+    }
+    return results
+
+
+def metric_values_from_payload(metrics: dict[str, Any]) -> dict[str, float]:
+    values: dict[str, float] = {}
+    for metric_name, payload in metrics.items():
+        if isinstance(payload, dict) and not payload.get("insufficient_data", False) and payload.get("value") is not None:
+            values[metric_name] = float(payload["value"])
+        elif isinstance(payload, (int, float)):
+            values[metric_name] = float(payload)
+    return values
+
+
+def metrics_have_executable_registry(registry: dict[str, dict[str, Any]] | None = None) -> bool:
+    active_registry = registry or observable_metrics_registry()
+    return all(
+        {"metric_id", "parameter", "depends_on", "evaluator", "formula", "direction", "min_samples"} <= set(spec.keys())
+        and isinstance(spec["evaluator"], str)
+        and spec["min_samples"] > 0
+        for spec in active_registry.values()
+    )
 
 
 def run_cognitive_style_trial(
@@ -734,33 +1150,7 @@ def run_cognitive_style_trial(
             }
         )
     bridge = CognitiveParameterBridge(active_parameters)
-    sequence = [
-        (
-            {"phase": "ambiguity_probe"},
-            {"evidence_strength": 0.28, "uncertainty": 0.84, "expected_error": 0.42, "imagined_risk": 0.48},
-            ResourceSnapshot(energy=0.78, budget=0.82, stress=0.24, time_remaining=0.90),
-        ),
-        (
-            {"phase": "commit_window"},
-            {"evidence_strength": 0.87, "uncertainty": 0.18, "expected_error": 0.15, "imagined_risk": 0.12},
-            ResourceSnapshot(energy=0.74, budget=0.75, stress=0.28, time_remaining=0.70),
-        ),
-        (
-            {"phase": "pressure_spike"},
-            {"evidence_strength": 0.36, "uncertainty": 0.52, "expected_error": 0.39, "imagined_risk": 0.41},
-            ResourceSnapshot(energy=0.22 if stress else 0.32, budget=0.18 if stress else 0.28, stress=0.82, time_remaining=0.21),
-        ),
-        (
-            {"phase": "counterfactual_conflict"},
-            {"evidence_strength": 0.67, "uncertainty": 0.24, "expected_error": 0.21, "imagined_risk": 0.79},
-            ResourceSnapshot(energy=0.58, budget=0.63, stress=0.41, time_remaining=0.49),
-        ),
-        (
-            {"phase": "recovery_probe"},
-            {"evidence_strength": 0.51, "uncertainty": 0.31, "expected_error": 0.27, "imagined_risk": 0.22},
-            ResourceSnapshot(energy=0.56, budget=0.47, stress=0.36, time_remaining=0.45),
-        ),
-    ]
+    sequence = _sample_trial_sequence(seed=seed, stress=stress, episodes_per_family=3)
     logs = [
         bridge.decide(
             tick=index,
@@ -773,320 +1163,143 @@ def run_cognitive_style_trial(
         for index, (context, evidence, resource_state) in enumerate(sequence, start=1)
     ]
     patterns = reconstruct_behavior_patterns(logs)
-    metrics = compute_observable_metrics(logs)
+    observable_metrics = compute_observable_metrics(logs)
+    metric_values = metric_values_from_payload(observable_metrics)
     return {
         "parameters": active_parameters.to_dict(),
         "logs": [record.to_dict() for record in logs],
         "patterns": patterns,
-        "observable_metrics": metrics,
+        "observable_metrics": observable_metrics,
+        "observable_metric_values": metric_values,
         "summary": {
             "selected_actions": [record.selected_action for record in logs],
             "mean_confidence": round(sum(record.internal_confidence for record in logs) / len(logs), 6),
             "mean_update_magnitude": round(sum(record.update_magnitude for record in logs) / len(logs), 6),
             "pattern_count": len(patterns),
+            "unique_action_count": len(set(record.selected_action for record in logs)),
+            "scenario_families": sorted({record.task_context.get("phase", "") for record in logs}),
+            "observable_metrics_with_data": sorted(metric_values.keys()),
         },
     }
 
 
-def _probe_score_delta(
+def compute_trial_variation(
+    reference_trial: dict[str, Any],
+    comparison_trial: dict[str, Any],
+) -> dict[str, Any]:
+    reference_actions = reference_trial["summary"]["selected_actions"]
+    comparison_actions = comparison_trial["summary"]["selected_actions"]
+    differing_positions = sum(
+        1
+        for left, right in zip(reference_actions, comparison_actions)
+        if left != right
+    )
+    reference_metrics = reference_trial.get("observable_metric_values", {})
+    comparison_metrics = comparison_trial.get("observable_metric_values", {})
+    shared = sorted(set(reference_metrics) & set(comparison_metrics))
+    metric_delta = round(
+        sum(abs(float(reference_metrics[name]) - float(comparison_metrics[name])) for name in shared) / len(shared),
+        6,
+    ) if shared else 0.0
+    return {
+        "differing_positions": differing_positions,
+        "action_overlap_ratio": round(
+            sum(1 for left, right in zip(reference_actions, comparison_actions) if left == right) / max(1, len(reference_actions)),
+            6,
+        ),
+        "mean_metric_delta": metric_delta,
+        "varies": differing_positions > 0 and metric_delta >= 0.01,
+    }
+
+
+def _mean_trial_metric(
     parameters: CognitiveStyleParameters,
+    metric_name: str,
     *,
-    action_name_a: str,
-    action_name_b: str,
-    context: dict[str, float],
-    resource_state: ResourceSnapshot,
-) -> float:
-    actions = {action.name: action for action in canonical_action_schemas()}
-    bridge = CognitiveParameterBridge(parameters)
-    score_a = bridge.score_action(actions[action_name_a], resource_state=resource_state, **context)
-    score_b = bridge.score_action(actions[action_name_b], resource_state=resource_state, **context)
-    return round(score_a.total_score - score_b.total_score, 6)
+    seeds: list[int],
+    stress: bool = False,
+) -> tuple[float | None, list[str]]:
+    values: list[float] = []
+    action_digest: list[str] = []
+    for seed in seeds:
+        trial = run_cognitive_style_trial(parameters, seed=seed, stress=stress)
+        metric_payload = trial["observable_metrics"][metric_name]
+        if not metric_payload["insufficient_data"] and metric_payload["value"] is not None:
+            values.append(float(metric_payload["value"]))
+        action_digest.append(",".join(trial["summary"]["selected_actions"][:6]))
+    return (_mean(values), action_digest)
 
 
 def parameter_probe_registry() -> dict[str, dict[str, Any]]:
-    moderate_resources = ResourceSnapshot(energy=0.72, budget=0.76, stress=0.25, time_remaining=0.83)
-    hard_resources = ResourceSnapshot(energy=0.18, budget=0.22, stress=0.82, time_remaining=0.20)
     return {
-        "uncertainty_sensitivity": {
-            "probe_type": "score_margin",
-            "context": {"evidence_strength": 0.22, "uncertainty": 0.92, "expected_error": 0.35, "imagined_risk": 0.18},
-            "resource_state": moderate_resources,
-            "target": "scan_minus_commit_margin",
-            "actions": ("scan", "commit"),
-            "expectation": "higher",
-        },
-        "error_aversion": {
-            "probe_type": "score_margin",
-            "context": {"evidence_strength": 0.28, "uncertainty": 0.44, "expected_error": 0.86, "imagined_risk": 0.20},
-            "resource_state": moderate_resources,
-            "target": "recover_minus_guess_margin",
-            "actions": ("recover", "guess"),
-            "expectation": "higher",
-        },
-        "exploration_bias": {
-            "probe_type": "score_margin",
-            "context": {"evidence_strength": 0.22, "uncertainty": 0.92, "expected_error": 0.35, "imagined_risk": 0.18},
-            "resource_state": moderate_resources,
-            "target": "query_minus_rest_margin",
-            "actions": ("query", "rest"),
-            "expectation": "higher",
-        },
-        "attention_selectivity": {
-            "probe_type": "attention_share",
-            "context": {"evidence_strength": 0.98, "uncertainty": 0.06, "expected_error": 0.08, "imagined_risk": 0.02},
-            "resource_state": moderate_resources,
-            "target": "attention_allocation.evidence",
-            "expectation": "higher",
-        },
-        "confidence_gain": {
-            "probe_type": "commit_confidence",
-            "context": {"evidence_strength": 0.92, "uncertainty": 0.08, "expected_error": 0.05, "imagined_risk": 0.01},
-            "resource_state": moderate_resources,
-            "target": "commit.expected_confidence",
-            "expectation": "higher",
-        },
-        "update_rigidity": {
-            "probe_type": "recover_update_magnitude",
-            "context": {"evidence_strength": 0.28, "uncertainty": 0.44, "expected_error": 0.86, "imagined_risk": 0.20},
-            "resource_state": moderate_resources,
-            "target": "recover.update_magnitude",
-            "expectation": "lower",
-        },
-        "resource_pressure_sensitivity": {
-            "probe_type": "trial_metric",
-            "trial_kwargs": {"stress": True},
-            "target": "high_pressure_low_cost_ratio",
-            "metric": "high_pressure_low_cost_ratio",
-            "expectation": "higher",
-        },
-        "virtual_prediction_error_gain": {
-            "probe_type": "score_margin",
-            "context": {"evidence_strength": 0.72, "uncertainty": 0.22, "expected_error": 0.15, "imagined_risk": 0.96},
-            "resource_state": moderate_resources,
-            "target": "recover_minus_commit_margin",
-            "actions": ("recover", "commit"),
-            "expectation": "higher",
-        },
+        "uncertainty_sensitivity": {"metric": "uncertainty_confidence_drop_rate", "expectation": "higher", "min_effect": 0.10},
+        "error_aversion": {"metric": "evidence_aligned_choice_rate", "expectation": "higher", "min_effect": 0.10},
+        "exploration_bias": {"metric": "novel_action_ratio", "expectation": "higher", "min_effect": 0.08},
+        "attention_selectivity": {"metric": "dominant_attention_share", "expectation": "higher", "min_effect": 0.05},
+        "confidence_gain": {"metric": "high_evidence_commit_rate", "expectation": "higher", "min_effect": 0.08},
+        "update_rigidity": {"metric": "mean_update_inverse", "expectation": "higher", "min_effect": 0.08},
+        "resource_pressure_sensitivity": {"metric": "high_pressure_low_cost_ratio", "expectation": "higher", "min_effect": 0.10, "stress": True},
+        "virtual_prediction_error_gain": {"metric": "conflict_avoidance_shift", "expectation": "higher", "min_effect": 0.10},
     }
 
 
-def parameter_causality_matrix(*, seed: int = 41) -> dict[str, dict[str, Any]]:
+def parameter_intervention_sensitivity_matrix(*, seeds: list[int] | None = None) -> dict[str, dict[str, Any]]:
+    active_seeds = seeds or [41, 42, 43]
     baseline = CognitiveStyleParameters()
-    actions = {action.name: action for action in canonical_action_schemas()}
     matrix: dict[str, dict[str, Any]] = {}
     for parameter_name, probe in parameter_probe_registry().items():
         low = CognitiveStyleParameters.from_dict({**baseline.to_dict(), parameter_name: 0.0})
         high = CognitiveStyleParameters.from_dict({**baseline.to_dict(), parameter_name: 1.0})
-        low_value = 0.0
-        high_value = 0.0
-        low_trial: dict[str, Any] | None = None
-        high_trial: dict[str, Any] | None = None
-        if probe["probe_type"] == "score_margin":
-            low_value = _probe_score_delta(
-                low,
-                action_name_a=probe["actions"][0],
-                action_name_b=probe["actions"][1],
-                context=dict(probe["context"]),
-                resource_state=probe["resource_state"],
+        stress = bool(probe.get("stress", False))
+        low_value, low_actions = _mean_trial_metric(low, probe["metric"], seeds=active_seeds, stress=stress)
+        high_value, high_actions = _mean_trial_metric(high, probe["metric"], seeds=active_seeds, stress=stress)
+        delta = None if low_value is None or high_value is None else high_value - low_value
+        identifiable = bool(
+            delta is not None
+            and (
+                (probe["expectation"] == "higher" and delta >= probe["min_effect"])
+                or (probe["expectation"] == "lower" and delta <= -probe["min_effect"])
             )
-            high_value = _probe_score_delta(
-                high,
-                action_name_a=probe["actions"][0],
-                action_name_b=probe["actions"][1],
-                context=dict(probe["context"]),
-                resource_state=probe["resource_state"],
-            )
-        elif probe["probe_type"] == "attention_share":
-            low_value = CognitiveParameterBridge(low)._attention_allocation(**probe["context"])["evidence"]
-            high_value = CognitiveParameterBridge(high)._attention_allocation(**probe["context"])["evidence"]
-        elif probe["probe_type"] == "commit_confidence":
-            low_value = CognitiveParameterBridge(low).score_action(
-                actions["commit"],
-                resource_state=probe["resource_state"],
-                **probe["context"],
-            ).expected_confidence
-            high_value = CognitiveParameterBridge(high).score_action(
-                actions["commit"],
-                resource_state=probe["resource_state"],
-                **probe["context"],
-            ).expected_confidence
-        elif probe["probe_type"] == "recover_update_magnitude":
-            low_value = CognitiveParameterBridge(low).score_action(
-                actions["recover"],
-                resource_state=probe["resource_state"],
-                **probe["context"],
-            ).update_magnitude
-            high_value = CognitiveParameterBridge(high).score_action(
-                actions["recover"],
-                resource_state=probe["resource_state"],
-                **probe["context"],
-            ).update_magnitude
-        elif probe["probe_type"] == "trial_metric":
-            trial_kwargs = dict(probe.get("trial_kwargs", {}))
-            low_trial = run_cognitive_style_trial(low, seed=seed, **trial_kwargs)
-            high_trial = run_cognitive_style_trial(high, seed=seed, **trial_kwargs)
-            low_value = float(low_trial["observable_metrics"][probe["metric"]])
-            high_value = float(high_trial["observable_metrics"][probe["metric"]])
-        identifiable = high_value > low_value if probe["expectation"] == "higher" else high_value < low_value
+        )
         matrix[parameter_name] = {
             "parameter": parameter_name,
-            "probe_type": probe["probe_type"],
-            "target": probe["target"],
+            "analysis_type": "intervention_sensitivity",
+            "target_metric": probe["metric"],
             "expectation": probe["expectation"],
+            "minimum_effect": probe["min_effect"],
             "low_parameter_value": 0.0,
             "high_parameter_value": 1.0,
-            "low_observed_value": round(float(low_value), 6),
-            "high_observed_value": round(float(high_value), 6),
-            "delta": round(float(high_value) - float(low_value), 6),
-            "identifiable": bool(identifiable),
-            "low_selected_actions": low_trial["summary"]["selected_actions"] if low_trial is not None else [],
-            "high_selected_actions": high_trial["summary"]["selected_actions"] if high_trial is not None else [],
+            "low_observed_value": _round_float(low_value),
+            "high_observed_value": _round_float(high_value),
+            "delta": _round_float(delta),
+            "identifiable": identifiable,
+            "insufficient_data": low_value is None or high_value is None,
+            "seeds": list(active_seeds),
+            "stress_mode": stress,
+            "low_selected_actions": low_actions,
+            "high_selected_actions": high_actions,
         }
     return matrix
 
 
-def reconstruct_behavior_patterns(records: list[DecisionLogRecord | dict[str, Any]]) -> list[dict[str, Any]]:
-    normalized = [
-        record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record)
-        for record in records
-    ]
-    patterns: list[dict[str, Any]] = []
-    if any(
-        record.selected_action in {"scan", "query"} and record.observation_evidence.get("uncertainty", 0.0) >= 0.75
-        for record in normalized
-    ):
-        patterns.append({"label": "directed_exploration", "evidence": "inspect-like action selected during high uncertainty"})
-    if any(
-        record.selected_action in {"rest", "recover"}
-        and ResourceSnapshot.from_dict(record.resource_state).energy <= 0.35
-        and ResourceSnapshot.from_dict(record.resource_state).budget <= 0.30
-        for record in normalized
-    ):
-        patterns.append({"label": "resource_conservation", "evidence": "recovery action selected under elevated resource pressure"})
-    if any(
-        record.selected_action == "commit"
-        and record.internal_confidence >= 0.60
-        and record.update_magnitude <= 0.20
-        for record in normalized
-    ):
-        patterns.append({"label": "confidence_sharpening", "evidence": "commit selected with high confidence and bounded update"})
-    if any(
-        record.prediction_error_vector.get("virtual_error", 0.0) > record.prediction_error_vector.get("direct_error", 0.0)
-        and record.selected_action != "commit"
-        for record in normalized
-    ):
-        patterns.append({"label": "counterfactual_avoidance", "evidence": "imagined-loss conflict shifted choice away from commit"})
-    return patterns
+def parameter_causality_matrix(*, seeds: list[int] | None = None) -> dict[str, dict[str, Any]]:
+    return parameter_intervention_sensitivity_matrix(seeds=seeds)
 
 
-def _mean(values: list[float], default: float = 0.0) -> float:
-    return round(sum(values) / len(values), 6) if values else default
-
-
-def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, float]:
-    normalized = [
-        record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record)
-        for record in records
-    ]
-    selected_actions = [record.selected_action for record in normalized]
-    max_repeat = 0
-    streak = 0
-    previous = None
-    for action in selected_actions:
-        streak = streak + 1 if action == previous else 1
-        max_repeat = max(max_repeat, streak)
-        previous = action
-
-    high_uncertainty = [record for record in normalized if record.observation_evidence.get("uncertainty", 0.0) >= 0.6]
-    high_error = [record for record in normalized if record.observation_evidence.get("expected_error", 0.0) >= 0.35]
-    high_evidence = [record for record in normalized if record.observation_evidence.get("evidence_strength", 0.0) >= 0.7]
-    high_pressure = [
-        record
-        for record in normalized
-        if (
-            1.0
-            - (
-                (
-                    record.resource_state.get("energy", 0.0)
-                    + record.resource_state.get("budget", 0.0)
-                    + record.resource_state.get("time_remaining", 0.0)
-                )
-                / 3.0
-            )
-            + record.resource_state.get("stress", 0.0)
-        )
-        / 2.0
-        >= 0.6
-    ]
-    conflict_cases = [
-        record
-        for record in normalized
-        if record.prediction_error_vector.get("virtual_error", 0.0) > record.prediction_error_vector.get("direct_error", 0.0)
-    ]
-    conservative_actions = {"rest", "recover", "conserve", "scan", "plan", "query"}
-    risky_actions = {"commit", "guess", "retry"}
-    inspect_actions = {"scan", "inspect", "query"}
-    low_cost_actions = {"rest", "recover", "conserve", "scan"}
-
+def parameter_identifiability_probe(*, seeds: list[int] | None = None) -> dict[str, Any]:
+    matrix = parameter_intervention_sensitivity_matrix(seeds=seeds)
+    baseline = run_cognitive_style_trial(CognitiveStyleParameters(), seed=(seeds or [41])[0])
     return {
-        "uncertainty_confidence_drop_rate": _mean(
-            [
-                record.observation_evidence.get("uncertainty", 0.0) * (1.0 - record.internal_confidence)
-                for record in high_uncertainty
-            ]
-        ),
-        "high_uncertainty_inspect_ratio": _mean([1.0 if record.selected_action in inspect_actions else 0.0 for record in high_uncertainty]),
-        "high_expected_error_rejection_rate": _mean([1.0 if record.selected_action not in risky_actions else 0.0 for record in high_error]),
-        "post_error_conservative_shift": _mean([1.0 if record.selected_action in conservative_actions else 0.0 for record in high_error]),
-        "novel_action_ratio": _mean([1.0 if record.selected_action in inspect_actions else 0.0 for record in normalized if record.observation_evidence.get("uncertainty", 0.0) >= 0.5]),
-        "choice_repeat_suppression": round(1.0 / max_repeat, 6) if max_repeat else 0.0,
-        "dominant_attention_share": _mean([max(record.attention_allocation.values()) for record in normalized if record.attention_allocation]),
-        "evidence_aligned_choice_rate": _mean(
-            [
-                1.0
-                if (
-                    (record.percept_summary.get("dominant_signal") == "evidence" and record.selected_action == "commit")
-                    or (record.percept_summary.get("dominant_signal") == "uncertainty" and record.selected_action in inspect_actions)
-                    or (record.percept_summary.get("dominant_signal") == "error" and record.selected_action in {"recover", "rest", "plan"})
-                    or (record.percept_summary.get("dominant_signal") == "counterfactual" and record.selected_action in conservative_actions)
-                )
-                else 0.0
-                for record in normalized
-            ]
-        ),
-        "confidence_evidence_slope": _mean(
-            [
-                record.observation_evidence.get("evidence_strength", 0.0) * record.internal_confidence
-                for record in normalized
-            ]
-        ),
-        "high_evidence_commit_rate": _mean([1.0 if record.selected_action == "commit" else 0.0 for record in high_evidence]),
-        "mean_update_inverse": round(1.0 - _mean([record.model_update.get("magnitude", 0.0) for record in normalized]), 6),
-        "strategy_persistence_after_error": _mean([1.0 - record.model_update.get("strategy_shift", 0.0) for record in high_error]),
-        "high_pressure_low_cost_ratio": _mean([1.0 if record.selected_action in low_cost_actions else 0.0 for record in high_pressure]),
-        "recovery_trigger_rate": _mean(
-            [
-                1.0 if record.selected_action in {"rest", "recover", "conserve"} else 0.0
-                for record in normalized
-                if record.resource_state.get("energy", 0.0) <= 0.35 or record.resource_state.get("time_remaining", 0.0) <= 0.30
-            ]
-        ),
-        "conflict_avoidance_shift": _mean([1.0 if record.selected_action != "commit" else 0.0 for record in conflict_cases]),
-        "counterfactual_loss_sensitivity": _mean(
-            [
-                max(0.0, record.prediction_error_vector.get("virtual_error", 0.0) - record.prediction_error_vector.get("direct_error", 0.0))
-                * (1.0 if record.selected_action in conservative_actions else 0.0)
-                for record in normalized
-            ]
-        ),
+        "analysis_type": "intervention_sensitivity",
+        "contracts": observable_parameter_contracts(),
+        "identifiable": {name: payload["identifiable"] for name, payload in matrix.items()},
+        "baseline": baseline["summary"],
+        "probes": matrix,
     }
 
 
 def audit_decision_log(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, Any]:
-    normalized = [
-        record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record)
-        for record in records
-    ]
+    normalized = [record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record) for record in records]
     required_fields = DecisionLogRecord.schema()["required"]
     missing_counts = {field_name: 0 for field_name in required_fields}
     parameter_snapshot_complete_records = 0
@@ -1116,82 +1329,150 @@ def audit_decision_log(records: list[DecisionLogRecord | dict[str, Any]]) -> dic
         "invalid_rate": invalid_rate,
         "missing_field_counts": missing_counts,
         "parameter_snapshot_complete_records": parameter_snapshot_complete_records,
-        "parameter_snapshot_complete_rate": round(
-            (parameter_snapshot_complete_records / total_records) if total_records else 0.0,
-            6,
-        ),
+        "parameter_snapshot_complete_rate": round((parameter_snapshot_complete_records / total_records) if total_records else 0.0, 6),
     }
 
 
 PROFILE_REGISTRY: dict[str, CognitiveStyleParameters] = {
     "high_exploration_low_caution": CognitiveStyleParameters(
-        exploration_bias=0.88,
-        uncertainty_sensitivity=0.82,
-        error_aversion=0.28,
-        confidence_gain=0.48,
-        update_rigidity=0.32,
-        resource_pressure_sensitivity=0.34,
-        virtual_prediction_error_gain=0.24,
+        uncertainty_sensitivity=0.84,
+        error_aversion=0.24,
+        exploration_bias=0.92,
+        attention_selectivity=0.48,
+        confidence_gain=0.42,
+        update_rigidity=0.28,
+        resource_pressure_sensitivity=0.30,
+        virtual_prediction_error_gain=0.22,
     ),
     "low_exploration_high_caution": CognitiveStyleParameters(
-        exploration_bias=0.22,
-        uncertainty_sensitivity=0.35,
-        error_aversion=0.90,
-        confidence_gain=0.62,
-        update_rigidity=0.82,
-        resource_pressure_sensitivity=0.86,
-        virtual_prediction_error_gain=0.90,
+        uncertainty_sensitivity=0.34,
+        error_aversion=0.92,
+        exploration_bias=0.16,
+        attention_selectivity=0.70,
+        confidence_gain=0.66,
+        update_rigidity=0.86,
+        resource_pressure_sensitivity=0.90,
+        virtual_prediction_error_gain=0.88,
     ),
     "balanced_midline": CognitiveStyleParameters(
-        exploration_bias=0.52,
-        uncertainty_sensitivity=0.56,
+        uncertainty_sensitivity=0.58,
         error_aversion=0.58,
-        confidence_gain=0.68,
+        exploration_bias=0.54,
+        attention_selectivity=0.62,
+        confidence_gain=0.70,
         update_rigidity=0.60,
-        resource_pressure_sensitivity=0.62,
+        resource_pressure_sensitivity=0.64,
         virtual_prediction_error_gain=0.62,
     ),
 }
 
 
-def classify_profile_from_metrics(metrics: dict[str, float]) -> str:
-    if (
-        metrics["novel_action_ratio"] >= 0.90
-        and metrics["high_pressure_low_cost_ratio"] <= 0.20
-    ):
-        return "high_exploration_low_caution"
-    if (
-        metrics["novel_action_ratio"] <= 0.10
-        and metrics["high_uncertainty_inspect_ratio"] <= 0.10
-    ):
-        return "low_exploration_high_caution"
-    return "balanced_midline"
+BLIND_CLASSIFICATION_FEATURES = [
+    "high_uncertainty_inspect_ratio",
+    "high_expected_error_rejection_rate",
+    "novel_action_ratio",
+    "choice_repeat_suppression",
+    "evidence_aligned_choice_rate",
+    "high_evidence_commit_rate",
+    "mean_update_inverse",
+    "high_pressure_low_cost_ratio",
+    "conflict_avoidance_shift",
+]
 
 
-def blind_classification_experiment(*, seeds: list[int] | None = None) -> dict[str, Any]:
-    active_seeds = seeds or [41, 42, 43, 44]
-    samples: list[dict[str, Any]] = []
+def _feature_vector(metrics: dict[str, Any], feature_names: list[str] | None = None) -> dict[str, float]:
+    metric_values = metric_values_from_payload(metrics)
+    active_features = feature_names or BLIND_CLASSIFICATION_FEATURES
+    return {name: float(metric_values[name]) for name in active_features if name in metric_values}
+
+
+def _prototype_distance(features: dict[str, float], prototype: dict[str, float]) -> float:
+    shared = sorted(set(features) & set(prototype))
+    if not shared:
+        return float("inf")
+    return sum(abs(features[name] - prototype[name]) for name in shared) / len(shared)
+
+
+def _profile_prototypes(*, seeds: list[int]) -> dict[str, dict[str, float]]:
+    prototypes: dict[str, dict[str, float]] = {}
+    for profile_name, parameters in PROFILE_REGISTRY.items():
+        feature_values: dict[str, list[float]] = {name: [] for name in BLIND_CLASSIFICATION_FEATURES}
+        for seed in seeds:
+            trial = run_cognitive_style_trial(
+                parameters,
+                seed=seed,
+                stress=profile_name == "low_exploration_high_caution",
+            )
+            features = _feature_vector(trial["observable_metrics"])
+            for name, value in features.items():
+                feature_values[name].append(value)
+        prototypes[profile_name] = {
+            name: round(sum(values) / len(values), 6)
+            for name, values in feature_values.items()
+            if values
+        }
+    return prototypes
+
+
+def classify_profile_from_metrics(
+    metrics: dict[str, Any],
+    prototypes: dict[str, dict[str, float]] | None = None,
+) -> str:
+    active_prototypes = prototypes or _profile_prototypes(seeds=TRAIN_PROFILE_SEEDS)
+    features = _feature_vector(metrics)
+    best_profile = min(
+        active_prototypes,
+        key=lambda name: (_prototype_distance(features, active_prototypes[name]), name),
+    )
+    return best_profile
+
+
+def blind_classification_experiment(
+    *,
+    train_seeds: list[int] | None = None,
+    eval_seeds: list[int] | None = None,
+) -> dict[str, Any]:
+    active_train = train_seeds or list(TRAIN_PROFILE_SEEDS)
+    active_eval = eval_seeds or list(EVAL_PROFILE_SEEDS)
+    prototypes = _profile_prototypes(seeds=active_train)
+    blind_samples: list[dict[str, Any]] = []
+    evaluated_samples: list[dict[str, Any]] = []
     confusion_matrix = {
         profile_name: {other_name: 0 for other_name in PROFILE_REGISTRY}
         for profile_name in PROFILE_REGISTRY
     }
     for profile_name, parameters in PROFILE_REGISTRY.items():
-        for seed in active_seeds:
-            trial = run_cognitive_style_trial(parameters, seed=seed, stress=profile_name == "low_exploration_high_caution")
-            metrics = dict(trial["observable_metrics"])
-            predicted_profile = classify_profile_from_metrics(metrics)
+        for seed in active_eval:
+            trial = run_cognitive_style_trial(
+                parameters,
+                seed=seed,
+                stress=profile_name == "low_exploration_high_caution",
+            )
+            features = _feature_vector(trial["observable_metrics"])
+            blind_samples.append(
+                {
+                    "sample_id": f"{profile_name}:{seed}",
+                    "seed": seed,
+                    "selected_actions": trial["summary"]["selected_actions"],
+                    "metrics": features,
+                }
+            )
+            predicted_profile = classify_profile_from_metrics(trial["observable_metrics"], prototypes)
             confusion_matrix[profile_name][predicted_profile] += 1
-            samples.append(
+            evaluated_samples.append(
                 {
                     "seed": seed,
                     "true_profile": profile_name,
                     "predicted_profile": predicted_profile,
                     "selected_actions": trial["summary"]["selected_actions"],
-                    "metrics": metrics,
+                    "metrics": features,
                 }
             )
-    accuracy = round(sum(1 for sample in samples if sample["true_profile"] == sample["predicted_profile"]) / len(samples), 6)
-    per_class = {}
+    accuracy = round(
+        sum(1 for sample in evaluated_samples if sample["true_profile"] == sample["predicted_profile"]) / max(1, len(evaluated_samples)),
+        6,
+    )
+    per_class: dict[str, dict[str, float]] = {}
     for profile_name in PROFILE_REGISTRY:
         true_positive = confusion_matrix[profile_name][profile_name]
         predicted_positive = sum(confusion_matrix[other][profile_name] for other in PROFILE_REGISTRY)
@@ -1200,25 +1481,112 @@ def blind_classification_experiment(*, seeds: list[int] | None = None) -> dict[s
             "precision": round(true_positive / predicted_positive, 6) if predicted_positive else 0.0,
             "recall": round(true_positive / actual_positive, 6) if actual_positive else 0.0,
         }
+    baseline_accuracy = round(1.0 / len(PROFILE_REGISTRY), 6)
+    misclassified = [
+        {
+            "seed": sample["seed"],
+            "true_profile": sample["true_profile"],
+            "predicted_profile": sample["predicted_profile"],
+        }
+        for sample in evaluated_samples
+        if sample["true_profile"] != sample["predicted_profile"]
+    ]
     return {
+        "analysis_type": "toy_internal_distinguishability",
+        "benchmark_scope": "toy benchmark distinguishability within the same generator family",
+        "generator_family": "same_generator_family",
+        "external_validation": False,
+        "validation_limits": [
+            "train/eval seed split only",
+            "same generator family for prototypes and evaluation samples",
+            "toy benchmark distinguishability rather than external blind validation",
+        ],
         "profiles": {name: params.to_dict() for name, params in PROFILE_REGISTRY.items()},
-        "seeds": active_seeds,
-        "samples": samples,
+        "train_eval_split": {"train_seeds": active_train, "eval_seeds": active_eval},
+        "feature_set": list(BLIND_CLASSIFICATION_FEATURES),
+        "profile_prototypes": prototypes,
+        "blind_samples": blind_samples,
+        "samples": evaluated_samples,
+        "sample_count": len(evaluated_samples),
         "accuracy": accuracy,
+        "baseline_accuracy": baseline_accuracy,
         "per_class": per_class,
         "confusion_matrix": confusion_matrix,
+        "misclassified_samples": misclassified,
     }
 
 
-def parameter_identifiability_probe(*, seed: int = 41) -> dict[str, Any]:
-    baseline = run_cognitive_style_trial(CognitiveStyleParameters(), seed=seed)
-    matrix = parameter_causality_matrix(seed=seed)
-    return {
-        "contracts": observable_parameter_contracts(),
-        "identifiable": {name: probe["identifiable"] for name, probe in matrix.items()},
-        "baseline": baseline["summary"],
-        "probes": matrix,
+def validate_acceptance_report(report: dict[str, Any]) -> dict[str, Any]:
+    required_gates = {
+        "schema_integrity",
+        "trial_variation",
+        "observability",
+        "intervention_sensitivity",
+        "blind_distinguishability",
+        "log_completeness",
+        "stress_behavior",
+        "regression",
     }
+    errors: list[str] = []
+    gates = report.get("gates", {})
+    missing = sorted(required_gates - set(gates))
+    if missing:
+        errors.append(f"missing_gates:{missing}")
+    for gate_name in required_gates & set(gates):
+        gate = gates[gate_name]
+        if "passed" not in gate:
+            errors.append(f"{gate_name}:missing_passed")
+        evidence = gate.get("evidence")
+        if not isinstance(evidence, dict) or not evidence:
+            errors.append(f"{gate_name}:missing_evidence")
+    intervention_gate = gates.get("intervention_sensitivity", {})
+    intervention_evidence = intervention_gate.get("evidence", {})
+    if intervention_evidence:
+        if intervention_evidence.get("analysis_type") != "intervention_sensitivity":
+            errors.append("intervention_sensitivity:analysis_type_invalid")
+        probes = intervention_evidence.get("probes")
+        if not isinstance(probes, dict) or not probes:
+            errors.append("intervention_sensitivity:missing_probes")
+        elif any(payload.get("analysis_type") != "intervention_sensitivity" for payload in probes.values()):
+            errors.append("intervention_sensitivity:probe_analysis_type_invalid")
+    blind_gate = gates.get("blind_distinguishability", {})
+    blind_evidence = blind_gate.get("evidence", {})
+    if blind_evidence:
+        if blind_evidence.get("analysis_type") != "toy_internal_distinguishability":
+            errors.append("blind_distinguishability:analysis_type_invalid")
+        if blind_evidence.get("generator_family") != "same_generator_family":
+            errors.append("blind_distinguishability:generator_family_missing")
+        if blind_evidence.get("external_validation") is not False:
+            errors.append("blind_distinguishability:external_validation_flag_invalid")
+        limits = blind_evidence.get("validation_limits")
+        if not isinstance(limits, list) or len(limits) < 3:
+            errors.append("blind_distinguishability:validation_limits_missing")
+        split = blind_evidence.get("train_eval_split")
+        if not isinstance(split, dict):
+            errors.append("blind_distinguishability:train_eval_split_missing")
+        elif not {"train_seeds", "eval_seeds"} <= set(split):
+            errors.append("blind_distinguishability:train_eval_split_incomplete")
+    regression_gate = gates.get("regression", {})
+    regression_evidence = regression_gate.get("evidence", {})
+    if regression_evidence:
+        if not isinstance(regression_evidence.get("self_artifacts"), dict) or not regression_evidence["self_artifacts"]:
+            errors.append("regression:self_artifacts_missing")
+        if not isinstance(regression_evidence.get("dependencies"), dict) or not regression_evidence["dependencies"]:
+            errors.append("regression:dependencies_missing")
+    findings = report.get("findings")
+    if not isinstance(findings, list):
+        errors.append("findings_not_list")
+    status = report.get("status")
+    if status not in {"PASS", "FAIL"}:
+        errors.append("status_invalid")
+    blocking_failures = [
+        gate_name
+        for gate_name, gate in gates.items()
+        if isinstance(gate, dict) and gate.get("blocking") and gate.get("passed") is False
+    ]
+    if blocking_failures and status != "FAIL":
+        errors.append(f"status_mismatch:blocking_gate_failed:{sorted(blocking_failures)}")
+    return {"valid": not errors, "errors": errors}
 
 
 def logistic(value: float) -> float:
