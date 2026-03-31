@@ -1,0 +1,107 @@
+{
+  "milestone_id": "M4.4",
+  "status": "PASS",
+  "generated_at": "2026-03-31T00:49:36+00:00",
+  "git_head": "ecc1e76b6be04127204d5935075b49d9295c6fb6",
+  "seed_set": [
+    44,
+    144
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m44_cross_task_trace.json",
+    "shared_vs_independent": "E:\\workspace\\segments\\artifacts\\m44_shared_vs_independent.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m44_cross_task_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m44_cross_task_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m44_acceptance_summary.md",
+    "regressions": {
+      "m43": {
+        "trace": "E:\\workspace\\segments\\artifacts\\m43_confidence_fit_trace.json",
+        "baselines": "E:\\workspace\\segments\\artifacts\\m43_baseline_comparison.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m43_confidence_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m43_confidence_stress.json",
+        "failure_analysis": "E:\\workspace\\segments\\artifacts\\m43_failure_analysis.json",
+        "report": "E:\\workspace\\segments\\reports\\m43_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m43_acceptance_summary.md"
+      },
+      "m42": {
+        "preprocess": "E:\\workspace\\segments\\artifacts\\m42_confidence_preprocess.json",
+        "protocol": "E:\\workspace\\segments\\artifacts\\m42_benchmark_protocol.json",
+        "trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m42_confidence_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m42_confidence_stress.json",
+        "report": "E:\\workspace\\segments\\reports\\m42_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md"
+      }
+    }
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m44_igt_adapter.py",
+      "tests/test_m44_shared_parameters.py",
+      "tests/test_m44_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m43_acceptance.py",
+      "tests/test_m42_acceptance.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    },
+    "artifact_freshness": {
+      "passed": true
+    },
+    "shared_threshold": {
+      "passed": true
+    }
+  },
+  "findings": [],
+  "readiness": {
+    "deployment_readiness": "NOT_READY",
+    "claim_envelope": "prototype_only",
+    "warning_count": 3,
+    "warnings": [],
+    "strengths": [
+      "A stable shared-parameter core is present across tasks.",
+      "IGT policy alignment clears the minimum behavioral bar."
+    ],
+    "blocking_gaps": [
+      "Cross-task evidence is still based on undersized benchmark slices.",
+      "Cross-task subject coverage is too small for production generalization claims.",
+      "Cross-task validation still relies on repository-frozen slices."
+    ],
+    "metrics_snapshot": {
+      "confidence_trial_count": 4,
+      "confidence_subject_count": 1,
+      "igt_trial_count": 4,
+      "igt_subject_count": 1,
+      "shared_parameter_count": 5,
+      "parameter_distance_mean": 0.062857,
+      "policy_alignment_rate": 0.75
+    }
+  },
+  "residual_risks": [
+    "M4.4 uses a repository-frozen IGT slice; negative evidence should still down-weight unified-style claims if later real datasets disagree."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-31T00:49:18+00:00"
+  },
+  "recommendation": "ACCEPT"
+}

@@ -1,0 +1,6 @@
+{
+  "between_profile_distance_mean": 0.676533,
+  "restart_distance_mean": 0.0,
+  "within_profile_cross_seed_distance_mean": 0.304079,
+  "style_divergence_reproducible": true
+}

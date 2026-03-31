@@ -1,0 +1,50 @@
+{
+  "shared": {
+    "confidence": {
+      "accuracy": 1.0,
+      "calibration_error": 0.290536,
+      "brier_score": 0.086701,
+      "heldout_likelihood": -0.114901,
+      "confidence_bias": -0.025536,
+      "auroc2": 0.5,
+      "meta_d_prime_ratio": 0.0,
+      "confidence_alignment": 1.0,
+      "subject_count": 1.0
+    },
+    "igt": {
+      "advantageous_choice_rate": 1.0,
+      "mean_net_outcome": -6.25,
+      "reward_fit": -7817.6004,
+      "confidence_advantage_alignment": -0.258199,
+      "deck_match_rate": 0.25,
+      "policy_alignment_rate": 0.75,
+      "late_advantageous_rate": 1.0
+    }
+  },
+  "task_specific": {
+    "confidence": {
+      "accuracy": 1.0,
+      "calibration_error": 0.290536,
+      "brier_score": 0.086701,
+      "heldout_likelihood": -0.114901,
+      "confidence_bias": -0.025536,
+      "auroc2": 0.5,
+      "meta_d_prime_ratio": 0.0,
+      "confidence_alignment": 1.0,
+      "subject_count": 1.0
+    },
+    "igt": {
+      "advantageous_choice_rate": 1.0,
+      "mean_net_outcome": -6.25,
+      "reward_fit": -7845.4116,
+      "confidence_advantage_alignment": -0.258199,
+      "deck_match_rate": 0.25,
+      "policy_alignment_rate": 0.75,
+      "late_advantageous_rate": 1.0
+    }
+  },
+  "gaps": {
+    "confidence_likelihood_gap": 0.0,
+    "igt_advantageous_gap": 0.0
+  }
+}

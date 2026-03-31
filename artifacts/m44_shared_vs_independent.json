@@ -1,0 +1,41 @@
+{
+  "parameters": {
+    "schema_version": "m4.cognitive_style.v1",
+    "uncertainty_sensitivity": 0.56,
+    "error_aversion": 0.56,
+    "exploration_bias": 0.66,
+    "attention_selectivity": 0.58,
+    "confidence_gain": 0.82,
+    "update_rigidity": 0.56,
+    "resource_pressure_sensitivity": 0.6
+  },
+  "heldout": {
+    "confidence": {
+      "accuracy": 1.0,
+      "calibration_error": 0.290536,
+      "brier_score": 0.086701,
+      "heldout_likelihood": -0.114901,
+      "confidence_bias": -0.025536,
+      "auroc2": 0.5,
+      "meta_d_prime_ratio": 0.0,
+      "confidence_alignment": 1.0,
+      "subject_count": 1.0
+    },
+    "igt": {
+      "advantageous_choice_rate": 1.0,
+      "mean_net_outcome": -6.25,
+      "reward_fit": -7817.6004,
+      "confidence_advantage_alignment": -0.258199,
+      "deck_match_rate": 0.25,
+      "policy_alignment_rate": 0.75,
+      "late_advantageous_rate": 1.0
+    }
+  },
+  "evidence": {
+    "confidence_trial_count": 4,
+    "confidence_subject_count": 1,
+    "igt_trial_count": 4,
+    "igt_subject_count": 1
+  },
+  "objective": 2.316306
+}

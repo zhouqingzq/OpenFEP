@@ -1,0 +1,337 @@
+{
+  "parameters": {
+    "schema_version": "m4.cognitive_style.v1",
+    "uncertainty_sensitivity": 0.65,
+    "error_aversion": 0.7,
+    "exploration_bias": 0.55,
+    "attention_selectivity": 0.6,
+    "confidence_gain": 0.7,
+    "update_rigidity": 0.65,
+    "resource_pressure_sensitivity": 0.75
+  },
+  "seed": 45,
+  "probe_type": "synthetic_probe",
+  "logs": [
+    {
+      "task": {
+        "task_id": "knowledge_probe",
+        "task_type": "knowledge_retrieval",
+        "uncertainty": 0.7463125248630454,
+        "evidence_strength": 0.33904225662807264,
+        "expected_error": 0.36655034738969333,
+        "resource_state": {
+          "energy": 0.7670986789593656,
+          "budget": 0.7857866886164283,
+          "stress": 0.21066218202479398,
+          "time_remaining": 0.8470310177539261
+        },
+        "recovery_window": false,
+        "failure_injected": false
+      },
+      "decision": {
+        "schema_version": "m4.decision_log.v1",
+        "tick": 1,
+        "seed": 45,
+        "task_context": {
+          "task_id": "knowledge_probe",
+          "task_type": "knowledge_retrieval"
+        },
+        "observation_evidence": {
+          "uncertainty": 0.746313,
+          "evidence_strength": 0.339042,
+          "expected_error": 0.36655
+        },
+        "candidate_actions": [
+          {
+            "action": {
+              "name": "query",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.22,
+              "resource_cost": {
+                "tokens": 0.08
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.643991,
+            "expected_confidence": 0.313469,
+            "expected_prediction_error": 0.36655,
+            "update_magnitude": 0.187857,
+            "resource_penalty": 0.089633,
+            "uncertainty_bonus": 0.610808
+          },
+          {
+            "action": {
+              "name": "scan",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.18,
+              "resource_cost": {
+                "tokens": 0.06
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.654957,
+            "expected_confidence": 0.313469,
+            "expected_prediction_error": 0.36655,
+            "update_magnitude": 0.187857,
+            "resource_penalty": 0.083011,
+            "uncertainty_bonus": 0.544808
+          },
+          {
+            "action": {
+              "name": "guess",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.06,
+              "resource_cost": {
+                "tokens": 0.02
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.233187,
+            "expected_confidence": 0.233469,
+            "expected_prediction_error": 0.36655,
+            "update_magnitude": 0.187857,
+            "resource_penalty": 0.063606,
+            "uncertainty_bonus": 0.410472
+          }
+        ],
+        "resource_state": {
+          "energy": 0.7670986789593656,
+          "budget": 0.7857866886164283,
+          "stress": 0.21066218202479398,
+          "time_remaining": 0.8470310177539261
+        },
+        "internal_confidence": 0.313469,
+        "selected_action": "scan",
+        "prediction_error": 0.36655,
+        "update_magnitude": 0.187857
+      },
+      "task_consistent": true
+    },
+    {
+      "task": {
+        "task_id": "plan_route",
+        "task_type": "multi_step_planning",
+        "uncertainty": 0.4494165092446422,
+        "evidence_strength": 0.56488305798496,
+        "expected_error": 0.3394776634271765,
+        "resource_state": {
+          "energy": 0.5935755715512693,
+          "budget": 0.5924937557180471,
+          "stress": 0.31080089287256324,
+          "time_remaining": 0.5836056994772467
+        },
+        "recovery_window": false,
+        "failure_injected": false
+      },
+      "decision": {
+        "schema_version": "m4.decision_log.v1",
+        "tick": 2,
+        "seed": 45,
+        "task_context": {
+          "task_id": "plan_route",
+          "task_type": "multi_step_planning"
+        },
+        "observation_evidence": {
+          "uncertainty": 0.449417,
+          "evidence_strength": 0.564883,
+          "expected_error": 0.339478
+        },
+        "candidate_actions": [
+          {
+            "action": {
+              "name": "inspect",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.18,
+              "resource_cost": {
+                "tokens": 0.05
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.355352,
+            "expected_confidence": 0.452787,
+            "expected_prediction_error": 0.339478,
+            "update_magnitude": 0.173982,
+            "resource_penalty": 0.145308,
+            "uncertainty_bonus": 0.328074
+          },
+          {
+            "action": {
+              "name": "plan",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.2,
+              "resource_cost": {
+                "tokens": 0.08
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.400551,
+            "expected_confidence": 0.452787,
+            "expected_prediction_error": 0.339478,
+            "update_magnitude": 0.173982,
+            "resource_penalty": 0.151932,
+            "uncertainty_bonus": 0.247179
+          },
+          {
+            "action": {
+              "name": "commit",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.14,
+              "resource_cost": {
+                "tokens": 0.04
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.398652,
+            "expected_confidence": 0.452787,
+            "expected_prediction_error": 0.339478,
+            "update_magnitude": 0.173982,
+            "resource_penalty": 0.134089,
+            "uncertainty_bonus": 0.247179
+          }
+        ],
+        "resource_state": {
+          "energy": 0.5935755715512693,
+          "budget": 0.5924937557180471,
+          "stress": 0.31080089287256324,
+          "time_remaining": 0.5836056994772467
+        },
+        "internal_confidence": 0.452787,
+        "selected_action": "plan",
+        "prediction_error": 0.339478,
+        "update_magnitude": 0.173982
+      },
+      "task_consistent": true
+    },
+    {
+      "task": {
+        "task_id": "repair_after_failure",
+        "task_type": "failure_recovery",
+        "uncertainty": 0.5989574099505681,
+        "evidence_strength": 0.40266061797406466,
+        "expected_error": 0.4748076580172264,
+        "resource_state": {
+          "energy": 0.3730381033249442,
+          "budget": 0.3144970795271923,
+          "stress": 0.8163252553769366,
+          "time_remaining": 0.2720270654814811
+        },
+        "recovery_window": true,
+        "failure_injected": true
+      },
+      "decision": {
+        "schema_version": "m4.decision_log.v1",
+        "tick": 3,
+        "seed": 45,
+        "task_context": {
+          "task_id": "repair_after_failure",
+          "task_type": "failure_recovery"
+        },
+        "observation_evidence": {
+          "uncertainty": 0.598957,
+          "evidence_strength": 0.402661,
+          "expected_error": 0.474808
+        },
+        "candidate_actions": [
+          {
+            "action": {
+              "name": "retry",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.12,
+              "resource_cost": {
+                "tokens": 0.04
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": -0.158009,
+            "expected_confidence": 0.349409,
+            "expected_prediction_error": 0.474808,
+            "update_magnitude": 0.243339,
+            "resource_penalty": 0.307188,
+            "uncertainty_bonus": 0.329427
+          },
+          {
+            "action": {
+              "name": "recover",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.16,
+              "resource_cost": {
+                "tokens": 0.05
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.48915,
+            "expected_confidence": 0.391409,
+            "expected_prediction_error": 0.474808,
+            "update_magnitude": 0.243339,
+            "resource_penalty": 0.232327,
+            "uncertainty_bonus": 0.329427
+          },
+          {
+            "action": {
+              "name": "conserve",
+              "params": {},
+              "params_schema": {},
+              "cost_estimate": 0.05,
+              "resource_cost": {
+                "tokens": 0.01
+              },
+              "failure_modes": [],
+              "constraints": {},
+              "reversible": true
+            },
+            "total_score": 0.517674,
+            "expected_confidence": 0.349409,
+            "expected_prediction_error": 0.474808,
+            "update_magnitude": 0.243339,
+            "resource_penalty": 0.078859,
+            "uncertainty_bonus": 0.269531
+          }
+        ],
+        "resource_state": {
+          "energy": 0.3730381033249442,
+          "budget": 0.3144970795271923,
+          "stress": 0.8163252553769366,
+          "time_remaining": 0.2720270654814811
+        },
+        "internal_confidence": 0.349409,
+        "selected_action": "conserve",
+        "prediction_error": 0.474808,
+        "update_magnitude": 0.243339
+      },
+      "task_consistent": true
+    }
+  ],
+  "summary": {
+    "goal_consistency_rate": 1.0,
+    "resource_sensitive_shift": true,
+    "adaptive_recovery_rate": 1.0,
+    "mechanical_retry_rate": 0.0,
+    "query_rate": 0.0,
+    "planful_rate": 0.333333,
+    "mean_confidence": 0.371888
+  }
+}

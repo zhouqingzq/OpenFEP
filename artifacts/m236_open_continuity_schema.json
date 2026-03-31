@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-03-26T07:03:18+00:00",
+  "generated_at": "2026-03-30T23:24:38+00:00",
   "schema_version": "m236_open_continuity_v1",
   "payload_kind": "m236_acceptance_bundle",
   "roundtrip_ok": true,
   "canonical_fields_present": true,
   "determinism_signature_preserved": true,
-  "payload_size_bytes": 101294,
+  "payload_size_bytes": 101227,
   "reference_signature": {
     "aggregate_metrics": {
       "inquiry_stability": {
-        "mean_active_targets": 3.628571,
-        "active_target_stability": 0.429972,
-        "inquiry_churn_rate": 0.570028,
+        "mean_active_targets": 3.828571,
+        "active_target_stability": 0.435364,
+        "inquiry_churn_rate": 0.564636,
         "useful_information_gain": 0.0,
         "low_value_suppression_rate": 1.0,
-        "delayed_evidence_persistence": 2.0,
-        "recovery_after_inconclusive": 0.25,
+        "delayed_evidence_persistence": 1.833333,
+        "recovery_after_inconclusive": 0.75,
         "inquiry_collapse_detected": false
       },
       "identity_retention": {
-        "continuity_mean": 0.743897,
+        "continuity_mean": 0.737788,
         "continuity_min": 0.6468,
         "commitment_retention": 0.75,
         "anchor_stability": 0.45,
-        "chapter_transition_coherence": 0.814896,
+        "chapter_transition_coherence": 0.827026,
         "restart_consistency": 1.0,
         "bounded_drift_score": 1.0
       },
@@ -31,20 +31,20 @@
         "personality_drift": 0.0,
         "value_drift": 0.0,
         "commitment_drift": 0.25,
-        "inquiry_policy_drift": 0.166667,
+        "inquiry_policy_drift": 0.0,
         "social_trust_drift": 0.0,
         "continuity_anchor_drift": 0.55,
-        "adaptive_revision_score": 0.7875
+        "adaptive_revision_score": 0.9375
       },
       "maintenance_inquiry_coupling": 1.0,
       "social_verification_coupling": 0.2,
       "trace_action_coupling": 0.4,
-      "subject_state_coupling": 0.4,
+      "subject_state_coupling": 0.382857,
       "conflict_persistence_phases": 11,
       "reopened_conflict_count": 1,
       "reconciled_conflict_count": 1,
       "trace_reactivation_events": 35,
-      "safe_evidence_trace_reduction": 0.127673,
+      "safe_evidence_trace_reduction": 0.138989,
       "verification_resolution_rate": 0.0,
       "adaptive_revision_observed": true
     },
@@ -58,14 +58,14 @@
         },
         "bounded_continuity": {
           "passed": true,
-          "continuity_mean": 0.743897,
+          "continuity_mean": 0.737788,
           "restart_consistency": 1.0,
           "anchor_stability": 0.45
         },
         "active_bounded_inquiry": {
           "passed": true,
-          "mean_active_targets": 3.628571,
-          "inquiry_churn_rate": 0.570028,
+          "mean_active_targets": 3.828571,
+          "inquiry_churn_rate": 0.564636,
           "low_value_suppression_rate": 1.0
         },
         "conflict_reconciliation": {
@@ -76,11 +76,11 @@
         "structural_trace": {
           "passed": true,
           "trace_reactivation_events": 35,
-          "safe_evidence_trace_reduction": 0.127673
+          "safe_evidence_trace_reduction": 0.138989
         },
         "bounded_adaptation": {
           "passed": true,
-          "adaptive_revision_score": 0.7875,
+          "adaptive_revision_score": 0.9375,
           "bounded_drift_score": 1.0
         },
         "coupling": {
@@ -88,7 +88,7 @@
           "maintenance_inquiry_coupling": 1.0,
           "social_verification_coupling": 0.2,
           "trace_action_coupling": 0.4,
-          "subject_state_coupling": 0.4
+          "subject_state_coupling": 0.382857
         }
       },
       "findings": [
@@ -114,7 +114,7 @@
           "severity": "S2",
           "kind": "unresolved_overload",
           "detail": "The organism ended the trial under unresolved maintenance overload.",
-          "final_maintenance_pressure": 0.872327
+          "final_maintenance_pressure": 0.861011
         }
       ],
       "summary": "The organism remained continuous, inquiry stayed bounded, and adaptive revision occurred without identity fracture."

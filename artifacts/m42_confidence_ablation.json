@@ -1,18 +1,26 @@
 {
   "full_metrics": {
     "accuracy": 1.0,
-    "calibration_error": 0.328014,
-    "brier_score": 0.1283,
-    "heldout_likelihood": -0.161661,
-    "confidence_bias": -0.063847
+    "calibration_error": 0.317447,
+    "brier_score": 0.102862,
+    "heldout_likelihood": -0.114268,
+    "confidence_bias": -0.052448,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
   },
   "ablated_metrics": {
     "accuracy": 1.0,
-    "calibration_error": 0.318837,
-    "brier_score": 0.117009,
-    "heldout_likelihood": -0.16178,
-    "confidence_bias": -0.054671
+    "calibration_error": 0.44895,
+    "brier_score": 0.202643,
+    "heldout_likelihood": -0.117099,
+    "confidence_bias": -0.18395,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
   },
-  "heldout_delta": 0.000119,
-  "calibration_delta": -0.009177
+  "heldout_delta": 0.002831,
+  "calibration_delta": 0.131503
 }

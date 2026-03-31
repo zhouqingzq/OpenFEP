@@ -1,0 +1,107 @@
+{
+  "corruption_examples": {
+    "cautious": {
+      "base": {
+        "query_rate": 0.0,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.333333,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.365329
+      },
+      "restarted": {
+        "query_rate": 0.0,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.333333,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.365329
+      },
+      "corrupted": {
+        "query_rate": 0.333333,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.0,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.336936
+      },
+      "repaired": {
+        "query_rate": 0.0,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.333333,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.374481
+      }
+    },
+    "exploratory": {
+      "base": {
+        "query_rate": 0.333333,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.333333,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.365329
+      },
+      "restarted": {
+        "query_rate": 0.333333,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.333333,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.365329
+      },
+      "corrupted": {
+        "query_rate": 0.333333,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.0,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.336936
+      },
+      "repaired": {
+        "query_rate": 0.333333,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.333333,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.374481
+      }
+    },
+    "rigid": {
+      "base": {
+        "query_rate": 0.0,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.0,
+        "recovery_rate": 0.333333,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.380129
+      },
+      "restarted": {
+        "query_rate": 0.0,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.0,
+        "recovery_rate": 0.333333,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.380129
+      },
+      "corrupted": {
+        "query_rate": 0.333333,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.0,
+        "recovery_rate": 0.0,
+        "planful_rate": 0.0,
+        "confidence_mean": 0.336936
+      },
+      "repaired": {
+        "query_rate": 0.0,
+        "exploration_rate": 0.333333,
+        "conservation_rate": 0.0,
+        "recovery_rate": 0.333333,
+        "planful_rate": 0.333333,
+        "confidence_mean": 0.389281
+      }
+    }
+  },
+  "contained_without_crash": true
+}

@@ -10,7 +10,7 @@ Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Gen
 
 ## Summary
 
-M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while the M4.5/M4.6 open-world and longitudinal flows remain synthetic probes with only partial live integration.
+M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while M4.5 is now framed as a controlled complex-environment bridge milestone rather than direct open-world tooling, and M4.6 remains a longitudinal probe layer over that controlled validation stack.
 
 FEP remains relatively marginal in mainstream AGI engineering. The dominant practical path has centered on scaling laws, RLHF, and architecture search rather than FEP, not only because FEP is often criticized as difficult to falsify, but because it has not yet produced a system that surpasses Transformers on standard benchmarks. In its conventional form, FEP explains how a system maintains its own existence; it does not, by itself, explain the core powers of language such as compositionality, recursion, and pragmatic reasoning across contexts.
 
@@ -169,6 +169,19 @@ print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
 | 13 | `one_line_conclusion` | Single-line conclusion |
 
 Every inferred parameter is wrapped in `ConfidenceRated(value, confidence, evidence, reasoning)` for transparency.
+
+## M4 Roadmap Notes
+
+The current M4 roadmap aims to turn cognitive style from a narrative description into a measurable, serializable, cross-context behavioral interface.
+
+- `M4.1` defines the parameter family and decision-log protocol, including explicit source-trust terms for indirect information.
+- `M4.2` connects those parameters to benchmark task adapters and reproducible evaluation flows.
+- `M4.3` tests whether the architecture beats weak baselines and stays competitive with stronger metacognitive baselines on single-task behavioral fit.
+- `M4.4` checks whether shared parameters remain credible across confidence and Iowa Gambling Task slices.
+- `M4.5` validates cross-context transfer in a controlled complex environment before any real-tool open-world step.
+- `M4.6` quantifies whether style is stable, reproducible, and recoverable across long runs and perturbations.
+
+Open-world tool integration is treated as an `M5` concern. The purpose of M4 is to establish cross-context cognitive-style validity under controlled conditions before moving to noisy real-tool environments.
 
 ## Tests
 

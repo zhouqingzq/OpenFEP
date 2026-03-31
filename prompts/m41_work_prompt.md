@@ -13,8 +13,12 @@ Turn digital personality and cognitive style into a measurable, serializable, cr
 ## Engineering Scope
 
 - Define a stable cognitive parameter family and versioned schema
+- Explicitly split source trust into two parameters:
+  - `source_precision_gain`, the relative precision given to virtual prediction error from deliberative or linguistic inputs versus direct perceptual error,
+  - `source_authority_weighting`, the degree to which source reliability history changes weighting across conflicting indirect sources
 - Add a decision log schema that records evidence, candidate actions, resource state, confidence, selected action, prediction error, update magnitude, task context, seed, and tick
 - Provide a pluggable bridge from cognitive parameters into planner or action-schema scoring
+- Add behavior probes for language-warning compliance, language-versus-perception conflict resolution, and source-preference switching under reliability updates
 - Provide a behavior-metric to parameter mapping table
 - Produce canonical, ablation, stress, and mapping artifacts
 
@@ -36,6 +40,7 @@ Turn digital personality and cognitive style into a measurable, serializable, cr
 - `stress`
 - `regression`
 - `artifact_freshness`
+- `source_trust_observability`
 
 ## Required Regressions
 
@@ -44,4 +49,4 @@ Turn digital personality and cognitive style into a measurable, serializable, cr
 
 ## Exit Condition
 
-The M4.1 acceptance report is `PASS`, the parameter and log schemas round-trip, action selection changes under parameter ablation, stress replay avoids silent corruption, and M3.5-M3.6 acceptance remains intact.
+The M4.1 acceptance report is `PASS`, the parameter and log schemas round-trip, action selection changes under parameter ablation, source-trust effects are behaviorally observable, stress replay avoids silent corruption, and M3.5-M3.6 acceptance remains intact.

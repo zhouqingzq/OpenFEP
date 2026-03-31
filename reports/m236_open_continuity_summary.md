@@ -1,10 +1,10 @@
 # M2.36 Open Continuity Trial
 
-- Status: PASS
-- Recommendation: ACCEPT
-- Continuity mean: 0.746504
+- Status: FAIL
+- Recommendation: BLOCK
+- Continuity mean: 0.741215
 - Restart consistency: 1.0
-- Inquiry mean active targets: 3.628571
+- Inquiry mean active targets: 3.828571
 - Reopened conflicts: 1
 - Reconciled conflicts: 1
 - Trace reactivation events: 35
