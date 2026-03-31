@@ -1,0 +1,437 @@
+{
+  "profiles": {
+    "high_exploration_low_caution": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.82,
+      "error_aversion": 0.28,
+      "exploration_bias": 0.88,
+      "attention_selectivity": 0.6,
+      "confidence_gain": 0.48,
+      "update_rigidity": 0.32,
+      "resource_pressure_sensitivity": 0.34,
+      "virtual_prediction_error_gain": 0.24
+    },
+    "low_exploration_high_caution": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.35,
+      "error_aversion": 0.9,
+      "exploration_bias": 0.22,
+      "attention_selectivity": 0.6,
+      "confidence_gain": 0.62,
+      "update_rigidity": 0.82,
+      "resource_pressure_sensitivity": 0.86,
+      "virtual_prediction_error_gain": 0.9
+    },
+    "balanced_midline": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.56,
+      "error_aversion": 0.58,
+      "exploration_bias": 0.52,
+      "attention_selectivity": 0.6,
+      "confidence_gain": 0.68,
+      "update_rigidity": 0.6,
+      "resource_pressure_sensitivity": 0.62,
+      "virtual_prediction_error_gain": 0.62
+    }
+  },
+  "seeds": [
+    41,
+    42,
+    43,
+    44
+  ],
+  "samples": [
+    {
+      "seed": 41,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "selected_actions": [
+        "query",
+        "commit",
+        "query",
+        "query",
+        "query"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.673536,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 1.0,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.456289,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.219254,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.805276,
+        "strategy_persistence_after_error": 0.74256,
+        "high_pressure_low_cost_ratio": 0.0,
+        "recovery_trigger_rate": 0.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.079063
+      }
+    },
+    {
+      "seed": 42,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "selected_actions": [
+        "query",
+        "commit",
+        "query",
+        "query",
+        "query"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.673536,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 1.0,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.456289,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.219254,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.805276,
+        "strategy_persistence_after_error": 0.74256,
+        "high_pressure_low_cost_ratio": 0.0,
+        "recovery_trigger_rate": 0.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.079063
+      }
+    },
+    {
+      "seed": 43,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "selected_actions": [
+        "query",
+        "commit",
+        "query",
+        "query",
+        "query"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.673536,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 1.0,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.456289,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.219254,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.805276,
+        "strategy_persistence_after_error": 0.74256,
+        "high_pressure_low_cost_ratio": 0.0,
+        "recovery_trigger_rate": 0.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.079063
+      }
+    },
+    {
+      "seed": 44,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "selected_actions": [
+        "query",
+        "commit",
+        "query",
+        "query",
+        "query"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.673536,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 1.0,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.456289,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.219254,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.805276,
+        "strategy_persistence_after_error": 0.74256,
+        "high_pressure_low_cost_ratio": 0.0,
+        "recovery_trigger_rate": 0.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.079063
+      }
+    },
+    {
+      "seed": 41,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "selected_actions": [
+        "recover",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.580048,
+        "high_uncertainty_inspect_ratio": 0.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.422006,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.265909,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.857373,
+        "strategy_persistence_after_error": 0.850488,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 0.8,
+        "counterfactual_loss_sensitivity": 0.292507
+      }
+    },
+    {
+      "seed": 42,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "selected_actions": [
+        "recover",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.580048,
+        "high_uncertainty_inspect_ratio": 0.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.422006,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.265909,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.857373,
+        "strategy_persistence_after_error": 0.850488,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 0.8,
+        "counterfactual_loss_sensitivity": 0.292507
+      }
+    },
+    {
+      "seed": 43,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "selected_actions": [
+        "recover",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.580048,
+        "high_uncertainty_inspect_ratio": 0.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.422006,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.265909,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.857373,
+        "strategy_persistence_after_error": 0.850488,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 0.8,
+        "counterfactual_loss_sensitivity": 0.292507
+      }
+    },
+    {
+      "seed": 44,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "selected_actions": [
+        "recover",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.580048,
+        "high_uncertainty_inspect_ratio": 0.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.422006,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.265909,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.857373,
+        "strategy_persistence_after_error": 0.850488,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 0.8,
+        "counterfactual_loss_sensitivity": 0.292507
+      }
+    },
+    {
+      "seed": 41,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "selected_actions": [
+        "query",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.62648,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.5,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.437272,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.271094,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.822904,
+        "strategy_persistence_after_error": 0.794566,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.201955
+      }
+    },
+    {
+      "seed": 42,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "selected_actions": [
+        "query",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.62648,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.5,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.437272,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.271094,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.822904,
+        "strategy_persistence_after_error": 0.794566,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.201955
+      }
+    },
+    {
+      "seed": 43,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "selected_actions": [
+        "query",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.62648,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.5,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.437272,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.271094,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.822904,
+        "strategy_persistence_after_error": 0.794566,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.201955
+      }
+    },
+    {
+      "seed": 44,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "selected_actions": [
+        "query",
+        "commit",
+        "rest",
+        "recover",
+        "recover"
+      ],
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.62648,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "high_expected_error_rejection_rate": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "novel_action_ratio": 0.5,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.437272,
+        "evidence_aligned_choice_rate": 0.2,
+        "confidence_evidence_slope": 0.271094,
+        "high_evidence_commit_rate": 1.0,
+        "mean_update_inverse": 0.822904,
+        "strategy_persistence_after_error": 0.794566,
+        "high_pressure_low_cost_ratio": 1.0,
+        "recovery_trigger_rate": 1.0,
+        "conflict_avoidance_shift": 1.0,
+        "counterfactual_loss_sensitivity": 0.201955
+      }
+    }
+  ],
+  "accuracy": 1.0,
+  "per_class": {
+    "high_exploration_low_caution": {
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "low_exploration_high_caution": {
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "balanced_midline": {
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  },
+  "confusion_matrix": {
+    "high_exploration_low_caution": {
+      "high_exploration_low_caution": 4,
+      "low_exploration_high_caution": 0,
+      "balanced_midline": 0
+    },
+    "low_exploration_high_caution": {
+      "high_exploration_low_caution": 0,
+      "low_exploration_high_caution": 4,
+      "balanced_midline": 0
+    },
+    "balanced_midline": {
+      "high_exploration_low_caution": 0,
+      "low_exploration_high_caution": 0,
+      "balanced_midline": 4
+    }
+  }
+}

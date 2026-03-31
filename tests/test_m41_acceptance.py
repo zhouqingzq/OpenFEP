@@ -17,7 +17,15 @@ class TestM41Acceptance(unittest.TestCase):
         self.assertTrue(report["gates"]["determinism"]["passed"])
         self.assertTrue(report["gates"]["causality"]["passed"])
         self.assertTrue(report["gates"]["ablation"]["passed"])
+        self.assertTrue(report["gates"]["observability"]["passed"])
+        self.assertTrue(report["gates"]["distinguishability"]["passed"])
+        self.assertTrue(report["gates"]["log_completeness"]["passed"])
         self.assertTrue(report["gates"]["stress"]["passed"])
+        self.assertTrue(report["gates"]["log_completeness"]["passed"])
+        self.assertEqual(
+            len(report["findings"]),
+            0,
+        )
 
 
 if __name__ == "__main__":

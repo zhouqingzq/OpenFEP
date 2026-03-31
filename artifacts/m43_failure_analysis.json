@@ -1,0 +1,48 @@
+{
+  "largest_calibration_gap_trial": "cd_012",
+  "agent_beats_statistical_baseline_on_heldout_likelihood": false,
+  "agent_subject_floor": -0.125624,
+  "seed_stability_range": 0.0,
+  "secondary_seed_agent_metrics": {
+    "accuracy": 1.0,
+    "calibration_error": 0.175162,
+    "brier_score": 0.031655,
+    "heldout_likelihood": -0.125624,
+    "confidence_bias": 0.089838,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "bootstrap_evidence": {
+    "agent_vs_statistical": {
+      "mean": -0.096064,
+      "lower": -0.115622,
+      "upper": -0.080767
+    },
+    "agent_vs_signal_detection": {
+      "mean": 0.025213,
+      "lower": 0.022992,
+      "upper": 0.027618
+    },
+    "agent_vs_no_persona": {
+      "mean": 0.133207,
+      "lower": 0.127128,
+      "upper": 0.139618
+    },
+    "statistical_cv_metrics": {
+      "accuracy": 1.0,
+      "calibration_error": 0.264885,
+      "brier_score": 0.081926,
+      "heldout_likelihood": -0.081465,
+      "confidence_bias": -0.000718,
+      "auroc2": 0.5,
+      "meta_d_prime_ratio": 0.0,
+      "confidence_alignment": 1.0,
+      "subject_count": 1.0
+    },
+    "agent_subject_floor": -0.125624,
+    "agent_calibration_ceiling": 0.175055,
+    "sample_size_sufficient_for_claim": false
+  }
+}

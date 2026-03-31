@@ -1,0 +1,57 @@
+{
+  "agent": {
+    "accuracy": 1.0,
+    "calibration_error": 0.175055,
+    "brier_score": 0.031607,
+    "heldout_likelihood": -0.125624,
+    "confidence_bias": 0.089945,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "statistical": {
+    "accuracy": 1.0,
+    "calibration_error": 0.26529,
+    "brier_score": 0.071856,
+    "heldout_likelihood": -0.02988,
+    "confidence_bias": -0.00029,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "signal_detection": {
+    "accuracy": 1.0,
+    "calibration_error": 0.3358,
+    "brier_score": 0.113312,
+    "heldout_likelihood": -0.150838,
+    "confidence_bias": -0.0708,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "no_persona": {
+    "accuracy": 1.0,
+    "calibration_error": 0.4073,
+    "brier_score": 0.166121,
+    "heldout_likelihood": -0.258593,
+    "confidence_bias": -0.1423,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "task_optimal": {
+    "accuracy": 1.0,
+    "calibration_error": 0.2261,
+    "brier_score": 0.052115,
+    "heldout_likelihood": -0.127833,
+    "confidence_bias": 0.0389,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  }
+}

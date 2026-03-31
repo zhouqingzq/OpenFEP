@@ -1,0 +1,147 @@
+{
+  "milestone_id": "M4.3",
+  "status": "FAIL",
+  "generated_at": "2026-03-31T11:42:24+00:00",
+  "git_head": "1506533f1d625d42b734f578d418285fb77534c3",
+  "seed_set": [
+    43,
+    143
+  ],
+  "artifacts": {
+    "trace": "E:\\workspace\\segments\\artifacts\\m43_confidence_fit_trace.json",
+    "baselines": "E:\\workspace\\segments\\artifacts\\m43_baseline_comparison.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m43_confidence_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m43_confidence_stress.json",
+    "failure_analysis": "E:\\workspace\\segments\\artifacts\\m43_failure_analysis.json",
+    "summary": "E:\\workspace\\segments\\reports\\m43_acceptance_summary.md",
+    "regressions": {
+      "m42": {
+        "protocol": "E:\\workspace\\segments\\artifacts\\m42_benchmark_protocol.json",
+        "confidence_trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
+        "igt_trace": "E:\\workspace\\segments\\artifacts\\m42_igt_trace.json",
+        "bandit_trace": "E:\\workspace\\segments\\artifacts\\m42_two_armed_bandit_trace.json",
+        "reproducibility": "E:\\workspace\\segments\\artifacts\\m42_reproducibility_report.json",
+        "report": "E:\\workspace\\segments\\reports\\m42_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md"
+      },
+      "m41": {
+        "schema": "E:\\workspace\\segments\\artifacts\\m41_cognitive_schema.json",
+        "trace": "E:\\workspace\\segments\\artifacts\\m41_cognitive_trace.json",
+        "ablation": "E:\\workspace\\segments\\artifacts\\m41_cognitive_ablation.json",
+        "stress": "E:\\workspace\\segments\\artifacts\\m41_cognitive_stress.json",
+        "mapping": "E:\\workspace\\segments\\artifacts\\m41_behavior_mapping.json",
+        "blind_classification": "E:\\workspace\\segments\\artifacts\\m41_blind_classification.json",
+        "decision_log_audit": "E:\\workspace\\segments\\artifacts\\m41_decision_log_audit.json",
+        "parameter_reference": "E:\\workspace\\segments\\reports\\m41_parameter_reference.md",
+        "report": "E:\\workspace\\segments\\reports\\m41_acceptance_report.json",
+        "summary": "E:\\workspace\\segments\\reports\\m41_acceptance_summary.md"
+      }
+    }
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m43_single_task_fit.py",
+      "tests/test_m43_baselines.py",
+      "tests/test_m43_acceptance.py"
+    ],
+    "regressions": [
+      "tests/test_m42_acceptance.py",
+      "tests/test_m41_acceptance.py"
+    ]
+  },
+  "gates": {
+    "schema": {
+      "passed": true
+    },
+    "determinism": {
+      "passed": true
+    },
+    "causality": {
+      "passed": true
+    },
+    "upstream_parameter_causality": {
+      "passed": true
+    },
+    "upstream_log_completeness": {
+      "passed": true
+    },
+    "ablation": {
+      "passed": true
+    },
+    "stress": {
+      "passed": true
+    },
+    "regression": {
+      "passed": true
+    },
+    "artifact_freshness": {
+      "passed": true
+    },
+    "benchmark_fit": {
+      "passed": false
+    },
+    "leakage_check_passed": {
+      "passed": true
+    },
+    "baseline_competitive": {
+      "passed": false
+    },
+    "seed_stability_passed": {
+      "passed": true
+    },
+    "sample_size_sufficient_for_claim": {
+      "passed": false
+    }
+  },
+  "findings": [
+    {
+      "severity": "S1",
+      "label": "statistical_baseline_wins",
+      "detail": "The simple statistical baseline matched or beat the cognitive agent on heldout likelihood."
+    },
+    {
+      "severity": "S2",
+      "label": "sample_too_small_for_strong_claim",
+      "detail": "The current benchmark slice is too small to support strong heldout conclusions."
+    }
+  ],
+  "headline_metrics": {
+    "trial_count": 4,
+    "subject_count": 1,
+    "synthetic": false,
+    "external_bundle": false,
+    "split_unit": "session_id",
+    "claim_envelope": "smoke_only"
+  },
+  "readiness": {
+    "deployment_readiness": "NOT_READY",
+    "claim_envelope": "prototype_only",
+    "warning_count": 4,
+    "warnings": [],
+    "strengths": [
+      "Worst-subject calibration remains bounded.",
+      "Per-subject held-out floor stays above collapse threshold."
+    ],
+    "blocking_gaps": [
+      "Held-out bootstrap margin is not robustly positive.",
+      "confidence_database trial count is too small for deployment-grade fit claims.",
+      "confidence_database subject coverage is too small for production calibration trust.",
+      "confidence_database evidence comes from a repository-curated slice rather than a production benchmark feed."
+    ],
+    "metrics_snapshot": {
+      "trial_count": 4,
+      "subject_count": 1,
+      "bootstrap_lower": -0.115622,
+      "subject_floor": -0.125624,
+      "calibration_ceiling": 0.175055
+    }
+  },
+  "residual_risks": [
+    "M4.3 still uses a frozen repository slice and approximate meta-d'/d' style metric rather than a publication-grade estimator."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-31T11:41:47+00:00"
+  },
+  "recommendation": "BLOCK"
+}

@@ -1,9 +1,12 @@
 {
   "milestone_id": "M4.1",
   "status": "PASS",
-  "generated_at": "2026-03-30T10:19:25+00:00",
+  "generated_at": "2026-03-31T11:42:24+00:00",
   "seed_set": [
-    41
+    41,
+    42,
+    43,
+    44
   ],
   "artifacts": {
     "schema": "E:\\workspace\\segments\\artifacts\\m41_cognitive_schema.json",
@@ -11,6 +14,10 @@
     "ablation": "E:\\workspace\\segments\\artifacts\\m41_cognitive_ablation.json",
     "stress": "E:\\workspace\\segments\\artifacts\\m41_cognitive_stress.json",
     "mapping": "E:\\workspace\\segments\\artifacts\\m41_behavior_mapping.json",
+    "blind_classification": "E:\\workspace\\segments\\artifacts\\m41_blind_classification.json",
+    "decision_log_audit": "E:\\workspace\\segments\\artifacts\\m41_decision_log_audit.json",
+    "parameter_reference": "E:\\workspace\\segments\\reports\\m41_parameter_reference.md",
+    "blind_summary": "E:\\workspace\\segments\\reports\\m41_blind_classification_summary.md",
     "summary": "E:\\workspace\\segments\\reports\\m41_acceptance_summary.md",
     "regressions": {
       "m35": {
@@ -35,6 +42,8 @@
     "milestone": [
       "tests/test_m41_cognitive_parameters.py",
       "tests/test_m41_decision_logging.py",
+      "tests/test_m41_observables.py",
+      "tests/test_m41_blind_classification.py",
       "tests/test_m41_acceptance.py"
     ],
     "regressions": [
@@ -55,6 +64,15 @@
     "ablation": {
       "passed": true
     },
+    "observability": {
+      "passed": true
+    },
+    "distinguishability": {
+      "passed": true
+    },
+    "log_completeness": {
+      "passed": true
+    },
     "stress": {
       "passed": true
     },
@@ -67,11 +85,11 @@
   },
   "findings": [],
   "residual_risks": [
-    "M4.1 validates a reusable parameter and logging layer but does not yet prove human-task fit."
+    "M4.1 now validates the parameter family, indirect observables, blind profile separability, and decision-log completeness in toy trials."
   ],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-03-30T10:19:25+00:00"
+    "round_started_at": "2026-03-31T11:41:47+00:00"
   },
   "recommendation": "ACCEPT"
 }

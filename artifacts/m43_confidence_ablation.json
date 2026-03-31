@@ -1,0 +1,47 @@
+{
+  "full_metrics": {
+    "accuracy": 1.0,
+    "calibration_error": 0.193326,
+    "brier_score": 0.050839,
+    "heldout_likelihood": -0.171627,
+    "confidence_bias": 0.070841,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 3.0
+  },
+  "ablated_metrics": {
+    "accuracy": 1.0,
+    "calibration_error": 0.257759,
+    "brier_score": 0.080116,
+    "heldout_likelihood": -0.171627,
+    "confidence_bias": 0.006408,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 3.0
+  },
+  "heldout_agent_metrics": {
+    "accuracy": 1.0,
+    "calibration_error": 0.175055,
+    "brier_score": 0.031607,
+    "heldout_likelihood": -0.125624,
+    "confidence_bias": 0.089945,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "heldout_statistical_metrics": {
+    "accuracy": 1.0,
+    "calibration_error": 0.26529,
+    "brier_score": 0.071856,
+    "heldout_likelihood": -0.02988,
+    "confidence_bias": -0.00029,
+    "auroc2": 0.5,
+    "meta_d_prime_ratio": 0.0,
+    "confidence_alignment": 1.0,
+    "subject_count": 1.0
+  },
+  "heldout_delta": -0.095744
+}

@@ -1,6 +1,6 @@
 {
   "parameter_schema": {
-    "schema_version": "m4.cognitive_style.v1",
+    "schema_version": "m4.cognitive_style.v2",
     "type": "object",
     "required": [
       "schema_version",
@@ -10,7 +10,8 @@
       "attention_selectivity",
       "confidence_gain",
       "update_rigidity",
-      "resource_pressure_sensitivity"
+      "resource_pressure_sensitivity",
+      "virtual_prediction_error_gain"
     ],
     "properties": {
       "schema_version": {
@@ -19,56 +20,91 @@
       "uncertainty_sensitivity": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.65
       },
       "error_aversion": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.7
       },
       "exploration_bias": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.55
       },
       "attention_selectivity": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.6
       },
       "confidence_gain": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.7
       },
       "update_rigidity": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.65
       },
       "resource_pressure_sensitivity": {
         "type": "number",
         "minimum": 0.0,
-        "maximum": 1.0
+        "maximum": 1.0,
+        "default": 0.75
+      },
+      "virtual_prediction_error_gain": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0,
+        "default": 0.68
       }
     }
   },
   "decision_log_schema": {
-    "schema_version": "m4.decision_log.v1",
+    "schema_version": "m4.decision_log.v3",
     "type": "object",
     "required": [
       "schema_version",
       "tick",
+      "timestamp",
       "seed",
       "task_context",
+      "percept_summary",
       "observation_evidence",
+      "prediction_error_vector",
+      "attention_allocation",
       "candidate_actions",
+      "parameter_snapshot",
       "resource_state",
       "internal_confidence",
       "selected_action",
+      "result_feedback",
+      "model_update",
       "prediction_error",
       "update_magnitude"
-    ]
+    ],
+    "properties": {
+      "candidate_actions": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "action",
+            "expected_value",
+            "expected_confidence",
+            "expected_prediction_error",
+            "resource_cost"
+          ]
+        }
+      }
+    }
   },
   "canonical_actions": [
     {
@@ -78,6 +114,18 @@
       "cost_estimate": 0.35,
       "resource_cost": {
         "tokens": 0.15
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    },
+    {
+      "name": "query",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.22,
+      "resource_cost": {
+        "tokens": 0.08
       },
       "failure_modes": [],
       "constraints": {},
@@ -96,10 +144,46 @@
       "reversible": true
     },
     {
+      "name": "plan",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.18,
+      "resource_cost": {
+        "tokens": 0.05
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    },
+    {
+      "name": "recover",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.16,
+      "resource_cost": {
+        "tokens": 0.03
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    },
+    {
       "name": "rest",
       "params": {},
       "params_schema": {},
       "cost_estimate": 0.08,
+      "resource_cost": {
+        "tokens": 0.02
+      },
+      "failure_modes": [],
+      "constraints": {},
+      "reversible": true
+    },
+    {
+      "name": "guess",
+      "params": {},
+      "params_schema": {},
+      "cost_estimate": 0.06,
       "resource_cost": {
         "tokens": 0.02
       },
@@ -113,5 +197,204 @@
     "budget",
     "stress",
     "time_remaining"
-  ]
+  ],
+  "observable_contracts": {
+    "uncertainty_sensitivity": {
+      "physical_meaning": "Sensitivity to ambiguity and incomplete evidence.",
+      "observables": [
+        {
+          "metric": "uncertainty_confidence_drop_rate",
+          "description": "High uncertainty lowers internal confidence.",
+          "formula": "mean(high_uncertainty * (1 - internal_confidence))",
+          "depends_on": [
+            "observation_evidence.uncertainty",
+            "internal_confidence"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "high_uncertainty_inspect_ratio",
+          "description": "Ambiguous contexts increase inspect-like actions.",
+          "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.6)",
+          "depends_on": [
+            "observation_evidence.uncertainty",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "error_aversion": {
+      "physical_meaning": "Penalty applied to options with elevated expected failure cost.",
+      "observables": [
+        {
+          "metric": "high_expected_error_rejection_rate",
+          "description": "Riskier actions are rejected when expected error is high.",
+          "formula": "P(selected_action not in {commit,guess,retry} | expected_error >= 0.45)",
+          "depends_on": [
+            "observation_evidence.expected_error",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "post_error_conservative_shift",
+          "description": "Error signals trigger conservative follow-up choices.",
+          "formula": "P(selected_action in {rest,recover,scan,plan} | prediction_error >= 0.4)",
+          "depends_on": [
+            "prediction_error",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "exploration_bias": {
+      "physical_meaning": "Preference for information-seeking or novel actions.",
+      "observables": [
+        {
+          "metric": "novel_action_ratio",
+          "description": "Information-seeking actions are favored in uncertainty.",
+          "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.5)",
+          "depends_on": [
+            "observation_evidence.uncertainty",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "choice_repeat_suppression",
+          "description": "Repeated action streaks shorten when exploration rises.",
+          "formula": "1 / max_repeat_streak(selected_action)",
+          "depends_on": [
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "attention_selectivity": {
+      "physical_meaning": "Degree to which attention concentrates on the strongest evidence channels.",
+      "observables": [
+        {
+          "metric": "dominant_attention_share",
+          "description": "Attention concentrates on the strongest evidence feature.",
+          "formula": "mean(max(attention_allocation.values()))",
+          "depends_on": [
+            "attention_allocation"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "evidence_aligned_choice_rate",
+          "description": "Chosen actions align with the dominant evidence channel.",
+          "formula": "P(selected_action matches percept_summary.dominant_signal)",
+          "depends_on": [
+            "selected_action",
+            "percept_summary.dominant_signal"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "confidence_gain": {
+      "physical_meaning": "Amplification from clean evidence separation into internal confidence.",
+      "observables": [
+        {
+          "metric": "confidence_evidence_slope",
+          "description": "Confidence rises with stronger evidence separation.",
+          "formula": "mean(evidence_strength * internal_confidence)",
+          "depends_on": [
+            "observation_evidence.evidence_strength",
+            "internal_confidence"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "high_evidence_commit_rate",
+          "description": "Commit wins more often once evidence becomes strong.",
+          "formula": "P(selected_action == commit | evidence_strength >= 0.7)",
+          "depends_on": [
+            "observation_evidence.evidence_strength",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "update_rigidity": {
+      "physical_meaning": "Resistance to changing internal state after observed error.",
+      "observables": [
+        {
+          "metric": "mean_update_inverse",
+          "description": "Prediction errors yield smaller internal updates.",
+          "formula": "1 - mean(model_update.magnitude)",
+          "depends_on": [
+            "model_update.magnitude"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "strategy_persistence_after_error",
+          "description": "After error, action policy changes more slowly.",
+          "formula": "mean(1 - model_update.strategy_shift)",
+          "depends_on": [
+            "model_update.strategy_shift"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "resource_pressure_sensitivity": {
+      "physical_meaning": "Pressure response to low energy, low budget, high stress, or little time.",
+      "observables": [
+        {
+          "metric": "high_pressure_low_cost_ratio",
+          "description": "Low-cost actions dominate under resource pressure.",
+          "formula": "P(selected_action in {rest,conserve,recover,scan} | pressure >= 0.6)",
+          "depends_on": [
+            "resource_state",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "recovery_trigger_rate",
+          "description": "Recovery triggers when energy and time are low.",
+          "formula": "P(selected_action in {rest,recover,conserve} | energy <= 0.35 or time_remaining <= 0.3)",
+          "depends_on": [
+            "resource_state",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    },
+    "virtual_prediction_error_gain": {
+      "physical_meaning": "Weight placed on imagined or counterfactual prediction-error signals.",
+      "observables": [
+        {
+          "metric": "conflict_avoidance_shift",
+          "description": "Imagined loss signals bias decisions away from direct commit.",
+          "formula": "P(selected_action != commit | virtual_error > direct_error)",
+          "depends_on": [
+            "prediction_error_vector.virtual_error",
+            "prediction_error_vector.direct_error",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        },
+        {
+          "metric": "counterfactual_loss_sensitivity",
+          "description": "Counterfactual loss increases conservative choices.",
+          "formula": "mean((virtual_error - direct_error)_+ * conservative_choice)",
+          "depends_on": [
+            "prediction_error_vector",
+            "selected_action"
+          ],
+          "direction": "higher_means_higher_parameter"
+        }
+      ]
+    }
+  }
 }

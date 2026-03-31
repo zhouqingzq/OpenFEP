@@ -1,0 +1,2285 @@
+{
+  "seed": 43,
+  "agent": {
+    "benchmark_id": "confidence_database",
+    "parameters": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.56,
+      "error_aversion": 0.68,
+      "exploration_bias": 0.56,
+      "attention_selectivity": 0.66,
+      "confidence_gain": 0.82,
+      "update_rigidity": 0.56,
+      "resource_pressure_sensitivity": 0.74,
+      "virtual_prediction_error_gain": 0.68
+    },
+    "seed": 43,
+    "trial_count": 12,
+    "split": "all",
+    "protocol_validation": {
+      "protocol_mode": "dataset_aligned",
+      "trial_count": 12,
+      "subject_count": 3,
+      "ok": true
+    },
+    "metrics": {
+      "accuracy": 1.0,
+      "calibration_error": 0.193326,
+      "brier_score": 0.050839,
+      "heldout_likelihood": -0.171627,
+      "confidence_bias": 0.070841,
+      "auroc2": 0.5,
+      "meta_d_prime_ratio": 0.0,
+      "confidence_alignment": 1.0,
+      "subject_count": 3.0
+    },
+    "predictions": [
+      {
+        "trial_id": "cd_001",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.961759,
+        "predicted_probability_right": 0.975398,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.93
+      },
+      {
+        "trial_id": "cd_002",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.756566,
+        "predicted_probability_right": 0.79576,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.66
+      },
+      {
+        "trial_id": "cd_003",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.730838,
+        "predicted_probability_right": 0.238667,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.61
+      },
+      {
+        "trial_id": "cd_004",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.932689,
+        "predicted_probability_right": 0.034891,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.89
+      },
+      {
+        "trial_id": "cd_005",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.576976,
+        "predicted_probability_right": 0.608259,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.56
+      },
+      {
+        "trial_id": "cd_006",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.616018,
+        "predicted_probability_right": 0.327393,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.58
+      },
+      {
+        "trial_id": "cd_007",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.913253,
+        "predicted_probability_right": 0.95606,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.84
+      },
+      {
+        "trial_id": "cd_008",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.893461,
+        "predicted_probability_right": 0.055201,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.82
+      },
+      {
+        "trial_id": "cd_009",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.803202,
+        "predicted_probability_right": 0.862949,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.71
+      },
+      {
+        "trial_id": "cd_010",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.784679,
+        "predicted_probability_right": 0.162465,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.69
+      },
+      {
+        "trial_id": "cd_011",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "human_choice": "right",
+        "predicted_choice": "right",
+        "predicted_confidence": 0.863759,
+        "predicted_probability_right": 0.922728,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.79
+      },
+      {
+        "trial_id": "cd_012",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "human_choice": "left",
+        "predicted_choice": "left",
+        "predicted_confidence": 0.84689,
+        "predicted_probability_right": 0.092793,
+        "correct": true,
+        "human_choice_match": true,
+        "human_confidence": 0.75
+      }
+    ],
+    "trial_trace": [
+      {
+        "trial_id": "cd_001",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "stimulus_strength": 0.92,
+        "evidence_strength": 0.92,
+        "uncertainty": 0.08,
+        "agent_choice": "right",
+        "agent_confidence_rating": 0.961759,
+        "correct_choice": "right",
+        "human_choice": "right",
+        "human_confidence": 0.93,
+        "predicted_choice": "right",
+        "predicted_confidence": 0.961759,
+        "predicted_probability_right": 0.975398,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 710,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_002",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "stimulus_strength": 0.34,
+        "evidence_strength": 0.34,
+        "uncertainty": 0.66,
+        "agent_choice": "right",
+        "agent_confidence_rating": 0.756566,
+        "correct_choice": "right",
+        "human_choice": "right",
+        "human_confidence": 0.66,
+        "predicted_choice": "right",
+        "predicted_confidence": 0.756566,
+        "predicted_probability_right": 0.79576,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 905,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_003",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "stimulus_strength": -0.29,
+        "evidence_strength": 0.29,
+        "uncertainty": 0.71,
+        "agent_choice": "left",
+        "agent_confidence_rating": 0.730838,
+        "correct_choice": "left",
+        "human_choice": "left",
+        "human_confidence": 0.61,
+        "predicted_choice": "left",
+        "predicted_confidence": 0.730838,
+        "predicted_probability_right": 0.238667,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 990,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_004",
+        "subject_id": "s01",
+        "session_id": "s01",
+        "split": "train",
+        "stimulus_strength": -0.83,
+        "evidence_strength": 0.83,
+        "uncertainty": 0.17,
+        "agent_choice": "left",
+        "agent_confidence_rating": 0.932689,
+        "correct_choice": "left",
+        "human_choice": "left",
+        "human_confidence": 0.89,
+        "predicted_choice": "left",
+        "predicted_confidence": 0.932689,
+        "predicted_probability_right": 0.034891,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 748,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_005",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "stimulus_strength": 0.11,
+        "evidence_strength": 0.11,
+        "uncertainty": 0.89,
+        "agent_choice": "right",
+        "agent_confidence_rating": 0.576976,
+        "correct_choice": "right",
+        "human_choice": "right",
+        "human_confidence": 0.56,
+        "predicted_choice": "right",
+        "predicted_confidence": 0.576976,
+        "predicted_probability_right": 0.608259,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 1140,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_006",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "stimulus_strength": -0.18,
+        "evidence_strength": 0.18,
+        "uncertainty": 0.82,
+        "agent_choice": "left",
+        "agent_confidence_rating": 0.616018,
+        "correct_choice": "left",
+        "human_choice": "left",
+        "human_confidence": 0.58,
+        "predicted_choice": "left",
+        "predicted_confidence": 0.616018,
+        "predicted_probability_right": 0.327393,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 1125,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_007",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "stimulus_strength": 0.77,
+        "evidence_strength": 0.77,
+        "uncertainty": 0.23,
+        "agent_choice": "right",
+        "agent_confidence_rating": 0.913253,
+        "correct_choice": "right",
+        "human_choice": "right",
+        "human_confidence": 0.84,
+        "predicted_choice": "right",
+        "predicted_confidence": 0.913253,
+        "predicted_probability_right": 0.95606,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 802,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_008",
+        "subject_id": "s02",
+        "session_id": "s02",
+        "split": "validation",
+        "stimulus_strength": -0.71,
+        "evidence_strength": 0.71,
+        "uncertainty": 0.29,
+        "agent_choice": "left",
+        "agent_confidence_rating": 0.893461,
+        "correct_choice": "left",
+        "human_choice": "left",
+        "human_confidence": 0.82,
+        "predicted_choice": "left",
+        "predicted_confidence": 0.893461,
+        "predicted_probability_right": 0.055201,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 818,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_009",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "stimulus_strength": 0.46,
+        "evidence_strength": 0.46,
+        "uncertainty": 0.54,
+        "agent_choice": "right",
+        "agent_confidence_rating": 0.803202,
+        "correct_choice": "right",
+        "human_choice": "right",
+        "human_confidence": 0.71,
+        "predicted_choice": "right",
+        "predicted_confidence": 0.803202,
+        "predicted_probability_right": 0.862949,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 936,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_010",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "stimulus_strength": -0.41,
+        "evidence_strength": 0.41,
+        "uncertainty": 0.59,
+        "agent_choice": "left",
+        "agent_confidence_rating": 0.784679,
+        "correct_choice": "left",
+        "human_choice": "left",
+        "human_confidence": 0.69,
+        "predicted_choice": "left",
+        "predicted_confidence": 0.784679,
+        "predicted_probability_right": 0.162465,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 952,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_011",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "stimulus_strength": 0.62,
+        "evidence_strength": 0.62,
+        "uncertainty": 0.38,
+        "agent_choice": "right",
+        "agent_confidence_rating": 0.863759,
+        "correct_choice": "right",
+        "human_choice": "right",
+        "human_confidence": 0.79,
+        "predicted_choice": "right",
+        "predicted_confidence": 0.863759,
+        "predicted_probability_right": 0.922728,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 845,
+        "source_dataset": "",
+        "source_file": ""
+      },
+      {
+        "trial_id": "cd_012",
+        "subject_id": "s03",
+        "session_id": "s03",
+        "split": "heldout",
+        "stimulus_strength": -0.57,
+        "evidence_strength": 0.57,
+        "uncertainty": 0.43,
+        "agent_choice": "left",
+        "agent_confidence_rating": 0.84689,
+        "correct_choice": "left",
+        "human_choice": "left",
+        "human_confidence": 0.75,
+        "predicted_choice": "left",
+        "predicted_confidence": 0.84689,
+        "predicted_probability_right": 0.092793,
+        "correct": true,
+        "human_choice_match": true,
+        "rt_ms": 868,
+        "source_dataset": "",
+        "source_file": ""
+      }
+    ],
+    "subject_summary": {
+      "subjects": {
+        "s01": {
+          "accuracy": 1.0,
+          "calibration_error": 0.154537,
+          "brier_score": 0.034425,
+          "heldout_likelihood": -0.140391,
+          "confidence_bias": 0.072963,
+          "auroc2": 0.5,
+          "meta_d_prime_ratio": 0.0,
+          "confidence_alignment": 1.0,
+          "subject_count": 1.0
+        },
+        "s02": {
+          "accuracy": 1.0,
+          "calibration_error": 0.250073,
+          "brier_score": 0.086317,
+          "heldout_likelihood": -0.248867,
+          "confidence_bias": 0.049927,
+          "auroc2": 0.5,
+          "meta_d_prime_ratio": 0.0,
+          "confidence_alignment": 1.0,
+          "subject_count": 1.0
+        },
+        "s03": {
+          "accuracy": 1.0,
+          "calibration_error": 0.175367,
+          "brier_score": 0.031774,
+          "heldout_likelihood": -0.125624,
+          "confidence_bias": 0.089633,
+          "auroc2": 0.5,
+          "meta_d_prime_ratio": 0.0,
+          "confidence_alignment": 1.0,
+          "subject_count": 1.0
+        }
+      },
+      "subject_count": 3,
+      "heldout_likelihood_floor": -0.248867,
+      "heldout_likelihood_mean": -0.171627,
+      "calibration_ceiling": 0.250073
+    },
+    "schema": {
+      "benchmark_id": "confidence_database",
+      "status": "repo_smoke_fixture",
+      "source_type": "repo_curated_sample",
+      "source_label": "local_repo_bundle",
+      "grouping_fields": [
+        "session_id",
+        "subject_id"
+      ],
+      "default_split_unit": "session_id",
+      "external_bundle_preferred": true,
+      "smoke_test_only": true,
+      "benchmark_state": "blocked_missing_external_bundle",
+      "available_states": [
+        "scaffold_complete",
+        "smoke_only",
+        "blocked_missing_external_bundle"
+      ],
+      "blockers": [
+        "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external."
+      ],
+      "trial_fields": [
+        "trial_id",
+        "subject_id",
+        "session_id",
+        "stimulus_strength",
+        "correct_choice",
+        "human_choice",
+        "human_confidence",
+        "rt_ms",
+        "split",
+        "source_dataset",
+        "source_file"
+      ],
+      "trial_export_schema": {
+        "schema_id": "m42.confidence.human_aligned_export.v1",
+        "required": [
+          "trial_id",
+          "subject_id",
+          "session_id",
+          "split",
+          "stimulus_strength",
+          "evidence_strength",
+          "agent_choice",
+          "agent_confidence_rating",
+          "correct_choice",
+          "human_choice",
+          "human_confidence"
+        ],
+        "field_types": {
+          "trial_id": "str",
+          "subject_id": "str",
+          "session_id": "str",
+          "split": "str",
+          "stimulus_strength": "float",
+          "evidence_strength": "float",
+          "agent_choice": "str",
+          "agent_confidence_rating": "float",
+          "correct_choice": "str",
+          "human_choice": "str",
+          "human_confidence": "float",
+          "source_dataset": "str",
+          "source_file": "str"
+        }
+      },
+      "observation_fields": [
+        "stimulus_strength",
+        "evidence_strength",
+        "uncertainty",
+        "resource_pressure"
+      ],
+      "action_fields": [
+        "left",
+        "right"
+      ]
+    },
+    "resources": [],
+    "bundle": {
+      "benchmark_id": "confidence_database",
+      "version": "1.0.0",
+      "manifest_path": "E:\\workspace\\segments\\data\\benchmarks\\confidence_database\\manifest.json",
+      "data_path": "E:\\workspace\\segments\\data\\benchmarks\\confidence_database\\confidence_database_sample.jsonl",
+      "source_type": "repo_curated_sample",
+      "source_label": "local_repo_bundle",
+      "benchmark_slice": "repo_curated_sample",
+      "record_count": 12,
+      "status": "repo_smoke_fixture",
+      "grouping_fields": [
+        "session_id",
+        "subject_id"
+      ],
+      "default_split_unit": "session_id",
+      "external_bundle_preferred": true,
+      "smoke_test_only": true,
+      "is_synthetic": false,
+      "manifest": {
+        "benchmark_id": "confidence_database",
+        "version": "1.0.0",
+        "status": "repo_smoke_fixture",
+        "benchmark_slice": "repo_curated_sample",
+        "source_type": "repo_curated_sample",
+        "source_label": "local_repo_bundle",
+        "grouping_fields": [
+          "session_id",
+          "subject_id"
+        ],
+        "default_split_unit": "session_id",
+        "external_bundle_preferred": true,
+        "acceptance_requires_external_bundle": true,
+        "smoke_test_only": true,
+        "is_synthetic": false,
+        "data_file": "confidence_database_sample.jsonl",
+        "description": "Curated confidence-judgment benchmark slice aligned to Confidence Database-style trial fields for deterministic repository evaluation.",
+        "record_count": 12,
+        "fields": [
+          "trial_id",
+          "subject_id",
+          "stimulus_strength",
+          "correct_choice",
+          "human_choice",
+          "human_confidence",
+          "rt_ms"
+        ],
+        "splits": {
+          "train": 6,
+          "validation": 3,
+          "heldout": 3
+        },
+        "notes": [
+          "This repository slice is intentionally small and deterministic.",
+          "It is used to validate adapter, logging, and audit infrastructure rather than make publication-grade claims.",
+          "Default evaluation should use an external bundle; this repo copy is smoke-test-only.",
+          "Acceptance-grade confidence evaluation requires importing a real external bundle into the active benchmark registry."
+        ]
+      },
+      "benchmark_state": "blocked_missing_external_bundle",
+      "available_states": [
+        "scaffold_complete",
+        "smoke_only",
+        "blocked_missing_external_bundle"
+      ],
+      "blockers": [
+        "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external."
+      ],
+      "status_notes": [
+        "Manifest marks the active bundle as smoke-test-only.",
+        "Import an external bundle into 'E:\\workspace\\segments\\data\\benchmarks\\confidence_database' or point SEGMENTUM_BENCHMARK_ROOT at a registry containing one."
+      ]
+    },
+    "benchmark_status": {
+      "benchmark_id": "confidence_database",
+      "benchmark_state": "blocked_missing_external_bundle",
+      "available_states": [
+        "scaffold_complete",
+        "smoke_only",
+        "blocked_missing_external_bundle"
+      ],
+      "blockers": [
+        "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external."
+      ],
+      "status_notes": [
+        "Manifest marks the active bundle as smoke-test-only.",
+        "Import an external bundle into 'E:\\workspace\\segments\\data\\benchmarks\\confidence_database' or point SEGMENTUM_BENCHMARK_ROOT at a registry containing one."
+      ],
+      "acceptance_ready": false,
+      "scaffold_complete": true,
+      "smoke_only": true,
+      "external_bundle_required": true
+    },
+    "bundle_mode": "repo_smoke_test",
+    "claim_envelope": "smoke_only",
+    "split_unit": "session_id",
+    "leakage_check": {
+      "split_unit": "session_id",
+      "subject": {
+        "key_field": "subject_id",
+        "ok": true,
+        "leaking_keys": []
+      },
+      "session": {
+        "key_field": "session_id",
+        "ok": true,
+        "leaking_keys": []
+      },
+      "precomputed_split_available": false,
+      "selected_split": null
+    },
+    "trial_export_validation": {
+      "expected_length": 12,
+      "observed_length": 12,
+      "length_matches": true,
+      "missing_fields": {
+        "trial_id": 0,
+        "subject_id": 0,
+        "session_id": 0,
+        "split": 0,
+        "stimulus_strength": 0,
+        "evidence_strength": 0,
+        "agent_choice": 0,
+        "agent_confidence_rating": 0,
+        "correct_choice": 0,
+        "human_choice": 0,
+        "human_confidence": 0
+      },
+      "wrong_types": {
+        "trial_id": 0,
+        "subject_id": 0,
+        "session_id": 0,
+        "split": 0,
+        "stimulus_strength": 0,
+        "evidence_strength": 0,
+        "agent_choice": 0,
+        "agent_confidence_rating": 0,
+        "correct_choice": 0,
+        "human_choice": 0,
+        "human_confidence": 0,
+        "source_dataset": 0,
+        "source_file": 0
+      },
+      "ok": true
+    },
+    "skipped_malformed": 0,
+    "model_label": "parameterized_cognitive_agent",
+    "fit": {
+      "selected_candidate": "cv_candidate_68",
+      "objective": 0.154823,
+      "cv_metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.184647,
+        "brier_score": 0.044539,
+        "heldout_likelihood": -0.171627,
+        "confidence_bias": 0.07952,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 1.0
+      },
+      "seed_stability": {
+        "heldout_likelihood_range": 0.0,
+        "calibration_error_range": 0.007891
+      },
+      "parameter_interval": {
+        "uncertainty_sensitivity": {
+          "min": 0.56,
+          "max": 0.56
+        },
+        "error_aversion": {
+          "min": 0.56,
+          "max": 0.68
+        },
+        "exploration_bias": {
+          "min": 0.46,
+          "max": 0.56
+        },
+        "attention_selectivity": {
+          "min": 0.58,
+          "max": 0.66
+        },
+        "confidence_gain": {
+          "min": 0.82,
+          "max": 0.82
+        },
+        "update_rigidity": {
+          "min": 0.56,
+          "max": 0.68
+        },
+        "resource_pressure_sensitivity": {
+          "min": 0.6,
+          "max": 0.74
+        }
+      }
+    }
+  },
+  "baselines": {
+    "statistical": {
+      "model_label": "simple_statistical_logistic",
+      "trial_count": 12,
+      "split": "all",
+      "coefficients": {
+        "choice_intercept": 0.094424,
+        "choice_slope": 7.150674,
+        "confidence_intercept": 0.498545,
+        "confidence_slope": 0.458573
+      },
+      "predictions": [
+        {
+          "trial_id": "cd_001",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.92043216,
+          "predicted_probability_right": 0.9987370535362216,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.93
+        },
+        {
+          "trial_id": "cd_002",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.65445982,
+          "predicted_probability_right": 0.9259207485092474,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.66
+        },
+        {
+          "trial_id": "cd_003",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.63153117,
+          "predicted_probability_right": 0.12139652210486718,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.61
+        },
+        {
+          "trial_id": "cd_004",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.87916059,
+          "predicted_probability_right": 0.0028985687516328664,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.89
+        },
+        {
+          "trial_id": "cd_005",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.5489880300000001,
+          "predicted_probability_right": 0.7070290175170192,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.56
+        },
+        {
+          "trial_id": "cd_006",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.58108814,
+          "predicted_probability_right": 0.23277686936706612,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.58
+        },
+        {
+          "trial_id": "cd_007",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.85164621,
+          "predicted_probability_right": 0.9963173857748668,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.84
+        },
+        {
+          "trial_id": "cd_008",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.82413183,
+          "predicted_probability_right": 0.006809833109315933,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.82
+        },
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.70948858,
+          "predicted_probability_right": 0.9671922982799308,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.68655993,
+          "predicted_probability_right": 0.05533878508568965,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7828602600000001,
+          "predicted_probability_right": 0.9893115108967093,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.75993161,
+          "predicted_probability_right": 0.018316616553594095,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.264143,
+        "brier_score": 0.082947,
+        "heldout_likelihood": -0.079355,
+        "confidence_bias": 2.3e-05,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 3.0
+      }
+    },
+    "signal_detection": {
+      "model_label": "signal_detection_fixed_confidence",
+      "trial_count": 12,
+      "split": "all",
+      "predictions": [
+        {
+          "trial_id": "cd_001",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7776000000000001,
+          "predicted_probability_right": 0.9648381948147848,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.93
+        },
+        {
+          "trial_id": "cd_002",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6152000000000001,
+          "predicted_probability_right": 0.7727667089732031,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.66
+        },
+        {
+          "trial_id": "cd_003",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6012000000000001,
+          "predicted_probability_right": 0.26037892892097797,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.61
+        },
+        {
+          "trial_id": "cd_004",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.7524000000000001,
+          "predicted_probability_right": 0.047970946788029815,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.89
+        },
+        {
+          "trial_id": "cd_005",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.5508000000000001,
+          "predicted_probability_right": 0.5977262388897371,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.56
+        },
+        {
+          "trial_id": "cd_006",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.5704,
+          "predicted_probability_right": 0.34344037417764955,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.58
+        },
+        {
+          "trial_id": "cd_007",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7356,
+          "predicted_probability_right": 0.9411438685026128,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.84
+        },
+        {
+          "trial_id": "cd_008",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.7188,
+          "predicted_probability_right": 0.07202443267268428,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.82
+        },
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6488,
+          "predicted_probability_right": 0.8397003196067644,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6348,
+          "predicted_probability_right": 0.18603235603832202,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6936,
+          "predicted_probability_right": 0.9030865426616987,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6796,
+          "predicted_probability_right": 0.11385044834696255,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.3351,
+        "brier_score": 0.117204,
+        "heldout_likelihood": -0.193206,
+        "confidence_bias": -0.070933,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 3.0
+      }
+    },
+    "no_persona": {
+      "model_label": "no_persona_no_resource",
+      "trial_count": 12,
+      "split": "all",
+      "predictions": [
+        {
+          "trial_id": "cd_001",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6656,
+          "predicted_probability_right": 0.9009656167252947,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.93
+        },
+        {
+          "trial_id": "cd_002",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.5612,
+          "predicted_probability_right": 0.6933865920564958,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.66
+        },
+        {
+          "trial_id": "cd_003",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.5522,
+          "predicted_probability_right": 0.3326996751729084,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.61
+        },
+        {
+          "trial_id": "cd_004",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6494,
+          "predicted_probability_right": 0.12004543281715084,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.89
+        },
+        {
+          "trial_id": "cd_005",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.5198,
+          "predicted_probability_right": 0.5656193249329816,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.56
+        },
+        {
+          "trial_id": "cd_006",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.5324,
+          "predicted_probability_right": 0.3936488512999091,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.58
+        },
+        {
+          "trial_id": "cd_007",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6386000000000001,
+          "predicted_probability_right": 0.8638921090281604,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.84
+        },
+        {
+          "trial_id": "cd_008",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6278,
+          "predicted_probability_right": 0.15394356385485436,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.82
+        },
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.5828,
+          "predicted_probability_right": 0.7510088346069963,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.5738,
+          "predicted_probability_right": 0.2720988176402693,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6116,
+          "predicted_probability_right": 0.8157778937429687,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6026,
+          "predicted_probability_right": 0.20294316871114162,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.40685,
+        "brier_score": 0.167557,
+        "heldout_likelihood": -0.285069,
+        "confidence_bias": -0.142683,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 3.0
+      }
+    },
+    "task_optimal": {
+      "model_label": "task_specific_optimal_fit",
+      "trial_count": 12,
+      "split": "all",
+      "predictions": [
+        {
+          "trial_id": "cd_001",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.9272,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.93
+        },
+        {
+          "trial_id": "cd_002",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7084,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.66
+        },
+        {
+          "trial_id": "cd_003",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6874,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.61
+        },
+        {
+          "trial_id": "cd_004",
+          "subject_id": "s01",
+          "session_id": "s01",
+          "split": "train",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.8934000000000001,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.89
+        },
+        {
+          "trial_id": "cd_005",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6222000000000001,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.56
+        },
+        {
+          "trial_id": "cd_006",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6476000000000001,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.58
+        },
+        {
+          "trial_id": "cd_007",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.8690000000000001,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.84
+        },
+        {
+          "trial_id": "cd_008",
+          "subject_id": "s02",
+          "session_id": "s02",
+          "split": "validation",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.8470000000000001,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.82
+        },
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7532,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.7346,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.8140000000000001,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.7938000000000001,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.225183,
+        "brier_score": 0.059614,
+        "heldout_likelihood": -0.127833,
+        "confidence_bias": 0.038983,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 3.0
+      }
+    }
+  },
+  "heldout": {
+    "agent": {
+      "benchmark_id": "confidence_database",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.56,
+        "error_aversion": 0.68,
+        "exploration_bias": 0.56,
+        "attention_selectivity": 0.66,
+        "confidence_gain": 0.82,
+        "update_rigidity": 0.56,
+        "resource_pressure_sensitivity": 0.74,
+        "virtual_prediction_error_gain": 0.68
+      },
+      "seed": 43,
+      "trial_count": 4,
+      "split": "heldout",
+      "protocol_validation": {
+        "protocol_mode": "dataset_aligned",
+        "trial_count": 4,
+        "subject_count": 1,
+        "ok": true
+      },
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.175055,
+        "brier_score": 0.031607,
+        "heldout_likelihood": -0.125624,
+        "confidence_bias": 0.089945,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 1.0
+      },
+      "predictions": [
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.805207,
+          "predicted_probability_right": 0.862949,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.785524,
+          "predicted_probability_right": 0.162465,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.863334,
+          "predicted_probability_right": 0.922728,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.845713,
+          "predicted_probability_right": 0.092793,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "trial_trace": [
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "stimulus_strength": 0.46,
+          "evidence_strength": 0.46,
+          "uncertainty": 0.54,
+          "agent_choice": "right",
+          "agent_confidence_rating": 0.805207,
+          "correct_choice": "right",
+          "human_choice": "right",
+          "human_confidence": 0.71,
+          "predicted_choice": "right",
+          "predicted_confidence": 0.805207,
+          "predicted_probability_right": 0.862949,
+          "correct": true,
+          "human_choice_match": true,
+          "rt_ms": 936,
+          "source_dataset": "",
+          "source_file": ""
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "stimulus_strength": -0.41,
+          "evidence_strength": 0.41,
+          "uncertainty": 0.59,
+          "agent_choice": "left",
+          "agent_confidence_rating": 0.785524,
+          "correct_choice": "left",
+          "human_choice": "left",
+          "human_confidence": 0.69,
+          "predicted_choice": "left",
+          "predicted_confidence": 0.785524,
+          "predicted_probability_right": 0.162465,
+          "correct": true,
+          "human_choice_match": true,
+          "rt_ms": 952,
+          "source_dataset": "",
+          "source_file": ""
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "stimulus_strength": 0.62,
+          "evidence_strength": 0.62,
+          "uncertainty": 0.38,
+          "agent_choice": "right",
+          "agent_confidence_rating": 0.863334,
+          "correct_choice": "right",
+          "human_choice": "right",
+          "human_confidence": 0.79,
+          "predicted_choice": "right",
+          "predicted_confidence": 0.863334,
+          "predicted_probability_right": 0.922728,
+          "correct": true,
+          "human_choice_match": true,
+          "rt_ms": 845,
+          "source_dataset": "",
+          "source_file": ""
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "stimulus_strength": -0.57,
+          "evidence_strength": 0.57,
+          "uncertainty": 0.43,
+          "agent_choice": "left",
+          "agent_confidence_rating": 0.845713,
+          "correct_choice": "left",
+          "human_choice": "left",
+          "human_confidence": 0.75,
+          "predicted_choice": "left",
+          "predicted_confidence": 0.845713,
+          "predicted_probability_right": 0.092793,
+          "correct": true,
+          "human_choice_match": true,
+          "rt_ms": 868,
+          "source_dataset": "",
+          "source_file": ""
+        }
+      ],
+      "subject_summary": {
+        "subjects": {
+          "s03": {
+            "accuracy": 1.0,
+            "calibration_error": 0.175055,
+            "brier_score": 0.031607,
+            "heldout_likelihood": -0.125624,
+            "confidence_bias": 0.089945,
+            "auroc2": 0.5,
+            "meta_d_prime_ratio": 0.0,
+            "confidence_alignment": 1.0,
+            "subject_count": 1.0
+          }
+        },
+        "subject_count": 1,
+        "heldout_likelihood_floor": -0.125624,
+        "heldout_likelihood_mean": -0.125624,
+        "calibration_ceiling": 0.175055
+      },
+      "schema": {
+        "benchmark_id": "confidence_database",
+        "status": "repo_smoke_fixture",
+        "source_type": "repo_curated_sample",
+        "source_label": "local_repo_bundle",
+        "grouping_fields": [
+          "session_id",
+          "subject_id"
+        ],
+        "default_split_unit": "session_id",
+        "external_bundle_preferred": true,
+        "smoke_test_only": true,
+        "benchmark_state": "blocked_missing_external_bundle",
+        "available_states": [
+          "scaffold_complete",
+          "smoke_only",
+          "blocked_missing_external_bundle"
+        ],
+        "blockers": [
+          "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external."
+        ],
+        "trial_fields": [
+          "trial_id",
+          "subject_id",
+          "session_id",
+          "stimulus_strength",
+          "correct_choice",
+          "human_choice",
+          "human_confidence",
+          "rt_ms",
+          "split",
+          "source_dataset",
+          "source_file"
+        ],
+        "trial_export_schema": {
+          "schema_id": "m42.confidence.human_aligned_export.v1",
+          "required": [
+            "trial_id",
+            "subject_id",
+            "session_id",
+            "split",
+            "stimulus_strength",
+            "evidence_strength",
+            "agent_choice",
+            "agent_confidence_rating",
+            "correct_choice",
+            "human_choice",
+            "human_confidence"
+          ],
+          "field_types": {
+            "trial_id": "str",
+            "subject_id": "str",
+            "session_id": "str",
+            "split": "str",
+            "stimulus_strength": "float",
+            "evidence_strength": "float",
+            "agent_choice": "str",
+            "agent_confidence_rating": "float",
+            "correct_choice": "str",
+            "human_choice": "str",
+            "human_confidence": "float",
+            "source_dataset": "str",
+            "source_file": "str"
+          }
+        },
+        "observation_fields": [
+          "stimulus_strength",
+          "evidence_strength",
+          "uncertainty",
+          "resource_pressure"
+        ],
+        "action_fields": [
+          "left",
+          "right"
+        ]
+      },
+      "resources": [],
+      "bundle": {
+        "benchmark_id": "confidence_database",
+        "version": "1.0.0",
+        "manifest_path": "E:\\workspace\\segments\\data\\benchmarks\\confidence_database\\manifest.json",
+        "data_path": "E:\\workspace\\segments\\data\\benchmarks\\confidence_database\\confidence_database_sample.jsonl",
+        "source_type": "repo_curated_sample",
+        "source_label": "local_repo_bundle",
+        "benchmark_slice": "repo_curated_sample",
+        "record_count": 12,
+        "status": "repo_smoke_fixture",
+        "grouping_fields": [
+          "session_id",
+          "subject_id"
+        ],
+        "default_split_unit": "session_id",
+        "external_bundle_preferred": true,
+        "smoke_test_only": true,
+        "is_synthetic": false,
+        "manifest": {
+          "benchmark_id": "confidence_database",
+          "version": "1.0.0",
+          "status": "repo_smoke_fixture",
+          "benchmark_slice": "repo_curated_sample",
+          "source_type": "repo_curated_sample",
+          "source_label": "local_repo_bundle",
+          "grouping_fields": [
+            "session_id",
+            "subject_id"
+          ],
+          "default_split_unit": "session_id",
+          "external_bundle_preferred": true,
+          "acceptance_requires_external_bundle": true,
+          "smoke_test_only": true,
+          "is_synthetic": false,
+          "data_file": "confidence_database_sample.jsonl",
+          "description": "Curated confidence-judgment benchmark slice aligned to Confidence Database-style trial fields for deterministic repository evaluation.",
+          "record_count": 12,
+          "fields": [
+            "trial_id",
+            "subject_id",
+            "stimulus_strength",
+            "correct_choice",
+            "human_choice",
+            "human_confidence",
+            "rt_ms"
+          ],
+          "splits": {
+            "train": 6,
+            "validation": 3,
+            "heldout": 3
+          },
+          "notes": [
+            "This repository slice is intentionally small and deterministic.",
+            "It is used to validate adapter, logging, and audit infrastructure rather than make publication-grade claims.",
+            "Default evaluation should use an external bundle; this repo copy is smoke-test-only.",
+            "Acceptance-grade confidence evaluation requires importing a real external bundle into the active benchmark registry."
+          ]
+        },
+        "benchmark_state": "blocked_missing_external_bundle",
+        "available_states": [
+          "scaffold_complete",
+          "smoke_only",
+          "blocked_missing_external_bundle"
+        ],
+        "blockers": [
+          "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external."
+        ],
+        "status_notes": [
+          "Manifest marks the active bundle as smoke-test-only.",
+          "Import an external bundle into 'E:\\workspace\\segments\\data\\benchmarks\\confidence_database' or point SEGMENTUM_BENCHMARK_ROOT at a registry containing one."
+        ]
+      },
+      "benchmark_status": {
+        "benchmark_id": "confidence_database",
+        "benchmark_state": "blocked_missing_external_bundle",
+        "available_states": [
+          "scaffold_complete",
+          "smoke_only",
+          "blocked_missing_external_bundle"
+        ],
+        "blockers": [
+          "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external."
+        ],
+        "status_notes": [
+          "Manifest marks the active bundle as smoke-test-only.",
+          "Import an external bundle into 'E:\\workspace\\segments\\data\\benchmarks\\confidence_database' or point SEGMENTUM_BENCHMARK_ROOT at a registry containing one."
+        ],
+        "acceptance_ready": false,
+        "scaffold_complete": true,
+        "smoke_only": true,
+        "external_bundle_required": true
+      },
+      "bundle_mode": "repo_smoke_test",
+      "claim_envelope": "smoke_only",
+      "split_unit": "session_id",
+      "leakage_check": {
+        "split_unit": "session_id",
+        "subject": {
+          "key_field": "subject_id",
+          "ok": true,
+          "leaking_keys": []
+        },
+        "session": {
+          "key_field": "session_id",
+          "ok": true,
+          "leaking_keys": []
+        },
+        "precomputed_split_available": false,
+        "selected_split": "heldout"
+      },
+      "trial_export_validation": {
+        "expected_length": 4,
+        "observed_length": 4,
+        "length_matches": true,
+        "missing_fields": {
+          "trial_id": 0,
+          "subject_id": 0,
+          "session_id": 0,
+          "split": 0,
+          "stimulus_strength": 0,
+          "evidence_strength": 0,
+          "agent_choice": 0,
+          "agent_confidence_rating": 0,
+          "correct_choice": 0,
+          "human_choice": 0,
+          "human_confidence": 0
+        },
+        "wrong_types": {
+          "trial_id": 0,
+          "subject_id": 0,
+          "session_id": 0,
+          "split": 0,
+          "stimulus_strength": 0,
+          "evidence_strength": 0,
+          "agent_choice": 0,
+          "agent_confidence_rating": 0,
+          "correct_choice": 0,
+          "human_choice": 0,
+          "human_confidence": 0,
+          "source_dataset": 0,
+          "source_file": 0
+        },
+        "ok": true
+      },
+      "skipped_malformed": 0,
+      "model_label": "parameterized_cognitive_agent",
+      "fit": {
+        "selected_candidate": "cv_candidate_68",
+        "objective": 0.154823,
+        "cv_metrics": {
+          "accuracy": 1.0,
+          "calibration_error": 0.184647,
+          "brier_score": 0.044539,
+          "heldout_likelihood": -0.171627,
+          "confidence_bias": 0.07952,
+          "auroc2": 0.5,
+          "meta_d_prime_ratio": 0.0,
+          "confidence_alignment": 1.0,
+          "subject_count": 1.0
+        },
+        "seed_stability": {
+          "heldout_likelihood_range": 0.0,
+          "calibration_error_range": 0.007891
+        },
+        "parameter_interval": {
+          "uncertainty_sensitivity": {
+            "min": 0.56,
+            "max": 0.56
+          },
+          "error_aversion": {
+            "min": 0.56,
+            "max": 0.68
+          },
+          "exploration_bias": {
+            "min": 0.46,
+            "max": 0.56
+          },
+          "attention_selectivity": {
+            "min": 0.58,
+            "max": 0.66
+          },
+          "confidence_gain": {
+            "min": 0.82,
+            "max": 0.82
+          },
+          "update_rigidity": {
+            "min": 0.56,
+            "max": 0.68
+          },
+          "resource_pressure_sensitivity": {
+            "min": 0.6,
+            "max": 0.74
+          }
+        }
+      }
+    },
+    "statistical": {
+      "model_label": "simple_statistical_logistic",
+      "trial_count": 4,
+      "split": "heldout",
+      "coefficients": {
+        "choice_intercept": 0.094424,
+        "choice_slope": 7.150674,
+        "confidence_intercept": 0.498545,
+        "confidence_slope": 0.458573
+      },
+      "predictions": [
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.70948858,
+          "predicted_probability_right": 0.9671922982799308,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.68655993,
+          "predicted_probability_right": 0.05533878508568965,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7828602600000001,
+          "predicted_probability_right": 0.9893115108967093,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.75993161,
+          "predicted_probability_right": 0.018316616553594095,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.26529,
+        "brier_score": 0.071856,
+        "heldout_likelihood": -0.02988,
+        "confidence_bias": -0.00029,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 1.0
+      }
+    },
+    "signal_detection": {
+      "model_label": "signal_detection_fixed_confidence",
+      "trial_count": 4,
+      "split": "heldout",
+      "predictions": [
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6488,
+          "predicted_probability_right": 0.8397003196067644,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6348,
+          "predicted_probability_right": 0.18603235603832202,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6936,
+          "predicted_probability_right": 0.9030865426616987,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6796,
+          "predicted_probability_right": 0.11385044834696255,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.3358,
+        "brier_score": 0.113312,
+        "heldout_likelihood": -0.150838,
+        "confidence_bias": -0.0708,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 1.0
+      }
+    },
+    "no_persona": {
+      "model_label": "no_persona_no_resource",
+      "trial_count": 4,
+      "split": "heldout",
+      "predictions": [
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.5828,
+          "predicted_probability_right": 0.7510088346069963,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.5738,
+          "predicted_probability_right": 0.2720988176402693,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.6116,
+          "predicted_probability_right": 0.8157778937429687,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.6026,
+          "predicted_probability_right": 0.20294316871114162,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.4073,
+        "brier_score": 0.166121,
+        "heldout_likelihood": -0.258593,
+        "confidence_bias": -0.1423,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 1.0
+      }
+    },
+    "task_optimal": {
+      "model_label": "task_specific_optimal_fit",
+      "trial_count": 4,
+      "split": "heldout",
+      "predictions": [
+        {
+          "trial_id": "cd_009",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.7532,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.71
+        },
+        {
+          "trial_id": "cd_010",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.7346,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.69
+        },
+        {
+          "trial_id": "cd_011",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "right",
+          "predicted_choice": "right",
+          "predicted_confidence": 0.8140000000000001,
+          "predicted_probability_right": 0.88,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.79
+        },
+        {
+          "trial_id": "cd_012",
+          "subject_id": "s03",
+          "session_id": "s03",
+          "split": "heldout",
+          "human_choice": "left",
+          "predicted_choice": "left",
+          "predicted_confidence": 0.7938000000000001,
+          "predicted_probability_right": 0.12,
+          "correct": true,
+          "human_choice_match": true,
+          "human_confidence": 0.75
+        }
+      ],
+      "metrics": {
+        "accuracy": 1.0,
+        "calibration_error": 0.2261,
+        "brier_score": 0.052115,
+        "heldout_likelihood": -0.127833,
+        "confidence_bias": 0.0389,
+        "auroc2": 0.5,
+        "meta_d_prime_ratio": 0.0,
+        "confidence_alignment": 1.0,
+        "subject_count": 1.0
+      }
+    }
+  },
+  "evidence": {
+    "agent_vs_statistical": {
+      "mean": -0.096064,
+      "lower": -0.115622,
+      "upper": -0.080767
+    },
+    "agent_vs_signal_detection": {
+      "mean": 0.025213,
+      "lower": 0.022992,
+      "upper": 0.027618
+    },
+    "agent_vs_no_persona": {
+      "mean": 0.133207,
+      "lower": 0.127128,
+      "upper": 0.139618
+    },
+    "statistical_cv_metrics": {
+      "accuracy": 1.0,
+      "calibration_error": 0.264885,
+      "brier_score": 0.081926,
+      "heldout_likelihood": -0.081465,
+      "confidence_bias": -0.000718,
+      "auroc2": 0.5,
+      "meta_d_prime_ratio": 0.0,
+      "confidence_alignment": 1.0,
+      "subject_count": 1.0
+    },
+    "agent_subject_floor": -0.125624,
+    "agent_calibration_ceiling": 0.175055,
+    "sample_size_sufficient_for_claim": false
+  },
+  "leakage_check": {
+    "subject": {
+      "key_field": "subject_id",
+      "ok": true,
+      "leaking_keys": []
+    },
+    "session": {
+      "key_field": "session_id",
+      "ok": true,
+      "leaking_keys": []
+    }
+  },
+  "recommendation": "NOT_READY",
+  "failure_analysis": {
+    "largest_calibration_gap_trial": "cd_012",
+    "agent_beats_statistical_baseline_on_heldout_likelihood": false,
+    "agent_subject_floor": -0.125624,
+    "seed_stability_range": 0.0
+  }
+}
