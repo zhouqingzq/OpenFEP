@@ -1,82 +1,76 @@
 {
   "milestone_id": "M4.2",
+  "generated_at": "2026-03-31T08:56:51+00:00",
+  "round_started_at": "2026-03-31T08:56:51+00:00",
   "status": "PASS",
-  "generated_at": "2026-03-30T10:19:25+00:00",
-  "seed_set": [
-    42
-  ],
+  "acceptance_state": "acceptance_pass",
+  "reference_modes": {
+    "repo_smoke_fixtures": {
+      "mode": "smoke-only",
+      "status": "available_but_not_used_for_acceptance"
+    }
+  },
   "artifacts": {
-    "preprocess": "E:\\workspace\\segments\\artifacts\\m42_confidence_preprocess.json",
     "protocol": "E:\\workspace\\segments\\artifacts\\m42_benchmark_protocol.json",
-    "trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m42_confidence_ablation.json",
-    "stress": "E:\\workspace\\segments\\artifacts\\m42_confidence_stress.json",
-    "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md",
-    "regressions": {
-      "m41": {
-        "schema": "E:\\workspace\\segments\\artifacts\\m41_cognitive_schema.json",
-        "trace": "E:\\workspace\\segments\\artifacts\\m41_cognitive_trace.json",
-        "ablation": "E:\\workspace\\segments\\artifacts\\m41_cognitive_ablation.json",
-        "stress": "E:\\workspace\\segments\\artifacts\\m41_cognitive_stress.json",
-        "mapping": "E:\\workspace\\segments\\artifacts\\m41_behavior_mapping.json",
-        "report": "E:\\workspace\\segments\\reports\\m41_acceptance_report.json",
-        "summary": "E:\\workspace\\segments\\reports\\m41_acceptance_summary.md"
+    "confidence_trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
+    "igt_trace": "E:\\workspace\\segments\\artifacts\\m42_igt_trace.json",
+    "bandit_trace": "E:\\workspace\\segments\\artifacts\\m42_two_armed_bandit_trace.json",
+    "reproducibility": "E:\\workspace\\segments\\artifacts\\m42_reproducibility_report.json",
+    "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md"
+  },
+  "tracks": {
+    "confidence_database": {
+      "mode": "acceptance-grade",
+      "status": "pass",
+      "trial_count": 1264,
+      "subject_count": 20,
+      "export_schema_ok": true,
+      "selected_source_dataset": "Siedlecka_unpub"
+    },
+    "iowa_gambling_task": {
+      "mode": "acceptance-grade",
+      "status": "pass",
+      "trial_count": 100,
+      "subject_count": 1,
+      "protocol_mode": "standard_100",
+      "standard_trial_count": 100,
+      "selected_subject_id": "s-10"
+    },
+    "two_armed_bandit": {
+      "mode": "acceptance-grade",
+      "status": "pass",
+      "trial_count": 50,
+      "extensibility_claim": "adapter_only"
+    },
+    "reproducibility": {
+      "mode": "acceptance-grade",
+      "status": "pass",
+      "same_seed_triple_replay_exact_match": true,
+      "different_seeds_differ": true,
+      "bootstrap_metric": {
+        "metric": "mean_reward",
+        "mean": 0.6725,
+        "variance": 0.003594,
+        "ci_lower": 0.63,
+        "ci_upper": 0.715
       },
-      "m36": {
-        "trace": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_trace.json",
-        "ablation": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_ablation.json",
-        "stress": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_stress.json",
-        "snapshots": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_snapshots.json",
-        "failure_audit": "E:\\workspace\\segments\\artifacts\\m36_open_world_growth_failure_audit.json",
-        "report": "E:\\workspace\\segments\\reports\\m36_acceptance_report.json",
-        "summary": "E:\\workspace\\segments\\reports\\m36_acceptance_summary.md"
+      "tolerance_gate": {
+        "metric": "mean_reward",
+        "passed": true,
+        "ci": {
+          "metric": "mean_reward",
+          "mean": 0.6725,
+          "variance": 0.003594,
+          "ci_lower": 0.63,
+          "ci_upper": 0.715
+        },
+        "tolerance": {
+          "lower_bound": 0.55,
+          "upper_bound": 0.8,
+          "min_variance": 0.0001
+        }
       }
     }
   },
-  "tests": {
-    "milestone": [
-      "tests/test_m42_benchmark_adapter.py",
-      "tests/test_m42_confidence_benchmark.py",
-      "tests/test_m42_acceptance.py"
-    ],
-    "regressions": [
-      "tests/test_m41_acceptance.py",
-      "tests/test_m36_acceptance.py"
-    ]
-  },
-  "gates": {
-    "schema": {
-      "passed": true
-    },
-    "determinism": {
-      "passed": true
-    },
-    "causality": {
-      "passed": true
-    },
-    "ablation": {
-      "passed": true
-    },
-    "stress": {
-      "passed": true
-    },
-    "regression": {
-      "passed": true
-    },
-    "artifact_freshness": {
-      "passed": true
-    },
-    "benchmark_closed_loop": {
-      "passed": true
-    }
-  },
-  "findings": [],
-  "residual_risks": [
-    "M4.2 ships a deterministic benchmark slice and adapter scaffold; larger external benchmark ingestion remains future work."
-  ],
-  "freshness": {
-    "generated_this_round": true,
-    "round_started_at": "2026-03-30T10:19:25+00:00"
-  },
-  "recommendation": "ACCEPT"
+  "findings": []
 }

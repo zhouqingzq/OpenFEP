@@ -1,0 +1,4445 @@
+{
+  "benchmark_id": "two_armed_bandit",
+  "parameters": {
+    "schema_version": "m4.cognitive_style.v2",
+    "uncertainty_sensitivity": 0.65,
+    "error_aversion": 0.7,
+    "exploration_bias": 0.55,
+    "attention_selectivity": 0.6,
+    "confidence_gain": 0.7,
+    "update_rigidity": 0.65,
+    "resource_pressure_sensitivity": 0.75,
+    "virtual_prediction_error_gain": 0.68
+  },
+  "seed": 46,
+  "trial_count": 50,
+  "split": "all",
+  "protocol_validation": {
+    "protocol_mode": "synthetic_bandit",
+    "trial_count": 50,
+    "ok": true
+  },
+  "metrics": {
+    "optimal_choice_rate": 1.0,
+    "mean_reward": 0.68,
+    "reward_variance": 0.2176,
+    "mean_confidence": 0.826447
+  },
+  "predictions": [
+    {
+      "trial_id": "bandit::001",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 1,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 1,
+      "agent_confidence_rating": 0.686577,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.264,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 1,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left"
+        ],
+        "confidence": 0.686577
+      }
+    },
+    {
+      "trial_id": "bandit::002",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 2,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 2,
+      "agent_confidence_rating": 0.747391,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.458304,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 2,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.747391
+      }
+    },
+    {
+      "trial_id": "bandit::003",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 3,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 2,
+      "agent_confidence_rating": 0.802519,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.337312,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 3,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.802519
+      }
+    },
+    {
+      "trial_id": "bandit::004",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 4,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 3,
+      "agent_confidence_rating": 0.769323,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.512262,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 4,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.769323
+      }
+    },
+    {
+      "trial_id": "bandit::005",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 5,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 4,
+      "agent_confidence_rating": 0.821839,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.641025,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 5,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.821839
+      }
+    },
+    {
+      "trial_id": "bandit::006",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 6,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 5,
+      "agent_confidence_rating": 0.837621,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.735794,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 6,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.837621
+      }
+    },
+    {
+      "trial_id": "bandit::007",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 7,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 6,
+      "agent_confidence_rating": 0.863505,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.805544,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 7,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.863505
+      }
+    },
+    {
+      "trial_id": "bandit::008",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 8,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 7,
+      "agent_confidence_rating": 0.875176,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.85688,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 8,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.875176
+      }
+    },
+    {
+      "trial_id": "bandit::009",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 9,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 8,
+      "agent_confidence_rating": 0.883287,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.894664,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 9,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.883287
+      }
+    },
+    {
+      "trial_id": "bandit::010",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 10,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 9,
+      "agent_confidence_rating": 0.886767,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.922473,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 10,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.886767
+      }
+    },
+    {
+      "trial_id": "bandit::011",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 11,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 9,
+      "agent_confidence_rating": 0.889249,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.67894,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 11,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.889249
+      }
+    },
+    {
+      "trial_id": "bandit::012",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 12,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 10,
+      "agent_confidence_rating": 0.851514,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.7637,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 12,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.851514
+      }
+    },
+    {
+      "trial_id": "bandit::013",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 13,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 11,
+      "agent_confidence_rating": 0.868541,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.826083,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 13,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.868541
+      }
+    },
+    {
+      "trial_id": "bandit::014",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 14,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 12,
+      "agent_confidence_rating": 0.876233,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.871997,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 14,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.876233
+      }
+    },
+    {
+      "trial_id": "bandit::015",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 15,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 13,
+      "agent_confidence_rating": 0.88059,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.90579,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 15,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.88059
+      }
+    },
+    {
+      "trial_id": "bandit::016",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 16,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 14,
+      "agent_confidence_rating": 0.887005,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.930661,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 16,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.887005
+      }
+    },
+    {
+      "trial_id": "bandit::017",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 17,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 15,
+      "agent_confidence_rating": 0.890527,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.948966,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 17,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.890527
+      }
+    },
+    {
+      "trial_id": "bandit::018",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 18,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 15,
+      "agent_confidence_rating": 0.890529,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.698439,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 18,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.890529
+      }
+    },
+    {
+      "trial_id": "bandit::019",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 19,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 16,
+      "agent_confidence_rating": 0.854996,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.778051,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 19,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.854996
+      }
+    },
+    {
+      "trial_id": "bandit::020",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 20,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 17,
+      "agent_confidence_rating": 0.870005,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.836646,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 20,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.870005
+      }
+    },
+    {
+      "trial_id": "bandit::021",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 21,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 18,
+      "agent_confidence_rating": 0.877748,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.879771,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 21,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.877748
+      }
+    },
+    {
+      "trial_id": "bandit::022",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 22,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 18,
+      "agent_confidence_rating": 0.883669,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.647511,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 22,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.883669
+      }
+    },
+    {
+      "trial_id": "bandit::023",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 23,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 19,
+      "agent_confidence_rating": 0.847609,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.740568,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 23,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.847609
+      }
+    },
+    {
+      "trial_id": "bandit::024",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 24,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 20,
+      "agent_confidence_rating": 0.861736,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.809058,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 24,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.861736
+      }
+    },
+    {
+      "trial_id": "bandit::025",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 25,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 21,
+      "agent_confidence_rating": 0.872734,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.859467,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 25,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.872734
+      }
+    },
+    {
+      "trial_id": "bandit::026",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 26,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 22,
+      "agent_confidence_rating": 0.865602,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.896568,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 26,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.865602
+      }
+    },
+    {
+      "trial_id": "bandit::027",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 27,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 22,
+      "agent_confidence_rating": 0.869069,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.659874,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 27,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.869069
+      }
+    },
+    {
+      "trial_id": "bandit::028",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 28,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 22,
+      "agent_confidence_rating": 0.82943,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.485667,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 28,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.82943
+      }
+    },
+    {
+      "trial_id": "bandit::029",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 29,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.794852,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.621451,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 29,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.794852
+      }
+    },
+    {
+      "trial_id": "bandit::030",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 30,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.82271,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.457388,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 30,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.82271
+      }
+    },
+    {
+      "trial_id": "bandit::031",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 31,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.788237,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.336638,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 31,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.788237
+      }
+    },
+    {
+      "trial_id": "bandit::032",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 32,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.733767,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.247766,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 32,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.733767
+      }
+    },
+    {
+      "trial_id": "bandit::033",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 33,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 24,
+      "agent_confidence_rating": 0.722228,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.446356,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 33,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.722228
+      }
+    },
+    {
+      "trial_id": "bandit::034",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 34,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 24,
+      "agent_confidence_rating": 0.782713,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.328518,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 34,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.782713
+      }
+    },
+    {
+      "trial_id": "bandit::035",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 35,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 25,
+      "agent_confidence_rating": 0.756823,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.505789,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 35,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.756823
+      }
+    },
+    {
+      "trial_id": "bandit::036",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 36,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 25,
+      "agent_confidence_rating": 0.799213,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.372261,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 36,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.799213
+      }
+    },
+    {
+      "trial_id": "bandit::037",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 37,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 25,
+      "agent_confidence_rating": 0.762219,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.273984,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 37,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.762219
+      }
+    },
+    {
+      "trial_id": "bandit::038",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 38,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 26,
+      "agent_confidence_rating": 0.699544,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.465652,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 38,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.699544
+      }
+    },
+    {
+      "trial_id": "bandit::039",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 39,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 26,
+      "agent_confidence_rating": 0.798761,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.34272,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 39,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.798761
+      }
+    },
+    {
+      "trial_id": "bandit::040",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 40,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 27,
+      "agent_confidence_rating": 0.734173,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.516242,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 40,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.734173
+      }
+    },
+    {
+      "trial_id": "bandit::041",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 41,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 28,
+      "agent_confidence_rating": 0.798793,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.643954,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 41,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.798793
+      }
+    },
+    {
+      "trial_id": "bandit::042",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 42,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 29,
+      "agent_confidence_rating": 0.82476,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.73795,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 42,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.82476
+      }
+    },
+    {
+      "trial_id": "bandit::043",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 43,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 30,
+      "agent_confidence_rating": 0.844869,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.807131,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 43,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.844869
+      }
+    },
+    {
+      "trial_id": "bandit::044",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 44,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 31,
+      "agent_confidence_rating": 0.857586,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.858048,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 44,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.857586
+      }
+    },
+    {
+      "trial_id": "bandit::045",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 45,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 32,
+      "agent_confidence_rating": 0.860181,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.895523,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 45,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.860181
+      }
+    },
+    {
+      "trial_id": "bandit::046",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 46,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 32,
+      "agent_confidence_rating": 0.871215,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.659105,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 46,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.871215
+      }
+    },
+    {
+      "trial_id": "bandit::047",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 47,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 33,
+      "agent_confidence_rating": 0.831558,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.749101,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 47,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.831558
+      }
+    },
+    {
+      "trial_id": "bandit::048",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 48,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 33,
+      "agent_confidence_rating": 0.843815,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.551338,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 48,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.843815
+      }
+    },
+    {
+      "trial_id": "bandit::049",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 49,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 33,
+      "agent_confidence_rating": 0.799397,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.405785,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 49,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.799397
+      }
+    },
+    {
+      "trial_id": "bandit::050",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 50,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 34,
+      "agent_confidence_rating": 0.754163,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.562658,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 50,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.754163
+      }
+    }
+  ],
+  "trial_trace": [
+    {
+      "trial_id": "bandit::001",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 1,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 1,
+      "agent_confidence_rating": 0.686577,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.264,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 1,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left"
+        ],
+        "confidence": 0.686577
+      }
+    },
+    {
+      "trial_id": "bandit::002",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 2,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 2,
+      "agent_confidence_rating": 0.747391,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.458304,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 2,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.747391
+      }
+    },
+    {
+      "trial_id": "bandit::003",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 3,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 2,
+      "agent_confidence_rating": 0.802519,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.337312,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 3,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.802519
+      }
+    },
+    {
+      "trial_id": "bandit::004",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 4,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 3,
+      "agent_confidence_rating": 0.769323,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.512262,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 4,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.769323
+      }
+    },
+    {
+      "trial_id": "bandit::005",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 5,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 4,
+      "agent_confidence_rating": 0.821839,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.641025,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 5,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.821839
+      }
+    },
+    {
+      "trial_id": "bandit::006",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 6,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 5,
+      "agent_confidence_rating": 0.837621,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.735794,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 6,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.837621
+      }
+    },
+    {
+      "trial_id": "bandit::007",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 7,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 6,
+      "agent_confidence_rating": 0.863505,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.805544,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 7,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.863505
+      }
+    },
+    {
+      "trial_id": "bandit::008",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 8,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 7,
+      "agent_confidence_rating": 0.875176,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.85688,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 8,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.875176
+      }
+    },
+    {
+      "trial_id": "bandit::009",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 9,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 8,
+      "agent_confidence_rating": 0.883287,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.894664,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 9,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.883287
+      }
+    },
+    {
+      "trial_id": "bandit::010",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 10,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 9,
+      "agent_confidence_rating": 0.886767,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.922473,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 10,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.886767
+      }
+    },
+    {
+      "trial_id": "bandit::011",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 11,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 9,
+      "agent_confidence_rating": 0.889249,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.67894,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 11,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.889249
+      }
+    },
+    {
+      "trial_id": "bandit::012",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 12,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 10,
+      "agent_confidence_rating": 0.851514,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.7637,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 12,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.851514
+      }
+    },
+    {
+      "trial_id": "bandit::013",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 13,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 11,
+      "agent_confidence_rating": 0.868541,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.826083,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 13,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.868541
+      }
+    },
+    {
+      "trial_id": "bandit::014",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 14,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 12,
+      "agent_confidence_rating": 0.876233,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.871997,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 14,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.876233
+      }
+    },
+    {
+      "trial_id": "bandit::015",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 15,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 13,
+      "agent_confidence_rating": 0.88059,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.90579,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 15,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.88059
+      }
+    },
+    {
+      "trial_id": "bandit::016",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 16,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 14,
+      "agent_confidence_rating": 0.887005,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.930661,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 16,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.887005
+      }
+    },
+    {
+      "trial_id": "bandit::017",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 17,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 15,
+      "agent_confidence_rating": 0.890527,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.948966,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 17,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.890527
+      }
+    },
+    {
+      "trial_id": "bandit::018",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 18,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 15,
+      "agent_confidence_rating": 0.890529,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.698439,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 18,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.890529
+      }
+    },
+    {
+      "trial_id": "bandit::019",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 19,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 16,
+      "agent_confidence_rating": 0.854996,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.778051,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 19,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.854996
+      }
+    },
+    {
+      "trial_id": "bandit::020",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 20,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 17,
+      "agent_confidence_rating": 0.870005,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.836646,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 20,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.870005
+      }
+    },
+    {
+      "trial_id": "bandit::021",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 21,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 18,
+      "agent_confidence_rating": 0.877748,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.879771,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 21,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.877748
+      }
+    },
+    {
+      "trial_id": "bandit::022",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 22,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 18,
+      "agent_confidence_rating": 0.883669,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.647511,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 22,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.883669
+      }
+    },
+    {
+      "trial_id": "bandit::023",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 23,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 19,
+      "agent_confidence_rating": 0.847609,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.740568,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 23,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.847609
+      }
+    },
+    {
+      "trial_id": "bandit::024",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 24,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 20,
+      "agent_confidence_rating": 0.861736,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.809058,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 24,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.861736
+      }
+    },
+    {
+      "trial_id": "bandit::025",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 25,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.72,
+      "optimal_choice": true,
+      "cumulative_reward": 21,
+      "agent_confidence_rating": 0.872734,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.859467,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 25,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.872734
+      }
+    },
+    {
+      "trial_id": "bandit::026",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 26,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 22,
+      "agent_confidence_rating": 0.865602,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.896568,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 26,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.865602
+      }
+    },
+    {
+      "trial_id": "bandit::027",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 27,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 22,
+      "agent_confidence_rating": 0.869069,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.659874,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 27,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.869069
+      }
+    },
+    {
+      "trial_id": "bandit::028",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 28,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 22,
+      "agent_confidence_rating": 0.82943,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.485667,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 28,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.82943
+      }
+    },
+    {
+      "trial_id": "bandit::029",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 29,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.794852,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.621451,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 29,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.794852
+      }
+    },
+    {
+      "trial_id": "bandit::030",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 30,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.82271,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.457388,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 30,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.82271
+      }
+    },
+    {
+      "trial_id": "bandit::031",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 31,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.788237,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.336638,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 31,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.788237
+      }
+    },
+    {
+      "trial_id": "bandit::032",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 32,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 23,
+      "agent_confidence_rating": 0.733767,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.247766,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 32,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.733767
+      }
+    },
+    {
+      "trial_id": "bandit::033",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 33,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 24,
+      "agent_confidence_rating": 0.722228,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.446356,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 33,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.722228
+      }
+    },
+    {
+      "trial_id": "bandit::034",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 34,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 24,
+      "agent_confidence_rating": 0.782713,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.328518,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 34,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.782713
+      }
+    },
+    {
+      "trial_id": "bandit::035",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 35,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 25,
+      "agent_confidence_rating": 0.756823,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.505789,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 35,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.756823
+      }
+    },
+    {
+      "trial_id": "bandit::036",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 36,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 25,
+      "agent_confidence_rating": 0.799213,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.372261,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 36,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.799213
+      }
+    },
+    {
+      "trial_id": "bandit::037",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 37,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 25,
+      "agent_confidence_rating": 0.762219,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.273984,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 37,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.762219
+      }
+    },
+    {
+      "trial_id": "bandit::038",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 38,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 26,
+      "agent_confidence_rating": 0.699544,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.465652,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 38,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.699544
+      }
+    },
+    {
+      "trial_id": "bandit::039",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 39,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 26,
+      "agent_confidence_rating": 0.798761,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.34272,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 39,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.798761
+      }
+    },
+    {
+      "trial_id": "bandit::040",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 40,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 27,
+      "agent_confidence_rating": 0.734173,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.516242,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 40,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.734173
+      }
+    },
+    {
+      "trial_id": "bandit::041",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 41,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 28,
+      "agent_confidence_rating": 0.798793,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.643954,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 41,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.798793
+      }
+    },
+    {
+      "trial_id": "bandit::042",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 42,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 29,
+      "agent_confidence_rating": 0.82476,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.73795,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 42,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.82476
+      }
+    },
+    {
+      "trial_id": "bandit::043",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 43,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 30,
+      "agent_confidence_rating": 0.844869,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.807131,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 43,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.844869
+      }
+    },
+    {
+      "trial_id": "bandit::044",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 44,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 31,
+      "agent_confidence_rating": 0.857586,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.858048,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 44,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.857586
+      }
+    },
+    {
+      "trial_id": "bandit::045",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 45,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 32,
+      "agent_confidence_rating": 0.860181,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.895523,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 45,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.860181
+      }
+    },
+    {
+      "trial_id": "bandit::046",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 46,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 32,
+      "agent_confidence_rating": 0.871215,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.659105,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 46,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.871215
+      }
+    },
+    {
+      "trial_id": "bandit::047",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 47,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 33,
+      "agent_confidence_rating": 0.831558,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.749101,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 47,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.831558
+      }
+    },
+    {
+      "trial_id": "bandit::048",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 48,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 33,
+      "agent_confidence_rating": 0.843815,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.551338,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 48,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.843815
+      }
+    },
+    {
+      "trial_id": "bandit::049",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 49,
+      "chosen_arm": "arm_left",
+      "reward": 0,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 33,
+      "agent_confidence_rating": 0.799397,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.405785,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 49,
+          "arm_right": 0
+        },
+        "last_reward": 0,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.799397
+      }
+    },
+    {
+      "trial_id": "bandit::050",
+      "subject_id": "bandit_agent",
+      "session_id": "bandit_acceptance_session",
+      "split": "acceptance",
+      "trial_index": 50,
+      "chosen_arm": "arm_left",
+      "reward": 1,
+      "reward_probability": 0.65,
+      "optimal_choice": true,
+      "cumulative_reward": 34,
+      "agent_confidence_rating": 0.754163,
+      "internal_state_snapshot": {
+        "q_values": {
+          "arm_left": 0.562658,
+          "arm_right": 0.0
+        },
+        "counts": {
+          "arm_left": 50,
+          "arm_right": 0
+        },
+        "last_reward": 1,
+        "choice_history": [
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left",
+          "arm_left"
+        ],
+        "confidence": 0.754163
+      }
+    }
+  ],
+  "subject_summary": {
+    "subjects": {
+      "bandit_agent": {
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.68,
+        "reward_variance": 0.2176,
+        "mean_confidence": 0.826447
+      }
+    },
+    "subject_count": 1
+  },
+  "schema": {
+    "benchmark_id": "two_armed_bandit",
+    "status": "acceptance_ready",
+    "source_type": "synthetic_protocol",
+    "source_label": "two_armed_bandit_acceptance_demo",
+    "trial_export_schema": {
+      "schema_id": "m42.two_armed_bandit.trial_trace.v1",
+      "required": [
+        "trial_id",
+        "subject_id",
+        "session_id",
+        "split",
+        "trial_index",
+        "chosen_arm",
+        "reward",
+        "cumulative_reward",
+        "internal_state_snapshot"
+      ],
+      "field_types": {
+        "trial_id": "str",
+        "subject_id": "str",
+        "session_id": "str",
+        "split": "str",
+        "trial_index": "int",
+        "chosen_arm": "str",
+        "reward": "int",
+        "cumulative_reward": "int",
+        "internal_state_snapshot": "dict"
+      }
+    },
+    "action_fields": [
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "resources": [],
+  "bundle": {
+    "benchmark_id": "two_armed_bandit",
+    "source_type": "synthetic_protocol",
+    "source_label": "two_armed_bandit_acceptance_demo"
+  },
+  "benchmark_status": {
+    "benchmark_id": "two_armed_bandit",
+    "benchmark_state": "acceptance_ready",
+    "acceptance_ready": true,
+    "available_states": [
+      "scaffold_complete",
+      "acceptance_ready"
+    ],
+    "blockers": [],
+    "status_notes": []
+  },
+  "bundle_mode": "synthetic_protocol",
+  "claim_envelope": "acceptance_grade",
+  "trial_export_validation": {
+    "expected_length": 50,
+    "observed_length": 50,
+    "length_matches": true,
+    "missing_fields": {
+      "trial_id": 0,
+      "subject_id": 0,
+      "session_id": 0,
+      "split": 0,
+      "trial_index": 0,
+      "chosen_arm": 0,
+      "reward": 0,
+      "cumulative_reward": 0,
+      "internal_state_snapshot": 0
+    },
+    "wrong_types": {
+      "trial_id": 0,
+      "subject_id": 0,
+      "session_id": 0,
+      "split": 0,
+      "trial_index": 0,
+      "chosen_arm": 0,
+      "reward": 0,
+      "cumulative_reward": 0,
+      "internal_state_snapshot": 0
+    },
+    "ok": true
+  }
+}

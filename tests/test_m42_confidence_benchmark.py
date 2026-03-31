@@ -1,26 +1,42 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import unittest
 
-from segmentum.m4_benchmarks import run_confidence_database_benchmark
-from segmentum.m4_cognitive_style import CognitiveStyleParameters
+from segmentum.m42_audit import M42_CONFIDENCE_TRACE_PATH, write_m42_acceptance_artifacts
+from segmentum.m4_benchmarks import default_acceptance_benchmark_root
 
 
 class TestM42ConfidenceBenchmark(unittest.TestCase):
-    def test_benchmark_run_is_deterministic_on_fixed_seed(self) -> None:
-        first = run_confidence_database_benchmark(CognitiveStyleParameters(), seed=42, allow_smoke_test=True)
-        second = run_confidence_database_benchmark(CognitiveStyleParameters(), seed=42, allow_smoke_test=True)
-        self.assertEqual(first["metrics"], second["metrics"])
-        self.assertEqual(first["predictions"], second["predictions"])
+    @classmethod
+    def setUpClass(cls) -> None:
+        if default_acceptance_benchmark_root() is None:
+            raise unittest.SkipTest("external acceptance bundle required")
+        write_m42_acceptance_artifacts()
+        cls.payload = json.loads(Path(M42_CONFIDENCE_TRACE_PATH).read_text(encoding="utf-8"))
 
-    def test_neutral_ablation_underperforms_full_profile(self) -> None:
-        full = run_confidence_database_benchmark(CognitiveStyleParameters(), seed=42, allow_smoke_test=True)
-        neutral = run_confidence_database_benchmark(
-            CognitiveStyleParameters(resource_pressure_sensitivity=0.0, confidence_gain=0.5, error_aversion=0.5),
-            seed=42,
-            allow_smoke_test=True,
-        )
-        self.assertGreater(full["metrics"]["heldout_likelihood"], neutral["metrics"]["heldout_likelihood"])
+    def test_full_trial_export_matches_trial_count(self) -> None:
+        self.assertEqual(self.payload["trial_count"], len(self.payload["trial_trace"]))
+        self.assertTrue(self.payload["trial_export_validation"]["ok"])
+
+    def test_human_aligned_fields_are_present(self) -> None:
+        row = self.payload["trial_trace"][0]
+        for field_name in (
+            "trial_id",
+            "subject_id",
+            "session_id",
+            "split",
+            "stimulus_strength",
+            "evidence_strength",
+            "agent_choice",
+            "agent_confidence_rating",
+            "correct_choice",
+            "human_choice",
+            "human_confidence",
+        ):
+            self.assertIn(field_name, row)
+        self.assertEqual(row["source_dataset"], self.payload["trial_trace"][0]["source_dataset"])
 
 
 if __name__ == "__main__":

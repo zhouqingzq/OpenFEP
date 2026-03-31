@@ -49,7 +49,7 @@ class TestIgtExternalBundle(unittest.TestCase):
             previous_root = os.environ.get("SEGMENTUM_BENCHMARK_ROOT")
             try:
                 os.environ["SEGMENTUM_BENCHMARK_ROOT"] = str(destination_root)
-                run = run_iowa_gambling_benchmark(CognitiveStyleParameters(), seed=44)
+                run = run_iowa_gambling_benchmark(CognitiveStyleParameters(), seed=44, protocol_mode="nonstandard")
             finally:
                 if previous_root is None:
                     os.environ.pop("SEGMENTUM_BENCHMARK_ROOT", None)
@@ -58,6 +58,7 @@ class TestIgtExternalBundle(unittest.TestCase):
             self.assertEqual(run["benchmark_status"]["benchmark_state"], "acceptance_ready")
             self.assertEqual(run["claim_envelope"], "benchmark_eval")
             self.assertEqual(run["trial_count"], 6)
+            self.assertEqual(run["protocol_validation"]["protocol_mode"], "nonstandard")
 
 
 if __name__ == "__main__":

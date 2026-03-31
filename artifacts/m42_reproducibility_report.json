@@ -1,0 +1,99 @@
+{
+  "same_seed_triple_replay": {
+    "task_id": "two_armed_bandit",
+    "seed": 91,
+    "exact_match": true
+  },
+  "different_seed_behavior": {
+    "task_id": "two_armed_bandit",
+    "seed_summaries": [
+      {
+        "seed": 1,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.7,
+        "reward_variance": 0.21
+      },
+      {
+        "seed": 2,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.66,
+        "reward_variance": 0.2244
+      },
+      {
+        "seed": 3,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.58,
+        "reward_variance": 0.2436
+      },
+      {
+        "seed": 4,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.76,
+        "reward_variance": 0.1824
+      },
+      {
+        "seed": 5,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.7,
+        "reward_variance": 0.21
+      },
+      {
+        "seed": 6,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.58,
+        "reward_variance": 0.2436
+      },
+      {
+        "seed": 7,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.68,
+        "reward_variance": 0.2176
+      },
+      {
+        "seed": 8,
+        "optimal_choice_rate": 1.0,
+        "mean_reward": 0.72,
+        "reward_variance": 0.2016
+      }
+    ],
+    "behavioral_summary": {
+      "optimal_choice_rate": {
+        "mean": 1.0,
+        "variance": 0.0
+      },
+      "mean_reward": {
+        "mean": 0.6725,
+        "variance": 0.003594
+      },
+      "reward_variance": {
+        "mean": 0.21665,
+        "variance": 0.000375
+      }
+    },
+    "unique_behavior_sequences": 8,
+    "different_seeds_differ": true
+  },
+  "bootstrap_ci": {
+    "metric": "mean_reward",
+    "mean": 0.6725,
+    "variance": 0.003594,
+    "ci_lower": 0.63,
+    "ci_upper": 0.715
+  },
+  "tolerance_gate": {
+    "metric": "mean_reward",
+    "passed": true,
+    "ci": {
+      "metric": "mean_reward",
+      "mean": 0.6725,
+      "variance": 0.003594,
+      "ci_lower": 0.63,
+      "ci_upper": 0.715
+    },
+    "tolerance": {
+      "lower_bound": 0.55,
+      "upper_bound": 0.8,
+      "min_variance": 0.0001
+    }
+  }
+}

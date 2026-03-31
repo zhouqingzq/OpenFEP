@@ -79,6 +79,7 @@ class TestM42ExternalBundleIntegration(unittest.TestCase):
                     include_subject_summary=False,
                     include_predictions=False,
                     max_trials=6,
+                    protocol_mode="nonstandard",
                 )
             finally:
                 if previous_root is None:
@@ -92,6 +93,7 @@ class TestM42ExternalBundleIntegration(unittest.TestCase):
             self.assertEqual(igt_run["benchmark_status"]["benchmark_state"], "acceptance_ready")
             self.assertEqual(igt_run["claim_envelope"], "benchmark_eval")
             self.assertEqual(igt_run["trial_count"], 6)
+            self.assertEqual(igt_run["protocol_validation"]["protocol_mode"], "nonstandard")
 
 
 if __name__ == "__main__":
