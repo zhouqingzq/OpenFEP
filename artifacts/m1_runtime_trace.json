@@ -1,0 +1,46 @@
+{
+  "seed": 23,
+  "summary": {
+    "cycles_completed": 4,
+    "survival_ticks": 4,
+    "sleep_count": 0,
+    "internal_update_count": 0,
+    "memory_retrieval_count": 3,
+    "telemetry_error_count": 0,
+    "persistence_error_count": 0,
+    "memory_hit_rate": 0.75,
+    "avg_free_energy_before": 0.6945038969665607,
+    "avg_free_energy_after": 0.7545266994823863,
+    "avg_free_energy_drop": 0.030156466734300558,
+    "min_energy": 0.81,
+    "max_stress": 0.10999999999999999,
+    "action_counts": {
+      "hide": 1,
+      "rest": 3
+    },
+    "action_distribution": {
+      "hide": 0.25,
+      "rest": 0.75
+    },
+    "action_switch_count": 1,
+    "unique_actions": 2,
+    "action_entropy": 0.8112781244591328,
+    "dominant_action": "rest",
+    "dominant_action_share": 0.75,
+    "max_action_streak": 3,
+    "last_choice": "rest",
+    "termination_reason": "cycles_exhausted"
+  },
+  "snapshot_excerpt": {
+    "cycle": 4,
+    "energy": 0.9000000000000001,
+    "stress": 0.01999999999999999,
+    "episode_count": 3,
+    "action_history_tail": [
+      "hide",
+      "rest",
+      "rest",
+      "rest"
+    ]
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "milestone_id": "M1",
+  "title": "Core Survival Agent Foundations",
+  "status": "PASS",
+  "generated_at": "2026-03-31T05:29:07+00:00",
+  "seed_set": [
+    7,
+    23,
+    29
+  ],
+  "artifacts": {
+    "runtime_trace": "E:\\workspace\\segments\\artifacts\\m1_runtime_trace.json",
+    "memory_gate": "E:\\workspace\\segments\\artifacts\\m1_memory_gate.json",
+    "sleep_trace": "E:\\workspace\\segments\\artifacts\\m1_sleep_consolidation.json",
+    "narrative_trace": "E:\\workspace\\segments\\artifacts\\m1_narrative_trace.json",
+    "summary": "E:\\workspace\\segments\\reports\\m1_acceptance_summary.md"
+  },
+  "tests": {
+    "acceptance": [
+      "tests/test_m1_acceptance.py"
+    ],
+    "direct": [
+      "tests/test_runtime.py",
+      "tests/test_memory.py",
+      "tests/test_self_model.py",
+      "tests/test_sleep_consolidation_loop.py",
+      "tests/test_narrative_compiler.py",
+      "tests/test_narrative_ingestion.py"
+    ]
+  },
+  "gates": {
+    "determinism": {
+      "passed": true,
+      "detail": "Fixed-seed runtime produces a stable 4-cycle execution summary."
+    },
+    "persistence": {
+      "passed": true,
+      "detail": "Runtime snapshot contains agent state and episodic memory after execution."
+    },
+    "self_model": {
+      "passed": true,
+      "detail": "Resource exhaustion and fatal faults are classified through the self model."
+    },
+    "memory": {
+      "passed": true,
+      "detail": "High-surprise episodes are stored while low-value low-error ticks are skipped."
+    },
+    "sleep": {
+      "passed": true,
+      "detail": "Sleep extracts reusable rules and reduces surprise on repeat exposure."
+    },
+    "narrative": {
+      "passed": true,
+      "detail": "Narrative episodes compile deterministically and ingest into episodic memory with provenance."
+    },
+    "regression": {
+      "passed": true,
+      "detail": "Core pre-M2 regression suites remain green in this round."
+    }
+  },
+  "findings": [
+    {
+      "severity": "S2",
+      "label": "reconstructed_spec",
+      "detail": "No authored M1 milestone spec/report was found in the repository. This acceptance bundle is reconstructed from README-described core architecture and the earliest core regression tests."
+    }
+  ],
+  "residual_risks": [
+    "The original authored M1 contract is absent, so this pass only applies to the reconstructed minimal M1 scope."
+  ],
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-03-31T05:29:07+00:00"
+  },
+  "recommendation": "ACCEPT_RECONSTRUCTED_SCOPE",
+  "canonical_files": [
+    "segmentum/agent.py",
+    "segmentum/runtime.py",
+    "segmentum/memory.py",
+    "segmentum/self_model.py",
+    "segmentum/sleep_consolidator.py",
+    "segmentum/narrative_compiler.py",
+    "segmentum/narrative_ingestion.py",
+    "segmentum/m1_audit.py",
+    "tests/test_m1_acceptance.py",
+    "reports/m1_milestone_spec.md"
+  ],
+  "blockers": []
+}

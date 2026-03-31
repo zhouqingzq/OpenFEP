@@ -1,0 +1,2590 @@
+{
+  "compiled": {
+    "episode_id": "m1:narrative:compiler",
+    "timestamp": 1,
+    "observation": {
+      "food": 0.35,
+      "danger": 0.94,
+      "novelty": 0.30250000000000005,
+      "shelter": 0.3125,
+      "temperature": 0.5,
+      "social": 0.5
+    },
+    "appraisal": {
+      "physical_threat": 0.94,
+      "social_threat": 0.0,
+      "uncertainty": 0.55,
+      "controllability": -0.55,
+      "novelty": 0.0,
+      "loss": 0.15,
+      "moral_salience": 0.0,
+      "contamination": 0.0,
+      "attachment_signal": 0.0,
+      "trust_impact": 0.0,
+      "self_efficacy_impact": -0.2,
+      "meaning_violation": 0.25
+    },
+    "body_state": {
+      "energy": 0.593,
+      "stress": 0.773,
+      "fatigue": 0.21,
+      "temperature": 0.5,
+      "dopamine": 0.16499999999999998
+    },
+    "predicted_outcome": "survival_threat",
+    "value_tags": [
+      "survival_threat",
+      "threat_learning"
+    ],
+    "narrative_tags": [
+      "predator",
+      "predator_attack",
+      "uncertainty:threat_persistence"
+    ],
+    "compiler_confidence": 0.81,
+    "provenance": {
+      "source_episode_id": "m1:narrative:compiler",
+      "source_type": "audit",
+      "episode_metadata": {
+        "seed": 7
+      },
+      "compiler": "semantic_grounded_m31_v1",
+      "compiled_event": {
+        "event_id": "m1:narrative:compiler:event",
+        "timestamp": 1,
+        "setting": "river",
+        "actors": [
+          "agent"
+        ],
+        "subject_role": "actor",
+        "event_type": "predator_attack",
+        "outcome_type": "survival_threat",
+        "self_involvement": 0.95,
+        "witnessed": false,
+        "direct_harm": true,
+        "controllability_hint": 0.2,
+        "annotations": {
+          "matched_rules": [
+            "predator_attack"
+          ],
+          "semantic_direction_scores": {
+            "threat": 2.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "lexical_surface_hits": {
+            "resource_gain": 0,
+            "predator_attack": 2,
+            "witnessed_death": 0,
+            "social_exclusion": 0,
+            "rescue": 0,
+            "exploration": 0,
+            "uncertainty": 0
+          },
+          "paraphrase_hits": {
+            "predator_attack": 0,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "implicit_hits": {
+            "predator_attack": 0,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "event_structure_signals": [
+            "direct_threat",
+            "physical_exposure"
+          ],
+          "surface_adversarial_risk": 0.0,
+          "low_signal": false,
+          "conflict_cues": [],
+          "uncertainty_cues": 0.0,
+          "semantic_grounding": {
+            "episode_id": "m1:narrative:compiler",
+            "motifs": [
+              "predator_attack"
+            ],
+            "evidence": [
+              {
+                "evidence_id": "m1:narrative:compiler:predator_attack:surface",
+                "source_type": "surface",
+                "label": "predator_attack",
+                "strength": 0.6666666666666666,
+                "matched_text": [
+                  "攻击",
+                  "受伤"
+                ],
+                "direction": "threat",
+                "metadata": {
+                  "surface_hits": 2
+                }
+              }
+            ],
+            "semantic_direction_scores": {
+              "threat": 2.0,
+              "social": 0.0,
+              "resource": 0.0,
+              "exploration": 0.0,
+              "uncertainty": 0.0
+            },
+            "lexical_surface_hits": {
+              "resource_gain": 0,
+              "predator_attack": 2,
+              "witnessed_death": 0,
+              "social_exclusion": 0,
+              "rescue": 0,
+              "exploration": 0,
+              "uncertainty": 0
+            },
+            "paraphrase_hits": {
+              "predator_attack": 0,
+              "rescue": 0,
+              "social_exclusion": 0,
+              "resource_gain": 0,
+              "exploration": 0
+            },
+            "implicit_hits": {
+              "predator_attack": 0,
+              "rescue": 0,
+              "social_exclusion": 0,
+              "resource_gain": 0,
+              "exploration": 0
+            },
+            "supporting_segments": [
+              "攻击",
+              "受伤"
+            ],
+            "provenance": {
+              "metadata": {
+                "seed": 7
+              },
+              "matched_event_type": "predator_attack",
+              "negation_hits": 0,
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            },
+            "low_signal": false
+          }
+        },
+        "source_episode_id": "m1:narrative:compiler"
+      },
+      "appraisal_dimensions": [
+        "attachment_signal",
+        "contamination",
+        "controllability",
+        "loss",
+        "meaning_violation",
+        "moral_salience",
+        "novelty",
+        "physical_threat",
+        "self_efficacy_impact",
+        "social_threat",
+        "trust_impact",
+        "uncertainty"
+      ],
+      "semantic_direction_scores": {
+        "threat": 2.0,
+        "social": 0.0,
+        "exploration": 0.0
+      },
+      "lexical_surface_hits": {
+        "resource_gain": 0,
+        "predator_attack": 2,
+        "witnessed_death": 0,
+        "social_exclusion": 0,
+        "rescue": 0,
+        "exploration": 0,
+        "uncertainty": 0
+      },
+      "paraphrase_hits": {
+        "predator_attack": 0,
+        "rescue": 0,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "implicit_hits": {
+        "predator_attack": 0,
+        "rescue": 0,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "event_structure_signals": [
+        "direct_threat",
+        "physical_exposure"
+      ],
+      "surface_adversarial_risk": 0.0,
+      "low_signal": false,
+      "conflict_cues": [],
+      "semantic_grounding": {
+        "episode_id": "m1:narrative:compiler",
+        "motifs": [
+          "predator_attack"
+        ],
+        "evidence": [
+          {
+            "evidence_id": "m1:narrative:compiler:predator_attack:surface",
+            "source_type": "surface",
+            "label": "predator_attack",
+            "strength": 0.6666666666666666,
+            "matched_text": [
+              "攻击",
+              "受伤"
+            ],
+            "direction": "threat",
+            "metadata": {
+              "surface_hits": 2
+            }
+          }
+        ],
+        "semantic_direction_scores": {
+          "threat": 2.0,
+          "social": 0.0,
+          "resource": 0.0,
+          "exploration": 0.0,
+          "uncertainty": 0.0
+        },
+        "lexical_surface_hits": {
+          "resource_gain": 0,
+          "predator_attack": 2,
+          "witnessed_death": 0,
+          "social_exclusion": 0,
+          "rescue": 0,
+          "exploration": 0,
+          "uncertainty": 0
+        },
+        "paraphrase_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "implicit_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "supporting_segments": [
+          "攻击",
+          "受伤"
+        ],
+        "provenance": {
+          "metadata": {
+            "seed": 7
+          },
+          "matched_event_type": "predator_attack",
+          "negation_hits": 0,
+          "surface_adversarial_risk": 0.0,
+          "conflict_cues": []
+        },
+        "low_signal": false
+      },
+      "uncertainty_decomposition": {
+        "episode_id": "m1:narrative:compiler",
+        "source_episode_id": "m1:narrative:compiler",
+        "unknowns": [
+          {
+            "unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "unknown_type": "threat_persistence",
+            "source_episode_id": "m1:narrative:compiler",
+            "source_span": "第二天，agent昨天路过河边，被一只鳄鱼攻击了，没受伤。",
+            "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+            "uncertainty_level": 0.55,
+            "action_relevant": true,
+            "linked_entities": [],
+            "linked_chapters": [],
+            "evidence_links": [
+              "predator_attack"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.48,
+              "social_stance": 0.08,
+              "risk_level": 0.893,
+              "verification_urgency": 0.4,
+              "memory_protection": 0.31914,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.893,
+              "total_score": 0.485554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "competing_hypothesis_ids": [
+              "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:compiler:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:compiler:unknown:threat_persistence:hyp:environment"
+            ],
+            "latent_cause_ids": [
+              "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent:cause",
+              "m1:narrative:compiler:unknown:threat_persistence:hyp:accident:cause",
+              "m1:narrative:compiler:unknown:threat_persistence:hyp:environment:cause"
+            ],
+            "surface_cue_ids": [],
+            "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+          }
+        ],
+        "competing_hypotheses": [
+          {
+            "hypothesis_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent",
+            "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "statement": "There is a stable threat source that will continue shaping future danger.",
+            "prior_plausibility": 0.5,
+            "support": {
+              "support_evidence": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "contradicting_evidence": [],
+              "support_score": 0.58,
+              "contradiction_score": 0.0
+            },
+            "implied_consequences": [
+              "favor hide or scan",
+              "protect memory of threat cues"
+            ],
+            "expected_state_shift": {
+              "danger": 0.72,
+              "shelter": 0.58
+            },
+            "decision_relevance": {
+              "action_choice": 0.578,
+              "social_stance": 0.129,
+              "risk_level": 0.993,
+              "verification_urgency": 0.54,
+              "memory_protection": 0.38214,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.22,
+              "total_score": 0.625554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "persistent_threat"
+          },
+          {
+            "hypothesis_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:accident",
+            "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "statement": "The danger was a local accident rather than a persistent source.",
+            "prior_plausibility": 0.32,
+            "support": {
+              "support_evidence": [
+                "uncertainty"
+              ],
+              "contradicting_evidence": [
+                "direct_threat"
+              ],
+              "support_score": 0.46,
+              "contradiction_score": 0.12
+            },
+            "implied_consequences": [
+              "resume exploration sooner",
+              "verify recurrence before escalating"
+            ],
+            "expected_state_shift": {
+              "danger": 0.38,
+              "novelty": 0.34
+            },
+            "decision_relevance": {
+              "action_choice": 0.522,
+              "social_stance": 0.101,
+              "risk_level": 0.993,
+              "verification_urgency": 0.46,
+              "memory_protection": 0.34614,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.16,
+              "total_score": 0.545554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "local_accident"
+          },
+          {
+            "hypothesis_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:environment",
+            "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "statement": "Environmental interference or misleading conditions created the danger appearance.",
+            "prior_plausibility": 0.18,
+            "support": {
+              "support_evidence": [
+                "explicit_uncertainty"
+              ],
+              "contradicting_evidence": [
+                "physical_exposure"
+              ],
+              "support_score": 0.46,
+              "contradiction_score": 0.12
+            },
+            "implied_consequences": [
+              "verify environment before attributing stable threat",
+              "avoid overweighting one scene"
+            ],
+            "expected_state_shift": {
+              "danger": 0.44,
+              "novelty": 0.26
+            },
+            "decision_relevance": {
+              "action_choice": 0.508,
+              "social_stance": 0.094,
+              "risk_level": 0.993,
+              "verification_urgency": 0.44,
+              "memory_protection": 0.33714,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.24,
+              "total_score": 0.525554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "environmental_interference"
+          }
+        ],
+        "latent_causes": [
+          {
+            "cause_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent:cause",
+            "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "cause_type": "persistent_threat",
+            "statement": "There is a stable threat source that will continue shaping future danger.",
+            "confidence": 0.478,
+            "evidence_links": [
+              "direct_threat",
+              "physical_exposure"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.578,
+              "social_stance": 0.129,
+              "risk_level": 0.993,
+              "verification_urgency": 0.54,
+              "memory_protection": 0.38214,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.22,
+              "total_score": 0.625554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          },
+          {
+            "cause_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:accident:cause",
+            "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "cause_type": "local_accident",
+            "statement": "The danger was a local accident rather than a persistent source.",
+            "confidence": 0.3154,
+            "evidence_links": [
+              "uncertainty"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.522,
+              "social_stance": 0.101,
+              "risk_level": 0.993,
+              "verification_urgency": 0.46,
+              "memory_protection": 0.34614,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.16,
+              "total_score": 0.545554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          },
+          {
+            "cause_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:environment:cause",
+            "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+            "cause_type": "environmental_interference",
+            "statement": "Environmental interference or misleading conditions created the danger appearance.",
+            "confidence": 0.2384,
+            "evidence_links": [
+              "explicit_uncertainty"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.508,
+              "social_stance": 0.094,
+              "risk_level": 0.993,
+              "verification_urgency": 0.44,
+              "memory_protection": 0.33714,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.24,
+              "total_score": 0.525554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          }
+        ],
+        "surface_cues": [],
+        "profile": {
+          "total_unknown_count": 1,
+          "decision_relevant_unknown_count": 1,
+          "competing_hypothesis_count": 3,
+          "latent_cause_count": 3,
+          "surface_cue_count": 0,
+          "interpretive_competition": 1.0,
+          "latent_cause_uncertainty_burden": 1.0,
+          "social_ambiguity_burden": 0.0,
+          "trust_ambiguity_burden": 0.0,
+          "environment_ambiguity_burden": 1.0,
+          "retained_uncertainty_burden": 0.485554
+        },
+        "promoted_unknown_ids": [
+          "m1:narrative:compiler:unknown:threat_persistence"
+        ],
+        "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+      }
+    },
+    "uncertainty_decomposition": {
+      "episode_id": "m1:narrative:compiler",
+      "source_episode_id": "m1:narrative:compiler",
+      "unknowns": [
+        {
+          "unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "unknown_type": "threat_persistence",
+          "source_episode_id": "m1:narrative:compiler",
+          "source_span": "第二天，agent昨天路过河边，被一只鳄鱼攻击了，没受伤。",
+          "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+          "uncertainty_level": 0.55,
+          "action_relevant": true,
+          "linked_entities": [],
+          "linked_chapters": [],
+          "evidence_links": [
+            "predator_attack"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.48,
+            "social_stance": 0.08,
+            "risk_level": 0.893,
+            "verification_urgency": 0.4,
+            "memory_protection": 0.31914,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.893,
+            "total_score": 0.485554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "competing_hypothesis_ids": [
+            "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent",
+            "m1:narrative:compiler:unknown:threat_persistence:hyp:accident",
+            "m1:narrative:compiler:unknown:threat_persistence:hyp:environment"
+          ],
+          "latent_cause_ids": [
+            "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent:cause",
+            "m1:narrative:compiler:unknown:threat_persistence:hyp:accident:cause",
+            "m1:narrative:compiler:unknown:threat_persistence:hyp:environment:cause"
+          ],
+          "surface_cue_ids": [],
+          "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+        }
+      ],
+      "competing_hypotheses": [
+        {
+          "hypothesis_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent",
+          "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "statement": "There is a stable threat source that will continue shaping future danger.",
+          "prior_plausibility": 0.5,
+          "support": {
+            "support_evidence": [
+              "direct_threat",
+              "physical_exposure"
+            ],
+            "contradicting_evidence": [],
+            "support_score": 0.58,
+            "contradiction_score": 0.0
+          },
+          "implied_consequences": [
+            "favor hide or scan",
+            "protect memory of threat cues"
+          ],
+          "expected_state_shift": {
+            "danger": 0.72,
+            "shelter": 0.58
+          },
+          "decision_relevance": {
+            "action_choice": 0.578,
+            "social_stance": 0.129,
+            "risk_level": 0.993,
+            "verification_urgency": 0.54,
+            "memory_protection": 0.38214,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.22,
+            "total_score": 0.625554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "latent_cause_type": "persistent_threat"
+        },
+        {
+          "hypothesis_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:accident",
+          "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "statement": "The danger was a local accident rather than a persistent source.",
+          "prior_plausibility": 0.32,
+          "support": {
+            "support_evidence": [
+              "uncertainty"
+            ],
+            "contradicting_evidence": [
+              "direct_threat"
+            ],
+            "support_score": 0.46,
+            "contradiction_score": 0.12
+          },
+          "implied_consequences": [
+            "resume exploration sooner",
+            "verify recurrence before escalating"
+          ],
+          "expected_state_shift": {
+            "danger": 0.38,
+            "novelty": 0.34
+          },
+          "decision_relevance": {
+            "action_choice": 0.522,
+            "social_stance": 0.101,
+            "risk_level": 0.993,
+            "verification_urgency": 0.46,
+            "memory_protection": 0.34614,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.16,
+            "total_score": 0.545554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "latent_cause_type": "local_accident"
+        },
+        {
+          "hypothesis_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:environment",
+          "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "statement": "Environmental interference or misleading conditions created the danger appearance.",
+          "prior_plausibility": 0.18,
+          "support": {
+            "support_evidence": [
+              "explicit_uncertainty"
+            ],
+            "contradicting_evidence": [
+              "physical_exposure"
+            ],
+            "support_score": 0.46,
+            "contradiction_score": 0.12
+          },
+          "implied_consequences": [
+            "verify environment before attributing stable threat",
+            "avoid overweighting one scene"
+          ],
+          "expected_state_shift": {
+            "danger": 0.44,
+            "novelty": 0.26
+          },
+          "decision_relevance": {
+            "action_choice": 0.508,
+            "social_stance": 0.094,
+            "risk_level": 0.993,
+            "verification_urgency": 0.44,
+            "memory_protection": 0.33714,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.24,
+            "total_score": 0.525554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          },
+          "latent_cause_type": "environmental_interference"
+        }
+      ],
+      "latent_causes": [
+        {
+          "cause_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:persistent:cause",
+          "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "cause_type": "persistent_threat",
+          "statement": "There is a stable threat source that will continue shaping future danger.",
+          "confidence": 0.478,
+          "evidence_links": [
+            "direct_threat",
+            "physical_exposure"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.578,
+            "social_stance": 0.129,
+            "risk_level": 0.993,
+            "verification_urgency": 0.54,
+            "memory_protection": 0.38214,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.22,
+            "total_score": 0.625554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          }
+        },
+        {
+          "cause_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:accident:cause",
+          "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "cause_type": "local_accident",
+          "statement": "The danger was a local accident rather than a persistent source.",
+          "confidence": 0.3154,
+          "evidence_links": [
+            "uncertainty"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.522,
+            "social_stance": 0.101,
+            "risk_level": 0.993,
+            "verification_urgency": 0.46,
+            "memory_protection": 0.34614,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.16,
+            "total_score": 0.545554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          }
+        },
+        {
+          "cause_id": "m1:narrative:compiler:unknown:threat_persistence:hyp:environment:cause",
+          "parent_unknown_id": "m1:narrative:compiler:unknown:threat_persistence",
+          "cause_type": "environmental_interference",
+          "statement": "Environmental interference or misleading conditions created the danger appearance.",
+          "confidence": 0.2384,
+          "evidence_links": [
+            "explicit_uncertainty"
+          ],
+          "decision_relevance": {
+            "action_choice": 0.508,
+            "social_stance": 0.094,
+            "risk_level": 0.993,
+            "verification_urgency": 0.44,
+            "memory_protection": 0.33714,
+            "continuity_impact": 0.22,
+            "downstream_prediction_delta": 0.24,
+            "total_score": 0.525554,
+            "summary": "This uncertainty changes danger prediction and caution."
+          }
+        }
+      ],
+      "surface_cues": [],
+      "profile": {
+        "total_unknown_count": 1,
+        "decision_relevant_unknown_count": 1,
+        "competing_hypothesis_count": 3,
+        "latent_cause_count": 3,
+        "surface_cue_count": 0,
+        "interpretive_competition": 1.0,
+        "latent_cause_uncertainty_burden": 1.0,
+        "social_ambiguity_burden": 0.0,
+        "trust_ambiguity_burden": 0.0,
+        "environment_ambiguity_burden": 1.0,
+        "retained_uncertainty_burden": 0.485554
+      },
+      "promoted_unknown_ids": [
+        "m1:narrative:compiler:unknown:threat_persistence"
+      ],
+      "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+    },
+    "semantic_grounding": {
+      "episode_id": "m1:narrative:compiler",
+      "motifs": [
+        "predator_attack"
+      ],
+      "evidence": [
+        {
+          "evidence_id": "m1:narrative:compiler:predator_attack:surface",
+          "source_type": "surface",
+          "label": "predator_attack",
+          "strength": 0.6666666666666666,
+          "matched_text": [
+            "攻击",
+            "受伤"
+          ],
+          "direction": "threat",
+          "metadata": {
+            "surface_hits": 2
+          }
+        }
+      ],
+      "semantic_direction_scores": {
+        "threat": 2.0,
+        "social": 0.0,
+        "resource": 0.0,
+        "exploration": 0.0,
+        "uncertainty": 0.0
+      },
+      "lexical_surface_hits": {
+        "resource_gain": 0,
+        "predator_attack": 2,
+        "witnessed_death": 0,
+        "social_exclusion": 0,
+        "rescue": 0,
+        "exploration": 0,
+        "uncertainty": 0
+      },
+      "paraphrase_hits": {
+        "predator_attack": 0,
+        "rescue": 0,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "implicit_hits": {
+        "predator_attack": 0,
+        "rescue": 0,
+        "social_exclusion": 0,
+        "resource_gain": 0,
+        "exploration": 0
+      },
+      "supporting_segments": [
+        "攻击",
+        "受伤"
+      ],
+      "provenance": {
+        "metadata": {
+          "seed": 7
+        },
+        "matched_event_type": "predator_attack",
+        "negation_hits": 0,
+        "surface_adversarial_risk": 0.0,
+        "conflict_cues": []
+      },
+      "low_signal": false
+    }
+  },
+  "ingestion_result": {
+    "episode_id": "m1:narrative:ingestion",
+    "raw_text": "第二天，agent昨天路过河边，被一只鳄鱼攻击了，没受伤。",
+    "compilation": {
+      "episode_id": "m1:narrative:ingestion",
+      "timestamp": 2,
+      "observation": {
+        "food": 0.35,
+        "danger": 0.94,
+        "novelty": 0.30250000000000005,
+        "shelter": 0.3125,
+        "temperature": 0.5,
+        "social": 0.5
+      },
+      "appraisal": {
+        "physical_threat": 0.94,
+        "social_threat": 0.0,
+        "uncertainty": 0.55,
+        "controllability": -0.55,
+        "novelty": 0.0,
+        "loss": 0.15,
+        "moral_salience": 0.0,
+        "contamination": 0.0,
+        "attachment_signal": 0.0,
+        "trust_impact": 0.0,
+        "self_efficacy_impact": -0.2,
+        "meaning_violation": 0.25
+      },
+      "body_state": {
+        "energy": 0.593,
+        "stress": 0.773,
+        "fatigue": 0.21,
+        "temperature": 0.5,
+        "dopamine": 0.16499999999999998
+      },
+      "predicted_outcome": "survival_threat",
+      "value_tags": [
+        "survival_threat",
+        "threat_learning"
+      ],
+      "narrative_tags": [
+        "predator",
+        "predator_attack",
+        "uncertainty:threat_persistence"
+      ],
+      "compiler_confidence": 0.81,
+      "provenance": {
+        "source_episode_id": "m1:narrative:ingestion",
+        "source_type": "audit",
+        "episode_metadata": {
+          "seed": 7
+        },
+        "compiler": "semantic_grounded_m31_v1",
+        "compiled_event": {
+          "event_id": "m1:narrative:ingestion:event",
+          "timestamp": 2,
+          "setting": "river",
+          "actors": [
+            "agent"
+          ],
+          "subject_role": "actor",
+          "event_type": "predator_attack",
+          "outcome_type": "survival_threat",
+          "self_involvement": 0.95,
+          "witnessed": false,
+          "direct_harm": true,
+          "controllability_hint": 0.2,
+          "annotations": {
+            "matched_rules": [
+              "predator_attack"
+            ],
+            "semantic_direction_scores": {
+              "threat": 2.0,
+              "social": 0.0,
+              "exploration": 0.0
+            },
+            "lexical_surface_hits": {
+              "resource_gain": 0,
+              "predator_attack": 2,
+              "witnessed_death": 0,
+              "social_exclusion": 0,
+              "rescue": 0,
+              "exploration": 0,
+              "uncertainty": 0
+            },
+            "paraphrase_hits": {
+              "predator_attack": 0,
+              "rescue": 0,
+              "social_exclusion": 0,
+              "resource_gain": 0,
+              "exploration": 0
+            },
+            "implicit_hits": {
+              "predator_attack": 0,
+              "rescue": 0,
+              "social_exclusion": 0,
+              "resource_gain": 0,
+              "exploration": 0
+            },
+            "event_structure_signals": [
+              "direct_threat",
+              "physical_exposure"
+            ],
+            "surface_adversarial_risk": 0.0,
+            "low_signal": false,
+            "conflict_cues": [],
+            "uncertainty_cues": 0.0,
+            "semantic_grounding": {
+              "episode_id": "m1:narrative:ingestion",
+              "motifs": [
+                "predator_attack"
+              ],
+              "evidence": [
+                {
+                  "evidence_id": "m1:narrative:ingestion:predator_attack:surface",
+                  "source_type": "surface",
+                  "label": "predator_attack",
+                  "strength": 0.6666666666666666,
+                  "matched_text": [
+                    "攻击",
+                    "受伤"
+                  ],
+                  "direction": "threat",
+                  "metadata": {
+                    "surface_hits": 2
+                  }
+                }
+              ],
+              "semantic_direction_scores": {
+                "threat": 2.0,
+                "social": 0.0,
+                "resource": 0.0,
+                "exploration": 0.0,
+                "uncertainty": 0.0
+              },
+              "lexical_surface_hits": {
+                "resource_gain": 0,
+                "predator_attack": 2,
+                "witnessed_death": 0,
+                "social_exclusion": 0,
+                "rescue": 0,
+                "exploration": 0,
+                "uncertainty": 0
+              },
+              "paraphrase_hits": {
+                "predator_attack": 0,
+                "rescue": 0,
+                "social_exclusion": 0,
+                "resource_gain": 0,
+                "exploration": 0
+              },
+              "implicit_hits": {
+                "predator_attack": 0,
+                "rescue": 0,
+                "social_exclusion": 0,
+                "resource_gain": 0,
+                "exploration": 0
+              },
+              "supporting_segments": [
+                "攻击",
+                "受伤"
+              ],
+              "provenance": {
+                "metadata": {
+                  "seed": 7
+                },
+                "matched_event_type": "predator_attack",
+                "negation_hits": 0,
+                "surface_adversarial_risk": 0.0,
+                "conflict_cues": []
+              },
+              "low_signal": false
+            }
+          },
+          "source_episode_id": "m1:narrative:ingestion"
+        },
+        "appraisal_dimensions": [
+          "attachment_signal",
+          "contamination",
+          "controllability",
+          "loss",
+          "meaning_violation",
+          "moral_salience",
+          "novelty",
+          "physical_threat",
+          "self_efficacy_impact",
+          "social_threat",
+          "trust_impact",
+          "uncertainty"
+        ],
+        "semantic_direction_scores": {
+          "threat": 2.0,
+          "social": 0.0,
+          "exploration": 0.0
+        },
+        "lexical_surface_hits": {
+          "resource_gain": 0,
+          "predator_attack": 2,
+          "witnessed_death": 0,
+          "social_exclusion": 0,
+          "rescue": 0,
+          "exploration": 0,
+          "uncertainty": 0
+        },
+        "paraphrase_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "implicit_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "event_structure_signals": [
+          "direct_threat",
+          "physical_exposure"
+        ],
+        "surface_adversarial_risk": 0.0,
+        "low_signal": false,
+        "conflict_cues": [],
+        "semantic_grounding": {
+          "episode_id": "m1:narrative:ingestion",
+          "motifs": [
+            "predator_attack"
+          ],
+          "evidence": [
+            {
+              "evidence_id": "m1:narrative:ingestion:predator_attack:surface",
+              "source_type": "surface",
+              "label": "predator_attack",
+              "strength": 0.6666666666666666,
+              "matched_text": [
+                "攻击",
+                "受伤"
+              ],
+              "direction": "threat",
+              "metadata": {
+                "surface_hits": 2
+              }
+            }
+          ],
+          "semantic_direction_scores": {
+            "threat": 2.0,
+            "social": 0.0,
+            "resource": 0.0,
+            "exploration": 0.0,
+            "uncertainty": 0.0
+          },
+          "lexical_surface_hits": {
+            "resource_gain": 0,
+            "predator_attack": 2,
+            "witnessed_death": 0,
+            "social_exclusion": 0,
+            "rescue": 0,
+            "exploration": 0,
+            "uncertainty": 0
+          },
+          "paraphrase_hits": {
+            "predator_attack": 0,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "implicit_hits": {
+            "predator_attack": 0,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "supporting_segments": [
+            "攻击",
+            "受伤"
+          ],
+          "provenance": {
+            "metadata": {
+              "seed": 7
+            },
+            "matched_event_type": "predator_attack",
+            "negation_hits": 0,
+            "surface_adversarial_risk": 0.0,
+            "conflict_cues": []
+          },
+          "low_signal": false
+        },
+        "uncertainty_decomposition": {
+          "episode_id": "m1:narrative:ingestion",
+          "source_episode_id": "m1:narrative:ingestion",
+          "unknowns": [
+            {
+              "unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "unknown_type": "threat_persistence",
+              "source_episode_id": "m1:narrative:ingestion",
+              "source_span": "第二天，agent昨天路过河边，被一只鳄鱼攻击了，没受伤。",
+              "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+              "uncertainty_level": 0.55,
+              "action_relevant": true,
+              "linked_entities": [],
+              "linked_chapters": [],
+              "evidence_links": [
+                "predator_attack"
+              ],
+              "decision_relevance": {
+                "action_choice": 0.48,
+                "social_stance": 0.08,
+                "risk_level": 0.893,
+                "verification_urgency": 0.4,
+                "memory_protection": 0.31914,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.893,
+                "total_score": 0.485554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              },
+              "competing_hypothesis_ids": [
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+              ],
+              "latent_cause_ids": [
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:cause",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:cause",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:cause"
+              ],
+              "surface_cue_ids": [],
+              "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+            }
+          ],
+          "competing_hypotheses": [
+            {
+              "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "statement": "There is a stable threat source that will continue shaping future danger.",
+              "prior_plausibility": 0.5,
+              "support": {
+                "support_evidence": [
+                  "direct_threat",
+                  "physical_exposure"
+                ],
+                "contradicting_evidence": [],
+                "support_score": 0.58,
+                "contradiction_score": 0.0
+              },
+              "implied_consequences": [
+                "favor hide or scan",
+                "protect memory of threat cues"
+              ],
+              "expected_state_shift": {
+                "danger": 0.72,
+                "shelter": 0.58
+              },
+              "decision_relevance": {
+                "action_choice": 0.578,
+                "social_stance": 0.129,
+                "risk_level": 0.993,
+                "verification_urgency": 0.54,
+                "memory_protection": 0.38214,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.22,
+                "total_score": 0.625554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              },
+              "latent_cause_type": "persistent_threat"
+            },
+            {
+              "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "statement": "The danger was a local accident rather than a persistent source.",
+              "prior_plausibility": 0.32,
+              "support": {
+                "support_evidence": [
+                  "uncertainty"
+                ],
+                "contradicting_evidence": [
+                  "direct_threat"
+                ],
+                "support_score": 0.46,
+                "contradiction_score": 0.12
+              },
+              "implied_consequences": [
+                "resume exploration sooner",
+                "verify recurrence before escalating"
+              ],
+              "expected_state_shift": {
+                "danger": 0.38,
+                "novelty": 0.34
+              },
+              "decision_relevance": {
+                "action_choice": 0.522,
+                "social_stance": 0.101,
+                "risk_level": 0.993,
+                "verification_urgency": 0.46,
+                "memory_protection": 0.34614,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.16,
+                "total_score": 0.545554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              },
+              "latent_cause_type": "local_accident"
+            },
+            {
+              "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+              "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "statement": "Environmental interference or misleading conditions created the danger appearance.",
+              "prior_plausibility": 0.18,
+              "support": {
+                "support_evidence": [
+                  "explicit_uncertainty"
+                ],
+                "contradicting_evidence": [
+                  "physical_exposure"
+                ],
+                "support_score": 0.46,
+                "contradiction_score": 0.12
+              },
+              "implied_consequences": [
+                "verify environment before attributing stable threat",
+                "avoid overweighting one scene"
+              ],
+              "expected_state_shift": {
+                "danger": 0.44,
+                "novelty": 0.26
+              },
+              "decision_relevance": {
+                "action_choice": 0.508,
+                "social_stance": 0.094,
+                "risk_level": 0.993,
+                "verification_urgency": 0.44,
+                "memory_protection": 0.33714,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.24,
+                "total_score": 0.525554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              },
+              "latent_cause_type": "environmental_interference"
+            }
+          ],
+          "latent_causes": [
+            {
+              "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:cause",
+              "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "cause_type": "persistent_threat",
+              "statement": "There is a stable threat source that will continue shaping future danger.",
+              "confidence": 0.478,
+              "evidence_links": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "decision_relevance": {
+                "action_choice": 0.578,
+                "social_stance": 0.129,
+                "risk_level": 0.993,
+                "verification_urgency": 0.54,
+                "memory_protection": 0.38214,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.22,
+                "total_score": 0.625554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              }
+            },
+            {
+              "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:cause",
+              "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "cause_type": "local_accident",
+              "statement": "The danger was a local accident rather than a persistent source.",
+              "confidence": 0.3154,
+              "evidence_links": [
+                "uncertainty"
+              ],
+              "decision_relevance": {
+                "action_choice": 0.522,
+                "social_stance": 0.101,
+                "risk_level": 0.993,
+                "verification_urgency": 0.46,
+                "memory_protection": 0.34614,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.16,
+                "total_score": 0.545554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              }
+            },
+            {
+              "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:cause",
+              "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+              "cause_type": "environmental_interference",
+              "statement": "Environmental interference or misleading conditions created the danger appearance.",
+              "confidence": 0.2384,
+              "evidence_links": [
+                "explicit_uncertainty"
+              ],
+              "decision_relevance": {
+                "action_choice": 0.508,
+                "social_stance": 0.094,
+                "risk_level": 0.993,
+                "verification_urgency": 0.44,
+                "memory_protection": 0.33714,
+                "continuity_impact": 0.22,
+                "downstream_prediction_delta": 0.24,
+                "total_score": 0.525554,
+                "summary": "This uncertainty changes danger prediction and caution."
+              }
+            }
+          ],
+          "surface_cues": [],
+          "profile": {
+            "total_unknown_count": 1,
+            "decision_relevant_unknown_count": 1,
+            "competing_hypothesis_count": 3,
+            "latent_cause_count": 3,
+            "surface_cue_count": 0,
+            "interpretive_competition": 1.0,
+            "latent_cause_uncertainty_burden": 1.0,
+            "social_ambiguity_burden": 0.0,
+            "trust_ambiguity_burden": 0.0,
+            "environment_ambiguity_burden": 1.0,
+            "retained_uncertainty_burden": 0.485554
+          },
+          "promoted_unknown_ids": [
+            "m1:narrative:ingestion:unknown:threat_persistence"
+          ],
+          "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+        }
+      },
+      "uncertainty_decomposition": {
+        "episode_id": "m1:narrative:ingestion",
+        "source_episode_id": "m1:narrative:ingestion",
+        "unknowns": [
+          {
+            "unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "unknown_type": "threat_persistence",
+            "source_episode_id": "m1:narrative:ingestion",
+            "source_span": "第二天，agent昨天路过河边，被一只鳄鱼攻击了，没受伤。",
+            "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+            "uncertainty_level": 0.55,
+            "action_relevant": true,
+            "linked_entities": [],
+            "linked_chapters": [],
+            "evidence_links": [
+              "predator_attack"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.48,
+              "social_stance": 0.08,
+              "risk_level": 0.893,
+              "verification_urgency": 0.4,
+              "memory_protection": 0.31914,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.893,
+              "total_score": 0.485554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "competing_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "latent_cause_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:cause",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:cause",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:cause"
+            ],
+            "surface_cue_ids": [],
+            "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+          }
+        ],
+        "competing_hypotheses": [
+          {
+            "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "statement": "There is a stable threat source that will continue shaping future danger.",
+            "prior_plausibility": 0.5,
+            "support": {
+              "support_evidence": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "contradicting_evidence": [],
+              "support_score": 0.58,
+              "contradiction_score": 0.0
+            },
+            "implied_consequences": [
+              "favor hide or scan",
+              "protect memory of threat cues"
+            ],
+            "expected_state_shift": {
+              "danger": 0.72,
+              "shelter": 0.58
+            },
+            "decision_relevance": {
+              "action_choice": 0.578,
+              "social_stance": 0.129,
+              "risk_level": 0.993,
+              "verification_urgency": 0.54,
+              "memory_protection": 0.38214,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.22,
+              "total_score": 0.625554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "persistent_threat"
+          },
+          {
+            "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "statement": "The danger was a local accident rather than a persistent source.",
+            "prior_plausibility": 0.32,
+            "support": {
+              "support_evidence": [
+                "uncertainty"
+              ],
+              "contradicting_evidence": [
+                "direct_threat"
+              ],
+              "support_score": 0.46,
+              "contradiction_score": 0.12
+            },
+            "implied_consequences": [
+              "resume exploration sooner",
+              "verify recurrence before escalating"
+            ],
+            "expected_state_shift": {
+              "danger": 0.38,
+              "novelty": 0.34
+            },
+            "decision_relevance": {
+              "action_choice": 0.522,
+              "social_stance": 0.101,
+              "risk_level": 0.993,
+              "verification_urgency": 0.46,
+              "memory_protection": 0.34614,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.16,
+              "total_score": 0.545554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "local_accident"
+          },
+          {
+            "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "statement": "Environmental interference or misleading conditions created the danger appearance.",
+            "prior_plausibility": 0.18,
+            "support": {
+              "support_evidence": [
+                "explicit_uncertainty"
+              ],
+              "contradicting_evidence": [
+                "physical_exposure"
+              ],
+              "support_score": 0.46,
+              "contradiction_score": 0.12
+            },
+            "implied_consequences": [
+              "verify environment before attributing stable threat",
+              "avoid overweighting one scene"
+            ],
+            "expected_state_shift": {
+              "danger": 0.44,
+              "novelty": 0.26
+            },
+            "decision_relevance": {
+              "action_choice": 0.508,
+              "social_stance": 0.094,
+              "risk_level": 0.993,
+              "verification_urgency": 0.44,
+              "memory_protection": 0.33714,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.24,
+              "total_score": 0.525554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "environmental_interference"
+          }
+        ],
+        "latent_causes": [
+          {
+            "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:cause",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "cause_type": "persistent_threat",
+            "statement": "There is a stable threat source that will continue shaping future danger.",
+            "confidence": 0.478,
+            "evidence_links": [
+              "direct_threat",
+              "physical_exposure"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.578,
+              "social_stance": 0.129,
+              "risk_level": 0.993,
+              "verification_urgency": 0.54,
+              "memory_protection": 0.38214,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.22,
+              "total_score": 0.625554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          },
+          {
+            "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:cause",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "cause_type": "local_accident",
+            "statement": "The danger was a local accident rather than a persistent source.",
+            "confidence": 0.3154,
+            "evidence_links": [
+              "uncertainty"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.522,
+              "social_stance": 0.101,
+              "risk_level": 0.993,
+              "verification_urgency": 0.46,
+              "memory_protection": 0.34614,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.16,
+              "total_score": 0.545554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          },
+          {
+            "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:cause",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "cause_type": "environmental_interference",
+            "statement": "Environmental interference or misleading conditions created the danger appearance.",
+            "confidence": 0.2384,
+            "evidence_links": [
+              "explicit_uncertainty"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.508,
+              "social_stance": 0.094,
+              "risk_level": 0.993,
+              "verification_urgency": 0.44,
+              "memory_protection": 0.33714,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.24,
+              "total_score": 0.525554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          }
+        ],
+        "surface_cues": [],
+        "profile": {
+          "total_unknown_count": 1,
+          "decision_relevant_unknown_count": 1,
+          "competing_hypothesis_count": 3,
+          "latent_cause_count": 3,
+          "surface_cue_count": 0,
+          "interpretive_competition": 1.0,
+          "latent_cause_uncertainty_burden": 1.0,
+          "social_ambiguity_burden": 0.0,
+          "trust_ambiguity_burden": 0.0,
+          "environment_ambiguity_burden": 1.0,
+          "retained_uncertainty_burden": 0.485554
+        },
+        "promoted_unknown_ids": [
+          "m1:narrative:ingestion:unknown:threat_persistence"
+        ],
+        "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+      },
+      "semantic_grounding": {
+        "episode_id": "m1:narrative:ingestion",
+        "motifs": [
+          "predator_attack"
+        ],
+        "evidence": [
+          {
+            "evidence_id": "m1:narrative:ingestion:predator_attack:surface",
+            "source_type": "surface",
+            "label": "predator_attack",
+            "strength": 0.6666666666666666,
+            "matched_text": [
+              "攻击",
+              "受伤"
+            ],
+            "direction": "threat",
+            "metadata": {
+              "surface_hits": 2
+            }
+          }
+        ],
+        "semantic_direction_scores": {
+          "threat": 2.0,
+          "social": 0.0,
+          "resource": 0.0,
+          "exploration": 0.0,
+          "uncertainty": 0.0
+        },
+        "lexical_surface_hits": {
+          "resource_gain": 0,
+          "predator_attack": 2,
+          "witnessed_death": 0,
+          "social_exclusion": 0,
+          "rescue": 0,
+          "exploration": 0,
+          "uncertainty": 0
+        },
+        "paraphrase_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "implicit_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "supporting_segments": [
+          "攻击",
+          "受伤"
+        ],
+        "provenance": {
+          "metadata": {
+            "seed": 7
+          },
+          "matched_event_type": "predator_attack",
+          "negation_hits": 0,
+          "surface_adversarial_risk": 0.0,
+          "conflict_cues": []
+        },
+        "low_signal": false
+      }
+    },
+    "ingestion": {
+      "source_episode_id": "m1:narrative:ingestion",
+      "compiled_event": {
+        "event_id": "m1:narrative:ingestion:event",
+        "timestamp": 2,
+        "setting": "river",
+        "actors": [
+          "agent"
+        ],
+        "subject_role": "actor",
+        "event_type": "predator_attack",
+        "outcome_type": "survival_threat",
+        "self_involvement": 0.95,
+        "witnessed": false,
+        "direct_harm": true,
+        "controllability_hint": 0.2,
+        "annotations": {
+          "matched_rules": [
+            "predator_attack"
+          ],
+          "semantic_direction_scores": {
+            "threat": 2.0,
+            "social": 0.0,
+            "exploration": 0.0
+          },
+          "lexical_surface_hits": {
+            "resource_gain": 0,
+            "predator_attack": 2,
+            "witnessed_death": 0,
+            "social_exclusion": 0,
+            "rescue": 0,
+            "exploration": 0,
+            "uncertainty": 0
+          },
+          "paraphrase_hits": {
+            "predator_attack": 0,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "implicit_hits": {
+            "predator_attack": 0,
+            "rescue": 0,
+            "social_exclusion": 0,
+            "resource_gain": 0,
+            "exploration": 0
+          },
+          "event_structure_signals": [
+            "direct_threat",
+            "physical_exposure"
+          ],
+          "surface_adversarial_risk": 0.0,
+          "low_signal": false,
+          "conflict_cues": [],
+          "uncertainty_cues": 0.0,
+          "semantic_grounding": {
+            "episode_id": "m1:narrative:ingestion",
+            "motifs": [
+              "predator_attack"
+            ],
+            "evidence": [
+              {
+                "evidence_id": "m1:narrative:ingestion:predator_attack:surface",
+                "source_type": "surface",
+                "label": "predator_attack",
+                "strength": 0.6666666666666666,
+                "matched_text": [
+                  "攻击",
+                  "受伤"
+                ],
+                "direction": "threat",
+                "metadata": {
+                  "surface_hits": 2
+                }
+              }
+            ],
+            "semantic_direction_scores": {
+              "threat": 2.0,
+              "social": 0.0,
+              "resource": 0.0,
+              "exploration": 0.0,
+              "uncertainty": 0.0
+            },
+            "lexical_surface_hits": {
+              "resource_gain": 0,
+              "predator_attack": 2,
+              "witnessed_death": 0,
+              "social_exclusion": 0,
+              "rescue": 0,
+              "exploration": 0,
+              "uncertainty": 0
+            },
+            "paraphrase_hits": {
+              "predator_attack": 0,
+              "rescue": 0,
+              "social_exclusion": 0,
+              "resource_gain": 0,
+              "exploration": 0
+            },
+            "implicit_hits": {
+              "predator_attack": 0,
+              "rescue": 0,
+              "social_exclusion": 0,
+              "resource_gain": 0,
+              "exploration": 0
+            },
+            "supporting_segments": [
+              "攻击",
+              "受伤"
+            ],
+            "provenance": {
+              "metadata": {
+                "seed": 7
+              },
+              "matched_event_type": "predator_attack",
+              "negation_hits": 0,
+              "surface_adversarial_risk": 0.0,
+              "conflict_cues": []
+            },
+            "low_signal": false
+          }
+        },
+        "source_episode_id": "m1:narrative:ingestion"
+      },
+      "appraisal": {
+        "physical_threat": 0.94,
+        "social_threat": 0.0,
+        "uncertainty": 0.55,
+        "controllability": -0.55,
+        "novelty": 0.0,
+        "loss": 0.15,
+        "moral_salience": 0.0,
+        "contamination": 0.0,
+        "attachment_signal": 0.0,
+        "trust_impact": 0.0,
+        "self_efficacy_impact": -0.2,
+        "meaning_violation": 0.25
+      },
+      "compatibility_observation": {
+        "food": 0.35,
+        "danger": 0.94,
+        "novelty": 0.30250000000000005,
+        "shelter": 0.3125,
+        "temperature": 0.5,
+        "social": 0.5
+      },
+      "prediction_before_ingestion": {
+        "food": 0.5,
+        "danger": 0.3,
+        "novelty": 0.5,
+        "shelter": 0.4,
+        "temperature": 0.5,
+        "social": 0.3
+      },
+      "semantic_prediction": {
+        "applied_schema_ids": [],
+        "adjustments": {},
+        "match_strength": 0.0
+      },
+      "prediction_error": 0.2125,
+      "total_surprise": 1005.219215652344,
+      "value_score": -1.0,
+      "predicted_outcome": "survival_threat",
+      "episode_created": true,
+      "merged_into_episode_id": null,
+      "compiler_confidence": 0.81,
+      "narrative_tags": [
+        "predator",
+        "predator_attack",
+        "uncertainty:threat_persistence"
+      ],
+      "semantic_grounding": {
+        "episode_id": "m1:narrative:ingestion",
+        "motifs": [
+          "predator_attack"
+        ],
+        "evidence": [
+          {
+            "evidence_id": "m1:narrative:ingestion:predator_attack:surface",
+            "source_type": "surface",
+            "label": "predator_attack",
+            "strength": 0.6666666666666666,
+            "matched_text": [
+              "攻击",
+              "受伤"
+            ],
+            "direction": "threat",
+            "metadata": {
+              "surface_hits": 2
+            }
+          }
+        ],
+        "semantic_direction_scores": {
+          "threat": 2.0,
+          "social": 0.0,
+          "resource": 0.0,
+          "exploration": 0.0,
+          "uncertainty": 0.0
+        },
+        "lexical_surface_hits": {
+          "resource_gain": 0,
+          "predator_attack": 2,
+          "witnessed_death": 0,
+          "social_exclusion": 0,
+          "rescue": 0,
+          "exploration": 0,
+          "uncertainty": 0
+        },
+        "paraphrase_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "implicit_hits": {
+          "predator_attack": 0,
+          "rescue": 0,
+          "social_exclusion": 0,
+          "resource_gain": 0,
+          "exploration": 0
+        },
+        "supporting_segments": [
+          "攻击",
+          "受伤"
+        ],
+        "provenance": {
+          "metadata": {
+            "seed": 7
+          },
+          "matched_event_type": "predator_attack",
+          "negation_hits": 0,
+          "surface_adversarial_risk": 0.0,
+          "conflict_cues": []
+        },
+        "low_signal": false
+      },
+      "narrative_uncertainty": {
+        "episode_id": "m1:narrative:ingestion",
+        "source_episode_id": "m1:narrative:ingestion",
+        "unknowns": [
+          {
+            "unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "unknown_type": "threat_persistence",
+            "source_episode_id": "m1:narrative:ingestion",
+            "source_span": "第二天，agent昨天路过河边，被一只鳄鱼攻击了，没受伤。",
+            "unresolved_reason": "The narrative shows danger, but it is unclear whether the cause is stable or accidental.",
+            "uncertainty_level": 0.55,
+            "action_relevant": true,
+            "linked_entities": [],
+            "linked_chapters": [],
+            "evidence_links": [
+              "predator_attack"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.48,
+              "social_stance": 0.08,
+              "risk_level": 0.893,
+              "verification_urgency": 0.4,
+              "memory_protection": 0.31914,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.893,
+              "total_score": 0.485554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "competing_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "latent_cause_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:cause",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:cause",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:cause"
+            ],
+            "surface_cue_ids": [],
+            "promotion_reason": "Threat persistence changes risk posture, memory protection, and verification urgency."
+          }
+        ],
+        "competing_hypotheses": [
+          {
+            "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "statement": "There is a stable threat source that will continue shaping future danger.",
+            "prior_plausibility": 0.5,
+            "support": {
+              "support_evidence": [
+                "direct_threat",
+                "physical_exposure"
+              ],
+              "contradicting_evidence": [],
+              "support_score": 0.58,
+              "contradiction_score": 0.0
+            },
+            "implied_consequences": [
+              "favor hide or scan",
+              "protect memory of threat cues"
+            ],
+            "expected_state_shift": {
+              "danger": 0.72,
+              "shelter": 0.58
+            },
+            "decision_relevance": {
+              "action_choice": 0.578,
+              "social_stance": 0.129,
+              "risk_level": 0.993,
+              "verification_urgency": 0.54,
+              "memory_protection": 0.38214,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.22,
+              "total_score": 0.625554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "persistent_threat"
+          },
+          {
+            "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "statement": "The danger was a local accident rather than a persistent source.",
+            "prior_plausibility": 0.32,
+            "support": {
+              "support_evidence": [
+                "uncertainty"
+              ],
+              "contradicting_evidence": [
+                "direct_threat"
+              ],
+              "support_score": 0.46,
+              "contradiction_score": 0.12
+            },
+            "implied_consequences": [
+              "resume exploration sooner",
+              "verify recurrence before escalating"
+            ],
+            "expected_state_shift": {
+              "danger": 0.38,
+              "novelty": 0.34
+            },
+            "decision_relevance": {
+              "action_choice": 0.522,
+              "social_stance": 0.101,
+              "risk_level": 0.993,
+              "verification_urgency": 0.46,
+              "memory_protection": 0.34614,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.16,
+              "total_score": 0.545554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "local_accident"
+          },
+          {
+            "hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "statement": "Environmental interference or misleading conditions created the danger appearance.",
+            "prior_plausibility": 0.18,
+            "support": {
+              "support_evidence": [
+                "explicit_uncertainty"
+              ],
+              "contradicting_evidence": [
+                "physical_exposure"
+              ],
+              "support_score": 0.46,
+              "contradiction_score": 0.12
+            },
+            "implied_consequences": [
+              "verify environment before attributing stable threat",
+              "avoid overweighting one scene"
+            ],
+            "expected_state_shift": {
+              "danger": 0.44,
+              "novelty": 0.26
+            },
+            "decision_relevance": {
+              "action_choice": 0.508,
+              "social_stance": 0.094,
+              "risk_level": 0.993,
+              "verification_urgency": 0.44,
+              "memory_protection": 0.33714,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.24,
+              "total_score": 0.525554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            },
+            "latent_cause_type": "environmental_interference"
+          }
+        ],
+        "latent_causes": [
+          {
+            "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:cause",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "cause_type": "persistent_threat",
+            "statement": "There is a stable threat source that will continue shaping future danger.",
+            "confidence": 0.478,
+            "evidence_links": [
+              "direct_threat",
+              "physical_exposure"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.578,
+              "social_stance": 0.129,
+              "risk_level": 0.993,
+              "verification_urgency": 0.54,
+              "memory_protection": 0.38214,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.22,
+              "total_score": 0.625554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          },
+          {
+            "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:cause",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "cause_type": "local_accident",
+            "statement": "The danger was a local accident rather than a persistent source.",
+            "confidence": 0.3154,
+            "evidence_links": [
+              "uncertainty"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.522,
+              "social_stance": 0.101,
+              "risk_level": 0.993,
+              "verification_urgency": 0.46,
+              "memory_protection": 0.34614,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.16,
+              "total_score": 0.545554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          },
+          {
+            "cause_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:cause",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "cause_type": "environmental_interference",
+            "statement": "Environmental interference or misleading conditions created the danger appearance.",
+            "confidence": 0.2384,
+            "evidence_links": [
+              "explicit_uncertainty"
+            ],
+            "decision_relevance": {
+              "action_choice": 0.508,
+              "social_stance": 0.094,
+              "risk_level": 0.993,
+              "verification_urgency": 0.44,
+              "memory_protection": 0.33714,
+              "continuity_impact": 0.22,
+              "downstream_prediction_delta": 0.24,
+              "total_score": 0.525554,
+              "summary": "This uncertainty changes danger prediction and caution."
+            }
+          }
+        ],
+        "surface_cues": [],
+        "profile": {
+          "total_unknown_count": 1,
+          "decision_relevant_unknown_count": 1,
+          "competing_hypothesis_count": 3,
+          "latent_cause_count": 3,
+          "surface_cue_count": 0,
+          "interpretive_competition": 1.0,
+          "latent_cause_uncertainty_burden": 1.0,
+          "social_ambiguity_burden": 0.0,
+          "trust_ambiguity_burden": 0.0,
+          "environment_ambiguity_burden": 1.0,
+          "retained_uncertainty_burden": 0.485554
+        },
+        "promoted_unknown_ids": [
+          "m1:narrative:ingestion:unknown:threat_persistence"
+        ],
+        "summary": "The key unresolved latent cause is whether the threat is persistent or accidental, which materially changes future caution and verification."
+      },
+      "narrative_experiment": {
+        "generated_tick": 2,
+        "source_episode_id": "m1:narrative:ingestion",
+        "discrimination_targets": [
+          {
+            "target_id": "disc:m1:narrative:ingestion:unknown:threat_persistence",
+            "unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "decision_relevance": 0.485554,
+            "summary": "The narrative shows danger, but it is unclear whether the cause is stable or accidental."
+          }
+        ],
+        "predictions": [
+          {
+            "prediction_id": "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+            "parent_hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "observable_consequence": "There is a stable threat source that will continue shaping future danger. Observable consequence: favor hide or scan; protect memory of threat cues.",
+            "expected_horizon": 1,
+            "confidence": 0.478,
+            "evidence_channels": [
+              "danger",
+              "shelter"
+            ],
+            "support_signals": [
+              "danger>=0.72",
+              "shelter>=0.58"
+            ],
+            "contradiction_signals": [
+              "not(danger>=0.72)",
+              "not(shelter>=0.58)"
+            ],
+            "expected_state": {
+              "danger": 0.72,
+              "shelter": 0.58
+            },
+            "action_name": ""
+          },
+          {
+            "prediction_id": "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "parent_hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "observable_consequence": "The danger was a local accident rather than a persistent source. Observable consequence: resume exploration sooner; verify recurrence before escalating.",
+            "expected_horizon": 1,
+            "confidence": 0.319,
+            "evidence_channels": [
+              "danger",
+              "novelty"
+            ],
+            "support_signals": [
+              "danger<=0.38",
+              "novelty<=0.34"
+            ],
+            "contradiction_signals": [
+              "not(danger<=0.38)",
+              "not(novelty<=0.34)"
+            ],
+            "expected_state": {
+              "danger": 0.38,
+              "novelty": 0.34
+            },
+            "action_name": ""
+          },
+          {
+            "prediction_id": "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+            "parent_hypothesis_id": "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+            "parent_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "observable_consequence": "Environmental interference or misleading conditions created the danger appearance. Observable consequence: verify environment before attributing stable threat; avoid overweighting one scene.",
+            "expected_horizon": 1,
+            "confidence": 0.242,
+            "evidence_channels": [
+              "danger",
+              "novelty"
+            ],
+            "support_signals": [
+              "danger<=0.44",
+              "novelty<=0.26"
+            ],
+            "contradiction_signals": [
+              "not(danger<=0.44)",
+              "not(novelty<=0.26)"
+            ],
+            "expected_state": {
+              "danger": 0.44,
+              "novelty": 0.26
+            },
+            "action_name": ""
+          }
+        ],
+        "candidates": [
+          {
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:scan",
+            "action_name": "scan",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "discrimination_target_id": "disc:m1:narrative:ingestion:unknown:threat_persistence",
+            "linked_prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "distinction_summary": "scan helps separate m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent from m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "information_gain": {
+              "score": 0.695,
+              "separated_hypothesis_count": 3,
+              "confirmation_focus": 0.267,
+              "falsification_focus": 0.409,
+              "ambiguity_remaining": 0.305,
+              "weak_signal": false
+            },
+            "falsification_opportunity": {
+              "score": 0.44,
+              "target_hypothesis_ids": [
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+              ],
+              "summary": "scan can falsify m1:narrative:ingestion:unknown:threat_persistence:hyp:environment, m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+            },
+            "cost_profile": {
+              "score": 0.25376,
+              "expected_delay": 1.0,
+              "resource_cost": 0.0704,
+              "summary": "expected delay 1.0 and cost 0.07"
+            },
+            "risk_profile": {
+              "score": 0.26,
+              "safety_margin": 0.74,
+              "blockers": [],
+              "summary": "safe now"
+            },
+            "expected_horizon": 1,
+            "safe_to_recommend_now": true,
+            "action_available": true,
+            "selection_score": 0.450184,
+            "governance_note": "compatible with registered action schemas"
+          },
+          {
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:exploit_shelter",
+            "action_name": "exploit_shelter",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "discrimination_target_id": "disc:m1:narrative:ingestion:unknown:threat_persistence",
+            "linked_prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "distinction_summary": "exploit_shelter helps separate m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent from m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "information_gain": {
+              "score": 0.535,
+              "separated_hypothesis_count": 3,
+              "confirmation_focus": 0.267,
+              "falsification_focus": 0.329,
+              "ambiguity_remaining": 0.465,
+              "weak_signal": false
+            },
+            "falsification_opportunity": {
+              "score": 0.34,
+              "target_hypothesis_ids": [
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+              ],
+              "summary": "exploit_shelter can falsify m1:narrative:ingestion:unknown:threat_persistence:hyp:environment, m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+            },
+            "cost_profile": {
+              "score": 0.28568,
+              "expected_delay": 1.0,
+              "resource_cost": 0.0872,
+              "summary": "expected delay 1.0 and cost 0.09"
+            },
+            "risk_profile": {
+              "score": 0.08,
+              "safety_margin": 0.92,
+              "blockers": [],
+              "summary": "safe now"
+            },
+            "expected_horizon": 1,
+            "safe_to_recommend_now": true,
+            "action_available": true,
+            "selection_score": 0.380516,
+            "governance_note": "compatible with registered action schemas"
+          },
+          {
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:hide",
+            "action_name": "hide",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "discrimination_target_id": "disc:m1:narrative:ingestion:unknown:threat_persistence",
+            "linked_prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "distinction_summary": "hide helps separate m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent from m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "information_gain": {
+              "score": 0.555,
+              "separated_hypothesis_count": 3,
+              "confirmation_focus": 0.267,
+              "falsification_focus": 0.329,
+              "ambiguity_remaining": 0.445,
+              "weak_signal": false
+            },
+            "falsification_opportunity": {
+              "score": 0.34,
+              "target_hypothesis_ids": [
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+              ],
+              "summary": "hide can falsify m1:narrative:ingestion:unknown:threat_persistence:hyp:environment, m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+            },
+            "cost_profile": {
+              "score": 0.34488,
+              "expected_delay": 2.0,
+              "resource_cost": 0.0552,
+              "summary": "expected delay 2.0 and cost 0.06"
+            },
+            "risk_profile": {
+              "score": 0.1,
+              "safety_margin": 0.9,
+              "blockers": [],
+              "summary": "safe now"
+            },
+            "expected_horizon": 2,
+            "safe_to_recommend_now": true,
+            "action_available": true,
+            "selection_score": 0.378628,
+            "governance_note": "compatible with registered action schemas"
+          },
+          {
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:rest",
+            "action_name": "rest",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "discrimination_target_id": "disc:m1:narrative:ingestion:unknown:threat_persistence",
+            "linked_prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "distinction_summary": "rest helps separate m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent from m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+            "information_gain": {
+              "score": 0.495,
+              "separated_hypothesis_count": 3,
+              "confirmation_focus": 0.267,
+              "falsification_focus": 0.329,
+              "ambiguity_remaining": 0.505,
+              "weak_signal": false
+            },
+            "falsification_opportunity": {
+              "score": 0.34,
+              "target_hypothesis_ids": [
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment",
+                "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+              ],
+              "summary": "rest can falsify m1:narrative:ingestion:unknown:threat_persistence:hyp:environment, m1:narrative:ingestion:unknown:threat_persistence:hyp:accident"
+            },
+            "cost_profile": {
+              "score": 0.30156,
+              "expected_delay": 2.0,
+              "resource_cost": 0.0324,
+              "summary": "expected delay 2.0 and cost 0.03"
+            },
+            "risk_profile": {
+              "score": 0.05,
+              "safety_margin": 0.95,
+              "blockers": [],
+              "summary": "safe now"
+            },
+            "expected_horizon": 2,
+            "safe_to_recommend_now": true,
+            "action_available": true,
+            "selection_score": 0.363492,
+            "governance_note": "compatible with registered action schemas"
+          }
+        ],
+        "plans": [
+          {
+            "plan_id": "plan:disc:m1:narrative:ingestion:unknown:threat_persistence:scan",
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:scan",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "selected_action": "scan",
+            "selected_reason": "I selected scan because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m1:narrative:ingestion:unknown:threat_persistence, with information gain 0.70 at risk 0.26 and cost 0.25.",
+            "evidence_sought": [
+              "observe:danger",
+              "observe:shelter",
+              "observe:novelty"
+            ],
+            "outcome_differences": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:danger=0.72",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:danger=0.38",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:danger=0.44"
+            ],
+            "fallback_behavior": "If outcomes stay inconclusive, fall back to waiting for passive evidence and re-rank alternatives.",
+            "expected_horizon": 1,
+            "status": "active_experiment",
+            "prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "score": 0.450184,
+            "informative_value": 0.695,
+            "inconclusive_count": 0
+          },
+          {
+            "plan_id": "plan:disc:m1:narrative:ingestion:unknown:threat_persistence:exploit_shelter",
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:exploit_shelter",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "selected_action": "exploit_shelter",
+            "selected_reason": "I selected exploit_shelter because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m1:narrative:ingestion:unknown:threat_persistence, with information gain 0.53 at risk 0.08 and cost 0.29.",
+            "evidence_sought": [
+              "observe:danger",
+              "observe:shelter",
+              "observe:novelty"
+            ],
+            "outcome_differences": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:danger=0.72",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:danger=0.38",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:danger=0.44"
+            ],
+            "fallback_behavior": "If outcomes stay inconclusive, fall back to waiting for passive evidence and re-rank alternatives.",
+            "expected_horizon": 1,
+            "status": "queued_experiment",
+            "prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "score": 0.380516,
+            "informative_value": 0.535,
+            "inconclusive_count": 0
+          },
+          {
+            "plan_id": "plan:disc:m1:narrative:ingestion:unknown:threat_persistence:hide",
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:hide",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "selected_action": "hide",
+            "selected_reason": "I selected hide because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m1:narrative:ingestion:unknown:threat_persistence, with information gain 0.55 at risk 0.10 and cost 0.34.",
+            "evidence_sought": [
+              "observe:danger",
+              "observe:shelter",
+              "observe:novelty"
+            ],
+            "outcome_differences": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:danger=0.72",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:danger=0.38",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:danger=0.44"
+            ],
+            "fallback_behavior": "If outcomes stay inconclusive, fall back to waiting for passive evidence and re-rank alternatives.",
+            "expected_horizon": 2,
+            "status": "queued_experiment",
+            "prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "score": 0.378628,
+            "informative_value": 0.555,
+            "inconclusive_count": 0
+          },
+          {
+            "plan_id": "plan:disc:m1:narrative:ingestion:unknown:threat_persistence:rest",
+            "candidate_id": "disc:m1:narrative:ingestion:unknown:threat_persistence:rest",
+            "target_unknown_id": "m1:narrative:ingestion:unknown:threat_persistence",
+            "target_hypothesis_ids": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "selected_action": "rest",
+            "selected_reason": "I selected rest because it best distinguishes There is a stable threat source that will continue shaping future danger. from The danger was a local accident rather than a persistent source. for m1:narrative:ingestion:unknown:threat_persistence, with information gain 0.49 at risk 0.05 and cost 0.30.",
+            "evidence_sought": [
+              "observe:danger",
+              "observe:shelter",
+              "observe:novelty"
+            ],
+            "outcome_differences": [
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent:danger=0.72",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:accident:danger=0.38",
+              "m1:narrative:ingestion:unknown:threat_persistence:hyp:environment:danger=0.44"
+            ],
+            "fallback_behavior": "If outcomes stay inconclusive, fall back to waiting for passive evidence and re-rank alternatives.",
+            "expected_horizon": 2,
+            "status": "queued_experiment",
+            "prediction_ids": [
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:persistent",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:accident",
+              "exp_pred:m1:narrative:ingestion:unknown:threat_persistence:hyp:environment"
+            ],
+            "score": 0.363492,
+            "informative_value": 0.495,
+            "inconclusive_count": 0
+          }
+        ],
+        "summary": "The active inquiry is scan, targeting m1:narrative:ingestion:unknown:threat_persistence, because it offers the best bounded discrimination among competing narrative hypotheses. Scheduler: Inquiry scheduler promoted inquiry:plan:plan:disc:m1:narrative:ingestion:unknown:threat_persistence:scan because shared priority surface promoted this candidate."
+      },
+      "social_update": {
+        "updated": false,
+        "snapshot": {
+          "others": {},
+          "history_size": 0
+        }
+      },
+      "semantic_schemas": [],
+      "semantic_priority_bonus": 0.0,
+      "verification_semantic_priority": {
+        "prediction_id": "narrative:m1:narrative:ingestion",
+        "matched_schema_ids": [],
+        "priority_delta": 0.0
+      }
+    }
+  },
+  "stored_episode_excerpt": {
+    "source_episode_id": "m1:narrative:ingestion",
+    "source_type": "audit",
+    "predicted_outcome": "survival_threat",
+    "compiler_confidence": 0.81,
+    "has_appraisal": true,
+    "has_narrative_tags": true
+  }
+}

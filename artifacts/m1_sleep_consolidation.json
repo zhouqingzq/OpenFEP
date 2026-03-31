@@ -1,0 +1,117 @@
+{
+  "before_sleep": {
+    "value_score": -1.0,
+    "prediction_error": 0.22333333333333333,
+    "total_surprise": 1005.2300489856774,
+    "weighted_surprise": 1005.2300489856774,
+    "episode_created": true,
+    "predicted_outcome": "survival_threat",
+    "value_label": "survival_threat",
+    "preferred_probability": 0.0,
+    "risk": 1005.006715652344,
+    "preference_log_value": -1000.0,
+    "episode_score": 1.06,
+    "value_relevance": 1.0,
+    "policy_delta": 1.0,
+    "threat_significance": 1.0,
+    "redundancy_penalty": 0.0,
+    "support_delta": 0,
+    "episode_id": "ep-000001-forage",
+    "merged_into_episode_id": null,
+    "gating_reasons": [
+      "identity_critical_exception",
+      "high_value_relevance",
+      "policy_relevant",
+      "threat_significant"
+    ]
+  },
+  "sleep_summary": {
+    "average_free_energy_drop": 0.0,
+    "preferred_action": "rest",
+    "stable_beliefs": {
+      "food": 0.49203117021649884,
+      "danger": 0.3093977945037633,
+      "novelty": 0.4953391427059446,
+      "shelter": 0.39439778505759276,
+      "temperature": 0.49907400049700024,
+      "social": 0.2972127147255547
+    },
+    "dream_replay_count": 0,
+    "memory_consolidations": 6,
+    "sleep_cycle_id": 1,
+    "episodes_sampled": 5,
+    "clusters_created": 1,
+    "patterns_found": 1,
+    "world_model_updates": 2,
+    "policy_bias_updates": 1,
+    "epistemic_bonus_updates": 0,
+    "episodes_archived": 0,
+    "episodes_deleted": 0,
+    "memory_compressed": 4,
+    "prediction_error_before": 0.6367899999995,
+    "prediction_error_after": 0.37516346931808736,
+    "consolidation_metrics": {
+      "cluster_pe": [
+        {
+          "cluster_id": 0,
+          "action": "forage",
+          "pe_before": 0.6367899999995,
+          "pe_after": 0.37516346931808736,
+          "episode_count": 5,
+          "has_rule": true
+        }
+      ],
+      "conditioned_pe_before": 0.6367899999995,
+      "conditioned_pe_after": 0.37516346931808736,
+      "novelty_baseline": 0.22333333333333333,
+      "normalised_pe_before": 2.8512985074604478,
+      "normalised_pe_after": 1.6798364297824808,
+      "windowed_pe_history": [
+        0.37516346931808736
+      ],
+      "windowed_pe_mean": 0.37516346931808736,
+      "raw_pe_before": 0.6367899999995,
+      "raw_pe_after": 0.37516346931808736
+    },
+    "rules_extracted": 1,
+    "threat_updates": 1,
+    "preference_updates": 1,
+    "semantic_entries_written": 1,
+    "compression_removed": 4,
+    "llm_used": false,
+    "rule_ids": [
+      "sleep-1-0-forage-survival_threat"
+    ],
+    "counterfactual_episodes_evaluated": 0,
+    "counterfactual_insights_generated": 0,
+    "counterfactual_insights_absorbed": 0,
+    "counterfactual_energy_spent": 0.0,
+    "counterfactual_log": [],
+    "slow_learning_updates": 6,
+    "slow_learning_rejections": 2,
+    "slow_learning_summary": "Threat sensitivity changed through repeated experience. Continuity resilience remained stable because sleep-cycle drift budget exhausted."
+  },
+  "chosen_action_after_sleep": "hide",
+  "after_sleep": {
+    "value_score": 0.25934622467605517,
+    "prediction_error": 0.22333333333333333,
+    "total_surprise": 0.23004898567736703,
+    "weighted_surprise": 0.23004898567736703,
+    "episode_created": false,
+    "predicted_outcome": "resource_gain",
+    "value_label": "resource_gain",
+    "preferred_probability": 0.993306847254501,
+    "risk": 0.006715652344033707,
+    "preference_log_value": 5.0,
+    "episode_score": 0.15798774197288712,
+    "value_relevance": 0.25934622467605517,
+    "policy_delta": 0.0008394565430042134,
+    "threat_significance": 0.0016789130860084267,
+    "redundancy_penalty": 0.0,
+    "support_delta": 0,
+    "episode_id": null,
+    "merged_into_episode_id": null,
+    "gating_reasons": []
+  },
+  "threat_prior_cluster_0": 0.55
+}

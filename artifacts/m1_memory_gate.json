@@ -1,0 +1,62 @@
+{
+  "high_surprise": {
+    "value_score": -1.0,
+    "prediction_error": 0.29166666666666663,
+    "total_surprise": 1005.2983823190107,
+    "weighted_surprise": 1005.2983823190107,
+    "episode_created": true,
+    "predicted_outcome": "survival_threat",
+    "value_label": "survival_threat",
+    "preferred_probability": 0.0,
+    "risk": 1005.006715652344,
+    "preference_log_value": -1000.0,
+    "episode_score": 1.06,
+    "value_relevance": 1.0,
+    "policy_delta": 1.0,
+    "threat_significance": 1.0,
+    "redundancy_penalty": 0.0,
+    "support_delta": 0,
+    "episode_id": "ep-000001-hide",
+    "merged_into_episode_id": null,
+    "gating_reasons": [
+      "identity_critical_exception",
+      "high_value_relevance",
+      "policy_relevant",
+      "threat_significant"
+    ]
+  },
+  "low_surprise": {
+    "value_score": 0.25934622467605517,
+    "prediction_error": 0.008333333333333338,
+    "total_surprise": 0.008624811299654245,
+    "weighted_surprise": 0.008624811299654245,
+    "episode_created": false,
+    "predicted_outcome": "resource_gain",
+    "value_label": "resource_gain",
+    "preferred_probability": 0.993306847254501,
+    "risk": 0.006715652344033707,
+    "preference_log_value": 5.0,
+    "episode_score": 0.07341458536326867,
+    "value_relevance": 0.25934622467605517,
+    "policy_delta": 0.00017488677979254455,
+    "threat_significance": 0.0003497735595850891,
+    "redundancy_penalty": 0.0,
+    "support_delta": 0,
+    "episode_id": null,
+    "merged_into_episode_id": null,
+    "gating_reasons": []
+  },
+  "self_model": {
+    "classification": "self_error",
+    "predicted_resources": {
+      "token_exhaustion": true,
+      "memory_overflow": true,
+      "cpu_overload": true
+    },
+    "detected_threats": [
+      "token_exhaustion",
+      "memory_overflow",
+      "fatal_exception"
+    ]
+  }
+}
