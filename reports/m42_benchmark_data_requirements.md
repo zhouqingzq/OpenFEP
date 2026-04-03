@@ -20,6 +20,9 @@ What is not complete inside the repository:
 - Enough real subject coverage to make formal M4.2 benchmark claims
 - A passing M4.2 acceptance state
 
+`M4.2` is about benchmark-environment readiness. Claims about benchmark quality,
+human alignment, and baseline competitiveness are deferred to `M4.3`.
+
 ## Smoke Fixture vs External Bundle
 
 The files under `data/benchmarks/<benchmark_id>/` are repository fixtures for smoke testing.

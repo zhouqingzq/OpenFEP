@@ -2,27 +2,32 @@
 
 ## Title
 
-`M4.3: Single-Task Behavioral Fit and Initial Falsification`
+`M4.3: Single-Task Behavioral Fit and Baseline Comparison`
 
 ## Scope
 
-- Fit the repository Confidence Database slice at trial level.
-- Compare the parameterized cognitive agent against a three-tier baseline ladder:
-  - lower baselines that must be beaten,
+- Use the M4.2 benchmark environment to evaluate single-task behavioral fit.
+- Separate infrastructure metrics from benchmark-quality and human-alignment metrics.
+- Remove circular scoring paths where the benchmark would otherwise grade the agent with its own internal heuristic.
+- Compare the parameterized cognitive agent against a baseline ladder:
+  - weak baselines that must be beaten,
   - competitive baselines that should be matched or exceeded when the architecture is credible,
-  - an upper-bound per-subject or per-condition best-fit reference that functions as a ceiling rather than a mandatory target.
+  - an upper-bound reference used as a ceiling rather than a mandatory target.
 - Produce held-out metrics, ablation, stress, failure-analysis, and acceptance artifacts.
+
+## Non-Goals
+
+- Cross-task shared-parameter credibility
+- Controlled transfer claims
+- Longitudinal stability claims
 
 ## Acceptance Gates
 
-- `schema`
-- `determinism`
-- `causality`
-- `ablation`
-- `stress`
-- `regression`
-- `artifact_freshness`
 - `benchmark_fit`
+- `human_alignment_metrics`
+- `non_circular_scoring`
 - `baseline_tiering`
 - `competitive_parity`
 - `ceiling_gap_reported`
+- `sample_size_sufficient`
+- `regression`

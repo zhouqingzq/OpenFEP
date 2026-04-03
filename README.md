@@ -174,14 +174,16 @@ Every inferred parameter is wrapped in `ConfidenceRated(value, confidence, evide
 
 The current M4 roadmap aims to turn cognitive style from a narrative description into a measurable, serializable, cross-context behavioral interface.
 
-- `M4.1` should currently be read as an internal toy benchmark / simulator with executable decision logic and structured logs, not as a stage where cognitive style has been genuinely identified, externally validated, or fully explained as a real behavioral system.
-- `M4.2` connects those parameters to benchmark task adapters and reproducible evaluation flows.
-- `M4.3` tests whether the architecture beats weak baselines and stays competitive with stronger metacognitive baselines on single-task behavioral fit.
+- `M4.1` is the interface layer: unified cognitive parameters, executable observables, and structured decision logs.
+- `M4.2` is the benchmark-environment layer: task adapters, bundle provenance, replayability, and acceptance-grade benchmark plumbing.
+- `M4.3` is the single-task behavioral-fit layer: honest benchmark metrics, baseline comparison, and failure analysis.
 - `M4.4` checks whether shared parameters remain credible across confidence and Iowa Gambling Task slices.
 - `M4.5` validates cross-context transfer in a controlled complex environment before any real-tool open-world step.
 - `M4.6` quantifies whether style is stable, reproducible, and recoverable across long runs and perturbations.
 
 Open-world tool integration is treated as an `M5` concern. The purpose of M4 is to establish cross-context cognitive-style validity under controlled conditions before moving to noisy real-tool environments.
+
+Authoritative milestone boundaries are documented in [reports/m4_milestone_boundaries.md](/E:/workspace/segments/reports/m4_milestone_boundaries.md).
 
 ## Tests
 
@@ -195,11 +197,15 @@ python -m pytest tests/test_personality_analyzer.py -v
 
 ## M4.2 Benchmark Status
 
-The M4.2 benchmark pipeline in this repository is intentionally honest about the difference between repo smoke fixtures and acceptance-grade external data.
+The M4.2 benchmark pipeline in this repository is about environment readiness, not yet about strong behavioral-fit claims.
+
+It is intentionally honest about the difference between repo smoke fixtures and acceptance-grade external data.
 
 - `data/benchmarks/confidence_database/` is a smoke fixture, not an acceptance-ready benchmark bundle.
 - `data/benchmarks/iowa_gambling_task/` is a smoke fixture, not an acceptance-ready benchmark bundle.
 - Formal M4.2 acceptance remains blocked until real external bundles are imported for both benchmarks.
+
+Claims about benchmark quality, human alignment, and baseline competitiveness belong to `M4.3`, not `M4.2`.
 
 External bundles should be imported into the active benchmark registry, either under the default `data/benchmarks/<benchmark_id>/` layout or under a separate root referenced by `SEGMENTUM_BENCHMARK_ROOT`.
 
