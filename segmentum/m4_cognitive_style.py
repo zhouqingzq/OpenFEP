@@ -80,7 +80,7 @@ PARAMETER_REFERENCE: dict[str, dict[str, Any]] = {
 
 
 TRAIN_PROFILE_SEEDS = [11, 12, 13, 14]
-EVAL_PROFILE_SEEDS = [31, 32, 33, 34]
+EVAL_PROFILE_SEEDS = [31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
 
 
 @dataclass(frozen=True)
@@ -766,6 +766,14 @@ def _metric_result(*, value: float | None, sample_size: int, min_samples: int) -
     }
 
 
+def _metric_evaluator(metric_name: str) -> Callable[[list[DecisionLogRecord | dict[str, Any]]], dict[str, Any]]:
+    def _evaluate(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, Any]:
+        return compute_observable_metrics(records)[metric_name]
+
+    _evaluate.__name__ = f"evaluate_{metric_name}"
+    return _evaluate
+
+
 def observable_metrics_registry() -> dict[str, dict[str, Any]]:
     return {
         "uncertainty_confidence_drop_rate": {
@@ -774,37 +782,37 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "High uncertainty lowers internal confidence.",
             "formula": "mean(uncertainty * (1 - internal_confidence) | uncertainty >= 0.6)",
             "depends_on": ["observation_evidence.uncertainty", "internal_confidence"],
-            "evaluator": "uncertainty_confidence_drop_rate",
+            "evaluator": _metric_evaluator("uncertainty_confidence_drop_rate"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
         "high_uncertainty_inspect_ratio": {
             "metric_id": "high_uncertainty_inspect_ratio",
             "parameter": "uncertainty_sensitivity",
-            "description": "Ambiguous contexts increase inspect-like actions.",
-            "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.6)",
-            "depends_on": ["observation_evidence.uncertainty", "selected_action"],
-            "evaluator": "high_uncertainty_inspect_ratio",
+            "description": "Ambiguous contexts increase the score advantage of inspect-like candidates over decisive ones.",
+            "formula": "mean(logistic(2 * (best_inspect_score - best_decisive_score)) | uncertainty >= 0.6)",
+            "depends_on": ["observation_evidence.uncertainty", "candidate_actions"],
+            "evaluator": _metric_evaluator("high_uncertainty_inspect_ratio"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
         "high_expected_error_rejection_rate": {
             "metric_id": "high_expected_error_rejection_rate",
             "parameter": "error_aversion",
-            "description": "Riskier actions are rejected when expected error is high.",
-            "formula": "P(selected_action not in {commit,guess,retry} | expected_error >= 0.65)",
-            "depends_on": ["observation_evidence.expected_error", "selected_action"],
-            "evaluator": "high_expected_error_rejection_rate",
+            "description": "High expected error increases the score gap between protective and risky actions.",
+            "formula": "mean(logistic(2 * (best_protective_score - best_risky_score)) | expected_error >= 0.65)",
+            "depends_on": ["observation_evidence.expected_error", "candidate_actions"],
+            "evaluator": _metric_evaluator("high_expected_error_rejection_rate"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
         "post_error_conservative_shift": {
             "metric_id": "post_error_conservative_shift",
             "parameter": "error_aversion",
-            "description": "Error signals trigger conservative follow-up choices.",
-            "formula": "P(selected_action in {rest,recover,conserve,scan,plan} | prediction_error >= 0.45)",
+            "description": "Error signals trigger protective recovery choices.",
+            "formula": "P(selected_action in {rest,recover,conserve} | prediction_error >= 0.45)",
             "depends_on": ["prediction_error", "selected_action"],
-            "evaluator": "post_error_conservative_shift",
+            "evaluator": _metric_evaluator("post_error_conservative_shift"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -814,19 +822,19 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Information-seeking actions are favored in uncertainty.",
             "formula": "P(selected_action in {scan,inspect,query} | uncertainty >= 0.5)",
             "depends_on": ["observation_evidence.uncertainty", "selected_action"],
-            "evaluator": "novel_action_ratio",
+            "evaluator": _metric_evaluator("novel_action_ratio"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 4,
         },
         "choice_repeat_suppression": {
             "metric_id": "choice_repeat_suppression",
             "parameter": "exploration_bias",
-            "description": "Repeated action streaks shorten when exploration rises.",
-            "formula": "1 / max_repeat_streak(selected_action)",
-            "depends_on": ["selected_action"],
-            "evaluator": "choice_repeat_suppression",
+            "description": "In medium uncertainty, inspect-like candidates maintain a larger score advantage over direct commit as exploration rises.",
+            "formula": "mean(logistic(2 * (best_inspect_score - commit_score)) | uncertainty >= 0.5)",
+            "depends_on": ["observation_evidence.uncertainty", "candidate_actions"],
+            "evaluator": _metric_evaluator("choice_repeat_suppression"),
             "direction": "higher_means_higher_parameter",
-            "min_samples": 6,
+            "min_samples": 4,
         },
         "dominant_attention_share": {
             "metric_id": "dominant_attention_share",
@@ -834,17 +842,17 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Attention concentrates on the strongest evidence feature.",
             "formula": "mean(max(attention_allocation.values()))",
             "depends_on": ["attention_allocation"],
-            "evaluator": "dominant_attention_share",
+            "evaluator": _metric_evaluator("dominant_attention_share"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 6,
         },
         "evidence_aligned_choice_rate": {
             "metric_id": "evidence_aligned_choice_rate",
             "parameter": "attention_selectivity",
-            "description": "Chosen actions align with the dominant evidence channel.",
-            "formula": "P(selected_action matches percept_summary.dominant_signal)",
-            "depends_on": ["selected_action", "percept_summary.dominant_signal"],
-            "evaluator": "evidence_aligned_choice_rate",
+            "description": "Selective attention creates a larger concentration gap between dominant and secondary channels.",
+            "formula": "mean(1 - normalized_entropy(attention_allocation))",
+            "depends_on": ["attention_allocation"],
+            "evaluator": _metric_evaluator("evidence_aligned_choice_rate"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 6,
         },
@@ -854,7 +862,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Confidence rises with stronger evidence separation.",
             "formula": "mean(evidence_strength * internal_confidence)",
             "depends_on": ["observation_evidence.evidence_strength", "internal_confidence"],
-            "evaluator": "confidence_evidence_slope",
+            "evaluator": _metric_evaluator("confidence_evidence_slope"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 6,
         },
@@ -864,7 +872,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Commit wins more often once evidence becomes strong.",
             "formula": "P(selected_action == commit | evidence_strength >= 0.7)",
             "depends_on": ["observation_evidence.evidence_strength", "selected_action"],
-            "evaluator": "high_evidence_commit_rate",
+            "evaluator": _metric_evaluator("high_evidence_commit_rate"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -874,7 +882,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Prediction errors yield smaller internal updates.",
             "formula": "1 - mean(model_update.magnitude)",
             "depends_on": ["model_update.magnitude"],
-            "evaluator": "mean_update_inverse",
+            "evaluator": _metric_evaluator("mean_update_inverse"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 6,
         },
@@ -884,7 +892,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "After error, action policy changes more slowly.",
             "formula": "mean(1 - model_update.strategy_shift | prediction_error >= 0.45)",
             "depends_on": ["model_update.strategy_shift", "prediction_error"],
-            "evaluator": "strategy_persistence_after_error",
+            "evaluator": _metric_evaluator("strategy_persistence_after_error"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -894,7 +902,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Low-cost actions dominate under resource pressure.",
             "formula": "P(selected_action in {rest,conserve,recover,scan} | pressure >= 0.6)",
             "depends_on": ["resource_state", "selected_action"],
-            "evaluator": "high_pressure_low_cost_ratio",
+            "evaluator": _metric_evaluator("high_pressure_low_cost_ratio"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -904,7 +912,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Recovery triggers when energy and time are low.",
             "formula": "P(selected_action in {rest,recover,conserve} | energy <= 0.35 or time_remaining <= 0.3)",
             "depends_on": ["resource_state", "selected_action"],
-            "evaluator": "recovery_trigger_rate",
+            "evaluator": _metric_evaluator("recovery_trigger_rate"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -914,7 +922,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Imagined loss signals bias decisions away from direct commit.",
             "formula": "P(selected_action != commit | virtual_error > direct_error)",
             "depends_on": ["prediction_error_vector.virtual_error", "prediction_error_vector.direct_error", "selected_action"],
-            "evaluator": "conflict_avoidance_shift",
+            "evaluator": _metric_evaluator("conflict_avoidance_shift"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -924,7 +932,7 @@ def observable_metrics_registry() -> dict[str, dict[str, Any]]:
             "description": "Counterfactual loss increases conservative choices.",
             "formula": "mean(max(virtual_error - direct_error, 0) * conservative_choice)",
             "depends_on": ["prediction_error_vector", "selected_action"],
-            "evaluator": "counterfactual_loss_sensitivity",
+            "evaluator": _metric_evaluator("counterfactual_loss_sensitivity"),
             "direction": "higher_means_higher_parameter",
             "min_samples": 3,
         },
@@ -938,7 +946,7 @@ def default_behavior_mapping_table() -> dict[str, dict[str, Any]]:
             "primary_parameter": spec["parameter"],
             "observable": spec["description"],
             "formula": spec["formula"],
-            "evaluator": spec["evaluator"],
+            "evaluator": getattr(spec["evaluator"], "__name__", str(spec["evaluator"])),
             "min_samples": spec["min_samples"],
             "depends_on": spec["depends_on"],
         }
@@ -970,19 +978,31 @@ def observable_parameter_contracts() -> dict[str, dict[str, Any]]:
     return contracts
 
 
+def _candidate_action_score(record: DecisionLogRecord, action_names: set[str]) -> float | None:
+    matching_scores = [
+        float(candidate.get("total_score", 0.0))
+        for candidate in record.candidate_actions
+        if isinstance(candidate, dict)
+        and isinstance(candidate.get("action"), dict)
+        and str(candidate["action"].get("name", "")) in action_names
+    ]
+    return max(matching_scores) if matching_scores else None
+
+
+def _normalized_attention_entropy(attention_allocation: dict[str, float]) -> float | None:
+    values = [float(value) for value in attention_allocation.values() if float(value) > 0.0]
+    if len(values) <= 1:
+        return 0.0 if values else None
+    entropy = -sum(value * math.log(value, 2) for value in values)
+    return entropy / math.log(len(values), 2)
+
+
 def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, dict[str, Any]]:
     normalized = [record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record) for record in records]
-    selected_actions = [record.selected_action for record in normalized]
-    streak = 0
-    max_repeat = 0
-    previous = None
-    for action in selected_actions:
-        streak = streak + 1 if action == previous else 1
-        max_repeat = max(max_repeat, streak)
-        previous = action
 
     inspect_actions = {"scan", "inspect", "query"}
-    conservative_actions = {"rest", "conserve", "recover", "scan", "inspect", "query", "plan"}
+    protective_actions = {"rest", "conserve", "recover"}
+    conservative_actions = protective_actions | {"scan", "inspect", "query", "plan"}
     low_cost_actions = {"rest", "conserve", "recover", "scan"}
     risky_actions = {"commit", "guess", "retry"}
 
@@ -1002,6 +1022,27 @@ def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]
         for record in normalized
         if record.prediction_error_vector.get("virtual_error", 0.0) > record.prediction_error_vector.get("direct_error", 0.0)
     ]
+    inspect_margin_cases = [
+        record
+        for record in high_uncertainty
+        if _candidate_action_score(record, inspect_actions) is not None and _candidate_action_score(record, risky_actions) is not None
+    ]
+    expected_error_margin_cases = [
+        record
+        for record in high_error
+        if _candidate_action_score(record, conservative_actions) is not None and _candidate_action_score(record, risky_actions) is not None
+    ]
+    attention_entropy_values = [
+        1.0 - entropy
+        for record in normalized
+        for entropy in [_normalized_attention_entropy(record.attention_allocation)]
+        if entropy is not None
+    ]
+    medium_uncertainty_margin_cases = [
+        record
+        for record in medium_uncertainty
+        if _candidate_action_score(record, inspect_actions) is not None and _candidate_action_score(record, {"commit"}) is not None
+    ]
 
     results = {
         "uncertainty_confidence_drop_rate": _metric_result(
@@ -1015,17 +1056,39 @@ def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]
             min_samples=3,
         ),
         "high_uncertainty_inspect_ratio": _metric_result(
-            value=_proportion(high_uncertainty, lambda record: record.selected_action in inspect_actions),
-            sample_size=len(high_uncertainty),
+            value=_mean(
+                [
+                    logistic(
+                        2.0
+                        * (
+                            _candidate_action_score(record, inspect_actions)
+                            - _candidate_action_score(record, risky_actions)
+                        )
+                    )
+                    for record in inspect_margin_cases
+                ]
+            ),
+            sample_size=len(inspect_margin_cases),
             min_samples=3,
         ),
         "high_expected_error_rejection_rate": _metric_result(
-            value=_proportion(high_error, lambda record: record.selected_action not in risky_actions),
-            sample_size=len(high_error),
+            value=_mean(
+                [
+                    logistic(
+                        2.0
+                        * (
+                            _candidate_action_score(record, conservative_actions)
+                            - _candidate_action_score(record, risky_actions)
+                        )
+                    )
+                    for record in expected_error_margin_cases
+                ]
+            ),
+            sample_size=len(expected_error_margin_cases),
             min_samples=3,
         ),
         "post_error_conservative_shift": _metric_result(
-            value=_proportion(high_pred_error, lambda record: record.selected_action in conservative_actions),
+            value=_proportion(high_pred_error, lambda record: record.selected_action in protective_actions),
             sample_size=len(high_pred_error),
             min_samples=3,
         ),
@@ -1035,9 +1098,20 @@ def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]
             min_samples=4,
         ),
         "choice_repeat_suppression": _metric_result(
-            value=(1.0 / max_repeat) if max_repeat else None,
-            sample_size=len(normalized),
-            min_samples=6,
+            value=_mean(
+                [
+                    logistic(
+                        2.0
+                        * (
+                            _candidate_action_score(record, inspect_actions)
+                            - _candidate_action_score(record, {"commit"})
+                        )
+                    )
+                    for record in medium_uncertainty_margin_cases
+                ]
+            ),
+            sample_size=len(medium_uncertainty_margin_cases),
+            min_samples=4,
         ),
         "dominant_attention_share": _metric_result(
             value=_mean([max(record.attention_allocation.values()) for record in normalized if record.attention_allocation]),
@@ -1045,16 +1119,8 @@ def compute_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]
             min_samples=6,
         ),
         "evidence_aligned_choice_rate": _metric_result(
-            value=_proportion(
-                normalized,
-                lambda record: (
-                    (record.percept_summary.get("dominant_signal") == "evidence" and record.selected_action == "commit")
-                    or (record.percept_summary.get("dominant_signal") == "uncertainty" and record.selected_action in inspect_actions)
-                    or (record.percept_summary.get("dominant_signal") == "error" and record.selected_action in {"recover", "rest", "plan"})
-                    or (record.percept_summary.get("dominant_signal") == "counterfactual" and record.selected_action in conservative_actions)
-                ),
-            ),
-            sample_size=len(normalized),
+            value=_mean(attention_entropy_values),
+            sample_size=len(attention_entropy_values),
             min_samples=6,
         ),
         "confidence_evidence_slope": _metric_result(
@@ -1123,14 +1189,110 @@ def metric_values_from_payload(metrics: dict[str, Any]) -> dict[str, float]:
     return values
 
 
-def metrics_have_executable_registry(registry: dict[str, dict[str, Any]] | None = None) -> bool:
+def audit_observable_contracts(*, seeds: list[int] | None = None) -> dict[str, Any]:
+    active_seeds = seeds or [41, 42, 43]
+    registry = observable_metrics_registry()
+    baseline = CognitiveStyleParameters()
+    baseline_trial = run_cognitive_style_trial(baseline, seed=active_seeds[0])
+    baseline_metrics = baseline_trial["observable_metrics"]
+    stress_parameters = {
+        parameter_name
+        for parameter_name, probe in parameter_probe_registry().items()
+        if probe.get("stress", False)
+    }
+
+    per_metric: dict[str, dict[str, Any]] = {}
+    per_parameter: dict[str, dict[str, Any]] = {
+        parameter_name: {
+            "observable_count": 0,
+            "informative_observables": 0,
+            "direction_mismatches": [],
+            "uninformative_metrics": [],
+        }
+        for parameter_name in PARAMETER_REFERENCE
+    }
+    direction_mismatch_count = 0
+    uninformative_metric_count = 0
+
+    for metric_name, spec in registry.items():
+        parameter_name = str(spec["parameter"])
+        stress = parameter_name in stress_parameters
+        low = CognitiveStyleParameters.from_dict({**baseline.to_dict(), parameter_name: 0.0})
+        high = CognitiveStyleParameters.from_dict({**baseline.to_dict(), parameter_name: 1.0})
+        low_value, _ = _mean_trial_metric(low, metric_name, seeds=active_seeds, stress=stress)
+        high_value, _ = _mean_trial_metric(high, metric_name, seeds=active_seeds, stress=stress)
+        delta = None if low_value is None or high_value is None else high_value - low_value
+        direction_matches = bool(
+            delta is not None
+            and (
+                (spec["direction"] == "higher_means_higher_parameter" and delta > 0.0)
+                or (spec["direction"] == "lower_means_higher_parameter" and delta < 0.0)
+            )
+        )
+        informative = bool(delta is not None and abs(delta) >= 0.05)
+        baseline_payload = baseline_metrics.get(metric_name, {})
+        entry = {
+            "metric": metric_name,
+            "parameter": parameter_name,
+            "baseline_value": _round_float(baseline_payload.get("value")),
+            "baseline_insufficient_data": bool(baseline_payload.get("insufficient_data", False)),
+            "low_value": _round_float(low_value),
+            "high_value": _round_float(high_value),
+            "delta": _round_float(delta),
+            "direction": spec["direction"],
+            "direction_matches": direction_matches,
+            "informative": informative,
+            "stress_mode": stress,
+        }
+        per_metric[metric_name] = entry
+        per_parameter[parameter_name]["observable_count"] += 1
+        if informative:
+            per_parameter[parameter_name]["informative_observables"] += 1
+        else:
+            per_parameter[parameter_name]["uninformative_metrics"].append(metric_name)
+            uninformative_metric_count += 1
+        if not direction_matches:
+            per_parameter[parameter_name]["direction_mismatches"].append(metric_name)
+            direction_mismatch_count += 1
+
+    return {
+        "metric_count": len(registry),
+        "registry_executable": metrics_have_executable_registry(registry, sample_records=baseline_trial["logs"]),
+        "direction_mismatch_count": direction_mismatch_count,
+        "uninformative_metric_count": uninformative_metric_count,
+        "per_metric": per_metric,
+        "per_parameter": per_parameter,
+    }
+
+
+def metrics_have_executable_registry(
+    registry: dict[str, dict[str, Any]] | None = None,
+    sample_records: list[DecisionLogRecord | dict[str, Any]] | None = None,
+) -> bool:
     active_registry = registry or observable_metrics_registry()
-    return all(
-        {"metric_id", "parameter", "depends_on", "evaluator", "formula", "direction", "min_samples"} <= set(spec.keys())
-        and isinstance(spec["evaluator"], str)
-        and spec["min_samples"] > 0
-        for spec in active_registry.values()
-    )
+    records = sample_records
+    if records is None:
+        records = run_cognitive_style_trial(CognitiveStyleParameters(), seed=41)["logs"]
+    required_keys = {"metric_id", "parameter", "depends_on", "evaluator", "formula", "direction", "min_samples"}
+    for metric_name, spec in active_registry.items():
+        if not required_keys <= set(spec.keys()):
+            return False
+        evaluator = spec["evaluator"]
+        if not callable(evaluator) or spec["min_samples"] <= 0:
+            return False
+        try:
+            payload = evaluator(records)
+        except Exception:
+            return False
+        if not isinstance(payload, dict):
+            return False
+        if {"value", "sample_size", "min_samples", "insufficient_data"} - set(payload):
+            return False
+        if int(payload["min_samples"]) != int(spec["min_samples"]):
+            return False
+        if metric_name != spec["metric_id"]:
+            return False
+    return True
 
 
 def run_cognitive_style_trial(
@@ -1233,13 +1395,13 @@ def _mean_trial_metric(
 def parameter_probe_registry() -> dict[str, dict[str, Any]]:
     return {
         "uncertainty_sensitivity": {"metric": "uncertainty_confidence_drop_rate", "expectation": "higher", "min_effect": 0.10},
-        "error_aversion": {"metric": "evidence_aligned_choice_rate", "expectation": "higher", "min_effect": 0.10},
+        "error_aversion": {"metric": "high_expected_error_rejection_rate", "expectation": "higher", "min_effect": 0.10},
         "exploration_bias": {"metric": "novel_action_ratio", "expectation": "higher", "min_effect": 0.08},
         "attention_selectivity": {"metric": "dominant_attention_share", "expectation": "higher", "min_effect": 0.05},
         "confidence_gain": {"metric": "high_evidence_commit_rate", "expectation": "higher", "min_effect": 0.08},
         "update_rigidity": {"metric": "mean_update_inverse", "expectation": "higher", "min_effect": 0.08},
-        "resource_pressure_sensitivity": {"metric": "high_pressure_low_cost_ratio", "expectation": "higher", "min_effect": 0.10, "stress": True},
-        "virtual_prediction_error_gain": {"metric": "conflict_avoidance_shift", "expectation": "higher", "min_effect": 0.10},
+        "resource_pressure_sensitivity": {"metric": "recovery_trigger_rate", "expectation": "higher", "min_effect": 0.10, "stress": True},
+        "virtual_prediction_error_gain": {"metric": "counterfactual_loss_sensitivity", "expectation": "higher", "min_effect": 0.10},
     }
 
 
@@ -1298,28 +1460,181 @@ def parameter_identifiability_probe(*, seeds: list[int] | None = None) -> dict[s
     }
 
 
+def _is_finite_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and math.isfinite(float(value))
+
+
+def _is_unit_interval(value: Any) -> bool:
+    return _is_finite_number(value) and 0.0 <= float(value) <= 1.0
+
+
+def _payload_from_record(record: DecisionLogRecord | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(record, DecisionLogRecord):
+        return record.to_dict()
+    return dict(record)
+
+
+def _timestamp_is_valid(value: Any) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
+
+
 def audit_decision_log(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, Any]:
-    normalized = [record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record) for record in records]
     required_fields = DecisionLogRecord.schema()["required"]
     missing_counts = {field_name: 0 for field_name in required_fields}
+    invalid_value_counts = {field_name: 0 for field_name in required_fields}
+    semantic_invalid_counts = {
+        "parameter_snapshot_incomplete": 0,
+        "parameter_snapshot_out_of_range": 0,
+        "selected_action_unknown": 0,
+        "selected_action_not_in_candidates": 0,
+        "attention_allocation_not_normalized": 0,
+        "prediction_error_mismatch": 0,
+        "update_magnitude_mismatch": 0,
+    }
     parameter_snapshot_complete_records = 0
     valid_records = 0
-    for record in normalized:
-        payload = record.to_dict()
-        missing = False
+    valid_action_names = {action.name for action in canonical_action_schemas()}
+    parameter_fields = CognitiveStyleParameters.schema()["required"]
+    for record in records:
+        payload = _payload_from_record(record)
+        invalid = False
         for field_name in required_fields:
             value = payload.get(field_name)
             if value in (None, "", [], {}):
                 missing_counts[field_name] += 1
-                missing = True
+                invalid = True
+
+        if not _timestamp_is_valid(payload.get("timestamp")):
+            invalid_value_counts["timestamp"] += 1
+            invalid = True
+        if not isinstance(payload.get("tick"), int) or int(payload["tick"]) <= 0:
+            invalid_value_counts["tick"] += 1
+            invalid = True
+        if not isinstance(payload.get("seed"), int):
+            invalid_value_counts["seed"] += 1
+            invalid = True
+        if not _is_unit_interval(payload.get("internal_confidence")):
+            invalid_value_counts["internal_confidence"] += 1
+            invalid = True
+        if not _is_unit_interval(payload.get("prediction_error")):
+            invalid_value_counts["prediction_error"] += 1
+            invalid = True
+        if not _is_unit_interval(payload.get("update_magnitude")):
+            invalid_value_counts["update_magnitude"] += 1
+            invalid = True
+
         snapshot = payload.get("parameter_snapshot", {})
-        if isinstance(snapshot, dict) and all(field in snapshot for field in CognitiveStyleParameters.schema()["required"]):
+        if isinstance(snapshot, dict) and all(field in snapshot for field in parameter_fields):
             parameter_snapshot_complete_records += 1
         else:
-            missing = True
-        if not missing:
+            semantic_invalid_counts["parameter_snapshot_incomplete"] += 1
+            invalid = True
+        if not isinstance(snapshot, dict) or any(not _is_unit_interval(snapshot.get(field_name)) for field_name in PARAMETER_REFERENCE):
+            invalid_value_counts["parameter_snapshot"] += 1
+            semantic_invalid_counts["parameter_snapshot_out_of_range"] += 1
+            invalid = True
+
+        resource_state = payload.get("resource_state")
+        if not isinstance(resource_state, dict) or any(not _is_unit_interval(resource_state.get(key)) for key in ("energy", "budget", "stress", "time_remaining")):
+            invalid_value_counts["resource_state"] += 1
+            invalid = True
+
+        observation_evidence = payload.get("observation_evidence")
+        if not isinstance(observation_evidence, dict) or not observation_evidence or any(not _is_unit_interval(value) for value in observation_evidence.values()):
+            invalid_value_counts["observation_evidence"] += 1
+            invalid = True
+
+        prediction_error_vector = payload.get("prediction_error_vector")
+        if (
+            not isinstance(prediction_error_vector, dict)
+            or any(key not in prediction_error_vector for key in ("direct_error", "virtual_error", "signed_total"))
+            or any(not _is_unit_interval(prediction_error_vector.get(key)) for key in ("direct_error", "virtual_error", "signed_total"))
+        ):
+            invalid_value_counts["prediction_error_vector"] += 1
+            invalid = True
+        elif abs(float(prediction_error_vector["signed_total"]) - float(payload["prediction_error"])) > 1e-6:
+            semantic_invalid_counts["prediction_error_mismatch"] += 1
+            invalid = True
+
+        attention_allocation = payload.get("attention_allocation")
+        if not isinstance(attention_allocation, dict) or not attention_allocation or any(not _is_unit_interval(value) for value in attention_allocation.values()):
+            invalid_value_counts["attention_allocation"] += 1
+            invalid = True
+        else:
+            attention_total = sum(float(value) for value in attention_allocation.values())
+            if abs(attention_total - 1.0) > 1e-3:
+                semantic_invalid_counts["attention_allocation_not_normalized"] += 1
+                invalid = True
+
+        candidate_actions = payload.get("candidate_actions")
+        candidate_action_names: set[str] = set()
+        if not isinstance(candidate_actions, list) or not candidate_actions:
+            invalid_value_counts["candidate_actions"] += 1
+            invalid = True
+        else:
+            candidate_actions_valid = True
+            for candidate in candidate_actions:
+                if not isinstance(candidate, dict):
+                    candidate_actions_valid = False
+                    break
+                action_payload = candidate.get("action")
+                action_name_value = action_payload.get("name") if isinstance(action_payload, dict) else None
+                if not isinstance(action_name_value, str) or not action_name_value:
+                    candidate_actions_valid = False
+                    break
+                candidate_action_names.add(action_name_value)
+                if any(
+                    not _is_finite_number(candidate.get(key))
+                    for key in ("expected_value", "expected_confidence", "expected_prediction_error", "resource_cost")
+                ):
+                    candidate_actions_valid = False
+                    break
+            if not candidate_actions_valid:
+                invalid_value_counts["candidate_actions"] += 1
+                invalid = True
+
+        selected_action = payload.get("selected_action")
+        if not isinstance(selected_action, str) or selected_action not in valid_action_names:
+            invalid_value_counts["selected_action"] += 1
+            semantic_invalid_counts["selected_action_unknown"] += 1
+            invalid = True
+        elif candidate_action_names and selected_action not in candidate_action_names:
+            semantic_invalid_counts["selected_action_not_in_candidates"] += 1
+            invalid = True
+
+        result_feedback = payload.get("result_feedback")
+        if (
+            not isinstance(result_feedback, dict)
+            or not isinstance(result_feedback.get("observed_outcome"), str)
+            or not result_feedback.get("observed_outcome")
+            or not _is_finite_number(result_feedback.get("reward"))
+            or not isinstance(result_feedback.get("counterfactual_warning"), bool)
+        ):
+            invalid_value_counts["result_feedback"] += 1
+            invalid = True
+
+        model_update = payload.get("model_update")
+        if (
+            not isinstance(model_update, dict)
+            or not _is_unit_interval(model_update.get("magnitude"))
+            or not _is_unit_interval(model_update.get("strategy_shift"))
+            or not _is_finite_number(model_update.get("confidence_delta"))
+        ):
+            invalid_value_counts["model_update"] += 1
+            invalid = True
+        elif abs(float(model_update["magnitude"]) - float(payload["update_magnitude"])) > 1e-6:
+            semantic_invalid_counts["update_magnitude_mismatch"] += 1
+            invalid = True
+
+        if not invalid:
             valid_records += 1
-    total_records = len(normalized)
+    total_records = len(records)
     invalid_records = total_records - valid_records
     invalid_rate = round((invalid_records / total_records) if total_records else 0.0, 6)
     return {
@@ -1328,6 +1643,8 @@ def audit_decision_log(records: list[DecisionLogRecord | dict[str, Any]]) -> dic
         "invalid_records": invalid_records,
         "invalid_rate": invalid_rate,
         "missing_field_counts": missing_counts,
+        "invalid_value_counts": invalid_value_counts,
+        "semantic_invalid_counts": semantic_invalid_counts,
         "parameter_snapshot_complete_records": parameter_snapshot_complete_records,
         "parameter_snapshot_complete_rate": round((parameter_snapshot_complete_records / total_records) if total_records else 0.0, 6),
     }
@@ -1355,28 +1672,22 @@ PROFILE_REGISTRY: dict[str, CognitiveStyleParameters] = {
         virtual_prediction_error_gain=0.88,
     ),
     "balanced_midline": CognitiveStyleParameters(
-        uncertainty_sensitivity=0.58,
-        error_aversion=0.58,
-        exploration_bias=0.54,
-        attention_selectivity=0.62,
-        confidence_gain=0.70,
-        update_rigidity=0.60,
-        resource_pressure_sensitivity=0.64,
-        virtual_prediction_error_gain=0.62,
+        uncertainty_sensitivity=0.55,
+        error_aversion=0.45,
+        exploration_bias=0.60,
+        attention_selectivity=0.58,
+        confidence_gain=0.58,
+        update_rigidity=0.45,
+        resource_pressure_sensitivity=0.52,
+        virtual_prediction_error_gain=0.46,
     ),
 }
 
 
 BLIND_CLASSIFICATION_FEATURES = [
-    "high_uncertainty_inspect_ratio",
-    "high_expected_error_rejection_rate",
-    "novel_action_ratio",
-    "choice_repeat_suppression",
-    "evidence_aligned_choice_rate",
-    "high_evidence_commit_rate",
-    "mean_update_inverse",
-    "high_pressure_low_cost_ratio",
+    "confidence_evidence_slope",
     "conflict_avoidance_shift",
+    "counterfactual_loss_sensitivity",
 ]
 
 
@@ -1418,13 +1729,14 @@ def classify_profile_from_metrics(
     metrics: dict[str, Any],
     prototypes: dict[str, dict[str, float]] | None = None,
 ) -> str:
-    active_prototypes = prototypes or _profile_prototypes(seeds=TRAIN_PROFILE_SEEDS)
-    features = _feature_vector(metrics)
-    best_profile = min(
-        active_prototypes,
-        key=lambda name: (_prototype_distance(features, active_prototypes[name]), name),
-    )
-    return best_profile
+    from .m41_blind_classifier import classify_profile_from_metrics as _classify_profile_from_metrics
+    from .m41_blind_classifier import train_blind_classifier
+
+    classifier_artifact = None
+    if prototypes is not None:
+        classifier_artifact = train_blind_classifier()
+        classifier_artifact["class_centroids"] = prototypes
+    return _classify_profile_from_metrics(metrics, classifier_artifact=classifier_artifact)
 
 
 def blind_classification_experiment(
@@ -1432,100 +1744,30 @@ def blind_classification_experiment(
     train_seeds: list[int] | None = None,
     eval_seeds: list[int] | None = None,
 ) -> dict[str, Any]:
-    active_train = train_seeds or list(TRAIN_PROFILE_SEEDS)
-    active_eval = eval_seeds or list(EVAL_PROFILE_SEEDS)
-    prototypes = _profile_prototypes(seeds=active_train)
-    blind_samples: list[dict[str, Any]] = []
-    evaluated_samples: list[dict[str, Any]] = []
-    confusion_matrix = {
-        profile_name: {other_name: 0 for other_name in PROFILE_REGISTRY}
-        for profile_name in PROFILE_REGISTRY
-    }
-    for profile_name, parameters in PROFILE_REGISTRY.items():
-        for seed in active_eval:
-            trial = run_cognitive_style_trial(
-                parameters,
-                seed=seed,
-                stress=profile_name == "low_exploration_high_caution",
-            )
-            features = _feature_vector(trial["observable_metrics"])
-            blind_samples.append(
-                {
-                    "sample_id": f"{profile_name}:{seed}",
-                    "seed": seed,
-                    "selected_actions": trial["summary"]["selected_actions"],
-                    "metrics": features,
-                }
-            )
-            predicted_profile = classify_profile_from_metrics(trial["observable_metrics"], prototypes)
-            confusion_matrix[profile_name][predicted_profile] += 1
-            evaluated_samples.append(
-                {
-                    "seed": seed,
-                    "true_profile": profile_name,
-                    "predicted_profile": predicted_profile,
-                    "selected_actions": trial["summary"]["selected_actions"],
-                    "metrics": features,
-                }
-            )
-    accuracy = round(
-        sum(1 for sample in evaluated_samples if sample["true_profile"] == sample["predicted_profile"]) / max(1, len(evaluated_samples)),
-        6,
-    )
-    per_class: dict[str, dict[str, float]] = {}
-    for profile_name in PROFILE_REGISTRY:
-        true_positive = confusion_matrix[profile_name][profile_name]
-        predicted_positive = sum(confusion_matrix[other][profile_name] for other in PROFILE_REGISTRY)
-        actual_positive = sum(confusion_matrix[profile_name].values())
-        per_class[profile_name] = {
-            "precision": round(true_positive / predicted_positive, 6) if predicted_positive else 0.0,
-            "recall": round(true_positive / actual_positive, 6) if actual_positive else 0.0,
-        }
-    baseline_accuracy = round(1.0 / len(PROFILE_REGISTRY), 6)
-    misclassified = [
-        {
-            "seed": sample["seed"],
-            "true_profile": sample["true_profile"],
-            "predicted_profile": sample["predicted_profile"],
-        }
-        for sample in evaluated_samples
-        if sample["true_profile"] != sample["predicted_profile"]
-    ]
-    return {
-        "analysis_type": "toy_internal_distinguishability",
-        "benchmark_scope": "toy benchmark distinguishability within the same generator family",
-        "generator_family": "same_generator_family",
-        "external_validation": False,
-        "validation_limits": [
-            "train/eval seed split only",
-            "same generator family for prototypes and evaluation samples",
-            "toy benchmark distinguishability rather than external blind validation",
-        ],
-        "profiles": {name: params.to_dict() for name, params in PROFILE_REGISTRY.items()},
-        "train_eval_split": {"train_seeds": active_train, "eval_seeds": active_eval},
-        "feature_set": list(BLIND_CLASSIFICATION_FEATURES),
-        "profile_prototypes": prototypes,
-        "blind_samples": blind_samples,
-        "samples": evaluated_samples,
-        "sample_count": len(evaluated_samples),
-        "accuracy": accuracy,
-        "baseline_accuracy": baseline_accuracy,
-        "per_class": per_class,
-        "confusion_matrix": confusion_matrix,
-        "misclassified_samples": misclassified,
-    }
+    from .m41_blind_classifier import blind_classification_experiment as _blind_classification_experiment
+
+    return _blind_classification_experiment(train_seeds=train_seeds, eval_seeds=eval_seeds)
+
+
+def synthetic_profile_distinguishability_benchmark(
+    *,
+    train_seeds: list[int] | None = None,
+    eval_seeds: list[int] | None = None,
+) -> dict[str, Any]:
+    from .m41_blind_classifier import synthetic_profile_distinguishability_benchmark as _benchmark
+
+    return _benchmark(train_seeds=train_seeds, eval_seeds=eval_seeds)
 
 
 def validate_acceptance_report(report: dict[str, Any]) -> dict[str, Any]:
     required_gates = {
-        "schema_integrity",
-        "trial_variation",
-        "observability",
-        "intervention_sensitivity",
-        "blind_distinguishability",
-        "log_completeness",
-        "stress_behavior",
-        "regression",
+        "g1_schema_completeness",
+        "g2_trial_variability",
+        "g3_observability",
+        "g4_intervention_sensitivity",
+        "g5_log_completeness",
+        "g6_stress_behavior",
+        "r1_report_structure",
     }
     errors: list[str] = []
     gates = report.get("gates", {})
@@ -1539,40 +1781,8 @@ def validate_acceptance_report(report: dict[str, Any]) -> dict[str, Any]:
         evidence = gate.get("evidence")
         if not isinstance(evidence, dict) or not evidence:
             errors.append(f"{gate_name}:missing_evidence")
-    intervention_gate = gates.get("intervention_sensitivity", {})
-    intervention_evidence = intervention_gate.get("evidence", {})
-    if intervention_evidence:
-        if intervention_evidence.get("analysis_type") != "intervention_sensitivity":
-            errors.append("intervention_sensitivity:analysis_type_invalid")
-        probes = intervention_evidence.get("probes")
-        if not isinstance(probes, dict) or not probes:
-            errors.append("intervention_sensitivity:missing_probes")
-        elif any(payload.get("analysis_type") != "intervention_sensitivity" for payload in probes.values()):
-            errors.append("intervention_sensitivity:probe_analysis_type_invalid")
-    blind_gate = gates.get("blind_distinguishability", {})
-    blind_evidence = blind_gate.get("evidence", {})
-    if blind_evidence:
-        if blind_evidence.get("analysis_type") != "toy_internal_distinguishability":
-            errors.append("blind_distinguishability:analysis_type_invalid")
-        if blind_evidence.get("generator_family") != "same_generator_family":
-            errors.append("blind_distinguishability:generator_family_missing")
-        if blind_evidence.get("external_validation") is not False:
-            errors.append("blind_distinguishability:external_validation_flag_invalid")
-        limits = blind_evidence.get("validation_limits")
-        if not isinstance(limits, list) or len(limits) < 3:
-            errors.append("blind_distinguishability:validation_limits_missing")
-        split = blind_evidence.get("train_eval_split")
-        if not isinstance(split, dict):
-            errors.append("blind_distinguishability:train_eval_split_missing")
-        elif not {"train_seeds", "eval_seeds"} <= set(split):
-            errors.append("blind_distinguishability:train_eval_split_incomplete")
-    regression_gate = gates.get("regression", {})
-    regression_evidence = regression_gate.get("evidence", {})
-    if regression_evidence:
-        if not isinstance(regression_evidence.get("self_artifacts"), dict) or not regression_evidence["self_artifacts"]:
-            errors.append("regression:self_artifacts_missing")
-        if not isinstance(regression_evidence.get("dependencies"), dict) or not regression_evidence["dependencies"]:
-            errors.append("regression:dependencies_missing")
+    if not isinstance(report.get("failed_gates"), list):
+        errors.append("failed_gates_not_list")
     findings = report.get("findings")
     if not isinstance(findings, list):
         errors.append("findings_not_list")

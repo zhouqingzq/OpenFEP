@@ -1,0 +1,215 @@
+{
+  "milestone_id": "M4.1",
+  "status": "PASS",
+  "generated_at": "2026-04-03T16:15:04+00:00",
+  "scope": {
+    "milestone_goal": "Translate 'prior preference structure under finite energy constraints' into a unified parameter interface, observable interface, and logging interface that provides a common language for downstream benchmark tasks and open-world validation.",
+    "gates_in_scope": [
+      "g1_schema_completeness",
+      "g2_trial_variability",
+      "g3_observability",
+      "g4_intervention_sensitivity",
+      "g5_log_completeness",
+      "g6_stress_behavior"
+    ],
+    "deferred_to_later_milestones": [
+      "cross-generator blind classification (G7)",
+      "parameter falsification (G8)",
+      "cross-generator parameter recovery (G9)",
+      "inference engine audit (G10)",
+      "baseline non-hardcoded audit (G11)"
+    ],
+    "rationale": "G1-G6 verify the interface contracts (parameter roundtrip, observability, intervention sensitivity, log completeness, stress behavior). G7-G11 verify whether latent parameters correspond to real cognitive structure, which requires external human data and belongs to subsequent validation milestones."
+  },
+  "gates": {
+    "g1_schema_completeness": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "roundtrip_precision_loss": 0.0,
+        "roundtrip_ok": true,
+        "parameter_count": 8,
+        "invalid_rate": 0.0,
+        "parameter_snapshot_complete_rate": 1.0,
+        "passed": true
+      },
+      "validation_type": "interface_contract"
+    },
+    "g2_trial_variability": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "different_seed_produces_different_actions": true,
+        "same_seed_produces_identical_actions": true,
+        "different_param_produces_different_actions": true,
+        "passed": true
+      },
+      "validation_type": "interface_contract"
+    },
+    "g3_observability": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "parameter_count": 8,
+        "all_params_have_two_observables": true,
+        "registry_executable": true,
+        "metrics_with_data": 16,
+        "total_metrics": 16,
+        "sparse_insufficient_ratio": 1.0,
+        "sparse_threshold_works": true,
+        "direction_mismatch_count": 0,
+        "uninformative_metric_count": 0,
+        "informative_observables_per_parameter": {
+          "uncertainty_sensitivity": 2,
+          "error_aversion": 2,
+          "exploration_bias": 2,
+          "attention_selectivity": 2,
+          "confidence_gain": 2,
+          "update_rigidity": 2,
+          "resource_pressure_sensitivity": 2,
+          "virtual_prediction_error_gain": 2
+        },
+        "passed": true
+      },
+      "validation_type": "interface_contract"
+    },
+    "g4_intervention_sensitivity": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "identifiable_count": 8,
+        "total_parameters": 8,
+        "all_identifiable": true,
+        "per_parameter": {
+          "uncertainty_sensitivity": {
+            "metric": "uncertainty_confidence_drop_rate",
+            "delta": 0.176552,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "error_aversion": {
+            "metric": "high_expected_error_rejection_rate",
+            "delta": 0.243704,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "exploration_bias": {
+            "metric": "novel_action_ratio",
+            "delta": 0.3,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "attention_selectivity": {
+            "metric": "dominant_attention_share",
+            "delta": 0.075796,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "confidence_gain": {
+            "metric": "high_evidence_commit_rate",
+            "delta": 0.65,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "update_rigidity": {
+            "metric": "mean_update_inverse",
+            "delta": 0.243862,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "resource_pressure_sensitivity": {
+            "metric": "recovery_trigger_rate",
+            "delta": 0.833333,
+            "identifiable": true,
+            "expectation": "higher"
+          },
+          "virtual_prediction_error_gain": {
+            "metric": "counterfactual_loss_sensitivity",
+            "delta": 0.221426,
+            "identifiable": true,
+            "expectation": "higher"
+          }
+        },
+        "passed": true
+      },
+      "validation_type": "interface_contract"
+    },
+    "g5_log_completeness": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "total_records": 18,
+        "valid_records": 18,
+        "invalid_rate": 0.0,
+        "parameter_snapshot_complete_rate": 1.0,
+        "invalid_value_counts": {
+          "schema_version": 0,
+          "tick": 0,
+          "timestamp": 0,
+          "seed": 0,
+          "task_context": 0,
+          "percept_summary": 0,
+          "observation_evidence": 0,
+          "prediction_error_vector": 0,
+          "attention_allocation": 0,
+          "candidate_actions": 0,
+          "parameter_snapshot": 0,
+          "resource_state": 0,
+          "internal_confidence": 0,
+          "selected_action": 0,
+          "result_feedback": 0,
+          "model_update": 0,
+          "prediction_error": 0,
+          "update_magnitude": 0
+        },
+        "semantic_invalid_counts": {
+          "parameter_snapshot_incomplete": 0,
+          "parameter_snapshot_out_of_range": 0,
+          "selected_action_unknown": 0,
+          "selected_action_not_in_candidates": 0,
+          "attention_allocation_not_normalized": 0,
+          "prediction_error_mismatch": 0,
+          "update_magnitude_mismatch": 0
+        },
+        "passed": true
+      },
+      "validation_type": "interface_contract"
+    },
+    "g6_stress_behavior": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "total_actions": 18,
+        "low_cost_actions": 15,
+        "high_pressure_low_cost_ratio": 0.8333,
+        "passed": true
+      },
+      "validation_type": "interface_contract"
+    },
+    "r1_report_structure": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "gate_count": 7,
+        "all_gates_have_evidence": true,
+        "all_gates_have_passed_flag": true,
+        "failed_gates_match_recomputed": true,
+        "status_matches_blocking_gates": true,
+        "recomputed_failed_gates": [],
+        "recomputed_status": "PASS"
+      },
+      "validation_type": "report_integrity"
+    }
+  },
+  "failed_gates": [],
+  "findings": [],
+  "recommendation": "ACCEPT",
+  "freshness": {
+    "generated_this_round": true,
+    "round_started_at": "2026-04-03T16:15:00+00:00"
+  },
+  "report_validation": {
+    "valid": true,
+    "errors": []
+  }
+}

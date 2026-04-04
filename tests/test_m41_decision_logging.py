@@ -49,6 +49,18 @@ class TestM41DecisionLogging(unittest.TestCase):
         self.assertLess(audit["parameter_snapshot_complete_rate"], 1.0)
         self.assertGreater(audit["invalid_rate"], 0.0)
 
+    def test_log_audit_rejects_out_of_range_and_semantically_invalid_values(self) -> None:
+        payload = run_cognitive_style_trial(CognitiveStyleParameters())
+        corrupted = dict(payload["logs"][0])
+        corrupted["internal_confidence"] = 1.5
+        corrupted["attention_allocation"] = {"evidence": 0.9, "uncertainty": 0.9}
+        corrupted["selected_action"] = "teleport"
+        audit = audit_decision_log([corrupted, *payload["logs"][1:]])
+        self.assertGreater(audit["invalid_value_counts"]["internal_confidence"], 0)
+        self.assertGreater(audit["semantic_invalid_counts"]["attention_allocation_not_normalized"], 0)
+        self.assertGreater(audit["semantic_invalid_counts"]["selected_action_unknown"], 0)
+        self.assertGreater(audit["invalid_rate"], 0.0)
+
     def test_all_eight_parameters_have_independent_intervention_probes(self) -> None:
         matrix = parameter_intervention_sensitivity_matrix()
         self.assertEqual(set(matrix.keys()), set(PARAMETER_REFERENCE.keys()))

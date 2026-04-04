@@ -51,6 +51,13 @@ class TestM41CognitiveParameters(unittest.TestCase):
             for observable in contract["observables"]:
                 self.assertIn("evaluator", observable)
                 self.assertIn("min_samples", observable)
+                self.assertTrue(callable(observable["evaluator"]))
+
+    def test_error_aversion_probe_uses_its_own_contract_metric(self) -> None:
+        contracts = observable_parameter_contracts()
+        error_metrics = {observable["metric"] for observable in contracts["error_aversion"]["observables"]}
+        self.assertEqual(parameter_probe_registry()["error_aversion"]["metric"], "high_expected_error_rejection_rate")
+        self.assertIn(parameter_probe_registry()["error_aversion"]["metric"], error_metrics)
 
     def test_parameter_interventions_have_expected_direction_and_effect_size(self) -> None:
         matrix = parameter_intervention_sensitivity_matrix()
@@ -70,6 +77,7 @@ class TestM41CognitiveParameters(unittest.TestCase):
         probe = parameter_identifiability_probe()
         self.assertEqual(probe["analysis_type"], "intervention_sensitivity")
         self.assertTrue(all(probe["identifiable"].values()))
+        self.assertNotIn("external_validation", probe)
 
 
 if __name__ == "__main__":

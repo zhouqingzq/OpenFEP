@@ -21,8 +21,13 @@ class TestM41Observables(unittest.TestCase):
     def test_registry_entries_have_executable_evaluators(self) -> None:
         registry = observable_metrics_registry()
         self.assertTrue(metrics_have_executable_registry(registry))
-        for metric_name, payload in registry.items():
-            self.assertEqual(metric_name, payload["metric_id"])
+        trial = run_cognitive_style_trial(CognitiveStyleParameters())
+        for metric_name, spec in registry.items():
+            self.assertEqual(metric_name, spec["metric_id"])
+            self.assertTrue(callable(spec["evaluator"]))
+            metric_payload = spec["evaluator"](trial["logs"])
+            self.assertIsInstance(metric_payload, dict)
+            self.assertIn("insufficient_data", metric_payload)
 
     def test_all_registered_metrics_can_be_computed_from_logs(self) -> None:
         payload = run_cognitive_style_trial(CognitiveStyleParameters())

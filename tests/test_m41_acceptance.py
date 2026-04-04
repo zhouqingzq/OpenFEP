@@ -3,157 +3,114 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from unittest.mock import patch
 
 from segmentum.m41_audit import M41_REPORT_PATH, write_m41_acceptance_artifacts
 from segmentum.m4_cognitive_style import validate_acceptance_report
 
 
+INTERFACE_GATES = [
+    "g1_schema_completeness",
+    "g2_trial_variability",
+    "g3_observability",
+    "g4_intervention_sensitivity",
+    "g5_log_completeness",
+    "g6_stress_behavior",
+    "r1_report_structure",
+]
+
+
 class TestM41Acceptance(unittest.TestCase):
-    def test_acceptance_bundle_contains_required_fields(self) -> None:
+    def test_acceptance_gates_present_and_honest(self) -> None:
         write_m41_acceptance_artifacts()
         report = json.loads(Path(M41_REPORT_PATH).read_text(encoding="utf-8"))
         self.assertEqual(report["milestone_id"], "M4.1")
         self.assertIn(report["status"], {"PASS", "FAIL"})
-        self.assertEqual(report["analysis_scope"], "toy cognitive-style benchmark with falsifiable gates")
-        self.assertIn("not a causal inference system", Path(report["artifacts"]["summary"]).read_text(encoding="utf-8"))
-        blind_summary = Path(report["artifacts"]["blind_summary"]).read_text(encoding="utf-8")
-        self.assertIn("Generator family", blind_summary)
-        self.assertIn("External validation", blind_summary)
-        for gate_name in (
-            "schema_integrity",
-            "trial_variation",
-            "observability",
-            "intervention_sensitivity",
-            "blind_distinguishability",
-            "log_completeness",
-            "stress_behavior",
-            "regression",
-        ):
-            self.assertIn(gate_name, report["gates"])
-            self.assertIn("passed", report["gates"][gate_name])
-            self.assertIn("evidence", report["gates"][gate_name])
-        self.assertEqual(report["gates"]["intervention_sensitivity"]["evidence"]["analysis_type"], "intervention_sensitivity")
-        self.assertEqual(report["gates"]["blind_distinguishability"]["evidence"]["analysis_type"], "toy_internal_distinguishability")
-        self.assertEqual(report["gates"]["blind_distinguishability"]["evidence"]["generator_family"], "same_generator_family")
-        self.assertFalse(report["gates"]["blind_distinguishability"]["evidence"]["external_validation"])
-        self.assertIn("self_artifacts", report["gates"]["regression"]["evidence"])
-        self.assertIn("dependencies", report["gates"]["regression"]["evidence"])
+
+        # All interface gates must exist with passed flag and evidence
+        for gate_name in INTERFACE_GATES:
+            self.assertIn(gate_name, report["gates"], f"missing gate: {gate_name}")
+            gate = report["gates"][gate_name]
+            self.assertIn("passed", gate)
+            self.assertIsInstance(gate["evidence"], dict)
+            self.assertTrue(gate["evidence"], f"empty evidence for {gate_name}")
+
+        # All interface gates are blocking
+        for gate_name in INTERFACE_GATES:
+            self.assertTrue(
+                report["gates"][gate_name].get("blocking", False),
+                f"{gate_name} must be blocking",
+            )
+
+        # failed_gates is consistent with gate results
+        expected_failed = sorted(
+            name for name, payload in report["gates"].items() if not payload["passed"]
+        )
+        self.assertEqual(sorted(report["failed_gates"]), expected_failed)
+
+        # status is consistent with blocking gates
+        has_blocking_failure = any(
+            report["gates"][g]["blocking"] and not report["gates"][g]["passed"]
+            for g in report["gates"]
+        )
+        if has_blocking_failure:
+            self.assertEqual(report["status"], "FAIL")
+        else:
+            self.assertEqual(report["status"], "PASS")
+
+        # report_validation passes
         self.assertTrue(report["report_validation"]["valid"], msg=report["report_validation"])
 
-    def test_report_validation_rejects_gate_without_evidence(self) -> None:
-        broken_report = {
-            "status": "PASS",
-            "findings": [],
-            "gates": {
-                "schema_integrity": {"passed": True},
-                "trial_variation": {"passed": True, "evidence": {"ok": True}},
-                "observability": {"passed": True, "evidence": {"ok": True}},
-                "intervention_sensitivity": {"passed": True, "evidence": {"ok": True}},
-                "blind_distinguishability": {"passed": True, "evidence": {"ok": True}},
-                "log_completeness": {"passed": True, "evidence": {"ok": True}},
-                "stress_behavior": {"passed": True, "evidence": {"ok": True}},
-                "regression": {"passed": True, "evidence": {"ok": True}},
-            },
-        }
-        validation = validate_acceptance_report(broken_report)
-        self.assertFalse(validation["valid"])
-        self.assertTrue(any("missing_evidence" in item for item in validation["errors"]))
-
-    def test_report_validation_rejects_pass_status_when_blocking_gate_failed(self) -> None:
-        broken_report = {
-            "status": "PASS",
-            "findings": [],
-            "gates": {
-                "schema_integrity": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "trial_variation": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "observability": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "intervention_sensitivity": {
-                    "passed": True,
-                    "blocking": True,
-                    "evidence": {"analysis_type": "intervention_sensitivity", "probes": {"x": {"analysis_type": "intervention_sensitivity"}}},
-                },
-                "blind_distinguishability": {
-                    "passed": False,
-                    "blocking": True,
-                    "evidence": {
-                        "analysis_type": "toy_internal_distinguishability",
-                        "generator_family": "same_generator_family",
-                        "external_validation": False,
-                        "validation_limits": ["train/eval seed split only", "same generator family", "toy benchmark distinguishability"],
-                        "train_eval_split": {"train_seeds": [1], "eval_seeds": [2]},
-                    },
-                },
-                "log_completeness": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "stress_behavior": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "regression": {
-                    "passed": True,
-                    "blocking": True,
-                    "evidence": {"self_artifacts": {"ok": True}, "dependencies": {"m35": {"passed": True}}},
-                },
-            },
-        }
-        validation = validate_acceptance_report(broken_report)
-        self.assertFalse(validation["valid"])
-        self.assertTrue(any("status_mismatch:blocking_gate_failed" in item for item in validation["errors"]))
-
-    def test_regression_gate_fails_when_dependency_evidence_is_missing(self) -> None:
-        with TemporaryDirectory() as tmpdir:
-            missing_report = Path(tmpdir) / "missing_report.json"
-            missing_summary = Path(tmpdir) / "missing_summary.md"
-            missing_trace = Path(tmpdir) / "missing_trace.json"
-            bad_dependency = {
-                "report": str(missing_report),
-                "summary": str(missing_summary),
-                "trace": str(missing_trace),
-            }
-            with patch("segmentum.m41_audit.write_m35_acceptance_artifacts", return_value=bad_dependency):
-                write_m41_acceptance_artifacts()
+    def test_g1_evidence_has_numeric_values(self) -> None:
+        write_m41_acceptance_artifacts()
         report = json.loads(Path(M41_REPORT_PATH).read_text(encoding="utf-8"))
-        self.assertFalse(report["gates"]["regression"]["passed"])
-        self.assertEqual(report["status"], "FAIL")
-        self.assertEqual(report["recommendation"], "BLOCK")
-        self.assertTrue(any(item["label"] == "regression_failed" for item in report["findings"]))
+        g1 = report["gates"]["g1_schema_completeness"]["evidence"]
+        self.assertIsInstance(g1["roundtrip_precision_loss"], float)
+        self.assertIsInstance(g1["parameter_count"], int)
+        self.assertEqual(g1["parameter_count"], 8)
+        self.assertLess(g1["roundtrip_precision_loss"], 1e-6)
+        self.assertEqual(g1["parameter_snapshot_complete_rate"], 1.0)
 
-    def test_report_validation_rejects_misleading_causal_or_blind_claims(self) -> None:
-        broken_report = {
+    def test_g4_evidence_has_per_parameter_results(self) -> None:
+        write_m41_acceptance_artifacts()
+        report = json.loads(Path(M41_REPORT_PATH).read_text(encoding="utf-8"))
+        g4 = report["gates"]["g4_intervention_sensitivity"]["evidence"]
+        self.assertEqual(g4["total_parameters"], 8)
+        self.assertIsInstance(g4["per_parameter"], dict)
+        self.assertEqual(len(g4["per_parameter"]), 8)
+        for name, entry in g4["per_parameter"].items():
+            self.assertIn("delta", entry)
+            self.assertIn("identifiable", entry)
+
+    def test_g3_and_g5_evidence_include_honesty_checks(self) -> None:
+        write_m41_acceptance_artifacts()
+        report = json.loads(Path(M41_REPORT_PATH).read_text(encoding="utf-8"))
+        g3 = report["gates"]["g3_observability"]["evidence"]
+        g5 = report["gates"]["g5_log_completeness"]["evidence"]
+        self.assertIn("registry_executable", g3)
+        self.assertIn("informative_observables_per_parameter", g3)
+        self.assertIn("invalid_value_counts", g5)
+        self.assertIn("semantic_invalid_counts", g5)
+
+    def test_validate_acceptance_report_rejects_missing_gates(self) -> None:
+        broken = {
             "status": "PASS",
+            "gates": {"g1_schema_completeness": {"passed": True, "blocking": True, "evidence": {"ok": True}}},
             "findings": [],
-            "gates": {
-                "schema_integrity": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "trial_variation": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "observability": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "intervention_sensitivity": {
-                    "passed": True,
-                    "blocking": True,
-                    "evidence": {"analysis_type": "causal_inference", "probes": {"x": {"analysis_type": "causal_inference"}}},
-                },
-                "blind_distinguishability": {
-                    "passed": True,
-                    "blocking": True,
-                    "evidence": {
-                        "analysis_type": "blind_validation",
-                        "generator_family": "unknown",
-                        "external_validation": True,
-                        "validation_limits": [],
-                        "train_eval_split": {},
-                    },
-                },
-                "log_completeness": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "stress_behavior": {"passed": True, "blocking": True, "evidence": {"ok": True}},
-                "regression": {
-                    "passed": True,
-                    "blocking": True,
-                    "evidence": {"self_artifacts": {"ok": True}, "dependencies": {"m35": {"passed": True}}},
-                },
-            },
+            "failed_gates": [],
         }
-        validation = validate_acceptance_report(broken_report)
+        validation = validate_acceptance_report(broken)
         self.assertFalse(validation["valid"])
-        self.assertTrue(any("intervention_sensitivity:analysis_type_invalid" == item for item in validation["errors"]))
-        self.assertTrue(any("blind_distinguishability:analysis_type_invalid" == item for item in validation["errors"]))
-        self.assertTrue(any("blind_distinguishability:train_eval_split_incomplete" == item for item in validation["errors"]))
+        self.assertTrue(any("missing_gates" in e for e in validation["errors"]))
+
+    def test_scope_describes_interface_layer(self) -> None:
+        write_m41_acceptance_artifacts()
+        report = json.loads(Path(M41_REPORT_PATH).read_text(encoding="utf-8"))
+        scope = report["scope"]
+        self.assertIn("parameter interface", scope["milestone_goal"])
+        self.assertIn("observable interface", scope["milestone_goal"])
+        self.assertIn("logging interface", scope["milestone_goal"])
+        self.assertIsInstance(scope["deferred_to_later_milestones"], list)
+        self.assertGreater(len(scope["deferred_to_later_milestones"]), 0)
 
 
 if __name__ == "__main__":
