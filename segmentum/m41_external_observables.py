@@ -1,18 +1,28 @@
 from __future__ import annotations
 
+"""Same-framework synthetic holdout observables.
+
+This module keeps the historical ``external`` compatibility names, but the
+observable computations here are driven by a repository-owned synthetic
+holdout generator. They are useful as sidecar diagnostics only and should not
+be framed as external human-data validation.
+"""
+
 import math
 from typing import Any
 
 from .m4_cognitive_style import DecisionLogRecord
 
 
-EXTERNAL_OBSERVABLES_IMPLEMENTATION_FAMILY = "external_observables_v1"
+SAME_FRAMEWORK_HOLDOUT_OBSERVABLES_IMPLEMENTATION_FAMILY = "same_framework_holdout_observables_v1"
+EXTERNAL_OBSERVABLES_IMPLEMENTATION_FAMILY = SAME_FRAMEWORK_HOLDOUT_OBSERVABLES_IMPLEMENTATION_FAMILY
 
-EXTERNAL_MEASUREMENT_MISMATCHES = [
+SAME_FRAMEWORK_HOLDOUT_MEASUREMENT_MISMATCHES = [
     "uncertainty- and pressure-based cohorts use shifted thresholds relative to the internal observables",
     "confidence/evidence coupling uses centered-and-clipped terms instead of direct products for several metrics",
     "repeat suppression and recovery metrics use softer normalization to preserve generator-specific measurement mismatch",
 ]
+EXTERNAL_MEASUREMENT_MISMATCHES = SAME_FRAMEWORK_HOLDOUT_MEASUREMENT_MISMATCHES
 
 
 def _round(value: float | None) -> float | None:
@@ -46,7 +56,7 @@ def _metric_result(
         "sample_size": int(sample_size),
         "min_samples": int(min_samples),
         "insufficient_data": sample_size < min_samples or value is None,
-        "implementation_family": EXTERNAL_OBSERVABLES_IMPLEMENTATION_FAMILY,
+        "implementation_family": SAME_FRAMEWORK_HOLDOUT_OBSERVABLES_IMPLEMENTATION_FAMILY,
         "measurement_mismatch": list(notes or []),
     }
 
@@ -78,7 +88,7 @@ def _normalized_attention_entropy(attention_allocation: dict[str, float]) -> flo
     return entropy / math.log(len(values), 2)
 
 
-def compute_external_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, dict[str, Any]]:
+def compute_same_framework_holdout_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, dict[str, Any]]:
     normalized = [record if isinstance(record, DecisionLogRecord) else DecisionLogRecord.from_dict(record) for record in records]
 
     inspect_actions = {"scan", "inspect", "query"}
@@ -268,7 +278,7 @@ def compute_external_observable_metrics(records: list[DecisionLogRecord | dict[s
             value=_proportion(low_resource, lambda record: record.selected_action in {"rest", "recover", "conserve", "plan"}),
             sample_size=len(low_resource),
             min_samples=3,
-            notes=["plan counts as a weak recovery action for external workloads"],
+            notes=["plan counts as a weak recovery action for same-framework synthetic workloads"],
         ),
         "conflict_avoidance_shift": _metric_result(
             value=_proportion(conflict_cases, lambda record: record.selected_action not in {"commit", "guess"}),
@@ -294,3 +304,7 @@ def compute_external_observable_metrics(records: list[DecisionLogRecord | dict[s
         ),
     }
     return results
+
+
+def compute_external_observable_metrics(records: list[DecisionLogRecord | dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return compute_same_framework_holdout_observable_metrics(records)

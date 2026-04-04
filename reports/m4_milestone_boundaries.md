@@ -11,7 +11,7 @@ aligned across the repository.
 | Milestone | Primary Goal | Evidence That Counts | Explicit Non-Goals |
 | --- | --- | --- | --- |
 | `M4.1` | Translate cognitive variables into a unified parameter, observable, and logging interface. | Schema roundtrip, executable observable registry, intervention sensitivity inside the minimal simulator, log completeness, stress-mode interface behavior. | Benchmark adapters, benchmark bundle integration, human-data claims, blind classification, parameter recovery, falsification, baseline comparison. |
-| `M4.2` | Build the cognitive benchmark environment around the shared interfaces. | Benchmark registry, manifest validation, smoke-vs-external separation, protocol schemas, adapter execution, deterministic replay, leakage checks, provenance-rich artifacts. | Declaring good behavioral fit, proving human alignment, beating baselines, identifying latent parameters. |
+| `M4.2` | Build the cognitive benchmark and task layer around the shared interfaces. | Benchmark registry, manifest validation, smoke-vs-external separation, protocol schemas, adapter execution, deterministic replay, leakage checks, provenance-rich artifacts, and task-grounded replay/recovery setup. | Declaring good behavioral fit, proving human alignment, beating baselines, identifying latent parameters from same-framework toy sidecars. |
 | `M4.3` | Evaluate single-task benchmark quality and compare against baselines. | Held-out benchmark metrics, human-alignment metrics, non-circular scoring, ablations, stress tests, baseline ladder, honest failure analysis. | Cross-task shared-parameter credibility, transfer claims, longitudinal stability claims. |
 | `M4.4` | Test whether shared parameters remain credible across multiple benchmark tasks. | Cross-task consistency checks, shared-parameter audits, task-to-task credibility reports. | Open-world transfer and real-tool deployment. |
 | `M4.5` | Validate controlled transfer into a more complex environment. | Cross-context transfer results in a controlled non-trivial environment, failure recovery analysis. | Longitudinal stability and open-world tooling. |
@@ -20,10 +20,11 @@ aligned across the repository.
 ## Naming Rules
 
 - Use `interface layer` for `M4.1`.
-- Use `benchmark environment` for `M4.2`.
+- Use `benchmark environment` or `benchmark/task layer` for `M4.2`.
 - Use `behavioral fit` or `benchmark quality` for `M4.3`.
 - Reserve `external validation` for evidence grounded in independent external human benchmark data, not same-framework synthetic generators.
 - Reserve `identifiability`, `falsification`, and `blind classification` for the specific milestone or sidecar analysis that actually evaluates those claims.
+- Reserve `recovery-on-task` for `M4.2+` evidence grounded in benchmark tasks or independently designed task scenarios with replay and provenance.
 
 ## Legacy Cleanup Map
 
@@ -51,12 +52,14 @@ The following items have historically blurred milestone boundaries and should be
 
 ### Synthetic sidecar analyses, not `M4.1` acceptance evidence
 
+- `segmentum/m41_inference.py`
 - `segmentum/m41_blind_classifier.py`
 - `segmentum/m41_identifiability.py`
 - `segmentum/m41_falsification.py`
 - `segmentum/m41_baselines.py`
 - `segmentum/m41_external_generator.py`
 - `segmentum/m41_external_dataset.py`
+- `segmentum/m41_external_observables.py`
 - `scripts/generate_m41_external_data.py`
 - `data/m41_external/`
 
@@ -67,6 +70,11 @@ human-data claims.
 ## Practical Rule
 
 If a claim depends on benchmark tasks, it belongs no earlier than `M4.2`.
+
+If a claim depends on parameter recovery, replay, or provenance on tasks, it
+must begin no earlier than `M4.2` and must use benchmark tasks or independent
+task scenarios rather than the same-framework toy sidecars parked next to
+`M4.1`.
 
 If a claim depends on held-out fit, human-alignment metrics, or baseline
 comparison, it belongs no earlier than `M4.3`.

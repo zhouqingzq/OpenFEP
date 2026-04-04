@@ -28,6 +28,7 @@ It should not be read as evidence that:
 - benchmark environments have been fully built out
 - benchmark-task behavioral fit has already been established
 - latent parameters have already passed blind classification, falsification, or recovery audits
+- `segmentum/m41_inference.py` already proves benchmark-task parameter recovery
 
 ## Non-Goals
 
@@ -74,10 +75,12 @@ Moved to `M4.3` or later:
 
 Retained only as synthetic sidecar diagnostics, not `M4.1` acceptance evidence:
 
+- `segmentum/m41_inference.py`
 - blind classification
 - parameter recovery
 - falsification
-- synthetic external-generator comparisons
+- baseline comparison inside the same synthetic family
+- same-framework synthetic holdout comparisons
 
 ## Canonical Files
 

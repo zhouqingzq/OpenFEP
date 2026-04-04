@@ -214,7 +214,7 @@ def downgraded_claims_inventory() -> dict[str, Any]:
         "downgraded_claims": [
             {
                 "claim": "external validation",
-                "replacement": "same-framework cross-generator synthetic validation",
+                "replacement": "same-framework synthetic holdout validation sidecar",
                 "status": "downgraded",
             },
             {
@@ -236,16 +236,22 @@ def downgraded_claims_inventory() -> dict[str, Any]:
             ],
             "downgrade_to_same_framework": [
                 "segmentum/m41_inference.py",
+                "segmentum/m41_baselines.py",
                 "segmentum/m41_identifiability.py",
                 "segmentum/m41_blind_classifier.py",
                 "segmentum/m41_falsification.py",
                 "segmentum/m41_external_generator.py",
+                "segmentum/m41_external_dataset.py",
+                "segmentum/m41_external_observables.py",
             ],
             "stop_relying_on_for_m41_acceptance": [
                 "segmentum/m41_inference.py",
+                "segmentum/m41_baselines.py",
                 "segmentum/m41_identifiability.py",
                 "segmentum/m41_blind_classifier.py",
                 "segmentum/m41_falsification.py",
+                "segmentum/m41_external_dataset.py",
+                "segmentum/m41_external_observables.py",
                 "scripts/generate_m41_external_data.py",
             ],
         },
@@ -254,6 +260,7 @@ def downgraded_claims_inventory() -> dict[str, Any]:
             "identifiability of latent style semantics on human data",
             "falsification of the latent parameter ontology",
             "blind classification of true human cognitive profiles",
+            "completion of M4.2 benchmark/task-layer recovery",
         ],
     }
 

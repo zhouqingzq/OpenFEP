@@ -22,7 +22,12 @@ class TestM41Inference(unittest.TestCase):
         inference = infer_cognitive_style(payload["logs"])
         recovery = summarize_parameter_recovery(inference["inferred_parameters"], target.to_dict())
 
-        self.assertEqual(inference["analysis_type"], "behavior_to_style_inference")
+        self.assertEqual(inference["analysis_type"], "same_framework_synthetic_inference_sandbox")
+        self.assertEqual(inference["legacy_analysis_type"], "behavior_to_style_inference")
+        self.assertEqual(inference["claim_envelope"], "sidecar_synthetic_diagnostic")
+        self.assertEqual(inference["legacy_status"], "m42_plus_preresearch_sidecar")
+        self.assertEqual(inference["validation_type"], "same_framework_synthetic_only")
+        self.assertTrue(inference["not_acceptance_evidence"])
         self.assertGreaterEqual(inference["fit_confidence"], 0.55)
         self.assertLessEqual(recovery["mae"], 0.25)
         self.assertEqual(inference["classification"]["predicted_profile"], "high_exploration_low_caution")

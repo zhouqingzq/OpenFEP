@@ -175,13 +175,15 @@ Every inferred parameter is wrapped in `ConfidenceRated(value, confidence, evide
 The current M4 roadmap aims to turn cognitive style from a narrative description into a measurable, serializable, cross-context behavioral interface.
 
 - `M4.1` is the interface layer: unified cognitive parameters, executable observables, and structured decision logs.
-- `M4.2` is the benchmark-environment layer: task adapters, bundle provenance, replayability, and acceptance-grade benchmark plumbing.
+- `M4.2` is the benchmark/task layer: task adapters, bundle provenance, replayability, and acceptance-grade benchmark plumbing built on the `M4.1` interfaces.
 - `M4.3` is the single-task behavioral-fit layer: honest benchmark metrics, baseline comparison, and failure analysis.
 - `M4.4` checks whether shared parameters remain credible across confidence and Iowa Gambling Task slices.
 - `M4.5` validates cross-context transfer in a controlled complex environment before any real-tool open-world step.
 - `M4.6` quantifies whether style is stable, reproducible, and recoverable across long runs and perturbations.
 
 Open-world tool integration is treated as an `M5` concern. The purpose of M4 is to establish cross-context cognitive-style validity under controlled conditions before moving to noisy real-tool environments.
+
+The `segmentum/m41_inference.py`, `segmentum/m41_identifiability.py`, `segmentum/m41_blind_classifier.py`, `segmentum/m41_falsification.py`, and `segmentum/m41_baselines.py` modules are retained as synthetic sidecar diagnostics only. They do not count as `M4.1` acceptance evidence, and they should not be read as proof that `M4.2` benchmark/task recovery is already complete.
 
 Authoritative milestone boundaries are documented in [reports/m4_milestone_boundaries.md](/E:/workspace/segments/reports/m4_milestone_boundaries.md).
 
@@ -197,13 +199,17 @@ python -m pytest tests/test_personality_analyzer.py -v
 
 ## M4.2 Benchmark Status
 
-The M4.2 benchmark pipeline in this repository is about environment readiness, not yet about strong behavioral-fit claims.
+`M4.2` is where this repository enters the benchmark/task layer using the interfaces defined in `M4.1`.
+
+Any recovery, replay, provenance, or task-adaptation claim that counts for milestone progress must therefore be grounded in benchmark tasks or independently designed task scenarios, not in the toy same-framework inference sidecars parked next to `M4.1`.
+
+The current M4.2 benchmark pipeline in this repository is about environment readiness and task execution, not yet about strong behavioral-fit claims.
 
 It is intentionally honest about the difference between repo smoke fixtures and acceptance-grade external data.
 
 - `data/benchmarks/confidence_database/` is a smoke fixture, not an acceptance-ready benchmark bundle.
 - `data/benchmarks/iowa_gambling_task/` is a smoke fixture, not an acceptance-ready benchmark bundle.
-- Formal M4.2 acceptance remains blocked until real external bundles are imported for both benchmarks.
+- Formal M4.2 claims only count when real external bundles are used for both benchmarks; repo smoke fixtures alone do not qualify.
 
 Claims about benchmark quality, human alignment, and baseline competitiveness belong to `M4.3`, not `M4.2`.
 
