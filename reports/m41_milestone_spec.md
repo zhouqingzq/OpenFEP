@@ -38,6 +38,7 @@ It should not be read as evidence that:
 - Baseline superiority claims
 - Cross-task parameter credibility claims
 - Open-world deployment claims
+- Parameter recovery, blind classification, or falsification claims of any kind
 
 ## Acceptance Definition
 
@@ -59,6 +60,37 @@ M4.1 passes only if the current round demonstrates all of the following:
 - `g6_stress_behavior`
 - `r1_report_structure`
 
+## Canonical Files
+
+Only these files are M4.1 acceptance evidence:
+
+- `segmentum/m4_cognitive_style.py`
+- `segmentum/m41_audit.py`
+- `segmentum/m41_explanations.py`
+- `tests/test_m41_cognitive_parameters.py`
+- `tests/test_m41_observables.py`
+- `tests/test_m41_decision_logging.py`
+- `tests/test_m41_acceptance.py`
+
+## Sidecar Modules (NOT acceptance evidence)
+
+The following carry an `m41_` prefix but are synthetic diagnostic sidecars
+for M4.3+ pre-research. They must not be cited as M4.1 acceptance evidence
+and must not carry `external_validation: true` labels.
+
+- `segmentum/m41_inference.py` — toy parameter recovery (ridge regression + candidate bank)
+- `segmentum/m41_blind_classifier.py` — cross-generator synthetic classifier
+- `segmentum/m41_baselines.py` — same-framework baseline models
+- `segmentum/m41_falsification.py` — internal intervention sensitivity
+- `segmentum/m41_identifiability.py` — same-framework recoverability
+- `segmentum/m41_external_generator.py` — second synthetic generator (NOT external)
+- `segmentum/m41_external_dataset.py` — holdout data loader
+- `segmentum/m41_external_observables.py` — alternative observable computation
+- `segmentum/m41_external_validation.py` — task eval wrapper
+- `segmentum/m41_external_task_eval.py` — belongs to M4.2 scope
+- `scripts/generate_m41_external_data.py` — synthetic data generator
+- `data/m41_external/` — synthetic holdout data (not external human data)
+
 ## Deferred Work
 
 Moved to `M4.2`:
@@ -72,22 +104,6 @@ Moved to `M4.3` or later:
 - single-task behavioral fit
 - baseline comparison
 - benchmark-quality metrics
-
-Retained only as synthetic sidecar diagnostics, not `M4.1` acceptance evidence:
-
-- `segmentum/m41_inference.py`
-- blind classification
-- parameter recovery
-- falsification
-- baseline comparison inside the same synthetic family
-- same-framework synthetic holdout comparisons
-
-## Canonical Files
-
-- `segmentum/m4_cognitive_style.py`
-- `segmentum/m41_audit.py`
-- `scripts/generate_m41_acceptance_artifacts.py`
-- `tests/test_m41_cognitive_parameters.py`
-- `tests/test_m41_observables.py`
-- `tests/test_m41_decision_logging.py`
-- `tests/test_m41_acceptance.py`
+- blind classification on external data
+- parameter falsification on benchmark data
+- parameter recovery on non-synthetic data

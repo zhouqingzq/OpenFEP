@@ -10,7 +10,7 @@ aligned across the repository.
 
 | Milestone | Primary Goal | Evidence That Counts | Explicit Non-Goals |
 | --- | --- | --- | --- |
-| `M4.1` | Translate cognitive variables into a unified parameter, observable, and logging interface. | Schema roundtrip, executable observable registry, intervention sensitivity inside the minimal simulator, log completeness, stress-mode interface behavior. | Benchmark adapters, benchmark bundle integration, human-data claims, blind classification, parameter recovery, falsification, baseline comparison. |
+| `M4.1` | Translate cognitive variables into a unified parameter, observable, and logging interface. | Schema roundtrip, executable observable registry, intervention sensitivity inside the minimal simulator, log completeness, stress-mode interface behavior. | Benchmark adapters, benchmark bundle integration, human-data claims, blind classification, parameter recovery, falsification, baseline comparison, inference engines. |
 | `M4.2` | Build the cognitive benchmark and task layer around the shared interfaces. | Benchmark registry, manifest validation, smoke-vs-external separation, protocol schemas, adapter execution, deterministic replay, leakage checks, provenance-rich artifacts, and task-grounded replay/recovery setup. | Declaring good behavioral fit, proving human alignment, beating baselines, identifying latent parameters from same-framework toy sidecars. |
 | `M4.3` | Evaluate single-task benchmark quality and compare against baselines. | Held-out benchmark metrics, human-alignment metrics, non-circular scoring, ablations, stress tests, baseline ladder, honest failure analysis. | Cross-task shared-parameter credibility, transfer claims, longitudinal stability claims. |
 | `M4.4` | Test whether shared parameters remain credible across multiple benchmark tasks. | Cross-task consistency checks, shared-parameter audits, task-to-task credibility reports. | Open-world transfer and real-tool deployment. |
@@ -25,49 +25,83 @@ aligned across the repository.
 - Reserve `external validation` for evidence grounded in independent external human benchmark data, not same-framework synthetic generators.
 - Reserve `identifiability`, `falsification`, and `blind classification` for the specific milestone or sidecar analysis that actually evaluates those claims.
 - Reserve `recovery-on-task` for `M4.2+` evidence grounded in benchmark tasks or independently designed task scenarios with replay and provenance.
+- Never label same-framework cross-generator results as `external_validation: true`. Use `cross_generator_synthetic` instead.
 
-## Legacy Cleanup Map
+## M4.1 / M4.2 Boundary Detail
 
-The following items have historically blurred milestone boundaries and should be interpreted using the mapping below.
+### What M4.1 owns (acceptance-grade)
 
-### `M4.1` acceptance evidence
+| Item | Purpose |
+| --- | --- |
+| `segmentum/m4_cognitive_style.py` | Parameter dataclass, decision-log dataclass, observable registry, minimal simulator, intervention sensitivity |
+| `segmentum/m41_audit.py` | G1-G6 gate evaluation, acceptance report generation |
+| `segmentum/m41_explanations.py` | Per-record parameter-contribution explanations (interface utility) |
+| `tests/test_m41_cognitive_parameters.py` | Parameter schema and intervention probe tests |
+| `tests/test_m41_observables.py` | Observable registry executable evaluator tests |
+| `tests/test_m41_decision_logging.py` | Decision log completeness and audit tests |
+| `tests/test_m41_acceptance.py` | Acceptance report structure and gate consistency tests |
 
-- `segmentum/m4_cognitive_style.py`
-- `segmentum/m41_audit.py`
-- `tests/test_m41_cognitive_parameters.py`
-- `tests/test_m41_observables.py`
-- `tests/test_m41_decision_logging.py`
-- `tests/test_m41_acceptance.py`
+### What lives under M4.1 prefix but is NOT M4.1 acceptance evidence
 
-### `M4.2` environment evidence
+These are synthetic sidecar modules. They may remain for diagnostic use but
+must not be cited as M4.1 acceptance evidence or labeled with
+`external_validation: true`.
 
-- `segmentum/benchmark_registry.py`
-- `segmentum/m4_benchmarks.py`
-- `segmentum/m42_audit.py`
-- `tests/test_m42_benchmark_adapter.py`
-- `tests/test_m42_confidence_benchmark.py`
-- `tests/test_m42_external_bundle_integration.py`
-- `tests/test_m42_reproducibility.py`
-- `tests/test_m42_acceptance.py`
+| Item | What it actually does | Future home |
+| --- | --- | --- |
+| `segmentum/m41_inference.py` | Toy parameter recovery via per-parameter ridge regression + candidate bank. Trained and evaluated on same-framework synthetic data. | M4.3 pre-research; must be re-evaluated on benchmark tasks before any acceptance claim. |
+| `segmentum/m41_blind_classifier.py` | Nearest-centroid profile classifier. Trained on internal generator, evaluated on external generator. Both generators share the same action schema and parameter semantics. | M4.3 sidecar; cross-generator ≠ external validation. |
+| `segmentum/m41_baselines.py` | Same-framework baseline models for toy comparison. | M4.3 baseline ladder. |
+| `segmentum/m41_falsification.py` | Same-framework intervention sensitivity checks (Cohen's d on internal synthetic series). | M4.3 falsification; must be re-run on benchmark data. |
+| `segmentum/m41_identifiability.py` | Same-framework recoverability analysis. | M4.3 identifiability; needs benchmark-grounded evidence. |
+| `segmentum/m41_external_generator.py` | A second synthetic data generator with softmax sampling and separate scenario pools. NOT an independent external source. | Sidecar utility; rename to `m41_synthetic_holdout_generator.py` when convenient. |
+| `segmentum/m41_external_dataset.py` | Loader and normalizer for same-framework holdout data. | Sidecar utility. |
+| `segmentum/m41_external_observables.py` | Alternative observable computation with shifted thresholds. | Sidecar utility. |
+| `segmentum/m41_external_validation.py` | Wrapper re-exporting external task eval functions. | M4.2+ task eval. |
+| `segmentum/m41_external_task_eval.py` | External benchmark bundle evaluation and leakage checks. | M4.2 canonical evidence. |
+| `scripts/generate_m41_external_data.py` | Script generating same-framework synthetic holdout data. | Sidecar utility. |
+| `data/m41_external/` | 1000-row synthetic holdout dataset generated by `m41_external_generator.py`. Subject IDs leak profile names. | Sidecar data; not external. |
 
-### Synthetic sidecar analyses, not `M4.1` acceptance evidence
+### What M4.2 owns (acceptance-grade)
 
-- `segmentum/m41_inference.py`
-- `segmentum/m41_blind_classifier.py`
-- `segmentum/m41_identifiability.py`
-- `segmentum/m41_falsification.py`
-- `segmentum/m41_baselines.py`
-- `segmentum/m41_external_generator.py`
-- `segmentum/m41_external_dataset.py`
-- `segmentum/m41_external_observables.py`
-- `scripts/generate_m41_external_data.py`
-- `data/m41_external/`
+| Item | Purpose |
+| --- | --- |
+| `segmentum/benchmark_registry.py` | Benchmark bundle discovery, manifest validation, smoke-vs-external separation |
+| `segmentum/m4_benchmarks.py` | Benchmark adapters (Confidence DB, IGT, Two-Armed Bandit), replay, bootstrap CI |
+| `segmentum/m42_audit.py` | M4.2 acceptance artifact generation |
+| `tests/test_m42_benchmark_adapter.py` | Adapter execution tests |
+| `tests/test_m42_confidence_benchmark.py` | Confidence DB protocol and export tests |
+| `tests/test_m42_external_bundle_integration.py` | Bundle provenance and leakage tests |
+| `tests/test_m42_reproducibility.py` | Deterministic replay and seed tolerance tests |
+| `tests/test_m42_acceptance.py` | M4.2 acceptance gate tests |
 
-These modules may remain useful as controlled synthetic diagnostics, but they do
-not define `M4.1` acceptance and they do not, by themselves, justify external
-human-data claims.
+### Artifacts ownership
 
-## Practical Rule
+| Artifact | Owner | Notes |
+| --- | --- | --- |
+| `artifacts/m41_blind_classification.json` | Sidecar (not M4.1 acceptance) | Must use `external_validation: false` and `generator_family: cross_generator_synthetic` |
+| `artifacts/m41_baseline_comparison.json` | Sidecar (not M4.1 acceptance) | Same-framework comparison only |
+| `artifacts/m41_external_validation.json` | Sidecar (not M4.1 acceptance) | Claims correctly downgraded in file |
+| `artifacts/m41_falsification.json` | Sidecar (not M4.1 acceptance) | Internal sensitivity, not benchmark falsification |
+| `artifacts/m41_generator_separation.json` | Sidecar (not M4.1 acceptance) | JS divergence between two synthetic generators |
+| `artifacts/m41_identifiability.json` | Sidecar (not M4.1 acceptance) | Same-framework recoverability |
+| `artifacts/m41_task_bundle_eval.json` | Sidecar (not M4.1 acceptance) | Claims correctly downgraded in file |
+| `reports/m41_acceptance_report.json` | **M4.1 acceptance** | G1-G6 + R1 only |
+| `reports/m42_acceptance_report.json` | **M4.2 acceptance** | Bundle provenance, adapters, replay, leakage |
+
+## Known Data Integrity Issues
+
+1. `data/m41_external/sample_external_behavior.jsonl` subject IDs contain
+   profile names (e.g. `high_exploration_low_caution-subject-1`). The code's
+   blindness check only verifies that `parameter_snapshot` is empty and
+   `ground_truth_*` fields are stripped during normalization, so the inference
+   code path is technically blinded, but the raw data design is sloppy.
+
+2. `artifacts/m41_blind_classification.json` previously set
+   `external_validation: true` even though both generators share the same
+   action schema and parameter semantics. This must be corrected to `false`.
+
+## Practical Rules
 
 If a claim depends on benchmark tasks, it belongs no earlier than `M4.2`.
 
@@ -78,3 +112,7 @@ task scenarios rather than the same-framework toy sidecars parked next to
 
 If a claim depends on held-out fit, human-alignment metrics, or baseline
 comparison, it belongs no earlier than `M4.3`.
+
+If an artifact is labeled `external_validation: true`, the evidence must come
+from data that was not generated by any code in this repository. Same-framework
+cross-generator synthetic data does not qualify.

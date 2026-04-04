@@ -8,6 +8,8 @@ from segmentum.m4_benchmarks import (
     ConfidenceDatabaseAdapter,
     IowaGamblingTaskAdapter,
     STANDARD_IGT_TRIAL_COUNT,
+    TwoArmedBanditAdapter,
+    preprocess_iowa_gambling_task,
     task_adapter_registry,
     preprocess_confidence_database,
     run_iowa_gambling_benchmark,
@@ -21,6 +23,10 @@ class TestM42BenchmarkAdapter(unittest.TestCase):
         self.assertIn("two_armed_bandit", registry)
         result = run_task_adapter("two_armed_bandit", seed=12, trial_count=12, include_predictions=False, include_subject_summary=False)
         self.assertEqual(result["trial_count"], 12)
+        self.assertEqual(result["claim_envelope"], "smoke_only")
+        self.assertEqual(result["bundle_mode"], "synthetic_protocol")
+        self.assertEqual(result["benchmark_status"]["benchmark_state"], "smoke_only")
+        self.assertFalse(result["benchmark_status"]["acceptance_ready"])
         self.assertTrue(result["trial_export_validation"]["ok"])
 
     def test_confidence_schema_exposes_human_aligned_export(self) -> None:
@@ -33,6 +39,17 @@ class TestM42BenchmarkAdapter(unittest.TestCase):
         schema = IowaGamblingTaskAdapter().schema()
         self.assertEqual(schema["benchmark_id"], "iowa_gambling_task")
         self.assertEqual(schema["standard_protocol"]["trial_count"], STANDARD_IGT_TRIAL_COUNT)
+
+    def test_bandit_schema_is_consistently_smoke_only(self) -> None:
+        schema = TwoArmedBanditAdapter().schema()
+        self.assertEqual(schema["benchmark_id"], "two_armed_bandit")
+        self.assertEqual(schema["status"], "smoke_only")
+        self.assertEqual(schema["benchmark_state"], "smoke_only")
+        self.assertEqual(schema["source_type"], "synthetic_protocol")
+        self.assertEqual(schema["bundle_mode"], "synthetic_protocol")
+        self.assertEqual(schema["claim_envelope"], "smoke_only")
+        self.assertTrue(schema["smoke_test_only"])
+        self.assertTrue(schema["is_synthetic"])
 
     def test_smoke_igt_fixture_is_rejected_as_standard_protocol(self) -> None:
         with self.assertRaises(ValueError):
@@ -47,6 +64,20 @@ class TestM42BenchmarkAdapter(unittest.TestCase):
         self.assertEqual(payload["bundle_mode"], "external_bundle")
         self.assertEqual(payload["claim_envelope"], "benchmark_eval")
         self.assertGreater(payload["trial_count"], 1000)
+        self.assertTrue(payload["leakage_check"]["ok"])
+        self.assertTrue(payload["leakage_check"]["subject"]["ok"])
+        self.assertTrue(payload["leakage_check"]["session"]["ok"])
+
+    @unittest.skipUnless((EXTERNAL_BENCHMARK_ROOT / "iowa_gambling_task" / "manifest.json").exists(), "external bundle required")
+    def test_igt_external_dataset_exposes_leakage_check(self) -> None:
+        payload = preprocess_iowa_gambling_task(
+            benchmark_root=EXTERNAL_BENCHMARK_ROOT,
+        )
+        self.assertEqual(payload["bundle_mode"], "external_bundle")
+        self.assertEqual(payload["claim_envelope"], "benchmark_eval")
+        self.assertIn("leakage_check", payload)
+        self.assertTrue(payload["leakage_check"]["ok"])
+        self.assertTrue(payload["leakage_check"]["subject"]["ok"])
 
 
 if __name__ == "__main__":

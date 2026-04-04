@@ -44802,18 +44802,51 @@
   "split_unit": "session_id",
   "leakage_check": {
     "split_unit": "session_id",
+    "selected_split": null,
+    "trial_count": 1264,
+    "split_counts": {
+      "heldout": 141,
+      "train": 645,
+      "validation": 478
+    },
+    "checks": {
+      "subject_id": {
+        "key_field": "subject_id",
+        "ok": true,
+        "leaking_keys": [],
+        "observed_key_count": 20,
+        "distinct_split_count": 3,
+        "leaking_key_splits": {}
+      },
+      "session_id": {
+        "key_field": "session_id",
+        "ok": true,
+        "leaking_keys": [],
+        "observed_key_count": 20,
+        "distinct_split_count": 3,
+        "leaking_key_splits": {}
+      }
+    },
+    "failing_checks": [],
+    "ok": true,
+    "status": "pass",
+    "precomputed_split_available": true,
     "subject": {
       "key_field": "subject_id",
       "ok": true,
-      "leaking_keys": []
+      "leaking_keys": [],
+      "observed_key_count": 20,
+      "distinct_split_count": 3,
+      "leaking_key_splits": {}
     },
     "session": {
       "key_field": "session_id",
       "ok": true,
-      "leaking_keys": []
-    },
-    "precomputed_split_available": true,
-    "selected_split": null
+      "leaking_keys": [],
+      "observed_key_count": 20,
+      "distinct_split_count": 3,
+      "leaking_key_splits": {}
+    }
   },
   "trial_export_validation": {
     "expected_length": 1264,

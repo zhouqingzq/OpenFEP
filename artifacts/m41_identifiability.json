@@ -1,0 +1,1930 @@
+{
+  "analysis_type": "cross_generator_identifiability",
+  "benchmark_scope": "cross_generator synthetic validation",
+  "sample_counts": {
+    "total": 20
+  },
+  "inference_path_blinded": true,
+  "blindness_checks": [
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    },
+    {
+      "record_count": 50,
+      "parameter_snapshot_empty_records": 50,
+      "parameter_snapshot_empty_rate": 1.0,
+      "ground_truth_visible_record_indexes": [],
+      "ground_truth_visible": false,
+      "inference_path_blinded": true
+    }
+  ],
+  "primary_recovery_model": {
+    "model_type": "per_parameter_weighted_linear_regression",
+    "training_source": "internal_generator",
+    "train_seeds": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "sample_count": 36,
+    "parameter_models": {
+      "uncertainty_sensitivity": {
+        "parameter": "uncertainty_sensitivity",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": -0.035455,
+          "confidence_evidence_slope": -0.07094,
+          "conflict_avoidance_shift": 0.012716,
+          "counterfactual_loss_sensitivity": 0.190728,
+          "dominant_attention_share": 0.04744,
+          "evidence_aligned_choice_rate": 0.214825,
+          "high_evidence_commit_rate": -0.281252,
+          "high_expected_error_rejection_rate": -0.0,
+          "high_pressure_low_cost_ratio": -0.0,
+          "high_uncertainty_inspect_ratio": -0.0,
+          "mean_update_inverse": -0.071477,
+          "novel_action_ratio": 0.186149,
+          "post_error_conservative_shift": -0.0,
+          "recovery_trigger_rate": -0.183148,
+          "strategy_persistence_after_error": -0.276545,
+          "uncertainty_confidence_drop_rate": 0.155111
+        },
+        "bias": 0.642252,
+        "blend_weights": {
+          "regression_component": 0.917613,
+          "direct_estimate_component": 0.082387
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.033817,
+          "direct_estimate_train_mae": 0.376651,
+          "coverage": 0.666667
+        }
+      },
+      "error_aversion": {
+        "parameter": "error_aversion",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.170556,
+          "confidence_evidence_slope": 0.352342,
+          "conflict_avoidance_shift": -0.005521,
+          "counterfactual_loss_sensitivity": -0.079106,
+          "dominant_attention_share": -0.074986,
+          "evidence_aligned_choice_rate": -0.014236,
+          "high_evidence_commit_rate": 0.077375,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": 0.059499,
+          "novel_action_ratio": -0.190151,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": 0.401963,
+          "strategy_persistence_after_error": 0.198259,
+          "uncertainty_confidence_drop_rate": -0.309242
+        },
+        "bias": 0.501582,
+        "blend_weights": {
+          "regression_component": 0.863952,
+          "direct_estimate_component": 0.136048
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.054787,
+          "direct_estimate_train_mae": 0.347917,
+          "coverage": 0.666667
+        }
+      },
+      "exploration_bias": {
+        "parameter": "exploration_bias",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.0899,
+          "confidence_evidence_slope": 0.320683,
+          "conflict_avoidance_shift": 0.094835,
+          "counterfactual_loss_sensitivity": 0.097751,
+          "dominant_attention_share": -0.003905,
+          "evidence_aligned_choice_rate": 0.58947,
+          "high_evidence_commit_rate": -0.309931,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": -0.20886,
+          "novel_action_ratio": 0.680967,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": -0.267816,
+          "strategy_persistence_after_error": -0.629267,
+          "uncertainty_confidence_drop_rate": -0.086856
+        },
+        "bias": 0.469449,
+        "blend_weights": {
+          "regression_component": 0.746096,
+          "direct_estimate_component": 0.253904
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.092037,
+          "direct_estimate_train_mae": 0.270452,
+          "coverage": 0.666667
+        }
+      },
+      "attention_selectivity": {
+        "parameter": "attention_selectivity",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.013634,
+          "confidence_evidence_slope": 0.01845,
+          "conflict_avoidance_shift": -0.011532,
+          "counterfactual_loss_sensitivity": -0.050711,
+          "dominant_attention_share": -0.014614,
+          "evidence_aligned_choice_rate": -0.091761,
+          "high_evidence_commit_rate": 0.08654,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": 0.037584,
+          "novel_action_ratio": -0.113766,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": 0.093893,
+          "strategy_persistence_after_error": 0.126122,
+          "uncertainty_confidence_drop_rate": -0.050584
+        },
+        "bias": 0.580016,
+        "blend_weights": {
+          "regression_component": 0.944553,
+          "direct_estimate_component": 0.055447
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.013086,
+          "direct_estimate_train_mae": 0.222918,
+          "coverage": 0.666667
+        }
+      },
+      "confidence_gain": {
+        "parameter": "confidence_gain",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.151606,
+          "confidence_evidence_slope": 0.422161,
+          "conflict_avoidance_shift": 0.046956,
+          "counterfactual_loss_sensitivity": -0.150527,
+          "dominant_attention_share": -0.078549,
+          "evidence_aligned_choice_rate": 0.175651,
+          "high_evidence_commit_rate": 0.101884,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": -0.044254,
+          "novel_action_ratio": 0.191165,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": 0.143628,
+          "strategy_persistence_after_error": -0.066689,
+          "uncertainty_confidence_drop_rate": -0.332513
+        },
+        "bias": 0.429697,
+        "blend_weights": {
+          "regression_component": 0.70577,
+          "direct_estimate_component": 0.29423
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.06362,
+          "direct_estimate_train_mae": 0.152605,
+          "coverage": 0.666667
+        }
+      },
+      "update_rigidity": {
+        "parameter": "update_rigidity",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.02927,
+          "confidence_evidence_slope": 0.005338,
+          "conflict_avoidance_shift": -0.050545,
+          "counterfactual_loss_sensitivity": -0.021028,
+          "dominant_attention_share": -0.017291,
+          "evidence_aligned_choice_rate": -0.232544,
+          "high_evidence_commit_rate": 0.101908,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": 0.119898,
+          "novel_action_ratio": -0.40802,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": 0.292684,
+          "strategy_persistence_after_error": 0.347574,
+          "uncertainty_confidence_drop_rate": -0.073428
+        },
+        "bias": 0.587806,
+        "blend_weights": {
+          "regression_component": 0.837134,
+          "direct_estimate_component": 0.162866
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.032129,
+          "direct_estimate_train_mae": 0.165143,
+          "coverage": 0.666667
+        }
+      },
+      "resource_pressure_sensitivity": {
+        "parameter": "resource_pressure_sensitivity",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.167716,
+          "confidence_evidence_slope": 0.385749,
+          "conflict_avoidance_shift": 0.007219,
+          "counterfactual_loss_sensitivity": -0.112632,
+          "dominant_attention_share": -0.079573,
+          "evidence_aligned_choice_rate": 0.02518,
+          "high_evidence_commit_rate": 0.106092,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": 0.037905,
+          "novel_action_ratio": -0.104947,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": 0.346353,
+          "strategy_persistence_after_error": 0.150653,
+          "uncertainty_confidence_drop_rate": -0.334739
+        },
+        "bias": 0.512781,
+        "blend_weights": {
+          "regression_component": 0.650201,
+          "direct_estimate_component": 0.349799
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.05746,
+          "direct_estimate_train_mae": 0.106806,
+          "coverage": 0.666667
+        }
+      },
+      "virtual_prediction_error_gain": {
+        "parameter": "virtual_prediction_error_gain",
+        "selected_metrics": [
+          "choice_repeat_suppression",
+          "confidence_evidence_slope",
+          "conflict_avoidance_shift",
+          "counterfactual_loss_sensitivity",
+          "dominant_attention_share",
+          "evidence_aligned_choice_rate",
+          "high_evidence_commit_rate",
+          "high_expected_error_rejection_rate",
+          "high_pressure_low_cost_ratio",
+          "high_uncertainty_inspect_ratio",
+          "mean_update_inverse",
+          "novel_action_ratio",
+          "post_error_conservative_shift",
+          "recovery_trigger_rate",
+          "strategy_persistence_after_error",
+          "uncertainty_confidence_drop_rate"
+        ],
+        "weights": {
+          "choice_repeat_suppression": 0.036625,
+          "confidence_evidence_slope": 0.027602,
+          "conflict_avoidance_shift": -0.047503,
+          "counterfactual_loss_sensitivity": -0.07994,
+          "dominant_attention_share": -0.030234,
+          "evidence_aligned_choice_rate": -0.269278,
+          "high_evidence_commit_rate": 0.178726,
+          "high_expected_error_rejection_rate": 0.0,
+          "high_pressure_low_cost_ratio": 0.0,
+          "high_uncertainty_inspect_ratio": 0.0,
+          "mean_update_inverse": 0.126089,
+          "novel_action_ratio": -0.41056,
+          "post_error_conservative_shift": 0.0,
+          "recovery_trigger_rate": 0.310609,
+          "strategy_persistence_after_error": 0.388022,
+          "uncertainty_confidence_drop_rate": -0.113351
+        },
+        "bias": 0.548324,
+        "blend_weights": {
+          "regression_component": 0.861771,
+          "direct_estimate_component": 0.138229
+        },
+        "train_seeds": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "fit_statistics": {
+          "sample_count": 24,
+          "train_mae": 0.037739,
+          "direct_estimate_train_mae": 0.235278,
+          "coverage": 0.666667
+        }
+      }
+    }
+  },
+  "parameter_recovery": {
+    "uncertainty_sensitivity": {
+      "mae": 0.111584,
+      "mean_abs_error": 0.111584,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "attention_selectivity",
+        "virtual_prediction_error_gain"
+      ]
+    },
+    "error_aversion": {
+      "mae": 0.133895,
+      "mean_abs_error": 0.133895,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "resource_pressure_sensitivity",
+        "attention_selectivity"
+      ]
+    },
+    "exploration_bias": {
+      "mae": 0.212921,
+      "mean_abs_error": 0.212921,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "virtual_prediction_error_gain",
+        "update_rigidity"
+      ]
+    },
+    "attention_selectivity": {
+      "mae": 0.070788,
+      "mean_abs_error": 0.070788,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "update_rigidity",
+        "virtual_prediction_error_gain"
+      ]
+    },
+    "confidence_gain": {
+      "mae": 0.134674,
+      "mean_abs_error": 0.134674,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "resource_pressure_sensitivity",
+        "error_aversion"
+      ]
+    },
+    "update_rigidity": {
+      "mae": 0.188129,
+      "mean_abs_error": 0.188129,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "virtual_prediction_error_gain",
+        "attention_selectivity"
+      ]
+    },
+    "resource_pressure_sensitivity": {
+      "mae": 0.113272,
+      "mean_abs_error": 0.113272,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "error_aversion",
+        "attention_selectivity"
+      ]
+    },
+    "virtual_prediction_error_gain": {
+      "mae": 0.174475,
+      "mean_abs_error": 0.174475,
+      "identifiable": true,
+      "identifiable_rate": 1.0,
+      "non_identifiable_interval": null,
+      "coupled_with": [
+        "update_rigidity",
+        "attention_selectivity"
+      ]
+    }
+  },
+  "candidate_bank_baseline": {
+    "uncertainty_sensitivity": {
+      "mae": 0.110565,
+      "mean_abs_error": 0.110565,
+      "recoverable": true
+    },
+    "error_aversion": {
+      "mae": 0.160558,
+      "mean_abs_error": 0.160558,
+      "recoverable": true
+    },
+    "exploration_bias": {
+      "mae": 0.200715,
+      "mean_abs_error": 0.200715,
+      "recoverable": true
+    },
+    "attention_selectivity": {
+      "mae": 0.093633,
+      "mean_abs_error": 0.093633,
+      "recoverable": true
+    },
+    "confidence_gain": {
+      "mae": 0.071682,
+      "mean_abs_error": 0.071682,
+      "recoverable": true
+    },
+    "update_rigidity": {
+      "mae": 0.159446,
+      "mean_abs_error": 0.159446,
+      "recoverable": true
+    },
+    "resource_pressure_sensitivity": {
+      "mae": 0.160319,
+      "mean_abs_error": 0.160319,
+      "recoverable": true
+    },
+    "virtual_prediction_error_gain": {
+      "mae": 0.146503,
+      "mean_abs_error": 0.146503,
+      "recoverable": true
+    }
+  },
+  "primary_vs_baseline_delta": {
+    "uncertainty_sensitivity": {
+      "primary_minus_baseline_mae": 0.001019,
+      "primary_better_or_equal": false
+    },
+    "error_aversion": {
+      "primary_minus_baseline_mae": -0.026662,
+      "primary_better_or_equal": true
+    },
+    "exploration_bias": {
+      "primary_minus_baseline_mae": 0.012206,
+      "primary_better_or_equal": false
+    },
+    "attention_selectivity": {
+      "primary_minus_baseline_mae": -0.022844,
+      "primary_better_or_equal": true
+    },
+    "confidence_gain": {
+      "primary_minus_baseline_mae": 0.062992,
+      "primary_better_or_equal": false
+    },
+    "update_rigidity": {
+      "primary_minus_baseline_mae": 0.028683,
+      "primary_better_or_equal": false
+    },
+    "resource_pressure_sensitivity": {
+      "primary_minus_baseline_mae": -0.047047,
+      "primary_better_or_equal": true
+    },
+    "virtual_prediction_error_gain": {
+      "primary_minus_baseline_mae": 0.027971,
+      "primary_better_or_equal": false
+    }
+  },
+  "parameter_coupling": {
+    "uncertainty_sensitivity": {
+      "uncertainty_sensitivity": 1.0,
+      "error_aversion": -0.917601,
+      "exploration_bias": 0.935842,
+      "attention_selectivity": -0.981843,
+      "confidence_gain": -0.45498,
+      "update_rigidity": -0.974518,
+      "resource_pressure_sensitivity": -0.888935,
+      "virtual_prediction_error_gain": -0.97639
+    },
+    "error_aversion": {
+      "uncertainty_sensitivity": -0.917601,
+      "error_aversion": 1.0,
+      "exploration_bias": -0.783739,
+      "attention_selectivity": 0.954709,
+      "confidence_gain": 0.710381,
+      "update_rigidity": 0.941798,
+      "resource_pressure_sensitivity": 0.994494,
+      "virtual_prediction_error_gain": 0.920233
+    },
+    "exploration_bias": {
+      "uncertainty_sensitivity": 0.935842,
+      "error_aversion": -0.783739,
+      "exploration_bias": 1.0,
+      "attention_selectivity": -0.928926,
+      "confidence_gain": -0.149326,
+      "update_rigidity": -0.942424,
+      "resource_pressure_sensitivity": -0.737575,
+      "virtual_prediction_error_gain": -0.95892
+    },
+    "attention_selectivity": {
+      "uncertainty_sensitivity": -0.981843,
+      "error_aversion": 0.954709,
+      "exploration_bias": -0.928926,
+      "attention_selectivity": 1.0,
+      "confidence_gain": 0.48525,
+      "update_rigidity": 0.996519,
+      "resource_pressure_sensitivity": 0.927977,
+      "virtual_prediction_error_gain": 0.992594
+    },
+    "confidence_gain": {
+      "uncertainty_sensitivity": -0.45498,
+      "error_aversion": 0.710381,
+      "exploration_bias": -0.149326,
+      "attention_selectivity": 0.48525,
+      "confidence_gain": 1.0,
+      "update_rigidity": 0.439849,
+      "resource_pressure_sensitivity": 0.759173,
+      "virtual_prediction_error_gain": 0.386681
+    },
+    "update_rigidity": {
+      "uncertainty_sensitivity": -0.974518,
+      "error_aversion": 0.941798,
+      "exploration_bias": -0.942424,
+      "attention_selectivity": 0.996519,
+      "confidence_gain": 0.439849,
+      "update_rigidity": 1.0,
+      "resource_pressure_sensitivity": 0.912529,
+      "virtual_prediction_error_gain": 0.997556
+    },
+    "resource_pressure_sensitivity": {
+      "uncertainty_sensitivity": -0.888935,
+      "error_aversion": 0.994494,
+      "exploration_bias": -0.737575,
+      "attention_selectivity": 0.927977,
+      "confidence_gain": 0.759173,
+      "update_rigidity": 0.912529,
+      "resource_pressure_sensitivity": 1.0,
+      "virtual_prediction_error_gain": 0.886072
+    },
+    "virtual_prediction_error_gain": {
+      "uncertainty_sensitivity": -0.97639,
+      "error_aversion": 0.920233,
+      "exploration_bias": -0.95892,
+      "attention_selectivity": 0.992594,
+      "confidence_gain": 0.386681,
+      "update_rigidity": 0.997556,
+      "resource_pressure_sensitivity": 0.886072,
+      "virtual_prediction_error_gain": 1.0
+    }
+  },
+  "recoverable_parameters": [
+    "attention_selectivity",
+    "confidence_gain",
+    "error_aversion",
+    "exploration_bias",
+    "resource_pressure_sensitivity",
+    "uncertainty_sensitivity",
+    "update_rigidity",
+    "virtual_prediction_error_gain"
+  ],
+  "unrecoverable_parameters": [],
+  "high_correlation_pairs": [
+    {
+      "left": "uncertainty_sensitivity",
+      "right": "update_rigidity",
+      "correlation": -0.974518
+    },
+    {
+      "left": "uncertainty_sensitivity",
+      "right": "virtual_prediction_error_gain",
+      "correlation": -0.97639
+    },
+    {
+      "left": "error_aversion",
+      "right": "uncertainty_sensitivity",
+      "correlation": -0.917601
+    },
+    {
+      "left": "error_aversion",
+      "right": "exploration_bias",
+      "correlation": -0.783739
+    },
+    {
+      "left": "error_aversion",
+      "right": "update_rigidity",
+      "correlation": 0.941798
+    },
+    {
+      "left": "error_aversion",
+      "right": "resource_pressure_sensitivity",
+      "correlation": 0.994494
+    },
+    {
+      "left": "error_aversion",
+      "right": "virtual_prediction_error_gain",
+      "correlation": 0.920233
+    },
+    {
+      "left": "exploration_bias",
+      "right": "uncertainty_sensitivity",
+      "correlation": 0.935842
+    },
+    {
+      "left": "exploration_bias",
+      "right": "update_rigidity",
+      "correlation": -0.942424
+    },
+    {
+      "left": "exploration_bias",
+      "right": "resource_pressure_sensitivity",
+      "correlation": -0.737575
+    },
+    {
+      "left": "exploration_bias",
+      "right": "virtual_prediction_error_gain",
+      "correlation": -0.95892
+    },
+    {
+      "left": "attention_selectivity",
+      "right": "uncertainty_sensitivity",
+      "correlation": -0.981843
+    },
+    {
+      "left": "attention_selectivity",
+      "right": "error_aversion",
+      "correlation": 0.954709
+    },
+    {
+      "left": "attention_selectivity",
+      "right": "exploration_bias",
+      "correlation": -0.928926
+    },
+    {
+      "left": "attention_selectivity",
+      "right": "update_rigidity",
+      "correlation": 0.996519
+    },
+    {
+      "left": "attention_selectivity",
+      "right": "resource_pressure_sensitivity",
+      "correlation": 0.927977
+    },
+    {
+      "left": "attention_selectivity",
+      "right": "virtual_prediction_error_gain",
+      "correlation": 0.992594
+    },
+    {
+      "left": "confidence_gain",
+      "right": "error_aversion",
+      "correlation": 0.710381
+    },
+    {
+      "left": "confidence_gain",
+      "right": "resource_pressure_sensitivity",
+      "correlation": 0.759173
+    },
+    {
+      "left": "update_rigidity",
+      "right": "virtual_prediction_error_gain",
+      "correlation": 0.997556
+    },
+    {
+      "left": "resource_pressure_sensitivity",
+      "right": "uncertainty_sensitivity",
+      "correlation": -0.888935
+    },
+    {
+      "left": "resource_pressure_sensitivity",
+      "right": "update_rigidity",
+      "correlation": 0.912529
+    },
+    {
+      "left": "resource_pressure_sensitivity",
+      "right": "virtual_prediction_error_gain",
+      "correlation": 0.886072
+    }
+  ],
+  "train_test_seed_overlap": 0,
+  "evidence_rows": [
+    {
+      "session_id": "balanced_midline-104",
+      "subject_id": "balanced_midline-subject-0",
+      "true_profile": "balanced_midline",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.641467,
+        "error_aversion": 0.682481,
+        "exploration_bias": 0.615153,
+        "attention_selectivity": 0.564849,
+        "confidence_gain": 0.507149,
+        "update_rigidity": 0.602768,
+        "resource_pressure_sensitivity": 0.535318,
+        "virtual_prediction_error_gain": 0.515868
+      },
+      "parameter_recovery": {
+        "mae": 0.081382,
+        "max_error": 0.232481,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.091467,
+          "error_aversion": 0.232481,
+          "exploration_bias": 0.015153,
+          "attention_selectivity": 0.015151,
+          "confidence_gain": 0.072851,
+          "update_rigidity": 0.152768,
+          "resource_pressure_sensitivity": 0.015318,
+          "virtual_prediction_error_gain": 0.055868
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.075161,
+        "max_error": 0.136883,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.11082,
+          "error_aversion": 0.057993,
+          "exploration_bias": 0.136883,
+          "attention_selectivity": 0.038214,
+          "confidence_gain": 0.038886,
+          "update_rigidity": 0.064963,
+          "resource_pressure_sensitivity": 0.061814,
+          "virtual_prediction_error_gain": 0.091713
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "balanced_midline-101",
+      "subject_id": "balanced_midline-subject-1",
+      "true_profile": "balanced_midline",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.713837,
+        "error_aversion": 0.574108,
+        "exploration_bias": 0.892398,
+        "attention_selectivity": 0.511186,
+        "confidence_gain": 0.547432,
+        "update_rigidity": 0.43549,
+        "resource_pressure_sensitivity": 0.450752,
+        "virtual_prediction_error_gain": 0.356828
+      },
+      "parameter_recovery": {
+        "mae": 0.108582,
+        "max_error": 0.292398,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.163837,
+          "error_aversion": 0.124108,
+          "exploration_bias": 0.292398,
+          "attention_selectivity": 0.068814,
+          "confidence_gain": 0.032568,
+          "update_rigidity": 0.01451,
+          "resource_pressure_sensitivity": 0.069248,
+          "virtual_prediction_error_gain": 0.103172
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.12817,
+        "max_error": 0.166674,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.166674,
+          "error_aversion": 0.145811,
+          "exploration_bias": 0.15113,
+          "attention_selectivity": 0.057474,
+          "confidence_gain": 0.117074,
+          "update_rigidity": 0.097706,
+          "resource_pressure_sensitivity": 0.151558,
+          "virtual_prediction_error_gain": 0.137937
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "high_exploration_low_caution-104",
+      "subject_id": "high_exploration_low_caution-subject-0",
+      "true_profile": "high_exploration_low_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.731097,
+        "error_aversion": 0.486488,
+        "exploration_bias": 0.644637,
+        "attention_selectivity": 0.522897,
+        "confidence_gain": 0.341284,
+        "update_rigidity": 0.522304,
+        "resource_pressure_sensitivity": 0.368925,
+        "virtual_prediction_error_gain": 0.45246
+      },
+      "parameter_recovery": {
+        "mae": 0.162007,
+        "max_error": 0.275363,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.108903,
+          "error_aversion": 0.246488,
+          "exploration_bias": 0.275363,
+          "attention_selectivity": 0.042897,
+          "confidence_gain": 0.078716,
+          "update_rigidity": 0.242304,
+          "resource_pressure_sensitivity": 0.068925,
+          "virtual_prediction_error_gain": 0.23246
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.124724,
+        "max_error": 0.219628,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.177338,
+          "error_aversion": 0.104472,
+          "exploration_bias": 0.219628,
+          "attention_selectivity": 0.061151,
+          "confidence_gain": 0.073896,
+          "update_rigidity": 0.103956,
+          "resource_pressure_sensitivity": 0.110587,
+          "virtual_prediction_error_gain": 0.146762
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "high_exploration_low_caution-101",
+      "subject_id": "high_exploration_low_caution-subject-1",
+      "true_profile": "high_exploration_low_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.75188,
+        "error_aversion": 0.448143,
+        "exploration_bias": 0.697004,
+        "attention_selectivity": 0.509701,
+        "confidence_gain": 0.338595,
+        "update_rigidity": 0.481747,
+        "resource_pressure_sensitivity": 0.305665,
+        "virtual_prediction_error_gain": 0.411888
+      },
+      "parameter_recovery": {
+        "mae": 0.128708,
+        "max_error": 0.222996,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.08812,
+          "error_aversion": 0.208143,
+          "exploration_bias": 0.222996,
+          "attention_selectivity": 0.029701,
+          "confidence_gain": 0.081405,
+          "update_rigidity": 0.201747,
+          "resource_pressure_sensitivity": 0.005665,
+          "virtual_prediction_error_gain": 0.191888
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.08346,
+        "max_error": 0.165475,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.120366,
+          "error_aversion": 0.062256,
+          "exploration_bias": 0.165475,
+          "attention_selectivity": 0.041505,
+          "confidence_gain": 0.041503,
+          "update_rigidity": 0.070559,
+          "resource_pressure_sensitivity": 0.066406,
+          "virtual_prediction_error_gain": 0.099613
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "low_exploration_high_caution-104",
+      "subject_id": "low_exploration_high_caution-subject-0",
+      "true_profile": "low_exploration_high_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.505396,
+        "error_aversion": 0.940395,
+        "exploration_bias": 0.38849,
+        "attention_selectivity": 0.664994,
+        "confidence_gain": 0.547403,
+        "update_rigidity": 0.859606,
+        "resource_pressure_sensitivity": 0.721308,
+        "virtual_prediction_error_gain": 0.790214
+      },
+      "parameter_recovery": {
+        "mae": 0.103844,
+        "max_error": 0.22849,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.165396,
+          "error_aversion": 0.020395,
+          "exploration_bias": 0.22849,
+          "attention_selectivity": 0.035006,
+          "confidence_gain": 0.112597,
+          "update_rigidity": 0.000394,
+          "resource_pressure_sensitivity": 0.178692,
+          "virtual_prediction_error_gain": 0.089786
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.126456,
+        "max_error": 0.211464,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.087617,
+          "error_aversion": 0.17611,
+          "exploration_bias": 0.211464,
+          "attention_selectivity": 0.050067,
+          "confidence_gain": 0.005491,
+          "update_rigidity": 0.171061,
+          "resource_pressure_sensitivity": 0.134609,
+          "virtual_prediction_error_gain": 0.175233
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "low_exploration_high_caution-101",
+      "subject_id": "low_exploration_high_caution-subject-1",
+      "true_profile": "low_exploration_high_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.527399,
+        "error_aversion": 0.937576,
+        "exploration_bias": 0.422624,
+        "attention_selectivity": 0.65712,
+        "confidence_gain": 0.542877,
+        "update_rigidity": 0.839268,
+        "resource_pressure_sensitivity": 0.711952,
+        "virtual_prediction_error_gain": 0.773531
+      },
+      "parameter_recovery": {
+        "mae": 0.117856,
+        "max_error": 0.262624,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.187399,
+          "error_aversion": 0.017576,
+          "exploration_bias": 0.262624,
+          "attention_selectivity": 0.04288,
+          "confidence_gain": 0.117123,
+          "update_rigidity": 0.020732,
+          "resource_pressure_sensitivity": 0.188048,
+          "virtual_prediction_error_gain": 0.106469
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.125776,
+        "max_error": 0.210269,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.087131,
+          "error_aversion": 0.175235,
+          "exploration_bias": 0.210269,
+          "attention_selectivity": 0.049789,
+          "confidence_gain": 0.005483,
+          "update_rigidity": 0.170112,
+          "resource_pressure_sensitivity": 0.133924,
+          "virtual_prediction_error_gain": 0.174261
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "methodical_resource_guarded-102",
+      "subject_id": "methodical_resource_guarded-subject-0",
+      "true_profile": "methodical_resource_guarded",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.440344,
+        "error_aversion": 0.875607,
+        "exploration_bias": 0.228332,
+        "attention_selectivity": 0.668437,
+        "confidence_gain": 0.490841,
+        "update_rigidity": 0.868494,
+        "resource_pressure_sensitivity": 0.665931,
+        "virtual_prediction_error_gain": 0.81186
+      },
+      "parameter_recovery": {
+        "mae": 0.091509,
+        "max_error": 0.204069,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.029656,
+          "error_aversion": 0.055607,
+          "exploration_bias": 0.011668,
+          "attention_selectivity": 0.121563,
+          "confidence_gain": 0.079159,
+          "update_rigidity": 0.128494,
+          "resource_pressure_sensitivity": 0.204069,
+          "virtual_prediction_error_gain": 0.10186
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.125577,
+        "max_error": 0.211002,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.002602,
+          "error_aversion": 0.168814,
+          "exploration_bias": 0.211002,
+          "attention_selectivity": 0.162799,
+          "confidence_gain": 0.065541,
+          "update_rigidity": 0.128729,
+          "resource_pressure_sensitivity": 0.180336,
+          "virtual_prediction_error_gain": 0.084796
+        }
+      },
+      "fit_confidence": 0.700104,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "volatile_opportunistic-104",
+      "subject_id": "volatile_opportunistic-subject-0",
+      "true_profile": "volatile_opportunistic",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.687327,
+        "error_aversion": 0.53259,
+        "exploration_bias": 0.583868,
+        "attention_selectivity": 0.538934,
+        "confidence_gain": 0.354717,
+        "update_rigidity": 0.565224,
+        "resource_pressure_sensitivity": 0.419586,
+        "virtual_prediction_error_gain": 0.503316
+      },
+      "parameter_recovery": {
+        "mae": 0.166821,
+        "max_error": 0.345224,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.042673,
+          "error_aversion": 0.15259,
+          "exploration_bias": 0.176132,
+          "attention_selectivity": 0.098934,
+          "confidence_gain": 0.255283,
+          "update_rigidity": 0.345224,
+          "resource_pressure_sensitivity": 0.070414,
+          "virtual_prediction_error_gain": 0.193316
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.084553,
+        "max_error": 0.164318,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.067954,
+          "error_aversion": 0.033937,
+          "exploration_bias": 0.059162,
+          "attention_selectivity": 0.101363,
+          "confidence_gain": 0.114618,
+          "update_rigidity": 0.164318,
+          "resource_pressure_sensitivity": 0.0778,
+          "virtual_prediction_error_gain": 0.057272
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "volatile_opportunistic-101",
+      "subject_id": "volatile_opportunistic-subject-1",
+      "true_profile": "volatile_opportunistic",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.735846,
+        "error_aversion": 0.470504,
+        "exploration_bias": 0.663509,
+        "attention_selectivity": 0.518118,
+        "confidence_gain": 0.351286,
+        "update_rigidity": 0.501658,
+        "resource_pressure_sensitivity": 0.340607,
+        "virtual_prediction_error_gain": 0.439248
+      },
+      "parameter_recovery": {
+        "mae": 0.136246,
+        "max_error": 0.281658,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.005846,
+          "error_aversion": 0.090504,
+          "exploration_bias": 0.096491,
+          "attention_selectivity": 0.078118,
+          "confidence_gain": 0.258714,
+          "update_rigidity": 0.281658,
+          "resource_pressure_sensitivity": 0.149393,
+          "virtual_prediction_error_gain": 0.129248
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.073549,
+        "max_error": 0.148354,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.010771,
+          "error_aversion": 0.077531,
+          "exploration_bias": 0.005981,
+          "attention_selectivity": 0.081645,
+          "confidence_gain": 0.148354,
+          "update_rigidity": 0.130797,
+          "resource_pressure_sensitivity": 0.123367,
+          "virtual_prediction_error_gain": 0.009949
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "balanced_midline-103",
+      "subject_id": "balanced_midline-subject-1",
+      "true_profile": "balanced_midline",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.745551,
+        "error_aversion": 0.518596,
+        "exploration_bias": 0.868514,
+        "attention_selectivity": 0.501004,
+        "confidence_gain": 0.517075,
+        "update_rigidity": 0.409384,
+        "resource_pressure_sensitivity": 0.418706,
+        "virtual_prediction_error_gain": 0.317431
+      },
+      "parameter_recovery": {
+        "mae": 0.119883,
+        "max_error": 0.268514,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.195551,
+          "error_aversion": 0.068596,
+          "exploration_bias": 0.268514,
+          "attention_selectivity": 0.078996,
+          "confidence_gain": 0.062925,
+          "update_rigidity": 0.040616,
+          "resource_pressure_sensitivity": 0.101294,
+          "virtual_prediction_error_gain": 0.142569
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.127832,
+        "max_error": 0.166089,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.166089,
+          "error_aversion": 0.145741,
+          "exploration_bias": 0.150168,
+          "attention_selectivity": 0.057272,
+          "confidence_gain": 0.117105,
+          "update_rigidity": 0.097363,
+          "resource_pressure_sensitivity": 0.151469,
+          "virtual_prediction_error_gain": 0.137453
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "high_exploration_low_caution-103",
+      "subject_id": "high_exploration_low_caution-subject-1",
+      "true_profile": "high_exploration_low_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.821989,
+        "error_aversion": 0.373008,
+        "exploration_bias": 0.747919,
+        "attention_selectivity": 0.486704,
+        "confidence_gain": 0.321452,
+        "update_rigidity": 0.415913,
+        "resource_pressure_sensitivity": 0.295798,
+        "virtual_prediction_error_gain": 0.336657
+      },
+      "parameter_recovery": {
+        "mae": 0.08564,
+        "max_error": 0.172081,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.018011,
+          "error_aversion": 0.133008,
+          "exploration_bias": 0.172081,
+          "attention_selectivity": 0.006704,
+          "confidence_gain": 0.098548,
+          "update_rigidity": 0.135913,
+          "resource_pressure_sensitivity": 0.004202,
+          "virtual_prediction_error_gain": 0.116657
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.084582,
+        "max_error": 0.167829,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.122092,
+          "error_aversion": 0.062955,
+          "exploration_bias": 0.167829,
+          "attention_selectivity": 0.042101,
+          "confidence_gain": 0.041904,
+          "update_rigidity": 0.071571,
+          "resource_pressure_sensitivity": 0.067165,
+          "virtual_prediction_error_gain": 0.101042
+        }
+      },
+      "fit_confidence": 0.657054,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "low_exploration_high_caution-103",
+      "subject_id": "low_exploration_high_caution-subject-1",
+      "true_profile": "low_exploration_high_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.52537,
+        "error_aversion": 0.899104,
+        "exploration_bias": 0.325276,
+        "attention_selectivity": 0.657767,
+        "confidence_gain": 0.514477,
+        "update_rigidity": 0.842968,
+        "resource_pressure_sensitivity": 0.692969,
+        "virtual_prediction_error_gain": 0.772187
+      },
+      "parameter_recovery": {
+        "mae": 0.111397,
+        "max_error": 0.207031,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.18537,
+          "error_aversion": 0.020896,
+          "exploration_bias": 0.165276,
+          "attention_selectivity": 0.042233,
+          "confidence_gain": 0.145523,
+          "update_rigidity": 0.017032,
+          "resource_pressure_sensitivity": 0.207031,
+          "virtual_prediction_error_gain": 0.107813
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.388085,
+        "max_error": 0.579371,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.3181,
+          "error_aversion": 0.520672,
+          "exploration_bias": 0.579371,
+          "attention_selectivity": 0.157276,
+          "confidence_gain": 0.112034,
+          "update_rigidity": 0.473369,
+          "resource_pressure_sensitivity": 0.4344,
+          "virtual_prediction_error_gain": 0.509462
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "methodical_resource_guarded-104",
+      "subject_id": "methodical_resource_guarded-subject-0",
+      "true_profile": "methodical_resource_guarded",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.365567,
+        "error_aversion": 0.941672,
+        "exploration_bias": 0.126952,
+        "attention_selectivity": 0.705364,
+        "confidence_gain": 0.474023,
+        "update_rigidity": 0.973421,
+        "resource_pressure_sensitivity": 0.718071,
+        "virtual_prediction_error_gain": 0.930281
+      },
+      "parameter_recovery": {
+        "mae": 0.140675,
+        "max_error": 0.233421,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.104433,
+          "error_aversion": 0.121672,
+          "exploration_bias": 0.113048,
+          "attention_selectivity": 0.084636,
+          "confidence_gain": 0.095977,
+          "update_rigidity": 0.233421,
+          "resource_pressure_sensitivity": 0.151929,
+          "virtual_prediction_error_gain": 0.220281
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.128774,
+        "max_error": 0.2182,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.000155,
+          "error_aversion": 0.173337,
+          "exploration_bias": 0.2182,
+          "attention_selectivity": 0.164374,
+          "confidence_gain": 0.065911,
+          "update_rigidity": 0.134112,
+          "resource_pressure_sensitivity": 0.18379,
+          "virtual_prediction_error_gain": 0.09031
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "methodical_resource_guarded-101",
+      "subject_id": "methodical_resource_guarded-subject-1",
+      "true_profile": "methodical_resource_guarded",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.40111,
+        "error_aversion": 0.922739,
+        "exploration_bias": 0.157891,
+        "attention_selectivity": 0.69078,
+        "confidence_gain": 0.466312,
+        "update_rigidity": 0.940352,
+        "resource_pressure_sensitivity": 0.683925,
+        "virtual_prediction_error_gain": 0.897676
+      },
+      "parameter_recovery": {
+        "mae": 0.128844,
+        "max_error": 0.200352,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.06889,
+          "error_aversion": 0.102739,
+          "exploration_bias": 0.082109,
+          "attention_selectivity": 0.09922,
+          "confidence_gain": 0.103688,
+          "update_rigidity": 0.200352,
+          "resource_pressure_sensitivity": 0.186075,
+          "virtual_prediction_error_gain": 0.187676
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.216076,
+        "max_error": 0.352715,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.093812,
+          "error_aversion": 0.298675,
+          "exploration_bias": 0.352715,
+          "attention_selectivity": 0.206024,
+          "confidence_gain": 0.018738,
+          "update_rigidity": 0.245413,
+          "resource_pressure_sensitivity": 0.297008,
+          "virtual_prediction_error_gain": 0.216219
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "volatile_opportunistic-103",
+      "subject_id": "volatile_opportunistic-subject-1",
+      "true_profile": "volatile_opportunistic",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.610574,
+        "error_aversion": 0.569837,
+        "exploration_bias": 0.406825,
+        "attention_selectivity": 0.578525,
+        "confidence_gain": 0.315773,
+        "update_rigidity": 0.633766,
+        "resource_pressure_sensitivity": 0.416397,
+        "virtual_prediction_error_gain": 0.597116
+      },
+      "parameter_recovery": {
+        "mae": 0.233709,
+        "max_error": 0.413766,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.119426,
+          "error_aversion": 0.189837,
+          "exploration_bias": 0.353175,
+          "attention_selectivity": 0.138525,
+          "confidence_gain": 0.294227,
+          "update_rigidity": 0.413766,
+          "resource_pressure_sensitivity": 0.073603,
+          "virtual_prediction_error_gain": 0.287116
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.086123,
+        "max_error": 0.164946,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.069026,
+          "error_aversion": 0.03581,
+          "exploration_bias": 0.062995,
+          "attention_selectivity": 0.101733,
+          "confidence_gain": 0.116676,
+          "update_rigidity": 0.164946,
+          "resource_pressure_sensitivity": 0.079637,
+          "virtual_prediction_error_gain": 0.058159
+        }
+      },
+      "fit_confidence": 0.700104,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "balanced_midline-102",
+      "subject_id": "balanced_midline-subject-0",
+      "true_profile": "balanced_midline",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.48281,
+        "error_aversion": 0.750902,
+        "exploration_bias": 0.311691,
+        "attention_selectivity": 0.638608,
+        "confidence_gain": 0.453393,
+        "update_rigidity": 0.774107,
+        "resource_pressure_sensitivity": 0.563964,
+        "virtual_prediction_error_gain": 0.714811
+      },
+      "parameter_recovery": {
+        "mae": 0.183062,
+        "max_error": 0.324107,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.06719,
+          "error_aversion": 0.300902,
+          "exploration_bias": 0.288309,
+          "attention_selectivity": 0.058608,
+          "confidence_gain": 0.126607,
+          "update_rigidity": 0.324107,
+          "resource_pressure_sensitivity": 0.043964,
+          "virtual_prediction_error_gain": 0.254811
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.129016,
+        "max_error": 0.167766,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.167766,
+          "error_aversion": 0.146776,
+          "exploration_bias": 0.152135,
+          "attention_selectivity": 0.05785,
+          "confidence_gain": 0.117851,
+          "update_rigidity": 0.098345,
+          "resource_pressure_sensitivity": 0.152561,
+          "virtual_prediction_error_gain": 0.13884
+        }
+      },
+      "fit_confidence": 0.700104,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "high_exploration_low_caution-102",
+      "subject_id": "high_exploration_low_caution-subject-0",
+      "true_profile": "high_exploration_low_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.612471,
+        "error_aversion": 0.553888,
+        "exploration_bias": 0.40981,
+        "attention_selectivity": 0.581975,
+        "confidence_gain": 0.297334,
+        "update_rigidity": 0.650501,
+        "resource_pressure_sensitivity": 0.385261,
+        "virtual_prediction_error_gain": 0.608575
+      },
+      "parameter_recovery": {
+        "mae": 0.265073,
+        "max_error": 0.51019,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.227529,
+          "error_aversion": 0.313888,
+          "exploration_bias": 0.51019,
+          "attention_selectivity": 0.101975,
+          "confidence_gain": 0.122666,
+          "update_rigidity": 0.370501,
+          "resource_pressure_sensitivity": 0.085261,
+          "virtual_prediction_error_gain": 0.388575
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.084418,
+        "max_error": 0.167462,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.121827,
+          "error_aversion": 0.06287,
+          "exploration_bias": 0.167462,
+          "attention_selectivity": 0.042009,
+          "confidence_gain": 0.041865,
+          "update_rigidity": 0.071416,
+          "resource_pressure_sensitivity": 0.06707,
+          "virtual_prediction_error_gain": 0.100823
+        }
+      },
+      "fit_confidence": 0.700104,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "low_exploration_high_caution-102",
+      "subject_id": "low_exploration_high_caution-subject-0",
+      "true_profile": "low_exploration_high_caution",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.504088,
+        "error_aversion": 0.917252,
+        "exploration_bias": 0.369046,
+        "attention_selectivity": 0.664566,
+        "confidence_gain": 0.524341,
+        "update_rigidity": 0.862117,
+        "resource_pressure_sensitivity": 0.701639,
+        "virtual_prediction_error_gain": 0.791404
+      },
+      "parameter_recovery": {
+        "mae": 0.104506,
+        "max_error": 0.209046,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.164088,
+          "error_aversion": 0.002748,
+          "exploration_bias": 0.209046,
+          "attention_selectivity": 0.035434,
+          "confidence_gain": 0.135659,
+          "update_rigidity": 0.002117,
+          "resource_pressure_sensitivity": 0.198361,
+          "virtual_prediction_error_gain": 0.088596
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.186756,
+        "max_error": 0.29487,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.127604,
+          "error_aversion": 0.265911,
+          "exploration_bias": 0.29487,
+          "attention_selectivity": 0.072916,
+          "confidence_gain": 0.021101,
+          "update_rigidity": 0.249131,
+          "resource_pressure_sensitivity": 0.207308,
+          "virtual_prediction_error_gain": 0.255207
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "methodical_resource_guarded-103",
+      "subject_id": "methodical_resource_guarded-subject-1",
+      "true_profile": "methodical_resource_guarded",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.39704,
+        "error_aversion": 0.915378,
+        "exploration_bias": 0.065267,
+        "attention_selectivity": 0.694657,
+        "confidence_gain": 0.448796,
+        "update_rigidity": 0.952585,
+        "resource_pressure_sensitivity": 0.690304,
+        "virtual_prediction_error_gain": 0.905053
+      },
+      "parameter_recovery": {
+        "mae": 0.143369,
+        "max_error": 0.212585,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.07296,
+          "error_aversion": 0.095378,
+          "exploration_bias": 0.174733,
+          "attention_selectivity": 0.095343,
+          "confidence_gain": 0.121204,
+          "update_rigidity": 0.212585,
+          "resource_pressure_sensitivity": 0.179696,
+          "virtual_prediction_error_gain": 0.195053
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.305604,
+        "max_error": 0.490512,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.182059,
+          "error_aversion": 0.418952,
+          "exploration_bias": 0.490512,
+          "attention_selectivity": 0.245193,
+          "confidence_gain": 0.021355,
+          "update_rigidity": 0.349828,
+          "resource_pressure_sensitivity": 0.402471,
+          "virtual_prediction_error_gain": 0.334463
+        }
+      },
+      "fit_confidence": 0.678579,
+      "inference_path_blinded": true
+    },
+    {
+      "session_id": "volatile_opportunistic-102",
+      "subject_id": "volatile_opportunistic-subject-0",
+      "true_profile": "volatile_opportunistic",
+      "inferred_parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.605071,
+        "error_aversion": 0.560352,
+        "exploration_bias": 0.419374,
+        "attention_selectivity": 0.581026,
+        "confidence_gain": 0.311965,
+        "update_rigidity": 0.644331,
+        "resource_pressure_sensitivity": 0.405746,
+        "virtual_prediction_error_gain": 0.606277
+      },
+      "parameter_recovery": {
+        "mae": 0.236229,
+        "max_error": 0.424331,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.124929,
+          "error_aversion": 0.180352,
+          "exploration_bias": 0.340626,
+          "attention_selectivity": 0.141026,
+          "confidence_gain": 0.298035,
+          "update_rigidity": 0.424331,
+          "resource_pressure_sensitivity": 0.084254,
+          "virtual_prediction_error_gain": 0.296277
+        }
+      },
+      "candidate_bank_recovery": {
+        "mae": 0.073859,
+        "max_error": 0.148246,
+        "per_parameter_error": {
+          "uncertainty_sensitivity": 0.0115,
+          "error_aversion": 0.077298,
+          "exploration_bias": 0.007047,
+          "attention_selectivity": 0.081897,
+          "confidence_gain": 0.148246,
+          "update_rigidity": 0.131224,
+          "resource_pressure_sensitivity": 0.123109,
+          "virtual_prediction_error_gain": 0.010552
+        }
+      },
+      "fit_confidence": 0.700104,
+      "inference_path_blinded": true
+    }
+  ]
+}

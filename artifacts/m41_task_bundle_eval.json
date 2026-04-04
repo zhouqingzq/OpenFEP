@@ -1,0 +1,619 @@
+{
+  "analysis_type": "m41_minimal_external_task_validation",
+  "validation_type": "external_task_bundle",
+  "benchmark_scope": "task-level evaluation on imported external human benchmark bundles",
+  "training_design": {
+    "source": "none",
+    "claim": "no trainable latent recovery model is used in the M4.1 acceptance chain"
+  },
+  "scope_boundary": {
+    "downgraded_claims": [
+      {
+        "claim": "external validation",
+        "replacement": "same-framework cross-generator synthetic validation",
+        "status": "downgraded"
+      },
+      {
+        "claim": "identifiability",
+        "replacement": "within synthetic family recoverability",
+        "status": "downgraded"
+      },
+      {
+        "claim": "blind classification",
+        "replacement": "profile distinguishability on synthetic holdout",
+        "status": "downgraded"
+      }
+    ],
+    "module_inventory": {
+      "keep": [
+        "segmentum/m41_external_task_eval.py",
+        "segmentum/m4_benchmarks.py",
+        "segmentum/benchmark_registry.py"
+      ],
+      "downgrade_to_same_framework": [
+        "segmentum/m41_inference.py",
+        "segmentum/m41_identifiability.py",
+        "segmentum/m41_blind_classifier.py",
+        "segmentum/m41_falsification.py",
+        "segmentum/m41_external_generator.py"
+      ],
+      "stop_relying_on_for_m41_acceptance": [
+        "segmentum/m41_inference.py",
+        "segmentum/m41_identifiability.py",
+        "segmentum/m41_blind_classifier.py",
+        "segmentum/m41_falsification.py",
+        "scripts/generate_m41_external_data.py"
+      ]
+    },
+    "still_not_claimed": [
+      "external validation of latent cognitive parameters",
+      "identifiability of latent style semantics on human data",
+      "falsification of the latent parameter ontology",
+      "blind classification of true human cognitive profiles"
+    ]
+  },
+  "external_bundle_provenance": {
+    "confidence_database": {
+      "bundle": {
+        "benchmark_id": "confidence_database",
+        "version": "1.0.0",
+        "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\confidence_database\\manifest.json",
+        "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\confidence_database\\confidence_database_external.jsonl",
+        "source_type": "external_bundle",
+        "source_label": "Confidence Database",
+        "benchmark_slice": "confidence_database_external_bundle",
+        "record_count": 825344,
+        "status": "external_bundle_imported",
+        "grouping_fields": [
+          "session_id",
+          "subject_id"
+        ],
+        "default_split_unit": "subject_id",
+        "external_bundle_preferred": true,
+        "smoke_test_only": false,
+        "is_synthetic": false,
+        "manifest": {
+          "benchmark_id": "confidence_database",
+          "version": "1.0.0",
+          "status": "external_bundle_imported",
+          "benchmark_slice": "confidence_database_external_bundle",
+          "source_type": "external_bundle",
+          "source_label": "Confidence Database",
+          "grouping_fields": [
+            "session_id",
+            "subject_id"
+          ],
+          "default_split_unit": "subject_id",
+          "external_bundle_preferred": true,
+          "acceptance_requires_external_bundle": true,
+          "smoke_test_only": false,
+          "is_synthetic": false,
+          "data_file": "confidence_database_external.jsonl",
+          "description": "External confidence benchmark bundle converted from the local Confidence Database raw directory.",
+          "record_count": 825344,
+          "fields": [
+            "trial_id",
+            "subject_id",
+            "session_id",
+            "split",
+            "stimulus_strength",
+            "correct_choice",
+            "human_choice",
+            "human_confidence",
+            "rt_ms",
+            "source_dataset",
+            "source_file"
+          ],
+          "notes": [
+            "Converted from local Confidence Database raw CSV files.",
+            "Only files/rows that could be mapped conservatively into the current confidence benchmark schema were included.",
+            "Binary stimulus/response labels were canonicalized onto left/right labels for adapter compatibility.",
+            "Split assignments were precomputed deterministically from subject_id to keep heldout evaluation subject-disjoint.",
+            "Files with incompatible schemas were skipped and listed in conversion_summary."
+          ],
+          "conversion_summary": {
+            "included_files": 45,
+            "skipped_files": 129,
+            "subject_count": 2426,
+            "session_count": 3949,
+            "skipped_reasons": {
+              "data_AguilarLleyda_2018.csv": "missing_required_columns",
+              "data_AguilarLleyda_unpub.csv": "missing_required_columns",
+              "data_Akdogan_2017_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Akdogan_2017_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Akdogan_2017_Exp3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Akdogan_2017_Exp4.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Bang_2019_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Chandravadia_2020.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Chetverikov_2014_exp3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Chetverikov_2014_exp4.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Clark_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Clark_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2014.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2018_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2018_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2021_Cognit.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2021_PsyRes.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2022_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Desender_2022_Exp1S.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Dildine_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Double_2017.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Duyan_2018_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Duyan_2018_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Duyan_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Duyan_unpub_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Duyan_unpub_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Duyan_unpub_logos.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Faivre_2018_bioRxiv.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Faivre_2018_JN.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Fallow_unpub_1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Fallow_unpub_2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Fallow_unpub_3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Gajdos_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Gallagher_2019_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Gallagher_2019_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Gherman_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Haddara_2022_Expt1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Haddara_2022_Expt2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Hainguerlot_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Hainguerlot_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Hellmann_2023_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Hellmann_2023_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Hetland_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Hu_2017.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Jachs_2015_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Jachs_2015_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Jachs_2015_Exp3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2010.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2012_E1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2012_E2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2012_E3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2012_E4.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2014_E1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_2014_E2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_unpub1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kantner_unpub2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Konishi_2019.csv": "missing_required_columns",
+              "data_Kreis_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kvam_2015_ch.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kvam_2015_nc.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Kvam_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Law_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Lebreton_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Lempert_2015.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Lindsay_2014.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Matthews_2018_exp1.csv": "missing_required_columns",
+              "data_Matthews_2018_exp2.csv": "missing_required_columns",
+              "data_Matthews_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Matthews_unpub.csv": "missing_required_columns",
+              "data_Mazancieux_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt4.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt5.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt6.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mazor_2021_Expt7.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mei_2019_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Mei_2019_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_OHora_2017.csv": "no_rows_match_confidence_bundle_schema",
+              "data_OHora_unpub_1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_OHora_unpub_2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Paulewicz_unpub1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Pereira_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rausch_2014.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rausch_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rausch_2018_Expt1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rausch_2018_Expt2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rausch_2020.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Recht_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rouault_2018_Expt1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rouault_2018_Expt2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Rouault_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Sadeghi_2017_memory.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Sadeghi_2017_perception.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Samaha_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Samaha_2017_exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Samaha_2017_exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Samaha_2017_exp3.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Schmidt_2019_memory.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Schurgin_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Seow_2019.csv": "missing_required_columns",
+              "data_Sherman_unpub_Expt1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Sherman_unpub_Expt2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Siedlecka_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Siedlecka_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Siedlecka_2019_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Siedlecka_2019_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Sinanaj_2015.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Skora_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Skora_unpub.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Teuchies_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_VanBoxtel_2019_Expt1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_VanBoxtel_2019_Expt2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Wang_2017_NatComm.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Wang_2017_Neuropsychologia.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Wang_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Weidemann_2016.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Wierzchon_2012.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Xiang_2021.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Xu_2019_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Xu_2019_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Ye_2018.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Yeon_2019.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Yeon_unpub_Exp1.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Yeon_unpub_Exp2.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Zheng_2023.csv": "no_rows_match_confidence_bundle_schema",
+              "data_Zylberberg_2016.csv": "no_rows_match_confidence_bundle_schema"
+            }
+          }
+        },
+        "benchmark_state": "acceptance_ready",
+        "available_states": [
+          "scaffold_complete",
+          "acceptance_ready"
+        ],
+        "blockers": [],
+        "status_notes": []
+      },
+      "validation": {
+        "benchmark_id": "confidence_database",
+        "ok": true,
+        "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\confidence_database\\manifest.json",
+        "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\confidence_database\\confidence_database_external.jsonl",
+        "record_count_declared": 825344,
+        "record_count_observed": 825344,
+        "missing_fields": [],
+        "malformed_lines": 0,
+        "split_unit": "subject_id",
+        "grouping_fields": [
+          "session_id",
+          "subject_id"
+        ],
+        "external_bundle_preferred": true,
+        "smoke_test_only": false,
+        "is_synthetic": false,
+        "warnings": [],
+        "benchmark_state": "acceptance_ready",
+        "available_states": [
+          "scaffold_complete",
+          "acceptance_ready"
+        ],
+        "blockers": []
+      },
+      "status": {
+        "benchmark_id": "confidence_database",
+        "benchmark_state": "acceptance_ready",
+        "available_states": [
+          "scaffold_complete",
+          "acceptance_ready"
+        ],
+        "blockers": [],
+        "status_notes": [],
+        "acceptance_ready": true,
+        "scaffold_complete": true,
+        "smoke_only": false,
+        "external_bundle_required": true
+      },
+      "split_values": [
+        "heldout",
+        "train",
+        "validation"
+      ],
+      "record_count_observed": 825344,
+      "subject_split_integrity": {
+        "key_field": "subject_id",
+        "ok": true,
+        "group_count": 2426,
+        "leaking_keys": [],
+        "leaking_key_count": 0
+      },
+      "session_split_integrity": {
+        "key_field": "session_id",
+        "ok": true,
+        "group_count": 3949,
+        "leaking_keys": [],
+        "leaking_key_count": 0
+      }
+    },
+    "iowa_gambling_task": {
+      "bundle": {
+        "benchmark_id": "iowa_gambling_task",
+        "version": "1.0.0",
+        "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\manifest.json",
+        "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\iowa_gambling_task_external.jsonl",
+        "source_type": "external_bundle",
+        "source_label": "igt dataset",
+        "benchmark_slice": "iowa_gambling_task_external_bundle",
+        "record_count": 11800,
+        "status": "external_bundle_imported",
+        "grouping_fields": [
+          "subject_id"
+        ],
+        "default_split_unit": "subject_id",
+        "external_bundle_preferred": true,
+        "smoke_test_only": false,
+        "is_synthetic": false,
+        "manifest": {
+          "benchmark_id": "iowa_gambling_task",
+          "version": "1.0.0",
+          "status": "external_bundle_imported",
+          "benchmark_slice": "iowa_gambling_task_external_bundle",
+          "source_type": "external_bundle",
+          "source_label": "igt dataset",
+          "grouping_fields": [
+            "subject_id"
+          ],
+          "default_split_unit": "subject_id",
+          "external_bundle_preferred": true,
+          "acceptance_requires_external_bundle": true,
+          "smoke_test_only": false,
+          "is_synthetic": false,
+          "data_file": "iowa_gambling_task_external.jsonl",
+          "description": "External Iowa Gambling Task benchmark bundle converted from local participant IGT.csv files.",
+          "record_count": 11800,
+          "fields": [
+            "trial_id",
+            "subject_id",
+            "deck",
+            "reward",
+            "penalty",
+            "net_outcome",
+            "advantageous",
+            "trial_index",
+            "split",
+            "source_file"
+          ],
+          "notes": [
+            "Converted from local subject-level IGT.csv files.",
+            "Penalty values are normalized to signed negative values for benchmark compatibility.",
+            "Split assignments were precomputed deterministically from subject_id."
+          ],
+          "conversion_summary": {
+            "included_subjects": 59,
+            "skipped_subjects": 0,
+            "subject_count": 59,
+            "skipped_reasons": {}
+          }
+        },
+        "benchmark_state": "acceptance_ready",
+        "available_states": [
+          "scaffold_complete",
+          "acceptance_ready"
+        ],
+        "blockers": [],
+        "status_notes": []
+      },
+      "validation": {
+        "benchmark_id": "iowa_gambling_task",
+        "ok": true,
+        "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\manifest.json",
+        "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\iowa_gambling_task_external.jsonl",
+        "record_count_declared": 11800,
+        "record_count_observed": 11800,
+        "missing_fields": [],
+        "malformed_lines": 0,
+        "split_unit": "subject_id",
+        "grouping_fields": [
+          "subject_id"
+        ],
+        "external_bundle_preferred": true,
+        "smoke_test_only": false,
+        "is_synthetic": false,
+        "warnings": [],
+        "benchmark_state": "acceptance_ready",
+        "available_states": [
+          "scaffold_complete",
+          "acceptance_ready"
+        ],
+        "blockers": []
+      },
+      "status": {
+        "benchmark_id": "iowa_gambling_task",
+        "benchmark_state": "acceptance_ready",
+        "available_states": [
+          "scaffold_complete",
+          "acceptance_ready"
+        ],
+        "blockers": [],
+        "status_notes": [],
+        "acceptance_ready": true,
+        "scaffold_complete": true,
+        "smoke_only": false,
+        "external_bundle_required": true
+      },
+      "split_values": [
+        "heldout",
+        "train",
+        "validation"
+      ],
+      "record_count_observed": 11800,
+      "subject_split_integrity": {
+        "key_field": "subject_id",
+        "ok": true,
+        "group_count": 59,
+        "leaking_keys": [],
+        "leaking_key_count": 0
+      }
+    }
+  },
+  "smoke_fixture_rejection": {
+    "all_blocked": true,
+    "checks": {
+      "confidence_database": {
+        "blocked": true,
+        "error": "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external. Repo sample remains available only for smoke tests."
+      },
+      "iowa_gambling_task": {
+        "blocked": true,
+        "error": "Acceptance-grade evaluation requires an imported external bundle, but the active bundle is not external. Repo sample remains available only for smoke tests."
+      }
+    }
+  },
+  "confidence_benchmark": {
+    "benchmark_id": "confidence_database",
+    "claim_envelope": "benchmark_eval",
+    "split": "heldout",
+    "trial_count": 40,
+    "bundle_mode": "external_bundle",
+    "benchmark_status": {
+      "benchmark_id": "confidence_database",
+      "benchmark_state": "acceptance_ready",
+      "available_states": [
+        "scaffold_complete",
+        "acceptance_ready"
+      ],
+      "blockers": [],
+      "status_notes": [],
+      "acceptance_ready": true,
+      "scaffold_complete": true,
+      "smoke_only": false,
+      "external_bundle_required": true
+    },
+    "protocol_validation": {
+      "protocol_mode": "dataset_aligned",
+      "trial_count": 40,
+      "subject_count": 1,
+      "ok": true
+    },
+    "metrics": {
+      "accuracy": 0.925,
+      "auroc2": 0.837838,
+      "calibration_error": 0.450871,
+      "heldout_likelihood": -0.630649,
+      "confidence_alignment": 0.248427
+    },
+    "subject_summary": {
+      "subjects": {
+        "Adler_2018_Expt1::1": {
+          "accuracy": 0.925,
+          "calibration_error": 0.450871,
+          "brier_score": 0.208443,
+          "heldout_likelihood": -0.630649,
+          "confidence_bias": 0.528364,
+          "auroc2": 0.837838,
+          "meta_d_prime_ratio": 0.405771,
+          "confidence_alignment": 0.248427,
+          "subject_count": 1.0
+        }
+      },
+      "subject_count": 1,
+      "heldout_likelihood_floor": -0.630649,
+      "heldout_likelihood_mean": -0.630649,
+      "calibration_ceiling": 0.450871
+    },
+    "leakage_check": {
+      "split_unit": "session_id",
+      "subject": {
+        "key_field": "subject_id",
+        "ok": true,
+        "leaking_keys": []
+      },
+      "session": {
+        "key_field": "session_id",
+        "ok": true,
+        "leaking_keys": []
+      },
+      "precomputed_split_available": true,
+      "selected_split": "heldout"
+    },
+    "metric_gate": {
+      "passed": true,
+      "thresholds": {
+        "accuracy_gte": 0.85,
+        "auroc2_gte": 0.8,
+        "calibration_error_lte": 0.5,
+        "heldout_likelihood_gte": -1.0,
+        "trial_count_gte": 40
+      },
+      "observed": {
+        "accuracy": 0.925,
+        "auroc2": 0.837838,
+        "calibration_error": 0.450871,
+        "heldout_likelihood": -0.630649,
+        "trial_count": 40
+      }
+    }
+  },
+  "igt_benchmark": {
+    "benchmark_id": "iowa_gambling_task",
+    "claim_envelope": "benchmark_eval",
+    "split": "heldout",
+    "trial_count": 40,
+    "bundle_mode": "external_bundle",
+    "benchmark_status": {
+      "benchmark_id": "iowa_gambling_task",
+      "benchmark_state": "acceptance_ready",
+      "available_states": [
+        "scaffold_complete",
+        "acceptance_ready"
+      ],
+      "blockers": [],
+      "status_notes": [],
+      "acceptance_ready": true,
+      "scaffold_complete": true,
+      "smoke_only": false,
+      "external_bundle_required": true
+    },
+    "protocol_validation": {
+      "protocol_mode": "nonstandard",
+      "trial_count": 40,
+      "subject_count": 1,
+      "standard_trial_count": null,
+      "ok": true
+    },
+    "metrics": {
+      "advantageous_choice_rate": 1.0,
+      "policy_alignment_rate": 0.425,
+      "final_cumulative_gain": 1000.0,
+      "deck_match_rate": 0.225,
+      "late_advantageous_rate": 1.0
+    },
+    "subject_summary": {
+      "subjects": {
+        "s-10": {
+          "advantageous_choice_rate": 1.0,
+          "mean_net_outcome": 25.0,
+          "reward_fit": -737.20365,
+          "confidence_advantage_alignment": 0.067906,
+          "deck_match_rate": 0.225,
+          "policy_alignment_rate": 0.425,
+          "late_advantageous_rate": 1.0,
+          "final_cumulative_gain": 1000.0
+        }
+      },
+      "subject_count": 1,
+      "deck_match_floor": 0.225,
+      "policy_alignment_mean": 0.425
+    },
+    "leakage_check": {},
+    "metric_gate": {
+      "passed": true,
+      "thresholds": {
+        "advantageous_choice_rate_gte": 0.8,
+        "policy_alignment_rate_gte": 0.35,
+        "final_cumulative_gain_gte": 1000.0,
+        "trial_count_gte": 40
+      },
+      "observed": {
+        "advantageous_choice_rate": 1.0,
+        "policy_alignment_rate": 0.425,
+        "final_cumulative_gain": 1000.0,
+        "trial_count": 40
+      }
+    }
+  },
+  "evaluation_chain_audit": {
+    "paths": {
+      "E:\\workspace\\segments\\segmentum\\m41_external_task_eval.py": {
+        "forbidden_references_present": []
+      },
+      "E:\\workspace\\segments\\segmentum\\m41_audit.py": {
+        "forbidden_references_present": []
+      }
+    },
+    "all_clear": true
+  },
+  "repo_fixture_root": "E:\\workspace\\segments\\data\\benchmarks"
+}

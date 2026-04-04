@@ -1,99 +1,375 @@
 {
+  "benchmark_root": "E:\\workspace\\segments\\external_benchmark_registry",
+  "replay_basis": {
+    "benchmark_id": "iowa_gambling_task",
+    "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\manifest.json",
+    "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\iowa_gambling_task_external.jsonl",
+    "source_type": "external_bundle",
+    "smoke_test_only": false,
+    "is_synthetic": false,
+    "acceptance_requires_external_bundle": true,
+    "selected_subject_id": "s-10",
+    "protocol_mode": "standard_100",
+    "standard_trial_count": 100
+  },
   "same_seed_triple_replay": {
-    "task_id": "two_armed_bandit",
-    "seed": 91,
-    "exact_match": true
+    "task_id": "iowa_gambling_task",
+    "seed": 44,
+    "exact_match": true,
+    "trial_count": 100
   },
   "different_seed_behavior": {
-    "task_id": "two_armed_bandit",
+    "task_id": "iowa_gambling_task",
     "seed_summaries": [
       {
-        "seed": 1,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.7,
-        "reward_variance": 0.21
+        "seed": 41,
+        "mean_net_outcome": 25.0,
+        "advantageous_choice_rate": 1.0,
+        "final_cumulative_gain": 2500.0,
+        "mean_confidence": 0.739769,
+        "deck_match_rate": 0.19,
+        "reward_fit": -1023.834685,
+        "confidence_advantage_alignment": 0.109839,
+        "deck_distribution": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 0.9,
+          "D": 0.1
+        },
+        "deck_a_rate": 0.0,
+        "deck_b_rate": 0.0,
+        "deck_c_rate": 0.9,
+        "deck_d_rate": 0.1
       },
       {
-        "seed": 2,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.66,
-        "reward_variance": 0.2244
+        "seed": 42,
+        "mean_net_outcome": 25.0,
+        "advantageous_choice_rate": 1.0,
+        "final_cumulative_gain": 2500.0,
+        "mean_confidence": 0.740114,
+        "deck_match_rate": 0.19,
+        "reward_fit": -1023.834685,
+        "confidence_advantage_alignment": 0.154884,
+        "deck_distribution": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 0.9,
+          "D": 0.1
+        },
+        "deck_a_rate": 0.0,
+        "deck_b_rate": 0.0,
+        "deck_c_rate": 0.9,
+        "deck_d_rate": 0.1
       },
       {
-        "seed": 3,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.58,
-        "reward_variance": 0.2436
+        "seed": 43,
+        "mean_net_outcome": 25.0,
+        "advantageous_choice_rate": 1.0,
+        "final_cumulative_gain": 2500.0,
+        "mean_confidence": 0.7401,
+        "deck_match_rate": 0.19,
+        "reward_fit": -1023.834685,
+        "confidence_advantage_alignment": 0.087664,
+        "deck_distribution": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 0.9,
+          "D": 0.1
+        },
+        "deck_a_rate": 0.0,
+        "deck_b_rate": 0.0,
+        "deck_c_rate": 0.9,
+        "deck_d_rate": 0.1
       },
       {
-        "seed": 4,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.76,
-        "reward_variance": 0.1824
-      },
-      {
-        "seed": 5,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.7,
-        "reward_variance": 0.21
-      },
-      {
-        "seed": 6,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.58,
-        "reward_variance": 0.2436
-      },
-      {
-        "seed": 7,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.68,
-        "reward_variance": 0.2176
-      },
-      {
-        "seed": 8,
-        "optimal_choice_rate": 1.0,
-        "mean_reward": 0.72,
-        "reward_variance": 0.2016
+        "seed": 45,
+        "mean_net_outcome": 25.0,
+        "advantageous_choice_rate": 1.0,
+        "final_cumulative_gain": 2500.0,
+        "mean_confidence": 0.699801,
+        "deck_match_rate": 0.2,
+        "reward_fit": -725.478792,
+        "confidence_advantage_alignment": 0.078655,
+        "deck_distribution": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 1.0,
+          "D": 0.0
+        },
+        "deck_a_rate": 0.0,
+        "deck_b_rate": 0.0,
+        "deck_c_rate": 1.0,
+        "deck_d_rate": 0.0
       }
     ],
     "behavioral_summary": {
-      "optimal_choice_rate": {
+      "mean_net_outcome": {
+        "mean": 25.0,
+        "variance": 0.0,
+        "min": 25.0,
+        "max": 25.0,
+        "range": 0.0
+      },
+      "advantageous_choice_rate": {
         "mean": 1.0,
-        "variance": 0.0
+        "variance": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "range": 0.0
       },
-      "mean_reward": {
-        "mean": 0.6725,
-        "variance": 0.003594
+      "final_cumulative_gain": {
+        "mean": 2500.0,
+        "variance": 0.0,
+        "min": 2500.0,
+        "max": 2500.0,
+        "range": 0.0
       },
-      "reward_variance": {
-        "mean": 0.21665,
-        "variance": 0.000375
+      "mean_confidence": {
+        "mean": 0.729946,
+        "variance": 0.000303,
+        "min": 0.699801,
+        "max": 0.740114,
+        "range": 0.040313
+      },
+      "deck_match_rate": {
+        "mean": 0.1925,
+        "variance": 1.9e-05,
+        "min": 0.19,
+        "max": 0.2,
+        "range": 0.01
+      },
+      "reward_fit": {
+        "mean": -949.245712,
+        "variance": 16690.544791,
+        "min": -1023.834685,
+        "max": -725.478792,
+        "range": 298.355893
+      },
+      "confidence_advantage_alignment": {
+        "mean": 0.107761,
+        "variance": 0.000869,
+        "min": 0.078655,
+        "max": 0.154884,
+        "range": 0.076229
+      },
+      "deck_a_rate": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "range": 0.0
+      },
+      "deck_b_rate": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "range": 0.0
+      },
+      "deck_c_rate": {
+        "mean": 0.925,
+        "variance": 0.001875,
+        "min": 0.9,
+        "max": 1.0,
+        "range": 0.1
+      },
+      "deck_d_rate": {
+        "mean": 0.075,
+        "variance": 0.001875,
+        "min": 0.0,
+        "max": 0.1,
+        "range": 0.1
       }
     },
-    "unique_behavior_sequences": 8,
-    "different_seeds_differ": true
-  },
-  "bootstrap_ci": {
-    "metric": "mean_reward",
-    "mean": 0.6725,
-    "variance": 0.003594,
-    "ci_lower": 0.63,
-    "ci_upper": 0.715
-  },
-  "tolerance_gate": {
-    "metric": "mean_reward",
-    "passed": true,
-    "ci": {
-      "metric": "mean_reward",
-      "mean": 0.6725,
-      "variance": 0.003594,
-      "ci_lower": 0.63,
-      "ci_upper": 0.715
+    "unique_behavior_sequences": 4,
+    "different_seeds_differ": true,
+    "sequence_differences": [
+      {
+        "seed_left": 41,
+        "seed_right": 42,
+        "diff_count": 100,
+        "diff_ratio": 1.0,
+        "first_diff_positions": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "exact_match": false
+      },
+      {
+        "seed_left": 41,
+        "seed_right": 43,
+        "diff_count": 100,
+        "diff_ratio": 1.0,
+        "first_diff_positions": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "exact_match": false
+      },
+      {
+        "seed_left": 41,
+        "seed_right": 45,
+        "diff_count": 100,
+        "diff_ratio": 1.0,
+        "first_diff_positions": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "exact_match": false
+      },
+      {
+        "seed_left": 42,
+        "seed_right": 43,
+        "diff_count": 100,
+        "diff_ratio": 1.0,
+        "first_diff_positions": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "exact_match": false
+      },
+      {
+        "seed_left": 42,
+        "seed_right": 45,
+        "diff_count": 100,
+        "diff_ratio": 1.0,
+        "first_diff_positions": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "exact_match": false
+      },
+      {
+        "seed_left": 43,
+        "seed_right": 45,
+        "diff_count": 100,
+        "diff_ratio": 1.0,
+        "first_diff_positions": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "exact_match": false
+      }
+    ],
+    "sequence_diff_summary": {
+      "pairs_evaluated": 6,
+      "nonzero_pair_count": 6,
+      "max_diff_count": 100,
+      "min_diff_count": 100,
+      "mean_diff_count": 100.0
     },
-    "tolerance": {
-      "lower_bound": 0.55,
-      "upper_bound": 0.8,
-      "min_variance": 0.0001
+    "behavioral_evidence": {
+      "sequence_position_difference_observed": true,
+      "varying_metric_names": [
+        "confidence_advantage_alignment",
+        "deck_c_rate",
+        "deck_d_rate",
+        "deck_match_rate",
+        "mean_confidence",
+        "reward_fit"
+      ],
+      "varying_behavior_metric_count": 6,
+      "distribution_difference_observed": true,
+      "distinguishable": true
+    },
+    "deck_distribution_difference": {
+      "field_name": "deck_distribution",
+      "pairwise": [
+        {
+          "seed_left": 41,
+          "seed_right": 42,
+          "l1_distance": 0.0
+        },
+        {
+          "seed_left": 41,
+          "seed_right": 43,
+          "l1_distance": 0.0
+        },
+        {
+          "seed_left": 41,
+          "seed_right": 45,
+          "l1_distance": 0.2
+        },
+        {
+          "seed_left": 42,
+          "seed_right": 43,
+          "l1_distance": 0.0
+        },
+        {
+          "seed_left": 42,
+          "seed_right": 45,
+          "l1_distance": 0.2
+        },
+        {
+          "seed_left": 43,
+          "seed_right": 45,
+          "l1_distance": 0.2
+        }
+      ],
+      "max_l1_distance": 0.2,
+      "nonzero_pair_count": 3
+    },
+    "reproducibility_gate": {
+      "passed": true,
+      "requirements": {
+        "different_seeds_differ": true,
+        "sequence_position_difference_observed": true,
+        "varying_behavior_metric_count_at_least_two": true
+      }
     }
+  },
+  "smoke_reference": {
+    "benchmark_id": "two_armed_bandit",
+    "bundle_mode": "synthetic_protocol",
+    "claim_envelope": "smoke_only",
+    "trial_count": 50
   }
 }

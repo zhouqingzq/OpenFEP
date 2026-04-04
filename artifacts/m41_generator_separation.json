@@ -1,0 +1,20 @@
+{
+  "analysis_type": "generator_separation",
+  "seed": 42,
+  "internal_generator": "run_cognitive_style_trial",
+  "external_generator": "external_v1",
+  "internal_action_distribution": {
+    "commit": 0.111111,
+    "scan": 0.888889
+  },
+  "external_action_distribution": {
+    "commit": 0.1,
+    "inspect": 0.12,
+    "plan": 0.12,
+    "query": 0.28,
+    "recover": 0.1,
+    "retry": 0.04,
+    "scan": 0.24
+  },
+  "js_divergence": 0.473343
+}

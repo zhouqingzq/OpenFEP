@@ -7715,6 +7715,36 @@
   },
   "bundle_mode": "external_bundle",
   "claim_envelope": "benchmark_eval",
+  "leakage_check": {
+    "split_unit": "subject_id",
+    "selected_split": null,
+    "trial_count": 200,
+    "split_counts": {
+      "heldout": 200
+    },
+    "checks": {
+      "subject_id": {
+        "key_field": "subject_id",
+        "ok": true,
+        "leaking_keys": [],
+        "observed_key_count": 1,
+        "distinct_split_count": 1,
+        "leaking_key_splits": {}
+      }
+    },
+    "failing_checks": [],
+    "ok": true,
+    "status": "pass",
+    "precomputed_split_available": true,
+    "subject": {
+      "key_field": "subject_id",
+      "ok": true,
+      "leaking_keys": [],
+      "observed_key_count": 1,
+      "distinct_split_count": 1,
+      "leaking_key_splits": {}
+    }
+  },
   "trial_export_validation": {
     "expected_length": 100,
     "observed_length": 100,

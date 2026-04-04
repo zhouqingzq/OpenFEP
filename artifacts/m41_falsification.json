@@ -1,0 +1,333 @@
+{
+  "analysis_type": "parameter_falsification_suite",
+  "seeds": [
+    41,
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "experiments": {
+    "uncertainty_sensitivity": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "uncertainty_sensitivity",
+      "preregistered_observable": "uncertainty_confidence_drop_rate",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          0.76223,
+          0.796727,
+          0.774282,
+          0.788842,
+          0.802166,
+          0.799304
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.606662,
+          0.633497,
+          0.616391,
+          0.626407,
+          0.640201,
+          0.635219
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "resource_pressure_sensitivity",
+        "competitor_cohens_d": 8.519351,
+        "random_parameter_cohens_d": 8.519351
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 12.269558,
+      "supported": true
+    },
+    "error_aversion": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "error_aversion",
+      "preregistered_observable": "evidence_aligned_choice_rate",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          0.555556,
+          0.555556,
+          0.555556,
+          0.611111,
+          0.555556,
+          0.5
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.333333,
+          0.333333,
+          0.333333,
+          0.333333,
+          0.333333,
+          0.333333
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "attention_selectivity",
+        "competitor_cohens_d": 1.714992,
+        "random_parameter_cohens_d": 22.135807
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 9.797996,
+      "supported": true
+    },
+    "exploration_bias": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "exploration_bias",
+      "preregistered_observable": "novel_action_ratio",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.75,
+          0.75,
+          0.6,
+          0.75,
+          0.75,
+          0.75
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "error_aversion",
+        "competitor_cohens_d": 0.0,
+        "random_parameter_cohens_d": 0.0
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 6.957011,
+      "supported": true
+    },
+    "attention_selectivity": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "attention_selectivity",
+      "preregistered_observable": "dominant_attention_share",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          0.428115,
+          0.430741,
+          0.433918,
+          0.428333,
+          0.427783,
+          0.428731
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.360106,
+          0.36082,
+          0.362924,
+          0.36014,
+          0.362951,
+          0.362326
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "update_rigidity",
+        "competitor_cohens_d": 22.667693,
+        "random_parameter_cohens_d": 22.667693
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 38.825988,
+      "supported": true
+    },
+    "confidence_gain": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "confidence_gain",
+      "preregistered_observable": "high_evidence_commit_rate",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          0.6,
+          0.75,
+          0.6,
+          0.75,
+          0.75,
+          0.75
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "resource_pressure_sensitivity",
+        "competitor_cohens_d": 14.0,
+        "random_parameter_cohens_d": 14.0
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 14.0,
+      "supported": false
+    },
+    "update_rigidity": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "update_rigidity",
+      "preregistered_observable": "mean_update_inverse",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          0.892693,
+          0.891851,
+          0.894371,
+          0.890891,
+          0.889546,
+          0.892316
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.672644,
+          0.670077,
+          0.677765,
+          0.667149,
+          0.663045,
+          0.671494
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "exploration_bias",
+        "competitor_cohens_d": 40.035037,
+        "random_parameter_cohens_d": 40.035037
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 65.17738,
+      "supported": true
+    },
+    "resource_pressure_sensitivity": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "resource_pressure_sensitivity",
+      "preregistered_observable": "recovery_trigger_rate",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.166667,
+          0.166667,
+          0.166667,
+          0.166667,
+          0.0,
+          0.166667
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "exploration_bias",
+        "competitor_cohens_d": 5.366547,
+        "random_parameter_cohens_d": 19.606076
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 19.606076,
+      "supported": true
+    },
+    "virtual_prediction_error_gain": {
+      "analysis_type": "preregistered_falsification",
+      "parameter": "virtual_prediction_error_gain",
+      "preregistered_observable": "counterfactual_loss_sensitivity",
+      "presence_condition": {
+        "parameter_value": 0.95,
+        "observed_series": [
+          0.312394,
+          0.336062,
+          0.283363,
+          0.297594,
+          0.345191,
+          0.317442
+        ]
+      },
+      "absence_condition": {
+        "parameter_value": 0.05,
+        "observed_series": [
+          0.095898,
+          0.142892,
+          0.08521,
+          0.088452,
+          0.097269,
+          0.09635
+        ]
+      },
+      "alternative_explanation_test": {
+        "competitor_parameter": "uncertainty_sensitivity",
+        "competitor_cohens_d": 8.193327,
+        "random_parameter_cohens_d": 8.193327
+      },
+      "failure_condition": "supported is False when the target effect size is too small or not specific to the target parameter",
+      "cohens_d": 10.612698,
+      "supported": true
+    }
+  },
+  "falsification_failures": [
+    {
+      "parameter": "confidence_gain",
+      "cohens_d": 14.0
+    }
+  ],
+  "control_metric": {
+    "metric": "session_length",
+    "source_parameter": "resource_pressure_sensitivity",
+    "source_reason": "session_length is collected directly from each generated trial and is structurally independent from the scored observable metrics because the internal generator always emits a fixed episode schedule.",
+    "high_condition_series": [
+      18.0,
+      18.0,
+      18.0,
+      18.0,
+      18.0,
+      18.0
+    ],
+    "low_condition_series": [
+      18.0,
+      18.0,
+      18.0,
+      18.0,
+      18.0,
+      18.0
+    ],
+    "high_condition_summary": {
+      "count": 6,
+      "mean": 18.0,
+      "min": 18.0,
+      "max": 18.0
+    },
+    "low_condition_summary": {
+      "count": 6,
+      "mean": 18.0,
+      "min": 18.0,
+      "max": 18.0
+    },
+    "cohens_d": 0.0
+  }
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import asdict, dataclass
+from itertools import combinations, zip_longest
 import json
 import math
 from pathlib import Path
@@ -238,9 +239,49 @@ def detect_subject_leakage(rows: list[BenchmarkTrial | dict[str, Any]], *, key_f
         key = str(payload.get(key_field, "")).strip()
         if not key:
             continue
-        observed[key].add(str(payload.get("split", "")))
+        split = str(payload.get("split", "")).strip() or "unspecified"
+        observed[key].add(split)
     leaking_keys = sorted(key for key, splits in observed.items() if len(splits) > 1)
-    return {"key_field": key_field, "ok": not leaking_keys, "leaking_keys": leaking_keys}
+    return {
+        "key_field": key_field,
+        "ok": not leaking_keys,
+        "leaking_keys": leaking_keys,
+        "observed_key_count": len(observed),
+        "distinct_split_count": len({split for splits in observed.values() for split in splits}),
+        "leaking_key_splits": {key: sorted(observed[key]) for key in leaking_keys},
+    }
+
+
+def build_split_leakage_check(
+    rows: list[BenchmarkTrial | IowaTrial | dict[str, Any]],
+    *,
+    key_fields: list[str],
+    split_unit: str,
+    selected_split: str | None = None,
+    precomputed_split_available: bool | None = None,
+) -> dict[str, Any]:
+    split_counts: dict[str, int] = defaultdict(int)
+    for row in rows:
+        payload = row.to_dict() if hasattr(row, "to_dict") else dict(row)
+        split_counts[str(payload.get("split", "")).strip() or "unspecified"] += 1
+    checks = {key_field: detect_subject_leakage(rows, key_field=key_field) for key_field in key_fields}
+    failing_checks = [key_field for key_field, payload in checks.items() if not bool(payload["ok"])]
+    report: dict[str, Any] = {
+        "split_unit": split_unit,
+        "selected_split": selected_split,
+        "trial_count": len(rows),
+        "split_counts": dict(sorted(split_counts.items())),
+        "checks": checks,
+        "failing_checks": failing_checks,
+        "ok": not failing_checks,
+        "status": "pass" if not failing_checks else "fail",
+    }
+    if precomputed_split_available is not None:
+        report["precomputed_split_available"] = bool(precomputed_split_available)
+    for key_field, payload in checks.items():
+        alias = "subject" if key_field == "subject_id" else "session" if key_field == "session_id" else key_field
+        report[alias] = payload
+    return report
 
 
 def _confidence_export_schema() -> dict[str, Any]:
@@ -431,13 +472,13 @@ def preprocess_confidence_database(
         )
         if max_trials is not None and len(processed) >= max(0, int(max_trials)):
             break
-    leakage_check = {
-        "split_unit": active_split_unit,
-        "subject": detect_subject_leakage(processed, key_field="subject_id"),
-        "session": detect_subject_leakage(processed, key_field="session_id"),
-        "precomputed_split_available": precomputed_split_available,
-        "selected_split": selected_split,
-    }
+    leakage_check = build_split_leakage_check(
+        processed,
+        key_fields=["subject_id", "session_id"],
+        split_unit=active_split_unit,
+        selected_split=selected_split,
+        precomputed_split_available=precomputed_split_available,
+    )
     return {
         "manifest": dict(bundle.manifest),
         "trials": [trial.to_dict() for trial in processed],
@@ -499,6 +540,13 @@ def preprocess_iowa_gambling_task(
         )
         if max_trials is not None and len(processed) >= max(0, int(max_trials)):
             break
+    leakage_check = build_split_leakage_check(
+        processed,
+        key_fields=["subject_id"],
+        split_unit=bundle.default_split_unit or "subject_id",
+        selected_split=selected_split,
+        precomputed_split_available=True,
+    )
     return {
         "manifest": dict(bundle.manifest),
         "trials": [trial.to_dict() for trial in processed],
@@ -508,6 +556,7 @@ def preprocess_iowa_gambling_task(
         "benchmark_status": status.to_dict(),
         "bundle_mode": "external_bundle" if bundle.source_type == "external_bundle" else "repo_smoke_test",
         "claim_envelope": "benchmark_eval" if bundle.source_type == "external_bundle" else "smoke_only",
+        "leakage_check": leakage_check,
         "trial_count": len(processed),
         "subject_count": len({trial.subject_id for trial in processed}),
         "trial_export_schema": _igt_export_schema(),
@@ -1103,14 +1152,23 @@ class TwoArmedBanditAdapter:
     def schema(self) -> dict[str, Any]:
         return {
             "benchmark_id": self.benchmark_id(),
-            "status": "acceptance_ready",
+            "status": "smoke_only",
+            "benchmark_state": "smoke_only",
+            "available_states": ["scaffold_complete", "smoke_only"],
             "source_type": "synthetic_protocol",
-            "source_label": "two_armed_bandit_acceptance_demo",
+            "source_label": "two_armed_bandit_smoke_reference",
+            "smoke_test_only": True,
+            "is_synthetic": True,
+            "bundle_mode": "synthetic_protocol",
+            "claim_envelope": "smoke_only",
+            "status_notes": [
+                "Synthetic bandit traces are smoke-only reference artifacts and do not count as acceptance-grade benchmark evidence."
+            ],
             "trial_export_schema": _bandit_export_schema(),
             "action_fields": ["arm_left", "arm_right"],
         }
 
-    def load_trials(self, *, trial_count: int = 50, split: str = "acceptance", **_: Any) -> list[BanditTrial]:
+    def load_trials(self, *, trial_count: int = 50, split: str = "smoke_reference", **_: Any) -> list[BanditTrial]:
         trials: list[BanditTrial] = []
         for index in range(1, trial_count + 1):
             probabilities = {"arm_left": 0.72, "arm_right": 0.28} if index <= trial_count // 2 else {"arm_left": 0.65, "arm_right": 0.35}
@@ -1118,7 +1176,7 @@ class TwoArmedBanditAdapter:
                 BanditTrial(
                     trial_id=f"bandit::{index:03d}",
                     subject_id="bandit_agent",
-                    session_id="bandit_acceptance_session",
+                    session_id="bandit_smoke_session",
                     split=split,
                     trial_index=index,
                     arm_reward_probabilities=probabilities,
@@ -1128,7 +1186,12 @@ class TwoArmedBanditAdapter:
 
     def validate_protocol(self, trials: list[BanditTrial], **_: Any) -> dict[str, Any]:
         indices = [trial.trial_index for trial in trials]
-        return {"protocol_mode": "synthetic_bandit", "trial_count": len(trials), "ok": indices == list(range(1, len(trials) + 1))}
+        return {
+            "protocol_mode": "synthetic_protocol",
+            "trial_count": len(trials),
+            "claim_envelope": "smoke_only",
+            "ok": indices == list(range(1, len(trials) + 1)),
+        }
 
     def initial_state(self, *, subject_id: str, parameters: CognitiveStyleParameters) -> dict[str, Any]:
         return {
@@ -1374,21 +1437,43 @@ def _run_adapter(
             payload["leakage_check"] = preprocess_payload["leakage_check"]
             payload["trial_export_validation"] = validate_trial_export_records(records, _confidence_export_schema(), expected_length=len(trials))
         else:
+            preprocess_payload = preprocess_iowa_gambling_task(
+                allow_smoke_test=allow_smoke_test,
+                benchmark_root=benchmark_root,
+                prefer_external=prefer_external,
+                selected_subject_id=selected_subject_id,
+                selected_split=split,
+                max_trials=max_trials,
+            )
+            payload["leakage_check"] = preprocess_payload["leakage_check"]
             payload["trial_export_validation"] = validate_trial_export_records(records, _igt_export_schema(), expected_length=len(trials))
     else:
         payload.update(
             {
-                "bundle": {"benchmark_id": adapter.benchmark_id(), "source_type": "synthetic_protocol", "source_label": "two_armed_bandit_acceptance_demo"},
+                "bundle": {
+                    "benchmark_id": adapter.benchmark_id(),
+                    "source_type": "synthetic_protocol",
+                    "source_label": "two_armed_bandit_smoke_reference",
+                    "benchmark_state": "smoke_only",
+                    "available_states": ["scaffold_complete", "smoke_only"],
+                    "smoke_test_only": True,
+                    "is_synthetic": True,
+                },
                 "benchmark_status": {
                     "benchmark_id": adapter.benchmark_id(),
-                    "benchmark_state": "acceptance_ready",
-                    "acceptance_ready": True,
-                    "available_states": ["scaffold_complete", "acceptance_ready"],
+                    "benchmark_state": "smoke_only",
+                    "acceptance_ready": False,
+                    "scaffold_complete": True,
+                    "smoke_only": True,
+                    "external_bundle_required": False,
+                    "available_states": ["scaffold_complete", "smoke_only"],
                     "blockers": [],
-                    "status_notes": [],
+                    "status_notes": [
+                        "Synthetic bandit traces are available for adapter smoke testing only and do not count as external benchmark evidence."
+                    ],
                 },
                 "bundle_mode": "synthetic_protocol",
-                "claim_envelope": "acceptance_grade",
+                "claim_envelope": "smoke_only",
                 "trial_export_validation": validate_trial_export_records(records, _bandit_export_schema(), expected_length=len(trials)),
             }
         )
@@ -1558,10 +1643,28 @@ def run_two_armed_bandit_benchmark(parameters: CognitiveStyleParameters | None =
 def _behavior_signature(run_payload: dict[str, Any], *, task_id: str) -> list[Any]:
     trace = list(run_payload.get("trial_trace", []))
     if task_id == "confidence_database":
-        return [(row["trial_id"], row["agent_choice"], row["agent_confidence_rating"]) for row in trace]
+        return [(row["trial_id"], row["agent_choice"], _safe_round(row["agent_confidence_rating"])) for row in trace]
     if task_id == "iowa_gambling_task":
-        return [(row["trial_index"], row["chosen_deck"], row["net_outcome"], row["cumulative_gain"]) for row in trace]
-    return [(row["trial_index"], row["chosen_arm"], row["reward"], row["cumulative_reward"]) for row in trace]
+        return [
+            (
+                row["trial_index"],
+                row["chosen_deck"],
+                row["net_outcome"],
+                row["cumulative_gain"],
+                _safe_round(row.get("agent_confidence_rating", row.get("predicted_confidence", 0.0))),
+            )
+            for row in trace
+        ]
+    return [
+        (
+            row["trial_index"],
+            row["chosen_arm"],
+            row["reward"],
+            row["cumulative_reward"],
+            _safe_round(row.get("agent_confidence_rating", row.get("predicted_confidence", 0.0))),
+        )
+        for row in trace
+    ]
 
 
 def same_seed_triple_replay(task_id: str, *, seed: int, run_kwargs: dict[str, Any]) -> dict[str, Any]:
@@ -1570,26 +1673,179 @@ def same_seed_triple_replay(task_id: str, *, seed: int, run_kwargs: dict[str, An
     return {"task_id": task_id, "seed": seed, "exact_match": signatures[0] == signatures[1] == signatures[2], "signatures": signatures, "runs": runs}
 
 
+def _seed_summary_row(task_id: str, *, run: dict[str, Any], seed: int) -> dict[str, Any]:
+    trace = list(run.get("trial_trace", []))
+    metrics = dict(run.get("metrics", {}))
+    if task_id == "iowa_gambling_task":
+        deck_distribution = {
+            deck: _safe_round(_mean([1.0 if row["chosen_deck"] == deck else 0.0 for row in trace]))
+            for deck in "ABCD"
+        }
+        return {
+            "seed": seed,
+            "mean_net_outcome": _safe_round(_mean([float(item["net_outcome"]) for item in trace])),
+            "advantageous_choice_rate": _safe_round(_mean([1.0 if bool(item["advantageous_choice"]) else 0.0 for item in trace])),
+            "final_cumulative_gain": _safe_round(float(trace[-1]["cumulative_gain"]) if trace else 0.0),
+            "mean_confidence": _safe_round(
+                _mean([float(item.get("agent_confidence_rating", item.get("predicted_confidence", 0.0))) for item in trace])
+            ),
+            "deck_match_rate": _safe_round(float(metrics.get("deck_match_rate", 0.0))),
+            "reward_fit": _safe_round(float(metrics.get("reward_fit", 0.0))),
+            "confidence_advantage_alignment": _safe_round(float(metrics.get("confidence_advantage_alignment", 0.0))),
+            "deck_distribution": deck_distribution,
+            "deck_a_rate": deck_distribution["A"],
+            "deck_b_rate": deck_distribution["B"],
+            "deck_c_rate": deck_distribution["C"],
+            "deck_d_rate": deck_distribution["D"],
+        }
+    if task_id == "confidence_database":
+        return {
+            "seed": seed,
+            "choice_right_rate": _safe_round(_mean([1.0 if item["agent_choice"] == "right" else 0.0 for item in trace])),
+            "mean_confidence": _safe_round(_mean([float(item["agent_confidence_rating"]) for item in trace])),
+            "accuracy": _safe_round(_mean([1.0 if bool(item["correct"]) else 0.0 for item in trace])),
+            "heldout_likelihood": _safe_round(float(metrics.get("heldout_likelihood", 0.0))),
+        }
+    return {
+        "seed": seed,
+        "optimal_choice_rate": _safe_round(_mean([1.0 if bool(item["optimal_choice"]) else 0.0 for item in trace])),
+        "mean_reward": _safe_round(_mean([float(item["reward"]) for item in trace])),
+        "reward_variance": _safe_round(pvariance([float(item["reward"]) for item in trace]) if len(trace) > 1 else 0.0),
+        "mean_confidence": _safe_round(
+            _mean([float(item.get("agent_confidence_rating", item.get("predicted_confidence", 0.0))) for item in trace])
+        ),
+    }
+
+
+def _pairwise_sequence_differences(signatures: list[list[Any]], seeds: list[int]) -> list[dict[str, Any]]:
+    pairwise: list[dict[str, Any]] = []
+    sentinel = object()
+    for left_index, right_index in combinations(range(len(signatures)), 2):
+        left_signature = signatures[left_index]
+        right_signature = signatures[right_index]
+        differing_positions = [
+            position
+            for position, (left_value, right_value) in enumerate(zip_longest(left_signature, right_signature, fillvalue=sentinel), start=1)
+            if left_value != right_value
+        ]
+        compared_length = max(len(left_signature), len(right_signature), 1)
+        pairwise.append(
+            {
+                "seed_left": seeds[left_index],
+                "seed_right": seeds[right_index],
+                "diff_count": len(differing_positions),
+                "diff_ratio": _safe_round(len(differing_positions) / compared_length),
+                "first_diff_positions": differing_positions[:10],
+                "exact_match": not differing_positions,
+            }
+        )
+    return pairwise
+
+
+def _distribution_distance_report(seed_summaries: list[dict[str, Any]], *, field_name: str) -> dict[str, Any]:
+    pairwise: list[dict[str, Any]] = []
+    for left, right in combinations(seed_summaries, 2):
+        left_distribution = dict(left.get(field_name, {}))
+        right_distribution = dict(right.get(field_name, {}))
+        l1_distance = _safe_round(
+            sum(abs(float(left_distribution.get(key, 0.0)) - float(right_distribution.get(key, 0.0))) for key in sorted(set(left_distribution) | set(right_distribution)))
+        )
+        pairwise.append(
+            {
+                "seed_left": int(left["seed"]),
+                "seed_right": int(right["seed"]),
+                "l1_distance": l1_distance,
+            }
+        )
+    return {
+        "field_name": field_name,
+        "pairwise": pairwise,
+        "max_l1_distance": max((float(item["l1_distance"]) for item in pairwise), default=0.0),
+        "nonzero_pair_count": sum(1 for item in pairwise if float(item["l1_distance"]) > 0.0),
+    }
+
+
+def evaluate_reproducibility_gate(seed_summary: dict[str, Any]) -> dict[str, Any]:
+    sequence_diff_summary = dict(seed_summary.get("sequence_diff_summary", {}))
+    behavioral_evidence = dict(seed_summary.get("behavioral_evidence", {}))
+    requirements = {
+        "different_seeds_differ": bool(seed_summary.get("different_seeds_differ", False)),
+        "sequence_position_difference_observed": bool(behavioral_evidence.get("sequence_position_difference_observed", False)),
+        "varying_behavior_metric_count_at_least_two": int(behavioral_evidence.get("varying_behavior_metric_count", 0)) >= 2,
+    }
+    passed = all(requirements.values()) and int(sequence_diff_summary.get("max_diff_count", 0)) > 0
+    return {"passed": passed, "requirements": requirements}
+
+
 def compute_behavioral_seed_summaries(task_id: str, *, seeds: list[int], run_kwargs: dict[str, Any]) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     signatures: list[list[Any]] = []
     for seed in seeds:
         run = run_task_adapter(task_id, seed=seed, **dict(run_kwargs))
         signatures.append(_behavior_signature(run, task_id=task_id))
-        trace = run["trial_trace"]
-        if task_id == "iowa_gambling_task":
-            rows.append({"seed": seed, "mean_net_outcome": _safe_round(_mean([float(item["net_outcome"]) for item in trace])), "advantageous_choice_rate": _safe_round(_mean([1.0 if bool(item["advantageous_choice"]) else 0.0 for item in trace])), "final_cumulative_gain": _safe_round(float(trace[-1]["cumulative_gain"]) if trace else 0.0)})
-        elif task_id == "confidence_database":
-            rows.append({"seed": seed, "choice_right_rate": _safe_round(_mean([1.0 if item["agent_choice"] == "right" else 0.0 for item in trace])), "mean_confidence": _safe_round(_mean([float(item["agent_confidence_rating"]) for item in trace])), "accuracy": _safe_round(_mean([1.0 if bool(item["correct"]) else 0.0 for item in trace]))})
-        else:
-            rows.append({"seed": seed, "optimal_choice_rate": _safe_round(_mean([1.0 if bool(item["optimal_choice"]) else 0.0 for item in trace])), "mean_reward": _safe_round(_mean([float(item["reward"]) for item in trace])), "reward_variance": _safe_round(pvariance([float(item["reward"]) for item in trace]) if len(trace) > 1 else 0.0)})
+        rows.append(_seed_summary_row(task_id, run=run, seed=seed))
     unique_signatures = len({json.dumps(signature, ensure_ascii=False) for signature in signatures})
+    sequence_differences = _pairwise_sequence_differences(signatures, seeds)
     summary_by_metric: dict[str, dict[str, float]] = {}
-    metric_names = [name for name in rows[0].keys() if name != "seed"] if rows else []
+    metric_names = [name for name, value in rows[0].items() if name != "seed" and isinstance(value, (int, float))] if rows else []
     for metric_name in metric_names:
         values = [float(row[metric_name]) for row in rows]
-        summary_by_metric[metric_name] = {"mean": _safe_round(_mean(values)), "variance": _safe_round(pvariance(values) if len(values) > 1 else 0.0)}
-    return {"task_id": task_id, "seed_summaries": rows, "behavioral_summary": summary_by_metric, "unique_behavior_sequences": unique_signatures, "different_seeds_differ": unique_signatures > 1}
+        summary_by_metric[metric_name] = {
+            "mean": _safe_round(_mean(values)),
+            "variance": _safe_round(pvariance(values) if len(values) > 1 else 0.0),
+            "min": _safe_round(min(values) if values else 0.0),
+            "max": _safe_round(max(values) if values else 0.0),
+            "range": _safe_round((max(values) - min(values)) if values else 0.0),
+        }
+    varying_metric_names = sorted(metric_name for metric_name, summary in summary_by_metric.items() if float(summary["range"]) > 0.0)
+    sequence_diff_counts = [int(item["diff_count"]) for item in sequence_differences]
+    deck_distribution_difference = (
+        _distribution_distance_report(rows, field_name="deck_distribution")
+        if rows and isinstance(rows[0].get("deck_distribution"), dict)
+        else None
+    )
+    behavioral_evidence = {
+        "sequence_position_difference_observed": any(diff_count > 0 for diff_count in sequence_diff_counts),
+        "varying_metric_names": varying_metric_names,
+        "varying_behavior_metric_count": len(varying_metric_names),
+        "distribution_difference_observed": bool(
+            deck_distribution_difference and float(deck_distribution_difference["max_l1_distance"]) > 0.0
+        ),
+    }
+    behavioral_evidence["distinguishable"] = bool(unique_signatures > 1) and bool(
+        behavioral_evidence["sequence_position_difference_observed"]
+    ) and int(behavioral_evidence["varying_behavior_metric_count"]) >= 2
+    reproducibility_gate = evaluate_reproducibility_gate(
+        {
+            "different_seeds_differ": unique_signatures > 1,
+            "sequence_diff_summary": {
+                "pairs_evaluated": len(sequence_differences),
+                "nonzero_pair_count": sum(1 for diff_count in sequence_diff_counts if diff_count > 0),
+                "max_diff_count": max(sequence_diff_counts, default=0),
+                "min_diff_count": min(sequence_diff_counts, default=0),
+                "mean_diff_count": _safe_round(_mean([float(item) for item in sequence_diff_counts])),
+            },
+            "behavioral_evidence": behavioral_evidence,
+        }
+    )
+    return {
+        "task_id": task_id,
+        "seed_summaries": rows,
+        "behavioral_summary": summary_by_metric,
+        "unique_behavior_sequences": unique_signatures,
+        "different_seeds_differ": unique_signatures > 1,
+        "sequence_differences": sequence_differences,
+        "sequence_diff_summary": {
+            "pairs_evaluated": len(sequence_differences),
+            "nonzero_pair_count": sum(1 for diff_count in sequence_diff_counts if diff_count > 0),
+            "max_diff_count": max(sequence_diff_counts, default=0),
+            "min_diff_count": min(sequence_diff_counts, default=0),
+            "mean_diff_count": _safe_round(_mean([float(item) for item in sequence_diff_counts])),
+        },
+        "behavioral_evidence": behavioral_evidence,
+        "deck_distribution_difference": deck_distribution_difference,
+        "reproducibility_gate": reproducibility_gate,
+    }
 
 
 def bootstrap_seed_summary_ci(seed_summaries: list[dict[str, Any]], *, metric_name: str, bootstrap_seed: int, samples: int = 500) -> dict[str, float]:
@@ -1634,6 +1890,8 @@ __all__ = [
     "compute_behavioral_seed_summaries",
     "default_acceptance_benchmark_root",
     "detect_subject_leakage",
+    "build_split_leakage_check",
+    "evaluate_reproducibility_gate",
     "evaluate_iowa_predictions",
     "evaluate_predictions",
     "evaluate_seed_tolerance_gate",

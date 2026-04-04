@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
-import os
 
 from segmentum.confidence_external_bundle import build_confidence_external_bundle
 from segmentum.igt_external_bundle import build_igt_external_bundle
@@ -14,7 +13,28 @@ from segmentum.m4_cognitive_style import CognitiveStyleParameters
 
 
 class TestM42ExternalBundleIntegration(unittest.TestCase):
-    def test_both_external_bundles_reach_acceptance_ready_and_run_basic_flow(self) -> None:
+    @staticmethod
+    def _igt_rows(*, start_offset: int) -> list[str]:
+        rows = ["iteration,EEG sample,decision,win,lose,balance"]
+        balance = 2000
+        decks = "ABCD"
+        for index in range(1, 101):
+            deck = decks[(index - 1 + start_offset) % len(decks)]
+            reward = 100 if deck in {"A", "B"} else 50
+            penalty = 0
+            if deck == "A" and index % 5 == 0:
+                penalty = 250
+            elif deck == "B" and index % 10 == 0:
+                penalty = 125
+            elif deck == "C" and index % 5 == 0:
+                penalty = 25
+            elif deck == "D" and index % 4 == 0:
+                penalty = 50
+            balance += reward - penalty
+            rows.append(f"{index},{1000 * index},{deck},{reward},{penalty},{balance}")
+        return rows
+
+    def test_both_external_bundles_reach_acceptance_ready_and_run_formal_acceptance_flow(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp)
 
@@ -35,21 +55,9 @@ class TestM42ExternalBundleIntegration(unittest.TestCase):
             igt_source = workspace / "igt dataset"
             igt_source.mkdir()
             for subject_id, rows in {
-                "s-01": [
-                    "iteration,EEG sample,decision,win,lose,balance",
-                    "1,1000,B,100,0,2100",
-                    "2,2000,D,50,0,2150",
-                ],
-                "s-02": [
-                    "iteration,EEG sample,decision,win,lose,balance",
-                    "1,1000,A,100,250,1850",
-                    "2,2000,C,50,0,1900",
-                ],
-                "s-03": [
-                    "iteration,EEG sample,decision,win,lose,balance",
-                    "1,1000,D,50,0,2050",
-                    "2,2000,C,50,0,2100",
-                ],
+                "s-01": self._igt_rows(start_offset=0),
+                "s-02": self._igt_rows(start_offset=1),
+                "s-03": self._igt_rows(start_offset=2),
             }.items():
                 subject_dir = igt_source / subject_id
                 subject_dir.mkdir()
@@ -71,15 +79,14 @@ class TestM42ExternalBundleIntegration(unittest.TestCase):
                     split=None,
                     include_subject_summary=False,
                     include_predictions=False,
-                    max_trials=2,
                 )
                 igt_run = run_iowa_gambling_benchmark(
                     CognitiveStyleParameters(),
                     seed=44,
+                    selected_subject_id="s-01",
                     include_subject_summary=False,
                     include_predictions=False,
-                    max_trials=6,
-                    protocol_mode="nonstandard",
+                    protocol_mode="standard_100",
                 )
             finally:
                 if previous_root is None:
@@ -90,10 +97,14 @@ class TestM42ExternalBundleIntegration(unittest.TestCase):
             self.assertEqual(confidence_run["benchmark_status"]["benchmark_state"], "acceptance_ready")
             self.assertEqual(confidence_run["claim_envelope"], "benchmark_eval")
             self.assertGreaterEqual(confidence_run["trial_count"], 1)
+            self.assertTrue(confidence_run["leakage_check"]["ok"])
             self.assertEqual(igt_run["benchmark_status"]["benchmark_state"], "acceptance_ready")
             self.assertEqual(igt_run["claim_envelope"], "benchmark_eval")
-            self.assertEqual(igt_run["trial_count"], 6)
-            self.assertEqual(igt_run["protocol_validation"]["protocol_mode"], "nonstandard")
+            self.assertEqual(igt_run["trial_count"], 100)
+            self.assertEqual(igt_run["protocol_validation"]["protocol_mode"], "standard_100")
+            self.assertEqual(igt_run["protocol_validation"]["standard_trial_count"], 100)
+            self.assertEqual(igt_run["trial_trace"][-1]["trial_index"], 100)
+            self.assertTrue(igt_run["leakage_check"]["ok"])
 
 
 if __name__ == "__main__":

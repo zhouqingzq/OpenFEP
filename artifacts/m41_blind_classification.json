@@ -1,12 +1,14 @@
 {
-  "analysis_type": "toy_internal_distinguishability",
-  "benchmark_scope": "toy benchmark distinguishability within the same generator family",
-  "generator_family": "same_generator_family",
+  "analysis_type": "cross_generator_synthetic_blind_classification",
+  "benchmark_scope": "same-framework cross-generator synthetic distinguishability",
+  "generator_family": "cross_generator_synthetic",
   "external_validation": false,
+  "validation_type": "cross_generator_synthetic",
   "validation_limits": [
-    "train/eval seed split only",
-    "same generator family for prototypes and evaluation samples",
-    "toy benchmark distinguishability rather than external blind validation"
+    "train data comes from the internal generator",
+    "evaluation data comes from a second synthetic generator that shares the same action schema and parameter semantics",
+    "classifier parameters are derived from the training split only",
+    "both generators are part of the same codebase — this is NOT external validation"
   ],
   "profiles": {
     "high_exploration_low_caution": {
@@ -33,14 +35,14 @@
     },
     "balanced_midline": {
       "schema_version": "m4.cognitive_style.v2",
-      "uncertainty_sensitivity": 0.58,
-      "error_aversion": 0.58,
-      "exploration_bias": 0.54,
-      "attention_selectivity": 0.62,
-      "confidence_gain": 0.7,
-      "update_rigidity": 0.6,
-      "resource_pressure_sensitivity": 0.64,
-      "virtual_prediction_error_gain": 0.62
+      "uncertainty_sensitivity": 0.55,
+      "error_aversion": 0.45,
+      "exploration_bias": 0.6,
+      "attention_selectivity": 0.58,
+      "confidence_gain": 0.58,
+      "update_rigidity": 0.45,
+      "resource_pressure_sensitivity": 0.52,
+      "virtual_prediction_error_gain": 0.46
     }
   },
   "train_eval_split": {
@@ -54,474 +56,532 @@
       31,
       32,
       33,
-      34
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
     ]
   },
   "feature_set": [
+    "uncertainty_confidence_drop_rate",
     "high_uncertainty_inspect_ratio",
-    "high_expected_error_rejection_rate",
-    "novel_action_ratio",
+    "post_error_conservative_shift",
     "choice_repeat_suppression",
-    "evidence_aligned_choice_rate",
-    "high_evidence_commit_rate",
+    "dominant_attention_share",
+    "confidence_evidence_slope",
     "mean_update_inverse",
-    "high_pressure_low_cost_ratio",
-    "conflict_avoidance_shift"
+    "strategy_persistence_after_error",
+    "counterfactual_loss_sensitivity"
   ],
-  "profile_prototypes": {
-    "high_exploration_low_caution": {
-      "high_uncertainty_inspect_ratio": 1.0,
-      "high_expected_error_rejection_rate": 1.0,
-      "novel_action_ratio": 1.0,
-      "choice_repeat_suppression": 0.110227,
-      "evidence_aligned_choice_rate": 0.402778,
-      "high_evidence_commit_rate": 0.516667,
-      "mean_update_inverse": 0.785525,
-      "high_pressure_low_cost_ratio": 1.0,
-      "conflict_avoidance_shift": 1.0
+  "classifier_artifact": {
+    "model_type": "nearest_centroid",
+    "distance_metric": "mean_absolute_distance_on_scaled_features",
+    "feature_set": [
+      "uncertainty_confidence_drop_rate",
+      "high_uncertainty_inspect_ratio",
+      "post_error_conservative_shift",
+      "choice_repeat_suppression",
+      "dominant_attention_share",
+      "confidence_evidence_slope",
+      "mean_update_inverse",
+      "strategy_persistence_after_error",
+      "counterfactual_loss_sensitivity"
+    ],
+    "train_seeds": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "feature_scales": {
+      "uncertainty_confidence_drop_rate": {
+        "center": 0.733009,
+        "scale": 0.124508
+      },
+      "high_uncertainty_inspect_ratio": {
+        "center": 1.0,
+        "scale": 1e-06
+      },
+      "post_error_conservative_shift": {
+        "center": 1.0,
+        "scale": 1e-06
+      },
+      "choice_repeat_suppression": {
+        "center": 0.232675,
+        "scale": 0.409091
+      },
+      "dominant_attention_share": {
+        "center": 0.41365,
+        "scale": 0.030324
+      },
+      "confidence_evidence_slope": {
+        "center": 0.187358,
+        "scale": 0.077078
+      },
+      "mean_update_inverse": {
+        "center": 0.812175,
+        "scale": 0.081866
+      },
+      "strategy_persistence_after_error": {
+        "center": 0.758827,
+        "scale": 0.220067
+      },
+      "counterfactual_loss_sensitivity": {
+        "center": 0.241937,
+        "scale": 0.108582
+      }
     },
-    "low_exploration_high_caution": {
-      "high_uncertainty_inspect_ratio": 1.0,
-      "high_expected_error_rejection_rate": 1.0,
-      "novel_action_ratio": 0.75,
-      "choice_repeat_suppression": 0.416666,
-      "evidence_aligned_choice_rate": 0.416666,
-      "high_evidence_commit_rate": 0.75,
-      "mean_update_inverse": 0.858194,
-      "high_pressure_low_cost_ratio": 1.0,
-      "conflict_avoidance_shift": 0.959936
+    "feature_weights": {
+      "uncertainty_confidence_drop_rate": 4.0,
+      "high_uncertainty_inspect_ratio": 0.1,
+      "post_error_conservative_shift": 0.1,
+      "choice_repeat_suppression": 4.0,
+      "dominant_attention_share": 1.29855,
+      "confidence_evidence_slope": 3.492,
+      "mean_update_inverse": 3.63345,
+      "strategy_persistence_after_error": 4.0,
+      "counterfactual_loss_sensitivity": 3.3379
     },
-    "balanced_midline": {
-      "high_uncertainty_inspect_ratio": 1.0,
-      "high_expected_error_rejection_rate": 1.0,
-      "novel_action_ratio": 0.9375,
-      "choice_repeat_suppression": 0.395833,
-      "evidence_aligned_choice_rate": 0.458333,
-      "high_evidence_commit_rate": 0.775,
-      "mean_update_inverse": 0.811379,
-      "high_pressure_low_cost_ratio": 1.0,
-      "conflict_avoidance_shift": 1.0
+    "class_centroids": {
+      "high_exploration_low_caution": {
+        "uncertainty_confidence_drop_rate": 0.786711,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.110227,
+        "dominant_attention_share": 0.428691,
+        "confidence_evidence_slope": 0.150215,
+        "mean_update_inverse": 0.785525,
+        "strategy_persistence_after_error": 0.628637,
+        "counterfactual_loss_sensitivity": 0.257595
+      },
+      "low_exploration_high_caution": {
+        "uncertainty_confidence_drop_rate": 0.694294,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.416666,
+        "dominant_attention_share": 0.40272,
+        "confidence_evidence_slope": 0.220055,
+        "mean_update_inverse": 0.858194,
+        "strategy_persistence_after_error": 0.846762,
+        "counterfactual_loss_sensitivity": 0.267486
+      },
+      "balanced_midline": {
+        "uncertainty_confidence_drop_rate": 0.718022,
+        "high_uncertainty_inspect_ratio": 1.0,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.171131,
+        "dominant_attention_share": 0.40954,
+        "confidence_evidence_slope": 0.191805,
+        "mean_update_inverse": 0.792807,
+        "strategy_persistence_after_error": 0.684978,
+        "counterfactual_loss_sensitivity": 0.200728
+      }
+    },
+    "training_summary": {
+      "sample_count": 12,
+      "profiles": [
+        "balanced_midline",
+        "high_exploration_low_caution",
+        "low_exploration_high_caution"
+      ],
+      "samples_per_profile": {
+        "high_exploration_low_caution": 4,
+        "low_exploration_high_caution": 4,
+        "balanced_midline": 4
+      }
+    }
+  },
+  "training_summary": {
+    "sample_count": 12,
+    "profiles": [
+      "balanced_midline",
+      "high_exploration_low_caution",
+      "low_exploration_high_caution"
+    ],
+    "samples_per_profile": {
+      "high_exploration_low_caution": 4,
+      "low_exploration_high_caution": 4,
+      "balanced_midline": 4
     }
   },
   "blind_samples": [
     {
       "sample_id": "high_exploration_low_caution:31",
       "seed": 31,
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.090909,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.4,
-        "mean_update_inverse": 0.782886,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "uncertainty_confidence_drop_rate": 0.554414,
+        "high_uncertainty_inspect_ratio": 0.8,
+        "post_error_conservative_shift": 0.666667,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.528246,
+        "confidence_evidence_slope": 0.07472,
+        "mean_update_inverse": 0.742678,
+        "strategy_persistence_after_error": 0.708218
       }
     },
     {
       "sample_id": "high_exploration_low_caution:32",
       "seed": 32,
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.125,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.666667,
-        "mean_update_inverse": 0.779932,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "uncertainty_confidence_drop_rate": 0.522095,
+        "high_uncertainty_inspect_ratio": 0.583333,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.524578,
+        "confidence_evidence_slope": 0.093975,
+        "mean_update_inverse": 0.761239
       }
     },
     {
       "sample_id": "high_exploration_low_caution:33",
       "seed": 33,
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.111111,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.5,
-        "mean_update_inverse": 0.790109,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "uncertainty_confidence_drop_rate": 0.559458,
+        "high_uncertainty_inspect_ratio": 0.777778,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.524281,
+        "confidence_evidence_slope": 0.083657,
+        "mean_update_inverse": 0.756214,
+        "strategy_persistence_after_error": 0.71295
       }
     },
     {
       "sample_id": "high_exploration_low_caution:34",
       "seed": 34,
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.125,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.5,
-        "mean_update_inverse": 0.783579,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "uncertainty_confidence_drop_rate": 0.531148,
+        "high_uncertainty_inspect_ratio": 0.555556,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.520228,
+        "confidence_evidence_slope": 0.092054,
+        "mean_update_inverse": 0.762828
+      }
+    },
+    {
+      "sample_id": "high_exploration_low_caution:35",
+      "seed": 35,
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.519771,
+        "high_uncertainty_inspect_ratio": 0.666667,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.519316,
+        "confidence_evidence_slope": 0.093031,
+        "mean_update_inverse": 0.757144
+      }
+    },
+    {
+      "sample_id": "high_exploration_low_caution:36",
+      "seed": 36,
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.577052,
+        "high_uncertainty_inspect_ratio": 0.25,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.52225,
+        "confidence_evidence_slope": 0.094468,
+        "mean_update_inverse": 0.76222
+      }
+    },
+    {
+      "sample_id": "high_exploration_low_caution:37",
+      "seed": 37,
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.550872,
+        "high_uncertainty_inspect_ratio": 0.615385,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.524948,
+        "confidence_evidence_slope": 0.087903,
+        "mean_update_inverse": 0.756243,
+        "strategy_persistence_after_error": 0.70926
+      }
+    },
+    {
+      "sample_id": "high_exploration_low_caution:38",
+      "seed": 38,
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.527908,
+        "high_uncertainty_inspect_ratio": 0.5,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.520335,
+        "confidence_evidence_slope": 0.093555,
+        "mean_update_inverse": 0.757772
+      }
+    },
+    {
+      "sample_id": "high_exploration_low_caution:39",
+      "seed": 39,
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.558643,
+        "high_uncertainty_inspect_ratio": 0.9,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.520756,
+        "confidence_evidence_slope": 0.085445,
+        "mean_update_inverse": 0.755787,
+        "strategy_persistence_after_error": 0.704241
+      }
+    },
+    {
+      "sample_id": "high_exploration_low_caution:40",
+      "seed": 40,
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.528084,
+        "high_uncertainty_inspect_ratio": 0.5,
+        "choice_repeat_suppression": 0.25,
+        "dominant_attention_share": 0.519364,
+        "confidence_evidence_slope": 0.107583,
+        "mean_update_inverse": 0.766423
       }
     },
     {
       "sample_id": "low_exploration_high_caution:31",
       "seed": 31,
-      "selected_actions": [
-        "rest",
-        "recover",
-        "rest",
-        "recover",
-        "commit",
-        "rest",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "rest",
-        "scan",
-        "rest",
-        "recover",
-        "commit",
-        "commit",
-        "scan",
-        "rest"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.75,
+        "post_error_conservative_shift": 0.871795,
         "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.5,
-        "high_evidence_commit_rate": 1.0,
-        "mean_update_inverse": 0.860892,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "dominant_attention_share": 0.605129,
+        "confidence_evidence_slope": 0.218999,
+        "mean_update_inverse": 0.808551,
+        "strategy_persistence_after_error": 0.892346,
+        "counterfactual_loss_sensitivity": 0.216001
       }
     },
     {
       "sample_id": "low_exploration_high_caution:32",
       "seed": 32,
-      "selected_actions": [
-        "recover",
-        "rest",
-        "scan",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "recover",
-        "recover",
-        "commit",
-        "commit",
-        "rest",
-        "rest",
-        "recover",
-        "commit",
-        "rest",
-        "scan",
-        "rest"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.75,
-        "choice_repeat_suppression": 0.25,
-        "evidence_aligned_choice_rate": 0.5,
-        "high_evidence_commit_rate": 1.0,
-        "mean_update_inverse": 0.8569,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 0.923077
+        "post_error_conservative_shift": 0.866667,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.621903,
+        "confidence_evidence_slope": 0.250811,
+        "mean_update_inverse": 0.821335,
+        "strategy_persistence_after_error": 0.894399,
+        "counterfactual_loss_sensitivity": 0.202163
       }
     },
     {
       "sample_id": "low_exploration_high_caution:33",
       "seed": 33,
-      "selected_actions": [
-        "recover",
-        "scan",
-        "recover",
-        "rest",
-        "commit",
-        "scan",
-        "commit",
-        "rest",
-        "recover",
-        "scan",
-        "rest",
-        "scan",
-        "rest",
-        "recover",
-        "commit",
-        "rest",
-        "rest",
-        "recover"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.75,
+        "post_error_conservative_shift": 0.823529,
         "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.852367,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 0.923077
+        "dominant_attention_share": 0.615644,
+        "confidence_evidence_slope": 0.231329,
+        "mean_update_inverse": 0.817996,
+        "strategy_persistence_after_error": 0.894906,
+        "counterfactual_loss_sensitivity": 0.203189
       }
     },
     {
       "sample_id": "low_exploration_high_caution:34",
       "seed": 34,
-      "selected_actions": [
-        "commit",
-        "commit",
-        "scan",
-        "rest",
-        "rest",
-        "recover",
-        "scan",
-        "recover",
-        "rest",
-        "recover",
-        "rest",
-        "recover",
-        "scan",
-        "recover",
-        "rest",
-        "commit",
-        "scan",
-        "recover"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.6,
+        "post_error_conservative_shift": 0.777778,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.621918,
+        "confidence_evidence_slope": 0.24692,
+        "mean_update_inverse": 0.822311,
+        "strategy_persistence_after_error": 0.895277,
+        "counterfactual_loss_sensitivity": 0.185961
+      }
+    },
+    {
+      "sample_id": "low_exploration_high_caution:35",
+      "seed": 35,
+      "metrics": {
+        "post_error_conservative_shift": 0.911765,
         "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.857144,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 0.923077
+        "dominant_attention_share": 0.620317,
+        "confidence_evidence_slope": 0.250005,
+        "mean_update_inverse": 0.818567,
+        "strategy_persistence_after_error": 0.896716,
+        "counterfactual_loss_sensitivity": 0.206584
+      }
+    },
+    {
+      "sample_id": "low_exploration_high_caution:36",
+      "seed": 36,
+      "metrics": {
+        "post_error_conservative_shift": 0.681818,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.622764,
+        "confidence_evidence_slope": 0.250003,
+        "mean_update_inverse": 0.821863,
+        "strategy_persistence_after_error": 0.89172,
+        "counterfactual_loss_sensitivity": 0.16163
+      }
+    },
+    {
+      "sample_id": "low_exploration_high_caution:37",
+      "seed": 37,
+      "metrics": {
+        "post_error_conservative_shift": 0.9,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.618568,
+        "confidence_evidence_slope": 0.240292,
+        "mean_update_inverse": 0.818141,
+        "strategy_persistence_after_error": 0.893036,
+        "counterfactual_loss_sensitivity": 0.216163
+      }
+    },
+    {
+      "sample_id": "low_exploration_high_caution:38",
+      "seed": 38,
+      "metrics": {
+        "post_error_conservative_shift": 0.851852,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.620983,
+        "confidence_evidence_slope": 0.25202,
+        "mean_update_inverse": 0.819083,
+        "strategy_persistence_after_error": 0.893349,
+        "counterfactual_loss_sensitivity": 0.220638
+      }
+    },
+    {
+      "sample_id": "low_exploration_high_caution:39",
+      "seed": 39,
+      "metrics": {
+        "post_error_conservative_shift": 0.90625,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.615653,
+        "confidence_evidence_slope": 0.236392,
+        "mean_update_inverse": 0.817407,
+        "strategy_persistence_after_error": 0.894809,
+        "counterfactual_loss_sensitivity": 0.204198
+      }
+    },
+    {
+      "sample_id": "low_exploration_high_caution:40",
+      "seed": 40,
+      "metrics": {
+        "post_error_conservative_shift": 0.909091,
+        "choice_repeat_suppression": 0.25,
+        "dominant_attention_share": 0.629597,
+        "confidence_evidence_slope": 0.275792,
+        "mean_update_inverse": 0.824609,
+        "strategy_persistence_after_error": 0.893938,
+        "counterfactual_loss_sensitivity": 0.200514
       }
     },
     {
       "sample_id": "balanced_midline:31",
       "seed": 31,
-      "selected_actions": [
-        "commit",
-        "recover",
-        "scan",
-        "scan",
-        "rest",
-        "scan",
-        "scan",
-        "rest",
-        "scan",
-        "rest",
-        "rest",
-        "commit",
-        "scan",
-        "scan",
-        "recover",
-        "commit",
-        "recover",
-        "recover"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
+        "post_error_conservative_shift": 0.75,
         "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.6,
-        "mean_update_inverse": 0.808907,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "dominant_attention_share": 0.549598,
+        "confidence_evidence_slope": 0.148753,
+        "mean_update_inverse": 0.780693,
+        "strategy_persistence_after_error": 0.778704,
+        "counterfactual_loss_sensitivity": 0.025335
       }
     },
     {
       "sample_id": "balanced_midline:32",
       "seed": 32,
-      "selected_actions": [
-        "scan",
-        "recover",
-        "commit",
-        "commit",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "rest",
-        "commit",
-        "recover",
-        "rest",
-        "scan",
-        "rest",
-        "scan",
-        "rest",
-        "scan",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.8,
-        "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 1.0,
-        "mean_update_inverse": 0.806291,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.566158,
+        "confidence_evidence_slope": 0.174913,
+        "mean_update_inverse": 0.79704,
+        "counterfactual_loss_sensitivity": 0.023927
       }
     },
     {
       "sample_id": "balanced_midline:33",
       "seed": 33,
-      "selected_actions": [
-        "scan",
-        "rest",
-        "recover",
-        "rest",
-        "commit",
-        "rest",
-        "rest",
-        "commit",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "scan",
-        "scan",
-        "rest",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.333333,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.81494,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.559596,
+        "confidence_evidence_slope": 0.159666,
+        "mean_update_inverse": 0.792605,
+        "strategy_persistence_after_error": 0.783337,
+        "counterfactual_loss_sensitivity": 0.024618
       }
     },
     {
       "sample_id": "balanced_midline:34",
       "seed": 34,
-      "selected_actions": [
-        "rest",
-        "scan",
-        "scan",
-        "rest",
-        "commit",
-        "scan",
-        "recover",
-        "recover",
-        "commit",
-        "recover",
-        "commit",
-        "scan",
-        "rest",
-        "scan",
-        "scan",
-        "rest",
-        "recover",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.8,
         "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.809742,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
+        "dominant_attention_share": 0.566111,
+        "confidence_evidence_slope": 0.17184,
+        "mean_update_inverse": 0.798302,
+        "counterfactual_loss_sensitivity": 0.021092
+      }
+    },
+    {
+      "sample_id": "balanced_midline:35",
+      "seed": 35,
+      "metrics": {
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.565088,
+        "confidence_evidence_slope": 0.174099,
+        "mean_update_inverse": 0.793383,
+        "counterfactual_loss_sensitivity": 0.022297
+      }
+    },
+    {
+      "sample_id": "balanced_midline:36",
+      "seed": 36,
+      "metrics": {
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.568912,
+        "confidence_evidence_slope": 0.174851,
+        "mean_update_inverse": 0.797711,
+        "counterfactual_loss_sensitivity": 0.016823
+      }
+    },
+    {
+      "sample_id": "balanced_midline:37",
+      "seed": 37,
+      "metrics": {
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.562849,
+        "confidence_evidence_slope": 0.166324,
+        "mean_update_inverse": 0.792627,
+        "strategy_persistence_after_error": 0.780083,
+        "counterfactual_loss_sensitivity": 0.024022
+      }
+    },
+    {
+      "sample_id": "balanced_midline:38",
+      "seed": 38,
+      "metrics": {
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.564825,
+        "confidence_evidence_slope": 0.17531,
+        "mean_update_inverse": 0.794161,
+        "counterfactual_loss_sensitivity": 0.022969
+      }
+    },
+    {
+      "sample_id": "balanced_midline:39",
+      "seed": 39,
+      "metrics": {
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.561598,
+        "confidence_evidence_slope": 0.163211,
+        "mean_update_inverse": 0.792127,
+        "strategy_persistence_after_error": 0.772688,
+        "counterfactual_loss_sensitivity": 0.022569
+      }
+    },
+    {
+      "sample_id": "balanced_midline:40",
+      "seed": 40,
+      "metrics": {
+        "choice_repeat_suppression": 0.25,
+        "dominant_attention_share": 0.574066,
+        "confidence_evidence_slope": 0.19473,
+        "mean_update_inverse": 0.801518,
+        "counterfactual_loss_sensitivity": 0.021864
       }
     }
   ],
@@ -529,475 +589,966 @@
     {
       "seed": 31,
       "true_profile": "high_exploration_low_caution",
-      "predicted_profile": "high_exploration_low_caution",
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan"
-      ],
+      "predicted_profile": "balanced_midline",
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.090909,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.4,
-        "mean_update_inverse": 0.782886,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
+        "uncertainty_confidence_drop_rate": 0.554414,
+        "high_uncertainty_inspect_ratio": 0.8,
+        "post_error_conservative_shift": 0.666667,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.528246,
+        "confidence_evidence_slope": 0.07472,
+        "mean_update_inverse": 0.742678,
+        "strategy_persistence_after_error": 0.708218
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 2587.063888,
+        "low_exploration_high_caution": 2587.190338,
+        "balanced_midline": 2587.025157
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error"
+      ]
     },
     {
       "seed": 32,
       "true_profile": "high_exploration_low_caution",
       "predicted_profile": "high_exploration_low_caution",
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan"
-      ],
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.125,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.666667,
-        "mean_update_inverse": 0.779932,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
-    },
-    {
-      "seed": 33,
-      "true_profile": "high_exploration_low_caution",
-      "predicted_profile": "high_exploration_low_caution",
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.111111,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.5,
-        "mean_update_inverse": 0.790109,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
-    },
-    {
-      "seed": 34,
-      "true_profile": "high_exploration_low_caution",
-      "predicted_profile": "high_exploration_low_caution",
-      "selected_actions": [
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "commit",
-        "scan",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan",
-        "scan"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.125,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.5,
-        "mean_update_inverse": 0.783579,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
-    },
-    {
-      "seed": 31,
-      "true_profile": "low_exploration_high_caution",
-      "predicted_profile": "low_exploration_high_caution",
-      "selected_actions": [
-        "rest",
-        "recover",
-        "rest",
-        "recover",
-        "commit",
-        "rest",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "rest",
-        "scan",
-        "rest",
-        "recover",
-        "commit",
-        "commit",
-        "scan",
-        "rest"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.75,
-        "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.5,
-        "high_evidence_commit_rate": 1.0,
-        "mean_update_inverse": 0.860892,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
-    },
-    {
-      "seed": 32,
-      "true_profile": "low_exploration_high_caution",
-      "predicted_profile": "low_exploration_high_caution",
-      "selected_actions": [
-        "recover",
-        "rest",
-        "scan",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "recover",
-        "recover",
-        "commit",
-        "commit",
-        "rest",
-        "rest",
-        "recover",
-        "commit",
-        "rest",
-        "scan",
-        "rest"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.75,
-        "choice_repeat_suppression": 0.25,
-        "evidence_aligned_choice_rate": 0.5,
-        "high_evidence_commit_rate": 1.0,
-        "mean_update_inverse": 0.8569,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 0.923077
-      }
-    },
-    {
-      "seed": 33,
-      "true_profile": "low_exploration_high_caution",
-      "predicted_profile": "low_exploration_high_caution",
-      "selected_actions": [
-        "recover",
-        "scan",
-        "recover",
-        "rest",
-        "commit",
-        "scan",
-        "commit",
-        "rest",
-        "recover",
-        "scan",
-        "rest",
-        "scan",
-        "rest",
-        "recover",
-        "commit",
-        "rest",
-        "rest",
-        "recover"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.75,
-        "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.852367,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 0.923077
-      }
-    },
-    {
-      "seed": 34,
-      "true_profile": "low_exploration_high_caution",
-      "predicted_profile": "low_exploration_high_caution",
-      "selected_actions": [
-        "commit",
-        "commit",
-        "scan",
-        "rest",
-        "rest",
-        "recover",
-        "scan",
-        "recover",
-        "rest",
-        "recover",
-        "rest",
-        "recover",
-        "scan",
-        "recover",
-        "rest",
-        "commit",
-        "scan",
-        "recover"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.6,
-        "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.388889,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.857144,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 0.923077
-      }
-    },
-    {
-      "seed": 31,
-      "true_profile": "balanced_midline",
-      "predicted_profile": "balanced_midline",
-      "selected_actions": [
-        "commit",
-        "recover",
-        "scan",
-        "scan",
-        "rest",
-        "scan",
-        "scan",
-        "rest",
-        "scan",
-        "rest",
-        "rest",
-        "commit",
-        "scan",
-        "scan",
-        "recover",
-        "commit",
-        "recover",
-        "recover"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
-        "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.6,
-        "mean_update_inverse": 0.808907,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
-    },
-    {
-      "seed": 32,
-      "true_profile": "balanced_midline",
-      "predicted_profile": "balanced_midline",
-      "selected_actions": [
-        "scan",
-        "recover",
-        "commit",
-        "commit",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "rest",
-        "commit",
-        "recover",
-        "rest",
-        "scan",
-        "rest",
-        "scan",
-        "rest",
-        "scan",
-        "scan"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.8,
-        "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 1.0,
-        "mean_update_inverse": 0.806291,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
-    },
-    {
-      "seed": 33,
-      "true_profile": "balanced_midline",
-      "predicted_profile": "balanced_midline",
-      "selected_actions": [
-        "scan",
-        "rest",
-        "recover",
-        "rest",
-        "commit",
-        "rest",
-        "rest",
-        "commit",
-        "commit",
-        "scan",
-        "scan",
-        "scan",
-        "recover",
-        "recover",
-        "scan",
-        "scan",
-        "rest",
-        "scan"
-      ],
-      "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 1.0,
+        "uncertainty_confidence_drop_rate": 0.522095,
+        "high_uncertainty_inspect_ratio": 0.583333,
         "choice_repeat_suppression": 0.333333,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.81494,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
+        "dominant_attention_share": 0.524578,
+        "confidence_evidence_slope": 0.093975,
+        "mean_update_inverse": 0.761239
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 2522.701198,
+        "low_exploration_high_caution": 2522.892785,
+        "balanced_midline": 2522.714831
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse"
+      ]
+    },
+    {
+      "seed": 33,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.559458,
+        "high_uncertainty_inspect_ratio": 0.777778,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.524281,
+        "confidence_evidence_slope": 0.083657,
+        "mean_update_inverse": 0.756214,
+        "strategy_persistence_after_error": 0.71295
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1078.513099,
+        "low_exploration_high_caution": 1078.631207,
+        "balanced_midline": 1078.474367
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error"
+      ]
+    },
+    {
+      "seed": 34,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.531148,
+        "high_uncertainty_inspect_ratio": 0.555556,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.520228,
+        "confidence_evidence_slope": 0.092054,
+        "mean_update_inverse": 0.762828
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 2690.872889,
+        "low_exploration_high_caution": 2690.965855,
+        "balanced_midline": 2690.886522
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse"
+      ]
+    },
+    {
+      "seed": 35,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.519771,
+        "high_uncertainty_inspect_ratio": 0.666667,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.519316,
+        "confidence_evidence_slope": 0.093031,
+        "mean_update_inverse": 0.757144
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 2018.483302,
+        "low_exploration_high_caution": 2018.576267,
+        "balanced_midline": 2018.496935
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse"
+      ]
+    },
+    {
+      "seed": 36,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.577052,
+        "high_uncertainty_inspect_ratio": 0.25,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.52225,
+        "confidence_evidence_slope": 0.094468,
+        "mean_update_inverse": 0.76222
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 4539.948747,
+        "low_exploration_high_caution": 4540.041713,
+        "balanced_midline": 4539.96238
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse"
+      ]
+    },
+    {
+      "seed": 37,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.550872,
+        "high_uncertainty_inspect_ratio": 0.615385,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.524948,
+        "confidence_evidence_slope": 0.087903,
+        "mean_update_inverse": 0.756243,
+        "strategy_persistence_after_error": 0.70926
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1865.913393,
+        "low_exploration_high_caution": 1866.038006,
+        "balanced_midline": 1865.874662
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error"
+      ]
+    },
+    {
+      "seed": 38,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.527908,
+        "high_uncertainty_inspect_ratio": 0.5,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.520335,
+        "confidence_evidence_slope": 0.093555,
+        "mean_update_inverse": 0.757772
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 3027.102922,
+        "low_exploration_high_caution": 3027.195888,
+        "balanced_midline": 3027.116555
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse"
+      ]
+    },
+    {
+      "seed": 39,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.558643,
+        "high_uncertainty_inspect_ratio": 0.9,
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.520756,
+        "confidence_evidence_slope": 0.085445,
+        "mean_update_inverse": 0.755787,
+        "strategy_persistence_after_error": 0.704241
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 485.876117,
+        "low_exploration_high_caution": 486.009576,
+        "balanced_midline": 485.837385
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error"
+      ]
+    },
+    {
+      "seed": 40,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "high_exploration_low_caution",
+      "metrics": {
+        "uncertainty_confidence_drop_rate": 0.528084,
+        "high_uncertainty_inspect_ratio": 0.5,
+        "choice_repeat_suppression": 0.25,
+        "dominant_attention_share": 0.519364,
+        "confidence_evidence_slope": 0.107583,
+        "mean_update_inverse": 0.766423
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 3026.890433,
+        "low_exploration_high_caution": 3027.180642,
+        "balanced_midline": 3026.904066
+      },
+      "features_used": [
+        "uncertainty_confidence_drop_rate",
+        "high_uncertainty_inspect_ratio",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse"
+      ]
+    },
+    {
+      "seed": 31,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.871795,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.605129,
+        "confidence_evidence_slope": 0.218999,
+        "mean_update_inverse": 0.808551,
+        "strategy_persistence_after_error": 0.892346,
+        "counterfactual_loss_sensitivity": 0.216001
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 646.568391,
+        "low_exploration_high_caution": 646.194214,
+        "balanced_midline": 646.376262
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 32,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.866667,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.621903,
+        "confidence_evidence_slope": 0.250811,
+        "mean_update_inverse": 0.821335,
+        "strategy_persistence_after_error": 0.894399,
+        "counterfactual_loss_sensitivity": 0.202163
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 672.547257,
+        "low_exploration_high_caution": 672.111129,
+        "balanced_midline": 672.312293
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 33,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.823529,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.615644,
+        "confidence_evidence_slope": 0.231329,
+        "mean_update_inverse": 0.817996,
+        "strategy_persistence_after_error": 0.894906,
+        "counterfactual_loss_sensitivity": 0.203189
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 889.670434,
+        "low_exploration_high_caution": 889.249229,
+        "balanced_midline": 889.438646
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 34,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.777778,
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.621918,
+        "confidence_evidence_slope": 0.24692,
+        "mean_update_inverse": 0.822311,
+        "strategy_persistence_after_error": 0.895277,
+        "counterfactual_loss_sensitivity": 0.185961
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1120.019657,
+        "low_exploration_high_caution": 1119.661215,
+        "balanced_midline": 1119.780252
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 35,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.911765,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.620317,
+        "confidence_evidence_slope": 0.250005,
+        "mean_update_inverse": 0.818567,
+        "strategy_persistence_after_error": 0.896716,
+        "counterfactual_loss_sensitivity": 0.206584
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 445.473257,
+        "low_exploration_high_caution": 445.0495,
+        "balanced_midline": 445.251979
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 36,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.681818,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.622764,
+        "confidence_evidence_slope": 0.250003,
+        "mean_update_inverse": 0.821863,
+        "strategy_persistence_after_error": 0.89172,
+        "counterfactual_loss_sensitivity": 0.16163
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1603.280017,
+        "low_exploration_high_caution": 1602.84153,
+        "balanced_midline": 1603.040612
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 37,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.9,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.618568,
+        "confidence_evidence_slope": 0.240292,
+        "mean_update_inverse": 0.818141,
+        "strategy_persistence_after_error": 0.893036,
+        "counterfactual_loss_sensitivity": 0.216163
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 504.662196,
+        "low_exploration_high_caution": 504.240343,
+        "balanced_midline": 504.47057
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 38,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.851852,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.620983,
+        "confidence_evidence_slope": 0.25202,
+        "mean_update_inverse": 0.819083,
+        "strategy_persistence_after_error": 0.893349,
+        "counterfactual_loss_sensitivity": 0.220638
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 747.103488,
+        "low_exploration_high_caution": 746.677425,
+        "balanced_midline": 746.925713
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 39,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.90625,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.615653,
+        "confidence_evidence_slope": 0.236392,
+        "mean_update_inverse": 0.817407,
+        "strategy_persistence_after_error": 0.894809,
+        "counterfactual_loss_sensitivity": 0.204198
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 473.198235,
+        "low_exploration_high_caution": 472.779662,
+        "balanced_midline": 472.969571
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 40,
+      "true_profile": "low_exploration_high_caution",
+      "predicted_profile": "low_exploration_high_caution",
+      "metrics": {
+        "post_error_conservative_shift": 0.909091,
+        "choice_repeat_suppression": 0.25,
+        "dominant_attention_share": 0.629597,
+        "confidence_evidence_slope": 0.275792,
+        "mean_update_inverse": 0.824609,
+        "strategy_persistence_after_error": 0.893938,
+        "counterfactual_loss_sensitivity": 0.200514
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 458.912328,
+        "low_exploration_high_caution": 458.625664,
+        "balanced_midline": 458.672923
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 31,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "post_error_conservative_shift": 0.75,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.549598,
+        "confidence_evidence_slope": 0.148753,
+        "mean_update_inverse": 0.780693,
+        "strategy_persistence_after_error": 0.778704,
+        "counterfactual_loss_sensitivity": 0.025335
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1259.65476,
+        "low_exploration_high_caution": 1259.821845,
+        "balanced_midline": 1259.637632
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 32,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "choice_repeat_suppression": 0.333333,
+        "dominant_attention_share": 0.566158,
+        "confidence_evidence_slope": 0.174913,
+        "mean_update_inverse": 0.79704,
+        "counterfactual_loss_sensitivity": 0.023927
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.07102,
+        "low_exploration_high_caution": 1.272701,
+        "balanced_midline": 0.931418
+      },
+      "features_used": [
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 33,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.559596,
+        "confidence_evidence_slope": 0.159666,
+        "mean_update_inverse": 0.792605,
+        "strategy_persistence_after_error": 0.783337,
+        "counterfactual_loss_sensitivity": 0.024618
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.013648,
+        "low_exploration_high_caution": 1.097497,
+        "balanced_midline": 0.921763
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
     },
     {
       "seed": 34,
       "true_profile": "balanced_midline",
-      "predicted_profile": "low_exploration_high_caution",
-      "selected_actions": [
-        "rest",
-        "scan",
-        "scan",
-        "rest",
-        "commit",
-        "scan",
-        "recover",
-        "recover",
-        "commit",
-        "recover",
-        "commit",
-        "scan",
-        "rest",
-        "scan",
-        "scan",
-        "rest",
-        "recover",
-        "scan"
-      ],
+      "predicted_profile": "balanced_midline",
       "metrics": {
-        "high_uncertainty_inspect_ratio": 1.0,
-        "high_expected_error_rejection_rate": 1.0,
-        "novel_action_ratio": 0.8,
         "choice_repeat_suppression": 0.5,
-        "evidence_aligned_choice_rate": 0.444444,
-        "high_evidence_commit_rate": 0.75,
-        "mean_update_inverse": 0.809742,
-        "high_pressure_low_cost_ratio": 1.0,
-        "conflict_avoidance_shift": 1.0
-      }
+        "dominant_attention_share": 0.566111,
+        "confidence_evidence_slope": 0.17184,
+        "mean_update_inverse": 0.798302,
+        "counterfactual_loss_sensitivity": 0.021092
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.174533,
+        "low_exploration_high_caution": 1.283382,
+        "balanced_midline": 1.052597
+      },
+      "features_used": [
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 35,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.565088,
+        "confidence_evidence_slope": 0.174099,
+        "mean_update_inverse": 0.793383,
+        "counterfactual_loss_sensitivity": 0.022297
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.162046,
+        "low_exploration_high_caution": 1.285611,
+        "balanced_midline": 1.027123
+      },
+      "features_used": [
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 36,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.568912,
+        "confidence_evidence_slope": 0.174851,
+        "mean_update_inverse": 0.797711,
+        "counterfactual_loss_sensitivity": 0.016823
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.197459,
+        "low_exploration_high_caution": 1.292327,
+        "balanced_midline": 1.058214
+      },
+      "features_used": [
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 37,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.562849,
+        "confidence_evidence_slope": 0.166324,
+        "mean_update_inverse": 0.792627,
+        "strategy_persistence_after_error": 0.780083,
+        "counterfactual_loss_sensitivity": 0.024022
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.033842,
+        "low_exploration_high_caution": 1.093175,
+        "balanced_midline": 0.911485
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 38,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.564825,
+        "confidence_evidence_slope": 0.17531,
+        "mean_update_inverse": 0.794161,
+        "counterfactual_loss_sensitivity": 0.022969
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.165692,
+        "low_exploration_high_caution": 1.277914,
+        "balanced_midline": 1.023808
+      },
+      "features_used": [
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 39,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "post_error_conservative_shift": 1.0,
+        "choice_repeat_suppression": 0.5,
+        "dominant_attention_share": 0.561598,
+        "confidence_evidence_slope": 0.163211,
+        "mean_update_inverse": 0.792127,
+        "strategy_persistence_after_error": 0.772688,
+        "counterfactual_loss_sensitivity": 0.022569
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.018408,
+        "low_exploration_high_caution": 1.107712,
+        "balanced_midline": 0.912487
+      },
+      "features_used": [
+        "post_error_conservative_shift",
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "strategy_persistence_after_error",
+        "counterfactual_loss_sensitivity"
+      ]
+    },
+    {
+      "seed": 40,
+      "true_profile": "balanced_midline",
+      "predicted_profile": "balanced_midline",
+      "metrics": {
+        "choice_repeat_suppression": 0.25,
+        "dominant_attention_share": 0.574066,
+        "confidence_evidence_slope": 0.19473,
+        "mean_update_inverse": 0.801518,
+        "counterfactual_loss_sensitivity": 0.021864
+      },
+      "classification_method": "trained_nearest_centroid",
+      "profile_distances": {
+        "high_exploration_low_caution": 1.114403,
+        "low_exploration_high_caution": 1.280334,
+        "balanced_midline": 0.877695
+      },
+      "features_used": [
+        "choice_repeat_suppression",
+        "dominant_attention_share",
+        "confidence_evidence_slope",
+        "mean_update_inverse",
+        "counterfactual_loss_sensitivity"
+      ]
     }
   ],
-  "sample_count": 12,
-  "accuracy": 0.916667,
-  "baseline_accuracy": 0.333333,
+  "sample_count": 30,
+  "accuracy": 0.866667,
+  "chance_baseline": {
+    "mean_accuracy": 0.31,
+    "std_accuracy": 0.096667,
+    "scores": [
+      0.3,
+      0.233333,
+      0.4,
+      0.5,
+      0.2,
+      0.266667,
+      0.366667,
+      0.266667,
+      0.266667,
+      0.3,
+      0.366667,
+      0.4,
+      0.3,
+      0.333333,
+      0.4,
+      0.266667,
+      0.233333,
+      0.266667,
+      0.2,
+      0.3,
+      0.266667,
+      0.266667,
+      0.333333,
+      0.433333,
+      0.466667,
+      0.366667,
+      0.266667,
+      0.5,
+      0.133333,
+      0.366667,
+      0.4,
+      0.366667,
+      0.133333,
+      0.3,
+      0.166667,
+      0.4,
+      0.333333,
+      0.433333,
+      0.2,
+      0.3,
+      0.3,
+      0.466667,
+      0.233333,
+      0.133333,
+      0.3,
+      0.233333,
+      0.233333,
+      0.2,
+      0.3,
+      0.366667,
+      0.233333,
+      0.266667,
+      0.4,
+      0.366667,
+      0.6,
+      0.166667,
+      0.366667,
+      0.2,
+      0.3,
+      0.333333
+    ]
+  },
+  "threshold": 0.503334,
   "per_class": {
     "high_exploration_low_caution": {
       "precision": 1.0,
-      "recall": 1.0
+      "recall": 0.6
     },
     "low_exploration_high_caution": {
-      "precision": 0.8,
+      "precision": 1.0,
       "recall": 1.0
     },
     "balanced_midline": {
-      "precision": 1.0,
-      "recall": 0.75
+      "precision": 0.714286,
+      "recall": 1.0
     }
   },
   "confusion_matrix": {
     "high_exploration_low_caution": {
-      "high_exploration_low_caution": 4,
+      "high_exploration_low_caution": 6,
       "low_exploration_high_caution": 0,
-      "balanced_midline": 0
+      "balanced_midline": 4
     },
     "low_exploration_high_caution": {
       "high_exploration_low_caution": 0,
-      "low_exploration_high_caution": 4,
+      "low_exploration_high_caution": 10,
       "balanced_midline": 0
     },
     "balanced_midline": {
       "high_exploration_low_caution": 0,
-      "low_exploration_high_caution": 1,
-      "balanced_midline": 3
+      "low_exploration_high_caution": 0,
+      "balanced_midline": 10
     }
   },
   "misclassified_samples": [
     {
-      "seed": 34,
-      "true_profile": "balanced_midline",
-      "predicted_profile": "low_exploration_high_caution"
+      "seed": 31,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline"
+    },
+    {
+      "seed": 33,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline"
+    },
+    {
+      "seed": 37,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline"
+    },
+    {
+      "seed": 39,
+      "true_profile": "high_exploration_low_caution",
+      "predicted_profile": "balanced_midline"
     }
   ]
 }
