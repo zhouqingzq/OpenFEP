@@ -1,0 +1,166 @@
+{
+  "failure_modes": {
+    "confidence_database": [
+      {
+        "failure_mode": "stimulus_bin_breakdown",
+        "examples": [
+          {
+            "stimulus_bin": [
+              0.0,
+              0.15
+            ],
+            "trial_count": 2434,
+            "human_choice_match_rate": 0.693919,
+            "mean_calibration_gap": 0.238372
+          },
+          {
+            "stimulus_bin": [
+              0.15,
+              0.3
+            ],
+            "trial_count": 617,
+            "human_choice_match_rate": 0.807131,
+            "mean_calibration_gap": 0.29486
+          },
+          {
+            "stimulus_bin": [
+              0.3,
+              0.5
+            ],
+            "trial_count": 2886,
+            "human_choice_match_rate": 0.813583,
+            "mean_calibration_gap": 0.324784
+          }
+        ]
+      },
+      {
+        "failure_mode": "largest_confidence_disagreements",
+        "examples": [
+          {
+            "trial_id": "Jaquiery_unpub::56651",
+            "subject_id": "Jaquiery_unpub::255",
+            "session_id": "Jaquiery_unpub::255::session=default",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.039236,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Rahnev_2013::46203",
+            "subject_id": "Rahnev_2013::12",
+            "session_id": "Rahnev_2013::12::Condition=5",
+            "split": "heldout",
+            "human_choice": "right",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.02953,
+            "correct": true,
+            "human_choice_match": false,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Charalampaki_unpub_1::14210",
+            "subject_id": "Charalampaki_unpub_1::27",
+            "session_id": "Charalampaki_unpub_1::27::Condition=incongruent",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.040463,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Rahnev_2013::46216",
+            "subject_id": "Rahnev_2013::12",
+            "session_id": "Rahnev_2013::12::Condition=5",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.02938,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Arbuzova_unpub_3::24449",
+            "subject_id": "Arbuzova_unpub_3::29",
+            "session_id": "Arbuzova_unpub_3::29::Task=visuomotor",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.038178,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          }
+        ]
+      }
+    ],
+    "iowa_gambling_task": [
+      {
+        "failure_mode": "phase_breakdown",
+        "examples": [
+          {
+            "phase": "early_1_20",
+            "trial_count": 360,
+            "deck_match_rate": 0.258333,
+            "advantageous_choice_rate": 0.516667,
+            "human_advantageous_rate": 0.494444
+          },
+          {
+            "phase": "middle_41_60",
+            "trial_count": 360,
+            "deck_match_rate": 0.313889,
+            "advantageous_choice_rate": 0.522222,
+            "human_advantageous_rate": 0.5
+          },
+          {
+            "phase": "late_81_100",
+            "trial_count": 360,
+            "deck_match_rate": 0.338889,
+            "advantageous_choice_rate": 0.533333,
+            "human_advantageous_rate": 0.572222
+          }
+        ]
+      },
+      {
+        "failure_mode": "lowest_matching_subjects",
+        "examples": [
+          {
+            "subject_id": "s-33",
+            "deck_match_rate": 0.12,
+            "advantageous_choice_rate": 0.98
+          },
+          {
+            "subject_id": "s-27",
+            "deck_match_rate": 0.19,
+            "advantageous_choice_rate": 0.66
+          },
+          {
+            "subject_id": "s-41",
+            "deck_match_rate": 0.22,
+            "advantageous_choice_rate": 0.0
+          },
+          {
+            "subject_id": "s-35",
+            "deck_match_rate": 0.22,
+            "advantageous_choice_rate": 0.78
+          },
+          {
+            "subject_id": "s-30",
+            "deck_match_rate": 0.24,
+            "advantageous_choice_rate": 0.56
+          }
+        ]
+      }
+    ]
+  }
+}

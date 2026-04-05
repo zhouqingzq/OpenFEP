@@ -12,7 +12,7 @@ aligned across the repository.
 | --- | --- | --- | --- |
 | `M4.1` | Translate cognitive variables into a unified parameter, observable, and logging interface. | Schema roundtrip, executable observable registry, intervention sensitivity inside the minimal simulator, log completeness, stress-mode interface behavior. | Benchmark adapters, benchmark bundle integration, human-data claims, blind classification, parameter recovery, falsification, baseline comparison, inference engines. |
 | `M4.2` | Build the cognitive benchmark and task layer around the shared interfaces. | Benchmark registry, manifest validation, smoke-vs-external separation, protocol schemas, adapter execution, deterministic replay, leakage checks, provenance-rich artifacts, and task-grounded replay/recovery setup. | Declaring good behavioral fit, proving human alignment, beating baselines, identifying latent parameters from same-framework toy sidecars. |
-| `M4.3` | Evaluate single-task benchmark quality and compare against baselines. | Held-out benchmark metrics, human-alignment metrics, non-circular scoring, ablations, stress tests, baseline ladder, honest failure analysis. | Cross-task shared-parameter credibility, transfer claims, longitudinal stability claims. |
+| `M4.3` | Demonstrate single-task behavioral fit on real external data, compare against baseline ladder, assess parameter activity. | Real-data fit metrics (Confidence DB + IGT), tiered baseline comparison, parameter sensitivity on external data, non-circular scoring, honest failure analysis. All evidence must come from external_benchmark_registry, not smoke fixtures. | Cross-task shared-parameter credibility, transfer claims, longitudinal stability claims, architecture-level rewrite of scoring function. |
 | `M4.4` | Test whether shared parameters remain credible across multiple benchmark tasks. | Cross-task consistency checks, shared-parameter audits, task-to-task credibility reports. | Open-world transfer and real-tool deployment. |
 | `M4.5` | Validate controlled transfer into a more complex environment. | Cross-context transfer results in a controlled non-trivial environment, failure recovery analysis. | Longitudinal stability and open-world tooling. |
 | `M4.6` | Quantify stability, reproducibility, and recoverability over time and perturbation. | Long-run stability, perturbation response, recovery retention, reproducibility envelopes. | Open-world tool use and deployment claims. |
@@ -88,6 +88,59 @@ must not be cited as M4.1 acceptance evidence or labeled with
 | `artifacts/m41_task_bundle_eval.json` | Sidecar (not M4.1 acceptance) | Claims correctly downgraded in file |
 | `reports/m41_acceptance_report.json` | **M4.1 acceptance** | G1-G6 + R1 only |
 | `reports/m42_acceptance_report.json` | **M4.2 acceptance** | Bundle provenance, adapters, replay, leakage |
+
+## M4.2 / M4.3 Boundary Detail
+
+### What M4.2 delivered (environment scaffold)
+
+| Item | Purpose |
+| --- | --- |
+| `segmentum/benchmark_registry.py` | Bundle discovery, manifest validation, smoke/external separation |
+| `segmentum/m4_benchmarks.py` | Adapter pipeline + `_score_action_candidates` heuristic scoring |
+| `segmentum/m42_audit.py` | Environment acceptance artifacts |
+| `external_benchmark_registry/` | Real data: Confidence DB 825K trials, IGT 11.8K trials |
+| Leakage detection, deterministic replay | Infrastructure gates |
+
+### What M4.3 must build on top
+
+| Item | Why it's M4.3 not M4.2 |
+| --- | --- |
+| External bundle fit pipeline | M4.2 scaffold runs agent through trials; M4.3 must tune/evaluate fit |
+| IGT single-task fitting | M4.2 has the adapter; M4.3 must produce behavioral metrics on real IGT |
+| Baseline ladder (real data) | M4.2 has no baselines; M4.3 must implement and compare |
+| Parameter sensitivity on real data | M4.2 has no parameter sweep on external data |
+| Failure analysis on real data | M4.2 has no failure mode reporting |
+
+### What M4.3 inherits vs must redo
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| `_score_action_candidates` | Inherit as scaffold | Hand-tuned heuristic; M4.3 can tune parameters but not rewrite architecture |
+| M4.1 sidecar results | Must redo on real data | blind classification, falsification, recovery — all on synthetic data |
+| Current `m43_modeling.py` | Must rewrite | Hardcoded `allow_smoke_test=True`, no IGT, brute-force grid |
+| Current `m43_audit.py` | Must update | Add external bundle path, IGT track, parameter sensitivity gates |
+
+### What M4.3 owns (acceptance-grade)
+
+| Item | Purpose |
+| --- | --- |
+| `segmentum/m43_modeling.py` | Single-task fitting logic (Confidence DB + IGT) |
+| `segmentum/m43_baselines.py` | Independent baseline implementations |
+| `segmentum/m43_audit.py` | Acceptance artifact generation |
+| `tests/test_m43_single_task_fit.py` | Fit tests against real data |
+| `tests/test_m43_baselines.py` | Baseline correctness tests |
+| `tests/test_m43_acceptance.py` | Acceptance gate tests |
+
+### Artifact ownership (M4.3)
+
+| Artifact | Owner | Notes |
+| --- | --- | --- |
+| `artifacts/m43_confidence_fit.json` | **M4.3 acceptance** | Must use external bundle, claim_envelope: benchmark_eval |
+| `artifacts/m43_igt_fit.json` | **M4.3 acceptance** | Must use external bundle, claim_envelope: benchmark_eval |
+| `artifacts/m43_parameter_sensitivity.json` | **M4.3 acceptance** | Sweep on real data, external_validation: false |
+| `artifacts/m43_baseline_comparison.json` | **M4.3 acceptance** | Tiered baseline ladder |
+| `artifacts/m43_failure_analysis.json` | **M4.3 acceptance** | Failure modes with real examples |
+| `reports/m43_acceptance_report.json` | **M4.3 acceptance** | All gates + metrics |
 
 ## Known Data Integrity Issues
 

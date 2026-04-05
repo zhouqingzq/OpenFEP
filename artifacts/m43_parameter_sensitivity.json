@@ -1,0 +1,960 @@
+{
+  "benchmark_id": "m43_parameter_sensitivity",
+  "source_type": "external_bundle",
+  "claim_envelope": "benchmark_eval",
+  "external_validation": false,
+  "active_parameter_count": 7,
+  "required_active_parameter_count": 4,
+  "parameters": [
+    {
+      "parameter": "uncertainty_sensitivity",
+      "default": 0.65,
+      "sigma": 0.15,
+      "low_value": 0.0,
+      "high_value": 0.15,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.0,
+        "confidence_brier_score": 0.003798,
+        "confidence_alignment": 0.00021,
+        "igt_deck_match_rate": 0.0,
+        "igt_advantageous_ratio": 0.0,
+        "igt_learning_curve_slope": 0.0
+      },
+      "confidence_anchor_value": 0.0,
+      "igt_anchor_value": 0.65,
+      "winning_task": "confidence",
+      "winning_metric": "confidence_ambiguous_confidence",
+      "winning_step": 0.15,
+      "winning_direction": "high",
+      "noise_floor": 0.000629,
+      "signal_to_noise": 41.368839,
+      "practical_threshold": 0.015,
+      "activity_threshold": 0.015,
+      "winning_effect": 0.026021,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.0,
+        "confidence_mean_abs_rating_shift": 0.013692,
+        "confidence_choice_flip_rate": 0.0,
+        "igt_deck_flip_rate": 0.0,
+        "igt_advantageous_flip_rate": 0.0
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "confidence_ambiguous_confidence exceeded both the practical floor (0.015) and the seed-noise-adjusted threshold (0.015).",
+      "relevant_metrics": [
+        "confidence_ambiguous_confidence",
+        "confidence_confidence_separation"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 0.00021,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.090556
+        },
+        "confidence_ambiguous_confidence": {
+          "effect": 0.026021,
+          "noise_floor": 0.000629,
+          "practical_threshold": 0.015,
+          "signal_to_noise": 41.368839
+        },
+        "confidence_brier_score": {
+          "effect": 0.003798,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 4.360505
+        },
+        "confidence_confidence_separation": {
+          "effect": 0.020619,
+          "noise_floor": 0.000637,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 32.368917
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.0,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.0
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.0,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.0
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.0,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.0
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.0,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.0
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": false,
+          "winning_metric": "confidence_ambiguous_confidence",
+          "winning_effect": 0.0,
+          "activity_threshold": 0.015
+        },
+        {
+          "step": 0.15,
+          "active_after_step": true,
+          "winning_metric": "confidence_ambiguous_confidence",
+          "winning_effect": 0.026021,
+          "activity_threshold": 0.015
+        }
+      ]
+    },
+    {
+      "parameter": "error_aversion",
+      "default": 0.7,
+      "sigma": 0.15,
+      "low_value": 0.6,
+      "high_value": 0.7,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.000184,
+        "confidence_brier_score": 0.00048,
+        "confidence_alignment": 0.000135,
+        "igt_deck_match_rate": 0.016666,
+        "igt_advantageous_ratio": 0.136666,
+        "igt_learning_curve_slope": 0.035556
+      },
+      "confidence_anchor_value": 0.3,
+      "igt_anchor_value": 0.7,
+      "winning_task": "igt",
+      "winning_metric": "igt_post_loss_switch_rate",
+      "winning_step": 0.1,
+      "winning_direction": "low",
+      "noise_floor": 0.078191,
+      "signal_to_noise": 3.445486,
+      "practical_threshold": 0.03,
+      "activity_threshold": 0.097739,
+      "winning_effect": 0.269406,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.002863,
+        "confidence_mean_abs_rating_shift": 0.000599,
+        "confidence_choice_flip_rate": 0.0012,
+        "igt_deck_flip_rate": 0.306667,
+        "igt_advantageous_flip_rate": 0.231111
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "igt_post_loss_switch_rate exceeded both the practical floor (0.03) and the seed-noise-adjusted threshold (0.097739).",
+      "relevant_metrics": [
+        "igt_post_loss_switch_rate",
+        "igt_advantageous_ratio"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 0.000135,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.058215
+        },
+        "confidence_brier_score": {
+          "effect": 0.00048,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 0.551091
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.000184,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.349146
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.136666,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 1.778301
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.016666,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 1.47539
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.035556,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 1.242739
+        },
+        "igt_post_loss_switch_rate": {
+          "effect": 0.269406,
+          "noise_floor": 0.078191,
+          "practical_threshold": 0.03,
+          "signal_to_noise": 3.445486
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": true,
+          "winning_metric": "igt_post_loss_switch_rate",
+          "winning_effect": 0.269406,
+          "activity_threshold": 0.097739
+        }
+      ]
+    },
+    {
+      "parameter": "exploration_bias",
+      "default": 0.55,
+      "sigma": 0.15,
+      "low_value": 0.35,
+      "high_value": 0.65,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.000199,
+        "confidence_brier_score": 0.000348,
+        "confidence_alignment": 9.7e-05,
+        "igt_deck_match_rate": 0.013889,
+        "igt_advantageous_ratio": 0.022778,
+        "igt_learning_curve_slope": 0.010833
+      },
+      "confidence_anchor_value": 0.55,
+      "igt_anchor_value": 0.35,
+      "winning_task": "igt",
+      "winning_metric": "igt_early_switch_rate",
+      "winning_step": 0.3,
+      "winning_direction": "high",
+      "noise_floor": 0.033139,
+      "signal_to_noise": 1.499985,
+      "practical_threshold": 0.02,
+      "activity_threshold": 0.041424,
+      "winning_effect": 0.049708,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.00033,
+        "confidence_mean_abs_rating_shift": 0.000177,
+        "confidence_choice_flip_rate": 0.0016,
+        "igt_deck_flip_rate": 0.307778,
+        "igt_advantageous_flip_rate": 0.238333
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "igt_early_switch_rate exceeded both the practical floor (0.02) and the seed-noise-adjusted threshold (0.041424).",
+      "relevant_metrics": [
+        "igt_early_switch_rate",
+        "igt_learning_curve_slope",
+        "igt_deck_match_rate"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 9.7e-05,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.041828
+        },
+        "confidence_brier_score": {
+          "effect": 0.000348,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 0.399541
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.000199,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.377609
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.022778,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.296388
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.013889,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 1.22955
+        },
+        "igt_early_switch_rate": {
+          "effect": 0.049708,
+          "noise_floor": 0.033139,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 1.499985
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.010833,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.378631
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": false,
+          "winning_metric": "igt_deck_match_rate",
+          "winning_effect": 0.013889,
+          "activity_threshold": 0.01412
+        },
+        {
+          "step": 0.15,
+          "active_after_step": false,
+          "winning_metric": "igt_deck_match_rate",
+          "winning_effect": 0.013889,
+          "activity_threshold": 0.01412
+        },
+        {
+          "step": 0.3,
+          "active_after_step": true,
+          "winning_metric": "igt_early_switch_rate",
+          "winning_effect": 0.049708,
+          "activity_threshold": 0.041424
+        }
+      ]
+    },
+    {
+      "parameter": "attention_selectivity",
+      "default": 0.6,
+      "sigma": 0.15,
+      "low_value": 0.2,
+      "high_value": 0.5,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.000657,
+        "confidence_brier_score": 0.001517,
+        "confidence_alignment": 0.000194,
+        "igt_deck_match_rate": 0.013889,
+        "igt_advantageous_ratio": 0.1,
+        "igt_learning_curve_slope": 0.023889
+      },
+      "confidence_anchor_value": 0.32,
+      "igt_anchor_value": 0.2,
+      "winning_task": "igt",
+      "winning_metric": "igt_advantageous_ratio",
+      "winning_step": 0.3,
+      "winning_direction": "high",
+      "noise_floor": 0.076852,
+      "signal_to_noise": 1.301202,
+      "practical_threshold": 0.02,
+      "activity_threshold": 0.096065,
+      "winning_effect": 0.1,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.006957,
+        "confidence_mean_abs_rating_shift": 0.001416,
+        "confidence_choice_flip_rate": 0.002,
+        "igt_deck_flip_rate": 0.382778,
+        "igt_advantageous_flip_rate": 0.242222
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "igt_advantageous_ratio exceeded both the practical floor (0.02) and the seed-noise-adjusted threshold (0.096065).",
+      "relevant_metrics": [
+        "confidence_high_evidence_accuracy",
+        "confidence_confidence_separation",
+        "igt_advantageous_ratio",
+        "igt_deck_match_rate"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 0.000194,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.083657
+        },
+        "confidence_brier_score": {
+          "effect": 0.001517,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 1.741676
+        },
+        "confidence_confidence_separation": {
+          "effect": 0.00075,
+          "noise_floor": 0.000637,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 1.177394
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.000657,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 1.246679
+        },
+        "confidence_high_evidence_accuracy": {
+          "effect": 0.0,
+          "noise_floor": 0.0,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.0
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.1,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 1.301202
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.013889,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 1.22955
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.023889,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.834959
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": false,
+          "winning_metric": "igt_advantageous_ratio",
+          "winning_effect": 0.053889,
+          "activity_threshold": 0.096065
+        },
+        {
+          "step": 0.15,
+          "active_after_step": false,
+          "winning_metric": "igt_deck_match_rate",
+          "winning_effect": 0.012777,
+          "activity_threshold": 0.01412
+        },
+        {
+          "step": 0.3,
+          "active_after_step": true,
+          "winning_metric": "igt_advantageous_ratio",
+          "winning_effect": 0.1,
+          "activity_threshold": 0.096065
+        }
+      ]
+    },
+    {
+      "parameter": "confidence_gain",
+      "default": 0.7,
+      "sigma": 0.15,
+      "low_value": 0.9,
+      "high_value": 1.0,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 4.6e-05,
+        "confidence_brier_score": 0.003242,
+        "confidence_alignment": 5.2e-05,
+        "igt_deck_match_rate": 0.016112,
+        "igt_advantageous_ratio": 0.018889,
+        "igt_learning_curve_slope": 0.006111
+      },
+      "confidence_anchor_value": 1.0,
+      "igt_anchor_value": 0.78,
+      "winning_task": "confidence",
+      "winning_metric": "confidence_brier_score",
+      "winning_step": 0.1,
+      "winning_direction": "low",
+      "noise_floor": 0.000871,
+      "signal_to_noise": 3.722158,
+      "practical_threshold": 0.003,
+      "activity_threshold": 0.003,
+      "winning_effect": 0.003242,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.002035,
+        "confidence_mean_abs_rating_shift": 0.015579,
+        "confidence_choice_flip_rate": 0.0008,
+        "igt_deck_flip_rate": 0.06,
+        "igt_advantageous_flip_rate": 0.041111
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "confidence_brier_score exceeded both the practical floor (0.003) and the seed-noise-adjusted threshold (0.003).",
+      "relevant_metrics": [
+        "confidence_high_evidence_confidence",
+        "confidence_brier_score",
+        "confidence_confidence_separation"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 5.2e-05,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.022423
+        },
+        "confidence_brier_score": {
+          "effect": 0.003242,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 3.722158
+        },
+        "confidence_confidence_separation": {
+          "effect": 0.005821,
+          "noise_floor": 0.000637,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 9.138148
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 4.6e-05,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.087287
+        },
+        "confidence_high_evidence_confidence": {
+          "effect": 0.016773,
+          "noise_floor": 1.6e-05,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 1048.3125
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.018889,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.245784
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.016112,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 1.426346
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.006111,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.213589
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": true,
+          "winning_metric": "confidence_brier_score",
+          "winning_effect": 0.003242,
+          "activity_threshold": 0.003
+        }
+      ]
+    },
+    {
+      "parameter": "update_rigidity",
+      "default": 0.65,
+      "sigma": 0.15,
+      "low_value": 0.45,
+      "high_value": 0.6,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.000252,
+        "confidence_brier_score": 0.000279,
+        "confidence_alignment": 5.6e-05,
+        "igt_deck_match_rate": 0.007777,
+        "igt_advantageous_ratio": 0.027222,
+        "igt_learning_curve_slope": 0.011944
+      },
+      "confidence_anchor_value": 0.65,
+      "igt_anchor_value": 0.45,
+      "winning_task": "igt",
+      "winning_metric": "igt_post_loss_stay_rate",
+      "winning_step": 0.15,
+      "winning_direction": "high",
+      "noise_floor": 0.078191,
+      "signal_to_noise": 1.555064,
+      "practical_threshold": 0.03,
+      "activity_threshold": 0.097739,
+      "winning_effect": 0.121592,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.0004,
+        "confidence_mean_abs_rating_shift": 0.000211,
+        "confidence_choice_flip_rate": 0.0004,
+        "igt_deck_flip_rate": 0.218889,
+        "igt_advantageous_flip_rate": 0.175
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "igt_post_loss_stay_rate exceeded both the practical floor (0.03) and the seed-noise-adjusted threshold (0.097739).",
+      "relevant_metrics": [
+        "igt_post_loss_stay_rate",
+        "igt_learning_curve_slope"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 5.6e-05,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.024148
+        },
+        "confidence_brier_score": {
+          "effect": 0.000279,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 0.320321
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.000252,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.478178
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.027222,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.354213
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.007777,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.688474
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.011944,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.417462
+        },
+        "igt_post_loss_stay_rate": {
+          "effect": 0.121592,
+          "noise_floor": 0.078191,
+          "practical_threshold": 0.03,
+          "signal_to_noise": 1.555064
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": false,
+          "winning_metric": "igt_post_loss_stay_rate",
+          "winning_effect": 0.096934,
+          "activity_threshold": 0.097739
+        },
+        {
+          "step": 0.15,
+          "active_after_step": true,
+          "winning_metric": "igt_post_loss_stay_rate",
+          "winning_effect": 0.121592,
+          "activity_threshold": 0.097739
+        }
+      ]
+    },
+    {
+      "parameter": "resource_pressure_sensitivity",
+      "default": 0.75,
+      "sigma": 0.15,
+      "low_value": 0.65,
+      "high_value": 0.75,
+      "active": false,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.0,
+        "confidence_brier_score": 0.0,
+        "confidence_alignment": 0.0,
+        "igt_deck_match_rate": 0.0,
+        "igt_advantageous_ratio": 0.0,
+        "igt_learning_curve_slope": 0.0
+      },
+      "confidence_anchor_value": 0.75,
+      "igt_anchor_value": 0.75,
+      "winning_task": "confidence",
+      "winning_metric": "confidence_heldout_likelihood",
+      "winning_step": 0.1,
+      "winning_direction": "low",
+      "noise_floor": 0.000527,
+      "signal_to_noise": 0.0,
+      "practical_threshold": 0.005,
+      "activity_threshold": 0.005,
+      "winning_effect": 0.0,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.0,
+        "confidence_mean_abs_rating_shift": 0.0,
+        "confidence_choice_flip_rate": 0.0,
+        "igt_deck_flip_rate": 0.0,
+        "igt_advantageous_flip_rate": 0.0
+      },
+      "behavior_change_ok": false,
+      "classification_reason": "No relevant metric cleared the activity threshold above seed noise; best metric was confidence_heldout_likelihood with effect 0.0.",
+      "relevant_metrics": [
+        "confidence_heldout_likelihood",
+        "igt_deck_match_rate"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 0.0,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.0
+        },
+        "confidence_brier_score": {
+          "effect": 0.0,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 0.0
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.0,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.0
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.0,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.0
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.0,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.0
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.0,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.0
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": false,
+          "winning_metric": "confidence_heldout_likelihood",
+          "winning_effect": 0.0,
+          "activity_threshold": 0.005
+        },
+        {
+          "step": 0.15,
+          "active_after_step": false,
+          "winning_metric": "confidence_heldout_likelihood",
+          "winning_effect": 0.0,
+          "activity_threshold": 0.005
+        },
+        {
+          "step": 0.3,
+          "active_after_step": false,
+          "winning_metric": "confidence_heldout_likelihood",
+          "winning_effect": 0.0,
+          "activity_threshold": 0.005
+        }
+      ]
+    },
+    {
+      "parameter": "virtual_prediction_error_gain",
+      "default": 0.68,
+      "sigma": 0.15,
+      "low_value": 0.7,
+      "high_value": 1.0,
+      "active": true,
+      "measured_effects": {
+        "confidence_heldout_likelihood": 0.0,
+        "confidence_brier_score": 0.0,
+        "confidence_alignment": 0.0,
+        "igt_deck_match_rate": 0.003333,
+        "igt_advantageous_ratio": 0.023889,
+        "igt_learning_curve_slope": 0.004722
+      },
+      "confidence_anchor_value": 0.68,
+      "igt_anchor_value": 1.0,
+      "winning_task": "igt",
+      "winning_metric": "igt_post_loss_peak_loss_estimate",
+      "winning_step": 0.3,
+      "winning_direction": "low",
+      "noise_floor": 11.369117,
+      "signal_to_noise": 1.259047,
+      "practical_threshold": 10.0,
+      "activity_threshold": 14.211396,
+      "winning_effect": 14.314256,
+      "winning_behavioral_change": {
+        "confidence_mean_abs_probability_shift": 0.0,
+        "confidence_mean_abs_rating_shift": 0.0,
+        "confidence_choice_flip_rate": 0.0,
+        "igt_deck_flip_rate": 0.16,
+        "igt_advantageous_flip_rate": 0.118333
+      },
+      "behavior_change_ok": true,
+      "classification_reason": "igt_post_loss_peak_loss_estimate exceeded both the practical floor (10.0) and the seed-noise-adjusted threshold (14.211396).",
+      "relevant_metrics": [
+        "igt_loss_streak_escape_rate",
+        "igt_post_loss_peak_loss_estimate",
+        "igt_learning_curve_slope"
+      ],
+      "diagnostic_effects": {
+        "confidence_alignment": {
+          "effect": 0.0,
+          "noise_floor": 0.002319,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.0
+        },
+        "confidence_brier_score": {
+          "effect": 0.0,
+          "noise_floor": 0.000871,
+          "practical_threshold": 0.003,
+          "signal_to_noise": 0.0
+        },
+        "confidence_heldout_likelihood": {
+          "effect": 0.0,
+          "noise_floor": 0.000527,
+          "practical_threshold": 0.005,
+          "signal_to_noise": 0.0
+        },
+        "igt_advantageous_ratio": {
+          "effect": 0.023889,
+          "noise_floor": 0.076852,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.310844
+        },
+        "igt_deck_match_rate": {
+          "effect": 0.003333,
+          "noise_floor": 0.011296,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.29506
+        },
+        "igt_learning_curve_slope": {
+          "effect": 0.004722,
+          "noise_floor": 0.028611,
+          "practical_threshold": 0.02,
+          "signal_to_noise": 0.165041
+        },
+        "igt_loss_streak_escape_rate": {
+          "effect": 0.07353,
+          "noise_floor": 0.078191,
+          "practical_threshold": 0.01,
+          "signal_to_noise": 0.94039
+        },
+        "igt_post_loss_peak_loss_estimate": {
+          "effect": 14.314256,
+          "noise_floor": 11.369117,
+          "practical_threshold": 10.0,
+          "signal_to_noise": 1.259047
+        }
+      },
+      "evaluated_steps": [
+        {
+          "step": 0.1,
+          "active_after_step": false,
+          "winning_metric": "igt_post_loss_peak_loss_estimate",
+          "winning_effect": 6.570079,
+          "activity_threshold": 14.211396
+        },
+        {
+          "step": 0.15,
+          "active_after_step": false,
+          "winning_metric": "igt_post_loss_peak_loss_estimate",
+          "winning_effect": 8.686191,
+          "activity_threshold": 14.211396
+        },
+        {
+          "step": 0.3,
+          "active_after_step": true,
+          "winning_metric": "igt_post_loss_peak_loss_estimate",
+          "winning_effect": 14.314256,
+          "activity_threshold": 14.211396
+        }
+      ]
+    }
+  ],
+  "baseline_metrics": {
+    "confidence": {
+      "accuracy": 0.9464,
+      "calibration_error": 0.156648,
+      "brier_score": 0.052386,
+      "heldout_likelihood": -0.433075,
+      "confidence_bias": 0.222837,
+      "auroc2": 0.954593,
+      "meta_d_prime_ratio": 0.508657,
+      "confidence_alignment": -0.103074,
+      "subject_count": 96.0
+    },
+    "igt": {
+      "advantageous_choice_rate": 0.442222,
+      "mean_net_outcome": -0.361111,
+      "reward_fit": -67226.735267,
+      "confidence_advantage_alignment": 0.00588,
+      "deck_match_rate": 0.285556,
+      "policy_alignment_rate": 0.462222,
+      "late_advantageous_rate": 0.485556,
+      "final_cumulative_gain": 0.0,
+      "learning_curve_slope": 0.0075,
+      "human_learning_curve_slope": 0.023889,
+      "human_advantageous_rate": 0.506667,
+      "deck_distribution_l1": 0.593335,
+      "phase_deck_distribution_l1": 0.646297,
+      "late_advantageous_gap": 0.130556,
+      "phase_advantageous_gap": 0.086111,
+      "post_loss_switch_gap": 0.055823,
+      "subject_match_floor": 0.12
+    }
+  },
+  "baseline_parameters": {
+    "confidence": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.0,
+      "error_aversion": 0.29999999999999993,
+      "exploration_bias": 0.55,
+      "attention_selectivity": 0.31999999999999995,
+      "confidence_gain": 1.0,
+      "update_rigidity": 0.65,
+      "resource_pressure_sensitivity": 0.75,
+      "virtual_prediction_error_gain": 0.68
+    },
+    "igt": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.65,
+      "error_aversion": 0.7,
+      "exploration_bias": 0.35000000000000003,
+      "attention_selectivity": 0.19999999999999996,
+      "confidence_gain": 0.7799999999999999,
+      "update_rigidity": 0.45,
+      "resource_pressure_sensitivity": 0.75,
+      "virtual_prediction_error_gain": 1.0
+    }
+  },
+  "baseline_diagnostics": {
+    "confidence": {
+      "confidence_ambiguous_confidence": 0.635909,
+      "confidence_high_evidence_confidence": 0.970828,
+      "confidence_high_evidence_accuracy": 1.0,
+      "confidence_confidence_separation": 0.334919
+    },
+    "igt": {
+      "igt_early_switch_rate": 0.119883,
+      "igt_post_loss_switch_rate": 0.849315,
+      "igt_post_loss_stay_rate": 0.150685,
+      "igt_loss_streak_escape_rate": 0.849315,
+      "igt_post_loss_peak_loss_estimate": 92.408356
+    }
+  },
+  "noise_floor": {
+    "confidence": {
+      "confidence_heldout_likelihood": 0.000527,
+      "confidence_brier_score": 0.000871,
+      "confidence_alignment": 0.002319,
+      "confidence_ambiguous_confidence": 0.000629,
+      "confidence_high_evidence_confidence": 1.6e-05,
+      "confidence_high_evidence_accuracy": 0.0,
+      "confidence_confidence_separation": 0.000637,
+      "confidence_mean_abs_probability_shift": 0.016824,
+      "confidence_mean_abs_rating_shift": 0.008482,
+      "confidence_choice_flip_rate": 0.072667
+    },
+    "igt": {
+      "igt_deck_match_rate": 0.011296,
+      "igt_advantageous_ratio": 0.076852,
+      "igt_learning_curve_slope": 0.028611,
+      "igt_early_switch_rate": 0.033139,
+      "igt_post_loss_switch_rate": 0.078191,
+      "igt_post_loss_stay_rate": 0.078191,
+      "igt_loss_streak_escape_rate": 0.078191,
+      "igt_post_loss_peak_loss_estimate": 11.369117,
+      "igt_deck_flip_rate": 0.571852,
+      "igt_advantageous_flip_rate": 0.498333
+    }
+  },
+  "analysis_protocol": {
+    "confidence_split": "heldout",
+    "igt_split": "heldout",
+    "step_schedule": [
+      0.1,
+      0.15,
+      0.3
+    ],
+    "noise_seed_offsets": [
+      11,
+      23,
+      37
+    ],
+    "signal_to_noise_min": 1.25,
+    "noise_estimator": "mean_abs_seed_delta"
+  }
+}

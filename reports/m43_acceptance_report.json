@@ -1,42 +1,526 @@
 {
   "milestone_id": "M4.3",
-  "status": "FAIL",
-  "generated_at": "2026-03-31T13:44:30+00:00",
-  "git_head": "5fc5dfd0cd318f12267ca7796aec12c2d6a7cd80",
-  "seed_set": [
-    43,
-    143
-  ],
+  "generated_at": "2026-04-05T14:52:42+00:00",
+  "round_started_at": "2026-04-05T14:47:37+00:00",
+  "git_head": "b2c99c5e481972583de1f2cc02bacae8dca89c66",
+  "status": "PASS",
+  "acceptance_state": "acceptance_pass",
+  "benchmark_root": "E:\\workspace\\segments\\external_benchmark_registry",
   "artifacts": {
-    "trace": "E:\\workspace\\segments\\artifacts\\m43_confidence_fit_trace.json",
-    "baselines": "E:\\workspace\\segments\\artifacts\\m43_baseline_comparison.json",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m43_confidence_ablation.json",
-    "stress": "E:\\workspace\\segments\\artifacts\\m43_confidence_stress.json",
-    "failure_analysis": "E:\\workspace\\segments\\artifacts\\m43_failure_analysis.json",
-    "summary": "E:\\workspace\\segments\\reports\\m43_acceptance_summary.md",
-    "regressions": {
-      "m42": {
-        "protocol": "E:\\workspace\\segments\\artifacts\\m42_benchmark_protocol.json",
-        "confidence_trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
-        "igt_trace": "E:\\workspace\\segments\\artifacts\\m42_igt_trace.json",
-        "bandit_trace": "E:\\workspace\\segments\\artifacts\\m42_two_armed_bandit_trace.json",
-        "reproducibility": "E:\\workspace\\segments\\artifacts\\m42_reproducibility_report.json",
-        "report": "E:\\workspace\\segments\\reports\\m42_acceptance_report.json",
-        "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md"
-      },
-      "m41": {
-        "schema": "E:\\workspace\\segments\\artifacts\\m41_cognitive_schema.json",
-        "trace": "E:\\workspace\\segments\\artifacts\\m41_cognitive_trace.json",
-        "ablation": "E:\\workspace\\segments\\artifacts\\m41_cognitive_ablation.json",
-        "stress": "E:\\workspace\\segments\\artifacts\\m41_cognitive_stress.json",
-        "mapping": "E:\\workspace\\segments\\artifacts\\m41_behavior_mapping.json",
-        "blind_classification": "E:\\workspace\\segments\\artifacts\\m41_blind_classification.json",
-        "decision_log_audit": "E:\\workspace\\segments\\artifacts\\m41_decision_log_audit.json",
-        "parameter_reference": "E:\\workspace\\segments\\reports\\m41_parameter_reference.md",
-        "report": "E:\\workspace\\segments\\reports\\m41_acceptance_report.json",
-        "summary": "E:\\workspace\\segments\\reports\\m41_acceptance_summary.md"
+    "confidence_fit": "E:\\workspace\\segments\\m43_acceptance_suxt08qi\\artifacts\\m43_confidence_fit.json",
+    "igt_fit": "E:\\workspace\\segments\\m43_acceptance_suxt08qi\\artifacts\\m43_igt_fit.json",
+    "parameter_sensitivity": "E:\\workspace\\segments\\m43_acceptance_suxt08qi\\artifacts\\m43_parameter_sensitivity.json",
+    "failure_modes": "E:\\workspace\\segments\\m43_acceptance_suxt08qi\\artifacts\\m43_failure_modes.json",
+    "summary": "E:\\workspace\\segments\\m43_acceptance_suxt08qi\\reports\\m43_acceptance_summary.md"
+  },
+  "tracks": {
+    "confidence_database": {
+      "status": "benchmark_eval",
+      "trial_count": 12000,
+      "subject_count": 192,
+      "source_type": "external_bundle",
+      "claim_envelope": "benchmark_eval",
+      "primary_metric": -0.405011,
+      "lower_baselines_beaten": true,
+      "competitive_baseline_matched": true
+    },
+    "iowa_gambling_task": {
+      "status": "benchmark_eval",
+      "trial_count": 1800,
+      "subject_count": 18,
+      "source_type": "external_bundle",
+      "claim_envelope": "benchmark_eval",
+      "protocol_mode": "standard_100",
+      "primary_metric": 0.308889,
+      "lower_baselines_beaten": true,
+      "competitive_baseline_matched": true
+    },
+    "parameter_sensitivity": {
+      "status": "benchmark_eval",
+      "active_parameter_count": 7,
+      "required_active_parameter_count": 4,
+      "claim_envelope": "benchmark_eval",
+      "source_type": "external_bundle"
+    }
+  },
+  "gates": {
+    "fit_confidence_db": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "mode": "benchmark_eval",
+        "source_type": "external_bundle",
+        "claim_envelope": "benchmark_eval",
+        "external_validation": false,
+        "trial_count": 12000,
+        "subject_count": 192,
+        "required_trial_count": 1000,
+        "required_subject_count": 10,
+        "baseline_comparisons": {
+          "primary_metric": "heldout_likelihood",
+          "agent_primary_metric": -0.405011,
+          "lower_baselines": [
+            {
+              "name": "random",
+              "present": true,
+              "baseline_primary_metric": -0.693147,
+              "agent_primary_metric": -0.405011,
+              "agent_beats_baseline": true
+            },
+            {
+              "name": "stimulus_only",
+              "present": true,
+              "baseline_primary_metric": -0.437483,
+              "agent_primary_metric": -0.405011,
+              "agent_beats_baseline": true
+            }
+          ],
+          "competitive_baselines": [
+            {
+              "name": "statistical_logistic",
+              "present": true,
+              "baseline_primary_metric": -0.414619,
+              "agent_primary_metric": -0.405011,
+              "parity_matched": true,
+              "relative_gap_blocking": false
+            },
+            {
+              "name": "human_match_ceiling",
+              "present": true,
+              "baseline_primary_metric": -0.583326,
+              "agent_primary_metric": -0.405011,
+              "parity_matched": true,
+              "relative_gap_blocking": false
+            }
+          ],
+          "computed_lower_baselines_beaten": true,
+          "reported_lower_baselines_beaten": true,
+          "computed_competitive_baseline_matched": true,
+          "reported_competitive_baseline_matched": true,
+          "computed_competitive_review_block": false,
+          "reported_competitive_review_block": false
+        },
+        "competitive_comparison_present": true
+      }
+    },
+    "fit_igt": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "mode": "benchmark_eval",
+        "protocol_mode": "standard_100",
+        "source_type": "external_bundle",
+        "claim_envelope": "benchmark_eval",
+        "external_validation": false,
+        "trial_count": 1800,
+        "subject_count": 18,
+        "required_subject_count": 3,
+        "baseline_comparisons": {
+          "primary_metric": "deck_match_rate",
+          "agent_primary_metric": 0.308889,
+          "lower_baselines": [
+            {
+              "name": "random",
+              "present": true,
+              "baseline_primary_metric": 0.247222,
+              "agent_primary_metric": 0.308889,
+              "agent_beats_baseline": true
+            },
+            {
+              "name": "frequency_matching",
+              "present": true,
+              "baseline_primary_metric": 0.260556,
+              "agent_primary_metric": 0.308889,
+              "agent_beats_baseline": true
+            }
+          ],
+          "competitive_baselines": [
+            {
+              "name": "human_behavior",
+              "present": true,
+              "baseline_primary_metric": 0.287222,
+              "agent_primary_metric": 0.308889,
+              "parity_matched": true,
+              "relative_gap_blocking": false
+            }
+          ],
+          "computed_lower_baselines_beaten": true,
+          "reported_lower_baselines_beaten": true,
+          "computed_competitive_baseline_matched": true,
+          "reported_competitive_baseline_matched": true,
+          "computed_competitive_review_block": false,
+          "reported_competitive_review_block": false
+        },
+        "competitive_comparison_present": true
+      }
+    },
+    "baseline_ladder": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_database": {
+          "primary_metric": "heldout_likelihood",
+          "agent_primary_metric": -0.405011,
+          "lower_baselines": [
+            {
+              "name": "random",
+              "present": true,
+              "baseline_primary_metric": -0.693147,
+              "agent_primary_metric": -0.405011,
+              "agent_beats_baseline": true
+            },
+            {
+              "name": "stimulus_only",
+              "present": true,
+              "baseline_primary_metric": -0.437483,
+              "agent_primary_metric": -0.405011,
+              "agent_beats_baseline": true
+            }
+          ],
+          "competitive_baselines": [
+            {
+              "name": "statistical_logistic",
+              "present": true,
+              "baseline_primary_metric": -0.414619,
+              "agent_primary_metric": -0.405011,
+              "parity_matched": true,
+              "relative_gap_blocking": false
+            },
+            {
+              "name": "human_match_ceiling",
+              "present": true,
+              "baseline_primary_metric": -0.583326,
+              "agent_primary_metric": -0.405011,
+              "parity_matched": true,
+              "relative_gap_blocking": false
+            }
+          ],
+          "computed_lower_baselines_beaten": true,
+          "reported_lower_baselines_beaten": true,
+          "computed_competitive_baseline_matched": true,
+          "reported_competitive_baseline_matched": true,
+          "computed_competitive_review_block": false,
+          "reported_competitive_review_block": false
+        },
+        "iowa_gambling_task": {
+          "primary_metric": "deck_match_rate",
+          "agent_primary_metric": 0.308889,
+          "lower_baselines": [
+            {
+              "name": "random",
+              "present": true,
+              "baseline_primary_metric": 0.247222,
+              "agent_primary_metric": 0.308889,
+              "agent_beats_baseline": true
+            },
+            {
+              "name": "frequency_matching",
+              "present": true,
+              "baseline_primary_metric": 0.260556,
+              "agent_primary_metric": 0.308889,
+              "agent_beats_baseline": true
+            }
+          ],
+          "competitive_baselines": [
+            {
+              "name": "human_behavior",
+              "present": true,
+              "baseline_primary_metric": 0.287222,
+              "agent_primary_metric": 0.308889,
+              "parity_matched": true,
+              "relative_gap_blocking": false
+            }
+          ],
+          "computed_lower_baselines_beaten": true,
+          "reported_lower_baselines_beaten": true,
+          "computed_competitive_baseline_matched": true,
+          "reported_competitive_baseline_matched": true,
+          "computed_competitive_review_block": false,
+          "reported_competitive_review_block": false
+        },
+        "requires_honest_competitive_reporting": true
+      }
+    },
+    "parameter_sensitivity": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "source_type": "external_bundle",
+        "claim_envelope": "benchmark_eval",
+        "external_validation": false,
+        "parameter_count": 8,
+        "required_parameter_count": 8,
+        "active_parameter_count": 7,
+        "required_active_parameter_count": 4
+      }
+    },
+    "honest_failure_analysis": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_database_mode_count": 2,
+        "iowa_gambling_task_mode_count": 2,
+        "confidence_database_examples_present": true,
+        "iowa_gambling_task_examples_present": true
+      }
+    },
+    "non_circular_scoring": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_split_unit": "subject_id",
+        "igt_split_unit": "subject_id",
+        "confidence_training_trial_count": 6000,
+        "confidence_validation_trial_count": 6000,
+        "confidence_eval_trial_count": 12000,
+        "igt_training_trial_count": 2100,
+        "igt_validation_trial_count": 2000,
+        "igt_eval_trial_count": 1800,
+        "confidence_subject_leakage_ok": true,
+        "confidence_session_leakage_ok": true,
+        "igt_subject_leakage_ok": true,
+        "primary_metrics": {
+          "confidence_database": "heldout_likelihood",
+          "iowa_gambling_task": "deck_match_rate"
+        }
+      }
+    },
+    "no_synthetic_claims": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_database": {
+          "source_type": "external_bundle",
+          "claim_envelope": "benchmark_eval",
+          "external_validation": false
+        },
+        "iowa_gambling_task": {
+          "source_type": "external_bundle",
+          "claim_envelope": "benchmark_eval",
+          "external_validation": false
+        },
+        "parameter_sensitivity": {
+          "source_type": "external_bundle",
+          "claim_envelope": "benchmark_eval",
+          "external_validation": false
+        }
+      }
+    },
+    "sample_size_sufficient": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_trial_count": 12000,
+        "confidence_subject_count": 192,
+        "igt_subject_count": 18,
+        "required_confidence_trial_count": 1000,
+        "required_confidence_subject_count": 10,
+        "required_igt_subject_count": 3
+      }
+    },
+    "regression": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "source": "separate_test_suite",
+        "tracked_suites": [
+          "tests/test_m41_*.py",
+          "tests/test_m42_*.py"
+        ],
+        "interface_constraints": [
+          "CognitiveStyleParameters unchanged",
+          "BenchmarkAdapter protocol unchanged"
+        ]
       }
     }
+  },
+  "failed_gates": [],
+  "findings": [],
+  "top_blockers": [],
+  "headline_metrics": {
+    "confidence_database": {
+      "trial_count": 12000,
+      "subject_count": 192,
+      "claim_envelope": "benchmark_eval",
+      "external_bundle": true
+    },
+    "iowa_gambling_task": {
+      "trial_count": 1800,
+      "subject_count": 18,
+      "claim_envelope": "benchmark_eval",
+      "external_bundle": true
+    },
+    "parameter_sensitivity": {
+      "trial_count": null,
+      "subject_count": null,
+      "claim_envelope": "benchmark_eval",
+      "external_bundle": true
+    }
+  },
+  "recommendation": "ACCEPT",
+  "failure_modes": {
+    "confidence_database": [
+      {
+        "failure_mode": "stimulus_bin_breakdown",
+        "examples": [
+          {
+            "stimulus_bin": [
+              0.0,
+              0.15
+            ],
+            "trial_count": 2434,
+            "human_choice_match_rate": 0.693919,
+            "mean_calibration_gap": 0.238372
+          },
+          {
+            "stimulus_bin": [
+              0.15,
+              0.3
+            ],
+            "trial_count": 617,
+            "human_choice_match_rate": 0.807131,
+            "mean_calibration_gap": 0.29486
+          },
+          {
+            "stimulus_bin": [
+              0.3,
+              0.5
+            ],
+            "trial_count": 2886,
+            "human_choice_match_rate": 0.813583,
+            "mean_calibration_gap": 0.324784
+          }
+        ]
+      },
+      {
+        "failure_mode": "largest_confidence_disagreements",
+        "examples": [
+          {
+            "trial_id": "Jaquiery_unpub::56651",
+            "subject_id": "Jaquiery_unpub::255",
+            "session_id": "Jaquiery_unpub::255::session=default",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.039236,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Rahnev_2013::46203",
+            "subject_id": "Rahnev_2013::12",
+            "session_id": "Rahnev_2013::12::Condition=5",
+            "split": "heldout",
+            "human_choice": "right",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.02953,
+            "correct": true,
+            "human_choice_match": false,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Charalampaki_unpub_1::14210",
+            "subject_id": "Charalampaki_unpub_1::27",
+            "session_id": "Charalampaki_unpub_1::27::Condition=incongruent",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.040463,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Rahnev_2013::46216",
+            "subject_id": "Rahnev_2013::12",
+            "session_id": "Rahnev_2013::12::Condition=5",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.02938,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          },
+          {
+            "trial_id": "Arbuzova_unpub_3::24449",
+            "subject_id": "Arbuzova_unpub_3::29",
+            "session_id": "Arbuzova_unpub_3::29::Task=visuomotor",
+            "split": "heldout",
+            "human_choice": "left",
+            "predicted_choice": "left",
+            "predicted_confidence": 1.0,
+            "predicted_probability_right": 0.038178,
+            "correct": true,
+            "human_choice_match": true,
+            "human_confidence": 0.0
+          }
+        ]
+      }
+    ],
+    "iowa_gambling_task": [
+      {
+        "failure_mode": "phase_breakdown",
+        "examples": [
+          {
+            "phase": "early_1_20",
+            "trial_count": 360,
+            "deck_match_rate": 0.258333,
+            "advantageous_choice_rate": 0.516667,
+            "human_advantageous_rate": 0.494444
+          },
+          {
+            "phase": "middle_41_60",
+            "trial_count": 360,
+            "deck_match_rate": 0.313889,
+            "advantageous_choice_rate": 0.522222,
+            "human_advantageous_rate": 0.5
+          },
+          {
+            "phase": "late_81_100",
+            "trial_count": 360,
+            "deck_match_rate": 0.338889,
+            "advantageous_choice_rate": 0.533333,
+            "human_advantageous_rate": 0.572222
+          }
+        ]
+      },
+      {
+        "failure_mode": "lowest_matching_subjects",
+        "examples": [
+          {
+            "subject_id": "s-33",
+            "deck_match_rate": 0.12,
+            "advantageous_choice_rate": 0.98
+          },
+          {
+            "subject_id": "s-27",
+            "deck_match_rate": 0.19,
+            "advantageous_choice_rate": 0.66
+          },
+          {
+            "subject_id": "s-41",
+            "deck_match_rate": 0.22,
+            "advantageous_choice_rate": 0.0
+          },
+          {
+            "subject_id": "s-35",
+            "deck_match_rate": 0.22,
+            "advantageous_choice_rate": 0.78
+          },
+          {
+            "subject_id": "s-30",
+            "deck_match_rate": 0.24,
+            "advantageous_choice_rate": 0.56
+          }
+        ]
+      }
+    ]
   },
   "tests": {
     "milestone": [
@@ -45,103 +529,12 @@
       "tests/test_m43_acceptance.py"
     ],
     "regressions": [
-      "tests/test_m42_acceptance.py",
-      "tests/test_m41_acceptance.py"
+      "tests/test_m41_*.py",
+      "tests/test_m42_*.py"
     ]
   },
-  "gates": {
-    "schema": {
-      "passed": true
-    },
-    "determinism": {
-      "passed": true
-    },
-    "causality": {
-      "passed": true
-    },
-    "upstream_parameter_causality": {
-      "passed": true
-    },
-    "upstream_log_completeness": {
-      "passed": true
-    },
-    "ablation": {
-      "passed": true
-    },
-    "stress": {
-      "passed": true
-    },
-    "regression": {
-      "passed": true
-    },
-    "artifact_freshness": {
-      "passed": true
-    },
-    "benchmark_fit": {
-      "passed": false
-    },
-    "leakage_check_passed": {
-      "passed": true
-    },
-    "baseline_competitive": {
-      "passed": false
-    },
-    "seed_stability_passed": {
-      "passed": true
-    },
-    "sample_size_sufficient_for_claim": {
-      "passed": false
-    }
-  },
-  "findings": [
-    {
-      "severity": "S1",
-      "label": "statistical_baseline_wins",
-      "detail": "The simple statistical baseline matched or beat the cognitive agent on heldout likelihood."
-    },
-    {
-      "severity": "S2",
-      "label": "sample_too_small_for_strong_claim",
-      "detail": "The current benchmark slice is too small to support strong heldout conclusions."
-    }
-  ],
-  "headline_metrics": {
-    "trial_count": 4,
-    "subject_count": 1,
-    "synthetic": false,
-    "external_bundle": false,
-    "split_unit": "session_id",
-    "claim_envelope": "smoke_only"
-  },
   "readiness": {
-    "deployment_readiness": "NOT_READY",
-    "claim_envelope": "prototype_only",
-    "warning_count": 4,
-    "warnings": [],
-    "strengths": [
-      "Worst-subject calibration remains bounded.",
-      "Per-subject held-out floor stays above collapse threshold."
-    ],
-    "blocking_gaps": [
-      "Held-out bootstrap margin is not robustly positive.",
-      "confidence_database trial count is too small for deployment-grade fit claims.",
-      "confidence_database subject coverage is too small for production calibration trust.",
-      "confidence_database evidence comes from a repository-curated slice rather than a production benchmark feed."
-    ],
-    "metrics_snapshot": {
-      "trial_count": 4,
-      "subject_count": 1,
-      "bootstrap_lower": -0.115622,
-      "subject_floor": -0.125624,
-      "calibration_ceiling": 0.175055
-    }
-  },
-  "residual_risks": [
-    "M4.3 still uses a frozen repository slice and approximate meta-d'/d' style metric rather than a publication-grade estimator."
-  ],
-  "freshness": {
-    "generated_this_round": true,
-    "round_started_at": "2026-03-31T13:43:49+00:00"
-  },
-  "recommendation": "BLOCK"
+    "deployment_readiness": "READY",
+    "blocked": false
+  }
 }

@@ -594,6 +594,17 @@ def _score_action_candidates(
         row = dict(candidate)
         row["score"] = score
         scored.append(row)
+    max_score = max(float(item["score"]) for item in scored)
+    normalized_weights = {
+        str(item["action_id"]): math.exp(float(item["score"]) - max_score)
+        for item in scored
+    }
+    weight_total = sum(normalized_weights.values()) or 1.0
+    score_by_action = {str(item["action_id"]): _safe_round(float(item["score"])) for item in scored}
+    action_probabilities = {
+        action_id: _safe_round(weight / weight_total)
+        for action_id, weight in normalized_weights.items()
+    }
     scored.sort(key=lambda item: (-float(item["score"]), str(item["action_id"])))
     best = scored[0]
     margin = float(best["score"]) - float(scored[1]["score"]) if len(scored) > 1 else abs(float(best["score"]))
@@ -607,6 +618,8 @@ def _score_action_candidates(
     return {
         "chosen_action": str(best["action_id"]),
         "confidence": _safe_round(confidence),
+        "score_by_action": score_by_action,
+        "action_probabilities": action_probabilities,
         "scored_candidates": [
             {
                 "action_id": str(item["action_id"]),
@@ -685,6 +698,7 @@ class ConfidenceDatabaseAdapter:
             rng=random.Random(seed + trial_index),
             state=state,
         )
+        state["_last_decision"] = dict(decision)
         transition = self.apply_action(
             trial,
             chosen_action=decision["chosen_action"],
@@ -776,8 +790,13 @@ class ConfidenceDatabaseAdapter:
     ) -> dict[str, Any]:
         state["last_choice"] = chosen_action
         state["last_confidence"] = confidence
+        last_decision = dict(state.get("_last_decision", {}))
+        action_probabilities = dict(last_decision.get("action_probabilities", {}))
+        predicted_probability_right = float(
+            action_probabilities.get("right", confidence if chosen_action == "right" else 1.0 - confidence)
+        )
         return {
-            "predicted_probability_right": _safe_round(logistic(float(trial.stimulus_strength) * 4.0)),
+            "predicted_probability_right": _safe_round(_clamp01(predicted_probability_right)),
             "correct": chosen_action == trial.correct_choice,
             "human_choice_match": chosen_action == trial.human_choice,
             "human_confidence": float(trial.human_confidence),
@@ -917,7 +936,16 @@ class IowaGamblingTaskAdapter:
     ) -> dict[str, Any]:
         state = self.initial_state(subject_id=trial.subject_id, parameters=parameters)
         if deck_history:
-            state["value_estimates"].update({deck: float(value) * 100.0 for deck, value in deck_history.items()})
+            for deck, value in deck_history.items():
+                learned_value = float(value) * 100.0
+                state["value_estimates"][deck] = learned_value
+                if abs(learned_value) > 1e-6:
+                    state["deck_draw_counts"][deck] = 4
+                    state["choice_counts"][deck] = 4
+                    state["reward_estimates"][deck] = max(0.0, min(100.0, learned_value))
+                    state["loss_estimates"][deck] = max(0.0, min(250.0, -learned_value))
+                    state["loss_counts"][deck] = 2 if learned_value < 0.0 else 0
+                    state["recent_outcomes"][deck] = [_safe_round(learned_value)] * 3
         state["last_outcome"] = int(last_outcome)
         state["loss_streak"] = int(loss_streak)
         state["_run_seed"] = seed
@@ -973,6 +1001,10 @@ class IowaGamblingTaskAdapter:
             "subject_id": subject_id,
             "deck_history": [],
             "value_estimates": {deck: 0.0 for deck in "ABCD"},
+            "reward_estimates": {deck: 0.0 for deck in "ABCD"},
+            "loss_estimates": {deck: 0.0 for deck in "ABCD"},
+            "loss_counts": {deck: 0 for deck in "ABCD"},
+            "recent_outcomes": {deck: [] for deck in "ABCD"},
             "deck_draw_counts": {deck: 0 for deck in "ABCD"},
             "choice_counts": {deck: 0 for deck in "ABCD"},
             "last_outcome": 0,
@@ -980,6 +1012,21 @@ class IowaGamblingTaskAdapter:
             "cumulative_gain": 0,
             "confidence": 0.5,
         }
+
+    @staticmethod
+    def _scaled_signal(value: float, *, scale: float, limit: float = 1.5) -> float:
+        if scale <= 0.0:
+            return 0.0
+        return max(-limit, min(limit, float(value) / scale))
+
+    @staticmethod
+    def _recent_mean(outcomes: list[float]) -> float:
+        return float(mean(outcomes)) if outcomes else 0.0
+
+    def _deck_knowledge(self, state: dict[str, Any], deck: str) -> float:
+        draw_count = int(state["deck_draw_counts"][deck])
+        recent_count = len(state["recent_outcomes"][deck])
+        return _clamp01((min(draw_count, 8) / 8.0) * 0.7 + (min(recent_count, 4) / 4.0) * 0.3)
 
     def observation_from_trial(
         self,
@@ -989,15 +1036,19 @@ class IowaGamblingTaskAdapter:
         parameters: CognitiveStyleParameters,
         trial_index: int,
     ) -> dict[str, Any]:
-        estimates = list(float(value) for value in state["value_estimates"].values())
-        uncertainty = 1.0 - _clamp01((max(estimates) - min(estimates) + 100.0) / 200.0)
+        estimates = [float(value) for value in state["value_estimates"].values()]
+        ranked_estimates = sorted(estimates, reverse=True)
+        best_gap = ranked_estimates[0] - ranked_estimates[1] if len(ranked_estimates) > 1 else abs(ranked_estimates[0])
+        knowledge = mean(self._deck_knowledge(state, deck) for deck in "ABCD")
+        separation = _clamp01(best_gap / 150.0)
+        uncertainty = _clamp01((1.0 - knowledge) * 0.62 + (1.0 - separation) * 0.38)
         return {
             "trial_index": int(trial.trial_index),
             "last_outcome": int(state["last_outcome"]),
             "loss_streak": int(state["loss_streak"]),
             "uncertainty": _clamp01(uncertainty),
             "resource_pressure": 0.0,
-            "evidence_strength": _clamp01((max(estimates) + 50.0) / 150.0),
+            "evidence_strength": _clamp01(separation * (0.40 + knowledge * 0.60)),
         }
 
     def action_space(
@@ -1009,29 +1060,76 @@ class IowaGamblingTaskAdapter:
         parameters: CognitiveStyleParameters,
     ) -> list[dict[str, Any]]:
         candidates: list[dict[str, Any]] = []
+        total_draws = sum(int(state["deck_draw_counts"][deck]) for deck in "ABCD")
+        trial_phase = _clamp01(1.0 - max(0, int(observation["trial_index"]) - 1) / 80.0)
+        recent_history = list(state["deck_history"][-4:])
         for deck in "ABCD":
-            spec = IGT_DECK_PROTOCOL[deck]
             draw_count = int(state["deck_draw_counts"][deck])
-            cycle_penalty = int(spec["penalties"][draw_count % len(spec["penalties"])])
-            expected_value = float(state["value_estimates"][deck])
-            risk_penalty = abs(cycle_penalty) / 1250.0
-            novelty_bonus = max(0.0, 1.0 - (state["choice_counts"][deck] / max(1, observation["trial_index"])))
-            habit_value = state["value_estimates"][deck] / 100.0
-            if deck in {"C", "D"}:
-                expected_value += 8.0 + parameters.error_aversion * 6.0
-            else:
-                expected_value -= parameters.error_aversion * 5.0
-            if state["loss_streak"] >= 2 and deck in {"A", "B"}:
-                expected_value -= 8.0
+            knowledge = self._deck_knowledge(state, deck)
+            value_estimate = float(state["value_estimates"][deck])
+            reward_estimate = float(state["reward_estimates"][deck])
+            loss_estimate = float(state["loss_estimates"][deck])
+            recent_mean = self._recent_mean([float(value) for value in state["recent_outcomes"][deck]])
+            loss_rate = float(state["loss_counts"][deck]) / max(1, draw_count) if draw_count else 0.0
+            recent_downside = abs(min(0.0, recent_mean))
+            loss_severity = min(1.0, math.sqrt(loss_estimate / 900.0)) if loss_estimate > 0.0 else 0.0
+            downside_pressure = _clamp01(
+                loss_rate * 0.56
+                + loss_severity * 0.16
+                + min(1.0, recent_downside / 220.0) * 0.28
+            )
+            streak_multiplier = 1.0 + min(1.0, int(state["loss_streak"]) / 3.0) * (
+                0.35 + parameters.virtual_prediction_error_gain * 0.35
+            )
+            risk_penalty = _clamp01(downside_pressure * streak_multiplier)
+            expected_raw = (
+                value_estimate * (0.18 + parameters.attention_selectivity * 0.16)
+                + recent_mean * 0.28
+                + reward_estimate * (0.24 + parameters.attention_selectivity * 0.24)
+            )
+            evidence_raw = expected_raw * (0.30 + knowledge * 0.70)
+            unexplored_share = max(0.0, 1.0 - (draw_count / max(1, total_draws if total_draws > 0 else 4)))
+            novelty_bonus = (
+                unexplored_share
+                * (0.16 + trial_phase * 0.16)
+                * (0.45 + (1.0 - knowledge) * 0.55)
+                * (0.55 + parameters.exploration_bias * 1.10)
+            )
+            repeat_pressure = recent_history.count(deck) / max(1, len(recent_history)) if recent_history else 0.0
+            habit_value = 0.0
+            if recent_history and recent_history[-1] == deck:
+                habit_value += self._scaled_signal(max(0.0, recent_mean), scale=110.0, limit=0.42) * (
+                    0.65 + parameters.update_rigidity * 0.80
+                )
+                if int(state["loss_streak"]) > 0:
+                    habit_value -= risk_penalty * (
+                        0.10 + (1.0 - parameters.update_rigidity) * 0.32 + parameters.virtual_prediction_error_gain * 0.08
+                    )
+                    habit_value -= parameters.virtual_prediction_error_gain * 0.16 * min(1.0, int(state["loss_streak"]) / 2.0)
+                if float(state["last_outcome"]) < 0.0:
+                    habit_value -= min(0.75, 0.18 + abs(float(state["last_outcome"])) / 600.0) * (
+                        1.05 - parameters.update_rigidity * 0.85
+                    )
+            elif float(state["last_outcome"]) < 0.0:
+                habit_value += 0.12 * (0.30 + parameters.exploration_bias * 0.90) * (
+                    1.0 - parameters.update_rigidity * 0.60
+                ) + parameters.virtual_prediction_error_gain * (
+                    0.04 + 0.10 * min(1.0, int(state["loss_streak"]) / 2.0)
+                )
+            if repeat_pressure > 0.5:
+                habit_value -= (repeat_pressure - 0.5) * 0.08
+            if recent_mean > 0.0 and draw_count > 0:
+                habit_value += self._scaled_signal(recent_mean, scale=220.0, limit=0.12)
+            habit_value += self._scaled_signal(max(0.0, reward_estimate - loss_estimate * 0.05), scale=280.0, limit=0.12)
             candidates.append(
                 {
                     "action_id": deck,
-                    "expected_value": expected_value / 100.0,
-                    "evidence_alignment": expected_value / 100.0,
+                    "expected_value": self._scaled_signal(expected_raw, scale=120.0),
+                    "evidence_alignment": self._scaled_signal(evidence_raw, scale=120.0),
                     "risk_penalty": risk_penalty,
                     "habit_value": habit_value,
-                    "novelty_bonus": novelty_bonus * 0.18,
-                    "noise_scale": 0.05,
+                    "novelty_bonus": novelty_bonus,
+                    "noise_scale": 0.018 + observation["uncertainty"] * 0.04 + (1.0 - knowledge) * 0.028 + parameters.exploration_bias * 0.018,
                 }
             )
         return candidates
@@ -1057,9 +1155,24 @@ class IowaGamblingTaskAdapter:
         state["cumulative_gain"] += net_outcome
         state["last_outcome"] = net_outcome
         state["loss_streak"] = int(state["loss_streak"]) + 1 if net_outcome < 0 else 0
-        learning_rate = 0.18 + parameters.confidence_gain * 0.16 - parameters.update_rigidity * 0.06
+        learning_rate = 0.12 + parameters.confidence_gain * 0.12 - parameters.update_rigidity * 0.06
+        reward_learning_rate = 0.16 + parameters.attention_selectivity * 0.14 + parameters.confidence_gain * 0.08 - parameters.update_rigidity * 0.06
+        loss_learning_rate = 0.08 + parameters.error_aversion * 0.10 + parameters.virtual_prediction_error_gain * 0.12 - parameters.update_rigidity * 0.04
         prior = float(state["value_estimates"][chosen_action])
-        state["value_estimates"][chosen_action] = _safe_round(prior + learning_rate * (net_outcome - prior))
+        reward_prior = float(state["reward_estimates"][chosen_action])
+        observed_loss = abs(min(0, penalty))
+        loss_exponent = 0.72 + parameters.error_aversion * 0.18
+        subjective_loss = observed_loss ** loss_exponent if observed_loss > 0 else 0.0
+        subjective_loss *= 1.0 + parameters.virtual_prediction_error_gain * 0.08
+        subjective_net_outcome = reward - subjective_loss
+        state["value_estimates"][chosen_action] = _safe_round(prior + learning_rate * (subjective_net_outcome - prior))
+        state["reward_estimates"][chosen_action] = _safe_round(reward_prior + reward_learning_rate * (reward - reward_prior))
+        loss_prior = float(state["loss_estimates"][chosen_action])
+        state["loss_estimates"][chosen_action] = _safe_round(loss_prior + loss_learning_rate * (subjective_loss - loss_prior))
+        if penalty < 0:
+            state["loss_counts"][chosen_action] += 1
+        state["recent_outcomes"][chosen_action].append(_safe_round(subjective_net_outcome))
+        state["recent_outcomes"][chosen_action] = state["recent_outcomes"][chosen_action][-5:]
         state["deck_history"].append(chosen_action)
         state["deck_history"] = state["deck_history"][-20:]
         state["confidence"] = confidence
@@ -1088,6 +1201,13 @@ class IowaGamblingTaskAdapter:
         snapshot = {
             "deck_history": list(state["deck_history"]),
             "value_estimates": {deck: _safe_round(value) for deck, value in state["value_estimates"].items()},
+            "reward_estimates": {deck: _safe_round(value) for deck, value in state["reward_estimates"].items()},
+            "loss_estimates": {deck: _safe_round(value) for deck, value in state["loss_estimates"].items()},
+            "loss_counts": dict(state["loss_counts"]),
+            "recent_outcomes": {
+                deck: [_safe_round(value) for value in state["recent_outcomes"][deck]]
+                for deck in "ABCD"
+            },
             "last_outcome": int(state["last_outcome"]),
             "loss_streak": int(state["loss_streak"]),
             "confidence": _safe_round(state["confidence"]),
@@ -1379,6 +1499,7 @@ def _run_adapter(
             rng=rng,
             state=state,
         )
+        state["_last_decision"] = dict(decision)
         transition = adapter.apply_action(
             trial,
             chosen_action=decision["chosen_action"],
