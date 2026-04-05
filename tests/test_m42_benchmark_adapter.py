@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import unittest
 
 from segmentum.m4_benchmarks import (
@@ -15,6 +16,7 @@ from segmentum.m4_benchmarks import (
     run_iowa_gambling_benchmark,
     run_task_adapter,
 )
+from segmentum.m4_cognitive_style import CognitiveStyleParameters
 
 
 class TestM42BenchmarkAdapter(unittest.TestCase):
@@ -54,6 +56,53 @@ class TestM42BenchmarkAdapter(unittest.TestCase):
     def test_smoke_igt_fixture_is_rejected_as_standard_protocol(self) -> None:
         with self.assertRaises(ValueError):
             run_iowa_gambling_benchmark(seed=44, allow_smoke_test=True, include_predictions=False, include_subject_summary=False)
+
+    def test_confidence_smoke_predictions_use_decision_probabilities_not_stimulus_scaffold(self) -> None:
+        low_parameters = CognitiveStyleParameters(
+            uncertainty_sensitivity=1.0,
+            error_aversion=0.0,
+            exploration_bias=1.0,
+            attention_selectivity=0.0,
+            confidence_gain=0.0,
+            update_rigidity=0.0,
+            resource_pressure_sensitivity=0.0,
+            virtual_prediction_error_gain=0.0,
+        )
+        high_parameters = CognitiveStyleParameters(
+            uncertainty_sensitivity=0.0,
+            error_aversion=1.0,
+            exploration_bias=0.0,
+            attention_selectivity=1.0,
+            confidence_gain=1.0,
+            update_rigidity=1.0,
+            resource_pressure_sensitivity=1.0,
+            virtual_prediction_error_gain=1.0,
+        )
+        low_payload = run_task_adapter(
+            "confidence_database",
+            parameters=low_parameters,
+            seed=43,
+            allow_smoke_test=True,
+            max_trials=12,
+        )
+        high_payload = run_task_adapter(
+            "confidence_database",
+            parameters=high_parameters,
+            seed=43,
+            allow_smoke_test=True,
+            max_trials=12,
+        )
+        low_probabilities = [float(row["predicted_probability_right"]) for row in low_payload["predictions"]]
+        high_probabilities = [float(row["predicted_probability_right"]) for row in high_payload["predictions"]]
+        scaffold_probabilities = [
+            round(1.0 / (1.0 + math.exp(-float(row["stimulus_strength"]) * 4.0)), 6)
+            for row in low_payload["trial_trace"]
+        ]
+
+        self.assertNotEqual(low_probabilities, scaffold_probabilities)
+        self.assertTrue(
+            any(abs(low_value - high_value) > 1e-6 for low_value, high_value in zip(low_probabilities, high_probabilities))
+        )
 
     @unittest.skipUnless((EXTERNAL_BENCHMARK_ROOT / "confidence_database" / "manifest.json").exists(), "external bundle required")
     def test_confidence_external_dataset_preprocesses_as_acceptance_grade(self) -> None:

@@ -1,7 +1,7 @@
 {
   "milestone_id": "M4.2",
-  "generated_at": "2026-04-04T08:50:47+00:00",
-  "round_started_at": "2026-04-04T08:50:47+00:00",
+  "generated_at": "2026-04-05T14:56:55+00:00",
+  "round_started_at": "2026-04-05T14:56:55+00:00",
   "status": "PASS",
   "acceptance_state": "acceptance_pass",
   "reference_modes": {
@@ -172,13 +172,17 @@
         "min_diff_count": 100,
         "mean_diff_count": 100.0
       },
-      "varying_behavior_metric_count": 6,
+      "varying_behavior_metric_count": 10,
       "varying_metric_names": [
+        "advantageous_choice_rate",
         "confidence_advantage_alignment",
-        "deck_c_rate",
+        "deck_a_rate",
+        "deck_b_rate",
         "deck_d_rate",
         "deck_match_rate",
+        "final_cumulative_gain",
         "mean_confidence",
+        "mean_net_outcome",
         "reward_fit"
       ],
       "reproducibility_gate": {

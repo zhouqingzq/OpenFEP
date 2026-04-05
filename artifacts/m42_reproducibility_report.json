@@ -26,159 +26,159 @@
         "mean_net_outcome": 25.0,
         "advantageous_choice_rate": 1.0,
         "final_cumulative_gain": 2500.0,
-        "mean_confidence": 0.739769,
-        "deck_match_rate": 0.19,
-        "reward_fit": -1023.834685,
-        "confidence_advantage_alignment": 0.109839,
+        "mean_confidence": 0.587687,
+        "deck_match_rate": 0.29,
+        "reward_fit": -5322.07364,
+        "confidence_advantage_alignment": 0.034303,
         "deck_distribution": {
           "A": 0.0,
           "B": 0.0,
-          "C": 0.9,
-          "D": 0.1
+          "C": 0.0,
+          "D": 1.0
         },
         "deck_a_rate": 0.0,
         "deck_b_rate": 0.0,
-        "deck_c_rate": 0.9,
-        "deck_d_rate": 0.1
+        "deck_c_rate": 0.0,
+        "deck_d_rate": 1.0
       },
       {
         "seed": 42,
         "mean_net_outcome": 25.0,
         "advantageous_choice_rate": 1.0,
         "final_cumulative_gain": 2500.0,
-        "mean_confidence": 0.740114,
-        "deck_match_rate": 0.19,
-        "reward_fit": -1023.834685,
-        "confidence_advantage_alignment": 0.154884,
+        "mean_confidence": 0.587851,
+        "deck_match_rate": 0.29,
+        "reward_fit": -5322.07364,
+        "confidence_advantage_alignment": -0.043659,
         "deck_distribution": {
           "A": 0.0,
           "B": 0.0,
-          "C": 0.9,
-          "D": 0.1
+          "C": 0.0,
+          "D": 1.0
         },
         "deck_a_rate": 0.0,
         "deck_b_rate": 0.0,
-        "deck_c_rate": 0.9,
-        "deck_d_rate": 0.1
+        "deck_c_rate": 0.0,
+        "deck_d_rate": 1.0
       },
       {
         "seed": 43,
-        "mean_net_outcome": 25.0,
-        "advantageous_choice_rate": 1.0,
-        "final_cumulative_gain": 2500.0,
-        "mean_confidence": 0.7401,
-        "deck_match_rate": 0.19,
-        "reward_fit": -1023.834685,
-        "confidence_advantage_alignment": 0.087664,
+        "mean_net_outcome": -25.0,
+        "advantageous_choice_rate": 0.0,
+        "final_cumulative_gain": -2500.0,
+        "mean_confidence": 0.591283,
+        "deck_match_rate": 0.22,
+        "reward_fit": -21327.788505,
+        "confidence_advantage_alignment": 0.174981,
         "deck_distribution": {
-          "A": 0.0,
+          "A": 1.0,
           "B": 0.0,
-          "C": 0.9,
-          "D": 0.1
+          "C": 0.0,
+          "D": 0.0
         },
-        "deck_a_rate": 0.0,
+        "deck_a_rate": 1.0,
         "deck_b_rate": 0.0,
-        "deck_c_rate": 0.9,
-        "deck_d_rate": 0.1
+        "deck_c_rate": 0.0,
+        "deck_d_rate": 0.0
       },
       {
         "seed": 45,
-        "mean_net_outcome": 25.0,
-        "advantageous_choice_rate": 1.0,
-        "final_cumulative_gain": 2500.0,
-        "mean_confidence": 0.699801,
-        "deck_match_rate": 0.2,
-        "reward_fit": -725.478792,
-        "confidence_advantage_alignment": 0.078655,
+        "mean_net_outcome": -25.0,
+        "advantageous_choice_rate": 0.0,
+        "final_cumulative_gain": -2500.0,
+        "mean_confidence": 0.609846,
+        "deck_match_rate": 0.23,
+        "reward_fit": -125309.793408,
+        "confidence_advantage_alignment": 0.174288,
         "deck_distribution": {
-          "A": 0.0,
-          "B": 0.0,
-          "C": 1.0,
+          "A": 0.1,
+          "B": 0.9,
+          "C": 0.0,
           "D": 0.0
         },
-        "deck_a_rate": 0.0,
-        "deck_b_rate": 0.0,
-        "deck_c_rate": 1.0,
+        "deck_a_rate": 0.1,
+        "deck_b_rate": 0.9,
+        "deck_c_rate": 0.0,
         "deck_d_rate": 0.0
       }
     ],
     "behavioral_summary": {
       "mean_net_outcome": {
-        "mean": 25.0,
-        "variance": 0.0,
-        "min": 25.0,
+        "mean": 0.0,
+        "variance": 625.0,
+        "min": -25.0,
         "max": 25.0,
-        "range": 0.0
+        "range": 50.0
       },
       "advantageous_choice_rate": {
-        "mean": 1.0,
-        "variance": 0.0,
-        "min": 1.0,
+        "mean": 0.5,
+        "variance": 0.25,
+        "min": 0.0,
         "max": 1.0,
-        "range": 0.0
+        "range": 1.0
       },
       "final_cumulative_gain": {
-        "mean": 2500.0,
-        "variance": 0.0,
-        "min": 2500.0,
+        "mean": 0.0,
+        "variance": 6250000.0,
+        "min": -2500.0,
         "max": 2500.0,
-        "range": 0.0
+        "range": 5000.0
       },
       "mean_confidence": {
-        "mean": 0.729946,
-        "variance": 0.000303,
-        "min": 0.699801,
-        "max": 0.740114,
-        "range": 0.040313
+        "mean": 0.594167,
+        "variance": 8.4e-05,
+        "min": 0.587687,
+        "max": 0.609846,
+        "range": 0.022159
       },
       "deck_match_rate": {
-        "mean": 0.1925,
-        "variance": 1.9e-05,
-        "min": 0.19,
-        "max": 0.2,
-        "range": 0.01
+        "mean": 0.2575,
+        "variance": 0.001069,
+        "min": 0.22,
+        "max": 0.29,
+        "range": 0.07
       },
       "reward_fit": {
-        "mean": -949.245712,
-        "variance": 16690.544791,
-        "min": -1023.834685,
-        "max": -725.478792,
-        "range": 298.355893
+        "mean": -39320.432298,
+        "variance": 2507420559.410942,
+        "min": -125309.793408,
+        "max": -5322.07364,
+        "range": 119987.719768
       },
       "confidence_advantage_alignment": {
-        "mean": 0.107761,
-        "variance": 0.000869,
-        "min": 0.078655,
-        "max": 0.154884,
-        "range": 0.076229
+        "mean": 0.084978,
+        "variance": 0.008798,
+        "min": -0.043659,
+        "max": 0.174981,
+        "range": 0.21864
       },
       "deck_a_rate": {
-        "mean": 0.0,
-        "variance": 0.0,
+        "mean": 0.275,
+        "variance": 0.176875,
         "min": 0.0,
-        "max": 0.0,
-        "range": 0.0
+        "max": 1.0,
+        "range": 1.0
       },
       "deck_b_rate": {
+        "mean": 0.225,
+        "variance": 0.151875,
+        "min": 0.0,
+        "max": 0.9,
+        "range": 0.9
+      },
+      "deck_c_rate": {
         "mean": 0.0,
         "variance": 0.0,
         "min": 0.0,
         "max": 0.0,
         "range": 0.0
       },
-      "deck_c_rate": {
-        "mean": 0.925,
-        "variance": 0.001875,
-        "min": 0.9,
-        "max": 1.0,
-        "range": 0.1
-      },
       "deck_d_rate": {
-        "mean": 0.075,
-        "variance": 0.001875,
+        "mean": 0.5,
+        "variance": 0.25,
         "min": 0.0,
-        "max": 0.1,
-        "range": 0.1
+        "max": 1.0,
+        "range": 1.0
       }
     },
     "unique_behavior_sequences": 4,
@@ -309,14 +309,18 @@
     "behavioral_evidence": {
       "sequence_position_difference_observed": true,
       "varying_metric_names": [
+        "advantageous_choice_rate",
         "confidence_advantage_alignment",
-        "deck_c_rate",
+        "deck_a_rate",
+        "deck_b_rate",
         "deck_d_rate",
         "deck_match_rate",
+        "final_cumulative_gain",
         "mean_confidence",
+        "mean_net_outcome",
         "reward_fit"
       ],
-      "varying_behavior_metric_count": 6,
+      "varying_behavior_metric_count": 10,
       "distribution_difference_observed": true,
       "distinguishable": true
     },
@@ -331,31 +335,31 @@
         {
           "seed_left": 41,
           "seed_right": 43,
-          "l1_distance": 0.0
+          "l1_distance": 2.0
         },
         {
           "seed_left": 41,
           "seed_right": 45,
-          "l1_distance": 0.2
+          "l1_distance": 2.0
         },
         {
           "seed_left": 42,
           "seed_right": 43,
-          "l1_distance": 0.0
+          "l1_distance": 2.0
         },
         {
           "seed_left": 42,
           "seed_right": 45,
-          "l1_distance": 0.2
+          "l1_distance": 2.0
         },
         {
           "seed_left": 43,
           "seed_right": 45,
-          "l1_distance": 0.2
+          "l1_distance": 1.8
         }
       ],
-      "max_l1_distance": 0.2,
-      "nonzero_pair_count": 3
+      "max_l1_distance": 2.0,
+      "nonzero_pair_count": 5
     },
     "reproducibility_gate": {
       "passed": true,

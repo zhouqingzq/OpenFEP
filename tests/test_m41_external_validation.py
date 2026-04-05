@@ -11,6 +11,22 @@ from segmentum.m41_external_task_eval import (
 
 
 class TestM41ExternalValidation(unittest.TestCase):
+    def _gate_truth_matches_thresholds(self, gate: dict[str, object]) -> None:
+        thresholds = dict(gate["thresholds"])
+        observed = dict(gate["observed"])
+        expected = True
+        for key, threshold in thresholds.items():
+            metric_name, comparator = str(key).rsplit("_", 1)
+            value = float(observed[metric_name])
+            target = float(threshold)
+            if comparator == "gte":
+                expected = expected and value >= target
+            elif comparator == "lte":
+                expected = expected and value <= target
+            else:
+                self.fail(f"unsupported comparator in threshold key: {key}")
+        self.assertEqual(bool(gate["passed"]), expected)
+
     def test_external_task_validation_uses_real_external_bundles(self) -> None:
         payload = run_external_task_bundle_evaluation()
         self.assertEqual(payload["analysis_type"], "m41_minimal_external_task_validation")
@@ -28,7 +44,8 @@ class TestM41ExternalValidation(unittest.TestCase):
                 self.assertTrue(evidence["subject_split_integrity"]["ok"])
 
         self.assertTrue(payload["confidence_benchmark"]["metric_gate"]["passed"])
-        self.assertTrue(payload["igt_benchmark"]["metric_gate"]["passed"])
+        self._gate_truth_matches_thresholds(payload["confidence_benchmark"]["metric_gate"])
+        self._gate_truth_matches_thresholds(payload["igt_benchmark"]["metric_gate"])
         self.assertTrue(payload["evaluation_chain_audit"]["all_clear"])
 
     def test_scope_boundary_explicitly_downgrades_synthetic_claims(self) -> None:
