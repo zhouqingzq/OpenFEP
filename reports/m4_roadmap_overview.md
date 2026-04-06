@@ -10,7 +10,7 @@ M4 turns cognitive style from a descriptive personality layer into a measurable 
 - stress-tested across contexts,
 - and validated for longitudinal stability.
 
-The phase is intentionally structured as a staged validation ladder rather than a jump from toy tasks straight into open-world tooling.
+The phase is intentionally structured as a staged validation ladder rather than a jump from toy tasks straight into open-world tooling, with a dedicated three-step memory-system tranche inserted before controlled-environment transfer.
 
 ## Milestone Sequence
 
@@ -56,7 +56,31 @@ Focus:
 - test whether shared parameters remain credible across multiple tasks,
 - and separate stable style terms from task-local fit terms.
 
-### M4.5: Controlled Complex Environment Validation
+### M4.5: Human-Like Memory Data Model and Encoding
+
+Focus:
+
+- define the unified memory entry schema,
+- make encoding and salience computation auditable,
+- and add decay and legacy-bridge compatibility.
+
+### M4.6: Retrieval, Reconsolidation, and Offline Consolidation
+
+Focus:
+
+- make the new memory system retrievable and behaviorally useful,
+- support reconstruction and reconsolidation,
+- and add a full consolidation pipeline.
+
+### M4.7: Dynamic Memory Regulation and Style Integration
+
+Focus:
+
+- connect memory behavior to current agent state,
+- route cognitive-style parameters into memory encoding and retrieval,
+- and verify behavior-level differentiation caused by the integrated memory stack.
+
+### M4.8: Controlled Complex Environment Validation
 
 Focus:
 
@@ -73,7 +97,7 @@ This stage should also test:
 - graceful degradation under compute or attention limits,
 - and cue-following behavior under partially reliable hints to expose source-trust effects.
 
-### M4.6: Longitudinal Stability and Style Differentiation
+### M4.9: Longitudinal Stability and Style Differentiation
 
 Focus:
 
@@ -93,4 +117,4 @@ Recommended quantitative criteria:
 
 Open-world tool use, filesystem operations, network retrieval, and task-queue orchestration belong to M5.
 
-M4 should end once cognitive-style effects are credible across benchmark and controlled complex environments with quantitative stability evidence.
+M4 should end once cognitive-style effects are credible across benchmark tasks, the integrated memory stack, and controlled complex environments with quantitative stability evidence.

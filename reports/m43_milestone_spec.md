@@ -35,7 +35,7 @@ It should not be read as evidence that:
 
 - the cognitive-style agent matches human behavior across tasks (M4.4)
 - parameters transfer between tasks (M4.4)
-- style effects are stable over time (M4.6)
+- style effects are stable over time (M4.9)
 
 ## What M4.3 inherits from M4.2
 
@@ -56,8 +56,8 @@ M4.3 does NOT inherit the following as completed work:
 ## Non-Goals
 
 - Cross-task shared-parameter credibility (M4.4)
-- Controlled transfer claims (M4.5)
-- Longitudinal stability claims (M4.6)
+- Controlled transfer claims (M4.8)
+- Longitudinal stability claims (M4.9)
 - Modifying CognitiveStyleParameters parameter count
 - Modifying BenchmarkAdapter protocol
 - Architecture-level rewrite of `_score_action_candidates` (parameter tuning is fine)
@@ -100,7 +100,7 @@ Moved to `M4.4`:
 - Shared-parameter credibility checks
 - Task-to-task transfer metrics
 
-Moved to `M4.5` or later:
+Moved to `M4.8` or later:
 
 - Complex environment transfer
 - Longitudinal stability

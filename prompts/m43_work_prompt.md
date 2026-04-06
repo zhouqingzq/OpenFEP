@@ -87,7 +87,7 @@ reworked. Here is what exists and what's wrong with it:
 
 ### 5. No Scope Bloat
 - M4.3 is single-task fit. Do NOT implement cross-task transfer, longitudinal stability,
-  or population-level clustering. Those are M4.4–M4.6.
+  or population-level clustering. Those are M4.4–M4.9.
 - Do not add new parameters to CognitiveStyleParameters.
 - Do not modify the BenchmarkAdapter protocol.
 

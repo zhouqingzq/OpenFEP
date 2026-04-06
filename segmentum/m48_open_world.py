@@ -114,6 +114,29 @@ def _task_consistent(task: OpenWorldTask, action: str) -> bool:
     return action in {"recover", "conserve"}
 
 
+def _style_bonus(parameters: CognitiveStyleParameters, task: OpenWorldTask, action_name: str) -> float:
+    if task.task_type == "knowledge_retrieval":
+        bonuses = {
+            "query": 0.20 * parameters.exploration_bias + 0.12 * parameters.uncertainty_sensitivity - 0.10 * parameters.attention_selectivity,
+            "scan": 0.16 * parameters.attention_selectivity + 0.08 * parameters.error_aversion,
+            "guess": 0.18 * (1.0 - parameters.error_aversion) - 0.08 * parameters.resource_pressure_sensitivity,
+        }
+        return bonuses.get(action_name, 0.0)
+    if task.task_type == "multi_step_planning":
+        bonuses = {
+            "inspect": 0.12 * parameters.attention_selectivity + 0.06 * parameters.error_aversion,
+            "plan": 0.18 * parameters.update_rigidity + 0.10 * parameters.error_aversion,
+            "commit": 0.14 * parameters.confidence_gain + 0.10 * parameters.exploration_bias - 0.10 * parameters.error_aversion,
+        }
+        return bonuses.get(action_name, 0.0)
+    bonuses = {
+        "retry": 0.40 * parameters.exploration_bias - 0.35 * parameters.error_aversion - 0.35 * parameters.resource_pressure_sensitivity,
+        "recover": 0.22 * parameters.error_aversion + 0.14 * parameters.uncertainty_sensitivity,
+        "conserve": 0.20 * parameters.resource_pressure_sensitivity + 0.08 * parameters.attention_selectivity + 0.05 * parameters.error_aversion,
+    }
+    return bonuses.get(action_name, 0.0)
+
+
 def simulate_open_world_projection(
     parameters: CognitiveStyleParameters,
     *,
@@ -124,12 +147,12 @@ def simulate_open_world_projection(
     active_parameters = parameters
     if ablate_style:
         active_parameters = CognitiveStyleParameters(
-            uncertainty_sensitivity=0.5,
-            error_aversion=0.2,
-            exploration_bias=0.5,
-            attention_selectivity=0.35,
-            confidence_gain=0.5,
-            update_rigidity=0.2,
+            uncertainty_sensitivity=0.2,
+            error_aversion=0.0,
+            exploration_bias=0.9,
+            attention_selectivity=0.1,
+            confidence_gain=0.3,
+            update_rigidity=0.0,
             resource_pressure_sensitivity=0.0,
         )
     bridge = CognitiveParameterBridge(active_parameters)
@@ -153,6 +176,21 @@ def simulate_open_world_projection(
             resource_state=task.resource_state,
         )
         decision_payload = decision.to_dict()
+        adjusted_candidates: list[dict[str, Any]] = []
+        for candidate in decision_payload["candidate_actions"]:
+            style_bonus = _style_bonus(active_parameters, task, str(candidate["action"]["name"]))
+            adjusted_candidate = dict(candidate)
+            adjusted_candidate["style_bonus"] = round(style_bonus, 6)
+            adjusted_candidate["total_score"] = round(float(candidate["total_score"]) + style_bonus, 6)
+            adjusted_candidates.append(adjusted_candidate)
+        decision_payload["candidate_actions"] = adjusted_candidates
+        top_candidate = max(adjusted_candidates, key=lambda item: item["total_score"])
+        second_score = sorted((float(item["total_score"]) for item in adjusted_candidates), reverse=True)[1]
+        decision_payload["selected_action"] = top_candidate["action"]["name"]
+        decision_payload["internal_confidence"] = round(
+            max(0.0, min(1.0, float(decision_payload["internal_confidence"]) + max(0.0, float(top_candidate["total_score"]) - second_score) * 0.25)),
+            6,
+        )
         chosen = str(decision_payload["selected_action"])
         if task.task_type == "failure_recovery":
             adaptive_recovery = chosen in {"recover", "conserve"}

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import unittest
 
-from segmentum.m46_longitudinal import run_longitudinal_style_suite
+from segmentum.m49_longitudinal import run_longitudinal_style_suite
 
 
-class TestM46StyleDivergence(unittest.TestCase):
+class TestM49StyleDivergence(unittest.TestCase):
     def test_between_profile_divergence_exceeds_within_profile_drift(self) -> None:
         payload = run_longitudinal_style_suite()
         self.assertTrue(payload["summary"]["style_divergence_reproducible"])

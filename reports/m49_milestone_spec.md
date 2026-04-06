@@ -1,8 +1,8 @@
-# M4.6 Milestone Specification
+# M4.9 Milestone Specification
 
 ## Title
 
-`M4.6: Longitudinal Stability and Style Differentiation`
+`M4.9: Longitudinal Stability and Style Differentiation`
 
 ## Scope
 

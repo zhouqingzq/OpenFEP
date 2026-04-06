@@ -84,7 +84,7 @@ A naive approach — "find parameters that maximize joint score across tasks" �
 - You may add an IGT aggregate metric layer (see below) as long as it doesn't change the adapter interface.
 
 ### 6. No Scope Bloat
-- M4.4 is cross-task parameter consistency, not controlled environment transfer (M4.5), not longitudinal stability (M4.6).
+- M4.4 is cross-task parameter consistency, not controlled environment transfer (M4.8), not longitudinal stability (M4.9).
 - Do not implement grid worlds, multi-agent interactions, or temporal stability tests.
 
 ---
@@ -178,8 +178,8 @@ Before doing cross-task comparison, fix the IGT evaluation lens. `deck_match_rat
 **Include in acceptance report as a structured finding:**
 1. Quantify the IGT ceiling: what is the best possible deck_match_rate achievable by ANY parameter setting? (Run a broader parameter sweep if needed.)
 2. Compare this ceiling to random (0.247) and to the aggregate metrics.
-3. State whether IGT per-trial matching is a viable evaluation lens for future milestones (M4.5, M4.6) or whether aggregate metrics should replace it.
-4. If the architecture assessment concludes that `_score_action_candidates` is fundamentally limited for sequential tasks, record this as a **finding** (not a gate failure) with a recommendation for M4.5.
+3. State whether IGT per-trial matching is a viable evaluation lens for future milestones (M4.8, M4.9) or whether aggregate metrics should replace it.
+4. If the architecture assessment concludes that `_score_action_candidates` is fundamentally limited for sequential tasks, record this as a **finding** (not a gate failure) with a recommendation for M4.8.
 
 ### T7: Acceptance Reporting
 
@@ -271,4 +271,4 @@ Before M4.4 acceptance, verify:
 
 ## Key Principle
 
-**M4.4 is a diagnostic milestone, not a triumph milestone.** The most valuable outcome is an honest parameter stability map that tells M4.5 which parameters to trust across contexts and which to treat as task-specific. A finding that "only 3 of 8 parameters are cross-task stable" is a perfectly valid M4.4 result — as long as the evidence is real and the methodology is sound.
+**M4.4 is a diagnostic milestone, not a triumph milestone.** The most valuable outcome is an honest parameter stability map that tells M4.8 which parameters to trust across contexts and which to treat as task-specific. A finding that "only 3 of 8 parameters are cross-task stable" is a perfectly valid M4.4 result — as long as the evidence is real and the methodology is sound.

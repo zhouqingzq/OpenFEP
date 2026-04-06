@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .m3_audit import write_m36_acceptance_artifacts
 from .m44_audit import write_m44_acceptance_artifacts
-from .m45_open_world import benchmark_open_world_projection, simulate_open_world_projection
+from .m48_open_world import benchmark_open_world_projection, simulate_open_world_projection
 from .m4_cognitive_style import CognitiveStyleParameters
 from .m4_reliability import assess_synthetic_projection_reliability
 
@@ -15,12 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS_DIR = ROOT / "artifacts"
 REPORTS_DIR = ROOT / "reports"
 
-M45_TRACE_PATH = ARTIFACTS_DIR / "m45_open_world_trace.json"
-M45_MAPPING_PATH = ARTIFACTS_DIR / "m45_parameter_projection.json"
-M45_ABLATION_PATH = ARTIFACTS_DIR / "m45_open_world_ablation.json"
-M45_STRESS_PATH = ARTIFACTS_DIR / "m45_open_world_stress.json"
-M45_REPORT_PATH = REPORTS_DIR / "m45_acceptance_report.json"
-M45_SUMMARY_PATH = REPORTS_DIR / "m45_acceptance_summary.md"
+M48_TRACE_PATH = ARTIFACTS_DIR / "m48_open_world_trace.json"
+M48_MAPPING_PATH = ARTIFACTS_DIR / "m48_parameter_projection.json"
+M48_ABLATION_PATH = ARTIFACTS_DIR / "m48_open_world_ablation.json"
+M48_STRESS_PATH = ARTIFACTS_DIR / "m48_open_world_stress.json"
+M48_REPORT_PATH = REPORTS_DIR / "m48_acceptance_report.json"
+M48_SUMMARY_PATH = REPORTS_DIR / "m48_acceptance_summary.md"
 
 
 def _now_iso() -> str:
@@ -35,7 +35,7 @@ def _git_head() -> str | None:
     return completed.stdout.strip() if completed.returncode == 0 else None
 
 
-def write_m45_acceptance_artifacts(*, round_started_at: str | None = None) -> dict[str, str]:
+def write_m48_acceptance_artifacts(*, round_started_at: str | None = None) -> dict[str, str]:
     ARTIFACTS_DIR.mkdir(exist_ok=True)
     REPORTS_DIR.mkdir(exist_ok=True)
     started_at = round_started_at or _now_iso()
@@ -50,9 +50,9 @@ def write_m45_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         "m36": write_m36_acceptance_artifacts(round_started_at=started_at),
     }
 
-    M45_TRACE_PATH.write_text(json.dumps(canonical, indent=2, ensure_ascii=False), encoding="utf-8")
-    M45_MAPPING_PATH.write_text(json.dumps(mapping, indent=2, ensure_ascii=False), encoding="utf-8")
-    M45_ABLATION_PATH.write_text(
+    M48_TRACE_PATH.write_text(json.dumps(canonical, indent=2, ensure_ascii=False), encoding="utf-8")
+    M48_MAPPING_PATH.write_text(json.dumps(mapping, indent=2, ensure_ascii=False), encoding="utf-8")
+    M48_ABLATION_PATH.write_text(
         json.dumps(
             {
                 "full_summary": canonical["summary"],
@@ -65,7 +65,7 @@ def write_m45_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         ),
         encoding="utf-8",
     )
-    M45_STRESS_PATH.write_text(json.dumps(stress, indent=2, ensure_ascii=False), encoding="utf-8")
+    M48_STRESS_PATH.write_text(json.dumps(stress, indent=2, ensure_ascii=False), encoding="utf-8")
 
     schema_passed = set(canonical.keys()) >= {"parameters", "logs", "summary"}
     determinism_passed = canonical == replay
@@ -92,21 +92,21 @@ def write_m45_acceptance_artifacts(*, round_started_at: str | None = None) -> di
     status = "PASS" if not findings else "FAIL"
     recommendation = "ACCEPT" if not findings else "BLOCK"
     report = {
-        "milestone_id": "M4.5",
+        "milestone_id": "M4.8",
         "status": status,
         "generated_at": _now_iso(),
         "git_head": _git_head(),
         "seed_set": seed_set,
         "artifacts": {
-            "trace": str(M45_TRACE_PATH),
-            "mapping": str(M45_MAPPING_PATH),
-            "ablation": str(M45_ABLATION_PATH),
-            "stress": str(M45_STRESS_PATH),
-            "summary": str(M45_SUMMARY_PATH),
+            "trace": str(M48_TRACE_PATH),
+            "mapping": str(M48_MAPPING_PATH),
+            "ablation": str(M48_ABLATION_PATH),
+            "stress": str(M48_STRESS_PATH),
+            "summary": str(M48_SUMMARY_PATH),
             "regressions": regressions,
         },
         "tests": {
-            "milestone": ["tests/test_m45_parameter_projection.py", "tests/test_m45_failure_recovery.py", "tests/test_m45_acceptance.py"],
+            "milestone": ["tests/test_m48_parameter_projection.py", "tests/test_m48_failure_recovery.py", "tests/test_m48_acceptance.py"],
             "regressions": ["tests/test_m44_acceptance.py", "tests/test_m36_acceptance.py"],
         },
         "gates": {
@@ -131,28 +131,28 @@ def write_m45_acceptance_artifacts(*, round_started_at: str | None = None) -> di
             "live_integration": bool(mapping["live_cli_loop"]["summary"]["live_integration"]),
         },
         "readiness": assess_synthetic_projection_reliability(
-            milestone_name="M4.5",
+            milestone_name="M4.8",
             goal_consistency_rate=float(canonical["summary"]["goal_consistency_rate"]),
             adaptive_recovery_rate=float(canonical["summary"]["adaptive_recovery_rate"]),
             synthetic_environment=True,
             live_integration=bool(mapping["live_cli_loop"]["summary"]["live_integration"]),
         ).to_dict(),
-        "residual_risks": ["M4.5 remains a tool-shaped synthetic open-world trial rather than a live external environment integration."],
+        "residual_risks": ["M4.8 remains a tool-shaped synthetic open-world trial rather than a live external environment integration."],
         "freshness": {"generated_this_round": True, "round_started_at": started_at},
         "recommendation": recommendation,
     }
-    M45_REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    M45_SUMMARY_PATH.write_text(
-        "# M4.5 Acceptance Summary\n\nPASS: open-world projection, parameter-behavior mapping, ablation, stress evidence, and M4.4/M3.6 regressions were regenerated in the current round.\n"
+    M48_REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    M48_SUMMARY_PATH.write_text(
+        "# M4.8 Acceptance Summary\n\nPASS: open-world projection, parameter-behavior mapping, ablation, stress evidence, and M4.4/M3.6 regressions were regenerated in the current round.\n"
         if status == "PASS"
-        else "# M4.5 Acceptance Summary\n\nFAIL: at least one M4.5 gating condition remains unresolved.\n",
+        else "# M4.8 Acceptance Summary\n\nFAIL: at least one M4.8 gating condition remains unresolved.\n",
         encoding="utf-8",
     )
     return {
-        "trace": str(M45_TRACE_PATH),
-        "mapping": str(M45_MAPPING_PATH),
-        "ablation": str(M45_ABLATION_PATH),
-        "stress": str(M45_STRESS_PATH),
-        "report": str(M45_REPORT_PATH),
-        "summary": str(M45_SUMMARY_PATH),
+        "trace": str(M48_TRACE_PATH),
+        "mapping": str(M48_MAPPING_PATH),
+        "ablation": str(M48_ABLATION_PATH),
+        "stress": str(M48_STRESS_PATH),
+        "report": str(M48_REPORT_PATH),
+        "summary": str(M48_SUMMARY_PATH),
     }

@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import unittest
 
-from segmentum.m45_audit import M45_REPORT_PATH, write_m45_acceptance_artifacts
-from segmentum.m45_open_world import benchmark_open_world_projection, simulate_open_world_projection
+from segmentum.m48_audit import M48_REPORT_PATH, write_m48_acceptance_artifacts
+from segmentum.m48_open_world import benchmark_open_world_projection, simulate_open_world_projection
 from segmentum.m4_cognitive_style import CognitiveStyleParameters
 
 
-class TestM45ParameterProjection(unittest.TestCase):
+class TestM48ParameterProjection(unittest.TestCase):
     def test_projection_run_is_deterministic(self) -> None:
         first = simulate_open_world_projection(CognitiveStyleParameters(), seed=45)
         second = simulate_open_world_projection(CognitiveStyleParameters(), seed=45)
@@ -27,8 +27,8 @@ class TestM45ParameterProjection(unittest.TestCase):
             self.assertEqual(row["decision"]["selected_action"], top_candidate["action"]["name"])
 
     def test_report_marks_synthetic_probe_explicitly(self) -> None:
-        write_m45_acceptance_artifacts()
-        payload = json.loads(M45_REPORT_PATH.read_text(encoding="utf-8"))
+        write_m48_acceptance_artifacts()
+        payload = json.loads(M48_REPORT_PATH.read_text(encoding="utf-8"))
         self.assertTrue(payload["headline_metrics"]["synthetic_probe"])
         self.assertTrue(payload["headline_metrics"]["live_integration"])
 

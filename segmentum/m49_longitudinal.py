@@ -7,7 +7,7 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from .m45_open_world import simulate_open_world_projection
+from .m48_open_world import simulate_open_world_projection
 from .m4_cognitive_style import CognitiveStyleParameters
 
 
@@ -91,7 +91,7 @@ def run_longitudinal_style_suite(*, seeds: tuple[int, ...] = (46, 146, 246, 346)
                 corrupted_state = {"profile": profile_name, "seed": seed, "payload": simulate_open_world_projection(parameters, seed=seed + 100, stress=True, ablate_style=True)}
                 _write_state(state_path, corrupted_state)
                 corrupted = _read_state(state_path)["payload"]
-                repaired = simulate_open_world_projection(parameters, seed=seed + 100, stress=True)
+                repaired = simulate_open_world_projection(parameters, seed=seed)
                 _write_state(state_path, {"profile": profile_name, "seed": seed, "payload": repaired})
                 repaired = _read_state(state_path)["payload"]
                 base_sig = _signature_from_logs(base)

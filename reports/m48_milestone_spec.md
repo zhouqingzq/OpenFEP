@@ -1,8 +1,8 @@
-# M4.5 Milestone Specification
+# M4.8 Milestone Specification
 
 ## Title
 
-`M4.5: Controlled Complex Environment Validation`
+`M4.8: Controlled Complex Environment Validation`
 
 ## Scope
 

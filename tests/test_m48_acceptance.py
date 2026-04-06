@@ -4,14 +4,14 @@ import json
 import unittest
 from pathlib import Path
 
-from segmentum.m45_audit import M45_REPORT_PATH, write_m45_acceptance_artifacts
+from segmentum.m48_audit import M48_REPORT_PATH, write_m48_acceptance_artifacts
 
 
-class TestM45Acceptance(unittest.TestCase):
+class TestM48Acceptance(unittest.TestCase):
     def test_acceptance_bundle_contains_required_fields(self) -> None:
-        write_m45_acceptance_artifacts()
-        report = json.loads(Path(M45_REPORT_PATH).read_text(encoding="utf-8"))
-        self.assertEqual(report["milestone_id"], "M4.5")
+        write_m48_acceptance_artifacts()
+        report = json.loads(Path(M48_REPORT_PATH).read_text(encoding="utf-8"))
+        self.assertEqual(report["milestone_id"], "M4.8")
         self.assertEqual(report["status"], "PASS")
         self.assertTrue(report["gates"]["schema"]["passed"])
         self.assertTrue(report["gates"]["determinism"]["passed"])

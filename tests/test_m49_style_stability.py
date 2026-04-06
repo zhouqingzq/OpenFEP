@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import unittest
 
-from segmentum.m46_longitudinal import run_longitudinal_style_suite
+from segmentum.m49_longitudinal import run_longitudinal_style_suite
 
 
-class TestM46StyleStability(unittest.TestCase):
+class TestM49StyleStability(unittest.TestCase):
     def test_run_is_deterministic(self) -> None:
         first = run_longitudinal_style_suite()
         second = run_longitudinal_style_suite()

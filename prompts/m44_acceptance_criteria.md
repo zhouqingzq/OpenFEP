@@ -122,7 +122,7 @@ IGT 体验导致路径发散，per-trial 匹配的理论天花板很低。
 
 - [ ] 量化 IGT per-trial matching ceiling（最广参数扫描下的 best deck_match_rate）
 - [ ] 对比 ceiling 与 aggregate metrics 的信息量
-- [ ] 包含对 M4.5 的结构性建议（是否应改用 aggregate 作为 IGT 主指标）
+- [ ] 包含对 M4.8 的结构性建议（是否应改用 aggregate 作为 IGT 主指标）
 - [ ] 标记为 finding 而非 gate failure
 
 ### G8 Honest Failure Analysis
@@ -196,8 +196,8 @@ IGT 体验导致路径发散，per-trial 匹配的理论天花板很低。
 
 ## 明确不属于 M4.4 的内容
 
-- 受控环境迁移（M4.5）
-- 纵向稳定性（M4.6）
+- 受控环境迁移（M4.8）
+- 纵向稳定性（M4.9）
 - Grid world 或工具环境
 - 修改 CognitiveStyleParameters 参数数量
 - 修改 BenchmarkAdapter 协议
@@ -209,12 +209,12 @@ IGT 体验导致路径发散，per-trial 匹配的理论天花板很低。
 
 ## M4.4 通过后对下游的影响
 
-M4.4 的参数稳定性分类将直接影响 M4.5 和 M4.6 的设计：
+M4.4 的参数稳定性分类将直接影响 M4.8 和 M4.9 的设计：
 
-- **stable 参数**：M4.5 可以信任这些参数在新环境中的行为预测
-- **task_sensitive 参数**：M4.5 需要为每个新环境重新拟合这些参数，或者接受它们在新环境中的表现可能退化
-- **inert 参数**：M4.5/M4.6 可以考虑冻结或移除
-- **architecture assessment**：如果 M4.4 确认 IGT per-trial matching 是死胡同，M4.5 应该从一开始就用 aggregate 指标
+- **stable 参数**：M4.8 可以信任这些参数在新环境中的行为预测
+- **task_sensitive 参数**：M4.8 需要为每个新环境重新拟合这些参数，或者接受它们在新环境中的表现可能退化
+- **inert 参数**：M4.8/M4.9 可以考虑冻结或移除
+- **architecture assessment**：如果 M4.4 确认 IGT per-trial matching 是死胡同，M4.8 应该从一开始就用 aggregate 指标
 
 ## 验收心态
 
