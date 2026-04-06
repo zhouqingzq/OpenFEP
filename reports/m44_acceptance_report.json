@@ -1,107 +1,417 @@
 {
   "milestone_id": "M4.4",
+  "generated_at": "2026-04-06T06:54:56+00:00",
+  "round_started_at": "2026-04-06T06:50:55+00:00",
+  "git_head": "c7743c92fc92dba98d8567f40b3109a3420a29f2",
   "status": "PASS",
-  "generated_at": "2026-03-31T00:49:36+00:00",
-  "git_head": "ecc1e76b6be04127204d5935075b49d9295c6fb6",
-  "seed_set": [
-    44,
-    144
-  ],
+  "acceptance_state": "acceptance_pass",
+  "benchmark_root": "E:\\workspace\\segments\\external_benchmark_registry",
   "artifacts": {
-    "trace": "E:\\workspace\\segments\\artifacts\\m44_cross_task_trace.json",
-    "shared_vs_independent": "E:\\workspace\\segments\\artifacts\\m44_shared_vs_independent.json",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m44_cross_task_ablation.json",
-    "stress": "E:\\workspace\\segments\\artifacts\\m44_cross_task_stress.json",
-    "summary": "E:\\workspace\\segments\\reports\\m44_acceptance_summary.md",
-    "regressions": {
-      "m43": {
-        "trace": "E:\\workspace\\segments\\artifacts\\m43_confidence_fit_trace.json",
-        "baselines": "E:\\workspace\\segments\\artifacts\\m43_baseline_comparison.json",
-        "ablation": "E:\\workspace\\segments\\artifacts\\m43_confidence_ablation.json",
-        "stress": "E:\\workspace\\segments\\artifacts\\m43_confidence_stress.json",
-        "failure_analysis": "E:\\workspace\\segments\\artifacts\\m43_failure_analysis.json",
-        "report": "E:\\workspace\\segments\\reports\\m43_acceptance_report.json",
-        "summary": "E:\\workspace\\segments\\reports\\m43_acceptance_summary.md"
+    "joint_fit": "E:\\workspace\\segments\\artifacts\\m44_joint_fit.json",
+    "degradation": "E:\\workspace\\segments\\artifacts\\m44_degradation.json",
+    "parameter_stability": "E:\\workspace\\segments\\artifacts\\m44_parameter_stability.json",
+    "weight_sensitivity": "E:\\workspace\\segments\\artifacts\\m44_weight_sensitivity.json",
+    "igt_aggregate": "E:\\workspace\\segments\\artifacts\\m44_igt_aggregate.json",
+    "architecture_assessment": "E:\\workspace\\segments\\artifacts\\m44_architecture_assessment.json",
+    "summary": "E:\\workspace\\segments\\reports\\m44_acceptance_summary.md"
+  },
+  "tracks": {
+    "joint_fit": {
+      "status": "benchmark_eval",
+      "source_type": "external_bundle",
+      "claim_envelope": "benchmark_eval"
+    },
+    "igt_aggregate": {
+      "status": "benchmark_eval",
+      "source_type": "external_bundle",
+      "claim_envelope": "benchmark_eval"
+    },
+    "parameter_stability": {
+      "status": "benchmark_eval",
+      "stable_parameter_count": 4,
+      "task_sensitive_count": 2
+    }
+  },
+  "gates": {
+    "joint_fit_exists": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "source_type": "external_bundle",
+        "claim_envelope": "benchmark_eval",
+        "training_trial_count": {
+          "confidence": 1200,
+          "igt": 300
+        },
+        "validation_trial_count": {
+          "confidence": 1200,
+          "igt": 300
+        },
+        "heldout_trial_count": {
+          "confidence": 1500,
+          "igt": 300
+        },
+        "weights": {
+          "w_conf": 1.0,
+          "w_igt": 0.5,
+          "w_igt_agg": 0.8
+        }
+      }
+    },
+    "degradation_bounded": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_relative_degradation": 0.0,
+        "igt_relative_degradation": 0.0,
+        "confidence_threshold": 0.1,
+        "igt_threshold": 0.2,
+        "cross_application_matrix_complete": true
+      }
+    },
+    "parameter_stability_map": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "parameter_count": 8,
+        "stable_parameter_count": 4,
+        "task_sensitive_count": 2,
+        "resource_pressure_sensitivity": {
+          "parameter": "resource_pressure_sensitivity",
+          "classification": "inert",
+          "evidence": {
+            "confidence_specific_value": 0.75,
+            "igt_specific_value": 0.75,
+            "joint_value": 0.75,
+            "gap": 0.0,
+            "joint_shift_conf": 0.0,
+            "joint_shift_igt": 0.0,
+            "ablation": null,
+            "rationale": "inert_carryover"
+          }
+        }
+      }
+    },
+    "cross_application_matrix": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "parameter_sets": [
+          "confidence_specific",
+          "igt_specific",
+          "joint"
+        ],
+        "cell_count": 6
+      }
+    },
+    "weight_sensitivity": {
+      "passed": true,
+      "blocking": false,
+      "evidence": {
+        "fits": [
+          "default",
+          "igt_heavy",
+          "confidence_heavy"
+        ],
+        "weight_sensitive_parameters": [
+          "confidence_gain",
+          "uncertainty_sensitivity",
+          "update_rigidity"
+        ],
+        "max_parameter_deltas": {
+          "uncertainty_sensitivity": 0.65,
+          "error_aversion": 0.06,
+          "exploration_bias": 0.06,
+          "attention_selectivity": 0.14,
+          "confidence_gain": 0.3,
+          "update_rigidity": 0.2,
+          "resource_pressure_sensitivity": 0.0,
+          "virtual_prediction_error_gain": 0.0
+        }
+      }
+    },
+    "igt_aggregate_metrics": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "source_type": "external_bundle",
+        "claim_envelope": "benchmark_eval",
+        "submetrics": [
+          "learning_curve_distance",
+          "post_loss_switch_gap",
+          "deck_distribution_l1",
+          "exploration_exploitation_entropy_gap"
+        ],
+        "parameter_sets": [
+          "confidence_specific",
+          "igt_specific",
+          "joint"
+        ]
+      }
+    },
+    "architecture_assessment": {
+      "passed": true,
+      "blocking": false,
+      "evidence": {
+        "candidate_count": 8,
+        "aggregate_metrics_recommended": true,
+        "best_deck_match_rate": {
+          "label": "joint_confidence_heavy",
+          "parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.7,
+            "exploration_bias": 0.55,
+            "attention_selectivity": 0.19999999999999996,
+            "confidence_gain": 1.0,
+            "update_rigidity": 0.45,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.68
+          },
+          "deck_match_rate": 0.29,
+          "igt_behavioral_similarity": 0.779161
+        }
+      }
+    },
+    "honest_failure_analysis": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "dominant_sources": [
+          "parameter_compromise",
+          "igt_architecture_limit"
+        ],
+        "confidence_example_count": 5,
+        "igt_example_count": 5
+      }
+    },
+    "non_circular_scoring": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "confidence_split_unit": "subject_id",
+        "igt_split_unit": "subject_id",
+        "confidence_leakage": {
+          "subject": {
+            "key_field": "subject_id",
+            "ok": true,
+            "leaking_keys": [],
+            "observed_key_count": 384,
+            "distinct_split_count": 3,
+            "leaking_key_splits": {}
+          },
+          "session": {
+            "key_field": "session_id",
+            "ok": true,
+            "leaking_keys": [],
+            "observed_key_count": 423,
+            "distinct_split_count": 3,
+            "leaking_key_splits": {}
+          }
+        },
+        "igt_leakage": {
+          "subject": {
+            "key_field": "subject_id",
+            "ok": true,
+            "leaking_keys": [],
+            "observed_key_count": 9,
+            "distinct_split_count": 3,
+            "leaking_key_splits": {}
+          }
+        }
+      }
+    },
+    "regression": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "source": "separate_test_suite",
+        "tracked_suites": [
+          "tests/test_m41_*.py",
+          "tests/test_m42_*.py",
+          "tests/test_m43_*.py"
+        ]
+      }
+    },
+    "report_honesty": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "all_gates_have_evidence": true,
+        "headline_metrics": {
+          "joint_degradation": {
+            "confidence": 0.0,
+            "igt": 0.0
+          },
+          "stable_parameter_count": 4,
+          "task_sensitive_count": 2
+        },
+        "recommendation_consistent": true
+      }
+    }
+  },
+  "failed_gates": [],
+  "findings": [
+    {
+      "severity": "S3",
+      "label": "igt_architecture_limit",
+      "detail": "Per-trial deck matching appears ceiling-limited under the current shared scoring architecture."
+    }
+  ],
+  "top_blockers": [
+    {
+      "severity": "S3",
+      "label": "igt_architecture_limit",
+      "detail": "Per-trial deck matching appears ceiling-limited under the current shared scoring architecture."
+    }
+  ],
+  "headline_metrics": {
+    "joint_degradation": {
+      "confidence": 0.0,
+      "igt": 0.0
+    },
+    "stable_parameter_count": 4,
+    "task_sensitive_count": 2
+  },
+  "recommendation": "ACCEPT",
+  "failure_analysis": {
+    "dominant_sources": [
+      "parameter_compromise",
+      "igt_architecture_limit"
+    ],
+    "parameter_compromise_candidates": [
+      {
+        "parameter": "error_aversion",
+        "classification": "task_sensitive",
+        "gap": 0.14
       },
-      "m42": {
-        "preprocess": "E:\\workspace\\segments\\artifacts\\m42_confidence_preprocess.json",
-        "protocol": "E:\\workspace\\segments\\artifacts\\m42_benchmark_protocol.json",
-        "trace": "E:\\workspace\\segments\\artifacts\\m42_confidence_trace.json",
-        "ablation": "E:\\workspace\\segments\\artifacts\\m42_confidence_ablation.json",
-        "stress": "E:\\workspace\\segments\\artifacts\\m42_confidence_stress.json",
-        "report": "E:\\workspace\\segments\\reports\\m42_acceptance_report.json",
-        "summary": "E:\\workspace\\segments\\reports\\m42_acceptance_summary.md"
+      {
+        "parameter": "virtual_prediction_error_gain",
+        "classification": "task_sensitive",
+        "gap": 0.12
+      }
+    ],
+    "confidence_examples": [
+      {
+        "trial_id": "CalderTravis_unpub::1288",
+        "subject_id": "CalderTravis_unpub::3",
+        "stimulus_strength": 0.0,
+        "human_choice": "left",
+        "joint_probability_on_human_choice": 0.4468,
+        "confidence_specific_probability_on_human_choice": 0.603871,
+        "confidence_gap": 0.084601,
+        "probability_drop": 0.157071
+      },
+      {
+        "trial_id": "Maniscalco_2017_expt1::15019",
+        "subject_id": "Maniscalco_2017_expt1::16",
+        "stimulus_strength": 0.0,
+        "human_choice": "left",
+        "joint_probability_on_human_choice": 0.504108,
+        "confidence_specific_probability_on_human_choice": 0.65058,
+        "confidence_gap": 0.155752,
+        "probability_drop": 0.146472
+      },
+      {
+        "trial_id": "Peters_unpub::6244",
+        "subject_id": "Peters_unpub::14",
+        "stimulus_strength": 0.0,
+        "human_choice": "right",
+        "joint_probability_on_human_choice": 0.533303,
+        "confidence_specific_probability_on_human_choice": 0.675452,
+        "confidence_gap": 0.148763,
+        "probability_drop": 0.142149
+      },
+      {
+        "trial_id": "Paulewicz_unpub3::3076",
+        "subject_id": "Paulewicz_unpub3::16",
+        "stimulus_strength": 0.0,
+        "human_choice": "right",
+        "joint_probability_on_human_choice": 0.425254,
+        "confidence_specific_probability_on_human_choice": 0.555818,
+        "confidence_gap": 0.028754,
+        "probability_drop": 0.130564
+      },
+      {
+        "trial_id": "Locke_2020::49337",
+        "subject_id": "Locke_2020::10",
+        "stimulus_strength": 0.0,
+        "human_choice": "left",
+        "joint_probability_on_human_choice": 0.4228,
+        "confidence_specific_probability_on_human_choice": 0.551959,
+        "confidence_gap": 0.023606,
+        "probability_drop": 0.129159
+      }
+    ],
+    "igt_examples": [
+      {
+        "phase": "61-80",
+        "joint_advantageous_rate": 0.866667,
+        "igt_specific_advantageous_rate": 0.616667,
+        "human_advantageous_rate": 0.533333,
+        "joint_deck_match_rate": 0.216667,
+        "igt_specific_deck_match_rate": 0.283333
+      },
+      {
+        "phase": "1-20",
+        "joint_advantageous_rate": 0.466667,
+        "igt_specific_advantageous_rate": 0.6,
+        "human_advantageous_rate": 0.533333,
+        "joint_deck_match_rate": 0.233333,
+        "igt_specific_deck_match_rate": 0.3
+      },
+      {
+        "phase": "21-40",
+        "joint_advantageous_rate": 0.633333,
+        "igt_specific_advantageous_rate": 0.683333,
+        "human_advantageous_rate": 0.383333,
+        "joint_deck_match_rate": 0.2,
+        "igt_specific_deck_match_rate": 0.3
+      },
+      {
+        "phase": "81-100",
+        "joint_advantageous_rate": 0.6,
+        "igt_specific_advantageous_rate": 0.55,
+        "human_advantageous_rate": 0.55,
+        "joint_deck_match_rate": 0.133333,
+        "igt_specific_deck_match_rate": 0.216667
+      },
+      {
+        "phase": "41-60",
+        "joint_advantageous_rate": 0.733333,
+        "igt_specific_advantageous_rate": 0.766667,
+        "human_advantageous_rate": 0.5,
+        "joint_deck_match_rate": 0.233333,
+        "igt_specific_deck_match_rate": 0.333333
+      }
+    ],
+    "joint_degradation": {
+      "confidence_joint_vs_specific": {
+        "reference_metric": -0.46058,
+        "candidate_metric": -0.45766,
+        "relative_degradation": 0.0,
+        "meaningful_threshold": 0.05,
+        "meaningful_degradation": false
+      },
+      "igt_joint_vs_specific": {
+        "reference_metric": 0.732787,
+        "candidate_metric": 0.749259,
+        "relative_degradation": 0.0,
+        "meaningful_threshold": 0.1,
+        "meaningful_degradation": false
       }
     }
   },
   "tests": {
     "milestone": [
-      "tests/test_m44_igt_adapter.py",
-      "tests/test_m44_shared_parameters.py",
+      "tests/test_m44_cross_task.py",
+      "tests/test_m44_igt_aggregate.py",
       "tests/test_m44_acceptance.py"
     ],
     "regressions": [
-      "tests/test_m43_acceptance.py",
-      "tests/test_m42_acceptance.py"
+      "tests/test_m41_*.py",
+      "tests/test_m42_*.py",
+      "tests/test_m43_*.py"
     ]
-  },
-  "gates": {
-    "schema": {
-      "passed": true
-    },
-    "determinism": {
-      "passed": true
-    },
-    "causality": {
-      "passed": true
-    },
-    "ablation": {
-      "passed": true
-    },
-    "stress": {
-      "passed": true
-    },
-    "regression": {
-      "passed": true
-    },
-    "artifact_freshness": {
-      "passed": true
-    },
-    "shared_threshold": {
-      "passed": true
-    }
-  },
-  "findings": [],
-  "readiness": {
-    "deployment_readiness": "NOT_READY",
-    "claim_envelope": "prototype_only",
-    "warning_count": 3,
-    "warnings": [],
-    "strengths": [
-      "A stable shared-parameter core is present across tasks.",
-      "IGT policy alignment clears the minimum behavioral bar."
-    ],
-    "blocking_gaps": [
-      "Cross-task evidence is still based on undersized benchmark slices.",
-      "Cross-task subject coverage is too small for production generalization claims.",
-      "Cross-task validation still relies on repository-frozen slices."
-    ],
-    "metrics_snapshot": {
-      "confidence_trial_count": 4,
-      "confidence_subject_count": 1,
-      "igt_trial_count": 4,
-      "igt_subject_count": 1,
-      "shared_parameter_count": 5,
-      "parameter_distance_mean": 0.062857,
-      "policy_alignment_rate": 0.75
-    }
-  },
-  "residual_risks": [
-    "M4.4 uses a repository-frozen IGT slice; negative evidence should still down-weight unified-style claims if later real datasets disagree."
-  ],
-  "freshness": {
-    "generated_this_round": true,
-    "round_started_at": "2026-03-31T00:49:18+00:00"
-  },
-  "recommendation": "ACCEPT"
+  }
 }

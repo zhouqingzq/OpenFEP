@@ -1,0 +1,172 @@
+{
+  "source_type": "external_bundle",
+  "claim_envelope": "benchmark_eval",
+  "external_validation": false,
+  "candidate_count": 8,
+  "random_baseline_deck_match_rate": 0.25,
+  "best_deck_match_rate": {
+    "label": "joint_confidence_heavy",
+    "parameters": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.0,
+      "error_aversion": 0.7,
+      "exploration_bias": 0.55,
+      "attention_selectivity": 0.19999999999999996,
+      "confidence_gain": 1.0,
+      "update_rigidity": 0.45,
+      "resource_pressure_sensitivity": 0.75,
+      "virtual_prediction_error_gain": 0.68
+    },
+    "deck_match_rate": 0.29,
+    "igt_behavioral_similarity": 0.779161
+  },
+  "best_behavioral_similarity": {
+    "label": "joint_confidence_heavy",
+    "parameters": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.0,
+      "error_aversion": 0.7,
+      "exploration_bias": 0.55,
+      "attention_selectivity": 0.19999999999999996,
+      "confidence_gain": 1.0,
+      "update_rigidity": 0.45,
+      "resource_pressure_sensitivity": 0.75,
+      "virtual_prediction_error_gain": 0.68
+    },
+    "deck_match_rate": 0.29,
+    "igt_behavioral_similarity": 0.779161
+  },
+  "aggregate_metrics_recommended": true,
+  "finding": "Per-trial deck matching appears ceiling-limited under the current shared scoring architecture.",
+  "recommendation_for_m45": "Use aggregate IGT behavioral metrics as the primary lens and keep deck_match_rate as a supplemental diagnostic.",
+  "evaluated_candidates": [
+    {
+      "label": "default",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.65,
+        "error_aversion": 0.7,
+        "exploration_bias": 0.55,
+        "attention_selectivity": 0.6,
+        "confidence_gain": 0.7,
+        "update_rigidity": 0.65,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.68
+      },
+      "deck_match_rate": 0.213333,
+      "igt_behavioral_similarity": 0.650053
+    },
+    {
+      "label": "confidence_specific",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.0,
+        "error_aversion": 0.7,
+        "exploration_bias": 0.55,
+        "attention_selectivity": 0.94,
+        "confidence_gain": 1.0,
+        "update_rigidity": 0.65,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.68
+      },
+      "deck_match_rate": 0.223333,
+      "igt_behavioral_similarity": 0.621172
+    },
+    {
+      "label": "igt_specific",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.65,
+        "error_aversion": 0.8399999999999999,
+        "exploration_bias": 0.75,
+        "attention_selectivity": 0.39999999999999997,
+        "confidence_gain": 0.49999999999999994,
+        "update_rigidity": 0.65,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.8
+      },
+      "deck_match_rate": 0.21,
+      "igt_behavioral_similarity": 0.70701
+    },
+    {
+      "label": "joint_default",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.0,
+        "error_aversion": 0.76,
+        "exploration_bias": 0.49000000000000005,
+        "attention_selectivity": 0.33999999999999997,
+        "confidence_gain": 0.7,
+        "update_rigidity": 0.65,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.68
+      },
+      "deck_match_rate": 0.216667,
+      "igt_behavioral_similarity": 0.717533
+    },
+    {
+      "label": "joint_igt_heavy",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.65,
+        "error_aversion": 0.7,
+        "exploration_bias": 0.55,
+        "attention_selectivity": 0.39999999999999997,
+        "confidence_gain": 0.7,
+        "update_rigidity": 0.65,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.68
+      },
+      "deck_match_rate": 0.273333,
+      "igt_behavioral_similarity": 0.403515
+    },
+    {
+      "label": "joint_confidence_heavy",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.0,
+        "error_aversion": 0.7,
+        "exploration_bias": 0.55,
+        "attention_selectivity": 0.19999999999999996,
+        "confidence_gain": 1.0,
+        "update_rigidity": 0.45,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.68
+      },
+      "deck_match_rate": 0.29,
+      "igt_behavioral_similarity": 0.779161
+    },
+    {
+      "label": "sweep_01",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.5191062170518631,
+        "error_aversion": 0.7068329831717304,
+        "exploration_bias": 0.4532223086090144,
+        "attention_selectivity": 0.8406802205112476,
+        "confidence_gain": 0.599561291026754,
+        "update_rigidity": 0.5769882663318073,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.7505770887968564
+      },
+      "deck_match_rate": 0.286667,
+      "igt_behavioral_similarity": 0.631254
+    },
+    {
+      "label": "sweep_02",
+      "parameters": {
+        "schema_version": "m4.cognitive_style.v2",
+        "uncertainty_sensitivity": 0.8273590910395316,
+        "error_aversion": 0.5783147028225912,
+        "exploration_bias": 0.778329529049387,
+        "attention_selectivity": 0.2885162375726469,
+        "confidence_gain": 0.8913049046357524,
+        "update_rigidity": 0.7052610671849336,
+        "resource_pressure_sensitivity": 0.75,
+        "virtual_prediction_error_gain": 0.8864278044561844
+      },
+      "deck_match_rate": 0.266667,
+      "igt_behavioral_similarity": 0.568226
+    }
+  ]
+}

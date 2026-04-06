@@ -1,0 +1,310 @@
+{
+  "source_type": "external_bundle",
+  "claim_envelope": "benchmark_eval",
+  "external_validation": false,
+  "parameter_count": 8,
+  "stable_parameter_count": 4,
+  "task_sensitive_count": 2,
+  "inert_parameter_count": 2,
+  "indeterminate_parameter_count": 0,
+  "parameters": [
+    {
+      "parameter": "uncertainty_sensitivity",
+      "classification": "stable",
+      "evidence": {
+        "confidence_specific_value": 0.0,
+        "igt_specific_value": 0.65,
+        "joint_value": 0.0,
+        "gap": 0.65,
+        "joint_shift_conf": 0.0,
+        "joint_shift_igt": 0.65,
+        "ablation": {
+          "confidence_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.7,
+            "exploration_bias": 0.35000000000000003,
+            "attention_selectivity": 0.94,
+            "confidence_gain": 1.0,
+            "update_rigidity": 0.65,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.68
+          },
+          "igt_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.7599999999999999,
+            "exploration_bias": 0.95,
+            "attention_selectivity": 0.39999999999999997,
+            "confidence_gain": 0.6199999999999999,
+            "update_rigidity": 0.77,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.8
+          },
+          "confidence_relative_degradation": 0.0,
+          "igt_relative_degradation": 0.0,
+          "confidence_threshold": 0.05,
+          "igt_threshold": 0.05,
+          "heldout_seeds": {
+            "confidence": 945,
+            "igt": 1045
+          }
+        },
+        "rationale": "two_task_tolerance"
+      }
+    },
+    {
+      "parameter": "error_aversion",
+      "classification": "task_sensitive",
+      "evidence": {
+        "confidence_specific_value": 0.7,
+        "igt_specific_value": 0.84,
+        "joint_value": 0.9,
+        "gap": 0.14,
+        "joint_shift_conf": 0.2,
+        "joint_shift_igt": 0.06,
+        "ablation": {
+          "confidence_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.8999999999999999,
+            "exploration_bias": 0.0,
+            "attention_selectivity": 0.34,
+            "confidence_gain": 1.0,
+            "update_rigidity": 0.88,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.68
+          },
+          "igt_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.65,
+            "error_aversion": 0.8999999999999999,
+            "exploration_bias": 0.55,
+            "attention_selectivity": 0.39999999999999997,
+            "confidence_gain": 0.49999999999999994,
+            "update_rigidity": 0.65,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.8
+          },
+          "confidence_relative_degradation": 0.0,
+          "igt_relative_degradation": 0.114928,
+          "confidence_threshold": 0.05,
+          "igt_threshold": 0.05,
+          "heldout_seeds": {
+            "confidence": 946,
+            "igt": 1046
+          }
+        },
+        "rationale": "task_degradation:igt"
+      }
+    },
+    {
+      "parameter": "exploration_bias",
+      "classification": "stable",
+      "evidence": {
+        "confidence_specific_value": 0.55,
+        "igt_specific_value": 0.75,
+        "joint_value": 0.75,
+        "gap": 0.2,
+        "joint_shift_conf": 0.2,
+        "joint_shift_igt": 0.0,
+        "ablation": {
+          "confidence_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.8999999999999999,
+            "exploration_bias": 0.75,
+            "attention_selectivity": 0.54,
+            "confidence_gain": 1.0,
+            "update_rigidity": 0.8500000000000001,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.68
+          },
+          "igt_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.65,
+            "error_aversion": 0.8399999999999999,
+            "exploration_bias": 0.75,
+            "attention_selectivity": 0.39999999999999997,
+            "confidence_gain": 0.49999999999999994,
+            "update_rigidity": 0.8500000000000001,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.8
+          },
+          "confidence_relative_degradation": 0.0,
+          "igt_relative_degradation": 0.0,
+          "confidence_threshold": 0.05,
+          "igt_threshold": 0.05,
+          "heldout_seeds": {
+            "confidence": 947,
+            "igt": 1047
+          }
+        },
+        "rationale": "two_task_tolerance"
+      }
+    },
+    {
+      "parameter": "attention_selectivity",
+      "classification": "inert",
+      "evidence": {
+        "confidence_specific_value": 0.94,
+        "igt_specific_value": 0.4,
+        "joint_value": 0.6,
+        "gap": 0.54,
+        "joint_shift_conf": 0.34,
+        "joint_shift_igt": 0.2,
+        "ablation": null,
+        "rationale": "inert_carryover"
+      }
+    },
+    {
+      "parameter": "confidence_gain",
+      "classification": "stable",
+      "evidence": {
+        "confidence_specific_value": 1.0,
+        "igt_specific_value": 0.5,
+        "joint_value": 0.62,
+        "gap": 0.5,
+        "joint_shift_conf": 0.38,
+        "joint_shift_igt": 0.12,
+        "ablation": {
+          "confidence_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.7,
+            "exploration_bias": 0.69,
+            "attention_selectivity": 1.0,
+            "confidence_gain": 0.6199999999999999,
+            "update_rigidity": 0.65,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.68
+          },
+          "igt_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.65,
+            "error_aversion": 0.7199999999999999,
+            "exploration_bias": 0.83,
+            "attention_selectivity": 0.39999999999999997,
+            "confidence_gain": 0.6199999999999999,
+            "update_rigidity": 0.65,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.8
+          },
+          "confidence_relative_degradation": 0.0,
+          "igt_relative_degradation": 0.011274,
+          "confidence_threshold": 0.05,
+          "igt_threshold": 0.05,
+          "heldout_seeds": {
+            "confidence": 949,
+            "igt": 1049
+          }
+        },
+        "rationale": "two_task_tolerance"
+      }
+    },
+    {
+      "parameter": "update_rigidity",
+      "classification": "stable",
+      "evidence": {
+        "confidence_specific_value": 0.65,
+        "igt_specific_value": 0.65,
+        "joint_value": 0.65,
+        "gap": 0.0,
+        "joint_shift_conf": 0.0,
+        "joint_shift_igt": 0.0,
+        "ablation": {
+          "confidence_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.49999999999999994,
+            "exploration_bias": 0.63,
+            "attention_selectivity": 0.86,
+            "confidence_gain": 1.0,
+            "update_rigidity": 0.65,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.68
+          },
+          "igt_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.65,
+            "error_aversion": 0.6399999999999999,
+            "exploration_bias": 1.0,
+            "attention_selectivity": 0.6599999999999999,
+            "confidence_gain": 0.35999999999999993,
+            "update_rigidity": 0.65,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 0.94
+          },
+          "confidence_relative_degradation": 0.0,
+          "igt_relative_degradation": 0.0,
+          "confidence_threshold": 0.05,
+          "igt_threshold": 0.05,
+          "heldout_seeds": {
+            "confidence": 950,
+            "igt": 1050
+          }
+        },
+        "rationale": "two_task_tolerance"
+      }
+    },
+    {
+      "parameter": "resource_pressure_sensitivity",
+      "classification": "inert",
+      "evidence": {
+        "confidence_specific_value": 0.75,
+        "igt_specific_value": 0.75,
+        "joint_value": 0.75,
+        "gap": 0.0,
+        "joint_shift_conf": 0.0,
+        "joint_shift_igt": 0.0,
+        "ablation": null,
+        "rationale": "inert_carryover"
+      }
+    },
+    {
+      "parameter": "virtual_prediction_error_gain",
+      "classification": "task_sensitive",
+      "evidence": {
+        "confidence_specific_value": 0.68,
+        "igt_specific_value": 0.8,
+        "joint_value": 1.0,
+        "gap": 0.12,
+        "joint_shift_conf": 0.32,
+        "joint_shift_igt": 0.2,
+        "ablation": {
+          "confidence_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.0,
+            "error_aversion": 0.49999999999999994,
+            "exploration_bias": 0.23000000000000004,
+            "attention_selectivity": 0.8,
+            "confidence_gain": 1.0,
+            "update_rigidity": 1.0,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 1.0
+          },
+          "igt_fixed_fit_parameters": {
+            "schema_version": "m4.cognitive_style.v2",
+            "uncertainty_sensitivity": 0.65,
+            "error_aversion": 0.6399999999999999,
+            "exploration_bias": 0.63,
+            "attention_selectivity": 0.19999999999999996,
+            "confidence_gain": 0.82,
+            "update_rigidity": 0.77,
+            "resource_pressure_sensitivity": 0.75,
+            "virtual_prediction_error_gain": 1.0
+          },
+          "confidence_relative_degradation": 0.0,
+          "igt_relative_degradation": 0.177771,
+          "confidence_threshold": 0.05,
+          "igt_threshold": 0.05,
+          "heldout_seeds": {
+            "confidence": 952,
+            "igt": 1052
+          }
+        },
+        "rationale": "task_degradation:igt"
+      }
+    }
+  ]
+}

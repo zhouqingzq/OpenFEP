@@ -1139,11 +1139,26 @@ def run_fitted_igt_agent(
     allow_smoke_test: bool = False,
     sample_limits: dict[str, int] | None = None,
 ) -> dict[str, Any]:
-    _ = sample_limits or {}
+    limits = sample_limits or {}
     data = _load_igt_data(benchmark_root=benchmark_root, allow_smoke_test=allow_smoke_test)
-    training_trials = list(data["splits"].get("train", data["all_trials"]))
-    validation_trials = list(data["splits"].get("validation", data["all_trials"]))
-    heldout_trials = list(data["splits"].get("heldout", data["all_trials"]))
+    training_trials = _balanced_subject_sample(
+        list(data["splits"].get("train", data["all_trials"])),
+        max_trials=limits.get("igt_train_max_trials"),
+        max_subjects=limits.get("igt_train_max_subjects"),
+        seed=seed,
+    )
+    validation_trials = _balanced_subject_sample(
+        list(data["splits"].get("validation", data["all_trials"])),
+        max_trials=limits.get("igt_validation_max_trials"),
+        max_subjects=limits.get("igt_validation_max_subjects"),
+        seed=seed + 1,
+    )
+    heldout_trials = _balanced_subject_sample(
+        list(data["splits"].get("heldout", data["all_trials"])),
+        max_trials=limits.get("igt_heldout_max_trials"),
+        max_subjects=limits.get("igt_heldout_max_subjects"),
+        seed=seed + 2,
+    )
     fit = _coordinate_descent_fit_igt(training_trials, validation_trials, seed=seed)
     agent = _simulate_igt_trials(heldout_trials, fit["parameters"], seed=seed + 1000)
     baselines = {

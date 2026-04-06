@@ -1,0 +1,304 @@
+{
+  "source_type": "external_bundle",
+  "claim_envelope": "benchmark_eval",
+  "external_validation": false,
+  "submetrics": [
+    "learning_curve_distance",
+    "post_loss_switch_gap",
+    "deck_distribution_l1",
+    "exploration_exploitation_entropy_gap"
+  ],
+  "parameter_sets": {
+    "confidence_specific": {
+      "metrics": {
+        "advantageous_choice_rate": 0.346667,
+        "mean_net_outcome": -6.833333,
+        "reward_fit": -15218.335343,
+        "confidence_advantage_alignment": 0.004003,
+        "deck_match_rate": 0.24,
+        "policy_alignment_rate": 0.54,
+        "late_advantageous_rate": 0.346667,
+        "final_cumulative_gain": 0.0,
+        "learning_curve_slope": -0.013333,
+        "human_learning_curve_slope": 0.018333,
+        "human_advantageous_rate": 0.5,
+        "deck_distribution_l1": 1.053333,
+        "phase_deck_distribution_l1": 1.044444,
+        "late_advantageous_gap": 0.216667,
+        "phase_advantageous_gap": 0.172222,
+        "post_loss_switch_gap": 0.892437,
+        "subject_match_floor": 0.18,
+        "learning_curve_distance": 0.766667,
+        "advantageous_learning_curve": 0.846667,
+        "agent_post_loss_switch_rate": 0.009524,
+        "human_post_loss_switch_rate": 0.901961,
+        "post_loss_switching_pattern": 0.107563,
+        "agent_post_loss_event_count": 105,
+        "human_post_loss_event_count": 51,
+        "deck_distribution_alignment": 0.473333,
+        "exploration_exploitation_entropy_gap": 0.485418,
+        "exploration_exploitation_transition": 0.514582,
+        "igt_behavioral_similarity": 0.485536,
+        "primary_metric": 0.24
+      },
+      "aggregate_metrics": {
+        "phases": [
+          {
+            "phase": "001_020",
+            "trial_count": 60,
+            "agent_entropy": 0.61548,
+            "human_entropy": 0.997537,
+            "gap": 0.382057
+          },
+          {
+            "phase": "021_040",
+            "trial_count": 60,
+            "agent_entropy": 0.459148,
+            "human_entropy": 0.973432,
+            "gap": 0.514284
+          },
+          {
+            "phase": "041_060",
+            "trial_count": 60,
+            "agent_entropy": 0.459148,
+            "human_entropy": 0.991936,
+            "gap": 0.532788
+          },
+          {
+            "phase": "061_080",
+            "trial_count": 60,
+            "agent_entropy": 0.459148,
+            "human_entropy": 0.973432,
+            "gap": 0.514284
+          },
+          {
+            "phase": "081_100",
+            "trial_count": 60,
+            "agent_entropy": 0.459148,
+            "human_entropy": 0.942824,
+            "gap": 0.483676
+          }
+        ],
+        "learning_curve_distance": 0.766667,
+        "advantageous_learning_curve": 0.846667,
+        "agent_post_loss_switch_rate": 0.009524,
+        "human_post_loss_switch_rate": 0.901961,
+        "post_loss_switch_gap": 0.892437,
+        "post_loss_switching_pattern": 0.107563,
+        "agent_post_loss_event_count": 105,
+        "human_post_loss_event_count": 51,
+        "agent_deck_distribution": {
+          "A": 0.653333,
+          "B": 0.0,
+          "C": 0.013333,
+          "D": 0.333333
+        },
+        "human_deck_distribution": {
+          "A": 0.223333,
+          "B": 0.276667,
+          "C": 0.263333,
+          "D": 0.236667
+        },
+        "deck_distribution_l1": 1.053333,
+        "deck_distribution_alignment": 0.473333,
+        "exploration_exploitation_entropy_gap": 0.485418,
+        "exploration_exploitation_transition": 0.514582,
+        "igt_behavioral_similarity": 0.485536
+      }
+    },
+    "igt_specific": {
+      "metrics": {
+        "advantageous_choice_rate": 0.643333,
+        "mean_net_outcome": 8.083333,
+        "reward_fit": -45017.732335,
+        "confidence_advantage_alignment": 0.005004,
+        "deck_match_rate": 0.286667,
+        "policy_alignment_rate": 0.496667,
+        "late_advantageous_rate": 0.58,
+        "final_cumulative_gain": 0.0,
+        "learning_curve_slope": -0.016667,
+        "human_learning_curve_slope": 0.018333,
+        "human_advantageous_rate": 0.5,
+        "deck_distribution_l1": 0.846665,
+        "phase_deck_distribution_l1": 0.888889,
+        "late_advantageous_gap": 0.0,
+        "phase_advantageous_gap": 0.111111,
+        "post_loss_switch_gap": 0.107843,
+        "subject_match_floor": 0.28,
+        "learning_curve_distance": 0.716667,
+        "advantageous_learning_curve": 0.856667,
+        "agent_post_loss_switch_rate": 0.794118,
+        "human_post_loss_switch_rate": 0.901961,
+        "post_loss_switching_pattern": 0.892157,
+        "agent_post_loss_event_count": 34,
+        "human_post_loss_event_count": 51,
+        "deck_distribution_alignment": 0.576667,
+        "exploration_exploitation_entropy_gap": 0.394342,
+        "exploration_exploitation_transition": 0.605658,
+        "igt_behavioral_similarity": 0.732787,
+        "primary_metric": 0.286667
+      },
+      "aggregate_metrics": {
+        "phases": [
+          {
+            "phase": "001_020",
+            "trial_count": 60,
+            "agent_entropy": 0.708343,
+            "human_entropy": 0.997537,
+            "gap": 0.289194
+          },
+          {
+            "phase": "021_040",
+            "trial_count": 60,
+            "agent_entropy": 0.45036,
+            "human_entropy": 0.973432,
+            "gap": 0.523072
+          },
+          {
+            "phase": "041_060",
+            "trial_count": 60,
+            "agent_entropy": 0.479341,
+            "human_entropy": 0.991936,
+            "gap": 0.512595
+          },
+          {
+            "phase": "061_080",
+            "trial_count": 60,
+            "agent_entropy": 0.587252,
+            "human_entropy": 0.973432,
+            "gap": 0.38618
+          },
+          {
+            "phase": "081_100",
+            "trial_count": 60,
+            "agent_entropy": 0.682153,
+            "human_entropy": 0.942824,
+            "gap": 0.260671
+          }
+        ],
+        "learning_curve_distance": 0.716667,
+        "advantageous_learning_curve": 0.856667,
+        "agent_post_loss_switch_rate": 0.794118,
+        "human_post_loss_switch_rate": 0.901961,
+        "post_loss_switch_gap": 0.107843,
+        "post_loss_switching_pattern": 0.892157,
+        "agent_post_loss_event_count": 34,
+        "human_post_loss_event_count": 51,
+        "agent_deck_distribution": {
+          "A": 0.056667,
+          "B": 0.3,
+          "C": 0.006667,
+          "D": 0.636667
+        },
+        "human_deck_distribution": {
+          "A": 0.223333,
+          "B": 0.276667,
+          "C": 0.263333,
+          "D": 0.236667
+        },
+        "deck_distribution_l1": 0.846665,
+        "deck_distribution_alignment": 0.576667,
+        "exploration_exploitation_entropy_gap": 0.394342,
+        "exploration_exploitation_transition": 0.605658,
+        "igt_behavioral_similarity": 0.732787
+      }
+    },
+    "joint": {
+      "metrics": {
+        "advantageous_choice_rate": 0.66,
+        "mean_net_outcome": 9.75,
+        "reward_fit": -36033.253162,
+        "confidence_advantage_alignment": -0.013856,
+        "deck_match_rate": 0.203333,
+        "policy_alignment_rate": 0.473333,
+        "late_advantageous_rate": 0.586667,
+        "final_cumulative_gain": 0.0,
+        "learning_curve_slope": 0.05,
+        "human_learning_curve_slope": 0.018333,
+        "human_advantageous_rate": 0.5,
+        "deck_distribution_l1": 0.833332,
+        "phase_deck_distribution_l1": 0.811111,
+        "late_advantageous_gap": 0.05,
+        "phase_advantageous_gap": 0.116667,
+        "post_loss_switch_gap": 0.023039,
+        "subject_match_floor": 0.18,
+        "learning_curve_distance": 0.933333,
+        "advantageous_learning_curve": 0.813333,
+        "agent_post_loss_switch_rate": 0.925,
+        "human_post_loss_switch_rate": 0.901961,
+        "post_loss_switching_pattern": 0.976961,
+        "agent_post_loss_event_count": 40,
+        "human_post_loss_event_count": 51,
+        "deck_distribution_alignment": 0.583334,
+        "exploration_exploitation_entropy_gap": 0.37659,
+        "exploration_exploitation_transition": 0.62341,
+        "igt_behavioral_similarity": 0.749259,
+        "primary_metric": 0.203333
+      },
+      "aggregate_metrics": {
+        "phases": [
+          {
+            "phase": "001_020",
+            "trial_count": 60,
+            "agent_entropy": 0.82396,
+            "human_entropy": 0.997537,
+            "gap": 0.173577
+          },
+          {
+            "phase": "021_040",
+            "trial_count": 60,
+            "agent_entropy": 0.62902,
+            "human_entropy": 0.973432,
+            "gap": 0.344412
+          },
+          {
+            "phase": "041_060",
+            "trial_count": 60,
+            "agent_entropy": 0.545579,
+            "human_entropy": 0.991936,
+            "gap": 0.446357
+          },
+          {
+            "phase": "061_080",
+            "trial_count": 60,
+            "agent_entropy": 0.349922,
+            "human_entropy": 0.973432,
+            "gap": 0.62351
+          },
+          {
+            "phase": "081_100",
+            "trial_count": 60,
+            "agent_entropy": 0.647731,
+            "human_entropy": 0.942824,
+            "gap": 0.295093
+          }
+        ],
+        "learning_curve_distance": 0.933333,
+        "advantageous_learning_curve": 0.813333,
+        "agent_post_loss_switch_rate": 0.925,
+        "human_post_loss_switch_rate": 0.901961,
+        "post_loss_switch_gap": 0.023039,
+        "post_loss_switching_pattern": 0.976961,
+        "agent_post_loss_event_count": 40,
+        "human_post_loss_event_count": 51,
+        "agent_deck_distribution": {
+          "A": 0.106667,
+          "B": 0.233333,
+          "C": 0.006667,
+          "D": 0.653333
+        },
+        "human_deck_distribution": {
+          "A": 0.223333,
+          "B": 0.276667,
+          "C": 0.263333,
+          "D": 0.236667
+        },
+        "deck_distribution_l1": 0.833332,
+        "deck_distribution_alignment": 0.583334,
+        "exploration_exploitation_entropy_gap": 0.37659,
+        "exploration_exploitation_transition": 0.62341,
+        "igt_behavioral_similarity": 0.749259
+      }
+    }
+  }
+}
