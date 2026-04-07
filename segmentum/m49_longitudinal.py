@@ -19,6 +19,9 @@ class StyleSignature:
     recovery_rate: float
     planful_rate: float
     confidence_mean: float
+    exploration_margin: float
+    planning_margin: float
+    recovery_margin: float
 
     def to_dict(self) -> dict[str, float]:
         return {
@@ -28,13 +31,26 @@ class StyleSignature:
             "recovery_rate": round(self.recovery_rate, 6),
             "planful_rate": round(self.planful_rate, 6),
             "confidence_mean": round(self.confidence_mean, 6),
+            "exploration_margin": round(self.exploration_margin, 6),
+            "planning_margin": round(self.planning_margin, 6),
+            "recovery_margin": round(self.recovery_margin, 6),
         }
+
+
+def _candidate_score(row: dict[str, Any], action_name: str) -> float:
+    for candidate in row["decision"]["candidate_actions"]:
+        if str(candidate["action"]["name"]) == action_name:
+            return float(candidate["total_score"])
+    return 0.0
 
 
 def _signature_from_logs(payload: dict[str, Any]) -> StyleSignature:
     actions = [row["decision"]["selected_action"] for row in payload["logs"]]
     confidences = [float(row["decision"]["internal_confidence"]) for row in payload["logs"]]
     total = max(1, len(actions))
+    knowledge_rows = [row for row in payload["logs"] if str(row["task"]["task_type"]) == "knowledge_retrieval"]
+    planning_rows = [row for row in payload["logs"] if str(row["task"]["task_type"]) == "multi_step_planning"]
+    recovery_rows = [row for row in payload["logs"] if str(row["task"]["task_type"]) == "failure_recovery"]
     return StyleSignature(
         query_rate=sum(1 for action in actions if action == "query") / total,
         exploration_rate=sum(1 for action in actions if action in {"query", "scan", "inspect"}) / total,
@@ -42,6 +58,9 @@ def _signature_from_logs(payload: dict[str, Any]) -> StyleSignature:
         recovery_rate=sum(1 for action in actions if action in {"recover"}) / total,
         planful_rate=sum(1 for action in actions if action in {"plan", "inspect"}) / total,
         confidence_mean=mean(confidences) if confidences else 0.0,
+        exploration_margin=mean(_candidate_score(row, "query") - _candidate_score(row, "scan") for row in knowledge_rows) if knowledge_rows else 0.0,
+        planning_margin=mean(_candidate_score(row, "plan") - _candidate_score(row, "inspect") for row in planning_rows) if planning_rows else 0.0,
+        recovery_margin=mean(_candidate_score(row, "recover") - _candidate_score(row, "conserve") for row in recovery_rows) if recovery_rows else 0.0,
     )
 
 
@@ -60,7 +79,10 @@ def _distance(left: StyleSignature, right: StyleSignature) -> float:
         + abs(left.conservation_rate - right.conservation_rate)
         + abs(left.recovery_rate - right.recovery_rate)
         + abs(left.planful_rate - right.planful_rate)
-        + abs(left.confidence_mean - right.confidence_mean),
+        + abs(left.confidence_mean - right.confidence_mean)
+        + abs(left.exploration_margin - right.exploration_margin)
+        + abs(left.planning_margin - right.planning_margin)
+        + abs(left.recovery_margin - right.recovery_margin),
         6,
     )
 

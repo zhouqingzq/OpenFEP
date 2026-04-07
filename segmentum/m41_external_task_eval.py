@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Any
 
 from .benchmark_registry import DEFAULT_BENCHMARK_ROOT, benchmark_status, load_benchmark_bundle, validate_benchmark_bundle
+from .confidence_external_bundle import build_confidence_external_bundle
+from .igt_external_bundle import build_igt_external_bundle
 from .m4_benchmarks import EXTERNAL_BENCHMARK_ROOT, run_confidence_database_benchmark, run_iowa_gambling_benchmark
 from .m4_cognitive_style import CognitiveStyleParameters
 
@@ -18,6 +20,11 @@ IGT_MIN_TRIALS = 40
 
 FORBIDDEN_IMPORT_MODULES = {"m41_external_generator", "m41_inference"}
 FORBIDDEN_CALL_NAMES = {"run_cognitive_style_trial", "compute_observable_metrics", "infer_cognitive_style"}
+
+_EXTERNAL_BUNDLE_BUILDERS: dict[str, tuple[Path, Any]] = {
+    "confidence_database": (ROOT / "Confidence Database", build_confidence_external_bundle),
+    "iowa_gambling_task": (ROOT / "igt dataset", build_igt_external_bundle),
+}
 
 
 def _round(value: float) -> float:
@@ -32,6 +39,22 @@ def _iter_jsonl(path: str | Path) -> list[dict[str, Any]]:
             if line:
                 rows.append(json.loads(line))
     return rows
+
+
+@lru_cache(maxsize=None)
+def _ensure_external_bundle_available(benchmark_id: str) -> None:
+    manifest_path = EXTERNAL_BENCHMARK_ROOT / benchmark_id / "manifest.json"
+    if manifest_path.exists():
+        return
+    if benchmark_id not in _EXTERNAL_BUNDLE_BUILDERS:
+        return
+    source_dir, builder = _EXTERNAL_BUNDLE_BUILDERS[benchmark_id]
+    if not source_dir.exists():
+        raise FileNotFoundError(
+            f"Benchmark manifest not found for '{benchmark_id}' at {manifest_path}, and source data directory '{source_dir}' is also missing."
+        )
+    EXTERNAL_BENCHMARK_ROOT.mkdir(parents=True, exist_ok=True)
+    builder(source_dir, EXTERNAL_BENCHMARK_ROOT)
 
 
 def _leakage_report(rows: list[dict[str, Any]], *, key_field: str) -> dict[str, Any]:
@@ -53,6 +76,7 @@ def _leakage_report(rows: list[dict[str, Any]], *, key_field: str) -> dict[str, 
 
 
 def _bundle_evidence(benchmark_id: str) -> dict[str, Any]:
+    _ensure_external_bundle_available(benchmark_id)
     bundle = load_benchmark_bundle(benchmark_id, root=EXTERNAL_BENCHMARK_ROOT)
     validation = validate_benchmark_bundle(benchmark_id, root=EXTERNAL_BENCHMARK_ROOT)
     status = benchmark_status(benchmark_id, root=EXTERNAL_BENCHMARK_ROOT)
@@ -295,6 +319,8 @@ def evaluation_chain_audit() -> dict[str, Any]:
 
 @lru_cache(maxsize=1)
 def run_external_task_bundle_evaluation() -> dict[str, Any]:
+    _ensure_external_bundle_available("confidence_database")
+    _ensure_external_bundle_available("iowa_gambling_task")
     confidence_bundle = _bundle_evidence("confidence_database")
     igt_bundle = _bundle_evidence("iowa_gambling_task")
     confidence_run = _run_summary(
