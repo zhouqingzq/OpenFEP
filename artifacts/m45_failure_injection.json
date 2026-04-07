@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "case": "missing_procedure_steps",
+      "message": "procedural memories require explicit procedure_steps"
+    },
+    {
+      "case": "all_weak_episodic_anchors",
+      "message": "episodic memories must retain protected anchors; agents/action/outcome cannot all be weak"
+    }
+  ]
+}

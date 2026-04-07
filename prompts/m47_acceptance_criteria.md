@@ -7,21 +7,24 @@ M4.5 + M4.6 必须 PASS。
 ## Gate 列表
 
 ### G1: state_vector_dynamics [BLOCKING]
-- AgentStateVector 包含 active_goals, recent_mood_baseline, recent_dominant_tags, threat_level, reward_context_active, social_context_active, last_updated
+- AgentStateVector 包含 active_goals, recent_mood_baseline, recent_dominant_tags, identity_active_themes, threat_level, reward_context_active, social_context_active, last_updated
 - 滑动窗口 N=20-50 条记忆更新
 - threat_level 随负面输入增多而上升
+- identity_active_themes 反映近期高频的自我叙事/角色连续性主题
 - 证据：序列输入后的 state vector 快照
 
 ### G2: salience_dynamic_regulation [BLOCKING]
 - 高 threat → w_arousal 增大系数 = 1 + threat_level × 0.5
 - reward_context → w_novelty 增大系数 = 1.3
 - goal_match → w_relevance 增大系数 = 1 + overlap × 0.5
+- identity/self match → `effective_w_relevance` 或 `relevance_self` 增大，且贡献可打印
 - 调节前后 salience 差异可数值验证（固定输入，变 state vector）
 - 证据：3 种状态下的对比计算
 
 ### G3: cognitive_style_memory_integration [BLOCKING]
 - 5 个认知参数对记忆行为的影响各有独立数值测试
 - 影响方向和幅度符合设计文档
+- 至少 1 个交互用例体现认知风格对 identity-relevant memory 稳定性的间接影响
 - 证据：参数 0.0 vs 1.0 时的输出差异
 
 ### G4: behavioral_scenario_A [BLOCKING]
@@ -46,7 +49,16 @@ M4.5 + M4.6 必须 PASS。
 - procedural λ_trace < episodic λ_trace（long 层）
 - semantic 检索干扰可观测
 - episodic 高 arousal 直接 long，abstractness 随 cycle 上升
+- semantic skeleton 具备较强可迁移性，且易受同结构条目干扰
+- identity-relevant semantic / autobiographical cluster 不被短期噪声轻易稀释
 - 证据：子类型行为对比表
+
+### Gx: identity_continuity_retention [BLOCKING]
+- 在低 arousal / 低 novelty 条件下，高 identity relevance 记忆仍可进入 mid 或 long
+- 长周期后仍可被检索
+- 能支持 self-related recall 或 identity narrative continuity
+- 提供与高 novelty、低 identity relevance 噪声组的对照比较
+- 证据：场景 D 的保留率、检索结果与对照统计
 
 ### G8: integration_interface [BLOCKING]
 - 完整 cycle 流程：encode → store → retrieve → reconsolidate → consolidate

@@ -149,6 +149,11 @@ from .m4_benchmarks import (
     preprocess_confidence_database,
     run_confidence_database_benchmark,
 )
+from .memory_model import AnchorStrength, MemoryClass, MemoryEntry, SourceType, StoreLevel
+from .memory_encoding import SalienceConfig, aggregate_relevance, compute_salience, encode_memory
+from .memory_decay import DecayReport, decay_accessibility, decay_trace_strength
+from .memory_store import MemoryStore
+from .m45_audit import write_m45_acceptance_artifacts
 
 __all__ = [
     "AgentState",
@@ -292,4 +297,18 @@ __all__ = [
     "IowaGamblingTaskAdapter",
     "preprocess_confidence_database",
     "run_confidence_database_benchmark",
+    "AnchorStrength",
+    "MemoryClass",
+    "MemoryEntry",
+    "SourceType",
+    "StoreLevel",
+    "SalienceConfig",
+    "aggregate_relevance",
+    "compute_salience",
+    "encode_memory",
+    "DecayReport",
+    "decay_accessibility",
+    "decay_trace_strength",
+    "MemoryStore",
+    "write_m45_acceptance_artifacts",
 ]

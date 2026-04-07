@@ -6,6 +6,7 @@ from math import log, sqrt
 from statistics import mean
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .memory_store import MemoryStore
 from .preferences import PreferenceModel, ValueHierarchy
 from .semantic_schema import SemanticSchemaStore
 
@@ -327,6 +328,7 @@ class LongTermMemory:
     restart_continuity_until_cycle: int = 0
     restart_continuity_anchor_ids: list[str] = field(default_factory=list)
     latest_schema_update: dict[str, object] = field(default_factory=dict)
+    memory_store: MemoryStore | None = None
 
     @property
     def value_hierarchy(self) -> PreferenceModel:
@@ -335,6 +337,64 @@ class LongTermMemory:
     @value_hierarchy.setter
     def value_hierarchy(self, model: PreferenceModel) -> None:
         self.preference_model = model
+
+    def ensure_memory_store(self) -> MemoryStore:
+        if self.memory_store is None:
+            return self._sync_memory_store_from_episodes(force=True)
+        if not self._memory_store_matches_episodes():
+            return self._sync_memory_store_from_episodes(force=True)
+        return self.memory_store
+
+    def _memory_store_matches_episodes(self) -> bool:
+        if self.memory_store is None:
+            return False
+        episode_ids = [str(payload.get("episode_id", "")) for payload in self.episodes]
+        if not all(episode_ids):
+            return False
+        return episode_ids == [entry.id for entry in self.memory_store.entries]
+
+    def _sync_memory_store_from_episodes(
+        self,
+        *,
+        force: bool = False,
+    ) -> MemoryStore | None:
+        if not force and self.memory_store is None:
+            return None
+        self.memory_store = MemoryStore.from_legacy_episodes(self.episodes)
+        return self.memory_store
+
+    def _upsert_memory_store_episode(self, payload: dict[str, object]) -> MemoryStore | None:
+        if self.memory_store is None:
+            return None
+        episode_ids = [str(item.get("episode_id", "")) for item in self.episodes]
+        store_ids = [entry.id for entry in self.memory_store.entries]
+        if not all(episode_ids) or not all(store_ids):
+            return self._sync_memory_store_from_episodes(force=True)
+        retained_store_ids = [episode_id for episode_id in episode_ids if episode_id in set(store_ids)]
+        if retained_store_ids != store_ids:
+            return self._sync_memory_store_from_episodes(force=True)
+        self.memory_store.upsert_legacy_episode(payload)
+        return self.memory_store
+
+    def _remove_memory_store_episode(self, payload: dict[str, object]) -> MemoryStore | None:
+        if self.memory_store is None:
+            return None
+        episode_ids = [str(item.get("episode_id", "")) for item in self.episodes]
+        store_ids = [entry.id for entry in self.memory_store.entries]
+        removed_id = str(payload.get("episode_id", ""))
+        if not all(episode_ids) or not all(store_ids) or not removed_id:
+            return self._sync_memory_store_from_episodes(force=True)
+        expected_store_ids = [entry_id for entry_id in store_ids if entry_id != removed_id]
+        if expected_store_ids != episode_ids:
+            return self._sync_memory_store_from_episodes(force=True)
+        self.memory_store.remove_legacy_episode(str(payload.get("episode_id", "")))
+        return self.memory_store
+
+    def _replace_memory_store_group(self, payloads: list[dict[str, object]]) -> MemoryStore | None:
+        if self.memory_store is None:
+            return None
+        self.memory_store.replace_legacy_group(payloads)
+        return self.memory_store
 
     def store_episode(
         self,
@@ -365,6 +425,7 @@ class LongTermMemory:
         if len(self.episodes) > self.max_episodes:
             self.episodes = self.episodes[-self.max_episodes :]
         self._refresh_semantic_patterns()
+        self._upsert_memory_store_episode(payload)
         return payload
 
     def maybe_store_episode(
@@ -433,6 +494,7 @@ class LongTermMemory:
         if merged_payload is not None:
             self._merge_into_existing_episode(merged_payload, episode, gate)
             self._refresh_semantic_patterns()
+            self._upsert_memory_store_episode(merged_payload)
             return MemoryDecision(
                 value_score=episode.value_score,
                 prediction_error=episode.prediction_error,
@@ -459,6 +521,7 @@ class LongTermMemory:
         if len(self.episodes) > self.max_episodes:
             self.episodes = self.episodes[-self.max_episodes :]
         self._refresh_semantic_patterns()
+        self._upsert_memory_store_episode(payload)
         return MemoryDecision(
             value_score=episode.value_score,
             prediction_error=episode.prediction_error,
@@ -828,6 +891,7 @@ class LongTermMemory:
                 self.lifecycle_events.pop()
             return False
         self._refresh_semantic_patterns()
+        self._remove_memory_store_episode(payload)
         return True
 
     def archive_episode(
@@ -980,6 +1044,7 @@ class LongTermMemory:
             compressed.sort(key=self._episode_cycle)
         self.episodes = compressed[-self.max_episodes :]
         self._refresh_semantic_patterns()
+        self._replace_memory_store_group(self.episodes)
         return removed
 
     def family_coverage_summary(self) -> dict[str, object]:
@@ -1249,6 +1314,7 @@ class LongTermMemory:
             "restart_continuity_until_cycle": self.restart_continuity_until_cycle,
             "restart_continuity_anchor_ids": list(self.restart_continuity_anchor_ids),
             "latest_schema_update": dict(self.latest_schema_update),
+            "memory_store": self.memory_store.to_dict() if self.memory_store is not None else None,
         }
 
     @classmethod
@@ -1308,8 +1374,13 @@ class LongTermMemory:
             latest_schema_update=dict(payload.get("latest_schema_update", {}))
             if isinstance(payload.get("latest_schema_update"), dict)
             else {},
+            memory_store=MemoryStore.from_dict(payload.get("memory_store", {}))
+            if isinstance(payload.get("memory_store"), dict)
+            else None,
         )
         memory._rehydrate_continuity_payloads()
+        if memory.memory_store is not None and not memory._memory_store_matches_episodes():
+            memory._replace_memory_store_group(memory.episodes)
         return memory
 
     def _build_episode(

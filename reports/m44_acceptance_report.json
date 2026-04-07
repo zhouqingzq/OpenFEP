@@ -1,8 +1,8 @@
 {
   "milestone_id": "M4.4",
-  "generated_at": "2026-04-06T06:54:56+00:00",
-  "round_started_at": "2026-04-06T06:50:55+00:00",
-  "git_head": "c7743c92fc92dba98d8567f40b3109a3420a29f2",
+  "generated_at": "2026-04-07T00:59:54+00:00",
+  "round_started_at": "2026-04-07T00:04:07+00:00",
+  "git_head": "f59fe1ef65669849455bb16cad6cf12a8ad0f6e8",
   "status": "PASS",
   "acceptance_state": "acceptance_pass",
   "benchmark_root": "E:\\workspace\\segments\\external_benchmark_registry",
@@ -28,8 +28,8 @@
     },
     "parameter_stability": {
       "status": "benchmark_eval",
-      "stable_parameter_count": 4,
-      "task_sensitive_count": 2
+      "stable_parameter_count": 6,
+      "task_sensitive_count": 1
     }
   },
   "gates": {
@@ -40,16 +40,16 @@
         "source_type": "external_bundle",
         "claim_envelope": "benchmark_eval",
         "training_trial_count": {
-          "confidence": 1200,
-          "igt": 300
+          "confidence": 6000,
+          "igt": 2100
         },
         "validation_trial_count": {
-          "confidence": 1200,
-          "igt": 300
+          "confidence": 6000,
+          "igt": 2000
         },
         "heldout_trial_count": {
-          "confidence": 1500,
-          "igt": 300
+          "confidence": 12000,
+          "igt": 1800
         },
         "weights": {
           "w_conf": 1.0,
@@ -63,7 +63,7 @@
       "blocking": true,
       "evidence": {
         "confidence_relative_degradation": 0.0,
-        "igt_relative_degradation": 0.0,
+        "igt_relative_degradation": 0.194613,
         "confidence_threshold": 0.1,
         "igt_threshold": 0.2,
         "cross_application_matrix_complete": true
@@ -74,8 +74,8 @@
       "blocking": true,
       "evidence": {
         "parameter_count": 8,
-        "stable_parameter_count": 4,
-        "task_sensitive_count": 2,
+        "stable_parameter_count": 6,
+        "task_sensitive_count": 1,
         "resource_pressure_sensitivity": {
           "parameter": "resource_pressure_sensitivity",
           "classification": "inert",
@@ -114,19 +114,19 @@
           "confidence_heavy"
         ],
         "weight_sensitive_parameters": [
-          "confidence_gain",
-          "uncertainty_sensitivity",
-          "update_rigidity"
+          "attention_selectivity",
+          "exploration_bias",
+          "virtual_prediction_error_gain"
         ],
         "max_parameter_deltas": {
-          "uncertainty_sensitivity": 0.65,
+          "uncertainty_sensitivity": 0.06,
           "error_aversion": 0.06,
-          "exploration_bias": 0.06,
-          "attention_selectivity": 0.14,
-          "confidence_gain": 0.3,
-          "update_rigidity": 0.2,
+          "exploration_bias": 0.34,
+          "attention_selectivity": 0.26,
+          "confidence_gain": 0.04,
+          "update_rigidity": 0.14,
           "resource_pressure_sensitivity": 0.0,
-          "virtual_prediction_error_gain": 0.0
+          "virtual_prediction_error_gain": 0.2
         }
       }
     },
@@ -153,23 +153,23 @@
       "passed": true,
       "blocking": false,
       "evidence": {
-        "candidate_count": 8,
+        "candidate_count": 18,
         "aggregate_metrics_recommended": true,
         "best_deck_match_rate": {
-          "label": "joint_confidence_heavy",
+          "label": "sweep_05",
           "parameters": {
             "schema_version": "m4.cognitive_style.v2",
-            "uncertainty_sensitivity": 0.0,
-            "error_aversion": 0.7,
-            "exploration_bias": 0.55,
-            "attention_selectivity": 0.19999999999999996,
-            "confidence_gain": 1.0,
-            "update_rigidity": 0.45,
+            "uncertainty_sensitivity": 0.1348531410767294,
+            "error_aversion": 0.4962009380371489,
+            "exploration_bias": 0.8994526783609735,
+            "attention_selectivity": 0.0036604448736010375,
+            "confidence_gain": 0.655263608783062,
+            "update_rigidity": 0.13567826439500158,
             "resource_pressure_sensitivity": 0.75,
-            "virtual_prediction_error_gain": 0.68
+            "virtual_prediction_error_gain": 0.7960589730126513
           },
-          "deck_match_rate": 0.29,
-          "igt_behavioral_similarity": 0.779161
+          "deck_match_rate": 0.306111,
+          "igt_behavioral_similarity": 0.805257
         }
       }
     },
@@ -204,7 +204,7 @@
             "key_field": "session_id",
             "ok": true,
             "leaking_keys": [],
-            "observed_key_count": 423,
+            "observed_key_count": 496,
             "distinct_split_count": 3,
             "leaking_key_splits": {}
           }
@@ -214,7 +214,7 @@
             "key_field": "subject_id",
             "ok": true,
             "leaking_keys": [],
-            "observed_key_count": 9,
+            "observed_key_count": 59,
             "distinct_split_count": 3,
             "leaking_key_splits": {}
           }
@@ -241,10 +241,10 @@
         "headline_metrics": {
           "joint_degradation": {
             "confidence": 0.0,
-            "igt": 0.0
+            "igt": 0.194613
           },
-          "stable_parameter_count": 4,
-          "task_sensitive_count": 2
+          "stable_parameter_count": 6,
+          "task_sensitive_count": 1
         },
         "recommendation_consistent": true
       }
@@ -268,10 +268,10 @@
   "headline_metrics": {
     "joint_degradation": {
       "confidence": 0.0,
-      "igt": 0.0
+      "igt": 0.194613
     },
-    "stable_parameter_count": 4,
-    "task_sensitive_count": 2
+    "stable_parameter_count": 6,
+    "task_sensitive_count": 1
   },
   "recommendation": "ACCEPT",
   "failure_analysis": {
@@ -283,122 +283,117 @@
       {
         "parameter": "error_aversion",
         "classification": "task_sensitive",
-        "gap": 0.14
-      },
-      {
-        "parameter": "virtual_prediction_error_gain",
-        "classification": "task_sensitive",
-        "gap": 0.12
+        "gap": 0.08
       }
     ],
     "confidence_examples": [
+      {
+        "trial_id": "Siedlecka_2018_bioRxiv::88",
+        "subject_id": "Siedlecka_2018_bioRxiv::3",
+        "stimulus_strength": 0.0,
+        "human_choice": "left",
+        "joint_probability_on_human_choice": 0.327296,
+        "confidence_specific_probability_on_human_choice": 0.53743,
+        "confidence_gap": -0.104222,
+        "probability_drop": 0.210134
+      },
       {
         "trial_id": "CalderTravis_unpub::1288",
         "subject_id": "CalderTravis_unpub::3",
         "stimulus_strength": 0.0,
         "human_choice": "left",
-        "joint_probability_on_human_choice": 0.4468,
-        "confidence_specific_probability_on_human_choice": 0.603871,
-        "confidence_gap": 0.084601,
-        "probability_drop": 0.157071
+        "joint_probability_on_human_choice": 0.445053,
+        "confidence_specific_probability_on_human_choice": 0.604996,
+        "confidence_gap": 0.041847,
+        "probability_drop": 0.159943
+      },
+      {
+        "trial_id": "Maniscalco_2017_expt1::15083",
+        "subject_id": "Maniscalco_2017_expt1::16",
+        "stimulus_strength": 0.0,
+        "human_choice": "left",
+        "joint_probability_on_human_choice": 0.542008,
+        "confidence_specific_probability_on_human_choice": 0.696417,
+        "confidence_gap": 0.113303,
+        "probability_drop": 0.154409
       },
       {
         "trial_id": "Maniscalco_2017_expt1::15019",
         "subject_id": "Maniscalco_2017_expt1::16",
         "stimulus_strength": 0.0,
         "human_choice": "left",
-        "joint_probability_on_human_choice": 0.504108,
-        "confidence_specific_probability_on_human_choice": 0.65058,
-        "confidence_gap": 0.155752,
-        "probability_drop": 0.146472
+        "joint_probability_on_human_choice": 0.499574,
+        "confidence_specific_probability_on_human_choice": 0.652932,
+        "confidence_gap": 0.125875,
+        "probability_drop": 0.153358
       },
       {
-        "trial_id": "Peters_unpub::6244",
-        "subject_id": "Peters_unpub::14",
-        "stimulus_strength": 0.0,
-        "human_choice": "right",
-        "joint_probability_on_human_choice": 0.533303,
-        "confidence_specific_probability_on_human_choice": 0.675452,
-        "confidence_gap": 0.148763,
-        "probability_drop": 0.142149
-      },
-      {
-        "trial_id": "Paulewicz_unpub3::3076",
-        "subject_id": "Paulewicz_unpub3::16",
-        "stimulus_strength": 0.0,
-        "human_choice": "right",
-        "joint_probability_on_human_choice": 0.425254,
-        "confidence_specific_probability_on_human_choice": 0.555818,
-        "confidence_gap": 0.028754,
-        "probability_drop": 0.130564
-      },
-      {
-        "trial_id": "Locke_2020::49337",
-        "subject_id": "Locke_2020::10",
+        "trial_id": "Wierzchon_2019::2296",
+        "subject_id": "Wierzchon_2019::8",
         "stimulus_strength": 0.0,
         "human_choice": "left",
-        "joint_probability_on_human_choice": 0.4228,
-        "confidence_specific_probability_on_human_choice": 0.551959,
-        "confidence_gap": 0.023606,
-        "probability_drop": 0.129159
+        "joint_probability_on_human_choice": 0.421847,
+        "confidence_specific_probability_on_human_choice": 0.571617,
+        "confidence_gap": -0.005544,
+        "probability_drop": 0.14977
       }
     ],
     "igt_examples": [
       {
-        "phase": "61-80",
-        "joint_advantageous_rate": 0.866667,
-        "igt_specific_advantageous_rate": 0.616667,
-        "human_advantageous_rate": 0.533333,
-        "joint_deck_match_rate": 0.216667,
-        "igt_specific_deck_match_rate": 0.283333
+        "phase": "21-40",
+        "joint_advantageous_rate": 0.333333,
+        "igt_specific_advantageous_rate": 0.608333,
+        "human_advantageous_rate": 0.441667,
+        "joint_deck_match_rate": 0.208333,
+        "igt_specific_deck_match_rate": 0.311111
       },
       {
-        "phase": "1-20",
-        "joint_advantageous_rate": 0.466667,
-        "igt_specific_advantageous_rate": 0.6,
-        "human_advantageous_rate": 0.533333,
-        "joint_deck_match_rate": 0.233333,
+        "phase": "41-60",
+        "joint_advantageous_rate": 0.333333,
+        "igt_specific_advantageous_rate": 0.558333,
+        "human_advantageous_rate": 0.5,
+        "joint_deck_match_rate": 0.277778,
         "igt_specific_deck_match_rate": 0.3
       },
       {
-        "phase": "21-40",
-        "joint_advantageous_rate": 0.633333,
-        "igt_specific_advantageous_rate": 0.683333,
-        "human_advantageous_rate": 0.383333,
-        "joint_deck_match_rate": 0.2,
+        "phase": "61-80",
+        "joint_advantageous_rate": 0.333333,
+        "igt_specific_advantageous_rate": 0.538889,
+        "human_advantageous_rate": 0.525,
+        "joint_deck_match_rate": 0.230556,
+        "igt_specific_deck_match_rate": 0.261111
+      },
+      {
+        "phase": "1-20",
+        "joint_advantageous_rate": 0.361111,
+        "igt_specific_advantageous_rate": 0.536111,
+        "human_advantageous_rate": 0.494444,
+        "joint_deck_match_rate": 0.255556,
         "igt_specific_deck_match_rate": 0.3
       },
       {
         "phase": "81-100",
-        "joint_advantageous_rate": 0.6,
-        "igt_specific_advantageous_rate": 0.55,
-        "human_advantageous_rate": 0.55,
-        "joint_deck_match_rate": 0.133333,
-        "igt_specific_deck_match_rate": 0.216667
-      },
-      {
-        "phase": "41-60",
-        "joint_advantageous_rate": 0.733333,
-        "igt_specific_advantageous_rate": 0.766667,
-        "human_advantageous_rate": 0.5,
-        "joint_deck_match_rate": 0.233333,
-        "igt_specific_deck_match_rate": 0.333333
+        "joint_advantageous_rate": 0.333333,
+        "igt_specific_advantageous_rate": 0.486111,
+        "human_advantageous_rate": 0.572222,
+        "joint_deck_match_rate": 0.219444,
+        "igt_specific_deck_match_rate": 0.3
       }
     ],
     "joint_degradation": {
       "confidence_joint_vs_specific": {
-        "reference_metric": -0.46058,
-        "candidate_metric": -0.45766,
+        "reference_metric": -0.444618,
+        "candidate_metric": -0.437838,
         "relative_degradation": 0.0,
         "meaningful_threshold": 0.05,
         "meaningful_degradation": false
       },
       "igt_joint_vs_specific": {
-        "reference_metric": 0.732787,
-        "candidate_metric": 0.749259,
-        "relative_degradation": 0.0,
+        "reference_metric": 0.830441,
+        "candidate_metric": 0.668826,
+        "relative_degradation": 0.194613,
         "meaningful_threshold": 0.1,
-        "meaningful_degradation": false
+        "meaningful_degradation": true
       }
     }
   },

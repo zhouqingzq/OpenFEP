@@ -12,12 +12,16 @@ M4.5 必须 PASS。
 - 情绪一致性效应可观测（负面 mood → 高 valence 负记忆排名上升）
 - accessibility=0.01 的记忆即使标签完全匹配也排名低于 accessibility=0.8 的部分匹配
 - is_dormant=true 的记忆不出现在普通检索结果中
+- RetrievalResult 最终输出包含 `recall_hypothesis`，而不是只返回 entry/top-k
+- `recall_hypothesis` 可追踪主干来源与辅助来源
 - 证据：≥5 个检索场景的分数分解表
 
 ### G2: candidate_competition [BLOCKING]
 - dominance_threshold=0.15（可配置）
 - 第一名与第二名差距 > threshold → confidence=high, interference_risk=false
 - 差距 < threshold → confidence=low, interference_risk=true, competitors 非空
+- 低置信度回忆被视为合法输出
+- `competing_interpretations` 或等价结构非空且可审计
 - 证据：2 组测试用例（悬殊 vs 接近）
 
 ### G3: reconstruction_mechanism [BLOCKING]
@@ -27,6 +31,10 @@ M4.5 必须 PASS。
 - 重构后：reality_confidence 下降，source_type=reconstruction
 - 借用来源 ≤ 2 条
 - content_hash 变化 → version += 1
+- episodic strong anchors 无支持证据时不得被改写
+- episodic weak anchors 可被补全
+- semantic / inferred 条目允许比 episodic 更高的重构自由度
+- reconstruction_trace 记录主干来源、借用来源、补全字段与保护字段
 - 证据：三组条件各 1 个测试用例
 
 ### G4: reconsolidation [BLOCKING]
@@ -35,16 +43,17 @@ M4.5 必须 PASS。
 - retrieval_count += 1
 - abstractness += 微量（建议 0.005-0.01）
 - last_accessed 更新
-- 覆写式默认：旧 content 不保留
-- 例外：content 差异超阈值 → 旧版本影子记录 is_dormant=true
+- procedural 核心动作序列默认不允许无证据改写
+- 冲突场景默认降低 reality_confidence、增加 counterevidence_count、生成 competing_interpretations，而不是直接覆盖旧 episodic
 - 证据：再巩固前后数值对比
 
 ### G5: offline_consolidation_pipeline [BLOCKING]
 - 四阶段完整执行
 - 升级：≥1 条 short→mid（高 salience + 高 retrieval_count）
-- 模式提取：≥1 条 inferred 被生成（给定 ≥ minimum_support 条共享结构记忆）
+- 模式提取：≥1 条 inferred 或 semantic skeleton 被生成（给定 ≥ minimum_support 条共享结构记忆）
 - 重组：产物 memory_class=inferred, source_type=inference
 - 清理：低 trace_strength 的 short 条目被清除
+- 至少 1 个多 episodic → semantic skeleton 用例，且 skeleton 保留 support 链
 - ConsolidationReport 包含每阶段统计数字
 - 证据：完整固化周期的 report
 

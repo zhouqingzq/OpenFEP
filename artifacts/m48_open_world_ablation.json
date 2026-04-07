@@ -6,7 +6,7 @@
     "mechanical_retry_rate": 0.0,
     "query_rate": 0.0,
     "planful_rate": 0.333333,
-    "mean_confidence": 0.371888
+    "mean_confidence": 0.335002
   },
   "ablated_summary": {
     "goal_consistency_rate": 0.666667,
@@ -14,8 +14,8 @@
     "adaptive_recovery_rate": 0.0,
     "mechanical_retry_rate": 1.0,
     "query_rate": 0.333333,
-    "planful_rate": 0.0,
-    "mean_confidence": 0.33583
+    "planful_rate": 0.333333,
+    "mean_confidence": 0.331147
   },
   "recovery_shift": 1.0,
   "resource_shift_retained": true

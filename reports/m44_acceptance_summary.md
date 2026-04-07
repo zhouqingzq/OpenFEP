@@ -7,9 +7,9 @@ Benchmark Root: `E:\workspace\segments\external_benchmark_registry`
 ## Headline Metrics
 
 - `joint_degradation.confidence`: `0.0`
-- `joint_degradation.igt`: `0.0`
-- `stable_parameter_count`: `4`
-- `task_sensitive_count`: `2`
+- `joint_degradation.igt`: `0.194613`
+- `stable_parameter_count`: `6`
+- `task_sensitive_count`: `1`
 
 ## Gate Status
 

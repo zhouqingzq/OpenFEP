@@ -11,21 +11,21 @@
       },
       "selected_parameters": {
         "schema_version": "m4.cognitive_style.v2",
-        "uncertainty_sensitivity": 0.0,
+        "uncertainty_sensitivity": 0.06,
         "error_aversion": 0.76,
-        "exploration_bias": 0.49000000000000005,
-        "attention_selectivity": 0.33999999999999997,
-        "confidence_gain": 0.7,
-        "update_rigidity": 0.65,
+        "exploration_bias": 0.6100000000000001,
+        "attention_selectivity": 0.45999999999999996,
+        "confidence_gain": 0.94,
+        "update_rigidity": 0.5900000000000001,
         "resource_pressure_sensitivity": 0.75,
-        "virtual_prediction_error_gain": 0.68
+        "virtual_prediction_error_gain": 0.8
       },
-      "validation_objective": 0.489185,
+      "validation_objective": 0.512887,
       "objective_components": {
-        "confidence_objective": -0.703715,
-        "igt_objective": 1.134015,
-        "igt_aggregate_objective": 0.782366,
-        "joint_objective": 0.489185,
+        "confidence_objective": -0.658451,
+        "igt_objective": 0.933006,
+        "igt_aggregate_objective": 0.881044,
+        "joint_objective": 0.512887,
         "weights": {
           "w_conf": 1.0,
           "w_igt": 0.5,
@@ -41,21 +41,21 @@
       },
       "selected_parameters": {
         "schema_version": "m4.cognitive_style.v2",
-        "uncertainty_sensitivity": 0.65,
-        "error_aversion": 0.7,
-        "exploration_bias": 0.55,
+        "uncertainty_sensitivity": 0.0,
+        "error_aversion": 0.82,
+        "exploration_bias": 0.95,
         "attention_selectivity": 0.39999999999999997,
-        "confidence_gain": 0.7,
+        "confidence_gain": 0.8999999999999999,
         "update_rigidity": 0.65,
         "resource_pressure_sensitivity": 0.75,
-        "virtual_prediction_error_gain": 0.68
+        "virtual_prediction_error_gain": 1.0
       },
-      "validation_objective": 0.460984,
+      "validation_objective": 1.370972,
       "objective_components": {
-        "confidence_objective": -0.733602,
-        "igt_objective": 0.112109,
-        "igt_aggregate_objective": 0.715676,
-        "joint_objective": 0.460984,
+        "confidence_objective": -0.660722,
+        "igt_objective": 0.85139,
+        "igt_aggregate_objective": 0.849943,
+        "joint_objective": 1.370972,
         "weights": {
           "w_conf": 0.5,
           "w_igt": 1.0,
@@ -72,20 +72,20 @@
       "selected_parameters": {
         "schema_version": "m4.cognitive_style.v2",
         "uncertainty_sensitivity": 0.0,
-        "error_aversion": 0.7,
-        "exploration_bias": 0.55,
+        "error_aversion": 0.82,
+        "exploration_bias": 0.75,
         "attention_selectivity": 0.19999999999999996,
-        "confidence_gain": 1.0,
+        "confidence_gain": 0.8999999999999999,
         "update_rigidity": 0.45,
         "resource_pressure_sensitivity": 0.75,
         "virtual_prediction_error_gain": 0.68
       },
-      "validation_objective": -0.345636,
+      "validation_objective": -0.236405,
       "objective_components": {
-        "confidence_objective": -0.681851,
-        "igt_objective": 0.424055,
-        "igt_aggregate_objective": 0.838013,
-        "joint_objective": -0.345636,
+        "confidence_objective": -0.65853,
+        "igt_objective": 0.839198,
+        "igt_aggregate_objective": 0.847618,
+        "joint_objective": -0.236405,
         "weights": {
           "w_conf": 1.0,
           "w_igt": 0.2,
@@ -95,19 +95,19 @@
     }
   },
   "max_parameter_deltas": {
-    "uncertainty_sensitivity": 0.65,
+    "uncertainty_sensitivity": 0.06,
     "error_aversion": 0.06,
-    "exploration_bias": 0.06,
-    "attention_selectivity": 0.14,
-    "confidence_gain": 0.3,
-    "update_rigidity": 0.2,
+    "exploration_bias": 0.34,
+    "attention_selectivity": 0.26,
+    "confidence_gain": 0.04,
+    "update_rigidity": 0.14,
     "resource_pressure_sensitivity": 0.0,
-    "virtual_prediction_error_gain": 0.0
+    "virtual_prediction_error_gain": 0.2
   },
   "weight_sensitive_parameters": [
-    "confidence_gain",
-    "uncertainty_sensitivity",
-    "update_rigidity"
+    "attention_selectivity",
+    "exploration_bias",
+    "virtual_prediction_error_gain"
   ],
   "robust_to_weighting": false
 }

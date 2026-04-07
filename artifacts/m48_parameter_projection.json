@@ -3,14 +3,15 @@
   "profiles": {
     "cautious": {
       "parameters": {
-        "schema_version": "m4.cognitive_style.v1",
+        "schema_version": "m4.cognitive_style.v2",
         "uncertainty_sensitivity": 0.65,
         "error_aversion": 0.82,
         "exploration_bias": 0.44,
         "attention_selectivity": 0.6,
         "confidence_gain": 0.7,
         "update_rigidity": 0.65,
-        "resource_pressure_sensitivity": 0.84
+        "resource_pressure_sensitivity": 0.84,
+        "virtual_prediction_error_gain": 0.68
       },
       "seed": 45,
       "probe_type": "synthetic_probe",
@@ -32,17 +33,35 @@
             "failure_injected": false
           },
           "decision": {
-            "schema_version": "m4.decision_log.v1",
+            "schema_version": "m4.decision_log.v3",
             "tick": 1,
+            "timestamp": "2026-01-01T01:12:56+00:00",
             "seed": 45,
             "task_context": {
               "task_id": "knowledge_probe",
               "task_type": "knowledge_retrieval"
             },
+            "percept_summary": {
+              "dominant_signal": "uncertainty",
+              "evidence_band": "low",
+              "uncertainty_band": "high",
+              "pressure_band": "low"
+            },
             "observation_evidence": {
               "uncertainty": 0.746313,
               "evidence_strength": 0.339042,
               "expected_error": 0.36655
+            },
+            "prediction_error_vector": {
+              "direct_error": 0.324705,
+              "virtual_error": 0.349921,
+              "signed_total": 0.337313
+            },
+            "attention_allocation": {
+              "evidence": 0.304083,
+              "uncertainty": 0.318408,
+              "error": 0.237301,
+              "counterfactual": 0.140208
             },
             "candidate_actions": [
               {
@@ -58,12 +77,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.48735,
-                "expected_confidence": 0.313469,
-                "expected_prediction_error": 0.36655,
-                "update_magnitude": 0.187857,
-                "resource_penalty": 0.100389,
-                "uncertainty_bonus": 0.515514
+                "total_score": 0.532255,
+                "expected_value": 0.484688,
+                "expected_confidence": 0.222946,
+                "expected_prediction_error": 0.337313,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.324705,
+                  "virtual_error": 0.349921,
+                  "signed_total": 0.337313
+                },
+                "update_magnitude": 0.179451,
+                "resource_penalty": 0.07148,
+                "uncertainty_bonus": 0.417567,
+                "resource_cost": 0.2344,
+                "style_bonus": 0.106
               },
               {
                 "action": {
@@ -78,12 +105,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.544427,
-                "expected_confidence": 0.313469,
-                "expected_prediction_error": 0.36655,
-                "update_magnitude": 0.187857,
-                "resource_penalty": 0.092972,
-                "uncertainty_bonus": 0.462714
+                "total_score": 0.595376,
+                "expected_value": 0.485591,
+                "expected_confidence": 0.222946,
+                "expected_prediction_error": 0.337313,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.324705,
+                  "virtual_error": 0.349921,
+                  "signed_total": 0.337313
+                },
+                "update_magnitude": 0.179451,
+                "resource_penalty": 0.063959,
+                "uncertainty_bonus": 0.417567,
+                "resource_cost": 0.1908,
+                "style_bonus": 0.1616
               },
               {
                 "action": {
@@ -98,24 +133,53 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.101893,
-                "expected_confidence": 0.233469,
-                "expected_prediction_error": 0.36655,
-                "update_magnitude": 0.187857,
-                "resource_penalty": 0.071238,
-                "uncertainty_bonus": 0.328378
+                "total_score": -0.308475,
+                "expected_value": 0.488224,
+                "expected_confidence": 0.122946,
+                "expected_prediction_error": 0.337313,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.324705,
+                  "virtual_error": 0.349921,
+                  "signed_total": 0.337313
+                },
+                "update_magnitude": 0.179451,
+                "resource_penalty": 0.042019,
+                "uncertainty_bonus": 0.091946,
+                "resource_cost": 0.0636,
+                "style_bonus": -0.0348
               }
             ],
+            "parameter_snapshot": {
+              "schema_version": "m4.cognitive_style.v2",
+              "uncertainty_sensitivity": 0.65,
+              "error_aversion": 0.82,
+              "exploration_bias": 0.44,
+              "attention_selectivity": 0.6,
+              "confidence_gain": 0.7,
+              "update_rigidity": 0.65,
+              "resource_pressure_sensitivity": 0.84,
+              "virtual_prediction_error_gain": 0.68
+            },
             "resource_state": {
               "energy": 0.7670986789593656,
               "budget": 0.7857866886164283,
               "stress": 0.21066218202479398,
               "time_remaining": 0.8470310177539261
             },
-            "internal_confidence": 0.313469,
+            "internal_confidence": 0.238726,
             "selected_action": "scan",
-            "prediction_error": 0.36655,
-            "update_magnitude": 0.187857
+            "result_feedback": {
+              "observed_outcome": "stabilized",
+              "reward": 0.651174,
+              "counterfactual_warning": true
+            },
+            "model_update": {
+              "magnitude": 0.179451,
+              "strategy_shift": 0.146791,
+              "confidence_delta": -0.277054
+            },
+            "prediction_error": 0.337313,
+            "update_magnitude": 0.179451
           },
           "task_consistent": true
         },
@@ -136,17 +200,35 @@
             "failure_injected": false
           },
           "decision": {
-            "schema_version": "m4.decision_log.v1",
+            "schema_version": "m4.decision_log.v3",
             "tick": 2,
+            "timestamp": "2026-01-01T01:13:07+00:00",
             "seed": 45,
             "task_context": {
               "task_id": "plan_route",
               "task_type": "multi_step_planning"
             },
+            "percept_summary": {
+              "dominant_signal": "evidence",
+              "evidence_band": "medium",
+              "uncertainty_band": "medium",
+              "pressure_band": "medium"
+            },
             "observation_evidence": {
               "uncertainty": 0.449417,
               "evidence_strength": 0.564883,
               "expected_error": 0.339478
+            },
+            "prediction_error_vector": {
+              "direct_error": 0.255368,
+              "virtual_error": 0.247852,
+              "signed_total": 0.25161
+            },
+            "attention_allocation": {
+              "evidence": 0.39313,
+              "uncertainty": 0.234887,
+              "error": 0.232753,
+              "counterfactual": 0.139231
             },
             "candidate_actions": [
               {
@@ -162,12 +244,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.259963,
-                "expected_confidence": 0.452787,
-                "expected_prediction_error": 0.339478,
-                "update_magnitude": 0.173982,
-                "resource_penalty": 0.162745,
-                "uncertainty_bonus": 0.278638
+                "total_score": 0.33267,
+                "expected_value": 0.560091,
+                "expected_confidence": 0.395572,
+                "expected_prediction_error": 0.25161,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.255368,
+                  "virtual_error": 0.247852,
+                  "signed_total": 0.25161
+                },
+                "update_magnitude": 0.133857,
+                "resource_penalty": 0.111727,
+                "uncertainty_bonus": 0.318285,
+                "resource_cost": 0.189,
+                "style_bonus": 0.1212
               },
               {
                 "action": {
@@ -182,12 +272,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.304367,
-                "expected_confidence": 0.452787,
-                "expected_prediction_error": 0.339478,
-                "update_magnitude": 0.173982,
-                "resource_penalty": 0.170163,
-                "uncertainty_bonus": 0.197743
+                "total_score": 0.132396,
+                "expected_value": 0.559169,
+                "expected_confidence": 0.395572,
+                "expected_prediction_error": 0.25161,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.255368,
+                  "virtual_error": 0.247852,
+                  "signed_total": 0.25161
+                },
+                "update_magnitude": 0.133857,
+                "resource_penalty": 0.119417,
+                "uncertainty_bonus": 0.031639,
+                "resource_cost": 0.2144,
+                "style_bonus": 0.199
               },
               {
                 "action": {
@@ -202,24 +300,53 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.30461,
-                "expected_confidence": 0.452787,
-                "expected_prediction_error": 0.339478,
-                "update_magnitude": 0.173982,
-                "resource_penalty": 0.15018,
-                "uncertainty_bonus": 0.197743
+                "total_score": 0.065867,
+                "expected_value": 0.561016,
+                "expected_confidence": 0.395572,
+                "expected_prediction_error": 0.25161,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.255368,
+                  "virtual_error": 0.247852,
+                  "signed_total": 0.25161
+                },
+                "update_magnitude": 0.133857,
+                "resource_penalty": 0.104024,
+                "uncertainty_bonus": 0.031639,
+                "resource_cost": 0.1472,
+                "style_bonus": 0.06
               }
             ],
+            "parameter_snapshot": {
+              "schema_version": "m4.cognitive_style.v2",
+              "uncertainty_sensitivity": 0.65,
+              "error_aversion": 0.82,
+              "exploration_bias": 0.44,
+              "attention_selectivity": 0.6,
+              "confidence_gain": 0.7,
+              "update_rigidity": 0.65,
+              "resource_pressure_sensitivity": 0.84,
+              "virtual_prediction_error_gain": 0.68
+            },
             "resource_state": {
               "energy": 0.5935755715512693,
               "budget": 0.5924937557180471,
               "stress": 0.31080089287256324,
               "time_remaining": 0.5836056994772467
             },
-            "internal_confidence": 0.452787,
-            "selected_action": "commit",
-            "prediction_error": 0.339478,
-            "update_magnitude": 0.173982
+            "internal_confidence": 0.44564,
+            "selected_action": "inspect",
+            "result_feedback": {
+              "observed_outcome": "stabilized",
+              "reward": 0.728279,
+              "counterfactual_warning": false
+            },
+            "model_update": {
+              "magnitude": 0.133857,
+              "strategy_shift": 0.109495,
+              "confidence_delta": -0.104428
+            },
+            "prediction_error": 0.25161,
+            "update_magnitude": 0.133857
           },
           "task_consistent": true
         },
@@ -240,17 +367,35 @@
             "failure_injected": true
           },
           "decision": {
-            "schema_version": "m4.decision_log.v1",
+            "schema_version": "m4.decision_log.v3",
             "tick": 3,
+            "timestamp": "2026-01-01T01:13:18+00:00",
             "seed": 45,
             "task_context": {
               "task_id": "repair_after_failure",
               "task_type": "failure_recovery"
             },
+            "percept_summary": {
+              "dominant_signal": "evidence",
+              "evidence_band": "medium",
+              "uncertainty_band": "medium",
+              "pressure_band": "high"
+            },
             "observation_evidence": {
               "uncertainty": 0.598957,
               "evidence_strength": 0.402661,
               "expected_error": 0.474808
+            },
+            "prediction_error_vector": {
+              "direct_error": 0.38912,
+              "virtual_error": 0.395858,
+              "signed_total": 0.392489
+            },
+            "attention_allocation": {
+              "evidence": 0.314065,
+              "uncertainty": 0.263656,
+              "error": 0.269471,
+              "counterfactual": 0.152808
             },
             "candidate_actions": [
               {
@@ -266,12 +411,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": -0.352504,
-                "expected_confidence": 0.349409,
-                "expected_prediction_error": 0.474808,
-                "update_magnitude": 0.243339,
-                "resource_penalty": 0.344051,
-                "uncertainty_bonus": 0.263541
+                "total_score": -0.963537,
+                "expected_value": 0.473416,
+                "expected_confidence": 0.269057,
+                "expected_prediction_error": 0.392489,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.38912,
+                  "virtual_error": 0.395858,
+                  "signed_total": 0.392489
+                },
+                "update_magnitude": 0.208804,
+                "resource_penalty": 0.227835,
+                "uncertainty_bonus": 0.073792,
+                "resource_cost": 0.1272,
+                "style_bonus": -0.405
               },
               {
                 "action": {
@@ -286,12 +439,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.42156,
-                "expected_confidence": 0.398609,
-                "expected_prediction_error": 0.474808,
-                "update_magnitude": 0.243339,
-                "resource_penalty": 0.260206,
-                "uncertainty_bonus": 0.263541
+                "total_score": 0.303405,
+                "expected_value": 0.490228,
+                "expected_confidence": 0.310057,
+                "expected_prediction_error": 0.392489,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.38912,
+                  "virtual_error": 0.395858,
+                  "signed_total": 0.392489
+                },
+                "update_magnitude": 0.208804,
+                "resource_penalty": 0.087741,
+                "uncertainty_bonus": 0.042167,
+                "resource_cost": 0.169,
+                "style_bonus": 0.2714
               },
               {
                 "action": {
@@ -306,24 +467,53 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.445396,
-                "expected_confidence": 0.349409,
-                "expected_prediction_error": 0.474808,
-                "update_magnitude": 0.243339,
-                "resource_penalty": 0.088322,
-                "uncertainty_bonus": 0.203646
+                "total_score": 0.505766,
+                "expected_value": 0.493763,
+                "expected_confidence": 0.269057,
+                "expected_prediction_error": 0.392489,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.38912,
+                  "virtual_error": 0.395858,
+                  "signed_total": 0.392489
+                },
+                "update_magnitude": 0.208804,
+                "resource_penalty": 0.058276,
+                "uncertainty_bonus": 0.006158,
+                "resource_cost": 0.0518,
+                "style_bonus": 0.257
               }
             ],
+            "parameter_snapshot": {
+              "schema_version": "m4.cognitive_style.v2",
+              "uncertainty_sensitivity": 0.65,
+              "error_aversion": 0.82,
+              "exploration_bias": 0.44,
+              "attention_selectivity": 0.6,
+              "confidence_gain": 0.7,
+              "update_rigidity": 0.65,
+              "resource_pressure_sensitivity": 0.84,
+              "virtual_prediction_error_gain": 0.68
+            },
             "resource_state": {
               "energy": 0.3730381033249442,
               "budget": 0.3144970795271923,
               "stress": 0.8163252553769366,
               "time_remaining": 0.2720270654814811
             },
-            "internal_confidence": 0.349409,
+            "internal_confidence": 0.319647,
             "selected_action": "conserve",
-            "prediction_error": 0.474808,
-            "update_magnitude": 0.243339
+            "result_feedback": {
+              "observed_outcome": "stabilized",
+              "reward": 0.597021,
+              "counterfactual_warning": true
+            },
+            "model_update": {
+              "magnitude": 0.208804,
+              "strategy_shift": 0.170802,
+              "confidence_delta": -0.230943
+            },
+            "prediction_error": 0.392489,
+            "update_magnitude": 0.208804
           },
           "task_consistent": true
         }
@@ -334,20 +524,21 @@
         "adaptive_recovery_rate": 1.0,
         "mechanical_retry_rate": 0.0,
         "query_rate": 0.0,
-        "planful_rate": 0.0,
-        "mean_confidence": 0.371888
+        "planful_rate": 0.333333,
+        "mean_confidence": 0.334671
       }
     },
     "exploratory": {
       "parameters": {
-        "schema_version": "m4.cognitive_style.v1",
+        "schema_version": "m4.cognitive_style.v2",
         "uncertainty_sensitivity": 0.65,
         "error_aversion": 0.54,
         "exploration_bias": 0.74,
         "attention_selectivity": 0.6,
         "confidence_gain": 0.7,
         "update_rigidity": 0.65,
-        "resource_pressure_sensitivity": 0.58
+        "resource_pressure_sensitivity": 0.58,
+        "virtual_prediction_error_gain": 0.68
       },
       "seed": 45,
       "probe_type": "synthetic_probe",
@@ -369,17 +560,35 @@
             "failure_injected": false
           },
           "decision": {
-            "schema_version": "m4.decision_log.v1",
+            "schema_version": "m4.decision_log.v3",
             "tick": 1,
+            "timestamp": "2026-01-01T01:12:56+00:00",
             "seed": 45,
             "task_context": {
               "task_id": "knowledge_probe",
               "task_type": "knowledge_retrieval"
             },
+            "percept_summary": {
+              "dominant_signal": "uncertainty",
+              "evidence_band": "low",
+              "uncertainty_band": "high",
+              "pressure_band": "low"
+            },
             "observation_evidence": {
               "uncertainty": 0.746313,
               "evidence_strength": 0.339042,
               "expected_error": 0.36655
+            },
+            "prediction_error_vector": {
+              "direct_error": 0.324705,
+              "virtual_error": 0.349921,
+              "signed_total": 0.337313
+            },
+            "attention_allocation": {
+              "evidence": 0.319848,
+              "uncertainty": 0.334916,
+              "error": 0.197759,
+              "counterfactual": 0.147477
             },
             "candidate_actions": [
               {
@@ -395,12 +604,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.904161,
-                "expected_confidence": 0.313469,
-                "expected_prediction_error": 0.36655,
-                "update_magnitude": 0.187857,
-                "resource_penalty": 0.069316,
-                "uncertainty_bonus": 0.775408
+                "total_score": 0.879488,
+                "expected_value": 0.487343,
+                "expected_confidence": 0.222946,
+                "expected_prediction_error": 0.337313,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.324705,
+                  "virtual_error": 0.349921,
+                  "signed_total": 0.337313
+                },
+                "update_magnitude": 0.179451,
+                "resource_penalty": 0.049355,
+                "uncertainty_bonus": 0.647726,
+                "resource_cost": 0.2344,
+                "style_bonus": 0.166
               },
               {
                 "action": {
@@ -415,12 +632,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.840204,
-                "expected_confidence": 0.313469,
-                "expected_prediction_error": 0.36655,
-                "update_magnitude": 0.187857,
-                "resource_penalty": 0.064195,
-                "uncertainty_bonus": 0.686608
+                "total_score": 0.85788,
+                "expected_value": 0.487966,
+                "expected_confidence": 0.222946,
+                "expected_prediction_error": 0.337313,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.324705,
+                  "virtual_error": 0.349921,
+                  "signed_total": 0.337313
+                },
+                "update_magnitude": 0.179451,
+                "resource_penalty": 0.044162,
+                "uncertainty_bonus": 0.647726,
+                "resource_cost": 0.1908,
+                "style_bonus": 0.1392
               },
               {
                 "action": {
@@ -435,24 +660,53 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.444826,
-                "expected_confidence": 0.233469,
-                "expected_prediction_error": 0.36655,
-                "update_magnitude": 0.187857,
-                "resource_penalty": 0.049188,
-                "uncertainty_bonus": 0.552271
+                "total_score": -0.063171,
+                "expected_value": 0.489784,
+                "expected_confidence": 0.122946,
+                "expected_prediction_error": 0.337313,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.324705,
+                  "virtual_error": 0.349921,
+                  "signed_total": 0.337313
+                },
+                "update_magnitude": 0.179451,
+                "resource_penalty": 0.029013,
+                "uncertainty_bonus": 0.154636,
+                "resource_cost": 0.0636,
+                "style_bonus": 0.0364
               }
             ],
+            "parameter_snapshot": {
+              "schema_version": "m4.cognitive_style.v2",
+              "uncertainty_sensitivity": 0.65,
+              "error_aversion": 0.54,
+              "exploration_bias": 0.74,
+              "attention_selectivity": 0.6,
+              "confidence_gain": 0.7,
+              "update_rigidity": 0.65,
+              "resource_pressure_sensitivity": 0.58,
+              "virtual_prediction_error_gain": 0.68
+            },
             "resource_state": {
               "energy": 0.7670986789593656,
               "budget": 0.7857866886164283,
               "stress": 0.21066218202479398,
               "time_remaining": 0.8470310177539261
             },
-            "internal_confidence": 0.313469,
+            "internal_confidence": 0.228348,
             "selected_action": "query",
-            "prediction_error": 0.36655,
-            "update_magnitude": 0.187857
+            "result_feedback": {
+              "observed_outcome": "stabilized",
+              "reward": 0.654738,
+              "counterfactual_warning": true
+            },
+            "model_update": {
+              "magnitude": 0.179451,
+              "strategy_shift": 0.146791,
+              "confidence_delta": -0.277054
+            },
+            "prediction_error": 0.337313,
+            "update_magnitude": 0.179451
           },
           "task_consistent": true
         },
@@ -473,17 +727,35 @@
             "failure_injected": false
           },
           "decision": {
-            "schema_version": "m4.decision_log.v1",
+            "schema_version": "m4.decision_log.v3",
             "tick": 2,
+            "timestamp": "2026-01-01T01:13:07+00:00",
             "seed": 45,
             "task_context": {
               "task_id": "plan_route",
               "task_type": "multi_step_planning"
             },
+            "percept_summary": {
+              "dominant_signal": "evidence",
+              "evidence_band": "medium",
+              "uncertainty_band": "medium",
+              "pressure_band": "medium"
+            },
             "observation_evidence": {
               "uncertainty": 0.449417,
               "evidence_strength": 0.564883,
               "expected_error": 0.339478
+            },
+            "prediction_error_vector": {
+              "direct_error": 0.255368,
+              "virtual_error": 0.247852,
+              "signed_total": 0.25161
+            },
+            "attention_allocation": {
+              "evidence": 0.412467,
+              "uncertainty": 0.24644,
+              "error": 0.195015,
+              "counterfactual": 0.146079
             },
             "candidate_actions": [
               {
@@ -499,12 +771,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.511699,
-                "expected_confidence": 0.452787,
-                "expected_prediction_error": 0.339478,
-                "update_magnitude": 0.173982,
-                "resource_penalty": 0.112372,
-                "uncertainty_bonus": 0.413463
+                "total_score": 0.540404,
+                "expected_value": 0.564241,
+                "expected_confidence": 0.395572,
+                "expected_prediction_error": 0.25161,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.255368,
+                  "virtual_error": 0.247852,
+                  "signed_total": 0.25161
+                },
+                "update_magnitude": 0.133857,
+                "resource_penalty": 0.077144,
+                "uncertainty_bonus": 0.480752,
+                "resource_cost": 0.189,
+                "style_bonus": 0.1044
               },
               {
                 "action": {
@@ -519,12 +799,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.558399,
-                "expected_confidence": 0.452787,
-                "expected_prediction_error": 0.339478,
-                "update_magnitude": 0.173982,
-                "resource_penalty": 0.117494,
-                "uncertainty_bonus": 0.332568
+                "total_score": 0.190416,
+                "expected_value": 0.563604,
+                "expected_confidence": 0.395572,
+                "expected_prediction_error": 0.25161,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.255368,
+                  "virtual_error": 0.247852,
+                  "signed_total": 0.25161
+                },
+                "update_magnitude": 0.133857,
+                "resource_penalty": 0.082455,
+                "uncertainty_bonus": 0.053211,
+                "resource_cost": 0.2144,
+                "style_bonus": 0.171
               },
               {
                 "action": {
@@ -539,24 +827,53 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.552457,
-                "expected_confidence": 0.452787,
-                "expected_prediction_error": 0.339478,
-                "update_magnitude": 0.173982,
-                "resource_penalty": 0.103696,
-                "uncertainty_bonus": 0.332568
+                "total_score": 0.244398,
+                "expected_value": 0.56488,
+                "expected_confidence": 0.395572,
+                "expected_prediction_error": 0.25161,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.255368,
+                  "virtual_error": 0.247852,
+                  "signed_total": 0.25161
+                },
+                "update_magnitude": 0.133857,
+                "resource_penalty": 0.071826,
+                "uncertainty_bonus": 0.053211,
+                "resource_cost": 0.1472,
+                "style_bonus": 0.118
               }
             ],
+            "parameter_snapshot": {
+              "schema_version": "m4.cognitive_style.v2",
+              "uncertainty_sensitivity": 0.65,
+              "error_aversion": 0.54,
+              "exploration_bias": 0.74,
+              "attention_selectivity": 0.6,
+              "confidence_gain": 0.7,
+              "update_rigidity": 0.65,
+              "resource_pressure_sensitivity": 0.58,
+              "virtual_prediction_error_gain": 0.68
+            },
             "resource_state": {
               "energy": 0.5935755715512693,
               "budget": 0.5924937557180471,
               "stress": 0.31080089287256324,
               "time_remaining": 0.5836056994772467
             },
-            "internal_confidence": 0.452787,
-            "selected_action": "plan",
-            "prediction_error": 0.339478,
-            "update_magnitude": 0.173982
+            "internal_confidence": 0.469573,
+            "selected_action": "inspect",
+            "result_feedback": {
+              "observed_outcome": "stabilized",
+              "reward": 0.734504,
+              "counterfactual_warning": false
+            },
+            "model_update": {
+              "magnitude": 0.133857,
+              "strategy_shift": 0.109495,
+              "confidence_delta": -0.104428
+            },
+            "prediction_error": 0.25161,
+            "update_magnitude": 0.133857
           },
           "task_consistent": true
         },
@@ -577,17 +894,35 @@
             "failure_injected": true
           },
           "decision": {
-            "schema_version": "m4.decision_log.v1",
+            "schema_version": "m4.decision_log.v3",
             "tick": 3,
+            "timestamp": "2026-01-01T01:13:18+00:00",
             "seed": 45,
             "task_context": {
               "task_id": "repair_after_failure",
               "task_type": "failure_recovery"
             },
+            "percept_summary": {
+              "dominant_signal": "evidence",
+              "evidence_band": "medium",
+              "uncertainty_band": "medium",
+              "pressure_band": "high"
+            },
             "observation_evidence": {
               "uncertainty": 0.598957,
               "evidence_strength": 0.402661,
               "expected_error": 0.474808
+            },
+            "prediction_error_vector": {
+              "direct_error": 0.38912,
+              "virtual_error": 0.395858,
+              "signed_total": 0.392489
+            },
+            "attention_allocation": {
+              "evidence": 0.334632,
+              "uncertainty": 0.280922,
+              "error": 0.221632,
+              "counterfactual": 0.162814
             },
             "candidate_actions": [
               {
@@ -603,12 +938,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.157242,
-                "expected_confidence": 0.349409,
-                "expected_prediction_error": 0.474808,
-                "update_magnitude": 0.243339,
-                "resource_penalty": 0.237559,
-                "uncertainty_bonus": 0.443228
+                "total_score": -0.430327,
+                "expected_value": 0.481879,
+                "expected_confidence": 0.269057,
+                "expected_prediction_error": 0.392489,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.38912,
+                  "virtual_error": 0.395858,
+                  "signed_total": 0.392489
+                },
+                "update_magnitude": 0.208804,
+                "resource_penalty": 0.157315,
+                "uncertainty_bonus": 0.124104,
+                "resource_cost": 0.1272,
+                "style_bonus": -0.096
               },
               {
                 "action": {
@@ -623,12 +966,20 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.606395,
-                "expected_confidence": 0.381809,
-                "expected_prediction_error": 0.474808,
-                "update_magnitude": 0.243339,
-                "resource_penalty": 0.179666,
-                "uncertainty_bonus": 0.443228
+                "total_score": 0.299711,
+                "expected_value": 0.493487,
+                "expected_confidence": 0.296057,
+                "expected_prediction_error": 0.392489,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.38912,
+                  "virtual_error": 0.395858,
+                  "signed_total": 0.392489
+                },
+                "update_magnitude": 0.208804,
+                "resource_penalty": 0.060583,
+                "uncertainty_bonus": 0.070917,
+                "resource_cost": 0.169,
+                "style_bonus": 0.2098
               },
               {
                 "action": {
@@ -643,24 +994,53 @@
                   "constraints": {},
                   "reversible": true
                 },
-                "total_score": 0.630258,
-                "expected_confidence": 0.349409,
-                "expected_prediction_error": 0.474808,
-                "update_magnitude": 0.243339,
-                "resource_penalty": 0.060985,
-                "uncertainty_bonus": 0.383333
+                "total_score": 0.429542,
+                "expected_value": 0.495928,
+                "expected_confidence": 0.269057,
+                "expected_prediction_error": 0.392489,
+                "expected_prediction_error_vector": {
+                  "direct_error": 0.38912,
+                  "virtual_error": 0.395858,
+                  "signed_total": 0.392489
+                },
+                "update_magnitude": 0.208804,
+                "resource_penalty": 0.040238,
+                "uncertainty_bonus": 0.043026,
+                "resource_cost": 0.0518,
+                "style_bonus": 0.191
               }
             ],
+            "parameter_snapshot": {
+              "schema_version": "m4.cognitive_style.v2",
+              "uncertainty_sensitivity": 0.65,
+              "error_aversion": 0.54,
+              "exploration_bias": 0.74,
+              "attention_selectivity": 0.6,
+              "confidence_gain": 0.7,
+              "update_rigidity": 0.65,
+              "resource_pressure_sensitivity": 0.58,
+              "virtual_prediction_error_gain": 0.68
+            },
             "resource_state": {
               "energy": 0.3730381033249442,
               "budget": 0.3144970795271923,
               "stress": 0.8163252553769366,
               "time_remaining": 0.2720270654814811
             },
-            "internal_confidence": 0.349409,
+            "internal_confidence": 0.301515,
             "selected_action": "conserve",
-            "prediction_error": 0.474808,
-            "update_magnitude": 0.243339
+            "result_feedback": {
+              "observed_outcome": "stabilized",
+              "reward": 0.600268,
+              "counterfactual_warning": true
+            },
+            "model_update": {
+              "magnitude": 0.208804,
+              "strategy_shift": 0.170802,
+              "confidence_delta": -0.230943
+            },
+            "prediction_error": 0.392489,
+            "update_magnitude": 0.208804
           },
           "task_consistent": true
         }
@@ -672,7 +1052,7 @@
         "mechanical_retry_rate": 0.0,
         "query_rate": 0.333333,
         "planful_rate": 0.333333,
-        "mean_confidence": 0.371888
+        "mean_confidence": 0.333145
       }
     }
   },

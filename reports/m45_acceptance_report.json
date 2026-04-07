@@ -1,0 +1,659 @@
+{
+  "milestone_id": "M4.5",
+  "generated_at": "2026-04-07T14:38:26+00:00",
+  "round_started_at": "2026-04-07T00:00:00+00:00",
+  "git_head": "f59fe1ef65669849455bb16cad6cf12a8ad0f6e8",
+  "status": "PASS",
+  "acceptance_state": "acceptance_pass",
+  "seed_set": [
+    45
+  ],
+  "artifacts": {
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m45_canonical_trace.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m45_ablation.json",
+    "failure_injection": "E:\\workspace\\segments\\artifacts\\m45_failure_injection.json",
+    "summary": "E:\\workspace\\segments\\reports\\m45_acceptance_summary.md"
+  },
+  "tests": {
+    "milestone": [
+      "tests/test_m45_memory_core.py",
+      "tests/test_m45_acceptance.py"
+    ],
+    "regression": [
+      "tests/test_m41_acceptance.py",
+      "tests/test_m41_baselines.py",
+      "tests/test_m41_blind_classification.py",
+      "tests/test_m41_cognitive_parameters.py",
+      "tests/test_m41_decision_logging.py",
+      "tests/test_m41_explanations.py",
+      "tests/test_m41_external_dataset.py",
+      "tests/test_m41_external_validation.py",
+      "tests/test_m41_falsification.py",
+      "tests/test_m41_identifiability.py",
+      "tests/test_m41_inference.py",
+      "tests/test_m41_observables.py",
+      "tests/test_m42_acceptance.py",
+      "tests/test_m42_benchmark_adapter.py",
+      "tests/test_m42_confidence_benchmark.py",
+      "tests/test_m42_external_bundle_integration.py",
+      "tests/test_m42_reproducibility.py",
+      "tests/test_m43_acceptance.py",
+      "tests/test_m43_baselines.py",
+      "tests/test_m43_single_task_fit.py",
+      "tests/test_m44_acceptance.py",
+      "tests/test_m44_cross_task.py",
+      "tests/test_m44_igt_adapter.py",
+      "tests/test_m44_igt_aggregate.py"
+    ]
+  },
+  "gates": {
+    "data_model_integrity": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "boundary": {
+          "round_trip_equal": true,
+          "content_hash_stable": true,
+          "version_incremented": true,
+          "procedural_guard": true,
+          "anchor_guard": true,
+          "field_count": 40
+        },
+        "integration": {
+          "round_trip_equal": true,
+          "semantic_lineage_type": "episodic_compression",
+          "semantic_predictive_use_cases": [
+            "pattern-guided recall",
+            "future expectation shaping"
+          ],
+          "inferred_lineage_type": "pattern_extraction",
+          "inferred_predictive_use_cases": [
+            "low-confidence planning hint",
+            "candidate explanation"
+          ],
+          "protected_anchor_strengths": {
+            "time": "weak",
+            "place": "weak",
+            "agents": "strong",
+            "action": "strong",
+            "outcome": "strong"
+          }
+        }
+      }
+    },
+    "salience_auditability": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "boundary": {
+          "numeric_checks": [
+            {
+              "expected": 0.5,
+              "actual": 0.5
+            },
+            {
+              "expected": 0.4800000000000001,
+              "actual": 0.4800000000000001
+            },
+            {
+              "expected": 0.41000000000000003,
+              "actual": 0.41000000000000003
+            }
+          ],
+          "max_diff": 0.0,
+          "audit_inputs": {
+            "arousal": 0.18,
+            "attention": 0.48,
+            "novelty": 0.12,
+            "relevance": 0.51,
+            "relevance_goal": 1.0,
+            "relevance_threat": 0.05,
+            "relevance_self": 1.0,
+            "relevance_social": 0.5,
+            "relevance_reward": 0.0
+          },
+          "audit_string": "arousal=0.180, attention=0.480, novelty=0.120, relevance=0.510 (goal=1.000, threat=0.050, self=1.000, social=0.500, reward=0.000) -> salience=0.327"
+        },
+        "integration": {
+          "has_signal_breakdown": true,
+          "relevance_audit": {
+            "weights": {
+              "goal": 0.2,
+              "threat": 0.2,
+              "self": 0.2,
+              "social": 0.2,
+              "reward": 0.2
+            },
+            "inputs": {
+              "goal": 1.0,
+              "threat": 0.05,
+              "self": 1.0,
+              "social": 0.5,
+              "reward": 0.0
+            },
+            "contributions": {
+              "goal": 0.2,
+              "threat": 0.010000000000000002,
+              "self": 0.2,
+              "social": 0.1,
+              "reward": 0.0
+            },
+            "formula": "relevance = (0.20*goal + 0.20*threat + 0.20*self + 0.20*social + 0.20*reward) / 1.00"
+          },
+          "self_evidence": [
+            "role_continuity:mentor",
+            "relationship_continuity:lin",
+            "commitment_continuity:checkin",
+            "commitment_continuity:mentor",
+            "commitment_continuity:weekly",
+            "narrative_continuity:care",
+            "narrative_continuity:continuity",
+            "narrative_continuity:mentor",
+            "narrative_continuity:reliable",
+            "guard:first_person_not_identity"
+          ],
+          "self_guardrails": [
+            "guard:first_person_not_identity"
+          ],
+          "memory_class_reason": "episodic_default"
+        }
+      }
+    },
+    "encoding_pipeline": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "boundary": {
+          "memory_classes": [
+            "episodic",
+            "inferred",
+            "procedural",
+            "semantic"
+          ],
+          "source_defaults": {
+            "experience": [
+              0.9,
+              0.85
+            ],
+            "hearsay": [
+              0.7,
+              0.5
+            ],
+            "inference": [
+              0.9,
+              0.35
+            ],
+            "reconstruction": [
+              0.4,
+              0.5
+            ]
+          },
+          "high_arousal_store_level": "long",
+          "high_salience_store_level": "long",
+          "identity_self_relevance": 1.0,
+          "noise_self_relevance": 0.0,
+          "first_person_self_relevance": 0.0,
+          "procedural_steps": [
+            "scan gauges",
+            "vent pressure",
+            "log readings"
+          ],
+          "semantic_lineage_type": "episodic_compression",
+          "inferred_lineage_type": "pattern_extraction",
+          "semantic_derived_from": [
+            "ep-a",
+            "ep-b",
+            "ep-c"
+          ],
+          "inferred_derived_from": [
+            "ep-a",
+            "ep-b"
+          ],
+          "reward_probe": {
+            "relevance_reward": 0.0,
+            "relevance_threat": 1.0,
+            "threat_evidence": [
+              "threat_keyword:loss",
+              "threat_keyword:penalty",
+              "threat_outcome:loss",
+              "threat_outcome:penalty",
+              "state_threat:0.05"
+            ]
+          }
+        },
+        "integration": {
+          "identity_store_level": "mid",
+          "noise_store_level": "short",
+          "identity_retention_reasons": [
+            "identity_continuity_priority"
+          ],
+          "identity_anchor_reasoning": {
+            "slots_present": {
+              "time": true,
+              "place": true,
+              "agents": true,
+              "action": true,
+              "outcome": true
+            },
+            "reasons": [
+              "episodic_default_protected_core",
+              "identity_strengthened_agents",
+              "social_context_strengthened_agents"
+            ]
+          },
+          "confidence_pairs": [
+            {
+              "label": "experience",
+              "entry_id": "5de9987b-a4fe-4777-83f1-a2ba64b08deb",
+              "source_type": "experience",
+              "source_confidence": 0.9,
+              "reality_confidence": 0.85
+            },
+            {
+              "label": "hearsay",
+              "entry_id": "da7ddf3b-d81c-4651-9ba3-57dea1134a00",
+              "source_type": "hearsay",
+              "source_confidence": 0.7,
+              "reality_confidence": 0.5
+            },
+            {
+              "label": "inference",
+              "entry_id": "632305b2-2ef0-417a-889b-b78e111bab27",
+              "source_type": "inference",
+              "source_confidence": 0.9,
+              "reality_confidence": 0.35
+            },
+            {
+              "label": "reconstruction",
+              "entry_id": "88e7d03f-43cd-47a8-844f-57ea8431c6ad",
+              "source_type": "reconstruction",
+              "source_confidence": 0.4,
+              "reality_confidence": 0.5
+            }
+          ],
+          "confidence_drift_cases": [
+            {
+              "label": "source_only_drift",
+              "entry_id": "d0b8a458-d2af-43f6-b6dc-4568e9a2cd22",
+              "source_type": "reconstruction",
+              "before": {
+                "source_confidence": 0.82,
+                "reality_confidence": 0.78
+              },
+              "after": {
+                "source_confidence": 0.768,
+                "reality_confidence": 0.78
+              },
+              "source_changed": true,
+              "reality_changed": false
+            },
+            {
+              "label": "reality_only_drift",
+              "entry_id": "28a63784-8c8c-4b8b-a943-e3322258abff",
+              "source_type": "experience",
+              "before": {
+                "source_confidence": 0.82,
+                "reality_confidence": 0.78
+              },
+              "after": {
+                "source_confidence": 0.82,
+                "reality_confidence": 0.6900000000000001
+              },
+              "source_changed": false,
+              "reality_changed": true
+            }
+          ]
+        }
+      }
+    },
+    "dual_decay_correctness": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "boundary": {
+          "timepoints": [
+            5,
+            20,
+            80
+          ],
+          "trace_curves": {
+            "short": [
+              0.951229424500714,
+              0.8187307530779818,
+              0.44932896411722156
+            ],
+            "mid": [
+              0.9900498337491681,
+              0.9607894391523232,
+              0.8521437889662113
+            ],
+            "long": [
+              0.999000499833375,
+              0.9960079893439915,
+              0.9841273200552851
+            ],
+            "procedural_long": [
+              0.9999000049998333,
+              0.9996000799893344,
+              0.9984012793176064
+            ]
+          },
+          "accessibility_curves": {
+            "short": [
+              0.7788007830714049,
+              0.36787944117144233,
+              0.01831563888873418
+            ],
+            "mid": [
+              0.9048374180359595,
+              0.6703200460356393,
+              0.20189651799465538
+            ],
+            "long": [
+              0.9753099120283326,
+              0.9048374180359595,
+              0.6703200460356393
+            ]
+          },
+          "forgetting_paths": {
+            "current_cycle": 81,
+            "deleted_short_residue": [
+              "a13054c9-474c-4539-a49e-11fe05977afd"
+            ],
+            "dormant_marked": [
+              "4109c1e3-8a50-4c87-a412-8a020b708bf0"
+            ],
+            "abstracted_entries": [
+              "30737473-673a-45a9-a2a2-6542ffb78101",
+              "b002e437-adaa-4d84-b890-7a0644f2dc78",
+              "4109c1e3-8a50-4c87-a412-8a020b708bf0"
+            ],
+            "source_confidence_drifted": [
+              "30737473-673a-45a9-a2a2-6542ffb78101",
+              "b002e437-adaa-4d84-b890-7a0644f2dc78"
+            ],
+            "reality_confidence_drifted": [
+              "30737473-673a-45a9-a2a2-6542ffb78101",
+              "4109c1e3-8a50-4c87-a412-8a020b708bf0"
+            ],
+            "confidence_drifted": [
+              "30737473-673a-45a9-a2a2-6542ffb78101",
+              "b002e437-adaa-4d84-b890-7a0644f2dc78",
+              "4109c1e3-8a50-4c87-a412-8a020b708bf0"
+            ],
+            "processed_entries": 4
+          },
+          "cleanup_report": {
+            "threshold": 0.05,
+            "deleted_short_residue": [
+              "a13054c9-474c-4539-a49e-11fe05977afd"
+            ],
+            "retained_non_short_low_trace": [
+              "4109c1e3-8a50-4c87-a412-8a020b708bf0"
+            ]
+          }
+        },
+        "integration": {
+          "processed_entries": 2,
+          "abstracted_entries": [
+            "09130328-a0fe-454f-ae33-210c8e4599ac",
+            "e5a87e95-2376-4d7d-8682-e27dceade39b"
+          ],
+          "source_confidence_drifted": [
+            "09130328-a0fe-454f-ae33-210c8e4599ac",
+            "e5a87e95-2376-4d7d-8682-e27dceade39b"
+          ],
+          "reality_confidence_drifted": [
+            "e5a87e95-2376-4d7d-8682-e27dceade39b"
+          ]
+        }
+      }
+    },
+    "legacy_bridge": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "boundary": {
+          "timestamp_preserved": true,
+          "action_reflected": "hide_revised",
+          "outcome_reflected": "mutated_outcome",
+          "prediction_error_reflected": 0.99,
+          "total_surprise_reflected": 0.77,
+          "support_count_reflected": 5,
+          "unknown_fields_preserved": {
+            "custom_flag": "keep-me",
+            "custom_nested": {
+              "note": "preserved"
+            }
+          }
+        },
+        "integration": {
+          "episodes_after_store": 2,
+          "store_entries_after_store": 2,
+          "merge_support_delta": 1,
+          "restored_store_entries": 2,
+          "replay_batch_size": 1,
+          "payload_episode_id": "ep-000031-hide"
+        },
+        "regression_summary": {
+          "executed": true,
+          "command": [
+            "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "pytest",
+            "tests/test_m41_acceptance.py",
+            "tests/test_m41_baselines.py",
+            "tests/test_m41_blind_classification.py",
+            "tests/test_m41_cognitive_parameters.py",
+            "tests/test_m41_decision_logging.py",
+            "tests/test_m41_explanations.py",
+            "tests/test_m41_external_dataset.py",
+            "tests/test_m41_external_validation.py",
+            "tests/test_m41_falsification.py",
+            "tests/test_m41_identifiability.py",
+            "tests/test_m41_inference.py",
+            "tests/test_m41_observables.py",
+            "tests/test_m42_acceptance.py",
+            "tests/test_m42_benchmark_adapter.py",
+            "tests/test_m42_confidence_benchmark.py",
+            "tests/test_m42_external_bundle_integration.py",
+            "tests/test_m42_reproducibility.py",
+            "tests/test_m43_acceptance.py",
+            "tests/test_m43_baselines.py",
+            "tests/test_m43_single_task_fit.py",
+            "tests/test_m44_acceptance.py",
+            "tests/test_m44_cross_task.py",
+            "tests/test_m44_igt_adapter.py",
+            "tests/test_m44_igt_aggregate.py",
+            "-q"
+          ],
+          "files": [
+            "tests/test_m41_acceptance.py",
+            "tests/test_m41_baselines.py",
+            "tests/test_m41_blind_classification.py",
+            "tests/test_m41_cognitive_parameters.py",
+            "tests/test_m41_decision_logging.py",
+            "tests/test_m41_explanations.py",
+            "tests/test_m41_external_dataset.py",
+            "tests/test_m41_external_validation.py",
+            "tests/test_m41_falsification.py",
+            "tests/test_m41_identifiability.py",
+            "tests/test_m41_inference.py",
+            "tests/test_m41_observables.py",
+            "tests/test_m42_acceptance.py",
+            "tests/test_m42_benchmark_adapter.py",
+            "tests/test_m42_confidence_benchmark.py",
+            "tests/test_m42_external_bundle_integration.py",
+            "tests/test_m42_reproducibility.py",
+            "tests/test_m43_acceptance.py",
+            "tests/test_m43_baselines.py",
+            "tests/test_m43_single_task_fit.py",
+            "tests/test_m44_acceptance.py",
+            "tests/test_m44_cross_task.py",
+            "tests/test_m44_igt_adapter.py",
+            "tests/test_m44_igt_aggregate.py"
+          ],
+          "returncode": 0,
+          "passed": true,
+          "passed_count": 108,
+          "duration_seconds": 858.113,
+          "summary_line": "108 passed, 1 skipped, 29 subtests passed in 853.47s (0:14:13)",
+          "stdout_tail": [
+            "........................................... [ 39%]",
+            "................................................s.................       [100%]",
+            "108 passed, 1 skipped, 29 subtests passed in 853.47s (0:14:13)"
+          ]
+        }
+      }
+    },
+    "store_level_transitions": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "boundary": {
+          "identity_store_level": "mid",
+          "long_store_level": "long",
+          "noise_store_level": "short",
+          "identity_transition": {
+            "reason": "identity_priority",
+            "effective_cycle": 20,
+            "elapsed_since_baseline": 8,
+            "old_level": "short",
+            "new_level": "mid",
+            "trace_before": 0.3018590452684298,
+            "trace_after": 0.3218096336580782,
+            "accessibility_before": 0.23457850011017198,
+            "accessibility_after": 0.29820771894872566,
+            "trace_rate_before": 0.01,
+            "trace_rate_after": 0.002,
+            "access_rate_before": 0.05,
+            "access_rate_after": 0.02
+          },
+          "long_transition": {
+            "reason": "salience_retrieval",
+            "effective_cycle": 26,
+            "elapsed_since_baseline": 10,
+            "old_level": "mid",
+            "new_level": "long",
+            "trace_before": 0.29209920464541306,
+            "trace_after": 0.29740459560286525,
+            "accessibility_before": 0.287210748179756,
+            "accessibility_after": 0.3336912821148505,
+            "trace_rate_before": 0.002,
+            "trace_rate_after": 0.0002,
+            "access_rate_before": 0.02,
+            "access_rate_after": 0.005
+          }
+        },
+        "integration": {
+          "identity_store_level": "mid",
+          "noise_store_level": "short"
+        }
+      }
+    },
+    "report_honesty": {
+      "passed": true,
+      "blocking": true,
+      "evidence": {
+        "all_gates_have_evidence": true,
+        "probe_catalog_complete": true,
+        "regression_summary": {
+          "executed": true,
+          "command": [
+            "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-m",
+            "pytest",
+            "tests/test_m41_acceptance.py",
+            "tests/test_m41_baselines.py",
+            "tests/test_m41_blind_classification.py",
+            "tests/test_m41_cognitive_parameters.py",
+            "tests/test_m41_decision_logging.py",
+            "tests/test_m41_explanations.py",
+            "tests/test_m41_external_dataset.py",
+            "tests/test_m41_external_validation.py",
+            "tests/test_m41_falsification.py",
+            "tests/test_m41_identifiability.py",
+            "tests/test_m41_inference.py",
+            "tests/test_m41_observables.py",
+            "tests/test_m42_acceptance.py",
+            "tests/test_m42_benchmark_adapter.py",
+            "tests/test_m42_confidence_benchmark.py",
+            "tests/test_m42_external_bundle_integration.py",
+            "tests/test_m42_reproducibility.py",
+            "tests/test_m43_acceptance.py",
+            "tests/test_m43_baselines.py",
+            "tests/test_m43_single_task_fit.py",
+            "tests/test_m44_acceptance.py",
+            "tests/test_m44_cross_task.py",
+            "tests/test_m44_igt_adapter.py",
+            "tests/test_m44_igt_aggregate.py",
+            "-q"
+          ],
+          "files": [
+            "tests/test_m41_acceptance.py",
+            "tests/test_m41_baselines.py",
+            "tests/test_m41_blind_classification.py",
+            "tests/test_m41_cognitive_parameters.py",
+            "tests/test_m41_decision_logging.py",
+            "tests/test_m41_explanations.py",
+            "tests/test_m41_external_dataset.py",
+            "tests/test_m41_external_validation.py",
+            "tests/test_m41_falsification.py",
+            "tests/test_m41_identifiability.py",
+            "tests/test_m41_inference.py",
+            "tests/test_m41_observables.py",
+            "tests/test_m42_acceptance.py",
+            "tests/test_m42_benchmark_adapter.py",
+            "tests/test_m42_confidence_benchmark.py",
+            "tests/test_m42_external_bundle_integration.py",
+            "tests/test_m42_reproducibility.py",
+            "tests/test_m43_acceptance.py",
+            "tests/test_m43_baselines.py",
+            "tests/test_m43_single_task_fit.py",
+            "tests/test_m44_acceptance.py",
+            "tests/test_m44_cross_task.py",
+            "tests/test_m44_igt_adapter.py",
+            "tests/test_m44_igt_aggregate.py"
+          ],
+          "returncode": 0,
+          "passed": true,
+          "passed_count": 108,
+          "duration_seconds": 858.113,
+          "summary_line": "108 passed, 1 skipped, 29 subtests passed in 853.47s (0:14:13)",
+          "stdout_tail": [
+            "........................................... [ 39%]",
+            "................................................s.................       [100%]",
+            "108 passed, 1 skipped, 29 subtests passed in 853.47s (0:14:13)"
+          ]
+        },
+        "failure_injection_cases": [
+          {
+            "case": "missing_procedure_steps",
+            "message": "procedural memories require explicit procedure_steps"
+          },
+          {
+            "case": "all_weak_episodic_anchors",
+            "message": "episodic memories must retain protected anchors; agents/action/outcome cannot all be weak"
+          }
+        ],
+        "ablation_signal_drop": 0.03674999999999995,
+        "unsupported_claims": []
+      }
+    }
+  },
+  "failed_gates": [],
+  "findings": [],
+  "top_blockers": [],
+  "headline_metrics": {
+    "identity_relevance_gap": 0.03674999999999995,
+    "identity_store_level": "mid",
+    "noise_store_level": "short",
+    "regression_passed": true
+  },
+  "residual_risks": [],
+  "freshness": {
+    "artifact_round_started_at": "2026-04-07T00:00:00+00:00",
+    "generated_in_this_run": true
+  },
+  "recommendation": "ACCEPT"
+}
