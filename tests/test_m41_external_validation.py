@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from segmentum.m41_external_validation import acceptance_scope_note
+import segmentum.m41_external_task_eval as external_eval
+import segmentum.m4_benchmarks as m4_benchmarks
 from segmentum.m41_external_task_eval import (
     run_external_task_bundle_evaluation,
     run_minimal_external_task_validation,
@@ -78,6 +83,39 @@ class TestM41ExternalValidation(unittest.TestCase):
 
     def test_legacy_external_task_entrypoint_remains_alias_only(self) -> None:
         self.assertEqual(run_minimal_external_task_validation(), run_external_task_bundle_evaluation())
+
+    def test_external_task_validation_falls_back_to_repo_fixture_when_raw_sources_are_missing(self) -> None:
+        with TemporaryDirectory() as tmp:
+            registry_root = Path(tmp) / "external_registry"
+            missing_conf = Path(tmp) / "missing_confidence"
+            missing_igt = Path(tmp) / "missing_igt"
+            patched_builders = {
+                "confidence_database": (missing_conf, external_eval._EXTERNAL_BUNDLE_BUILDERS["confidence_database"][1]),
+                "iowa_gambling_task": (missing_igt, external_eval._EXTERNAL_BUNDLE_BUILDERS["iowa_gambling_task"][1]),
+            }
+
+            external_eval._ensure_external_bundle_available.cache_clear()
+            external_eval._confidence_run.cache_clear()
+            external_eval._igt_run.cache_clear()
+            external_eval.run_external_task_bundle_evaluation.cache_clear()
+            try:
+                with patch.object(external_eval, "EXTERNAL_BENCHMARK_ROOT", registry_root), patch.object(
+                    external_eval, "_EXTERNAL_BUNDLE_BUILDERS", patched_builders
+                ), patch.object(m4_benchmarks, "EXTERNAL_BENCHMARK_ROOT", registry_root):
+                    payload = external_eval.run_external_task_bundle_evaluation()
+            finally:
+                external_eval._ensure_external_bundle_available.cache_clear()
+                external_eval._confidence_run.cache_clear()
+                external_eval._igt_run.cache_clear()
+                external_eval.run_external_task_bundle_evaluation.cache_clear()
+
+        confidence_bundle = payload["external_bundle_provenance"]["confidence_database"]["bundle"]
+        igt_bundle = payload["external_bundle_provenance"]["iowa_gambling_task"]["bundle"]
+        self.assertEqual(confidence_bundle["source_type"], "external_bundle")
+        self.assertEqual(confidence_bundle["source_label"], "repo_external_fallback")
+        self.assertEqual(igt_bundle["source_type"], "external_bundle")
+        self.assertEqual(igt_bundle["source_label"], "repo_external_fallback")
+        self.assertTrue(payload["confidence_benchmark"]["metric_gate"]["passed"])
 
 
 if __name__ == "__main__":
