@@ -812,6 +812,23 @@ class LongTermMemory:
             return batch
         return batch[: max(0, int(limit))]
 
+    def run_memory_consolidation_cycle(
+        self,
+        *,
+        current_cycle: int,
+        rng,
+        current_state: dict[str, object] | None = None,
+    ):
+        store = self.ensure_memory_store()
+        report = store.run_consolidation_cycle(
+            current_cycle=current_cycle,
+            rng=rng,
+            current_state=current_state,
+        )
+        self.episodes = store.to_legacy_episodes()
+        self._refresh_semantic_patterns()
+        return report
+
     def assign_clusters(self) -> int:
         if not self.episodes:
             self.cluster_centroids = []

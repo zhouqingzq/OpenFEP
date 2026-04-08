@@ -1,0 +1,95 @@
+{
+  "suite": "acceptance_method_negative_controls",
+  "baseline_honesty_status": "PASS",
+  "case_count": 6,
+  "all_cases_failed_closed": true,
+  "cases": [
+    {
+      "case": "fake_regression_pass",
+      "tamper": "Replace the regression prerequisite with a synthetic PASS summary.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "missing_integration_scenarios": [],
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {
+        "legacy_regression_prereq": [
+          "regression_command_matches_expected",
+          "regression_duration_recorded",
+          "regression_summary_looks_like_pytest_output"
+        ]
+      }
+    },
+    {
+      "case": "missing_integration_record",
+      "tamper": "Delete the required consolidation-validation integration scenario.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "missing_integration_scenarios": [
+        "consolidation_validation_linkage"
+      ],
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {}
+    },
+    {
+      "case": "tampered_candidate_ids",
+      "tamper": "Corrupt candidate_ids so they no longer match the recorded retrieval candidates.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "missing_integration_scenarios": [],
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {
+        "retrieval_tag_primary": [
+          "candidate_ids_match_candidates",
+          "tag_primary_still_ranked_first"
+        ]
+      }
+    },
+    {
+      "case": "tampered_validated_linkage",
+      "tamper": "Corrupt validated_inference_ids so they no longer match the LONG entries recorded in evidence.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "missing_integration_scenarios": [],
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {
+        "consolidation_validation_linkage": [
+          "validated_entries_match_report_ids"
+        ]
+      }
+    },
+    {
+      "case": "empty_observed_payload",
+      "tamper": "Erase a scenario observed payload entirely.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "missing_integration_scenarios": [],
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {}
+    },
+    {
+      "case": "duplicate_source_api_call_id",
+      "tamper": "Duplicate source_api_call_id across two scenarios.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "missing_integration_scenarios": [],
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [
+        "retrieval_context_rich"
+      ],
+      "duplicate_source_api_call_ids": [
+        "retrieval_multi_cue.retrieval_tag_primary.memorystore_retrieve.seed_none"
+      ],
+      "external_check_failures": {}
+    }
+  ]
+}

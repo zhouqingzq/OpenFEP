@@ -153,6 +153,41 @@ from .memory_model import AnchorStrength, MemoryClass, MemoryEntry, SourceType, 
 from .memory_encoding import SalienceConfig, aggregate_relevance, compute_salience, encode_memory
 from .memory_decay import DecayReport, decay_accessibility, decay_trace_strength
 from .memory_store import MemoryStore
+from .memory_retrieval import (
+    CompetitionResult,
+    RecallArtifact,
+    RetrievalQuery,
+    RetrievalResult,
+    ScoredCandidate,
+    build_recall_artifact,
+    compete_candidates,
+    retrieve,
+)
+from .memory_consolidation import (
+    ABSTRACTNESS_INCREMENT,
+    BOOST_ACCESS,
+    BOOST_TRACE,
+    ConflictResolution,
+    ConflictType,
+    ConsolidationReport,
+    ReconstructionConfig,
+    ReconstructionResult,
+    ReconsolidationReport,
+    ReconsolidationUpdateType,
+    UpgradeReport,
+    ValidationResult,
+    CleanupReport,
+    compress_episodic_cluster_to_semantic_skeleton,
+    consolidate_upgrade,
+    consolidation_cleanup,
+    constrained_replay,
+    extract_patterns,
+    maybe_reconstruct,
+    reconsolidate,
+    resolve_conflict,
+    run_consolidation_cycle,
+    validate_inference,
+)
 from .m45_audit import write_m45_acceptance_artifacts
 
 __all__ = [

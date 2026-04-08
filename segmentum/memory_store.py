@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
@@ -470,6 +471,59 @@ class MemoryStore:
             scored.append((score, entry.trace_strength, entry))
         scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
         return [entry for _, _, entry in scored[:k]]
+
+    def retrieve(
+        self,
+        query,
+        *,
+        current_mood: str | None = None,
+        k: int = 5,
+    ):
+        from .memory_retrieval import retrieve
+
+        return retrieve(query, self, current_mood=current_mood, k=k)
+
+    def reconsolidate_entry(
+        self,
+        entry_id: str,
+        *,
+        current_mood: str | None = None,
+        current_context_tags: list[str] | None = None,
+        current_cycle: int | None = None,
+        current_state: dict[str, object] | None = None,
+        recall_artifact=None,
+        conflict_type=None,
+    ):
+        from .memory_consolidation import reconsolidate
+
+        entry = self.get(entry_id)
+        if entry is None:
+            raise KeyError(entry_id)
+        return reconsolidate(
+            entry,
+            current_mood,
+            current_context_tags,
+            store=self,
+            current_cycle=current_cycle,
+            current_state=current_state,
+            recall_artifact=recall_artifact,
+            conflict_type=conflict_type,
+        )
+
+    def run_consolidation_cycle(
+        self,
+        current_cycle: int,
+        rng: random.Random,
+        current_state: dict[str, object] | None = None,
+    ):
+        from .memory_consolidation import run_consolidation_cycle
+
+        return run_consolidation_cycle(
+            self,
+            current_cycle=current_cycle,
+            rng=rng,
+            current_state=current_state,
+        )
 
     def mark_dormant(self, entry_id: str) -> None:
         entry = self.get(entry_id)

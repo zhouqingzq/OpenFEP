@@ -1,0 +1,14 @@
+{
+  "comparison": "full_evidence_vs_tampered_evidence",
+  "tampered_case_count": 6,
+  "tampered_cases_failed_closed": 6,
+  "all_tampered_cases_failed_closed": true,
+  "case_ids": [
+    "fake_regression_pass",
+    "missing_integration_record",
+    "tampered_candidate_ids",
+    "tampered_validated_linkage",
+    "empty_observed_payload",
+    "duplicate_source_api_call_id"
+  ]
+}
