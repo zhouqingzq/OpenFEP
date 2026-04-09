@@ -5,7 +5,9 @@ from dataclasses import dataclass, field
 from math import sqrt
 from typing import TYPE_CHECKING, Any
 
+from .m4_cognitive_style import CognitiveStyleParameters
 from .memory_model import AnchorStrength, MemoryClass, MemoryEntry
+from .memory_state import identity_match_ratio_for_entry, normalize_agent_state
 
 if TYPE_CHECKING:
     from .memory_store import MemoryStore
@@ -53,6 +55,24 @@ def _string_list(value: Any) -> list[str]:
 
 def _normalize_token(value: str) -> str:
     return str(value).strip().lower()
+
+
+def _style_value(
+    cognitive_style: CognitiveStyleParameters | dict[str, object] | None,
+    key: str,
+    default: float = 0.0,
+) -> float:
+    if cognitive_style is not None and hasattr(cognitive_style, key):
+        try:
+            return float(getattr(cognitive_style, key))
+        except (TypeError, ValueError):
+            return default
+    if isinstance(cognitive_style, dict):
+        try:
+            return float(cognitive_style.get(key, default))
+        except (TypeError, ValueError):
+            return default
+    return default
 
 
 def _token_set(values: list[str]) -> set[str]:
@@ -171,6 +191,27 @@ def _entry_anchor_summary(entry: MemoryEntry) -> str:
     return ", ".join(parts)
 
 
+def _primary_recall_backbone(entry: MemoryEntry) -> str:
+    protected = [
+        key
+        for key, strength in entry.anchor_strengths.items()
+        if strength in {AnchorStrength.LOCKED, AnchorStrength.STRONG} and entry.anchor_slots.get(key)
+    ]
+    stable_tags = ", ".join(entry.semantic_tags[:3])
+    protected_summary = ", ".join(
+        f"{key}={entry.anchor_slots.get(key)}" for key in protected[:3]
+    )
+    if entry.memory_class is MemoryClass.SEMANTIC:
+        return f"semantic pattern [{stable_tags or entry.memory_class.value}]"
+    if entry.memory_class is MemoryClass.INFERRED:
+        return f"candidate explanation [{stable_tags or entry.memory_class.value}]"
+    if protected_summary:
+        return f"episodic backbone [{protected_summary}]"
+    if stable_tags:
+        return f"{entry.memory_class.value} backbone [{stable_tags}]"
+    return f"{entry.memory_class.value} backbone"
+
+
 @dataclass(frozen=True)
 class RetrievalQuery:
     semantic_tags: list[str] = field(default_factory=list)
@@ -200,6 +241,7 @@ class ScoredCandidate:
     content_preview: str
     score_breakdown: dict[str, float]
     source_type: str
+    validation_status: str
     entry: MemoryEntry = field(repr=False)
 
     def to_dict(self) -> dict[str, object]:
@@ -210,6 +252,7 @@ class ScoredCandidate:
             "content_preview": self.content_preview,
             "score_breakdown": dict(self.score_breakdown),
             "source_type": self.source_type,
+            "validation_status": self.validation_status,
         }
 
 
@@ -244,6 +287,11 @@ class RecallArtifact:
     protected_fields: list[str]
     competing_interpretations: list[str] | None = None
     procedure_step_outline: list[str] | None = None
+    source_statuses: dict[str, str] | None = None
+    candidate_ids: list[str] | None = None
+    anchor_contributions: dict[str, list[dict[str, str]]] | None = None
+    competition_snapshot: dict[str, object] | None = None
+    donor_blocks: list[dict[str, str]] | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -262,6 +310,11 @@ class RecallArtifact:
             "procedure_step_outline": (
                 list(self.procedure_step_outline) if self.procedure_step_outline is not None else None
             ),
+            "source_statuses": dict(self.source_statuses or {}),
+            "candidate_ids": list(self.candidate_ids or []),
+            "anchor_contributions": deepcopy(self.anchor_contributions or {}),
+            "competition_snapshot": deepcopy(self.competition_snapshot or {}),
+            "donor_blocks": deepcopy(self.donor_blocks or []),
         }
 
 
@@ -343,6 +396,9 @@ def build_recall_artifact(
     auxiliaries: list[MemoryEntry],
     competition: CompetitionResult,
     query: RetrievalQuery,
+    *,
+    candidate_ids: list[str] | None = None,
+    donor_blocks: list[dict[str, str]] | None = None,
 ) -> RecallArtifact:
     protected_fields = [
         key
@@ -358,8 +414,31 @@ def build_recall_artifact(
         reconstructed_fields.append("context_focus")
     source_trace = [f"primary:{primary.id}"]
     source_trace.extend(f"auxiliary:{entry.id}" for entry in auxiliaries)
-    anchor_summary = _entry_anchor_summary(primary)
+    source_statuses = {
+        entry.id: str(dict(entry.compression_metadata or {}).get("validation_status", "validated"))
+        for entry in [primary, *auxiliaries]
+    }
     query_summary = ", ".join([*query.semantic_tags[:2], *query.context_tags[:2], *query.content_keywords[:2]])
+    anchor_contributions: dict[str, list[dict[str, str]]] = {}
+    for key in ("time", "place", "agents", "action", "outcome"):
+        value = primary.anchor_slots.get(key)
+        if value:
+            anchor_contributions.setdefault(key, []).append(
+                {"entry_id": primary.id, "role": "primary", "value": str(value)}
+            )
+    for auxiliary in auxiliaries:
+        for key in ("time", "place", "agents", "action", "outcome"):
+            value = auxiliary.anchor_slots.get(key)
+            if not value:
+                continue
+            if primary.anchor_strengths.get(key) in {AnchorStrength.LOCKED, AnchorStrength.STRONG}:
+                continue
+            if any(item.get("value") == str(value) for item in anchor_contributions.get(key, [])):
+                continue
+            anchor_contributions.setdefault(key, []).append(
+                {"entry_id": auxiliary.id, "role": "auxiliary", "value": str(value)}
+            )
+    competition_snapshot = competition.to_dict()
     if primary.memory_class is MemoryClass.PROCEDURAL:
         outline = list(primary.procedure_steps)
         for auxiliary in auxiliaries:
@@ -382,24 +461,39 @@ def build_recall_artifact(
             protected_fields=protected_fields or ["procedure_steps"],
             competing_interpretations=competition.competing_interpretations or None,
             procedure_step_outline=outline,
+            source_statuses=source_statuses,
+            candidate_ids=list(candidate_ids or []),
+            anchor_contributions=anchor_contributions,
+            competition_snapshot=competition_snapshot,
+            donor_blocks=list(donor_blocks or []),
         )
-
-    detail_fragments = [primary.content]
-    for auxiliary in auxiliaries:
-        auxiliary_anchor = _entry_anchor_summary(auxiliary)
-        if auxiliary_anchor:
-            detail_fragments.append(f"aux:{auxiliary_anchor}")
-        elif auxiliary.content:
-            detail_fragments.append(f"aux:{auxiliary.content[:80]}")
-    if anchor_summary:
-        detail_fragments.append(f"anchors:{anchor_summary}")
+    protected_summary = ", ".join(
+        f"{field}={primary.anchor_slots.get(field)}"
+        for field in protected_fields
+        if primary.anchor_slots.get(field)
+    )
+    weak_donor_summary = ", ".join(
+        f"{field}<-{items[-1]['entry_id']}"
+        for field, items in anchor_contributions.items()
+        if any(item.get("role") == "auxiliary" for item in items)
+    )
+    detail_fragments = [
+        f"candidate_set:{', '.join(candidate_ids or [primary.id])}",
+        f"primary_memory_class:{primary.memory_class.value}",
+    ]
+    if protected_summary:
+        detail_fragments.append(f"protected_anchors:{protected_summary}")
+    if weak_donor_summary:
+        detail_fragments.append(f"weak_field_donors:{weak_donor_summary}")
     if query_summary:
-        detail_fragments.append(f"cues:{query_summary}")
+        detail_fragments.append(f"cue_reconstruction:{query_summary}")
     if competition.competing_interpretations:
-        detail_fragments.append("competition:low-confidence alternatives preserved")
+        detail_fragments.append("competition_preserved:alternative interpretations remain active")
+    if donor_blocks:
+        detail_fragments.append(
+            "donor_blocks:" + ", ".join(f"{item['entry_id']}:{item['reason']}" for item in donor_blocks)
+        )
     content = " | ".join(detail_fragments)
-    if content == primary.content:
-        content = f"{primary.content} | reconstructed recall from cues"
     return RecallArtifact(
         content=content,
         primary_entry_id=primary.id,
@@ -410,6 +504,11 @@ def build_recall_artifact(
         protected_fields=protected_fields,
         competing_interpretations=competition.competing_interpretations or None,
         procedure_step_outline=None,
+        source_statuses=source_statuses,
+        candidate_ids=list(candidate_ids or []),
+        anchor_contributions=anchor_contributions,
+        competition_snapshot=competition_snapshot,
+        donor_blocks=list(donor_blocks or []),
     )
 
 
@@ -428,19 +527,39 @@ def _score_entry(
     query: RetrievalQuery,
     entry: MemoryEntry,
     current_mood: str | None,
+    *,
+    agent_state=None,
+    cognitive_style: CognitiveStyleParameters | dict[str, object] | None = None,
 ) -> ScoredCandidate:
     tag_score = _tag_overlap(query, entry)
     context_score = _context_overlap(query, entry)
     mood_score = _mood_match(current_mood, entry)
     accessibility_score = _clamp(entry.accessibility)
     recency_score = _recency_bonus(entry, query.reference_cycle)
+    exploration_bias = _clamp(_style_value(cognitive_style, "exploration_bias", 0.0))
+    attention_selectivity = _clamp(_style_value(cognitive_style, "attention_selectivity", 0.0))
+    novelty_bonus = exploration_bias * 0.2 * (1.0 / (1.0 + max(0, entry.retrieval_count)))
+    specificity_bonus = attention_selectivity * 0.12 * tag_score
+    identity_alignment = identity_match_ratio_for_entry(entry, agent_state) * 0.15
+    validation_status = str(dict(entry.compression_metadata or {}).get("validation_status", "validated"))
+    validation_discount = 1.0
+    if entry.memory_class is MemoryClass.INFERRED:
+        validation_discount = _clamp(
+            float(dict(entry.compression_metadata or {}).get("validation_discount", 0.35)),
+            0.0,
+            1.0,
+        )
     retrieval_score = (
         (RETRIEVAL_W1_TAG * tag_score)
         + (RETRIEVAL_W2_CONTEXT * context_score)
         + (RETRIEVAL_W3_MOOD * mood_score)
         + (RETRIEVAL_W4_ACCESSIBILITY * accessibility_score)
         + (RETRIEVAL_W5_RECENCY * recency_score)
+        + novelty_bonus
+        + specificity_bonus
+        + identity_alignment
     )
+    retrieval_score *= validation_discount
     return ScoredCandidate(
         entry_id=entry.id,
         memory_class=entry.memory_class.value,
@@ -452,8 +571,29 @@ def _score_entry(
             "mood_match": round(mood_score, 6),
             "accessibility": round(accessibility_score, 6),
             "recency": round(recency_score, 6),
+            **(
+                {"novelty_bonus": round(novelty_bonus, 6)}
+                if novelty_bonus > 0.0
+                else {}
+            ),
+            **(
+                {"specificity_bonus": round(specificity_bonus, 6)}
+                if specificity_bonus > 0.0
+                else {}
+            ),
+            **(
+                {"identity_alignment": round(identity_alignment, 6)}
+                if identity_alignment > 0.0
+                else {}
+            ),
+            **(
+                {"validation_discount": round(validation_discount, 6)}
+                if validation_discount < 0.999999 or entry.memory_class is MemoryClass.INFERRED
+                else {}
+            ),
         },
         source_type=entry.source_type.value,
+        validation_status=validation_status,
         entry=entry,
     )
 
@@ -463,14 +603,29 @@ def retrieve(
     store: "MemoryStore",
     current_mood: str | None = None,
     k: int = 5,
+    *,
+    agent_state=None,
+    cognitive_style: CognitiveStyleParameters | dict[str, object] | None = None,
 ) -> RetrievalResult:
+    normalized_state = normalize_agent_state(agent_state or getattr(store, "agent_state_vector", None))
+    attention_selectivity = _clamp(_style_value(cognitive_style, "attention_selectivity", 0.0))
     ranked = sorted(
-        [_score_entry(query, entry, current_mood) for entry in _filter_entries(query, store)],
+        [
+            _score_entry(
+                query,
+                entry,
+                current_mood,
+                agent_state=normalized_state,
+                cognitive_style=cognitive_style,
+            )
+            for entry in _filter_entries(query, store)
+        ],
         key=lambda item: (item.retrieval_score, item.entry.trace_strength, item.entry.id),
         reverse=True,
     )
     top_candidates = ranked[: max(0, int(k))]
-    competition = compete_candidates(top_candidates)
+    dominance_threshold = max(0.03, DEFAULT_DOMINANCE_THRESHOLD - (attention_selectivity * 0.15))
+    competition = compete_candidates(top_candidates, dominance_threshold=dominance_threshold)
     recall_hypothesis: RecallArtifact | None = None
     reconstruction_trace: dict[str, object] = {
         "query": {
@@ -481,16 +636,25 @@ def retrieve(
             "target_memory_class": (
                 query.target_memory_class.value if query.target_memory_class is not None else None
             ),
+            "agent_state_vector": normalized_state.to_dict(),
+            "dominance_threshold": round(dominance_threshold, 6),
         },
         "competition": competition.to_dict(),
     }
     source_trace: list[str] = []
     if competition.primary is not None:
         auxiliaries: list[MemoryEntry] = []
+        donor_blocks: list[dict[str, str]] = []
         for candidate in top_candidates[1:]:
             if candidate.entry.memory_class is MemoryClass.INFERRED:
                 metadata = dict(candidate.entry.compression_metadata or {})
                 if str(metadata.get("validation_status", "unvalidated")) in {"unvalidated", "contradicted"}:
+                    donor_blocks.append(
+                        {
+                            "entry_id": candidate.entry.id,
+                            "reason": str(metadata.get("validation_status", "unvalidated")),
+                        }
+                    )
                     continue
             if len(auxiliaries) >= 2:
                 break
@@ -500,9 +664,25 @@ def retrieve(
             auxiliaries,
             competition,
             query,
+            candidate_ids=[candidate.entry_id for candidate in top_candidates],
+            donor_blocks=donor_blocks,
         )
         source_trace = list(recall_hypothesis.source_trace)
         reconstruction_trace["selected_auxiliaries"] = [entry.id for entry in auxiliaries]
+        reconstruction_trace["validation_statuses"] = dict(recall_hypothesis.source_statuses or {})
+        reconstruction_trace["candidate_ids"] = list(recall_hypothesis.candidate_ids or [])
+        reconstruction_trace["anchor_contributions"] = deepcopy(recall_hypothesis.anchor_contributions or {})
+        reconstruction_trace["competition_snapshot"] = deepcopy(recall_hypothesis.competition_snapshot or {})
+        reconstruction_trace["donor_blocks"] = deepcopy(recall_hypothesis.donor_blocks or [])
+        if competition.primary.compression_metadata is None:
+            competition.primary.compression_metadata = {}
+        if isinstance(competition.primary.compression_metadata, dict):
+            competition.primary.compression_metadata["m47_recall_audit"] = {
+                "candidate_ids": list(recall_hypothesis.candidate_ids or []),
+                "anchor_contributions": deepcopy(recall_hypothesis.anchor_contributions or {}),
+                "competition_snapshot": deepcopy(recall_hypothesis.competition_snapshot or {}),
+                "donor_blocks": deepcopy(recall_hypothesis.donor_blocks or []),
+            }
     return RetrievalResult(
         candidates=top_candidates,
         recall_hypothesis=recall_hypothesis,

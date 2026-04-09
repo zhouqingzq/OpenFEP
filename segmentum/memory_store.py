@@ -44,6 +44,14 @@ def _string_list(value: Any) -> list[str]:
     return []
 
 
+def _style_value(cognitive_style: dict[str, object] | object | None, key: str, default: float = 0.0) -> float:
+    if cognitive_style is not None and hasattr(cognitive_style, key):
+        return _coerce_float(getattr(cognitive_style, key, default), default)
+    if isinstance(cognitive_style, dict):
+        return _coerce_float(cognitive_style.get(key, default), default)
+    return default
+
+
 def _internal_metadata(entry: MemoryEntry) -> dict[str, object]:
     if entry.compression_metadata is None:
         entry.compression_metadata = {}
@@ -313,6 +321,8 @@ class MemoryStore:
     mid_to_long_retrieval_threshold: int = 3
     identity_priority_threshold: float = 0.75
     identity_long_threshold: float = 0.85
+    state_window_size: int = 30
+    agent_state_vector: dict[str, object] | None = None
     last_cleanup_report: dict[str, object] = field(default_factory=dict)
 
     def _find_index(self, entry_id: str) -> int | None:
@@ -321,45 +331,136 @@ class MemoryStore:
                 return index
         return None
 
-    def _promote_store_level(self, entry: MemoryEntry) -> None:
+    def _promote_store_level(
+        self,
+        entry: MemoryEntry,
+        *,
+        current_state: dict[str, object] | None = None,
+        cognitive_style: dict[str, object] | object | None = None,
+    ) -> None:
+        from .memory_state import normalize_agent_state
+
         internal, baseline_cycle, base_trace, base_access = _ensure_decay_baseline(entry)
         effective_cycle = _effective_cycle(entry, baseline_cycle)
         old_level = entry.store_level
         new_level = old_level
-        reasons: list[str] = []
-
-        if new_level is StoreLevel.SHORT and (
-            (
-                entry.salience >= self.short_to_mid_salience_threshold
-                and entry.retrieval_count >= self.short_to_mid_retrieval_threshold
+        state_vector = normalize_agent_state(current_state or self.agent_state_vector)
+        selectivity = _style_value(cognitive_style, "attention_selectivity", 0.0)
+        rigidity = _style_value(cognitive_style, "update_rigidity", 0.0)
+        identity_active = 1.0 if state_vector.identity_active_themes else 0.0
+        threat_snapshot_bonus = (
+            0.14
+            if (
+                state_vector.threat_level >= 0.60
+                and entry.arousal >= 0.55
+                and entry.memory_class is MemoryClass.EPISODIC
             )
-            or entry.relevance_self >= self.identity_priority_threshold
-        ):
+            else 0.0
+        )
+        novelty_noise_penalty = (
+            0.16 + (selectivity * 0.04)
+            if (
+                entry.novelty >= 0.75
+                and entry.relevance_self < 0.20
+                and identity_active > 0.0
+            )
+            else 0.0
+        )
+        retrieval_short = min(1.0, entry.retrieval_count / max(1, self.short_to_mid_retrieval_threshold))
+        retrieval_long = min(1.0, entry.retrieval_count / max(1, self.mid_to_long_retrieval_threshold))
+        identity_bonus = entry.relevance_self * (0.18 + (0.10 * identity_active))
+        score_breakdown = {
+            "salience_signal": round(entry.salience * 0.52, 6),
+            "retrieval_short_signal": round(retrieval_short * 0.16, 6),
+            "retrieval_long_signal": round(retrieval_long * 0.22, 6),
+            "identity_signal": round(identity_bonus, 6),
+            "threat_snapshot_bonus": round(threat_snapshot_bonus, 6),
+            "novelty_noise_penalty": round(novelty_noise_penalty, 6),
+            "rigidity_penalty": round(rigidity * 0.08, 6),
+            "selectivity_bias": round(selectivity * 0.03 * max(0.0, entry.relevance_self - 0.20), 6),
+        }
+        short_to_mid_score = (
+            score_breakdown["salience_signal"]
+            + score_breakdown["retrieval_short_signal"]
+            + score_breakdown["identity_signal"]
+            + score_breakdown["threat_snapshot_bonus"]
+            + score_breakdown["selectivity_bias"]
+            - score_breakdown["novelty_noise_penalty"]
+            - score_breakdown["rigidity_penalty"]
+        )
+        mid_to_long_score = (
+            (entry.salience * 0.44)
+            + score_breakdown["retrieval_long_signal"]
+            + (entry.relevance_self * (0.22 + (0.10 * identity_active)))
+            + (threat_snapshot_bonus * 0.85)
+            - novelty_noise_penalty
+            - (rigidity * 0.10)
+        )
+        score_thresholds = {"short_to_mid": 0.55, "mid_to_long": 0.72}
+        promotion_reasons = [
+            label
+            for label, value in (
+                ("salience_signal", entry.salience),
+                ("retrieval_signal", max(retrieval_short, retrieval_long)),
+                ("identity_alignment", entry.relevance_self),
+                ("threat_snapshot", threat_snapshot_bonus),
+            )
+            if float(value) > 0.0
+        ]
+        if entry.compression_metadata is None:
+            entry.compression_metadata = {}
+        entry.compression_metadata["m47_promotion_audit"] = {
+            "short_to_mid_score": round(short_to_mid_score, 6),
+            "mid_to_long_score": round(mid_to_long_score, 6),
+            "score_thresholds": dict(score_thresholds),
+            "score_breakdown": dict(score_breakdown),
+            "state_identity_active": bool(identity_active),
+        }
+
+        if new_level is StoreLevel.SHORT and short_to_mid_score >= score_thresholds["short_to_mid"]:
             new_level = StoreLevel.MID
-            if entry.relevance_self >= self.identity_priority_threshold:
-                reasons.append("identity_priority")
-            else:
-                reasons.append("salience_retrieval")
-
-        if new_level is StoreLevel.MID and (
-            (
-                entry.salience >= self.mid_to_long_salience_threshold
-                and entry.retrieval_count >= self.mid_to_long_retrieval_threshold
-            )
-            or (entry.relevance_self >= self.identity_long_threshold and entry.retrieval_count >= 2)
-        ):
-            if old_level is StoreLevel.SHORT and new_level is StoreLevel.MID:
-                reasons.append("promotion_chain")
+        if new_level is StoreLevel.MID and mid_to_long_score >= score_thresholds["mid_to_long"]:
             new_level = StoreLevel.LONG
-            if entry.relevance_self >= self.identity_long_threshold and entry.retrieval_count >= 2:
-                reasons.append("identity_long_priority")
-            else:
-                reasons.append("salience_retrieval")
 
         if new_level is old_level:
             return
 
-        elapsed = max(0, effective_cycle - baseline_cycle)
+        self.promote_entry(
+            entry,
+            new_level=new_level,
+            reasons=promotion_reasons,
+            effective_cycle=effective_cycle,
+            promotion_context={
+                "short_to_mid_threshold": score_thresholds["short_to_mid"],
+                "mid_to_long_threshold": score_thresholds["mid_to_long"],
+                "promotion_score_short_to_mid": round(short_to_mid_score, 6),
+                "promotion_score_mid_to_long": round(mid_to_long_score, 6),
+                "promotion_score_breakdown": dict(score_breakdown),
+                "promotion_channel": "memory_store_add",
+            },
+        )
+
+    def promote_entry(
+        self,
+        entry: MemoryEntry,
+        *,
+        new_level: StoreLevel,
+        reasons: list[str] | None = None,
+        effective_cycle: int | None = None,
+        promotion_context: dict[str, object] | None = None,
+    ) -> bool:
+        old_level = entry.store_level
+        if new_level is old_level:
+            return False
+
+        _, baseline_cycle, base_trace, base_access = _ensure_decay_baseline(entry)
+        resolved_cycle = _effective_cycle(entry, baseline_cycle) if effective_cycle is None else max(
+            int(effective_cycle),
+            baseline_cycle,
+            entry.created_at,
+            entry.last_accessed,
+        )
+        elapsed = max(0, resolved_cycle - baseline_cycle)
         old_trace = decay_trace_strength_for_level(
             base_trace,
             old_level,
@@ -378,10 +479,11 @@ class MemoryStore:
         entry.store_level = new_level
         entry.trace_strength = new_trace
         entry.accessibility = new_access
-        internal = _refresh_decay_baseline(entry, cycle=effective_cycle)
+        entry.last_accessed = max(entry.last_accessed, resolved_cycle)
+        internal = _refresh_decay_baseline(entry, cycle=entry.last_accessed)
         promotion_record = {
-            "reason": "+".join(reasons) if reasons else "promotion",
-            "effective_cycle": effective_cycle,
+            "reason": "+".join(reasons or []) if reasons else "promotion",
+            "effective_cycle": entry.last_accessed,
             "elapsed_since_baseline": elapsed,
             "old_level": old_level.value,
             "new_level": new_level.value,
@@ -394,16 +496,31 @@ class MemoryStore:
             "access_rate_before": access_decay_rate(old_level),
             "access_rate_after": access_decay_rate(new_level),
         }
+        if promotion_context:
+            promotion_record.update(deepcopy(promotion_context))
         history = internal.get("promotion_history")
         if not isinstance(history, list):
             history = []
             internal["promotion_history"] = history
         history.append(promotion_record)
         internal["last_promotion"] = promotion_record
+        return True
 
-    def add(self, entry: MemoryEntry) -> str:
+    def add(
+        self,
+        entry: MemoryEntry,
+        *,
+        current_state: dict[str, object] | None = None,
+        cognitive_style: dict[str, object] | object | None = None,
+    ) -> str:
+        from .memory_state import update_agent_state_vector
+
         entry.sync_content_hash()
-        self._promote_store_level(entry)
+        self._promote_store_level(
+            entry,
+            current_state=current_state,
+            cognitive_style=cognitive_style,
+        )
         _, baseline_cycle, _, _ = _ensure_decay_baseline(entry)
         effective_cycle = _effective_cycle(entry, baseline_cycle)
         _refresh_decay_baseline(entry, cycle=effective_cycle)
@@ -412,6 +529,14 @@ class MemoryStore:
             self.entries.append(entry)
         else:
             self.entries[existing_index] = entry
+        self.agent_state_vector = update_agent_state_vector(
+            self,
+            window_size=self.state_window_size,
+            cycle=max(entry.created_at, entry.last_accessed),
+            active_goals=_string_list(
+                current_state.get("active_goals") if isinstance(current_state, dict) else []
+            ),
+        ).to_dict()
         return entry.id
 
     def upsert_legacy_episode(self, payload: dict[str, object], *, index: int = 0) -> str:
@@ -478,10 +603,19 @@ class MemoryStore:
         *,
         current_mood: str | None = None,
         k: int = 5,
+        agent_state=None,
+        cognitive_style=None,
     ):
         from .memory_retrieval import retrieve
 
-        return retrieve(query, self, current_mood=current_mood, k=k)
+        return retrieve(
+            query,
+            self,
+            current_mood=current_mood,
+            k=k,
+            agent_state=agent_state or self.agent_state_vector,
+            cognitive_style=cognitive_style,
+        )
 
     def reconsolidate_entry(
         self,
@@ -493,6 +627,7 @@ class MemoryStore:
         current_state: dict[str, object] | None = None,
         recall_artifact=None,
         conflict_type=None,
+        cognitive_style=None,
     ):
         from .memory_consolidation import reconsolidate
 
@@ -508,6 +643,7 @@ class MemoryStore:
             current_state=current_state,
             recall_artifact=recall_artifact,
             conflict_type=conflict_type,
+            cognitive_style=cognitive_style,
         )
 
     def run_consolidation_cycle(
@@ -515,15 +651,18 @@ class MemoryStore:
         current_cycle: int,
         rng: random.Random,
         current_state: dict[str, object] | None = None,
+        cognitive_style=None,
     ):
         from .memory_consolidation import run_consolidation_cycle
 
-        return run_consolidation_cycle(
+        report = run_consolidation_cycle(
             self,
             current_cycle=current_cycle,
             rng=rng,
             current_state=current_state,
+            cognitive_style=cognitive_style,
         )
+        return report
 
     def mark_dormant(self, entry_id: str) -> None:
         entry = self.get(entry_id)
@@ -645,6 +784,8 @@ class MemoryStore:
             "mid_to_long_retrieval_threshold": self.mid_to_long_retrieval_threshold,
             "identity_priority_threshold": self.identity_priority_threshold,
             "identity_long_threshold": self.identity_long_threshold,
+            "state_window_size": self.state_window_size,
+            "agent_state_vector": dict(self.agent_state_vector or {}),
             "last_cleanup_report": dict(self.last_cleanup_report),
         }
 
@@ -674,6 +815,10 @@ class MemoryStore:
             identity_long_threshold=_coerce_float(
                 payload.get("identity_long_threshold"), 0.85
             ),
+            state_window_size=_coerce_int(payload.get("state_window_size"), 30),
+            agent_state_vector=dict(payload.get("agent_state_vector", {}))
+            if isinstance(payload.get("agent_state_vector"), dict)
+            else None,
             last_cleanup_report=dict(payload.get("last_cleanup_report", {}))
             if isinstance(payload.get("last_cleanup_report"), dict)
             else {},

@@ -1,0 +1,672 @@
+{
+  "schema_version": "m47_runtime_v1",
+  "state_vector_events": [
+    {
+      "episode_id": "sv-01",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "I promised mentor Lin that I would keep the lab protocol steady.",
+        "semantic_tags": ["mentor", "promise", "continuity", "lab"],
+        "context_tags": ["lab", "shift_a"],
+        "valence": 0.25,
+        "arousal": 0.22,
+        "novelty": 0.18,
+        "place": "lab",
+        "action": "promise_protocol",
+        "outcome": "commitment_renewed"
+      }
+    },
+    {
+      "episode_id": "sv-02",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "threat",
+      "raw_input": {
+        "content": "A reactor alarm spiked after a harsh calibration miss in the lab.",
+        "semantic_tags": ["alarm", "threat", "mentor", "lab"],
+        "context_tags": ["lab", "reactor"],
+        "valence": -0.55,
+        "arousal": 0.82,
+        "novelty": 0.54,
+        "place": "reactor_room",
+        "action": "calibration_miss",
+        "outcome": "alarm_triggered"
+      }
+    },
+    {
+      "episode_id": "sv-03",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "I reminded the apprentice that our promise is to protect the team before speed.",
+        "semantic_tags": ["mentor", "promise", "protect", "team"],
+        "context_tags": ["briefing", "lab"],
+        "valence": 0.20,
+        "arousal": 0.24,
+        "novelty": 0.12,
+        "place": "briefing_room",
+        "action": "mentor_guidance",
+        "outcome": "promise_reinforced"
+      }
+    },
+    {
+      "episode_id": "sv-04",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "noise",
+      "raw_input": {
+        "content": "A market display flashed bright colors outside the transit gate.",
+        "semantic_tags": ["market", "flash", "novelty"],
+        "context_tags": ["transit", "street"],
+        "valence": 0.05,
+        "arousal": 0.30,
+        "novelty": 0.78,
+        "place": "transit_gate",
+        "action": "notice_display",
+        "outcome": "passing_distraction"
+      }
+    },
+    {
+      "episode_id": "sv-05",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "Mentor Lin trusted me to carry the continuity log after the night shift.",
+        "semantic_tags": ["mentor", "trust", "continuity", "log"],
+        "context_tags": ["lab", "night_shift"],
+        "valence": 0.34,
+        "arousal": 0.28,
+        "novelty": 0.14,
+        "place": "archive",
+        "action": "carry_log",
+        "outcome": "trust_confirmed"
+      }
+    },
+    {
+      "episode_id": "sv-06",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "threat",
+      "raw_input": {
+        "content": "The containment screen flickered and made the room feel unsafe for a breath.",
+        "semantic_tags": ["containment", "threat", "lab"],
+        "context_tags": ["lab", "containment"],
+        "valence": -0.42,
+        "arousal": 0.72,
+        "novelty": 0.43,
+        "place": "containment",
+        "action": "stabilize_screen",
+        "outcome": "risk_mitigated"
+      }
+    },
+    {
+      "episode_id": "sv-07",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "I kept the promise to check the apprentice schedule before leaving.",
+        "semantic_tags": ["promise", "mentor", "schedule", "continuity"],
+        "context_tags": ["lab", "schedule"],
+        "valence": 0.18,
+        "arousal": 0.16,
+        "novelty": 0.10,
+        "place": "lab",
+        "action": "review_schedule",
+        "outcome": "commitment_kept"
+      }
+    },
+    {
+      "episode_id": "sv-08",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "The team linked my role to keeping mentor promises consistent across shifts.",
+        "semantic_tags": ["mentor", "promise", "role", "continuity"],
+        "context_tags": ["team_room", "shift_a"],
+        "valence": 0.26,
+        "arousal": 0.22,
+        "novelty": 0.11,
+        "place": "team_room",
+        "action": "role_confirmation",
+        "outcome": "identity_strengthened"
+      }
+    },
+    {
+      "episode_id": "sv-09",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "noise",
+      "raw_input": {
+        "content": "A courier drone painted a bright advertisement across the station wall.",
+        "semantic_tags": ["advertisement", "drone", "novelty"],
+        "context_tags": ["station", "street"],
+        "valence": 0.08,
+        "arousal": 0.34,
+        "novelty": 0.82,
+        "place": "station_wall",
+        "action": "watch_ad",
+        "outcome": "temporary_notice"
+      }
+    },
+    {
+      "episode_id": "sv-10",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "I wrote a continuity note for mentor Lin about why the promise still matters.",
+        "semantic_tags": ["mentor", "continuity", "promise", "note"],
+        "context_tags": ["archive", "lab"],
+        "valence": 0.24,
+        "arousal": 0.18,
+        "novelty": 0.12,
+        "place": "archive",
+        "action": "write_note",
+        "outcome": "identity_log_saved"
+      }
+    },
+    {
+      "episode_id": "sv-11",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "threat",
+      "raw_input": {
+        "content": "A warning ping said the outer hatch was briefly unsecured.",
+        "semantic_tags": ["warning", "threat", "security"],
+        "context_tags": ["outer_hatch", "lab"],
+        "valence": -0.38,
+        "arousal": 0.68,
+        "novelty": 0.36,
+        "place": "outer_hatch",
+        "action": "secure_hatch",
+        "outcome": "risk_contained"
+      }
+    },
+    {
+      "episode_id": "sv-12",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "Keeping the apprentice safe is still the promise that defines this role.",
+        "semantic_tags": ["promise", "apprentice", "mentor", "role"],
+        "context_tags": ["briefing", "lab"],
+        "valence": 0.22,
+        "arousal": 0.20,
+        "novelty": 0.10,
+        "place": "briefing_room",
+        "action": "renew_role",
+        "outcome": "identity_continues"
+      }
+    },
+    {
+      "episode_id": "sv-13",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "Mentor Lin thanked me for keeping the continuity checklist stable.",
+        "semantic_tags": ["mentor", "continuity", "checklist", "trust"],
+        "context_tags": ["lab", "checklist"],
+        "valence": 0.30,
+        "arousal": 0.20,
+        "novelty": 0.09,
+        "place": "lab",
+        "action": "stabilize_checklist",
+        "outcome": "trust_reaffirmed"
+      }
+    },
+    {
+      "episode_id": "sv-14",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "noise",
+      "raw_input": {
+        "content": "A pop-up gallery projected shimmering fish over the station floor.",
+        "semantic_tags": ["gallery", "projection", "novelty"],
+        "context_tags": ["station", "hallway"],
+        "valence": 0.12,
+        "arousal": 0.32,
+        "novelty": 0.80,
+        "place": "hallway",
+        "action": "watch_projection",
+        "outcome": "momentary_distraction"
+      }
+    },
+    {
+      "episode_id": "sv-15",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "The continuity promise came up again while I coached the new shift lead.",
+        "semantic_tags": ["continuity", "promise", "mentor", "coach"],
+        "context_tags": ["shift_change", "lab"],
+        "valence": 0.21,
+        "arousal": 0.18,
+        "novelty": 0.11,
+        "place": "shift_change",
+        "action": "coach_shift_lead",
+        "outcome": "promise_transferred"
+      }
+    },
+    {
+      "episode_id": "sv-16",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "I reviewed the mentor log so the apprentice would inherit a stable narrative.",
+        "semantic_tags": ["mentor", "log", "continuity", "apprentice"],
+        "context_tags": ["archive", "shift_change"],
+        "valence": 0.23,
+        "arousal": 0.17,
+        "novelty": 0.10,
+        "place": "archive",
+        "action": "review_log",
+        "outcome": "narrative_stabilized"
+      }
+    },
+    {
+      "episode_id": "sv-17",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "threat",
+      "raw_input": {
+        "content": "A coolant hiss sounded wrong and briefly pushed everyone into caution.",
+        "semantic_tags": ["coolant", "threat", "caution"],
+        "context_tags": ["reactor", "lab"],
+        "valence": -0.36,
+        "arousal": 0.66,
+        "novelty": 0.35,
+        "place": "reactor_room",
+        "action": "check_coolant",
+        "outcome": "caution_spike"
+      }
+    },
+    {
+      "episode_id": "sv-18",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "The apprentice repeated our promise back to me, which strengthened the role.",
+        "semantic_tags": ["apprentice", "promise", "mentor", "role"],
+        "context_tags": ["briefing", "team_room"],
+        "valence": 0.28,
+        "arousal": 0.20,
+        "novelty": 0.09,
+        "place": "team_room",
+        "action": "repeat_promise",
+        "outcome": "role_confirmed"
+      }
+    },
+    {
+      "episode_id": "sv-19",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "I updated the continuity board so the next shift could trust the promise chain.",
+        "semantic_tags": ["continuity", "promise", "trust", "board"],
+        "context_tags": ["lab", "shift_b"],
+        "valence": 0.22,
+        "arousal": 0.18,
+        "novelty": 0.10,
+        "place": "lab",
+        "action": "update_board",
+        "outcome": "handoff_supported"
+      }
+    },
+    {
+      "episode_id": "sv-20",
+      "stream_id": "state_vector",
+      "seed_group": "core",
+      "supports_gates": ["state_vector_dynamics"],
+      "memory_role": "identity",
+      "raw_input": {
+        "content": "Mentor Lin said the most important job is still keeping the promise alive.",
+        "semantic_tags": ["mentor", "promise", "continuity", "identity"],
+        "context_tags": ["lab", "night_shift"],
+        "valence": 0.25,
+        "arousal": 0.21,
+        "novelty": 0.08,
+        "place": "lab",
+        "action": "mentor_reinforcement",
+        "outcome": "identity_active"
+      }
+    }
+  ],
+  "dynamic_salience_probe": {
+    "raw_input": {
+      "content": "I kept the mentor promise while monitoring a risky repair window.",
+      "semantic_tags": ["mentor", "promise", "repair", "goal"],
+      "context_tags": ["lab", "repair"],
+      "valence": 0.10,
+      "arousal": 0.42,
+      "novelty": 0.36,
+      "place": "lab",
+      "action": "monitor_repair",
+      "outcome": "repair_stabilized"
+    },
+    "identity_event": {
+      "content": "Keeping the continuity promise with mentor Lin still defines my role.",
+      "semantic_tags": ["mentor", "promise", "continuity", "identity"],
+      "context_tags": ["lab", "archive"],
+      "roles": ["mentor_keeper", "continuity_guardian"],
+      "relationships": ["mentor_lin"],
+      "commitments": ["keep promises", "protect mentees", "continuity"],
+      "identity_themes": ["mentor", "promise", "continuity"],
+      "identity_relevance_hint": 0.9,
+      "valence": 0.18,
+      "arousal": 0.18,
+      "novelty": 0.12,
+      "place": "archive",
+      "action": "affirm_identity",
+      "outcome": "identity_reinforced"
+    },
+    "novelty_noise": {
+      "content": "A festival drone show flashed over the station while I walked past.",
+      "semantic_tags": ["festival", "drone", "flash", "novelty"],
+      "context_tags": ["station", "street"],
+      "valence": 0.08,
+      "arousal": 0.32,
+      "novelty": 0.86,
+      "place": "station",
+      "action": "watch_show",
+      "outcome": "passing_novelty"
+    }
+  },
+  "cognitive_style_probe": {
+    "uncertainty_input": {
+      "content": "The warning pattern looked unfamiliar and may signal a new reactor fault.",
+      "semantic_tags": ["warning", "novel", "fault", "reactor"],
+      "context_tags": ["reactor", "lab"],
+      "valence": -0.10,
+      "arousal": 0.34,
+      "novelty": 0.62,
+      "place": "reactor_room",
+      "action": "inspect_warning",
+      "outcome": "fault_unclear"
+    },
+    "error_input": {
+      "content": "A preventable calibration mistake harmed the timeline for the team.",
+      "semantic_tags": ["error", "calibration", "team"],
+      "context_tags": ["lab", "calibration"],
+      "valence": -0.62,
+      "arousal": 0.58,
+      "novelty": 0.22,
+      "place": "lab",
+      "action": "review_error",
+      "outcome": "team_delay"
+    },
+    "selectivity_input": {
+      "content": "Mentor promise continuity archive repair apprentice schedule signal overlap.",
+      "semantic_tags": ["mentor", "promise", "continuity", "archive", "repair", "apprentice"],
+      "context_tags": ["lab", "archive", "repair", "schedule"],
+      "valence": 0.10,
+      "arousal": 0.24,
+      "novelty": 0.30,
+      "place": "archive",
+      "action": "sort_notes",
+      "outcome": "notes_grouped"
+    },
+    "identity_input": {
+      "content": "My role is to keep mentor promises stable even when updates feel noisy.",
+      "semantic_tags": ["mentor", "promise", "role", "identity"],
+      "context_tags": ["lab", "briefing"],
+      "valence": 0.16,
+      "arousal": 0.22,
+      "novelty": 0.40,
+      "place": "briefing_room",
+      "action": "affirm_role",
+      "outcome": "identity_preserved"
+    }
+  },
+  "short_seed_groups": [
+    {
+      "seed_group": "short_a",
+      "threat_learning": [
+        "reactor alarm during mentor patrol",
+        "containment warning during apprentice drill",
+        "security breach notice near archive room",
+        "hatch failure during transfer shift",
+        "coolant anomaly beside reactor hall",
+        "pressure spike during calibration review",
+        "fire suppression warning over lab grid",
+        "power dip during mentor briefing",
+        "radiation badge alert near vent line",
+        "sensor fault during continuity handoff"
+      ],
+      "semantic_clusters": [
+        {
+          "cluster_id": "overlap_lab_a",
+          "entries": [
+            {
+              "episode_id": "sb-a1",
+              "stream_id": "short_interference",
+              "seed_group": "short_a",
+              "supports_gates": ["behavioral_scenario_B_interference"],
+              "memory_role": "semantic_overlap",
+              "raw_input": {
+                "content": "Mentor archive protocol for reactor pattern A after a late promise review.",
+                "memory_class": "semantic",
+                "semantic_tags": ["mentor", "archive", "protocol", "reactor", "pattern"],
+                "context_tags": ["lab", "archive"],
+                "valence": 0.10,
+                "arousal": 0.28,
+                "novelty": 0.25,
+                "place": "archive",
+                "action": "catalog_pattern_a",
+                "outcome": "pattern_a_logged"
+              }
+            },
+            {
+              "episode_id": "sb-a2",
+              "stream_id": "short_interference",
+              "seed_group": "short_a",
+              "supports_gates": ["behavioral_scenario_B_interference"],
+              "memory_role": "semantic_overlap",
+              "raw_input": {
+                "content": "Mentor archive procedure for reactor pattern B after promise review.",
+                "memory_class": "semantic",
+                "semantic_tags": ["mentor", "archive", "procedure", "reactor", "pattern"],
+                "context_tags": ["lab", "archive"],
+                "valence": 0.10,
+                "arousal": 0.28,
+                "novelty": 0.25,
+                "place": "archive",
+                "action": "catalog_pattern_b",
+                "outcome": "pattern_b_logged"
+              }
+            },
+            {
+              "episode_id": "sb-a3",
+              "stream_id": "short_interference",
+              "seed_group": "short_a",
+              "supports_gates": ["behavioral_scenario_B_interference"],
+              "memory_role": "semantic_overlap",
+              "raw_input": {
+                "content": "Mentor archive heuristic for reactor pattern C after promise review.",
+                "memory_class": "semantic",
+                "semantic_tags": ["mentor", "archive", "heuristic", "reactor", "pattern"],
+                "context_tags": ["lab", "archive"],
+                "valence": 0.10,
+                "arousal": 0.28,
+                "novelty": 0.25,
+                "place": "archive",
+                "action": "catalog_pattern_c",
+                "outcome": "pattern_c_logged"
+              }
+            }
+          ],
+          "queries": [
+            {
+              "semantic_tags": ["mentor", "archive", "reactor"],
+              "context_tags": ["lab"],
+              "content_keywords": ["pattern"]
+            },
+            {
+              "semantic_tags": ["mentor", "pattern", "protocol"],
+              "context_tags": ["archive"],
+              "content_keywords": ["review"]
+            },
+            {
+              "semantic_tags": ["archive", "reactor", "pattern"],
+              "context_tags": ["lab"],
+              "content_keywords": ["mentor"]
+            }
+          ]
+        },
+        {
+          "cluster_id": "overlap_lab_b",
+          "entries": [
+            {
+              "episode_id": "sb-b1",
+              "stream_id": "short_interference",
+              "seed_group": "short_a",
+              "supports_gates": ["behavioral_scenario_B_interference"],
+              "memory_role": "semantic_overlap",
+              "raw_input": {
+                "content": "Continuity board checklist for mentor handoff after shift alpha.",
+                "memory_class": "semantic",
+                "semantic_tags": ["continuity", "board", "mentor", "handoff", "shift"],
+                "context_tags": ["lab", "shift_a"],
+                "valence": 0.10,
+                "arousal": 0.26,
+                "novelty": 0.22,
+                "place": "lab",
+                "action": "log_handoff_a",
+                "outcome": "handoff_a_logged"
+              }
+            },
+            {
+              "episode_id": "sb-b2",
+              "stream_id": "short_interference",
+              "seed_group": "short_a",
+              "supports_gates": ["behavioral_scenario_B_interference"],
+              "memory_role": "semantic_overlap",
+              "raw_input": {
+                "content": "Continuity board routine for mentor handoff after shift beta.",
+                "memory_class": "semantic",
+                "semantic_tags": ["continuity", "board", "mentor", "handoff", "shift"],
+                "context_tags": ["lab", "shift_b"],
+                "valence": 0.10,
+                "arousal": 0.26,
+                "novelty": 0.22,
+                "place": "lab",
+                "action": "log_handoff_b",
+                "outcome": "handoff_b_logged"
+              }
+            },
+            {
+              "episode_id": "sb-b3",
+              "stream_id": "short_interference",
+              "seed_group": "short_a",
+              "supports_gates": ["behavioral_scenario_B_interference"],
+              "memory_role": "semantic_overlap",
+              "raw_input": {
+                "content": "Continuity board habit for mentor handoff after shift gamma.",
+                "memory_class": "semantic",
+                "semantic_tags": ["continuity", "board", "mentor", "handoff", "shift"],
+                "context_tags": ["lab", "shift_c"],
+                "valence": 0.10,
+                "arousal": 0.26,
+                "novelty": 0.22,
+                "place": "lab",
+                "action": "log_handoff_c",
+                "outcome": "handoff_c_logged"
+              }
+            }
+          ],
+          "queries": [
+            {
+              "semantic_tags": ["continuity", "mentor", "handoff"],
+              "context_tags": ["lab"],
+              "content_keywords": ["shift"]
+            },
+            {
+              "semantic_tags": ["board", "mentor", "shift"],
+              "context_tags": ["lab"],
+              "content_keywords": ["handoff"]
+            },
+            {
+              "semantic_tags": ["continuity", "board", "shift"],
+              "context_tags": ["lab"],
+              "content_keywords": ["mentor"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "seed_group": "short_b",
+      "threat_learning": [
+        "airlock tremor before mentor check-in",
+        "stalled coolant pulse during archive escort",
+        "manual override warning in the control bay",
+        "fractured gauge reading during repair watch",
+        "dark corridor alarm on the transit spine",
+        "failed vent cycle beside the apprentice room",
+        "pressure leak notice by the reactor steps",
+        "sensor desync during containment review",
+        "backup power fault over the hall bridge",
+        "unexpected thermal alert near storage"
+      ],
+      "semantic_clusters": []
+    },
+    {
+      "seed_group": "short_c",
+      "threat_learning": [
+        "fire door warning during handoff walk",
+        "reactor mist event near the mentor station",
+        "shorted panel warning in the archive hall",
+        "control lag spike during apprentice drill",
+        "intake blockage alert beside vent access",
+        "security siren after a false badge read",
+        "support beam crack notice over transit ring",
+        "service tunnel alarm near coolant line",
+        "manual lock error during late repair",
+        "unexpected oxygen drop in the quiet bay"
+      ],
+      "semantic_clusters": []
+    }
+  ],
+  "long_seed_groups": [
+    {
+      "seed_group": "long_a",
+      "cycles": 220,
+      "query_mode": "default"
+    },
+    {
+      "seed_group": "long_b",
+      "cycles": 220,
+      "query_mode": "default"
+    }
+  ]
+}
