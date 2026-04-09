@@ -7,6 +7,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from .memory_model import AnchorStrength, MemoryClass, MemoryEntry, SourceType, StoreLevel
+from .memory_state import identity_match_ratio_for_entry, normalize_agent_state
 from .memory_retrieval import RecallArtifact
 
 if TYPE_CHECKING:
@@ -408,6 +409,7 @@ def reconsolidate(
     current_state: dict[str, object] | None = None,
     recall_artifact: RecallArtifact | None = None,
     conflict_type: ConflictType | None = None,
+    cognitive_style=None,
 ) -> ReconsolidationReport:
     before_version = entry.version
     before_source_confidence = entry.source_confidence
@@ -416,8 +418,17 @@ def reconsolidate(
     fields_rebound: list[str] = []
     fields_reconstructed: list[str] = []
     conflict_flags: list[str] = []
+    update_rigidity = _clamp(_style_value(current_state, "update_rigidity", 0.0))
+    error_aversion = _clamp(_style_value(current_state, "error_aversion", 0.0))
+    normalized_state = normalize_agent_state(current_state)
+    identity_match = identity_match_ratio_for_entry(entry, normalized_state)
+    effective_boost_access = BOOST_ACCESS * (1.0 - (update_rigidity * 0.3))
+    if identity_match > 0.0 and entry.relevance_self >= 0.35:
+        effective_boost_access *= max(0.75, 1.0 - (identity_match * 0.25))
+    if error_aversion >= 0.60 and entry.valence < 0.0:
+        effective_boost_access *= 1.05
 
-    entry.accessibility = _clamp(entry.accessibility + BOOST_ACCESS)
+    entry.accessibility = _clamp(entry.accessibility + effective_boost_access)
     entry.trace_strength = _clamp(entry.trace_strength + BOOST_TRACE)
     entry.retrieval_count += 1
     entry.abstractness = _clamp(entry.abstractness + ABSTRACTNESS_INCREMENT)
@@ -454,7 +465,12 @@ def reconsolidate(
             current_cycle=current_cycle or entry.last_accessed,
             current_state=current_state,
         )
-        if _style_value(current_state, "update_rigidity", 0.0) < 0.85:
+        reconstruction_blocked = update_rigidity >= 0.85
+        if identity_match >= 0.50 and entry.relevance_self >= 0.45:
+            reconstruction_blocked = True
+        if error_aversion >= 0.60 and entry.valence < 0.0:
+            reconstruction_blocked = True
+        if not reconstruction_blocked:
             reconstruction = maybe_reconstruct(entry, store.entries, store, config)
             if reconstruction.triggered:
                 reconstructed_entry = reconstruction.entry
@@ -737,15 +753,31 @@ def consolidate_upgrade(
     current_cycle: int,
     *,
     current_state: dict[str, object] | None = None,
+    cognitive_style=None,
 ) -> UpgradeReport:
+    state_vector = normalize_agent_state(current_state or getattr(store, "agent_state_vector", None))
+    update_rigidity = _clamp(_style_value(current_state, "update_rigidity", 0.0))
     promoted_ids: list[str] = []
     reasons: dict[str, str] = {}
-    identity_bias = 0.10 if current_state and _string_list(current_state.get("identity_themes")) else 0.0
-    threat_bias = 0.08 if current_state and float(current_state.get("threat_level", 0.0)) >= 0.6 else 0.0
+    identity_bias = 0.10 if state_vector.identity_active_themes else 0.0
+    threat_bias = 0.08 if state_vector.threat_level >= 0.6 else 0.0
+    group_support: dict[str, int] = {}
+    for entry in store.entries:
+        if len(entry.semantic_tags) < 2:
+            continue
+        signature = "|".join(sorted(tag.lower() for tag in entry.semantic_tags[:2]))
+        group_support[signature] = group_support.get(signature, 0) + 1
     for entry in store.entries:
         redundancy = 0.20 if dict(entry.compression_metadata or {}).get("absorbed_by") else 0.0
-        pattern_support = min(1.0, entry.support_count / DEFAULT_MINIMUM_SUPPORT)
+        signature = "|".join(sorted(tag.lower() for tag in entry.semantic_tags[:2])) if len(entry.semantic_tags) >= 2 else ""
+        cluster_support_count = group_support.get(signature, 0)
+        pattern_support = max(
+            min(1.0, entry.support_count / DEFAULT_MINIMUM_SUPPORT),
+            min(1.0, cluster_support_count / DEFAULT_MINIMUM_SUPPORT),
+        )
         retrieval_norm = min(1.0, entry.retrieval_count / 4.0)
+        identity_alignment = identity_match_ratio_for_entry(entry, state_vector)
+        novelty_noise_penalty = 0.24 if entry.novelty >= 0.75 and entry.relevance_self < 0.20 else 0.0
         priority = (
             (0.35 * entry.salience)
             + (0.25 * retrieval_norm)
@@ -753,17 +785,46 @@ def consolidate_upgrade(
             - (0.15 * redundancy)
             + identity_bias
             + threat_bias
+            + (identity_alignment * 0.15)
+            - novelty_noise_penalty
         )
-        if entry.store_level is StoreLevel.SHORT and priority > 0.45:
-            entry.store_level = StoreLevel.MID
-            promoted_ids.append(entry.id)
-            reasons[entry.id] = "short_to_mid_priority"
-        elif entry.store_level is StoreLevel.MID and (
-            priority > 0.68 or (entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED} and entry.support_count >= 3)
+        if entry.relevance_self >= 0.35 and identity_alignment > 0.0:
+            priority += 0.08 + (identity_alignment * 0.12)
+        if update_rigidity >= 0.70 and entry.relevance_self >= 0.35:
+            priority += 0.04
+        old_level = entry.store_level
+        new_level = old_level
+        promotion_reasons: list[str] = []
+        if old_level is StoreLevel.SHORT and priority > 0.45:
+            new_level = StoreLevel.MID
+            promotion_reasons.append("short_to_mid_priority")
+            if cluster_support_count >= DEFAULT_MINIMUM_SUPPORT:
+                promotion_reasons.append("cluster_support")
+        elif old_level is StoreLevel.MID and (
+            priority > 0.68
+            or (entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED} and entry.support_count >= 3)
         ):
-            entry.store_level = StoreLevel.LONG
+            new_level = StoreLevel.LONG
+            promotion_reasons.append("mid_to_long_stability")
+            if entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED} and entry.support_count >= 3:
+                promotion_reasons.append("stable_abstraction_support")
+        if store.promote_entry(
+            entry,
+            new_level=new_level,
+            reasons=promotion_reasons,
+            effective_cycle=current_cycle,
+            promotion_context={
+                "promotion_channel": "consolidation_cycle",
+                "consolidation_priority": round(priority, 6),
+                "pattern_support": round(pattern_support, 6),
+                "cluster_support_count": cluster_support_count,
+                "retrieval_norm": round(retrieval_norm, 6),
+                "identity_alignment": round(identity_alignment, 6),
+                "redundancy_penalty": round(redundancy, 6),
+            },
+        ):
             promoted_ids.append(entry.id)
-            reasons[entry.id] = "mid_to_long_stability"
+            reasons[entry.id] = "+".join(promotion_reasons) if promotion_reasons else "promotion"
     return UpgradeReport(promoted_ids=promoted_ids, promotion_reasons=reasons)
 
 
@@ -807,18 +868,24 @@ def run_consolidation_cycle(
     current_cycle: int,
     rng: random.Random,
     current_state: dict[str, object] | None = None,
+    cognitive_style=None,
 ) -> ConsolidationReport:
-    upgrade = consolidate_upgrade(store, current_cycle, current_state=current_state)
+    upgrade = consolidate_upgrade(
+        store,
+        current_cycle,
+        current_state=current_state,
+        cognitive_style=cognitive_style,
+    )
     extracted = extract_patterns(store)
     extracted_ids: list[str] = []
     for entry in extracted:
-        store.add(entry)
+        store.add(entry, current_state=current_state, cognitive_style=cognitive_style)
         extracted_ids.append(entry.id)
     replay_created = constrained_replay(store, rng=rng)
     replay_created_ids: list[str] = []
     validated_ids: list[str] = []
     for entry in replay_created:
-        store.add(entry)
+        store.add(entry, current_state=current_state, cognitive_style=cognitive_style)
         replay_created_ids.append(entry.id)
         validation = validate_inference(entry)
         if validation.passed:

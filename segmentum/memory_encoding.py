@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 import re
 from typing import Any
 
+from .m4_cognitive_style import CognitiveStyleParameters
 from .memory_model import (
     AnchorStrength,
     MemoryClass,
@@ -11,6 +12,7 @@ from .memory_model import (
     SourceType,
     StoreLevel,
 )
+from .memory_state import merge_state_context, resolve_dynamic_salience
 
 
 EMERGENCY_AROUSAL_THRESHOLD = 0.9
@@ -722,18 +724,84 @@ def _default_lineage_metadata(
     return derived_from, metadata
 
 
+def _style_value(
+    cognitive_style: CognitiveStyleParameters | dict[str, object] | None,
+    key: str,
+    default: float = 0.0,
+) -> float:
+    if cognitive_style is None:
+        return default
+    if hasattr(cognitive_style, key):
+        try:
+            return float(getattr(cognitive_style, key))
+        except (TypeError, ValueError):
+            return default
+    if isinstance(cognitive_style, dict):
+        try:
+            return float(cognitive_style.get(key, default))
+        except (TypeError, ValueError):
+            return default
+    return default
+
+
+def _effective_attention(raw_attention: float, signals: list[float], attention_selectivity: float) -> tuple[float, dict[str, object]]:
+    active_signal_count = sum(1 for score in signals if score >= 0.30)
+    k = max(1, int(round(5 - (attention_selectivity * 4))))
+    is_top_signal = active_signal_count <= k
+    multiplier = 1.0 if is_top_signal else (1.0 - (attention_selectivity * 0.5))
+    return _clamp(raw_attention * multiplier), {
+        "raw_attention": round(raw_attention, 6),
+        "attention_selectivity": round(attention_selectivity, 6),
+        "active_signal_count": active_signal_count,
+        "top_k": k,
+        "is_top_signal": is_top_signal,
+        "multiplier": round(multiplier, 6),
+    }
+
+
+def _focus_tags_for_selectivity(
+    semantic_tags: list[str],
+    context_tags: list[str],
+    *,
+    attention_selectivity: float,
+) -> tuple[list[str], list[str], dict[str, object]]:
+    semantic_limit = max(2, int(round(6 - (attention_selectivity * 4))))
+    context_limit = max(1, int(round(4 - (attention_selectivity * 3))))
+    focused_semantic = list(semantic_tags[:semantic_limit])
+    focused_context = list(context_tags[:context_limit])
+    return focused_semantic, focused_context, {
+        "semantic_limit": semantic_limit,
+        "context_limit": context_limit,
+        "semantic_before": list(semantic_tags),
+        "semantic_after": list(focused_semantic),
+        "context_before": list(context_tags),
+        "context_after": list(focused_context),
+    }
+
+
 def encode_memory(
     raw_input: dict[str, Any],
     current_state: dict[str, Any],
     config: SalienceConfig,
+    *,
+    agent_state=None,
+    cognitive_style: CognitiveStyleParameters | dict[str, object] | None = None,
 ) -> MemoryEntry:
-    signals = _build_encoding_signals(raw_input, current_state)
+    state_context = merge_state_context(
+        current_state,
+        agent_state=agent_state,
+        cognitive_style=cognitive_style,
+    )
+    signals = _build_encoding_signals(raw_input, state_context)
+    dynamic_regulation = resolve_dynamic_salience(
+        raw_input,
+        state_context,
+        config,
+        agent_state=agent_state,
+    )
     memory_class, memory_class_reason = _infer_memory_class(raw_input, signals)
     source_type, source_type_reason = _infer_source_type(raw_input, memory_class)
     content = _derive_content(raw_input, memory_class)
-    semantic_tags, context_tags = _derive_tags(raw_input, content)
-    anchor_slots, anchor_strengths, anchor_reasoning = _derive_anchor_slots(raw_input, memory_class, signals)
-
     valence = _coerce_float(raw_input.get("valence"), 0.0)
     arousal = _clamp(
         _coerce_float(
@@ -741,7 +809,30 @@ def encode_memory(
             max(abs(valence) * 0.5, _coerce_float(raw_input.get("threat_level"), 0.0)),
         )
     )
-    attention = _clamp(_coerce_float(raw_input.get("encoding_attention", raw_input.get("attention", 0.5)), 0.5))
+    uncertainty_sensitivity = _clamp(_style_value(cognitive_style, "uncertainty_sensitivity", 0.0))
+    error_aversion = _clamp(_style_value(cognitive_style, "error_aversion", 0.0))
+    attention_selectivity = _clamp(_style_value(cognitive_style, "attention_selectivity", 0.0))
+    semantic_tags, context_tags = _derive_tags(raw_input, content)
+    semantic_tags, context_tags, tag_focus_audit = _focus_tags_for_selectivity(
+        semantic_tags,
+        context_tags,
+        attention_selectivity=attention_selectivity,
+    )
+    anchor_slots, anchor_strengths, anchor_reasoning = _derive_anchor_slots(raw_input, memory_class, signals)
+    if dynamic_regulation.identity_match_ratio > 0.0 and signals.self.score >= 0.35:
+        if anchor_slots.get("agents"):
+            anchor_strengths["agents"] = AnchorStrength.LOCKED.value
+            anchor_reasoning["reasons"].append("state_identity_locked_agents")
+        if anchor_slots.get("time"):
+            anchor_strengths["time"] = AnchorStrength.STRONG.value
+            anchor_reasoning["reasons"].append("state_identity_strengthened_time")
+    if float(state_context.get("threat_level", 0.0)) >= 0.60 and memory_class is MemoryClass.EPISODIC:
+        for key in ("agents", "action", "outcome"):
+            anchor_strengths[key] = AnchorStrength.LOCKED.value if key == "outcome" else AnchorStrength.STRONG.value
+        anchor_reasoning["reasons"].append("state_threat_strengthened_core")
+    if valence < 0.0:
+        arousal = _clamp(arousal * (1.0 + (error_aversion * 0.25)))
+    raw_attention = _clamp(_coerce_float(raw_input.get("encoding_attention", raw_input.get("attention", 0.5)), 0.5))
     novelty = _clamp(
         _coerce_float(
             raw_input.get("novelty"),
@@ -751,19 +842,56 @@ def encode_memory(
             ),
         )
     )
+    novelty = _clamp(novelty * (1.0 + (uncertainty_sensitivity * 0.3)))
+    effective_self_relevance = _clamp(
+        signals.self.score * dynamic_regulation.effective_relevance_self_multiplier
+    )
+    attention, attention_audit = _effective_attention(
+        raw_attention,
+        [
+            signals.goal.score,
+            signals.threat.score,
+            signals.self.score,
+            signals.social.score,
+            signals.reward.score,
+            novelty,
+            arousal,
+        ],
+        attention_selectivity,
+    )
+    effective_config = SalienceConfig(
+        w_arousal=dynamic_regulation.effective_w_arousal,
+        w_attention=dynamic_regulation.effective_w_attention,
+        w_novelty=dynamic_regulation.effective_w_novelty,
+        w_relevance=dynamic_regulation.effective_w_relevance,
+        relevance_weights=dict(config.relevance_weights),
+    )
 
     relevance, relevance_audit = aggregate_relevance(
         goal=signals.goal.score,
         threat=signals.threat.score,
-        self=signals.self.score,
+        self=effective_self_relevance,
         social=signals.social.score,
         reward=signals.reward.score,
-        config=config,
+        config=effective_config,
     )
-    salience = compute_salience(arousal, attention, novelty, relevance, config)
+    salience = compute_salience(arousal, attention, novelty, relevance, effective_config)
     store_level = StoreLevel.LONG if (
         arousal > EMERGENCY_AROUSAL_THRESHOLD or salience > EMERGENCY_SALIENCE_THRESHOLD
     ) else StoreLevel.SHORT
+    if (
+        store_level is StoreLevel.SHORT
+        and dynamic_regulation.identity_match_ratio > 0.0
+        and effective_self_relevance >= 0.50
+        and novelty <= 0.45
+    ):
+        memory_class_reason = f"{memory_class_reason}+identity_active_retention_bias_pending_store"
+    if (
+        memory_class is MemoryClass.EPISODIC
+        and float(state_context.get("threat_level", 0.0)) >= 0.60
+        and arousal >= 0.55
+    ):
+        memory_class_reason = f"{memory_class_reason}+threat_snapshot_bias"
 
     procedure_steps = _string_list(raw_input.get("procedure_steps"))
     step_confidence = [
@@ -789,6 +917,21 @@ def encode_memory(
         retention_priority=_derive_retention_priority(signals, salience, novelty, arousal),
     )
     metadata["encoding_audit"] = audit.to_dict()
+    metadata["dynamic_salience_audit"] = dynamic_regulation.audit.to_dict()
+    metadata["cognitive_style_effects"] = {
+        "uncertainty_sensitivity": round(uncertainty_sensitivity, 6),
+        "error_aversion": round(error_aversion, 6),
+        "attention_selectivity": round(attention_selectivity, 6),
+        "effective_attention": dict(attention_audit),
+        "tag_focus": dict(tag_focus_audit),
+        "effective_novelty": round(novelty, 6),
+        "effective_arousal": round(arousal, 6),
+    }
+    metadata["structural_decisions"] = {
+        "memory_class_reason": memory_class_reason,
+        "store_level": store_level.value,
+        "anchor_reasoning": dict(anchor_reasoning),
+    }
 
     entry = MemoryEntry(
         content=content,
@@ -803,7 +946,7 @@ def encode_memory(
         novelty=novelty,
         relevance_goal=signals.goal.score,
         relevance_threat=signals.threat.score,
-        relevance_self=signals.self.score,
+        relevance_self=effective_self_relevance,
         relevance_social=signals.social.score,
         relevance_reward=signals.reward.score,
         relevance=relevance,
@@ -820,7 +963,7 @@ def encode_memory(
         procedure_steps=procedure_steps,
         step_confidence=step_confidence,
         execution_contexts=execution_contexts,
-        mood_context=_normalize_text(raw_input.get("mood_context") or current_state.get("recent_mood_baseline")),
+        mood_context=_normalize_text(raw_input.get("mood_context") or state_context.get("recent_mood_baseline")),
         retrieval_count=max(0, int(_coerce_float(raw_input.get("retrieval_count"), 0.0))),
         support_count=max(1, int(_coerce_float(raw_input.get("support_count"), 1.0))),
         counterevidence_count=max(0, int(_coerce_float(raw_input.get("counterevidence_count"), 0.0))),
