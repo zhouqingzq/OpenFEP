@@ -15,8 +15,6 @@ from segmentum.m45_audit import M45_REPORT_PATH, write_m45_acceptance_artifacts
 from segmentum.m45_acceptance_data import REGRESSION_TARGETS as M45_REGRESSION_TARGETS
 from segmentum.m46_audit import M46_REPORT_PATH, write_m46_acceptance_artifacts
 from segmentum.m47_audit import M47_REPORT_PATH, write_m47_acceptance_artifacts
-from segmentum.m48_audit import M48_REPORT_PATH, write_m48_acceptance_artifacts
-from segmentum.m49_audit import M49_REPORT_PATH, write_m49_acceptance_artifacts
 
 
 FIXED_STARTED_AT = "2026-04-09T00:00:00+00:00"
@@ -57,64 +55,6 @@ M47_AUDIT_FIELDS = {
     "base_short_to_mid_score",
     "boosted_short_to_mid_score",
     "score_cap_applied",
-}
-FROZEN_M48_REGRESSIONS = {
-    "m44": {
-        "joint_fit": r"E:\workspace\segments\artifacts\m44_joint_fit.json",
-        "degradation": r"E:\workspace\segments\artifacts\m44_degradation.json",
-        "parameter_stability": r"E:\workspace\segments\artifacts\m44_parameter_stability.json",
-        "weight_sensitivity": r"E:\workspace\segments\artifacts\m44_weight_sensitivity.json",
-        "igt_aggregate": r"E:\workspace\segments\artifacts\m44_igt_aggregate.json",
-        "architecture_assessment": r"E:\workspace\segments\artifacts\m44_architecture_assessment.json",
-        "report": r"E:\workspace\segments\reports\m44_acceptance_report.json",
-        "summary": r"E:\workspace\segments\reports\m44_acceptance_summary.md",
-    },
-    "m36": {
-        "trace": r"E:\workspace\segments\artifacts\m36_open_world_growth_trace.json",
-        "ablation": r"E:\workspace\segments\artifacts\m36_open_world_growth_ablation.json",
-        "stress": r"E:\workspace\segments\artifacts\m36_open_world_growth_stress.json",
-        "snapshots": r"E:\workspace\segments\artifacts\m36_open_world_growth_snapshots.json",
-        "failure_audit": r"E:\workspace\segments\artifacts\m36_open_world_growth_failure_audit.json",
-        "report": r"E:\workspace\segments\reports\m36_acceptance_report.json",
-        "summary": r"E:\workspace\segments\reports\m36_acceptance_summary.md",
-    },
-}
-FROZEN_M49_REGRESSIONS = {
-    "m48": {
-        "trace": r"E:\workspace\segments\artifacts\m48_open_world_trace.json",
-        "mapping": r"E:\workspace\segments\artifacts\m48_parameter_projection.json",
-        "ablation": r"E:\workspace\segments\artifacts\m48_open_world_ablation.json",
-        "stress": r"E:\workspace\segments\artifacts\m48_open_world_stress.json",
-        "report": r"E:\workspace\segments\reports\m48_acceptance_report.json",
-        "summary": r"E:\workspace\segments\reports\m48_acceptance_summary.md",
-    },
-    "m44": {
-        "joint_fit": r"E:\workspace\segments\artifacts\m44_joint_fit.json",
-        "degradation": r"E:\workspace\segments\artifacts\m44_degradation.json",
-        "parameter_stability": r"E:\workspace\segments\artifacts\m44_parameter_stability.json",
-        "weight_sensitivity": r"E:\workspace\segments\artifacts\m44_weight_sensitivity.json",
-        "igt_aggregate": r"E:\workspace\segments\artifacts\m44_igt_aggregate.json",
-        "architecture_assessment": r"E:\workspace\segments\artifacts\m44_architecture_assessment.json",
-        "report": r"E:\workspace\segments\reports\m44_acceptance_report.json",
-        "summary": r"E:\workspace\segments\reports\m44_acceptance_summary.md",
-    },
-    "m43": {
-        "confidence_fit": r"E:\workspace\segments\artifacts\m43_confidence_fit.json",
-        "igt_fit": r"E:\workspace\segments\artifacts\m43_igt_fit.json",
-        "parameter_sensitivity": r"E:\workspace\segments\artifacts\m43_parameter_sensitivity.json",
-        "failure_modes": r"E:\workspace\segments\artifacts\m43_failure_modes.json",
-        "report": r"E:\workspace\segments\reports\m43_acceptance_report.json",
-        "summary": r"E:\workspace\segments\reports\m43_acceptance_summary.md",
-    },
-    "m236": {
-        "trace": r"E:\workspace\segments\artifacts\m236_open_continuity_trace.jsonl",
-        "metrics": r"E:\workspace\segments\artifacts\m236_open_continuity_metrics.json",
-        "ablation": r"E:\workspace\segments\artifacts\m236_open_continuity_ablation.json",
-        "stress": r"E:\workspace\segments\artifacts\m236_open_continuity_stress.json",
-        "schema": r"E:\workspace\segments\artifacts\m236_open_continuity_schema.json",
-        "report": r"E:\workspace\segments\reports\m236_open_continuity_report.json",
-        "summary": r"E:\workspace\segments\reports\m236_open_continuity_summary.md",
-    },
 }
 
 
@@ -242,22 +182,3 @@ class TestOfficialArtifactsMatchBuilder(unittest.TestCase):
         self.assertEqual(committed["acceptance_state"], generated["acceptance_state"])
         self.assertEqual(committed["recommendation"], generated["recommendation"])
 
-    def test_m48_report_matches_writer(self) -> None:
-        with TemporaryDirectory() as tmpdir:
-            outputs = write_m48_acceptance_artifacts(
-                round_started_at=FIXED_STARTED_AT,
-                output_root=tmpdir,
-                regressions=FROZEN_M48_REGRESSIONS,
-            )
-            generated = _read_json(Path(outputs["report"]))
-        self._assert_report_matches("m48", M48_REPORT_PATH, generated)
-
-    def test_m49_report_matches_writer(self) -> None:
-        with TemporaryDirectory() as tmpdir:
-            outputs = write_m49_acceptance_artifacts(
-                round_started_at=FIXED_STARTED_AT,
-                output_root=tmpdir,
-                regressions=FROZEN_M49_REGRESSIONS,
-            )
-            generated = _read_json(Path(outputs["report"]))
-        self._assert_report_matches("m49", M49_REPORT_PATH, generated)

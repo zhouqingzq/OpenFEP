@@ -10,7 +10,7 @@ Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Gen
 
 ## Summary
 
-M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while M4.5-M4.7 now cover the staged human-like memory system, M4.8 is framed as a controlled complex-environment bridge milestone rather than direct open-world tooling, and M4.9 remains a longitudinal probe layer over that controlled validation stack.
+M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while M4.5-M4.7 now cover the staged human-like memory system. M4.8 targets ablation-contrast proof that memory causally changes agent behavior, and M4.9 targets representation-level recall reconstruction that constrains subsequent cognition.
 
 FEP remains relatively marginal in mainstream AGI engineering. The dominant practical path has centered on scaling laws, RLHF, and architecture search rather than FEP, not only because FEP is often criticized as difficult to falsify, but because it has not yet produced a system that surpasses Transformers on standard benchmarks. In its conventional form, FEP explains how a system maintains its own existence; it does not, by itself, explain the core powers of language such as compositionality, recursion, and pragmatic reasoning across contexts.
 
@@ -190,8 +190,8 @@ The current M4 roadmap aims to turn cognitive style from a narrative description
 - `M4.5` establishes the human-like memory data model, encoding pipeline, and decay rules.
 - `M4.6` adds retrieval, reconsolidation, and offline consolidation over the new memory substrate.
 - `M4.7` integrates memory dynamics with cognitive style and validates behavior-level differentiation.
-- `M4.8` validates cross-context transfer in a controlled complex environment before any real-tool open-world step.
-- `M4.9` quantifies whether style is stable, reproducible, and recoverable across long runs and perturbations.
+- `M4.8` proves memory causally changes default agent behavior via ablation contrast (decision entropy, option distribution, approach/avoidance bias divergence under `memory_enabled=True/False`).
+- `M4.9` replaces string-assembly recall with representation-level reconstruction: recall becomes a state-vector perturbation, competing memories resolve via softmax with residual interference, and DRM/misinformation A/B pairs produce measurable post-recall decision drift.
 
 Open-world tool integration is treated as an `M5` concern. The purpose of M4 is to establish cross-context cognitive-style validity under controlled conditions before moving to noisy real-tool environments.
 

@@ -17,8 +17,8 @@ aligned across the repository.
 | `M4.5` | Establish the human-like memory data model, encoding pipeline, and decay rules. | MemoryEntry schema integrity, salience auditability, encoding coverage, decay correctness, legacy bridging. | Controlled-environment transfer, longitudinal stability, open-world tooling. |
 | `M4.6` | Build retrieval, reconsolidation, and offline consolidation on top of the new memory substrate. | Multi-cue retrieval, candidate competition, reconstruction, reconsolidation, consolidation pipeline, inference validation. | Controlled-environment transfer, longitudinal stability, open-world tooling. |
 | `M4.7` | Integrate dynamic memory regulation with cognitive style and verify behavior-level effects. | AgentStateVector regulation, style-memory coupling, behavioral scenarios, subtype differentiation, integration traces. | Controlled-environment transfer, longitudinal stability, open-world tooling. |
-| `M4.8` | Validate controlled transfer into a more complex environment. | Cross-context transfer results in a controlled non-trivial environment, failure recovery analysis. | Longitudinal stability and open-world tooling. |
-| `M4.9` | Quantify stability, reproducibility, and recoverability over time and perturbation. | Long-run stability, perturbation response, recovery retention, reproducibility envelopes. | Open-world tool use and deployment claims. |
+| `M4.8` | Prove memory causally changes default agent behavior via ablation contrast. | Same-seed `memory_enabled=True/False` rollout produces significant, reproducible divergence in decision entropy, option distribution, and approach/avoidance bias; divergence direction aligns with MemoryEntry valence/threat. | Representation-level reconstruction, encoding dynamics, long-run phenomenological validation. |
+| `M4.9` | Replace string-assembly recall with representation-level reconstruction that constrains subsequent cognition. | Recall output is a state-vector perturbation (not text); donor blocks inject measurable prior bias; competing memories produce winner-take-most softmax with residual interference; DRM/misinformation A/B pair shows post-recall decision drift toward donor. | Encoding dynamics, consolidation dynamics, long-run phenomenological validation. |
 
 ## Naming Rules
 
@@ -177,4 +177,4 @@ cross-generator synthetic data does not qualify.
 
 - `M4.6` official acceptance is currently `INCOMPLETE / NOT_ISSUED`. The blocking gap is `legacy_integration=NOT_RUN` in the current acceptance builder.
 - `M4.7` official acceptance is currently `INCOMPLETE / NOT_ISSUED`. The blocking gap is `regression=NOT_RUN` in the current acceptance builder.
-- `M4.8` and `M4.9` remain valid milestone numbers in this repository and must not be reused by later roadmap drafts.
+- `M4.8` and `M4.9` were redefined on 2026-04-10. Previous content (cross-context transfer and longitudinal stability) was removed as insufficient and non-actionable. The new definitions target ablation contrast and representation-level reconstruction respectively.
