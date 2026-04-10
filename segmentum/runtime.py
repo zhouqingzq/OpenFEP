@@ -152,8 +152,9 @@ class SegmentRuntime:
         reset_predictive_precisions: bool = False,
         enable_restart_rebind: bool = False,
         memory_backend: str = "memory_store",
-        memory_enabled: bool = True,
+        memory_enabled: bool | None = None,
     ) -> SegmentRuntime:
+        requested_memory_enabled = memory_enabled
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
             Path(trace_path) if trace_path else derive_trace_path(path)
@@ -167,7 +168,11 @@ class SegmentRuntime:
                     rng=world.rng,
                     predictive_hyperparameters=predictive_hyperparameters,
                     memory_backend=memory_backend,
-                    memory_enabled=memory_enabled,
+                    memory_enabled=(
+                        requested_memory_enabled
+                        if requested_memory_enabled is not None
+                        else True
+                    ),
                 ),
                 world=world,
                 state_path=path,
@@ -195,7 +200,15 @@ class SegmentRuntime:
                 JsonlTraceWriter(resolved_trace_path).reset()
             world = SimulatedWorld(seed=seed)
             runtime = cls(
-                agent=SegmentAgent(rng=world.rng, memory_backend=memory_backend),
+                agent=SegmentAgent(
+                    rng=world.rng,
+                    memory_backend=memory_backend,
+                    memory_enabled=(
+                        requested_memory_enabled
+                        if requested_memory_enabled is not None
+                        else True
+                    ),
+                ),
                 world=world,
                 state_path=path,
                 trace_path=resolved_trace_path,
@@ -219,6 +232,8 @@ class SegmentRuntime:
             reset_predictive_precisions=reset_predictive_precisions,
             state_version=str(payload.get("state_version", "")),
         )
+        if requested_memory_enabled is not None:
+            agent.memory_enabled = requested_memory_enabled
         metrics = RunMetrics.from_dict(payload.get("metrics"))
         host_state = AgentState.from_dict(payload.get("host_state"))
         io_bus_payload = payload.get("io_bus")

@@ -1,148 +1,179 @@
 from __future__ import annotations
 
-import math
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
-from collections import Counter
 
+from segmentum.agent import SegmentAgent
+from segmentum.m48_audit import build_m48_ablation_evidence
 from segmentum.runtime import SegmentRuntime
 
 
-ABLATION_CYCLES = 20
-ABLATION_SEED = 42
-
-
-def _run_rollout(*, memory_enabled: bool, seed: int = ABLATION_SEED, cycles: int = ABLATION_CYCLES):
-    rt = SegmentRuntime.load_or_create(seed=seed, reset=True, memory_enabled=memory_enabled)
-    rt.run(cycles=cycles, verbose=False)
-    return rt
-
-
-def _action_sequence(rt: SegmentRuntime) -> list[str]:
-    return list(rt.agent.action_history[-ABLATION_CYCLES:])
-
-
-def _action_entropy(actions: list[str]) -> float:
-    counts = Counter(actions)
-    total = len(actions)
-    if total == 0:
-        return 0.0
-    return -sum(
-        (c / total) * math.log2(c / total)
-        for c in counts.values()
-        if c > 0
-    )
-
-
-def _avoidance_ratio(actions: list[str]) -> float:
-    avoidance = {"hide", "rest"}
-    if not actions:
-        return 0.0
-    return sum(1 for a in actions if a in avoidance) / len(actions)
+def _helper_query_inputs(runtime: SegmentRuntime) -> tuple[dict[str, float], dict[str, float], dict[str, float], dict[str, object]]:
+    observed = {
+        str(key): float(value)
+        for key, value in dict(runtime.agent.last_decision_observation).items()
+    }
+    baseline_prediction = {
+        str(key): float(value)
+        for key, value in dict(runtime.agent.last_memory_context.get("prediction_before_memory", {})).items()
+    }
+    errors = {
+        str(key): float(value)
+        for key, value in dict(runtime.agent.last_memory_context.get("errors", {})).items()
+    }
+    current_state_snapshot = {
+        "observation": dict(observed),
+        "prediction": dict(baseline_prediction),
+        "errors": dict(errors),
+        "body_state": runtime.agent._current_body_state(),
+    }
+    return observed, baseline_prediction, errors, current_state_snapshot
 
 
 class TestM48AblationContrast(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.ablation = build_m48_ablation_evidence(seed=42, cycles=20)
 
-    def test_negative_control_same_seed_identical(self) -> None:
-        rt1 = _run_rollout(memory_enabled=True, seed=ABLATION_SEED)
-        rt2 = _run_rollout(memory_enabled=True, seed=ABLATION_SEED)
-        seq1 = _action_sequence(rt1)
-        seq2 = _action_sequence(rt2)
-        self.assertEqual(seq1, seq2, "Two memory-enabled runs with the same seed must be identical")
+    def test_retrieve_decision_memories_returns_empty_when_disabled_directly(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=42, reset=True, memory_enabled=False)
+        runtime.run(cycles=8, verbose=False)
+        observed, baseline_prediction, errors, current_state_snapshot = _helper_query_inputs(runtime)
 
-    def test_ablation_produces_divergent_decisions(self) -> None:
-        rt_on = _run_rollout(memory_enabled=True)
-        rt_off = _run_rollout(memory_enabled=False)
-        seq_on = _action_sequence(rt_on)
-        seq_off = _action_sequence(rt_off)
-        diffs = sum(1 for a, b in zip(seq_on, seq_off) if a != b)
-        self.assertGreater(diffs, 0, "Enabled vs disabled must produce at least one different action")
-
-    def test_ablation_entropy_differs(self) -> None:
-        rt_on = _run_rollout(memory_enabled=True)
-        rt_off = _run_rollout(memory_enabled=False)
-        ent_on = _action_entropy(_action_sequence(rt_on))
-        ent_off = _action_entropy(_action_sequence(rt_off))
-        self.assertNotAlmostEqual(
-            ent_on, ent_off, places=4,
-            msg="Decision entropy should differ between enabled and disabled memory",
+        retrieved = runtime.agent._retrieve_decision_memories(
+            observed=observed,
+            baseline_prediction=baseline_prediction,
+            baseline_errors=errors,
+            current_state_snapshot=current_state_snapshot,
+            k=3,
         )
 
-    def test_memory_bias_nonzero_when_enabled(self) -> None:
-        rt = _run_rollout(memory_enabled=True)
-        ctx = rt.agent.last_memory_context
-        self.assertIn("memory_bias", ctx)
-        self.assertIn("pattern_bias", ctx)
-        self.assertTrue(ctx["memory_enabled"])
-        has_nonzero_bias = any(
-            abs(float(rt.agent.last_memory_context.get("memory_bias", 0))) > 1e-9
-            for _ in [None]
+        self.assertEqual(retrieved, [])
+        self.assertGreater(len(runtime.agent.long_term_memory.episodes), 0)
+
+    def test_build_memory_context_returns_explicit_zero_structure_when_disabled(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=42, reset=True, memory_enabled=False)
+        runtime.run(cycles=4, verbose=False)
+        observed, baseline_prediction, errors, _ = _helper_query_inputs(runtime)
+
+        context = runtime.agent._build_memory_context(
+            observed=observed,
+            baseline_prediction=baseline_prediction,
+            errors=errors,
+            similar_memories=[{"episode_id": "synthetic-memory"}],
+        )
+
+        aggregate = dict(context["aggregate"])
+        self.assertFalse(context["memory_hit"])
+        self.assertTrue(context["state_delta"])
+        self.assertTrue(all(abs(float(value)) <= 1e-9 for value in context["state_delta"].values()))
+        self.assertEqual(float(aggregate["chronic_threat_bias"]), 0.0)
+        self.assertEqual(float(aggregate["protected_anchor_bias"]), 0.0)
+
+    def test_runtime_load_or_create_respects_memory_enabled_across_fresh_restored_and_recovered(self) -> None:
+        with TemporaryDirectory() as tmp_dir:
+            state_path = Path(tmp_dir) / "segment_state.json"
+
+            fresh = SegmentRuntime.load_or_create(
+                state_path=state_path,
+                seed=42,
+                reset=True,
+                memory_enabled=False,
+            )
+            fresh.save_snapshot()
+            restored = SegmentRuntime.load_or_create(
+                state_path=state_path,
+                seed=99,
+                memory_enabled=False,
+            )
+
+        with TemporaryDirectory() as tmp_dir:
+            corrupt_path = Path(tmp_dir) / "segment_state.json"
+            corrupt_path.write_text("{not-json", encoding="utf-8")
+            recovered = SegmentRuntime.load_or_create(
+                state_path=corrupt_path,
+                seed=17,
+                memory_enabled=False,
+            )
+
+        agent = SegmentAgent(memory_enabled=False)
+        restored_agent = SegmentAgent.from_dict(agent.to_dict())
+
+        self.assertFalse(agent.memory_enabled)
+        self.assertFalse(restored_agent.memory_enabled)
+        self.assertFalse(fresh.agent.memory_enabled)
+        self.assertFalse(fresh.export_snapshot()["agent"]["memory_enabled"])
+        self.assertFalse(restored.agent.memory_enabled)
+        self.assertFalse(recovered.agent.memory_enabled)
+
+    def test_ablation_evidence_contains_per_cycle_trace(self) -> None:
+        enabled = self.ablation["enabled"]
+        disabled = self.ablation["disabled"]
+
+        self.assertEqual(len(enabled["trace"]), 20)
+        self.assertEqual(len(disabled["trace"]), 20)
+        self.assertIn("memory_bias", enabled["trace"][0])
+        self.assertIn("pattern_bias", enabled["trace"][0])
+        self.assertIn("state_delta", enabled["trace"][0])
+
+    def test_same_seed_negative_control_is_identical(self) -> None:
+        enabled = self.ablation["enabled"]["decision_sequence"]
+        control = self.ablation["negative_control"]["decision_sequence"]
+
+        self.assertEqual(enabled, control)
+        self.assertTrue(self.ablation["comparison"]["decision_sequences_identical_for_negative_control"])
+
+    def test_enabled_vs_disabled_diverge_and_entropy_differs(self) -> None:
+        comparison = self.ablation["comparison"]
+        enabled = self.ablation["enabled"]
+        disabled = self.ablation["disabled"]
+
+        self.assertGreater(len(comparison["differing_cycles"]), 0)
+        self.assertNotEqual(enabled["decision_sequence"], disabled["decision_sequence"])
+        self.assertNotAlmostEqual(
+            float(enabled["decision_entropy"]),
+            float(disabled["decision_entropy"]),
+            places=6,
+        )
+
+    def test_disabled_run_zeroes_state_delta_and_bias_every_cycle(self) -> None:
+        disabled_rows = self.ablation["disabled"]["trace"]
+
+        self.assertTrue(
+            all(float(row["max_abs_state_delta"]) <= 1e-9 for row in disabled_rows)
         )
         self.assertTrue(
-            has_nonzero_bias or abs(float(ctx.get("pattern_bias", 0))) > 1e-9,
-            "At least one of memory_bias or pattern_bias should be nonzero in an enabled run",
+            all(
+                abs(float(row["memory_bias"])) <= 1e-9
+                and abs(float(row["pattern_bias"])) <= 1e-9
+                for row in disabled_rows
+            )
         )
 
-    def test_memory_bias_zero_when_disabled(self) -> None:
-        rt = _run_rollout(memory_enabled=False)
-        ctx = rt.agent.last_memory_context
-        self.assertIn("memory_bias", ctx)
-        self.assertIn("pattern_bias", ctx)
-        self.assertFalse(ctx["memory_enabled"])
-        self.assertAlmostEqual(float(ctx["memory_bias"]), 0.0)
-        self.assertAlmostEqual(float(ctx["pattern_bias"]), 0.0)
+    def test_enabled_run_has_nonzero_state_delta_and_bias_signal(self) -> None:
+        enabled_rows = self.ablation["enabled"]["trace"]
 
-    def test_state_delta_zero_when_disabled(self) -> None:
-        rt = _run_rollout(memory_enabled=False)
-        ctx = rt.agent.last_memory_context
-        state_delta = ctx.get("state_delta", {})
-        if isinstance(state_delta, dict):
-            for key, value in state_delta.items():
-                self.assertAlmostEqual(
-                    float(value), 0.0, places=6,
-                    msg=f"state_delta[{key}] should be zero when memory is disabled",
-                )
-
-    def test_state_delta_nonzero_when_enabled(self) -> None:
-        rt = _run_rollout(memory_enabled=True)
-        ctx = rt.agent.last_memory_context
-        state_delta = ctx.get("state_delta", {})
-        max_delta = max(
-            (abs(float(v)) for v in state_delta.values()),
-            default=0.0,
+        self.assertTrue(
+            any(float(row["max_abs_state_delta"]) > 0.05 for row in enabled_rows)
         )
-        self.assertGreater(max_delta, 0.05, "Enabled run should have at least one state_delta > 0.05")
+        self.assertTrue(
+            any(
+                abs(float(row["memory_bias"])) > 1e-9
+                or abs(float(row["pattern_bias"])) > 1e-9
+                for row in enabled_rows
+            )
+        )
 
-    def test_episodes_still_recorded_when_disabled(self) -> None:
-        rt = _run_rollout(memory_enabled=False)
+    def test_avoidance_bias_increases_on_enabled_threat_cycles(self) -> None:
+        comparison = self.ablation["comparison"]
+
+        self.assertGreater(int(comparison["enabled_threat_cycle_count"]), 0)
         self.assertGreater(
-            len(rt.agent.long_term_memory.episodes), 0,
-            "Episodes should still be recorded even when memory is disabled",
+            float(comparison["enabled_avoidance_ratio_under_threat"]),
+            float(comparison["disabled_avoidance_ratio_under_threat"]),
         )
 
-    def test_memory_enabled_persists_in_snapshot(self) -> None:
-        rt = _run_rollout(memory_enabled=False, cycles=3)
-        snapshot = rt.export_snapshot()
-        agent_payload = snapshot["agent"]
-        self.assertFalse(agent_payload["memory_enabled"])
 
-    def test_memory_enabled_flag_roundtrips(self) -> None:
-        rt = _run_rollout(memory_enabled=False, cycles=3)
-        snapshot = rt.export_snapshot()
-        from segmentum.agent import SegmentAgent
-        restored = SegmentAgent.from_dict(snapshot["agent"])
-        self.assertFalse(restored.memory_enabled)
-
-    def test_valence_alignment_avoidance_bias(self) -> None:
-        rt_on = _run_rollout(memory_enabled=True)
-        rt_off = _run_rollout(memory_enabled=False)
-        ctx_on = rt_on.agent.last_memory_context
-        agg = ctx_on.get("aggregate", {})
-        chronic_threat = float(agg.get("chronic_threat_bias", 0.0))
-        if chronic_threat <= 0.1:
-            self.skipTest("chronic_threat_bias too low to test avoidance alignment")
-        avoid_on = _avoidance_ratio(_action_sequence(rt_on))
-        avoid_off = _avoidance_ratio(_action_sequence(rt_off))
-        self.assertGreater(
-            avoid_on, avoid_off,
-            f"When chronic_threat_bias={chronic_threat:.3f}, enabled run should have higher avoidance ratio",
-        )
+if __name__ == "__main__":
+    unittest.main()

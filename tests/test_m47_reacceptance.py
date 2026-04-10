@@ -30,18 +30,17 @@ class TestM47Reacceptance(unittest.TestCase):
         self.assertEqual(report["gate_summaries"][GATE_REGRESSION]["status"], STATUS_NOT_RUN)
         self.assertEqual(report["gate_summaries"][GATE_HONESTY]["status"], "PASS")
         self.assertIn("runtime_snapshot", report)
+        self.assertTrue(report["runtime_snapshot"]["diagnostic_only"])
 
-    def test_behavioral_gates_pass_from_corpus_backed_snapshot(self) -> None:
+    def test_behavioral_gates_are_explicitly_marked_diagnostic_only(self) -> None:
         report = build_m47_reacceptance_report()
         summaries = report["gate_summaries"]
 
-        self.assertEqual(summaries["behavioral_scenario_A_threat_learning"]["status"], "PASS")
-        self.assertEqual(summaries["behavioral_scenario_B_interference"]["status"], "PASS")
-        self.assertEqual(summaries["behavioral_scenario_C_consolidation"]["status"], "PASS")
-        self.assertEqual(summaries["long_term_subtypes"]["status"], "PASS")
-        self.assertEqual(summaries["identity_continuity_retention"]["status"], "PASS")
-        self.assertEqual(summaries["behavioral_scenario_E_natural_misattribution"]["status"], "PASS")
-        self.assertEqual(summaries["integration_interface"]["status"], "PASS")
+        self.assertTrue(summaries["behavioral_scenario_A_threat_learning"]["behavioral_claims_demoted"])
+        self.assertTrue(summaries["behavioral_scenario_B_interference"]["behavioral_claims_demoted"])
+        self.assertTrue(summaries["behavioral_scenario_C_consolidation"]["behavioral_claims_demoted"])
+        self.assertEqual(summaries["behavioral_scenario_A_threat_learning"]["evidence_role"], "diagnostic_only")
+        self.assertEqual(summaries["integration_interface"]["acceptance_layer"], "a_structural_self_consistency")
 
 
 if __name__ == "__main__":

@@ -27,6 +27,10 @@ class TestM47Acceptance(unittest.TestCase):
         self.assertEqual(report["formal_acceptance_conclusion"], FORMAL_CONCLUSION_NOT_ISSUED)
         self.assertEqual(report["gate_summaries"]["regression"]["status"], "NOT_RUN")
         self.assertEqual(evidence_report["runtime_snapshot"]["generated_at"], snapshot["generated_at"])
+        self.assertTrue(evidence_report["runtime_snapshot"]["diagnostic_only"])
+        self.assertTrue(
+            evidence_report["gate_summaries"]["behavioral_scenario_A_threat_learning"]["behavioral_claims_demoted"]
+        )
         self.assertTrue(failure_injection["all_cases_failed_closed"])
         self.assertTrue(ablation["all_tampered_cases_failed_closed"])
 

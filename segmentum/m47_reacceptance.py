@@ -76,6 +76,19 @@ GATE_CODES = {
     GATE_HONESTY: "G10",
 }
 
+DIAGNOSTIC_ONLY_GATES = (
+    GATE_STATE_VECTOR,
+    GATE_DYNAMIC_SALIENCE,
+    GATE_COGNITIVE_STYLE,
+    GATE_SCENARIO_A,
+    GATE_SCENARIO_B,
+    GATE_SCENARIO_C,
+    GATE_LONG_TERM_SUBTYPES,
+    GATE_IDENTITY,
+    GATE_MISATTRIBUTION,
+    GATE_INTEGRATION,
+)
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -205,7 +218,7 @@ def _gate_summary(gate: str, records: list[dict[str, object]]) -> dict[str, obje
         status = STATUS_NOT_RUN
     else:
         status = STATUS_PASS
-    return {
+    summary = {
         "gate": gate,
         "status": status,
         "scenario_ids": [str(record["scenario_id"]) for record in records],
@@ -217,6 +230,18 @@ def _gate_summary(gate: str, records: list[dict[str, object]]) -> dict[str, obje
         },
         "notes": [note for record in records for note in record.get("notes", []) if isinstance(note, str) and note],
     }
+    if gate in DIAGNOSTIC_ONLY_GATES:
+        summary["acceptance_layer"] = "a_structural_self_consistency"
+        summary["evidence_role"] = "diagnostic_only"
+        summary["behavioral_claims_demoted"] = True
+        summary["notes"] = list(summary["notes"]) + [
+            "M4.8 demotion: this gate is diagnostic_only and cannot issue layer-(b) behavioral claims."
+        ]
+    elif gate in {GATE_REGRESSION, GATE_HONESTY}:
+        summary["acceptance_layer"] = "process_control"
+        summary["evidence_role"] = "acceptance_control"
+        summary["behavioral_claims_demoted"] = False
+    return summary
 
 
 def _state_vector_record(snapshot: dict[str, Any]) -> dict[str, object]:
@@ -895,7 +920,13 @@ def build_m47_reacceptance_report(
     runtime_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, object]:
     snapshot = deepcopy(runtime_snapshot) if runtime_snapshot is not None else build_m47_runtime_snapshot()
-    # M4.8 demotion: diagnostic_only is set in build_m47_evidence_records
+    # M4.8 demotion applies to the shared snapshot itself, not only to the
+    # evidence records derived from it.
+    snapshot["diagnostic_only"] = True
+    snapshot["demotion_reason"] = (
+        "M4.7 behavioral claims depend on M4.8 ablation evidence; "
+        "this snapshot satisfies only structural self-consistency (layer a)."
+    )
     records = build_m47_evidence_records(include_regressions=include_regressions, runtime_snapshot=snapshot)
     gate_summaries = {gate: _gate_summary(gate, _all_gate_records(records, gate)) for gate in GATE_ORDER if gate != GATE_HONESTY}
     honesty_record = _build_honesty_record(records, include_regressions=include_regressions)

@@ -803,6 +803,15 @@ class SegmentAgent(MemoryAwareAgentMixin):
         current_state_snapshot: dict[str, object],
         k: int,
     ) -> list[dict[str, object]]:
+        if not self.memory_enabled:
+            self.long_term_memory.last_retrieval_result = {
+                "memory_backend": self._active_memory_backend(),
+                "memory_enabled": False,
+                "candidates": [],
+                "recall_hypothesis": {},
+                "reconstruction_trace": {},
+            }
+            return []
         if self._active_memory_backend() != "memory_store":
             with suppress_legacy_memory_warnings():
                 return self.long_term_memory.retrieve_similar_memories(
@@ -1249,6 +1258,43 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "dopamine": self.dopamine,
         }
 
+    def _zero_memory_context(
+        self,
+        *,
+        observed: dict[str, float],
+        baseline_prediction: dict[str, float],
+        errors: dict[str, float],
+        summary: str,
+    ) -> dict[str, object]:
+        channels = sorted(set(observed) | set(baseline_prediction))
+        zero_projection = {key: 0.0 for key in channels}
+        zero_delta = {key: 0.0 for key in channels}
+        return {
+            "memory_hit": False,
+            "retrieved_episode_ids": [],
+            "summary": summary,
+            "state_projection": zero_projection,
+            "state_delta": zero_delta,
+            "aggregate": {
+                "dominant_outcome": "none",
+                "risk": 0.0,
+                "preferred_probability": 0.0,
+                "expected_surprise": 0.0,
+                "chronic_threat_bias": 0.0,
+                "protected_anchor_bias": 0.0,
+                "outcome_distribution": {},
+            },
+            "actions": {},
+            "prediction_blend": 0.0,
+            "delta_gain": 0.0,
+            "body_state": self._current_body_state(),
+            "observation": dict(observed),
+            "prediction_error": compute_prediction_error(observed, baseline_prediction),
+            "errors": dict(errors),
+            "sensitive_channels": [],
+            "attention_biases": {},
+        }
+
     def _build_memory_context(
         self,
         *,
@@ -1257,18 +1303,20 @@ class SegmentAgent(MemoryAwareAgentMixin):
         errors: dict[str, float],
         similar_memories: list[dict[str, object]],
     ) -> dict[str, object]:
+        if not self.memory_enabled:
+            return self._zero_memory_context(
+                observed=observed,
+                baseline_prediction=baseline_prediction,
+                errors=errors,
+                summary="episodic memory influence suppressed",
+            )
         if not similar_memories:
-            return {
-                "memory_hit": False,
-                "retrieved_episode_ids": [],
-                "summary": "no episodic memory influence",
-                "state_projection": {},
-                "state_delta": {},
-                "aggregate": {},
-                "actions": {},
-                "prediction_blend": 0.0,
-                "delta_gain": 0.0,
-            }
+            return self._zero_memory_context(
+                observed=observed,
+                baseline_prediction=baseline_prediction,
+                errors=errors,
+                summary="no episodic memory influence",
+            )
 
         weighted_total = sum(
             max(1e-9, float(payload.get("similarity", payload.get("vector_similarity", 0.0))))
@@ -1720,16 +1768,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "errors": baseline_errors,
             "body_state": self._current_body_state(),
         }
-        similar_memories = (
-            self._retrieve_decision_memories(
-                observed=observed,
-                baseline_prediction=baseline_prediction,
-                baseline_errors=baseline_errors,
-                current_state_snapshot=current_state_snapshot,
-                k=3,
-            )
-            if self.memory_enabled
-            else []
+        similar_memories = self._retrieve_decision_memories(
+            observed=observed,
+            baseline_prediction=baseline_prediction,
+            baseline_errors=baseline_errors,
+            current_state_snapshot=current_state_snapshot,
+            k=3,
         )
         memory_context = self._build_memory_context(
             observed=observed,
