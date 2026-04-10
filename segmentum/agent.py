@@ -645,6 +645,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         memory_cognitive_style: CognitiveStyleParameters | dict[str, object] | None = None,
         memory_cycle_interval: int = 5,
         memory_salience_config: SalienceConfig | None = None,
+        memory_enabled: bool = True,
     ) -> None:
         self.rng = rng or random.Random()
         self.energy = 0.80
@@ -703,6 +704,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_decision_choice: str = ""
         self.last_decision_observation: dict[str, float] = {}
         self.last_memory_context: dict[str, object] = {}
+        self.memory_enabled: bool = memory_enabled
         self._sleeping = False
         self.counterfactual_insights: list[CounterfactualInsight] = []
         self.init_memory_awareness(
@@ -1718,12 +1720,16 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "errors": baseline_errors,
             "body_state": self._current_body_state(),
         }
-        similar_memories = self._retrieve_decision_memories(
-            observed=observed,
-            baseline_prediction=baseline_prediction,
-            baseline_errors=baseline_errors,
-            current_state_snapshot=current_state_snapshot,
-            k=3,
+        similar_memories = (
+            self._retrieve_decision_memories(
+                observed=observed,
+                baseline_prediction=baseline_prediction,
+                baseline_errors=baseline_errors,
+                current_state_snapshot=current_state_snapshot,
+                k=3,
+            )
+            if self.memory_enabled
+            else []
         )
         memory_context = self._build_memory_context(
             observed=observed,
@@ -1758,7 +1764,17 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "reconstruction_trace": dict(
                 self.long_term_memory.last_retrieval_result.get("reconstruction_trace", {}) or {}
             ),
+            "memory_enabled": self.memory_enabled,
+            "memory_bias": 0.0,
+            "pattern_bias": 0.0,
         }
+        # Restore decision-loop bias fields if they were set in this tick's
+        # _evaluate_options (validation perceive() re-invokes _top_down_pass
+        # after the decision, which would otherwise wipe them).
+        _stashed = getattr(self, "_decision_bias_stash", None)
+        if _stashed is not None:
+            self.last_memory_context["memory_bias"] = _stashed["memory_bias"]
+            self.last_memory_context["pattern_bias"] = _stashed["pattern_bias"]
         interoceptive_prediction = self.interoceptive_layer.predict(sensorimotor_prediction)
         return (
             strategic_prior,
@@ -2247,6 +2263,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "Action space is frozen: agent is in sleep consolidation phase. "
                 "External interaction is not permitted until sleep completes."
             )
+        # Clear decision-bias stash so stale values from previous ticks
+        # don't leak. The stash is set in _evaluate_options and restored
+        # in _top_down_pass to survive the validation perceive() call.
+        self._decision_bias_stash = None
         observed, prediction, errors, free_energy_before, hierarchy = self.perceive(
             observation
         )
@@ -2335,12 +2355,16 @@ class SegmentAgent(MemoryAwareAgentMixin):
             predicted_state = dict(option["predicted_state"])
             predicted_effects = dict(option["predicted_effects"])
             expected_fe = float(option["expected_free_energy"])
-            with suppress_legacy_memory_warnings():
-                memory_bias = self.long_term_memory.memory_bias(action, similar_memories)
-                pattern_bias = self.long_term_memory.pattern_bias(
-                    action,
-                    action_history=self.action_history,
-                )
+            if self.memory_enabled:
+                with suppress_legacy_memory_warnings():
+                    memory_bias = self.long_term_memory.memory_bias(action, similar_memories)
+                    pattern_bias = self.long_term_memory.pattern_bias(
+                        action,
+                        action_history=self.action_history,
+                    )
+            else:
+                memory_bias = 0.0
+                pattern_bias = 0.0
             policy_bias = self.world_model.get_policy_bias(current_cluster_id, action)
             epistemic_bonus = self.world_model.get_epistemic_bonus(
                 current_cluster_id,
@@ -2779,6 +2803,14 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_decision_diagnostics = diagnostics
         self.last_decision_choice = diagnostics.chosen.choice
         self.last_decision_observation = {str(key): float(value) for key, value in observed.items()}
+        self.last_memory_context["memory_enabled"] = self.memory_enabled
+        self.last_memory_context["memory_bias"] = float(diagnostics.chosen.memory_bias)
+        self.last_memory_context["pattern_bias"] = float(diagnostics.chosen.pattern_bias)
+        # Stash bias fields so they survive validation perceive()'s _top_down_pass
+        self._decision_bias_stash = {
+            "memory_bias": self.last_memory_context["memory_bias"],
+            "pattern_bias": self.last_memory_context["pattern_bias"],
+        }
         self._record_identity_tension(
             chosen_action=diagnostics.chosen.choice,
             commitment_focus=diagnostics.commitment_focus,
@@ -4146,6 +4178,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "memory_cognitive_style": self.memory_cognitive_style.to_dict(),
             "memory_cycle_interval": self.memory_cycle_interval,
             "memory_backend": self._active_memory_backend(),
+            "memory_enabled": self.memory_enabled,
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
             "attention_bottleneck": self.attention_bottleneck.to_dict(),
             "last_attention_trace": (
@@ -4240,6 +4273,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         if "memory_cycle_interval" in payload:
             agent.long_term_memory.memory_cycle_interval = int(payload.get("memory_cycle_interval", 5))
         agent.long_term_memory.memory_backend = str(payload.get("memory_backend", agent.long_term_memory.memory_backend))
+        agent.memory_enabled = bool(payload.get("memory_enabled", True))
         agent.episodes = [
             MemoryEpisode(**episode) for episode in payload.get("episodes", [])
         ]

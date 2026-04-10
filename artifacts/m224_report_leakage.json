@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-03-26T01:16:44+00:00",
-  "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
+  "generated_at": "2026-04-10T06:49:40+00:00",
+  "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
   "seed_set": [
     224,
     243,
@@ -1023,7 +1023,7 @@
           "shelter"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile, long-horizon-conflict. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, identity tension. Anchors held: ep-000001-hide. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile, long-horizon-conflict. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, identity tension. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "danger"
@@ -1037,7 +1037,7 @@
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile, long-horizon-conflict. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, identity tension. Anchors held: ep-000001-hide. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile, long-horizon-conflict. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, identity tension. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1124,8 +1124,20 @@
               "commitment_stability": 0.7,
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
-              "continuity_resilience": 0.66
+              "continuity_resilience": 0.66,
+              "compute_conservatism": 0.5,
+              "process_attraction_decay": 0.5,
+              "compression_preference": 0.5,
+              "uncertainty_tolerance": 0.48
             },
+            "cognitive_style_label": "balanced_adaptive",
+            "cognitive_style_evidence": [
+              "style remains balanced across compute, compression, and uncertainty"
+            ],
+            "cognitive_style_continuity": 1.0,
+            "cognitive_style_history": [
+              "balanced_adaptive"
+            ],
             "unresolved_tensions": [
               {
                 "label": "repeated surprise burden",
@@ -1251,12 +1263,52 @@
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66
               },
+              "style": {
+                "compute_conservatism": 0.5,
+                "process_attraction_decay": 0.5,
+                "compression_preference": 0.5,
+                "uncertainty_tolerance": 0.48
+              },
+              "effort_allocation_history": [
+                {
+                  "tick": 1,
+                  "action": "hide",
+                  "known_task": false,
+                  "compute_spend": 0.24,
+                  "uncertainty_load": 0.587904,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.4372
+                }
+              ],
+              "style_history": [
+                {
+                  "tick": 1,
+                  "label": "balanced_adaptive",
+                  "continuity": 0.0
+                }
+              ],
               "last_processed_tick": 0,
               "sleep_cycles": 0,
               "last_summary": ""
             },
             "latest_audit": null,
-            "recent_explanations": []
+            "recent_explanations": [],
+            "style_snapshot": {
+              "label": "balanced_adaptive",
+              "continuity": 1.0,
+              "known_task_compute": 0.0,
+              "unknown_task_compute": 0.24,
+              "selective_gap": 0.24,
+              "style_surface": {
+                "compute_conservatism": 0.5,
+                "process_attraction_decay": 0.5,
+                "compression_preference": 0.5,
+                "uncertainty_tolerance": 0.48
+              },
+              "evidence": [
+                "style remains balanced across compute, compression, and uncertainty"
+              ]
+            }
           }
         },
         "semantic_report": {
@@ -1273,8 +1325,8 @@
       },
       {
         "cycle": 2,
-        "choice": "rest",
-        "workspace_bias": -0.027202,
+        "choice": "scan",
+        "workspace_bias": 0.36,
         "workspace_broadcast_channels": [
           "novelty",
           "food"
@@ -1292,7 +1344,7 @@
           "danger"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "food"
@@ -1312,7 +1364,7 @@
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1362,7 +1414,8 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=15.102",
+                  "memory_surprise=15.134"
                 ]
               },
               {
@@ -1391,8 +1444,21 @@
               "commitment_stability": 0.7,
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
-              "continuity_resilience": 0.66
+              "continuity_resilience": 0.66,
+              "compute_conservatism": 0.485,
+              "process_attraction_decay": 0.475,
+              "compression_preference": 0.485,
+              "uncertainty_tolerance": 0.51
             },
+            "cognitive_style_label": "balanced_adaptive",
+            "cognitive_style_evidence": [
+              "style remains balanced across compute, compression, and uncertainty"
+            ],
+            "cognitive_style_continuity": 1.0,
+            "cognitive_style_history": [
+              "balanced_adaptive",
+              "balanced_adaptive"
+            ],
             "unresolved_tensions": [
               {
                 "label": "maintenance pressure",
@@ -1411,7 +1477,8 @@
                 "intensity": 1.0,
                 "repair_target": "critical",
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=15.102",
+                  "memory_surprise=15.134"
                 ]
               },
               {
@@ -1452,6 +1519,7 @@
             },
             "continuity_score": 0.7468,
             "continuity_anchors": [
+              "ep-000002-scan",
               "ep-000001-hide"
             ]
           },
@@ -1522,12 +1590,66 @@
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66
               },
+              "style": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.475,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.51
+              },
+              "effort_allocation_history": [
+                {
+                  "tick": 1,
+                  "action": "hide",
+                  "known_task": false,
+                  "compute_spend": 0.24,
+                  "uncertainty_load": 0.587904,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.4372
+                },
+                {
+                  "tick": 2,
+                  "action": "scan",
+                  "known_task": false,
+                  "compute_spend": 0.66,
+                  "uncertainty_load": 0.46188,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.8
+                }
+              ],
+              "style_history": [
+                {
+                  "tick": 1,
+                  "label": "balanced_adaptive",
+                  "continuity": 0.0
+                },
+                {
+                  "tick": 2,
+                  "label": "balanced_adaptive",
+                  "continuity": 1.0
+                }
+              ],
               "last_processed_tick": 0,
               "sleep_cycles": 0,
               "last_summary": ""
             },
             "latest_audit": null,
-            "recent_explanations": []
+            "recent_explanations": [],
+            "style_snapshot": {
+              "label": "balanced_adaptive",
+              "continuity": 1.0,
+              "known_task_compute": 0.0,
+              "unknown_task_compute": 0.45,
+              "selective_gap": 0.45,
+              "style_surface": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.475,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.51
+              },
+              "evidence": [
+                "style remains balanced across compute, compression, and uncertainty"
+              ]
+            }
           }
         },
         "semantic_report": {
@@ -1547,7 +1669,7 @@
       {
         "cycle": 3,
         "choice": "rest",
-        "workspace_bias": -0.025166,
+        "workspace_bias": -0.026775,
         "workspace_broadcast_channels": [
           "novelty",
           "food"
@@ -1555,15 +1677,15 @@
         "workspace_suppressed_channels": [
           "maintenance",
           "stress",
+          "danger",
           "conflict",
           "continuity",
           "shelter",
           "temperature",
-          "danger",
           "social"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, food. Carry-over still accessible: novelty. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, food. Carry-over still accessible: novelty. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "food"
@@ -1574,16 +1696,16 @@
           "suppressed_channels": [
             "maintenance",
             "stress",
+            "danger",
             "conflict",
             "continuity",
             "shelter",
             "temperature",
-            "danger",
             "social"
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1600,7 +1722,7 @@
               "narrative_ambiguity_active": false,
               "active_inquiry": false,
               "inquiry_deferred": false,
-              "continuity_fragile": true,
+              "continuity_fragile": false,
               "long_horizon_conflict": true
             },
             "priority_stack": [
@@ -1633,17 +1755,19 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=15.102",
+                  "memory_surprise=15.134"
                 ]
               },
               {
-                "label": "unresolved self inconsistency",
-                "weight": 0.73,
-                "priority_type": "identity_tension",
+                "label": "unresolved maintenance discrepancy",
+                "weight": 1.0,
+                "priority_type": "maintenance_overload",
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "none"
+                  "resource_guard",
+                  "reconcile:conflict:continuity_anchor:continuity:1"
                 ]
               }
             ],
@@ -1661,9 +1785,34 @@
               "commitment_stability": 0.7,
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
-              "continuity_resilience": 0.66
+              "continuity_resilience": 0.66,
+              "compute_conservatism": 0.485,
+              "process_attraction_decay": 0.45,
+              "compression_preference": 0.485,
+              "uncertainty_tolerance": 0.49
             },
+            "cognitive_style_label": "balanced_adaptive",
+            "cognitive_style_evidence": [
+              "style remains balanced across compute, compression, and uncertainty",
+              "process attraction decayed slowly"
+            ],
+            "cognitive_style_continuity": 1.0,
+            "cognitive_style_history": [
+              "balanced_adaptive",
+              "balanced_adaptive",
+              "balanced_adaptive"
+            ],
             "unresolved_tensions": [
+              {
+                "label": "unresolved maintenance discrepancy",
+                "tension_type": "maintenance_overload",
+                "intensity": 1.08,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "resource_guard",
+                  "reconcile:conflict:continuity_anchor:continuity:1"
+                ]
+              },
               {
                 "label": "maintenance pressure",
                 "tension_type": "maintenance",
@@ -1681,7 +1830,8 @@
                 "intensity": 1.0,
                 "repair_target": "critical",
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=15.102",
+                  "memory_surprise=15.134"
                 ]
               },
               {
@@ -1691,16 +1841,6 @@
                 "repair_target": "SURVIVAL",
                 "evidence": [
                   "none"
-                ]
-              },
-              {
-                "label": "continuity-relevant tension",
-                "tension_type": "continuity_instability",
-                "intensity": 0.6632,
-                "repair_target": "critical",
-                "evidence": [
-                  "continuity_score_drop",
-                  "ep-000001-hide"
                 ]
               }
             ],
@@ -1720,8 +1860,9 @@
               "environment_ambiguity_burden": 0.0,
               "retained_uncertainty_burden": 0.0
             },
-            "continuity_score": 0.680133,
+            "continuity_score": 0.813467,
             "continuity_anchors": [
+              "ep-000002-scan",
               "ep-000001-hide"
             ]
           },
@@ -1792,12 +1933,81 @@
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66
               },
+              "style": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.45,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.49
+              },
+              "effort_allocation_history": [
+                {
+                  "tick": 1,
+                  "action": "hide",
+                  "known_task": false,
+                  "compute_spend": 0.24,
+                  "uncertainty_load": 0.587904,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.4372
+                },
+                {
+                  "tick": 2,
+                  "action": "scan",
+                  "known_task": false,
+                  "compute_spend": 0.66,
+                  "uncertainty_load": 0.46188,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.8
+                },
+                {
+                  "tick": 3,
+                  "action": "rest",
+                  "known_task": false,
+                  "compute_spend": 0.18,
+                  "uncertainty_load": 0.580785,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.8
+                }
+              ],
+              "style_history": [
+                {
+                  "tick": 1,
+                  "label": "balanced_adaptive",
+                  "continuity": 0.0
+                },
+                {
+                  "tick": 2,
+                  "label": "balanced_adaptive",
+                  "continuity": 1.0
+                },
+                {
+                  "tick": 3,
+                  "label": "balanced_adaptive",
+                  "continuity": 1.0
+                }
+              ],
               "last_processed_tick": 0,
               "sleep_cycles": 0,
               "last_summary": ""
             },
             "latest_audit": null,
-            "recent_explanations": []
+            "recent_explanations": [],
+            "style_snapshot": {
+              "label": "balanced_adaptive",
+              "continuity": 1.0,
+              "known_task_compute": 0.0,
+              "unknown_task_compute": 0.36,
+              "selective_gap": 0.36,
+              "style_surface": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.45,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.49
+              },
+              "evidence": [
+                "style remains balanced across compute, compression, and uncertainty",
+                "process attraction decayed slowly"
+              ]
+            }
           }
         },
         "semantic_report": {
@@ -1817,7 +2027,7 @@
       {
         "cycle": 4,
         "choice": "rest",
-        "workspace_bias": -0.026471,
+        "workspace_bias": -0.023706,
         "workspace_broadcast_channels": [
           "novelty",
           "food"
@@ -1825,15 +2035,15 @@
         "workspace_suppressed_channels": [
           "maintenance",
           "stress",
+          "danger",
           "conflict",
           "continuity",
-          "danger",
           "shelter",
           "temperature",
           "social"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, food. Carry-over still accessible: novelty. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, food. Carry-over still accessible: novelty. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 8 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "food"
@@ -1844,16 +2054,16 @@
           "suppressed_channels": [
             "maintenance",
             "stress",
+            "danger",
             "conflict",
             "continuity",
-            "danger",
             "shelter",
             "temperature",
             "social"
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 8 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1881,9 +2091,9 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "reconcile:conflict:identity_action:identity_tension:1",
+                  "reconcile:conflict:continuity_anchor:continuity_instability:1",
                   "reconcile:conflict:self_expectation_falsification:none:1",
-                  "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
+                  "reconcile:conflict:continuity_anchor:continuity:1"
                 ]
               },
               {
@@ -1903,17 +2113,19 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=15.102",
+                  "memory_surprise=15.134"
                 ]
               },
               {
-                "label": "unresolved self inconsistency",
-                "weight": 0.88,
-                "priority_type": "identity_tension",
+                "label": "unresolved maintenance discrepancy",
+                "weight": 1.0,
+                "priority_type": "maintenance_overload",
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "none"
+                  "resource_guard",
+                  "reconcile:conflict:continuity_anchor:continuity:1"
                 ]
               }
             ],
@@ -1931,18 +2143,44 @@
               "commitment_stability": 0.7,
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
-              "continuity_resilience": 0.66
+              "continuity_resilience": 0.66,
+              "compute_conservatism": 0.485,
+              "process_attraction_decay": 0.425,
+              "compression_preference": 0.485,
+              "uncertainty_tolerance": 0.47
             },
+            "cognitive_style_label": "balanced_adaptive",
+            "cognitive_style_evidence": [
+              "style remains balanced across compute, compression, and uncertainty",
+              "process attraction decayed slowly"
+            ],
+            "cognitive_style_continuity": 1.0,
+            "cognitive_style_history": [
+              "balanced_adaptive",
+              "balanced_adaptive",
+              "balanced_adaptive",
+              "balanced_adaptive"
+            ],
             "unresolved_tensions": [
+              {
+                "label": "unresolved maintenance discrepancy",
+                "tension_type": "maintenance_overload",
+                "intensity": 1.08,
+                "repair_target": "SURVIVAL",
+                "evidence": [
+                  "resource_guard",
+                  "reconcile:conflict:continuity_anchor:continuity:1"
+                ]
+              },
               {
                 "label": "maintenance pressure",
                 "tension_type": "maintenance",
                 "intensity": 1.0,
                 "repair_target": "rest",
                 "evidence": [
-                  "reconcile:conflict:identity_action:identity_tension:1",
+                  "reconcile:conflict:continuity_anchor:continuity_instability:1",
                   "reconcile:conflict:self_expectation_falsification:none:1",
-                  "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
+                  "reconcile:conflict:continuity_anchor:continuity:1"
                 ]
               },
               {
@@ -1951,7 +2189,8 @@
                 "intensity": 1.0,
                 "repair_target": "critical",
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=15.102",
+                  "memory_surprise=15.134"
                 ]
               },
               {
@@ -1961,16 +2200,6 @@
                 "repair_target": "SURVIVAL",
                 "evidence": [
                   "none"
-                ]
-              },
-              {
-                "label": "continuity-relevant tension",
-                "tension_type": "continuity_instability",
-                "intensity": 0.8132,
-                "repair_target": "critical",
-                "evidence": [
-                  "continuity_score_drop",
-                  "ep-000001-hide"
                 ]
               }
             ],
@@ -1990,8 +2219,9 @@
               "environment_ambiguity_burden": 0.0,
               "retained_uncertainty_burden": 0.0
             },
-            "continuity_score": 0.6468,
+            "continuity_score": 0.7468,
             "continuity_anchors": [
+              "ep-000002-scan",
               "ep-000001-hide"
             ]
           },
@@ -2062,12 +2292,95 @@
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66
               },
+              "style": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.425,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.47
+              },
+              "effort_allocation_history": [
+                {
+                  "tick": 1,
+                  "action": "hide",
+                  "known_task": false,
+                  "compute_spend": 0.24,
+                  "uncertainty_load": 0.587904,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.4372
+                },
+                {
+                  "tick": 2,
+                  "action": "scan",
+                  "known_task": false,
+                  "compute_spend": 0.66,
+                  "uncertainty_load": 0.46188,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.8
+                },
+                {
+                  "tick": 3,
+                  "action": "rest",
+                  "known_task": false,
+                  "compute_spend": 0.18,
+                  "uncertainty_load": 0.580785,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.8
+                },
+                {
+                  "tick": 4,
+                  "action": "rest",
+                  "known_task": false,
+                  "compute_spend": 0.18,
+                  "uncertainty_load": 0.609016,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.8
+                }
+              ],
+              "style_history": [
+                {
+                  "tick": 1,
+                  "label": "balanced_adaptive",
+                  "continuity": 0.0
+                },
+                {
+                  "tick": 2,
+                  "label": "balanced_adaptive",
+                  "continuity": 1.0
+                },
+                {
+                  "tick": 3,
+                  "label": "balanced_adaptive",
+                  "continuity": 1.0
+                },
+                {
+                  "tick": 4,
+                  "label": "balanced_adaptive",
+                  "continuity": 1.0
+                }
+              ],
               "last_processed_tick": 0,
               "sleep_cycles": 0,
               "last_summary": ""
             },
             "latest_audit": null,
-            "recent_explanations": []
+            "recent_explanations": [],
+            "style_snapshot": {
+              "label": "balanced_adaptive",
+              "continuity": 1.0,
+              "known_task_compute": 0.0,
+              "unknown_task_compute": 0.315,
+              "selective_gap": 0.315,
+              "style_surface": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.425,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.47
+              },
+              "evidence": [
+                "style remains balanced across compute, compression, and uncertainty",
+                "process attraction decayed slowly"
+              ]
+            }
           }
         },
         "semantic_report": {
@@ -2078,7 +2391,6 @@
           "priority_gain": 0.35,
           "active_tasks": [
             "energy_recovery",
-            "continuity_guard",
             "reconciliation_review"
           ],
           "recommended_action": "forage"

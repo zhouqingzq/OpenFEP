@@ -269,6 +269,10 @@ def build_m47_acceptance_report(
     runtime_snapshot: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
     snapshot = deepcopy(runtime_snapshot) if runtime_snapshot is not None else build_m47_runtime_snapshot()
+    # M4.8 demotion: runtime snapshot is diagnostic-only, not acceptance evidence.
+    # Behavioral claims require M4.8 ablation contrast proof.
+    snapshot["diagnostic_only"] = True
+    snapshot["demotion_reason"] = "M4.7 behavioral claims depend on M4.8 ablation evidence; this snapshot satisfies only structural self-consistency (layer a)."
     evidence_records = build_m47_evidence_records(
         include_regressions=include_regressions,
         runtime_snapshot=snapshot,

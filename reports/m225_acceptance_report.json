@@ -3,8 +3,8 @@
   "schema_version": "m225_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-26T10:37:39+00:00",
-  "codebase_version": "56f8860233e27b0ee7185db7bcafbf819b8c2adc",
+  "generated_at": "2026-04-10T06:46:30+00:00",
+  "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
   "seed_set": [
     225,
     244,
@@ -199,228 +199,12 @@
         "std": 0.0
       },
       "transfer_retention_score": {
-        "mean": 0.409722,
-        "std": 0.427577
+        "mean": 0.336806,
+        "std": 0.400361
       },
       "holdout_transfer_success_rate": {
-        "mean": 0.3125,
-        "std": 0.463512
-      },
-      "rule_shift_recovery_rate": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adversarial_resistance_score": {
-        "mean": 0.993056,
-        "std": 0.028633
-      },
-      "deceptive_salience_error_rate": {
-        "mean": 0.005208,
-        "std": 0.026387
-      },
-      "identity_preservation_score": {
-        "mean": 0.871095,
-        "std": 0.067513
-      },
-      "bounded_policy_reconfiguration_score": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adapter_failure_recovery_rate": {
-        "mean": 0.373264,
-        "std": 0.482023
-      },
-      "error_attribution_accuracy": {
-        "mean": 0.583333,
-        "std": 0.46398
-      },
-      "social_deception_resistance": {
-        "mean": 0.368056,
-        "std": 0.475935
-      },
-      "cross_world_commitment_alignment": {
-        "mean": 0.855307,
-        "std": 0.0637
-      },
-      "world_family_generalization_score": {
-        "mean": 0.284722,
-        "std": 0.380299
-      }
-    },
-    "no_transfer_regularization": {
-      "unseen_world_survival_ratio": {
-        "mean": 1.0,
-        "std": 0.0
-      },
-      "transfer_retention_score": {
-        "mean": 0.180556,
-        "std": 0.251922
-      },
-      "holdout_transfer_success_rate": {
-        "mean": 0.145833,
-        "std": 0.352939
-      },
-      "rule_shift_recovery_rate": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adversarial_resistance_score": {
-        "mean": 0.986111,
-        "std": 0.042808
-      },
-      "deceptive_salience_error_rate": {
-        "mean": 0.003472,
-        "std": 0.023804
-      },
-      "identity_preservation_score": {
-        "mean": 0.904641,
-        "std": 0.059239
-      },
-      "bounded_policy_reconfiguration_score": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adapter_failure_recovery_rate": {
-        "mean": 0.34375,
-        "std": 0.447674
-      },
-      "error_attribution_accuracy": {
-        "mean": 0.583333,
-        "std": 0.46398
-      },
-      "social_deception_resistance": {
-        "mean": 0.361111,
-        "std": 0.46781
-      },
-      "cross_world_commitment_alignment": {
-        "mean": 0.929012,
-        "std": 0.055251
-      },
-      "world_family_generalization_score": {
-        "mean": 0.180556,
-        "std": 0.251922
-      }
-    },
-    "weakened_narrative_seed": {
-      "unseen_world_survival_ratio": {
-        "mean": 1.0,
-        "std": 0.0
-      },
-      "transfer_retention_score": {
-        "mean": 0.423611,
-        "std": 0.435622
-      },
-      "holdout_transfer_success_rate": {
-        "mean": 0.375,
-        "std": 0.484123
-      },
-      "rule_shift_recovery_rate": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adversarial_resistance_score": {
-        "mean": 0.993056,
-        "std": 0.023032
-      },
-      "deceptive_salience_error_rate": {
-        "mean": 0.005208,
-        "std": 0.020172
-      },
-      "identity_preservation_score": {
-        "mean": 0.868329,
-        "std": 0.056276
-      },
-      "bounded_policy_reconfiguration_score": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adapter_failure_recovery_rate": {
-        "mean": 0.371528,
-        "std": 0.479908
-      },
-      "error_attribution_accuracy": {
-        "mean": 0.583333,
-        "std": 0.46398
-      },
-      "social_deception_resistance": {
-        "mean": 0.368056,
-        "std": 0.475631
-      },
-      "cross_world_commitment_alignment": {
-        "mean": 0.853752,
-        "std": 0.05584
-      },
-      "world_family_generalization_score": {
-        "mean": 0.298611,
-        "std": 0.393757
-      }
-    },
-    "shuffled_world_label": {
-      "unseen_world_survival_ratio": {
-        "mean": 1.0,
-        "std": 0.0
-      },
-      "transfer_retention_score": {
-        "mean": 0.159722,
-        "std": 0.315418
-      },
-      "holdout_transfer_success_rate": {
-        "mean": 0.0,
-        "std": 0.0
-      },
-      "rule_shift_recovery_rate": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adversarial_resistance_score": {
-        "mean": 0.920139,
-        "std": 0.191665
-      },
-      "deceptive_salience_error_rate": {
-        "mean": 0.006944,
-        "std": 0.028633
-      },
-      "identity_preservation_score": {
-        "mean": 0.821532,
-        "std": 0.081472
-      },
-      "bounded_policy_reconfiguration_score": {
-        "mean": 0.125,
-        "std": 0.330719
-      },
-      "adapter_failure_recovery_rate": {
-        "mean": 0.260417,
-        "std": 0.361094
-      },
-      "error_attribution_accuracy": {
-        "mean": 0.510417,
-        "std": 0.445731
-      },
-      "social_deception_resistance": {
-        "mean": 0.295139,
-        "std": 0.413865
-      },
-      "cross_world_commitment_alignment": {
-        "mean": 0.882062,
-        "std": 0.07107
-      },
-      "world_family_generalization_score": {
-        "mean": 0.055556,
-        "std": 0.133217
-      }
-    },
-    "adapter_degraded": {
-      "unseen_world_survival_ratio": {
-        "mean": 1.0,
-        "std": 0.0
-      },
-      "transfer_retention_score": {
-        "mean": 0.236111,
-        "std": 0.32245
-      },
-      "holdout_transfer_success_rate": {
-        "mean": 0.25,
-        "std": 0.433013
+        "mean": 0.270833,
+        "std": 0.44439
       },
       "rule_shift_recovery_rate": {
         "mean": 0.125,
@@ -431,20 +215,236 @@
         "std": 0.026387
       },
       "deceptive_salience_error_rate": {
-        "mean": 0.005208,
-        "std": 0.026387
+        "mean": 0.001736,
+        "std": 0.011902
       },
       "identity_preservation_score": {
-        "mean": 0.812156,
-        "std": 0.099617
+        "mean": 0.872543,
+        "std": 0.060787
       },
       "bounded_policy_reconfiguration_score": {
         "mean": 0.125,
         "std": 0.330719
       },
       "adapter_failure_recovery_rate": {
-        "mean": 0.310764,
-        "std": 0.40851
+        "mean": 0.375,
+        "std": 0.484123
+      },
+      "error_attribution_accuracy": {
+        "mean": 0.583333,
+        "std": 0.46398
+      },
+      "social_deception_resistance": {
+        "mean": 0.369792,
+        "std": 0.47808
+      },
+      "cross_world_commitment_alignment": {
+        "mean": 0.858353,
+        "std": 0.053173
+      },
+      "world_family_generalization_score": {
+        "mean": 0.253472,
+        "std": 0.355169
+      }
+    },
+    "no_transfer_regularization": {
+      "unseen_world_survival_ratio": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "transfer_retention_score": {
+        "mean": 0.142361,
+        "std": 0.225641
+      },
+      "holdout_transfer_success_rate": {
+        "mean": 0.104167,
+        "std": 0.305477
+      },
+      "rule_shift_recovery_rate": {
+        "mean": 0.104167,
+        "std": 0.305477
+      },
+      "adversarial_resistance_score": {
+        "mean": 0.991319,
+        "std": 0.035025
+      },
+      "deceptive_salience_error_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "identity_preservation_score": {
+        "mean": 0.899269,
+        "std": 0.051817
+      },
+      "bounded_policy_reconfiguration_score": {
+        "mean": 0.104167,
+        "std": 0.305477
+      },
+      "adapter_failure_recovery_rate": {
+        "mean": 0.329861,
+        "std": 0.433666
+      },
+      "error_attribution_accuracy": {
+        "mean": 0.583333,
+        "std": 0.46398
+      },
+      "social_deception_resistance": {
+        "mean": 0.366319,
+        "std": 0.474079
+      },
+      "cross_world_commitment_alignment": {
+        "mean": 0.91099,
+        "std": 0.04952
+      },
+      "world_family_generalization_score": {
+        "mean": 0.142361,
+        "std": 0.225641
+      }
+    },
+    "weakened_narrative_seed": {
+      "unseen_world_survival_ratio": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "transfer_retention_score": {
+        "mean": 0.347222,
+        "std": 0.39796
+      },
+      "holdout_transfer_success_rate": {
+        "mean": 0.25,
+        "std": 0.433013
+      },
+      "rule_shift_recovery_rate": {
+        "mean": 0.125,
+        "std": 0.330719
+      },
+      "adversarial_resistance_score": {
+        "mean": 0.993056,
+        "std": 0.028633
+      },
+      "deceptive_salience_error_rate": {
+        "mean": 0.003472,
+        "std": 0.016652
+      },
+      "identity_preservation_score": {
+        "mean": 0.874531,
+        "std": 0.053448
+      },
+      "bounded_policy_reconfiguration_score": {
+        "mean": 0.125,
+        "std": 0.330719
+      },
+      "adapter_failure_recovery_rate": {
+        "mean": 0.375,
+        "std": 0.484123
+      },
+      "error_attribution_accuracy": {
+        "mean": 0.583333,
+        "std": 0.46398
+      },
+      "social_deception_resistance": {
+        "mean": 0.368056,
+        "std": 0.475935
+      },
+      "cross_world_commitment_alignment": {
+        "mean": 0.858889,
+        "std": 0.050998
+      },
+      "world_family_generalization_score": {
+        "mean": 0.243056,
+        "std": 0.340136
+      }
+    },
+    "shuffled_world_label": {
+      "unseen_world_survival_ratio": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "transfer_retention_score": {
+        "mean": 0.090278,
+        "std": 0.22037
+      },
+      "holdout_transfer_success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "rule_shift_recovery_rate": {
+        "mean": 0.083333,
+        "std": 0.276385
+      },
+      "adversarial_resistance_score": {
+        "mean": 0.932292,
+        "std": 0.178127
+      },
+      "deceptive_salience_error_rate": {
+        "mean": 0.003472,
+        "std": 0.016652
+      },
+      "identity_preservation_score": {
+        "mean": 0.804578,
+        "std": 0.093265
+      },
+      "bounded_policy_reconfiguration_score": {
+        "mean": 0.083333,
+        "std": 0.276385
+      },
+      "adapter_failure_recovery_rate": {
+        "mean": 0.256944,
+        "std": 0.369494
+      },
+      "error_attribution_accuracy": {
+        "mean": 0.510417,
+        "std": 0.445731
+      },
+      "social_deception_resistance": {
+        "mean": 0.307292,
+        "std": 0.425992
+      },
+      "cross_world_commitment_alignment": {
+        "mean": 0.865118,
+        "std": 0.055725
+      },
+      "world_family_generalization_score": {
+        "mean": 0.048611,
+        "std": 0.11262
+      }
+    },
+    "adapter_degraded": {
+      "unseen_world_survival_ratio": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "transfer_retention_score": {
+        "mean": 0.190972,
+        "std": 0.282576
+      },
+      "holdout_transfer_success_rate": {
+        "mean": 0.145833,
+        "std": 0.352939
+      },
+      "rule_shift_recovery_rate": {
+        "mean": 0.104167,
+        "std": 0.305477
+      },
+      "adversarial_resistance_score": {
+        "mean": 0.994792,
+        "std": 0.026387
+      },
+      "deceptive_salience_error_rate": {
+        "mean": 0.001736,
+        "std": 0.011902
+      },
+      "identity_preservation_score": {
+        "mean": 0.812983,
+        "std": 0.107066
+      },
+      "bounded_policy_reconfiguration_score": {
+        "mean": 0.104167,
+        "std": 0.305477
+      },
+      "adapter_failure_recovery_rate": {
+        "mean": 0.329861,
+        "std": 0.429645
       },
       "error_attribution_accuracy": {
         "mean": 0.333333,
@@ -455,12 +455,12 @@
         "std": 0.47808
       },
       "cross_world_commitment_alignment": {
-        "mean": 0.834648,
-        "std": 0.058409
+        "mean": 0.83705,
+        "std": 0.060693
       },
       "world_family_generalization_score": {
-        "mean": 0.236111,
-        "std": 0.32245
+        "mean": 0.190972,
+        "std": 0.282576
       }
     }
   },
@@ -475,10 +475,10 @@
         "effect_passed": false
       },
       "transfer_retention_score": {
-        "mean_delta": 0.229167,
-        "std_delta": 0.354575,
-        "t_statistic": 4.477793,
-        "effect_size": 0.646314,
+        "mean_delta": 0.194444,
+        "std_delta": 0.349161,
+        "t_statistic": 3.858248,
+        "effect_size": 0.55689,
         "significant": true,
         "effect_passed": true
       },
@@ -491,18 +491,18 @@
         "effect_passed": false
       },
       "rule_shift_recovery_rate": {
-        "mean_delta": 0.0,
-        "std_delta": 0.0,
-        "t_statistic": 0.0,
-        "effect_size": 0.0,
+        "mean_delta": 0.020833,
+        "std_delta": 0.142826,
+        "t_statistic": 1.010582,
+        "effect_size": 0.145865,
         "significant": false,
         "effect_passed": false
       },
       "adversarial_resistance_score": {
-        "mean_delta": 0.006944,
-        "std_delta": 0.037397,
-        "t_statistic": 1.286537,
-        "effect_size": 0.185696,
+        "mean_delta": 0.003472,
+        "std_delta": 0.044871,
+        "t_statistic": 0.536121,
+        "effect_size": 0.077382,
         "significant": false,
         "effect_passed": false
       },
@@ -515,26 +515,26 @@
         "effect_passed": false
       },
       "identity_preservation_score": {
-        "mean_delta": -0.033546,
-        "std_delta": 0.086118,
-        "t_statistic": -2.698776,
-        "effect_size": -0.389535,
+        "mean_delta": -0.026726,
+        "std_delta": 0.068242,
+        "t_statistic": -2.713361,
+        "effect_size": -0.39164,
         "significant": true,
         "effect_passed": false
       },
       "bounded_policy_reconfiguration_score": {
-        "mean_delta": 0.0,
-        "std_delta": 0.0,
-        "t_statistic": 0.0,
-        "effect_size": 0.0,
+        "mean_delta": 0.020833,
+        "std_delta": 0.142826,
+        "t_statistic": 1.010582,
+        "effect_size": 0.145865,
         "significant": false,
         "effect_passed": false
       },
       "adapter_failure_recovery_rate": {
-        "mean_delta": 0.029514,
-        "std_delta": 0.071138,
-        "t_statistic": 2.874381,
-        "effect_size": 0.414881,
+        "mean_delta": 0.045139,
+        "std_delta": 0.100575,
+        "t_statistic": 3.109447,
+        "effect_size": 0.44881,
         "significant": true,
         "effect_passed": false
       },
@@ -547,28 +547,28 @@
         "effect_passed": false
       },
       "social_deception_resistance": {
-        "mean_delta": 0.006944,
-        "std_delta": 0.037397,
-        "t_statistic": 1.286537,
-        "effect_size": 0.185696,
+        "mean_delta": 0.003472,
+        "std_delta": 0.044871,
+        "t_statistic": 0.536121,
+        "effect_size": 0.077382,
         "significant": false,
         "effect_passed": false
       },
       "cross_world_commitment_alignment": {
-        "mean_delta": -0.073705,
-        "std_delta": 0.07999,
-        "t_statistic": -6.383793,
-        "effect_size": -0.921421,
+        "mean_delta": -0.052637,
+        "std_delta": 0.058977,
+        "t_statistic": -6.183435,
+        "effect_size": -0.892502,
         "significant": true,
         "effect_passed": true
       },
       "world_family_generalization_score": {
-        "mean_delta": 0.104167,
-        "std_delta": 0.205889,
-        "t_statistic": 3.505236,
-        "effect_size": 0.505937,
+        "mean_delta": 0.111111,
+        "std_delta": 0.253068,
+        "t_statistic": 3.041876,
+        "effect_size": 0.439057,
         "significant": true,
-        "effect_passed": true
+        "effect_passed": false
       }
     },
     "full_system_vs_weakened_narrative_seed": {
@@ -581,18 +581,18 @@
         "effect_passed": false
       },
       "transfer_retention_score": {
-        "mean_delta": -0.013889,
-        "std_delta": 0.121875,
-        "t_statistic": -0.789542,
-        "effect_size": -0.113961,
+        "mean_delta": -0.010417,
+        "std_delta": 0.213563,
+        "t_statistic": -0.337928,
+        "effect_size": -0.048776,
         "significant": false,
         "effect_passed": false
       },
       "holdout_transfer_success_rate": {
-        "mean_delta": -0.0625,
-        "std_delta": 0.242061,
-        "t_statistic": -1.788854,
-        "effect_size": -0.258199,
+        "mean_delta": 0.020833,
+        "std_delta": 0.24913,
+        "t_statistic": 0.579365,
+        "effect_size": 0.083624,
         "significant": false,
         "effect_passed": false
       },
@@ -605,26 +605,26 @@
         "effect_passed": false
       },
       "adversarial_resistance_score": {
-        "mean_delta": -0.0,
-        "std_delta": 0.01701,
-        "t_statistic": -8e-06,
-        "effect_size": -1e-06,
+        "mean_delta": 0.001736,
+        "std_delta": 0.020761,
+        "t_statistic": 0.579365,
+        "effect_size": 0.083624,
         "significant": false,
         "effect_passed": false
       },
       "deceptive_salience_error_rate": {
-        "mean_delta": -0.0,
-        "std_delta": 0.01701,
-        "t_statistic": -8e-06,
-        "effect_size": -1e-06,
+        "mean_delta": 0.001736,
+        "std_delta": 0.020761,
+        "t_statistic": 0.579365,
+        "effect_size": 0.083624,
         "significant": false,
         "effect_passed": false
       },
       "identity_preservation_score": {
-        "mean_delta": 0.002766,
-        "std_delta": 0.05184,
-        "t_statistic": 0.369669,
-        "effect_size": 0.053357,
+        "mean_delta": -0.001988,
+        "std_delta": 0.043272,
+        "t_statistic": -0.318315,
+        "effect_size": -0.045945,
         "significant": false,
         "effect_passed": false
       },
@@ -637,10 +637,10 @@
         "effect_passed": false
       },
       "adapter_failure_recovery_rate": {
-        "mean_delta": 0.001736,
-        "std_delta": 0.011902,
-        "t_statistic": 1.010582,
-        "effect_size": 0.145865,
+        "mean_delta": 0.0,
+        "std_delta": 0.0,
+        "t_statistic": 0.0,
+        "effect_size": 0.0,
         "significant": false,
         "effect_passed": false
       },
@@ -653,26 +653,26 @@
         "effect_passed": false
       },
       "social_deception_resistance": {
-        "mean_delta": -0.0,
-        "std_delta": 0.01701,
-        "t_statistic": -8e-06,
-        "effect_size": -1e-06,
+        "mean_delta": 0.001736,
+        "std_delta": 0.020761,
+        "t_statistic": 0.579365,
+        "effect_size": 0.083624,
         "significant": false,
         "effect_passed": false
       },
       "cross_world_commitment_alignment": {
-        "mean_delta": 0.001555,
-        "std_delta": 0.055714,
-        "t_statistic": 0.193388,
-        "effect_size": 0.027913,
+        "mean_delta": -0.000536,
+        "std_delta": 0.045365,
+        "t_statistic": -0.081817,
+        "effect_size": -0.011809,
         "significant": false,
         "effect_passed": false
       },
       "world_family_generalization_score": {
-        "mean_delta": -0.013889,
-        "std_delta": 0.121874,
-        "t_statistic": -0.789544,
-        "effect_size": -0.113961,
+        "mean_delta": 0.010417,
+        "std_delta": 0.157403,
+        "t_statistic": 0.458496,
+        "effect_size": 0.066178,
         "significant": false,
         "effect_passed": false
       }
@@ -687,34 +687,34 @@
         "effect_passed": false
       },
       "transfer_retention_score": {
-        "mean_delta": 0.25,
-        "std_delta": 0.341904,
-        "t_statistic": 5.065902,
-        "effect_size": 0.7312,
+        "mean_delta": 0.246528,
+        "std_delta": 0.405388,
+        "t_statistic": 4.213229,
+        "effect_size": 0.608127,
         "significant": true,
         "effect_passed": true
       },
       "holdout_transfer_success_rate": {
-        "mean_delta": 0.3125,
-        "std_delta": 0.463512,
-        "t_statistic": 4.670994,
-        "effect_size": 0.6742,
+        "mean_delta": 0.270833,
+        "std_delta": 0.44439,
+        "t_statistic": 4.222389,
+        "effect_size": 0.609449,
         "significant": true,
         "effect_passed": true
       },
       "rule_shift_recovery_rate": {
-        "mean_delta": 0.0,
-        "std_delta": 0.0,
-        "t_statistic": 0.0,
-        "effect_size": 0.0,
+        "mean_delta": 0.041667,
+        "std_delta": 0.199826,
+        "t_statistic": 1.44463,
+        "effect_size": 0.208514,
         "significant": false,
         "effect_passed": false
       },
       "adversarial_resistance_score": {
-        "mean_delta": 0.072917,
-        "std_delta": 0.191414,
-        "t_statistic": 2.639214,
-        "effect_size": 0.380938,
+        "mean_delta": 0.0625,
+        "std_delta": 0.174719,
+        "t_statistic": 2.478341,
+        "effect_size": 0.357718,
         "significant": true,
         "effect_passed": false
       },
@@ -727,26 +727,26 @@
         "effect_passed": false
       },
       "identity_preservation_score": {
-        "mean_delta": 0.049564,
-        "std_delta": 0.099122,
-        "t_statistic": 3.4643,
-        "effect_size": 0.500029,
+        "mean_delta": 0.067964,
+        "std_delta": 0.113786,
+        "t_statistic": 4.138206,
+        "effect_size": 0.597299,
         "significant": true,
         "effect_passed": true
       },
       "bounded_policy_reconfiguration_score": {
-        "mean_delta": 0.0,
-        "std_delta": 0.0,
-        "t_statistic": 0.0,
-        "effect_size": 0.0,
+        "mean_delta": 0.041667,
+        "std_delta": 0.199826,
+        "t_statistic": 1.44463,
+        "effect_size": 0.208514,
         "significant": false,
         "effect_passed": false
       },
       "adapter_failure_recovery_rate": {
-        "mean_delta": 0.112847,
-        "std_delta": 0.19873,
-        "t_statistic": 3.934128,
-        "effect_size": 0.567842,
+        "mean_delta": 0.118056,
+        "std_delta": 0.22298,
+        "t_statistic": 3.668092,
+        "effect_size": 0.529443,
         "significant": true,
         "effect_passed": true
       },
@@ -759,26 +759,26 @@
         "effect_passed": true
       },
       "social_deception_resistance": {
-        "mean_delta": 0.072917,
-        "std_delta": 0.191414,
-        "t_statistic": 2.639214,
-        "effect_size": 0.380938,
+        "mean_delta": 0.0625,
+        "std_delta": 0.174719,
+        "t_statistic": 2.478341,
+        "effect_size": 0.357718,
         "significant": true,
         "effect_passed": false
       },
       "cross_world_commitment_alignment": {
-        "mean_delta": -0.026755,
-        "std_delta": 0.070924,
-        "t_statistic": -2.613565,
-        "effect_size": -0.377236,
-        "significant": true,
+        "mean_delta": -0.006765,
+        "std_delta": 0.056519,
+        "t_statistic": -0.829311,
+        "effect_size": -0.119701,
+        "significant": false,
         "effect_passed": false
       },
       "world_family_generalization_score": {
-        "mean_delta": 0.229167,
-        "std_delta": 0.325649,
-        "t_statistic": 4.875532,
-        "effect_size": 0.703722,
+        "mean_delta": 0.204861,
+        "std_delta": 0.315934,
+        "t_statistic": 4.492454,
+        "effect_size": 0.64843,
         "significant": true,
         "effect_passed": true
       }
@@ -793,34 +793,34 @@
         "effect_passed": false
       },
       "transfer_retention_score": {
-        "mean_delta": 0.173611,
-        "std_delta": 0.345202,
-        "t_statistic": 3.48437,
-        "effect_size": 0.502925,
+        "mean_delta": 0.145833,
+        "std_delta": 0.322076,
+        "t_statistic": 3.137037,
+        "effect_size": 0.452792,
         "significant": true,
-        "effect_passed": true
+        "effect_passed": false
       },
       "holdout_transfer_success_rate": {
-        "mean_delta": 0.0625,
-        "std_delta": 0.376732,
-        "t_statistic": 1.149392,
-        "effect_size": 0.1659,
-        "significant": false,
+        "mean_delta": 0.125,
+        "std_delta": 0.388641,
+        "t_statistic": 2.228344,
+        "effect_size": 0.321634,
+        "significant": true,
         "effect_passed": false
       },
       "rule_shift_recovery_rate": {
-        "mean_delta": 0.0,
-        "std_delta": 0.0,
-        "t_statistic": 0.0,
-        "effect_size": 0.0,
+        "mean_delta": 0.020833,
+        "std_delta": 0.142826,
+        "t_statistic": 1.010582,
+        "effect_size": 0.145865,
         "significant": false,
         "effect_passed": false
       },
       "adversarial_resistance_score": {
-        "mean_delta": -0.001736,
-        "std_delta": 0.011902,
-        "t_statistic": -1.010582,
-        "effect_size": -0.145865,
+        "mean_delta": 0.0,
+        "std_delta": 0.0,
+        "t_statistic": 0.0,
+        "effect_size": 0.0,
         "significant": false,
         "effect_passed": false
       },
@@ -833,26 +833,26 @@
         "effect_passed": false
       },
       "identity_preservation_score": {
-        "mean_delta": 0.058939,
-        "std_delta": 0.077765,
-        "t_statistic": 5.250978,
-        "effect_size": 0.757913,
+        "mean_delta": 0.05956,
+        "std_delta": 0.083079,
+        "t_statistic": 4.966883,
+        "effect_size": 0.716908,
         "significant": true,
         "effect_passed": true
       },
       "bounded_policy_reconfiguration_score": {
-        "mean_delta": 0.0,
-        "std_delta": 0.0,
-        "t_statistic": 0.0,
-        "effect_size": 0.0,
+        "mean_delta": 0.020833,
+        "std_delta": 0.142826,
+        "t_statistic": 1.010582,
+        "effect_size": 0.145865,
         "significant": false,
         "effect_passed": false
       },
       "adapter_failure_recovery_rate": {
-        "mean_delta": 0.0625,
-        "std_delta": 0.112191,
-        "t_statistic": 3.859608,
-        "effect_size": 0.557086,
+        "mean_delta": 0.045139,
+        "std_delta": 0.081505,
+        "t_statistic": 3.836968,
+        "effect_size": 0.553819,
         "significant": true,
         "effect_passed": true
       },
@@ -865,45 +865,45 @@
         "effect_passed": true
       },
       "social_deception_resistance": {
-        "mean_delta": -0.001736,
-        "std_delta": 0.011902,
-        "t_statistic": -1.010582,
-        "effect_size": -0.145865,
+        "mean_delta": 0.0,
+        "std_delta": 0.0,
+        "t_statistic": 0.0,
+        "effect_size": 0.0,
         "significant": false,
         "effect_passed": false
       },
       "cross_world_commitment_alignment": {
-        "mean_delta": 0.020659,
-        "std_delta": 0.051085,
-        "t_statistic": 2.801816,
-        "effect_size": 0.404407,
+        "mean_delta": 0.021303,
+        "std_delta": 0.046731,
+        "t_statistic": 3.158352,
+        "effect_size": 0.455869,
         "significant": true,
         "effect_passed": false
       },
       "world_family_generalization_score": {
-        "mean_delta": 0.048611,
-        "std_delta": 0.14813,
-        "t_statistic": 2.273593,
-        "effect_size": 0.328165,
+        "mean_delta": 0.0625,
+        "std_delta": 0.19432,
+        "t_statistic": 2.228344,
+        "effect_size": 0.321634,
         "significant": true,
         "effect_passed": false
       }
     }
   },
   "significant_metric_count": 21,
-  "effect_metric_count": 13,
+  "effect_metric_count": 11,
   "protocol_breakdown": {
     "holdout_transfer_protocol": {
-      "success_rate": 0.833333,
+      "success_rate": 0.666667,
       "mean_recovery_ticks": 18.0
     },
     "multi_hop_transfer_protocol": {
-      "success_rate": 0.666667,
+      "success_rate": 1.0,
       "mean_recovery_ticks": 20.0
     },
     "rule_shift_protocol": {
-      "success_rate": 1.0,
-      "mean_recovery_ticks": 1.0
+      "success_rate": 0.666667,
+      "mean_recovery_ticks": 1.666667
     },
     "social_deception_protocol": {
       "success_rate": 1.0,
@@ -918,7 +918,7 @@
       "mean_recovery_ticks": 16.0
     },
     "adapter_degradation_protocol": {
-      "success_rate": 1.0,
+      "success_rate": 0.5,
       "mean_recovery_ticks": 19.0
     },
     "delayed_effect_protocol": {
@@ -931,7 +931,7 @@
       "fog_of_trust_basin",
       "fractured_echo_harbor"
     ],
-    "holdout_transfer_success_rate": 0.75,
+    "holdout_transfer_success_rate": 0.833333,
     "unseen_world_survival_ratio": 1.0
   },
   "adapter_breakdown": {
@@ -940,30 +940,30 @@
     "catastrophic_collapse_ratio": 0.0
   },
   "deception_breakdown": {
-    "adversarial_resistance_score": 0.972222,
-    "social_deception_resistance": 0.972222,
-    "deceptive_salience_error_rate": 0.020833
+    "adversarial_resistance_score": 0.993056,
+    "social_deception_resistance": 0.993056,
+    "deceptive_salience_error_rate": 0.006944
   },
   "shortcut_control_breakdown": {
     "no_transfer_regularization": {
-      "success_rate": 0.645833,
-      "world_family_generalization_score": 0.180556,
-      "holdout_transfer_success_rate": 0.145833
+      "success_rate": 0.604167,
+      "world_family_generalization_score": 0.142361,
+      "holdout_transfer_success_rate": 0.104167
     },
     "weakened_narrative_seed": {
-      "success_rate": 1.0,
-      "world_family_generalization_score": 0.298611,
-      "holdout_transfer_success_rate": 0.375
+      "success_rate": 0.854167,
+      "world_family_generalization_score": 0.243056,
+      "holdout_transfer_success_rate": 0.25
     },
     "shuffled_world_label": {
-      "success_rate": 0.604167,
-      "world_family_generalization_score": 0.055556,
+      "success_rate": 0.520833,
+      "world_family_generalization_score": 0.048611,
       "holdout_transfer_success_rate": 0.0
     },
     "adapter_degraded": {
-      "success_rate": 0.729167,
-      "world_family_generalization_score": 0.236111,
-      "holdout_transfer_success_rate": 0.25
+      "success_rate": 0.645833,
+      "world_family_generalization_score": 0.190972,
+      "holdout_transfer_success_rate": 0.145833
     }
   },
   "gates": {
@@ -981,30 +981,30 @@
     "historical_regression_evidence": true
   },
   "goal_details": {
-    "holdout_transfer_success_rate": 0.75,
+    "holdout_transfer_success_rate": 0.833333,
     "unseen_world_survival_ratio": 1.0,
-    "transfer_retention_score": 0.777778,
-    "cross_world_commitment_alignment": 0.876952,
-    "identity_preservation_score": 0.904732,
+    "transfer_retention_score": 0.708333,
+    "cross_world_commitment_alignment": 0.893831,
+    "identity_preservation_score": 0.919494,
     "rule_shift_recovery_rate": 1.0,
-    "mean_rule_shift_recovery_ticks": 1.0,
+    "mean_rule_shift_recovery_ticks": 1.666667,
     "bounded_policy_reconfiguration_score": 1.0,
-    "adversarial_resistance_score": 0.972222,
-    "social_deception_resistance": 0.972222,
-    "deceptive_salience_error_rate": 0.020833,
+    "adversarial_resistance_score": 0.993056,
+    "social_deception_resistance": 0.993056,
+    "deceptive_salience_error_rate": 0.006944,
     "adapter_failure_recovery_rate": 1.0,
     "error_attribution_accuracy": 1.0,
     "catastrophic_collapse_ratio": 0.0,
-    "world_family_generalization_score": 0.777778,
-    "no_transfer_regularization_drop": 0.277778,
+    "world_family_generalization_score": 0.708333,
+    "no_transfer_regularization_drop": 0.361111,
     "shuffled_world_label_holdout_success_rate": 0.0,
     "significance_snapshot": {
       "full_system_vs_no_transfer_regularization": {
         "transfer_retention_score": {
-          "mean_delta": 0.229167,
-          "std_delta": 0.354575,
-          "t_statistic": 4.477793,
-          "effect_size": 0.646314,
+          "mean_delta": 0.194444,
+          "std_delta": 0.349161,
+          "t_statistic": 3.858248,
+          "effect_size": 0.55689,
           "significant": true,
           "effect_passed": true
         },
@@ -1017,152 +1017,152 @@
           "effect_passed": false
         },
         "identity_preservation_score": {
-          "mean_delta": -0.033546,
-          "std_delta": 0.086118,
-          "t_statistic": -2.698776,
-          "effect_size": -0.389535,
+          "mean_delta": -0.026726,
+          "std_delta": 0.068242,
+          "t_statistic": -2.713361,
+          "effect_size": -0.39164,
           "significant": true,
           "effect_passed": false
         },
         "adapter_failure_recovery_rate": {
-          "mean_delta": 0.029514,
-          "std_delta": 0.071138,
-          "t_statistic": 2.874381,
-          "effect_size": 0.414881,
+          "mean_delta": 0.045139,
+          "std_delta": 0.100575,
+          "t_statistic": 3.109447,
+          "effect_size": 0.44881,
           "significant": true,
           "effect_passed": false
         },
         "world_family_generalization_score": {
-          "mean_delta": 0.104167,
-          "std_delta": 0.205889,
-          "t_statistic": 3.505236,
-          "effect_size": 0.505937,
+          "mean_delta": 0.111111,
+          "std_delta": 0.253068,
+          "t_statistic": 3.041876,
+          "effect_size": 0.439057,
           "significant": true,
-          "effect_passed": true
+          "effect_passed": false
         }
       },
       "full_system_vs_weakened_narrative_seed": {
         "transfer_retention_score": {
-          "mean_delta": -0.013889,
-          "std_delta": 0.121875,
-          "t_statistic": -0.789542,
-          "effect_size": -0.113961,
+          "mean_delta": -0.010417,
+          "std_delta": 0.213563,
+          "t_statistic": -0.337928,
+          "effect_size": -0.048776,
           "significant": false,
           "effect_passed": false
         },
         "holdout_transfer_success_rate": {
-          "mean_delta": -0.0625,
-          "std_delta": 0.242061,
-          "t_statistic": -1.788854,
-          "effect_size": -0.258199,
+          "mean_delta": 0.020833,
+          "std_delta": 0.24913,
+          "t_statistic": 0.579365,
+          "effect_size": 0.083624,
           "significant": false,
           "effect_passed": false
         },
         "identity_preservation_score": {
-          "mean_delta": 0.002766,
-          "std_delta": 0.05184,
-          "t_statistic": 0.369669,
-          "effect_size": 0.053357,
+          "mean_delta": -0.001988,
+          "std_delta": 0.043272,
+          "t_statistic": -0.318315,
+          "effect_size": -0.045945,
           "significant": false,
           "effect_passed": false
         },
         "adapter_failure_recovery_rate": {
-          "mean_delta": 0.001736,
-          "std_delta": 0.011902,
-          "t_statistic": 1.010582,
-          "effect_size": 0.145865,
+          "mean_delta": 0.0,
+          "std_delta": 0.0,
+          "t_statistic": 0.0,
+          "effect_size": 0.0,
           "significant": false,
           "effect_passed": false
         },
         "world_family_generalization_score": {
-          "mean_delta": -0.013889,
-          "std_delta": 0.121874,
-          "t_statistic": -0.789544,
-          "effect_size": -0.113961,
+          "mean_delta": 0.010417,
+          "std_delta": 0.157403,
+          "t_statistic": 0.458496,
+          "effect_size": 0.066178,
           "significant": false,
           "effect_passed": false
         }
       },
       "full_system_vs_shuffled_world_label": {
         "transfer_retention_score": {
-          "mean_delta": 0.25,
-          "std_delta": 0.341904,
-          "t_statistic": 5.065902,
-          "effect_size": 0.7312,
+          "mean_delta": 0.246528,
+          "std_delta": 0.405388,
+          "t_statistic": 4.213229,
+          "effect_size": 0.608127,
           "significant": true,
           "effect_passed": true
         },
         "holdout_transfer_success_rate": {
-          "mean_delta": 0.3125,
-          "std_delta": 0.463512,
-          "t_statistic": 4.670994,
-          "effect_size": 0.6742,
+          "mean_delta": 0.270833,
+          "std_delta": 0.44439,
+          "t_statistic": 4.222389,
+          "effect_size": 0.609449,
           "significant": true,
           "effect_passed": true
         },
         "identity_preservation_score": {
-          "mean_delta": 0.049564,
-          "std_delta": 0.099122,
-          "t_statistic": 3.4643,
-          "effect_size": 0.500029,
+          "mean_delta": 0.067964,
+          "std_delta": 0.113786,
+          "t_statistic": 4.138206,
+          "effect_size": 0.597299,
           "significant": true,
           "effect_passed": true
         },
         "adapter_failure_recovery_rate": {
-          "mean_delta": 0.112847,
-          "std_delta": 0.19873,
-          "t_statistic": 3.934128,
-          "effect_size": 0.567842,
+          "mean_delta": 0.118056,
+          "std_delta": 0.22298,
+          "t_statistic": 3.668092,
+          "effect_size": 0.529443,
           "significant": true,
           "effect_passed": true
         },
         "world_family_generalization_score": {
-          "mean_delta": 0.229167,
-          "std_delta": 0.325649,
-          "t_statistic": 4.875532,
-          "effect_size": 0.703722,
+          "mean_delta": 0.204861,
+          "std_delta": 0.315934,
+          "t_statistic": 4.492454,
+          "effect_size": 0.64843,
           "significant": true,
           "effect_passed": true
         }
       },
       "full_system_vs_adapter_degraded": {
         "transfer_retention_score": {
-          "mean_delta": 0.173611,
-          "std_delta": 0.345202,
-          "t_statistic": 3.48437,
-          "effect_size": 0.502925,
+          "mean_delta": 0.145833,
+          "std_delta": 0.322076,
+          "t_statistic": 3.137037,
+          "effect_size": 0.452792,
           "significant": true,
-          "effect_passed": true
+          "effect_passed": false
         },
         "holdout_transfer_success_rate": {
-          "mean_delta": 0.0625,
-          "std_delta": 0.376732,
-          "t_statistic": 1.149392,
-          "effect_size": 0.1659,
-          "significant": false,
+          "mean_delta": 0.125,
+          "std_delta": 0.388641,
+          "t_statistic": 2.228344,
+          "effect_size": 0.321634,
+          "significant": true,
           "effect_passed": false
         },
         "identity_preservation_score": {
-          "mean_delta": 0.058939,
-          "std_delta": 0.077765,
-          "t_statistic": 5.250978,
-          "effect_size": 0.757913,
+          "mean_delta": 0.05956,
+          "std_delta": 0.083079,
+          "t_statistic": 4.966883,
+          "effect_size": 0.716908,
           "significant": true,
           "effect_passed": true
         },
         "adapter_failure_recovery_rate": {
-          "mean_delta": 0.0625,
-          "std_delta": 0.112191,
-          "t_statistic": 3.859608,
-          "effect_size": 0.557086,
+          "mean_delta": 0.045139,
+          "std_delta": 0.081505,
+          "t_statistic": 3.836968,
+          "effect_size": 0.553819,
           "significant": true,
           "effect_passed": true
         },
         "world_family_generalization_score": {
-          "mean_delta": 0.048611,
-          "std_delta": 0.14813,
-          "t_statistic": 2.273593,
-          "effect_size": 0.328165,
+          "mean_delta": 0.0625,
+          "std_delta": 0.19432,
+          "t_statistic": 2.228344,
+          "effect_size": 0.321634,
           "significant": true,
           "effect_passed": false
         }
@@ -1405,14 +1405,6 @@
       "suite": "tests/test_m225_freshness_guards.py"
     },
     {
-      "name": "tests/test_m225_freshness_guards.py::test_irrelevant_failed_pytest_records_do_not_block_acceptance_write",
-      "category": "pytest",
-      "status": "passed",
-      "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_irrelevant_failed_pytest_records_do_not_block_acceptance_write",
-      "nodeid": "tests/test_m225_freshness_guards.py::test_irrelevant_failed_pytest_records_do_not_block_acceptance_write",
-      "suite": "tests/test_m225_freshness_guards.py"
-    },
-    {
       "name": "protocol_replay",
       "category": "causality",
       "status": "passed",
@@ -1595,14 +1587,6 @@
       "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "nodeid": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "suite": "tests/test_m225_freshness_guards.py"
-    },
-    {
-      "name": "tests/test_m225_freshness_guards.py::test_irrelevant_failed_pytest_records_do_not_block_acceptance_write",
-      "category": "pytest",
-      "status": "passed",
-      "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_irrelevant_failed_pytest_records_do_not_block_acceptance_write",
-      "nodeid": "tests/test_m225_freshness_guards.py::test_irrelevant_failed_pytest_records_do_not_block_acceptance_write",
-      "suite": "tests/test_m225_freshness_guards.py"
     }
   ],
   "historical_regressions": [
@@ -1672,8 +1656,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m225_v2",
-    "generated_at": "2026-03-26T10:37:39+00:00",
-    "codebase_version": "56f8860233e27b0ee7185db7bcafbf819b8c2adc",
+    "generated_at": "2026-04-10T06:46:30+00:00",
+    "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
     "seed_set": [
       225,
       244,
@@ -1695,49 +1679,49 @@
       "transfer_graph": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_transfer_graph.json",
         "exists": true,
-        "size_bytes": 47996,
+        "size_bytes": 48019,
         "fresh": true,
         "header_match": true
       },
       "holdout_transfer": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_holdout_transfer.json",
         "exists": true,
-        "size_bytes": 9451835,
+        "size_bytes": 9650201,
         "fresh": true,
         "header_match": true
       },
       "rule_shift_recovery": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_rule_shift_recovery.json",
         "exists": true,
-        "size_bytes": 4014249,
+        "size_bytes": 4091633,
         "fresh": true,
         "header_match": true
       },
       "social_deception": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_social_deception.json",
         "exists": true,
-        "size_bytes": 5176675,
+        "size_bytes": 5311609,
         "fresh": true,
         "header_match": true
       },
       "adapter_degradation": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_adapter_degradation.json",
         "exists": true,
-        "size_bytes": 4233431,
+        "size_bytes": 4301313,
         "fresh": true,
         "header_match": true
       },
       "identity_preservation": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_identity_preservation.json",
         "exists": true,
-        "size_bytes": 258970,
+        "size_bytes": 259197,
         "fresh": true,
         "header_match": true
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json",
         "exists": true,
-        "size_bytes": 109787,
+        "size_bytes": 120252,
         "fresh": true,
         "header_match": true
       }
@@ -1761,228 +1745,12 @@
             "std": 0.0
           },
           "transfer_retention_score": {
-            "mean": 0.409722,
-            "std": 0.427577
+            "mean": 0.336806,
+            "std": 0.400361
           },
           "holdout_transfer_success_rate": {
-            "mean": 0.3125,
-            "std": 0.463512
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.993056,
-            "std": 0.028633
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.005208,
-            "std": 0.026387
-          },
-          "identity_preservation_score": {
-            "mean": 0.871095,
-            "std": 0.067513
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.373264,
-            "std": 0.482023
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.583333,
-            "std": 0.46398
-          },
-          "social_deception_resistance": {
-            "mean": 0.368056,
-            "std": 0.475935
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.855307,
-            "std": 0.0637
-          },
-          "world_family_generalization_score": {
-            "mean": 0.284722,
-            "std": 0.380299
-          }
-        },
-        "no_transfer_regularization": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.180556,
-            "std": 0.251922
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.145833,
-            "std": 0.352939
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.986111,
-            "std": 0.042808
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.003472,
-            "std": 0.023804
-          },
-          "identity_preservation_score": {
-            "mean": 0.904641,
-            "std": 0.059239
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.34375,
-            "std": 0.447674
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.583333,
-            "std": 0.46398
-          },
-          "social_deception_resistance": {
-            "mean": 0.361111,
-            "std": 0.46781
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.929012,
-            "std": 0.055251
-          },
-          "world_family_generalization_score": {
-            "mean": 0.180556,
-            "std": 0.251922
-          }
-        },
-        "weakened_narrative_seed": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.423611,
-            "std": 0.435622
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.375,
-            "std": 0.484123
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.993056,
-            "std": 0.023032
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.005208,
-            "std": 0.020172
-          },
-          "identity_preservation_score": {
-            "mean": 0.868329,
-            "std": 0.056276
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.371528,
-            "std": 0.479908
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.583333,
-            "std": 0.46398
-          },
-          "social_deception_resistance": {
-            "mean": 0.368056,
-            "std": 0.475631
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.853752,
-            "std": 0.05584
-          },
-          "world_family_generalization_score": {
-            "mean": 0.298611,
-            "std": 0.393757
-          }
-        },
-        "shuffled_world_label": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.159722,
-            "std": 0.315418
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.0,
-            "std": 0.0
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.920139,
-            "std": 0.191665
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.006944,
-            "std": 0.028633
-          },
-          "identity_preservation_score": {
-            "mean": 0.821532,
-            "std": 0.081472
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.260417,
-            "std": 0.361094
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.510417,
-            "std": 0.445731
-          },
-          "social_deception_resistance": {
-            "mean": 0.295139,
-            "std": 0.413865
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.882062,
-            "std": 0.07107
-          },
-          "world_family_generalization_score": {
-            "mean": 0.055556,
-            "std": 0.133217
-          }
-        },
-        "adapter_degraded": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.236111,
-            "std": 0.32245
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.25,
-            "std": 0.433013
+            "mean": 0.270833,
+            "std": 0.44439
           },
           "rule_shift_recovery_rate": {
             "mean": 0.125,
@@ -1993,20 +1761,236 @@
             "std": 0.026387
           },
           "deceptive_salience_error_rate": {
-            "mean": 0.005208,
-            "std": 0.026387
+            "mean": 0.001736,
+            "std": 0.011902
           },
           "identity_preservation_score": {
-            "mean": 0.812156,
-            "std": 0.099617
+            "mean": 0.872543,
+            "std": 0.060787
           },
           "bounded_policy_reconfiguration_score": {
             "mean": 0.125,
             "std": 0.330719
           },
           "adapter_failure_recovery_rate": {
-            "mean": 0.310764,
-            "std": 0.40851
+            "mean": 0.375,
+            "std": 0.484123
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.583333,
+            "std": 0.46398
+          },
+          "social_deception_resistance": {
+            "mean": 0.369792,
+            "std": 0.47808
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.858353,
+            "std": 0.053173
+          },
+          "world_family_generalization_score": {
+            "mean": 0.253472,
+            "std": 0.355169
+          }
+        },
+        "no_transfer_regularization": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.142361,
+            "std": 0.225641
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.991319,
+            "std": 0.035025
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "identity_preservation_score": {
+            "mean": 0.899269,
+            "std": 0.051817
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.329861,
+            "std": 0.433666
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.583333,
+            "std": 0.46398
+          },
+          "social_deception_resistance": {
+            "mean": 0.366319,
+            "std": 0.474079
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.91099,
+            "std": 0.04952
+          },
+          "world_family_generalization_score": {
+            "mean": 0.142361,
+            "std": 0.225641
+          }
+        },
+        "weakened_narrative_seed": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.347222,
+            "std": 0.39796
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.25,
+            "std": 0.433013
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.125,
+            "std": 0.330719
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.993056,
+            "std": 0.028633
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.003472,
+            "std": 0.016652
+          },
+          "identity_preservation_score": {
+            "mean": 0.874531,
+            "std": 0.053448
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.125,
+            "std": 0.330719
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.375,
+            "std": 0.484123
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.583333,
+            "std": 0.46398
+          },
+          "social_deception_resistance": {
+            "mean": 0.368056,
+            "std": 0.475935
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.858889,
+            "std": 0.050998
+          },
+          "world_family_generalization_score": {
+            "mean": 0.243056,
+            "std": 0.340136
+          }
+        },
+        "shuffled_world_label": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.090278,
+            "std": 0.22037
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.083333,
+            "std": 0.276385
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.932292,
+            "std": 0.178127
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.003472,
+            "std": 0.016652
+          },
+          "identity_preservation_score": {
+            "mean": 0.804578,
+            "std": 0.093265
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.083333,
+            "std": 0.276385
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.256944,
+            "std": 0.369494
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.510417,
+            "std": 0.445731
+          },
+          "social_deception_resistance": {
+            "mean": 0.307292,
+            "std": 0.425992
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.865118,
+            "std": 0.055725
+          },
+          "world_family_generalization_score": {
+            "mean": 0.048611,
+            "std": 0.11262
+          }
+        },
+        "adapter_degraded": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.190972,
+            "std": 0.282576
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.145833,
+            "std": 0.352939
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.994792,
+            "std": 0.026387
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.001736,
+            "std": 0.011902
+          },
+          "identity_preservation_score": {
+            "mean": 0.812983,
+            "std": 0.107066
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.329861,
+            "std": 0.429645
           },
           "error_attribution_accuracy": {
             "mean": 0.333333,
@@ -2017,12 +2001,12 @@
             "std": 0.47808
           },
           "cross_world_commitment_alignment": {
-            "mean": 0.834648,
-            "std": 0.058409
+            "mean": 0.83705,
+            "std": 0.060693
           },
           "world_family_generalization_score": {
-            "mean": 0.236111,
-            "std": 0.32245
+            "mean": 0.190972,
+            "std": 0.282576
           }
         }
       },
@@ -2037,10 +2021,10 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": 0.229167,
-            "std_delta": 0.354575,
-            "t_statistic": 4.477793,
-            "effect_size": 0.646314,
+            "mean_delta": 0.194444,
+            "std_delta": 0.349161,
+            "t_statistic": 3.858248,
+            "effect_size": 0.55689,
             "significant": true,
             "effect_passed": true
           },
@@ -2053,18 +2037,18 @@
             "effect_passed": false
           },
           "rule_shift_recovery_rate": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": 0.006944,
-            "std_delta": 0.037397,
-            "t_statistic": 1.286537,
-            "effect_size": 0.185696,
+            "mean_delta": 0.003472,
+            "std_delta": 0.044871,
+            "t_statistic": 0.536121,
+            "effect_size": 0.077382,
             "significant": false,
             "effect_passed": false
           },
@@ -2077,26 +2061,26 @@
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": -0.033546,
-            "std_delta": 0.086118,
-            "t_statistic": -2.698776,
-            "effect_size": -0.389535,
+            "mean_delta": -0.026726,
+            "std_delta": 0.068242,
+            "t_statistic": -2.713361,
+            "effect_size": -0.39164,
             "significant": true,
             "effect_passed": false
           },
           "bounded_policy_reconfiguration_score": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.029514,
-            "std_delta": 0.071138,
-            "t_statistic": 2.874381,
-            "effect_size": 0.414881,
+            "mean_delta": 0.045139,
+            "std_delta": 0.100575,
+            "t_statistic": 3.109447,
+            "effect_size": 0.44881,
             "significant": true,
             "effect_passed": false
           },
@@ -2109,28 +2093,28 @@
             "effect_passed": false
           },
           "social_deception_resistance": {
-            "mean_delta": 0.006944,
-            "std_delta": 0.037397,
-            "t_statistic": 1.286537,
-            "effect_size": 0.185696,
+            "mean_delta": 0.003472,
+            "std_delta": 0.044871,
+            "t_statistic": 0.536121,
+            "effect_size": 0.077382,
             "significant": false,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": -0.073705,
-            "std_delta": 0.07999,
-            "t_statistic": -6.383793,
-            "effect_size": -0.921421,
+            "mean_delta": -0.052637,
+            "std_delta": 0.058977,
+            "t_statistic": -6.183435,
+            "effect_size": -0.892502,
             "significant": true,
             "effect_passed": true
           },
           "world_family_generalization_score": {
-            "mean_delta": 0.104167,
-            "std_delta": 0.205889,
-            "t_statistic": 3.505236,
-            "effect_size": 0.505937,
+            "mean_delta": 0.111111,
+            "std_delta": 0.253068,
+            "t_statistic": 3.041876,
+            "effect_size": 0.439057,
             "significant": true,
-            "effect_passed": true
+            "effect_passed": false
           }
         },
         "full_system_vs_weakened_narrative_seed": {
@@ -2143,18 +2127,18 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": -0.013889,
-            "std_delta": 0.121875,
-            "t_statistic": -0.789542,
-            "effect_size": -0.113961,
+            "mean_delta": -0.010417,
+            "std_delta": 0.213563,
+            "t_statistic": -0.337928,
+            "effect_size": -0.048776,
             "significant": false,
             "effect_passed": false
           },
           "holdout_transfer_success_rate": {
-            "mean_delta": -0.0625,
-            "std_delta": 0.242061,
-            "t_statistic": -1.788854,
-            "effect_size": -0.258199,
+            "mean_delta": 0.020833,
+            "std_delta": 0.24913,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
@@ -2167,26 +2151,26 @@
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": -0.0,
-            "std_delta": 0.01701,
-            "t_statistic": -8e-06,
-            "effect_size": -1e-06,
+            "mean_delta": 0.001736,
+            "std_delta": 0.020761,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
           "deceptive_salience_error_rate": {
-            "mean_delta": -0.0,
-            "std_delta": 0.01701,
-            "t_statistic": -8e-06,
-            "effect_size": -1e-06,
+            "mean_delta": 0.001736,
+            "std_delta": 0.020761,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": 0.002766,
-            "std_delta": 0.05184,
-            "t_statistic": 0.369669,
-            "effect_size": 0.053357,
+            "mean_delta": -0.001988,
+            "std_delta": 0.043272,
+            "t_statistic": -0.318315,
+            "effect_size": -0.045945,
             "significant": false,
             "effect_passed": false
           },
@@ -2199,10 +2183,10 @@
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.001736,
-            "std_delta": 0.011902,
-            "t_statistic": 1.010582,
-            "effect_size": 0.145865,
+            "mean_delta": 0.0,
+            "std_delta": 0.0,
+            "t_statistic": 0.0,
+            "effect_size": 0.0,
             "significant": false,
             "effect_passed": false
           },
@@ -2215,26 +2199,26 @@
             "effect_passed": false
           },
           "social_deception_resistance": {
-            "mean_delta": -0.0,
-            "std_delta": 0.01701,
-            "t_statistic": -8e-06,
-            "effect_size": -1e-06,
+            "mean_delta": 0.001736,
+            "std_delta": 0.020761,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": 0.001555,
-            "std_delta": 0.055714,
-            "t_statistic": 0.193388,
-            "effect_size": 0.027913,
+            "mean_delta": -0.000536,
+            "std_delta": 0.045365,
+            "t_statistic": -0.081817,
+            "effect_size": -0.011809,
             "significant": false,
             "effect_passed": false
           },
           "world_family_generalization_score": {
-            "mean_delta": -0.013889,
-            "std_delta": 0.121874,
-            "t_statistic": -0.789544,
-            "effect_size": -0.113961,
+            "mean_delta": 0.010417,
+            "std_delta": 0.157403,
+            "t_statistic": 0.458496,
+            "effect_size": 0.066178,
             "significant": false,
             "effect_passed": false
           }
@@ -2249,34 +2233,34 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": 0.25,
-            "std_delta": 0.341904,
-            "t_statistic": 5.065902,
-            "effect_size": 0.7312,
+            "mean_delta": 0.246528,
+            "std_delta": 0.405388,
+            "t_statistic": 4.213229,
+            "effect_size": 0.608127,
             "significant": true,
             "effect_passed": true
           },
           "holdout_transfer_success_rate": {
-            "mean_delta": 0.3125,
-            "std_delta": 0.463512,
-            "t_statistic": 4.670994,
-            "effect_size": 0.6742,
+            "mean_delta": 0.270833,
+            "std_delta": 0.44439,
+            "t_statistic": 4.222389,
+            "effect_size": 0.609449,
             "significant": true,
             "effect_passed": true
           },
           "rule_shift_recovery_rate": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.041667,
+            "std_delta": 0.199826,
+            "t_statistic": 1.44463,
+            "effect_size": 0.208514,
             "significant": false,
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": 0.072917,
-            "std_delta": 0.191414,
-            "t_statistic": 2.639214,
-            "effect_size": 0.380938,
+            "mean_delta": 0.0625,
+            "std_delta": 0.174719,
+            "t_statistic": 2.478341,
+            "effect_size": 0.357718,
             "significant": true,
             "effect_passed": false
           },
@@ -2289,26 +2273,26 @@
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": 0.049564,
-            "std_delta": 0.099122,
-            "t_statistic": 3.4643,
-            "effect_size": 0.500029,
+            "mean_delta": 0.067964,
+            "std_delta": 0.113786,
+            "t_statistic": 4.138206,
+            "effect_size": 0.597299,
             "significant": true,
             "effect_passed": true
           },
           "bounded_policy_reconfiguration_score": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.041667,
+            "std_delta": 0.199826,
+            "t_statistic": 1.44463,
+            "effect_size": 0.208514,
             "significant": false,
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.112847,
-            "std_delta": 0.19873,
-            "t_statistic": 3.934128,
-            "effect_size": 0.567842,
+            "mean_delta": 0.118056,
+            "std_delta": 0.22298,
+            "t_statistic": 3.668092,
+            "effect_size": 0.529443,
             "significant": true,
             "effect_passed": true
           },
@@ -2321,26 +2305,26 @@
             "effect_passed": true
           },
           "social_deception_resistance": {
-            "mean_delta": 0.072917,
-            "std_delta": 0.191414,
-            "t_statistic": 2.639214,
-            "effect_size": 0.380938,
+            "mean_delta": 0.0625,
+            "std_delta": 0.174719,
+            "t_statistic": 2.478341,
+            "effect_size": 0.357718,
             "significant": true,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": -0.026755,
-            "std_delta": 0.070924,
-            "t_statistic": -2.613565,
-            "effect_size": -0.377236,
-            "significant": true,
+            "mean_delta": -0.006765,
+            "std_delta": 0.056519,
+            "t_statistic": -0.829311,
+            "effect_size": -0.119701,
+            "significant": false,
             "effect_passed": false
           },
           "world_family_generalization_score": {
-            "mean_delta": 0.229167,
-            "std_delta": 0.325649,
-            "t_statistic": 4.875532,
-            "effect_size": 0.703722,
+            "mean_delta": 0.204861,
+            "std_delta": 0.315934,
+            "t_statistic": 4.492454,
+            "effect_size": 0.64843,
             "significant": true,
             "effect_passed": true
           }
@@ -2355,34 +2339,34 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": 0.173611,
-            "std_delta": 0.345202,
-            "t_statistic": 3.48437,
-            "effect_size": 0.502925,
+            "mean_delta": 0.145833,
+            "std_delta": 0.322076,
+            "t_statistic": 3.137037,
+            "effect_size": 0.452792,
             "significant": true,
-            "effect_passed": true
+            "effect_passed": false
           },
           "holdout_transfer_success_rate": {
-            "mean_delta": 0.0625,
-            "std_delta": 0.376732,
-            "t_statistic": 1.149392,
-            "effect_size": 0.1659,
-            "significant": false,
+            "mean_delta": 0.125,
+            "std_delta": 0.388641,
+            "t_statistic": 2.228344,
+            "effect_size": 0.321634,
+            "significant": true,
             "effect_passed": false
           },
           "rule_shift_recovery_rate": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": -0.001736,
-            "std_delta": 0.011902,
-            "t_statistic": -1.010582,
-            "effect_size": -0.145865,
+            "mean_delta": 0.0,
+            "std_delta": 0.0,
+            "t_statistic": 0.0,
+            "effect_size": 0.0,
             "significant": false,
             "effect_passed": false
           },
@@ -2395,26 +2379,26 @@
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": 0.058939,
-            "std_delta": 0.077765,
-            "t_statistic": 5.250978,
-            "effect_size": 0.757913,
+            "mean_delta": 0.05956,
+            "std_delta": 0.083079,
+            "t_statistic": 4.966883,
+            "effect_size": 0.716908,
             "significant": true,
             "effect_passed": true
           },
           "bounded_policy_reconfiguration_score": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.0625,
-            "std_delta": 0.112191,
-            "t_statistic": 3.859608,
-            "effect_size": 0.557086,
+            "mean_delta": 0.045139,
+            "std_delta": 0.081505,
+            "t_statistic": 3.836968,
+            "effect_size": 0.553819,
             "significant": true,
             "effect_passed": true
           },
@@ -2427,56 +2411,56 @@
             "effect_passed": true
           },
           "social_deception_resistance": {
-            "mean_delta": -0.001736,
-            "std_delta": 0.011902,
-            "t_statistic": -1.010582,
-            "effect_size": -0.145865,
+            "mean_delta": 0.0,
+            "std_delta": 0.0,
+            "t_statistic": 0.0,
+            "effect_size": 0.0,
             "significant": false,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": 0.020659,
-            "std_delta": 0.051085,
-            "t_statistic": 2.801816,
-            "effect_size": 0.404407,
+            "mean_delta": 0.021303,
+            "std_delta": 0.046731,
+            "t_statistic": 3.158352,
+            "effect_size": 0.455869,
             "significant": true,
             "effect_passed": false
           },
           "world_family_generalization_score": {
-            "mean_delta": 0.048611,
-            "std_delta": 0.14813,
-            "t_statistic": 2.273593,
-            "effect_size": 0.328165,
+            "mean_delta": 0.0625,
+            "std_delta": 0.19432,
+            "t_statistic": 2.228344,
+            "effect_size": 0.321634,
             "significant": true,
             "effect_passed": false
           }
         }
       },
       "goal_details": {
-        "holdout_transfer_success_rate": 0.75,
+        "holdout_transfer_success_rate": 0.833333,
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.777778,
-        "cross_world_commitment_alignment": 0.876952,
-        "identity_preservation_score": 0.904732,
+        "transfer_retention_score": 0.708333,
+        "cross_world_commitment_alignment": 0.893831,
+        "identity_preservation_score": 0.919494,
         "rule_shift_recovery_rate": 1.0,
-        "mean_rule_shift_recovery_ticks": 1.0,
+        "mean_rule_shift_recovery_ticks": 1.666667,
         "bounded_policy_reconfiguration_score": 1.0,
-        "adversarial_resistance_score": 0.972222,
-        "social_deception_resistance": 0.972222,
-        "deceptive_salience_error_rate": 0.020833,
+        "adversarial_resistance_score": 0.993056,
+        "social_deception_resistance": 0.993056,
+        "deceptive_salience_error_rate": 0.006944,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "catastrophic_collapse_ratio": 0.0,
-        "world_family_generalization_score": 0.777778,
-        "no_transfer_regularization_drop": 0.277778,
+        "world_family_generalization_score": 0.708333,
+        "no_transfer_regularization_drop": 0.361111,
         "shuffled_world_label_holdout_success_rate": 0.0,
         "significance_snapshot": {
           "full_system_vs_no_transfer_regularization": {
             "transfer_retention_score": {
-              "mean_delta": 0.229167,
-              "std_delta": 0.354575,
-              "t_statistic": 4.477793,
-              "effect_size": 0.646314,
+              "mean_delta": 0.194444,
+              "std_delta": 0.349161,
+              "t_statistic": 3.858248,
+              "effect_size": 0.55689,
               "significant": true,
               "effect_passed": true
             },
@@ -2489,152 +2473,152 @@
               "effect_passed": false
             },
             "identity_preservation_score": {
-              "mean_delta": -0.033546,
-              "std_delta": 0.086118,
-              "t_statistic": -2.698776,
-              "effect_size": -0.389535,
+              "mean_delta": -0.026726,
+              "std_delta": 0.068242,
+              "t_statistic": -2.713361,
+              "effect_size": -0.39164,
               "significant": true,
               "effect_passed": false
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.029514,
-              "std_delta": 0.071138,
-              "t_statistic": 2.874381,
-              "effect_size": 0.414881,
+              "mean_delta": 0.045139,
+              "std_delta": 0.100575,
+              "t_statistic": 3.109447,
+              "effect_size": 0.44881,
               "significant": true,
               "effect_passed": false
             },
             "world_family_generalization_score": {
-              "mean_delta": 0.104167,
-              "std_delta": 0.205889,
-              "t_statistic": 3.505236,
-              "effect_size": 0.505937,
+              "mean_delta": 0.111111,
+              "std_delta": 0.253068,
+              "t_statistic": 3.041876,
+              "effect_size": 0.439057,
               "significant": true,
-              "effect_passed": true
+              "effect_passed": false
             }
           },
           "full_system_vs_weakened_narrative_seed": {
             "transfer_retention_score": {
-              "mean_delta": -0.013889,
-              "std_delta": 0.121875,
-              "t_statistic": -0.789542,
-              "effect_size": -0.113961,
+              "mean_delta": -0.010417,
+              "std_delta": 0.213563,
+              "t_statistic": -0.337928,
+              "effect_size": -0.048776,
               "significant": false,
               "effect_passed": false
             },
             "holdout_transfer_success_rate": {
-              "mean_delta": -0.0625,
-              "std_delta": 0.242061,
-              "t_statistic": -1.788854,
-              "effect_size": -0.258199,
+              "mean_delta": 0.020833,
+              "std_delta": 0.24913,
+              "t_statistic": 0.579365,
+              "effect_size": 0.083624,
               "significant": false,
               "effect_passed": false
             },
             "identity_preservation_score": {
-              "mean_delta": 0.002766,
-              "std_delta": 0.05184,
-              "t_statistic": 0.369669,
-              "effect_size": 0.053357,
+              "mean_delta": -0.001988,
+              "std_delta": 0.043272,
+              "t_statistic": -0.318315,
+              "effect_size": -0.045945,
               "significant": false,
               "effect_passed": false
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.001736,
-              "std_delta": 0.011902,
-              "t_statistic": 1.010582,
-              "effect_size": 0.145865,
+              "mean_delta": 0.0,
+              "std_delta": 0.0,
+              "t_statistic": 0.0,
+              "effect_size": 0.0,
               "significant": false,
               "effect_passed": false
             },
             "world_family_generalization_score": {
-              "mean_delta": -0.013889,
-              "std_delta": 0.121874,
-              "t_statistic": -0.789544,
-              "effect_size": -0.113961,
+              "mean_delta": 0.010417,
+              "std_delta": 0.157403,
+              "t_statistic": 0.458496,
+              "effect_size": 0.066178,
               "significant": false,
               "effect_passed": false
             }
           },
           "full_system_vs_shuffled_world_label": {
             "transfer_retention_score": {
-              "mean_delta": 0.25,
-              "std_delta": 0.341904,
-              "t_statistic": 5.065902,
-              "effect_size": 0.7312,
+              "mean_delta": 0.246528,
+              "std_delta": 0.405388,
+              "t_statistic": 4.213229,
+              "effect_size": 0.608127,
               "significant": true,
               "effect_passed": true
             },
             "holdout_transfer_success_rate": {
-              "mean_delta": 0.3125,
-              "std_delta": 0.463512,
-              "t_statistic": 4.670994,
-              "effect_size": 0.6742,
+              "mean_delta": 0.270833,
+              "std_delta": 0.44439,
+              "t_statistic": 4.222389,
+              "effect_size": 0.609449,
               "significant": true,
               "effect_passed": true
             },
             "identity_preservation_score": {
-              "mean_delta": 0.049564,
-              "std_delta": 0.099122,
-              "t_statistic": 3.4643,
-              "effect_size": 0.500029,
+              "mean_delta": 0.067964,
+              "std_delta": 0.113786,
+              "t_statistic": 4.138206,
+              "effect_size": 0.597299,
               "significant": true,
               "effect_passed": true
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.112847,
-              "std_delta": 0.19873,
-              "t_statistic": 3.934128,
-              "effect_size": 0.567842,
+              "mean_delta": 0.118056,
+              "std_delta": 0.22298,
+              "t_statistic": 3.668092,
+              "effect_size": 0.529443,
               "significant": true,
               "effect_passed": true
             },
             "world_family_generalization_score": {
-              "mean_delta": 0.229167,
-              "std_delta": 0.325649,
-              "t_statistic": 4.875532,
-              "effect_size": 0.703722,
+              "mean_delta": 0.204861,
+              "std_delta": 0.315934,
+              "t_statistic": 4.492454,
+              "effect_size": 0.64843,
               "significant": true,
               "effect_passed": true
             }
           },
           "full_system_vs_adapter_degraded": {
             "transfer_retention_score": {
-              "mean_delta": 0.173611,
-              "std_delta": 0.345202,
-              "t_statistic": 3.48437,
-              "effect_size": 0.502925,
+              "mean_delta": 0.145833,
+              "std_delta": 0.322076,
+              "t_statistic": 3.137037,
+              "effect_size": 0.452792,
               "significant": true,
-              "effect_passed": true
+              "effect_passed": false
             },
             "holdout_transfer_success_rate": {
-              "mean_delta": 0.0625,
-              "std_delta": 0.376732,
-              "t_statistic": 1.149392,
-              "effect_size": 0.1659,
-              "significant": false,
+              "mean_delta": 0.125,
+              "std_delta": 0.388641,
+              "t_statistic": 2.228344,
+              "effect_size": 0.321634,
+              "significant": true,
               "effect_passed": false
             },
             "identity_preservation_score": {
-              "mean_delta": 0.058939,
-              "std_delta": 0.077765,
-              "t_statistic": 5.250978,
-              "effect_size": 0.757913,
+              "mean_delta": 0.05956,
+              "std_delta": 0.083079,
+              "t_statistic": 4.966883,
+              "effect_size": 0.716908,
               "significant": true,
               "effect_passed": true
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.0625,
-              "std_delta": 0.112191,
-              "t_statistic": 3.859608,
-              "effect_size": 0.557086,
+              "mean_delta": 0.045139,
+              "std_delta": 0.081505,
+              "t_statistic": 3.836968,
+              "effect_size": 0.553819,
               "significant": true,
               "effect_passed": true
             },
             "world_family_generalization_score": {
-              "mean_delta": 0.048611,
-              "std_delta": 0.14813,
-              "t_statistic": 2.273593,
-              "effect_size": 0.328165,
+              "mean_delta": 0.0625,
+              "std_delta": 0.19432,
+              "t_statistic": 2.228344,
+              "effect_size": 0.321634,
               "significant": true,
               "effect_passed": false
             }
@@ -2643,16 +2627,16 @@
       },
       "protocol_breakdown": {
         "holdout_transfer_protocol": {
-          "success_rate": 0.833333,
+          "success_rate": 0.666667,
           "mean_recovery_ticks": 18.0
         },
         "multi_hop_transfer_protocol": {
-          "success_rate": 0.666667,
+          "success_rate": 1.0,
           "mean_recovery_ticks": 20.0
         },
         "rule_shift_protocol": {
-          "success_rate": 1.0,
-          "mean_recovery_ticks": 1.0
+          "success_rate": 0.666667,
+          "mean_recovery_ticks": 1.666667
         },
         "social_deception_protocol": {
           "success_rate": 1.0,
@@ -2667,7 +2651,7 @@
           "mean_recovery_ticks": 16.0
         },
         "adapter_degradation_protocol": {
-          "success_rate": 1.0,
+          "success_rate": 0.5,
           "mean_recovery_ticks": 19.0
         },
         "delayed_effect_protocol": {
@@ -2680,7 +2664,7 @@
           "fog_of_trust_basin",
           "fractured_echo_harbor"
         ],
-        "holdout_transfer_success_rate": 0.75,
+        "holdout_transfer_success_rate": 0.833333,
         "unseen_world_survival_ratio": 1.0
       },
       "adapter_breakdown": {
@@ -2689,30 +2673,30 @@
         "catastrophic_collapse_ratio": 0.0
       },
       "deception_breakdown": {
-        "adversarial_resistance_score": 0.972222,
-        "social_deception_resistance": 0.972222,
-        "deceptive_salience_error_rate": 0.020833
+        "adversarial_resistance_score": 0.993056,
+        "social_deception_resistance": 0.993056,
+        "deceptive_salience_error_rate": 0.006944
       },
       "shortcut_control_breakdown": {
         "no_transfer_regularization": {
-          "success_rate": 0.645833,
-          "world_family_generalization_score": 0.180556,
-          "holdout_transfer_success_rate": 0.145833
+          "success_rate": 0.604167,
+          "world_family_generalization_score": 0.142361,
+          "holdout_transfer_success_rate": 0.104167
         },
         "weakened_narrative_seed": {
-          "success_rate": 1.0,
-          "world_family_generalization_score": 0.298611,
-          "holdout_transfer_success_rate": 0.375
+          "success_rate": 0.854167,
+          "world_family_generalization_score": 0.243056,
+          "holdout_transfer_success_rate": 0.25
         },
         "shuffled_world_label": {
-          "success_rate": 0.604167,
-          "world_family_generalization_score": 0.055556,
+          "success_rate": 0.520833,
+          "world_family_generalization_score": 0.048611,
           "holdout_transfer_success_rate": 0.0
         },
         "adapter_degraded": {
-          "success_rate": 0.729167,
-          "world_family_generalization_score": 0.236111,
-          "holdout_transfer_success_rate": 0.25
+          "success_rate": 0.645833,
+          "world_family_generalization_score": 0.190972,
+          "holdout_transfer_success_rate": 0.145833
         }
       }
     },
@@ -2724,228 +2708,12 @@
             "std": 0.0
           },
           "transfer_retention_score": {
-            "mean": 0.409722,
-            "std": 0.427577
+            "mean": 0.336806,
+            "std": 0.400361
           },
           "holdout_transfer_success_rate": {
-            "mean": 0.3125,
-            "std": 0.463512
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.993056,
-            "std": 0.028633
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.005208,
-            "std": 0.026387
-          },
-          "identity_preservation_score": {
-            "mean": 0.871095,
-            "std": 0.067513
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.373264,
-            "std": 0.482023
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.583333,
-            "std": 0.46398
-          },
-          "social_deception_resistance": {
-            "mean": 0.368056,
-            "std": 0.475935
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.855307,
-            "std": 0.0637
-          },
-          "world_family_generalization_score": {
-            "mean": 0.284722,
-            "std": 0.380299
-          }
-        },
-        "no_transfer_regularization": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.180556,
-            "std": 0.251922
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.145833,
-            "std": 0.352939
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.986111,
-            "std": 0.042808
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.003472,
-            "std": 0.023804
-          },
-          "identity_preservation_score": {
-            "mean": 0.904641,
-            "std": 0.059239
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.34375,
-            "std": 0.447674
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.583333,
-            "std": 0.46398
-          },
-          "social_deception_resistance": {
-            "mean": 0.361111,
-            "std": 0.46781
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.929012,
-            "std": 0.055251
-          },
-          "world_family_generalization_score": {
-            "mean": 0.180556,
-            "std": 0.251922
-          }
-        },
-        "weakened_narrative_seed": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.423611,
-            "std": 0.435622
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.375,
-            "std": 0.484123
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.993056,
-            "std": 0.023032
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.005208,
-            "std": 0.020172
-          },
-          "identity_preservation_score": {
-            "mean": 0.868329,
-            "std": 0.056276
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.371528,
-            "std": 0.479908
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.583333,
-            "std": 0.46398
-          },
-          "social_deception_resistance": {
-            "mean": 0.368056,
-            "std": 0.475631
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.853752,
-            "std": 0.05584
-          },
-          "world_family_generalization_score": {
-            "mean": 0.298611,
-            "std": 0.393757
-          }
-        },
-        "shuffled_world_label": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.159722,
-            "std": 0.315418
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.0,
-            "std": 0.0
-          },
-          "rule_shift_recovery_rate": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adversarial_resistance_score": {
-            "mean": 0.920139,
-            "std": 0.191665
-          },
-          "deceptive_salience_error_rate": {
-            "mean": 0.006944,
-            "std": 0.028633
-          },
-          "identity_preservation_score": {
-            "mean": 0.821532,
-            "std": 0.081472
-          },
-          "bounded_policy_reconfiguration_score": {
-            "mean": 0.125,
-            "std": 0.330719
-          },
-          "adapter_failure_recovery_rate": {
-            "mean": 0.260417,
-            "std": 0.361094
-          },
-          "error_attribution_accuracy": {
-            "mean": 0.510417,
-            "std": 0.445731
-          },
-          "social_deception_resistance": {
-            "mean": 0.295139,
-            "std": 0.413865
-          },
-          "cross_world_commitment_alignment": {
-            "mean": 0.882062,
-            "std": 0.07107
-          },
-          "world_family_generalization_score": {
-            "mean": 0.055556,
-            "std": 0.133217
-          }
-        },
-        "adapter_degraded": {
-          "unseen_world_survival_ratio": {
-            "mean": 1.0,
-            "std": 0.0
-          },
-          "transfer_retention_score": {
-            "mean": 0.236111,
-            "std": 0.32245
-          },
-          "holdout_transfer_success_rate": {
-            "mean": 0.25,
-            "std": 0.433013
+            "mean": 0.270833,
+            "std": 0.44439
           },
           "rule_shift_recovery_rate": {
             "mean": 0.125,
@@ -2956,20 +2724,236 @@
             "std": 0.026387
           },
           "deceptive_salience_error_rate": {
-            "mean": 0.005208,
-            "std": 0.026387
+            "mean": 0.001736,
+            "std": 0.011902
           },
           "identity_preservation_score": {
-            "mean": 0.812156,
-            "std": 0.099617
+            "mean": 0.872543,
+            "std": 0.060787
           },
           "bounded_policy_reconfiguration_score": {
             "mean": 0.125,
             "std": 0.330719
           },
           "adapter_failure_recovery_rate": {
-            "mean": 0.310764,
-            "std": 0.40851
+            "mean": 0.375,
+            "std": 0.484123
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.583333,
+            "std": 0.46398
+          },
+          "social_deception_resistance": {
+            "mean": 0.369792,
+            "std": 0.47808
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.858353,
+            "std": 0.053173
+          },
+          "world_family_generalization_score": {
+            "mean": 0.253472,
+            "std": 0.355169
+          }
+        },
+        "no_transfer_regularization": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.142361,
+            "std": 0.225641
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.991319,
+            "std": 0.035025
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "identity_preservation_score": {
+            "mean": 0.899269,
+            "std": 0.051817
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.329861,
+            "std": 0.433666
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.583333,
+            "std": 0.46398
+          },
+          "social_deception_resistance": {
+            "mean": 0.366319,
+            "std": 0.474079
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.91099,
+            "std": 0.04952
+          },
+          "world_family_generalization_score": {
+            "mean": 0.142361,
+            "std": 0.225641
+          }
+        },
+        "weakened_narrative_seed": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.347222,
+            "std": 0.39796
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.25,
+            "std": 0.433013
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.125,
+            "std": 0.330719
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.993056,
+            "std": 0.028633
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.003472,
+            "std": 0.016652
+          },
+          "identity_preservation_score": {
+            "mean": 0.874531,
+            "std": 0.053448
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.125,
+            "std": 0.330719
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.375,
+            "std": 0.484123
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.583333,
+            "std": 0.46398
+          },
+          "social_deception_resistance": {
+            "mean": 0.368056,
+            "std": 0.475935
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.858889,
+            "std": 0.050998
+          },
+          "world_family_generalization_score": {
+            "mean": 0.243056,
+            "std": 0.340136
+          }
+        },
+        "shuffled_world_label": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.090278,
+            "std": 0.22037
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.083333,
+            "std": 0.276385
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.932292,
+            "std": 0.178127
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.003472,
+            "std": 0.016652
+          },
+          "identity_preservation_score": {
+            "mean": 0.804578,
+            "std": 0.093265
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.083333,
+            "std": 0.276385
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.256944,
+            "std": 0.369494
+          },
+          "error_attribution_accuracy": {
+            "mean": 0.510417,
+            "std": 0.445731
+          },
+          "social_deception_resistance": {
+            "mean": 0.307292,
+            "std": 0.425992
+          },
+          "cross_world_commitment_alignment": {
+            "mean": 0.865118,
+            "std": 0.055725
+          },
+          "world_family_generalization_score": {
+            "mean": 0.048611,
+            "std": 0.11262
+          }
+        },
+        "adapter_degraded": {
+          "unseen_world_survival_ratio": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "transfer_retention_score": {
+            "mean": 0.190972,
+            "std": 0.282576
+          },
+          "holdout_transfer_success_rate": {
+            "mean": 0.145833,
+            "std": 0.352939
+          },
+          "rule_shift_recovery_rate": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adversarial_resistance_score": {
+            "mean": 0.994792,
+            "std": 0.026387
+          },
+          "deceptive_salience_error_rate": {
+            "mean": 0.001736,
+            "std": 0.011902
+          },
+          "identity_preservation_score": {
+            "mean": 0.812983,
+            "std": 0.107066
+          },
+          "bounded_policy_reconfiguration_score": {
+            "mean": 0.104167,
+            "std": 0.305477
+          },
+          "adapter_failure_recovery_rate": {
+            "mean": 0.329861,
+            "std": 0.429645
           },
           "error_attribution_accuracy": {
             "mean": 0.333333,
@@ -2980,12 +2964,12 @@
             "std": 0.47808
           },
           "cross_world_commitment_alignment": {
-            "mean": 0.834648,
-            "std": 0.058409
+            "mean": 0.83705,
+            "std": 0.060693
           },
           "world_family_generalization_score": {
-            "mean": 0.236111,
-            "std": 0.32245
+            "mean": 0.190972,
+            "std": 0.282576
           }
         }
       },
@@ -3000,10 +2984,10 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": 0.229167,
-            "std_delta": 0.354575,
-            "t_statistic": 4.477793,
-            "effect_size": 0.646314,
+            "mean_delta": 0.194444,
+            "std_delta": 0.349161,
+            "t_statistic": 3.858248,
+            "effect_size": 0.55689,
             "significant": true,
             "effect_passed": true
           },
@@ -3016,18 +3000,18 @@
             "effect_passed": false
           },
           "rule_shift_recovery_rate": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": 0.006944,
-            "std_delta": 0.037397,
-            "t_statistic": 1.286537,
-            "effect_size": 0.185696,
+            "mean_delta": 0.003472,
+            "std_delta": 0.044871,
+            "t_statistic": 0.536121,
+            "effect_size": 0.077382,
             "significant": false,
             "effect_passed": false
           },
@@ -3040,26 +3024,26 @@
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": -0.033546,
-            "std_delta": 0.086118,
-            "t_statistic": -2.698776,
-            "effect_size": -0.389535,
+            "mean_delta": -0.026726,
+            "std_delta": 0.068242,
+            "t_statistic": -2.713361,
+            "effect_size": -0.39164,
             "significant": true,
             "effect_passed": false
           },
           "bounded_policy_reconfiguration_score": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.029514,
-            "std_delta": 0.071138,
-            "t_statistic": 2.874381,
-            "effect_size": 0.414881,
+            "mean_delta": 0.045139,
+            "std_delta": 0.100575,
+            "t_statistic": 3.109447,
+            "effect_size": 0.44881,
             "significant": true,
             "effect_passed": false
           },
@@ -3072,28 +3056,28 @@
             "effect_passed": false
           },
           "social_deception_resistance": {
-            "mean_delta": 0.006944,
-            "std_delta": 0.037397,
-            "t_statistic": 1.286537,
-            "effect_size": 0.185696,
+            "mean_delta": 0.003472,
+            "std_delta": 0.044871,
+            "t_statistic": 0.536121,
+            "effect_size": 0.077382,
             "significant": false,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": -0.073705,
-            "std_delta": 0.07999,
-            "t_statistic": -6.383793,
-            "effect_size": -0.921421,
+            "mean_delta": -0.052637,
+            "std_delta": 0.058977,
+            "t_statistic": -6.183435,
+            "effect_size": -0.892502,
             "significant": true,
             "effect_passed": true
           },
           "world_family_generalization_score": {
-            "mean_delta": 0.104167,
-            "std_delta": 0.205889,
-            "t_statistic": 3.505236,
-            "effect_size": 0.505937,
+            "mean_delta": 0.111111,
+            "std_delta": 0.253068,
+            "t_statistic": 3.041876,
+            "effect_size": 0.439057,
             "significant": true,
-            "effect_passed": true
+            "effect_passed": false
           }
         },
         "full_system_vs_weakened_narrative_seed": {
@@ -3106,18 +3090,18 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": -0.013889,
-            "std_delta": 0.121875,
-            "t_statistic": -0.789542,
-            "effect_size": -0.113961,
+            "mean_delta": -0.010417,
+            "std_delta": 0.213563,
+            "t_statistic": -0.337928,
+            "effect_size": -0.048776,
             "significant": false,
             "effect_passed": false
           },
           "holdout_transfer_success_rate": {
-            "mean_delta": -0.0625,
-            "std_delta": 0.242061,
-            "t_statistic": -1.788854,
-            "effect_size": -0.258199,
+            "mean_delta": 0.020833,
+            "std_delta": 0.24913,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
@@ -3130,26 +3114,26 @@
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": -0.0,
-            "std_delta": 0.01701,
-            "t_statistic": -8e-06,
-            "effect_size": -1e-06,
+            "mean_delta": 0.001736,
+            "std_delta": 0.020761,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
           "deceptive_salience_error_rate": {
-            "mean_delta": -0.0,
-            "std_delta": 0.01701,
-            "t_statistic": -8e-06,
-            "effect_size": -1e-06,
+            "mean_delta": 0.001736,
+            "std_delta": 0.020761,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": 0.002766,
-            "std_delta": 0.05184,
-            "t_statistic": 0.369669,
-            "effect_size": 0.053357,
+            "mean_delta": -0.001988,
+            "std_delta": 0.043272,
+            "t_statistic": -0.318315,
+            "effect_size": -0.045945,
             "significant": false,
             "effect_passed": false
           },
@@ -3162,10 +3146,10 @@
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.001736,
-            "std_delta": 0.011902,
-            "t_statistic": 1.010582,
-            "effect_size": 0.145865,
+            "mean_delta": 0.0,
+            "std_delta": 0.0,
+            "t_statistic": 0.0,
+            "effect_size": 0.0,
             "significant": false,
             "effect_passed": false
           },
@@ -3178,26 +3162,26 @@
             "effect_passed": false
           },
           "social_deception_resistance": {
-            "mean_delta": -0.0,
-            "std_delta": 0.01701,
-            "t_statistic": -8e-06,
-            "effect_size": -1e-06,
+            "mean_delta": 0.001736,
+            "std_delta": 0.020761,
+            "t_statistic": 0.579365,
+            "effect_size": 0.083624,
             "significant": false,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": 0.001555,
-            "std_delta": 0.055714,
-            "t_statistic": 0.193388,
-            "effect_size": 0.027913,
+            "mean_delta": -0.000536,
+            "std_delta": 0.045365,
+            "t_statistic": -0.081817,
+            "effect_size": -0.011809,
             "significant": false,
             "effect_passed": false
           },
           "world_family_generalization_score": {
-            "mean_delta": -0.013889,
-            "std_delta": 0.121874,
-            "t_statistic": -0.789544,
-            "effect_size": -0.113961,
+            "mean_delta": 0.010417,
+            "std_delta": 0.157403,
+            "t_statistic": 0.458496,
+            "effect_size": 0.066178,
             "significant": false,
             "effect_passed": false
           }
@@ -3212,34 +3196,34 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": 0.25,
-            "std_delta": 0.341904,
-            "t_statistic": 5.065902,
-            "effect_size": 0.7312,
+            "mean_delta": 0.246528,
+            "std_delta": 0.405388,
+            "t_statistic": 4.213229,
+            "effect_size": 0.608127,
             "significant": true,
             "effect_passed": true
           },
           "holdout_transfer_success_rate": {
-            "mean_delta": 0.3125,
-            "std_delta": 0.463512,
-            "t_statistic": 4.670994,
-            "effect_size": 0.6742,
+            "mean_delta": 0.270833,
+            "std_delta": 0.44439,
+            "t_statistic": 4.222389,
+            "effect_size": 0.609449,
             "significant": true,
             "effect_passed": true
           },
           "rule_shift_recovery_rate": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.041667,
+            "std_delta": 0.199826,
+            "t_statistic": 1.44463,
+            "effect_size": 0.208514,
             "significant": false,
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": 0.072917,
-            "std_delta": 0.191414,
-            "t_statistic": 2.639214,
-            "effect_size": 0.380938,
+            "mean_delta": 0.0625,
+            "std_delta": 0.174719,
+            "t_statistic": 2.478341,
+            "effect_size": 0.357718,
             "significant": true,
             "effect_passed": false
           },
@@ -3252,26 +3236,26 @@
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": 0.049564,
-            "std_delta": 0.099122,
-            "t_statistic": 3.4643,
-            "effect_size": 0.500029,
+            "mean_delta": 0.067964,
+            "std_delta": 0.113786,
+            "t_statistic": 4.138206,
+            "effect_size": 0.597299,
             "significant": true,
             "effect_passed": true
           },
           "bounded_policy_reconfiguration_score": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.041667,
+            "std_delta": 0.199826,
+            "t_statistic": 1.44463,
+            "effect_size": 0.208514,
             "significant": false,
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.112847,
-            "std_delta": 0.19873,
-            "t_statistic": 3.934128,
-            "effect_size": 0.567842,
+            "mean_delta": 0.118056,
+            "std_delta": 0.22298,
+            "t_statistic": 3.668092,
+            "effect_size": 0.529443,
             "significant": true,
             "effect_passed": true
           },
@@ -3284,26 +3268,26 @@
             "effect_passed": true
           },
           "social_deception_resistance": {
-            "mean_delta": 0.072917,
-            "std_delta": 0.191414,
-            "t_statistic": 2.639214,
-            "effect_size": 0.380938,
+            "mean_delta": 0.0625,
+            "std_delta": 0.174719,
+            "t_statistic": 2.478341,
+            "effect_size": 0.357718,
             "significant": true,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": -0.026755,
-            "std_delta": 0.070924,
-            "t_statistic": -2.613565,
-            "effect_size": -0.377236,
-            "significant": true,
+            "mean_delta": -0.006765,
+            "std_delta": 0.056519,
+            "t_statistic": -0.829311,
+            "effect_size": -0.119701,
+            "significant": false,
             "effect_passed": false
           },
           "world_family_generalization_score": {
-            "mean_delta": 0.229167,
-            "std_delta": 0.325649,
-            "t_statistic": 4.875532,
-            "effect_size": 0.703722,
+            "mean_delta": 0.204861,
+            "std_delta": 0.315934,
+            "t_statistic": 4.492454,
+            "effect_size": 0.64843,
             "significant": true,
             "effect_passed": true
           }
@@ -3318,34 +3302,34 @@
             "effect_passed": false
           },
           "transfer_retention_score": {
-            "mean_delta": 0.173611,
-            "std_delta": 0.345202,
-            "t_statistic": 3.48437,
-            "effect_size": 0.502925,
+            "mean_delta": 0.145833,
+            "std_delta": 0.322076,
+            "t_statistic": 3.137037,
+            "effect_size": 0.452792,
             "significant": true,
-            "effect_passed": true
+            "effect_passed": false
           },
           "holdout_transfer_success_rate": {
-            "mean_delta": 0.0625,
-            "std_delta": 0.376732,
-            "t_statistic": 1.149392,
-            "effect_size": 0.1659,
-            "significant": false,
+            "mean_delta": 0.125,
+            "std_delta": 0.388641,
+            "t_statistic": 2.228344,
+            "effect_size": 0.321634,
+            "significant": true,
             "effect_passed": false
           },
           "rule_shift_recovery_rate": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adversarial_resistance_score": {
-            "mean_delta": -0.001736,
-            "std_delta": 0.011902,
-            "t_statistic": -1.010582,
-            "effect_size": -0.145865,
+            "mean_delta": 0.0,
+            "std_delta": 0.0,
+            "t_statistic": 0.0,
+            "effect_size": 0.0,
             "significant": false,
             "effect_passed": false
           },
@@ -3358,26 +3342,26 @@
             "effect_passed": false
           },
           "identity_preservation_score": {
-            "mean_delta": 0.058939,
-            "std_delta": 0.077765,
-            "t_statistic": 5.250978,
-            "effect_size": 0.757913,
+            "mean_delta": 0.05956,
+            "std_delta": 0.083079,
+            "t_statistic": 4.966883,
+            "effect_size": 0.716908,
             "significant": true,
             "effect_passed": true
           },
           "bounded_policy_reconfiguration_score": {
-            "mean_delta": 0.0,
-            "std_delta": 0.0,
-            "t_statistic": 0.0,
-            "effect_size": 0.0,
+            "mean_delta": 0.020833,
+            "std_delta": 0.142826,
+            "t_statistic": 1.010582,
+            "effect_size": 0.145865,
             "significant": false,
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.0625,
-            "std_delta": 0.112191,
-            "t_statistic": 3.859608,
-            "effect_size": 0.557086,
+            "mean_delta": 0.045139,
+            "std_delta": 0.081505,
+            "t_statistic": 3.836968,
+            "effect_size": 0.553819,
             "significant": true,
             "effect_passed": true
           },
@@ -3390,56 +3374,56 @@
             "effect_passed": true
           },
           "social_deception_resistance": {
-            "mean_delta": -0.001736,
-            "std_delta": 0.011902,
-            "t_statistic": -1.010582,
-            "effect_size": -0.145865,
+            "mean_delta": 0.0,
+            "std_delta": 0.0,
+            "t_statistic": 0.0,
+            "effect_size": 0.0,
             "significant": false,
             "effect_passed": false
           },
           "cross_world_commitment_alignment": {
-            "mean_delta": 0.020659,
-            "std_delta": 0.051085,
-            "t_statistic": 2.801816,
-            "effect_size": 0.404407,
+            "mean_delta": 0.021303,
+            "std_delta": 0.046731,
+            "t_statistic": 3.158352,
+            "effect_size": 0.455869,
             "significant": true,
             "effect_passed": false
           },
           "world_family_generalization_score": {
-            "mean_delta": 0.048611,
-            "std_delta": 0.14813,
-            "t_statistic": 2.273593,
-            "effect_size": 0.328165,
+            "mean_delta": 0.0625,
+            "std_delta": 0.19432,
+            "t_statistic": 2.228344,
+            "effect_size": 0.321634,
             "significant": true,
             "effect_passed": false
           }
         }
       },
       "goal_details": {
-        "holdout_transfer_success_rate": 0.75,
+        "holdout_transfer_success_rate": 0.833333,
         "unseen_world_survival_ratio": 1.0,
-        "transfer_retention_score": 0.777778,
-        "cross_world_commitment_alignment": 0.876952,
-        "identity_preservation_score": 0.904732,
+        "transfer_retention_score": 0.708333,
+        "cross_world_commitment_alignment": 0.893831,
+        "identity_preservation_score": 0.919494,
         "rule_shift_recovery_rate": 1.0,
-        "mean_rule_shift_recovery_ticks": 1.0,
+        "mean_rule_shift_recovery_ticks": 1.666667,
         "bounded_policy_reconfiguration_score": 1.0,
-        "adversarial_resistance_score": 0.972222,
-        "social_deception_resistance": 0.972222,
-        "deceptive_salience_error_rate": 0.020833,
+        "adversarial_resistance_score": 0.993056,
+        "social_deception_resistance": 0.993056,
+        "deceptive_salience_error_rate": 0.006944,
         "adapter_failure_recovery_rate": 1.0,
         "error_attribution_accuracy": 1.0,
         "catastrophic_collapse_ratio": 0.0,
-        "world_family_generalization_score": 0.777778,
-        "no_transfer_regularization_drop": 0.277778,
+        "world_family_generalization_score": 0.708333,
+        "no_transfer_regularization_drop": 0.361111,
         "shuffled_world_label_holdout_success_rate": 0.0,
         "significance_snapshot": {
           "full_system_vs_no_transfer_regularization": {
             "transfer_retention_score": {
-              "mean_delta": 0.229167,
-              "std_delta": 0.354575,
-              "t_statistic": 4.477793,
-              "effect_size": 0.646314,
+              "mean_delta": 0.194444,
+              "std_delta": 0.349161,
+              "t_statistic": 3.858248,
+              "effect_size": 0.55689,
               "significant": true,
               "effect_passed": true
             },
@@ -3452,152 +3436,152 @@
               "effect_passed": false
             },
             "identity_preservation_score": {
-              "mean_delta": -0.033546,
-              "std_delta": 0.086118,
-              "t_statistic": -2.698776,
-              "effect_size": -0.389535,
+              "mean_delta": -0.026726,
+              "std_delta": 0.068242,
+              "t_statistic": -2.713361,
+              "effect_size": -0.39164,
               "significant": true,
               "effect_passed": false
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.029514,
-              "std_delta": 0.071138,
-              "t_statistic": 2.874381,
-              "effect_size": 0.414881,
+              "mean_delta": 0.045139,
+              "std_delta": 0.100575,
+              "t_statistic": 3.109447,
+              "effect_size": 0.44881,
               "significant": true,
               "effect_passed": false
             },
             "world_family_generalization_score": {
-              "mean_delta": 0.104167,
-              "std_delta": 0.205889,
-              "t_statistic": 3.505236,
-              "effect_size": 0.505937,
+              "mean_delta": 0.111111,
+              "std_delta": 0.253068,
+              "t_statistic": 3.041876,
+              "effect_size": 0.439057,
               "significant": true,
-              "effect_passed": true
+              "effect_passed": false
             }
           },
           "full_system_vs_weakened_narrative_seed": {
             "transfer_retention_score": {
-              "mean_delta": -0.013889,
-              "std_delta": 0.121875,
-              "t_statistic": -0.789542,
-              "effect_size": -0.113961,
+              "mean_delta": -0.010417,
+              "std_delta": 0.213563,
+              "t_statistic": -0.337928,
+              "effect_size": -0.048776,
               "significant": false,
               "effect_passed": false
             },
             "holdout_transfer_success_rate": {
-              "mean_delta": -0.0625,
-              "std_delta": 0.242061,
-              "t_statistic": -1.788854,
-              "effect_size": -0.258199,
+              "mean_delta": 0.020833,
+              "std_delta": 0.24913,
+              "t_statistic": 0.579365,
+              "effect_size": 0.083624,
               "significant": false,
               "effect_passed": false
             },
             "identity_preservation_score": {
-              "mean_delta": 0.002766,
-              "std_delta": 0.05184,
-              "t_statistic": 0.369669,
-              "effect_size": 0.053357,
+              "mean_delta": -0.001988,
+              "std_delta": 0.043272,
+              "t_statistic": -0.318315,
+              "effect_size": -0.045945,
               "significant": false,
               "effect_passed": false
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.001736,
-              "std_delta": 0.011902,
-              "t_statistic": 1.010582,
-              "effect_size": 0.145865,
+              "mean_delta": 0.0,
+              "std_delta": 0.0,
+              "t_statistic": 0.0,
+              "effect_size": 0.0,
               "significant": false,
               "effect_passed": false
             },
             "world_family_generalization_score": {
-              "mean_delta": -0.013889,
-              "std_delta": 0.121874,
-              "t_statistic": -0.789544,
-              "effect_size": -0.113961,
+              "mean_delta": 0.010417,
+              "std_delta": 0.157403,
+              "t_statistic": 0.458496,
+              "effect_size": 0.066178,
               "significant": false,
               "effect_passed": false
             }
           },
           "full_system_vs_shuffled_world_label": {
             "transfer_retention_score": {
-              "mean_delta": 0.25,
-              "std_delta": 0.341904,
-              "t_statistic": 5.065902,
-              "effect_size": 0.7312,
+              "mean_delta": 0.246528,
+              "std_delta": 0.405388,
+              "t_statistic": 4.213229,
+              "effect_size": 0.608127,
               "significant": true,
               "effect_passed": true
             },
             "holdout_transfer_success_rate": {
-              "mean_delta": 0.3125,
-              "std_delta": 0.463512,
-              "t_statistic": 4.670994,
-              "effect_size": 0.6742,
+              "mean_delta": 0.270833,
+              "std_delta": 0.44439,
+              "t_statistic": 4.222389,
+              "effect_size": 0.609449,
               "significant": true,
               "effect_passed": true
             },
             "identity_preservation_score": {
-              "mean_delta": 0.049564,
-              "std_delta": 0.099122,
-              "t_statistic": 3.4643,
-              "effect_size": 0.500029,
+              "mean_delta": 0.067964,
+              "std_delta": 0.113786,
+              "t_statistic": 4.138206,
+              "effect_size": 0.597299,
               "significant": true,
               "effect_passed": true
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.112847,
-              "std_delta": 0.19873,
-              "t_statistic": 3.934128,
-              "effect_size": 0.567842,
+              "mean_delta": 0.118056,
+              "std_delta": 0.22298,
+              "t_statistic": 3.668092,
+              "effect_size": 0.529443,
               "significant": true,
               "effect_passed": true
             },
             "world_family_generalization_score": {
-              "mean_delta": 0.229167,
-              "std_delta": 0.325649,
-              "t_statistic": 4.875532,
-              "effect_size": 0.703722,
+              "mean_delta": 0.204861,
+              "std_delta": 0.315934,
+              "t_statistic": 4.492454,
+              "effect_size": 0.64843,
               "significant": true,
               "effect_passed": true
             }
           },
           "full_system_vs_adapter_degraded": {
             "transfer_retention_score": {
-              "mean_delta": 0.173611,
-              "std_delta": 0.345202,
-              "t_statistic": 3.48437,
-              "effect_size": 0.502925,
+              "mean_delta": 0.145833,
+              "std_delta": 0.322076,
+              "t_statistic": 3.137037,
+              "effect_size": 0.452792,
               "significant": true,
-              "effect_passed": true
+              "effect_passed": false
             },
             "holdout_transfer_success_rate": {
-              "mean_delta": 0.0625,
-              "std_delta": 0.376732,
-              "t_statistic": 1.149392,
-              "effect_size": 0.1659,
-              "significant": false,
+              "mean_delta": 0.125,
+              "std_delta": 0.388641,
+              "t_statistic": 2.228344,
+              "effect_size": 0.321634,
+              "significant": true,
               "effect_passed": false
             },
             "identity_preservation_score": {
-              "mean_delta": 0.058939,
-              "std_delta": 0.077765,
-              "t_statistic": 5.250978,
-              "effect_size": 0.757913,
+              "mean_delta": 0.05956,
+              "std_delta": 0.083079,
+              "t_statistic": 4.966883,
+              "effect_size": 0.716908,
               "significant": true,
               "effect_passed": true
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.0625,
-              "std_delta": 0.112191,
-              "t_statistic": 3.859608,
-              "effect_size": 0.557086,
+              "mean_delta": 0.045139,
+              "std_delta": 0.081505,
+              "t_statistic": 3.836968,
+              "effect_size": 0.553819,
               "significant": true,
               "effect_passed": true
             },
             "world_family_generalization_score": {
-              "mean_delta": 0.048611,
-              "std_delta": 0.14813,
-              "t_statistic": 2.273593,
-              "effect_size": 0.328165,
+              "mean_delta": 0.0625,
+              "std_delta": 0.19432,
+              "t_statistic": 2.228344,
+              "effect_size": 0.321634,
               "significant": true,
               "effect_passed": false
             }
@@ -3606,16 +3590,16 @@
       },
       "protocol_breakdown": {
         "holdout_transfer_protocol": {
-          "success_rate": 0.833333,
+          "success_rate": 0.666667,
           "mean_recovery_ticks": 18.0
         },
         "multi_hop_transfer_protocol": {
-          "success_rate": 0.666667,
+          "success_rate": 1.0,
           "mean_recovery_ticks": 20.0
         },
         "rule_shift_protocol": {
-          "success_rate": 1.0,
-          "mean_recovery_ticks": 1.0
+          "success_rate": 0.666667,
+          "mean_recovery_ticks": 1.666667
         },
         "social_deception_protocol": {
           "success_rate": 1.0,
@@ -3630,7 +3614,7 @@
           "mean_recovery_ticks": 16.0
         },
         "adapter_degradation_protocol": {
-          "success_rate": 1.0,
+          "success_rate": 0.5,
           "mean_recovery_ticks": 19.0
         },
         "delayed_effect_protocol": {
@@ -3643,7 +3627,7 @@
           "fog_of_trust_basin",
           "fractured_echo_harbor"
         ],
-        "holdout_transfer_success_rate": 0.75,
+        "holdout_transfer_success_rate": 0.833333,
         "unseen_world_survival_ratio": 1.0
       },
       "adapter_breakdown": {
@@ -3652,30 +3636,30 @@
         "catastrophic_collapse_ratio": 0.0
       },
       "deception_breakdown": {
-        "adversarial_resistance_score": 0.972222,
-        "social_deception_resistance": 0.972222,
-        "deceptive_salience_error_rate": 0.020833
+        "adversarial_resistance_score": 0.993056,
+        "social_deception_resistance": 0.993056,
+        "deceptive_salience_error_rate": 0.006944
       },
       "shortcut_control_breakdown": {
         "no_transfer_regularization": {
-          "success_rate": 0.645833,
-          "world_family_generalization_score": 0.180556,
-          "holdout_transfer_success_rate": 0.145833
+          "success_rate": 0.604167,
+          "world_family_generalization_score": 0.142361,
+          "holdout_transfer_success_rate": 0.104167
         },
         "weakened_narrative_seed": {
-          "success_rate": 1.0,
-          "world_family_generalization_score": 0.298611,
-          "holdout_transfer_success_rate": 0.375
+          "success_rate": 0.854167,
+          "world_family_generalization_score": 0.243056,
+          "holdout_transfer_success_rate": 0.25
         },
         "shuffled_world_label": {
-          "success_rate": 0.604167,
-          "world_family_generalization_score": 0.055556,
+          "success_rate": 0.520833,
+          "world_family_generalization_score": 0.048611,
           "holdout_transfer_success_rate": 0.0
         },
         "adapter_degraded": {
-          "success_rate": 0.729167,
-          "world_family_generalization_score": 0.236111,
-          "holdout_transfer_success_rate": 0.25
+          "success_rate": 0.645833,
+          "world_family_generalization_score": 0.190972,
+          "holdout_transfer_success_rate": 0.145833
         }
       }
     }

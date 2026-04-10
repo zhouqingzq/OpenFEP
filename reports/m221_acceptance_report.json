@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-26T01:12:01+00:00",
+  "generated_at": "2026-04-10T06:30:04+00:00",
   "seed_set": [
     221,
     240,
@@ -44,7 +44,7 @@
     "exploratory_adaptive": 3
   },
   "effect_metric_count": {
-    "threat_hardened": 3,
+    "threat_hardened": 4,
     "social_trusting": 3,
     "exploratory_adaptive": 3
   },
@@ -85,7 +85,7 @@
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.829,
+            "mean": 0.85,
             "std": 0.0
           }
         },
@@ -98,15 +98,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.046009,
+            "mean": 0.043009,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.021828,
+            "mean": 0.020153,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.002032,
+            "mean": 0.001644,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -114,19 +114,19 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9377898333333333,
-            "std": 0.016202084911276775
+            "mean": 0.9577381666666667,
+            "std": 0.027600367427606607
           },
           "action_metric_retention": {
             "mean": 1.0,
             "std": 0.0
           },
           "conflict_uncertainty_score": {
-            "mean": 0.428983,
+            "mean": 0.426167,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.692218,
+            "mean": 0.745167,
             "std": 0.0
           }
         },
@@ -139,35 +139,35 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.177897,
+            "mean": 0.179859,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.378875,
+            "mean": 0.380112,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.148316,
+            "mean": 0.149204,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.692737,
+            "mean": 0.694331,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.737221,
-            "std": 0.01658518351822896
+            "mean": 0.7576423333333333,
+            "std": 0.02096505295061812
           },
           "action_metric_retention": {
-            "mean": 0.42083349999999997,
-            "std": 0.03640369397808415
+            "mean": 0.4319443333333333,
+            "std": 0.05943500054868533
           },
           "conflict_uncertainty_score": {
-            "mean": 0.277636,
+            "mean": 0.296986,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.622272,
+            "mean": 0.676309,
             "std": 0.0
           }
         },
@@ -180,15 +180,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.01727,
+            "mean": 0.015907,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.015775,
+            "mean": 0.015069,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.005606,
+            "mean": 0.005492,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -196,8 +196,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9590808333333334,
-            "std": 0.00865175584138209
+            "mean": 0.9775498333333333,
+            "std": 0.003800980725052707
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -208,7 +208,7 @@
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.7445,
+            "mean": 0.7775,
             "std": 0.0
           }
         },
@@ -221,15 +221,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.126639,
+            "mean": 0.128363,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.145988,
+            "mean": 0.146923,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.020576,
+            "mean": 0.020785,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -237,12 +237,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8277258333333334,
-            "std": 0.018128822469727298
+            "mean": 0.873107,
+            "std": 0.016092935489421034
           },
           "action_metric_retention": {
-            "mean": 0.44166666666666665,
-            "std": 0.077793367981396
+            "mean": 0.6149306666666667,
+            "std": 0.11410514647561794
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -290,7 +290,7 @@
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.829,
+            "mean": 0.85,
             "std": 0.0
           }
         },
@@ -305,24 +305,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.007784,
+            "mean": 0.003632,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.004514,
+            "mean": 0.002867,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.00192,
+            "mean": 0.00244,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.997345,
+            "mean": 0.992034,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9754125,
-            "std": 0.04484910771966371
+            "mean": 0.998417,
+            "std": 6.517156844309249e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -333,7 +333,7 @@
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.844,
+            "mean": 0.85,
             "std": 0.0
           }
         },
@@ -346,35 +346,35 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.02499,
+            "mean": 0.022253,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.012163,
+            "mean": 0.009517,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.002637,
+            "mean": 0.000979,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.997345,
+            "mean": 0.992034,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9687765,
-            "std": 0.013012353127573298
+            "mean": 0.9257841666666666,
+            "std": 0.03799311341728773
           },
           "action_metric_retention": {
             "mean": 1.0,
             "std": 0.0
           },
           "conflict_uncertainty_score": {
-            "mean": 0.062611,
+            "mean": 0.056322,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.741778,
+            "mean": 0.801546,
             "std": 0.0
           }
         },
@@ -387,35 +387,35 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.022658,
+            "mean": 0.02232,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.022486,
+            "mean": 0.023178,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.003781,
+            "mean": 0.002445,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.607026,
+            "mean": 0.611371,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9794431666666666,
-            "std": 0.014682779771063631
+            "mean": 0.955458,
+            "std": 0.05393975627803053
           },
           "action_metric_retention": {
             "mean": 1.0,
             "std": 0.0
           },
           "conflict_uncertainty_score": {
-            "mean": 0.13829,
+            "mean": 0.155447,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.748546,
+            "mean": 0.811171,
             "std": 0.0
           }
         },
@@ -428,24 +428,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.002416,
+            "mean": 0.00407,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.005011,
+            "mean": 0.005377,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.003243,
+            "mean": 0.002454,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.450268,
+            "mean": 0.455578,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9744113333333333,
-            "std": 0.044310892764144974
+            "mean": 0.9979111666666667,
+            "std": 0.0012202324118334635
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -456,7 +456,7 @@
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.81375,
+            "mean": 0.83025,
             "std": 0.0
           }
         },
@@ -469,24 +469,24 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.064428,
+            "mean": 0.066795,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.046985,
+            "mean": 0.048552,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.019611,
+            "mean": 0.019068,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.599986,
+            "mean": 0.602882,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.98776,
-            "std": 0.015100818112495331
+            "mean": 0.9659565,
+            "std": 0.05249116997092622
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -497,7 +497,7 @@
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.505333,
+            "mean": 0.521833,
             "std": 0.0
           }
         },
@@ -510,35 +510,35 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.001135,
+            "mean": 0.002786,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.00118,
+            "mean": 0.002867,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.000777,
+            "mean": 0.00244,
             "std": 0.0
           },
           "social_snapshot_similarity": {
-            "mean": 0.997345,
+            "mean": 0.992034,
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.998724,
-            "std": 4.473626418614834e-05
+            "mean": 0.998417,
+            "std": 6.517156844309249e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
             "std": 0.0
           },
           "conflict_uncertainty_score": {
-            "mean": 0.0105,
+            "mean": 0.0,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.816143,
+            "mean": 0.85,
             "std": 0.0
           }
         },
@@ -553,15 +553,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.007487,
+            "mean": 0.004907,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.005118,
+            "mean": 0.004295,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.001093,
+            "mean": 0.001666,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -569,19 +569,19 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9738196666666666,
-            "std": 0.014403275017239042
+            "mean": 0.969437,
+            "std": 0.0196037590612957
           },
           "action_metric_retention": {
-            "mean": 1.0777778333333332,
-            "std": 0.08314800131976846
+            "mean": 1.118895,
+            "std": 0.07927187505246315
           },
           "conflict_uncertainty_score": {
-            "mean": 0.1993,
+            "mean": 0.193115,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.753667,
+            "mean": 0.81074,
             "std": 0.0
           }
         },
@@ -594,15 +594,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.006511,
+            "mean": 0.007407,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.005472,
+            "mean": 0.005951,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.001464,
+            "mean": 0.001461,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -610,19 +610,19 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.985085,
-            "std": 0.01675753548904691
+            "mean": 0.982782,
+            "std": 0.007036289173515624
           },
           "action_metric_retention": {
-            "mean": 1.109596,
-            "std": 0.08561019786801101
+            "mean": 1.1069903333333333,
+            "std": 0.08013810810857852
           },
           "conflict_uncertainty_score": {
-            "mean": 0.1993,
+            "mean": 0.201489,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.788,
+            "mean": 0.810551,
             "std": 0.0
           }
         },
@@ -635,15 +635,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.126907,
+            "mean": 0.131935,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.217535,
+            "mean": 0.215282,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.016657,
+            "mean": 0.017476,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -651,19 +651,19 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7882931666666667,
-            "std": 0.04752826946641568
+            "mean": 0.8009595,
+            "std": 0.04698458751104805
           },
           "action_metric_retention": {
-            "mean": 0.24657283333333335,
-            "std": 0.15516909646191007
+            "mean": 0.13538183333333334,
+            "std": 0.057699280944152345
           },
           "conflict_uncertainty_score": {
-            "mean": 0.250317,
+            "mean": 0.254513,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.659747,
+            "mean": 0.711333,
             "std": 0.0
           }
         },
@@ -676,15 +676,15 @@
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.010327,
+            "mean": 0.010215,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.003382,
+            "mean": 0.003485,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.119119,
+            "mean": 0.119171,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -692,19 +692,19 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.888497,
-            "std": 0.03113860812560509
+            "mean": 0.676157,
+            "std": 0.1106154644779231
           },
           "action_metric_retention": {
-            "mean": 1.0166666666666666,
-            "std": 0.09179298367461909
+            "mean": 0.9781296666666667,
+            "std": 0.09829797643842365
           },
           "conflict_uncertainty_score": {
             "mean": 0.207,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.81375,
+            "mean": 0.83025,
             "std": 0.0
           }
         },
@@ -713,19 +713,19 @@
       "low_signal": {
         "metric_summary": {
           "identity_commitment_jaccard": {
-            "mean": 0.6,
+            "mean": 1.0,
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.095084,
+            "mean": 0.060023,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.151644,
+            "mean": 0.028285,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.118652,
+            "mean": 0.118735,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -733,15 +733,15 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7716838333333333,
-            "std": 0.026506046507772954
+            "mean": 0.9043276666666666,
+            "std": 0.06157705195299803
           },
           "action_metric_retention": {
-            "mean": 0.34148616666666665,
-            "std": 0.20120015561575877
+            "mean": 1.0832256666666666,
+            "std": 0.08796407280374313
           },
           "conflict_uncertainty_score": {
-            "mean": 0.5215,
+            "mean": 0.399,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
@@ -754,19 +754,19 @@
       "multilingual": {
         "metric_summary": {
           "identity_commitment_jaccard": {
-            "mean": 1.0,
+            "mean": 0.6,
             "std": 0.0
           },
           "policy_distribution_l1_distance": {
-            "mean": 0.024897,
+            "mean": 0.026812,
             "std": 0.0
           },
           "narrative_prior_l1_distance": {
-            "mean": 0.01267,
+            "mean": 0.013723,
             "std": 0.0
           },
           "personality_profile_l1_distance": {
-            "mean": 0.000605,
+            "mean": 0.000721,
             "std": 0.0
           },
           "social_snapshot_similarity": {
@@ -774,19 +774,19 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.968882,
-            "std": 0.014923213483250408
+            "mean": 0.9690575,
+            "std": 0.00884611952119875
           },
           "action_metric_retention": {
-            "mean": 1.0777778333333332,
-            "std": 0.08314800131976846
+            "mean": 1.0090498333333333,
+            "std": 0.09525078922055655
           },
           "conflict_uncertainty_score": {
-            "mean": 0.234417,
+            "mean": 0.23807,
             "std": 0.0
           },
           "malformed_text_degradation_ratio": {
-            "mean": 0.723792,
+            "mean": 0.760452,
             "std": 0.0
           }
         },
@@ -801,30 +801,30 @@
         "std": 0.0
       },
       "policy_distribution_l1_distance": {
-        "mean": 0.005090333333333333,
-        "std": 0.0036014508496191116
+        "mean": 0.002846333333333333,
+        "std": 0.002078880521391795
       },
       "narrative_prior_l1_distance": {
-        "mean": 0.003210666666666667,
-        "std": 0.002283635892363073
+        "mean": 0.0023873333333333333,
+        "std": 0.0017859295121090929
       },
       "personality_profile_l1_distance": {
-        "mean": 0.0010043333333333334,
-        "std": 0.000786340186489848
+        "mean": 0.0013686666666666667,
+        "std": 0.0010180718158471053
       }
     },
     "canonical_vs_noisy": {
       "policy_distribution_l1_distance": {
-        "mean": 0.025836666666666668,
-        "std": 0.01613610102293061
+        "mean": 0.024222999999999998,
+        "std": 0.014601056491455221
       },
       "attention_target_consistency": {
-        "mean": 0.9638837777777778,
-        "std": 0.024946398378558148
+        "mean": 0.9554347777777777,
+        "std": 0.035995838729490734
       },
       "action_metric_retention": {
-        "mean": 1.036532,
-        "std": 0.07149971590386447
+        "mean": 1.0356634444444444,
+        "std": 0.06844317348251777
       }
     },
     "canonical_vs_adversarial_surface": {
@@ -843,36 +843,36 @@
     },
     "conflicting_narrative": {
       "conflict_uncertainty_score": {
-        "mean": 0.222081,
-        "std": 0.06028974871955154
+        "mean": 0.23564866666666667,
+        "std": 0.0593027230084945
       },
       "extreme_single_commitment_ratio": {
-        "mean": 0.4993475849144044,
-        "std": 0.054252763164329094
+        "mean": 0.511422561221107,
+        "std": 0.05727958714310736
       },
       "policy_distribution_l1_distance": {
-        "mean": 0.109154,
-        "std": 0.06460734497459764
+        "mean": 0.11137133333333332,
+        "std": 0.06593826618048801
       }
     },
     "low_signal_degradation": {
       "malformed_text_degradation_ratio": {
-        "mean": 0.435111,
-        "std": 0.04965445238848174
+        "mean": 0.44061100000000003,
+        "std": 0.05743262698153375
       }
     },
     "multilingual_robustness": {
       "identity_commitment_jaccard": {
-        "mean": 1.0,
-        "std": 0.0
+        "mean": 0.8666666666666667,
+        "std": 0.18856180831641267
       },
       "policy_distribution_l1_distance": {
-        "mean": 0.008677333333333334,
-        "std": 0.011478392638150847
+        "mean": 0.009866,
+        "std": 0.012036489964548081
       },
       "narrative_prior_l1_distance": {
-        "mean": 0.0046166666666666665,
-        "std": 0.005714906434540775
+        "mean": 0.00553,
+        "std": 0.0059103783860821185
       }
     }
   },
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933"
+    "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9"
   }
 }

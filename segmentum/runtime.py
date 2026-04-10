@@ -152,6 +152,7 @@ class SegmentRuntime:
         reset_predictive_precisions: bool = False,
         enable_restart_rebind: bool = False,
         memory_backend: str = "memory_store",
+        memory_enabled: bool = True,
     ) -> SegmentRuntime:
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
@@ -166,6 +167,7 @@ class SegmentRuntime:
                     rng=world.rng,
                     predictive_hyperparameters=predictive_hyperparameters,
                     memory_backend=memory_backend,
+                    memory_enabled=memory_enabled,
                 ),
                 world=world,
                 state_path=path,

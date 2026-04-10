@@ -641,6 +641,9 @@ def build_m47_evidence_records(
     runtime_snapshot: dict[str, Any] | None = None,
 ) -> list[dict[str, object]]:
     snapshot = deepcopy(runtime_snapshot) if runtime_snapshot is not None else build_m47_runtime_snapshot()
+    # M4.8 demotion: runtime snapshot is diagnostic-only, not acceptance evidence.
+    snapshot["diagnostic_only"] = True
+    snapshot["demotion_reason"] = "M4.7 behavioral claims depend on M4.8 ablation evidence; this snapshot satisfies only structural self-consistency (layer a)."
     scenario_c_record, subtype_context = _consolidation_record(snapshot)
     return [
         _state_vector_record(snapshot),
@@ -892,6 +895,7 @@ def build_m47_reacceptance_report(
     runtime_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, object]:
     snapshot = deepcopy(runtime_snapshot) if runtime_snapshot is not None else build_m47_runtime_snapshot()
+    # M4.8 demotion: diagnostic_only is set in build_m47_evidence_records
     records = build_m47_evidence_records(include_regressions=include_regressions, runtime_snapshot=snapshot)
     gate_summaries = {gate: _gate_summary(gate, _all_gate_records(records, gate)) for gate in GATE_ORDER if gate != GATE_HONESTY}
     honesty_record = _build_honesty_record(records, include_regressions=include_regressions)

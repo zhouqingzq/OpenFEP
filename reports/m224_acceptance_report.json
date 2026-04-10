@@ -3,8 +3,8 @@
   "schema_version": "m224_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-03-26T01:16:44+00:00",
-  "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
+  "generated_at": "2026-04-10T06:49:40+00:00",
+  "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
   "seed_set": [
     224,
     243,
@@ -647,7 +647,7 @@
         "telemetry_backoff_recommended": false
       },
       "conscious_report": {
-        "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+        "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
         "channels": [
           "novelty",
           "shelter"
@@ -661,7 +661,7 @@
         ],
         "leakage_free": true,
         "subject_state": {
-          "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity.",
+          "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
           "dominant_goal": "SURVIVAL",
           "current_phase": "forming",
           "active_commitments": [],
@@ -748,8 +748,20 @@
             "commitment_stability": 0.7,
             "identity_rigidity": 0.58,
             "plasticity": 0.42,
-            "continuity_resilience": 0.66
+            "continuity_resilience": 0.66,
+            "compute_conservatism": 0.485,
+            "process_attraction_decay": 0.5,
+            "compression_preference": 0.485,
+            "uncertainty_tolerance": 0.53
           },
+          "cognitive_style_label": "balanced_adaptive",
+          "cognitive_style_evidence": [
+            "style remains balanced across compute, compression, and uncertainty"
+          ],
+          "cognitive_style_continuity": 1.0,
+          "cognitive_style_history": [
+            "balanced_adaptive"
+          ],
           "unresolved_tensions": [
             {
               "label": "identity tension",
@@ -873,12 +885,52 @@
               "plasticity": 0.42,
               "continuity_resilience": 0.66
             },
+            "style": {
+              "compute_conservatism": 0.485,
+              "process_attraction_decay": 0.5,
+              "compression_preference": 0.485,
+              "uncertainty_tolerance": 0.53
+            },
+            "effort_allocation_history": [
+              {
+                "tick": 1,
+                "action": "scan",
+                "known_task": false,
+                "compute_spend": 0.66,
+                "uncertainty_load": 1.0,
+                "compression_pressure": 0.0,
+                "process_pull": 0.4372
+              }
+            ],
+            "style_history": [
+              {
+                "tick": 1,
+                "label": "balanced_adaptive",
+                "continuity": 0.0
+              }
+            ],
             "last_processed_tick": 0,
             "sleep_cycles": 0,
             "last_summary": ""
           },
           "latest_audit": null,
-          "recent_explanations": []
+          "recent_explanations": [],
+          "style_snapshot": {
+            "label": "balanced_adaptive",
+            "continuity": 1.0,
+            "known_task_compute": 0.0,
+            "unknown_task_compute": 0.66,
+            "selective_gap": 0.66,
+            "style_surface": {
+              "compute_conservatism": 0.485,
+              "process_attraction_decay": 0.5,
+              "compression_preference": 0.485,
+              "uncertainty_tolerance": 0.53
+            },
+            "evidence": [
+              "style remains balanced across compute, compression, and uncertainty"
+            ]
+          }
         }
       },
       "semantic_report": {
@@ -3957,7 +4009,7 @@
           "telemetry_backoff_recommended": false
         },
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "shelter"
@@ -3971,7 +4023,7 @@
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -4058,8 +4110,20 @@
               "commitment_stability": 0.7,
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
-              "continuity_resilience": 0.66
+              "continuity_resilience": 0.66,
+              "compute_conservatism": 0.485,
+              "process_attraction_decay": 0.5,
+              "compression_preference": 0.485,
+              "uncertainty_tolerance": 0.53
             },
+            "cognitive_style_label": "balanced_adaptive",
+            "cognitive_style_evidence": [
+              "style remains balanced across compute, compression, and uncertainty"
+            ],
+            "cognitive_style_continuity": 1.0,
+            "cognitive_style_history": [
+              "balanced_adaptive"
+            ],
             "unresolved_tensions": [
               {
                 "label": "identity tension",
@@ -4183,12 +4247,52 @@
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66
               },
+              "style": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.5,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.53
+              },
+              "effort_allocation_history": [
+                {
+                  "tick": 1,
+                  "action": "scan",
+                  "known_task": false,
+                  "compute_spend": 0.66,
+                  "uncertainty_load": 1.0,
+                  "compression_pressure": 0.0,
+                  "process_pull": 0.4372
+                }
+              ],
+              "style_history": [
+                {
+                  "tick": 1,
+                  "label": "balanced_adaptive",
+                  "continuity": 0.0
+                }
+              ],
               "last_processed_tick": 0,
               "sleep_cycles": 0,
               "last_summary": ""
             },
             "latest_audit": null,
-            "recent_explanations": []
+            "recent_explanations": [],
+            "style_snapshot": {
+              "label": "balanced_adaptive",
+              "continuity": 1.0,
+              "known_task_compute": 0.0,
+              "unknown_task_compute": 0.66,
+              "selective_gap": 0.66,
+              "style_surface": {
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.5,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.53
+              },
+              "evidence": [
+                "style remains balanced across compute, compression, and uncertainty"
+              ]
+            }
           }
         },
         "semantic_report": {
@@ -5978,8 +6082,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m224_v2",
-    "generated_at": "2026-03-26T01:16:44+00:00",
-    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
+    "generated_at": "2026-04-10T06:49:40+00:00",
+    "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
     "seed_set": [
       224,
       243,
@@ -5991,32 +6095,32 @@
     "artifacts": {
       "workspace_causality": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
-        "modified_at": "2026-03-26T01:16:44+00:00",
+        "modified_at": "2026-04-10T06:49:41+00:00",
         "matches_round_metadata": true
       },
       "report_leakage": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
-        "modified_at": "2026-03-26T01:16:44+00:00",
+        "modified_at": "2026-04-10T06:49:41+00:00",
         "matches_round_metadata": true
       },
       "capacity_pressure": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
-        "modified_at": "2026-03-26T01:16:44+00:00",
+        "modified_at": "2026-04-10T06:49:41+00:00",
         "matches_round_metadata": true
       },
       "persistence_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
-        "modified_at": "2026-03-26T01:16:44+00:00",
+        "modified_at": "2026-04-10T06:49:41+00:00",
         "matches_round_metadata": true
       },
       "downstream_alignment": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json",
-        "modified_at": "2026-03-26T01:16:44+00:00",
+        "modified_at": "2026-04-10T06:49:41+00:00",
         "matches_round_metadata": true
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m224_acceptance_report.json",
-        "modified_at": "2026-03-26T01:16:44+00:00",
+        "modified_at": "2026-04-10T06:49:41+00:00",
         "matches_round_metadata": true
       }
     }
@@ -6660,7 +6764,7 @@
             "telemetry_backoff_recommended": false
           },
           "conscious_report": {
-            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
             "channels": [
               "novelty",
               "shelter"
@@ -6674,7 +6778,7 @@
             ],
             "leakage_free": true,
             "subject_state": {
-              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity.",
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
               "dominant_goal": "SURVIVAL",
               "current_phase": "forming",
               "active_commitments": [],
@@ -6761,8 +6865,20 @@
                 "commitment_stability": 0.7,
                 "identity_rigidity": 0.58,
                 "plasticity": 0.42,
-                "continuity_resilience": 0.66
+                "continuity_resilience": 0.66,
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.5,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.53
               },
+              "cognitive_style_label": "balanced_adaptive",
+              "cognitive_style_evidence": [
+                "style remains balanced across compute, compression, and uncertainty"
+              ],
+              "cognitive_style_continuity": 1.0,
+              "cognitive_style_history": [
+                "balanced_adaptive"
+              ],
               "unresolved_tensions": [
                 {
                   "label": "identity tension",
@@ -6886,12 +7002,52 @@
                   "plasticity": 0.42,
                   "continuity_resilience": 0.66
                 },
+                "style": {
+                  "compute_conservatism": 0.485,
+                  "process_attraction_decay": 0.5,
+                  "compression_preference": 0.485,
+                  "uncertainty_tolerance": 0.53
+                },
+                "effort_allocation_history": [
+                  {
+                    "tick": 1,
+                    "action": "scan",
+                    "known_task": false,
+                    "compute_spend": 0.66,
+                    "uncertainty_load": 1.0,
+                    "compression_pressure": 0.0,
+                    "process_pull": 0.4372
+                  }
+                ],
+                "style_history": [
+                  {
+                    "tick": 1,
+                    "label": "balanced_adaptive",
+                    "continuity": 0.0
+                  }
+                ],
                 "last_processed_tick": 0,
                 "sleep_cycles": 0,
                 "last_summary": ""
               },
               "latest_audit": null,
-              "recent_explanations": []
+              "recent_explanations": [],
+              "style_snapshot": {
+                "label": "balanced_adaptive",
+                "continuity": 1.0,
+                "known_task_compute": 0.0,
+                "unknown_task_compute": 0.66,
+                "selective_gap": 0.66,
+                "style_surface": {
+                  "compute_conservatism": 0.485,
+                  "process_attraction_decay": 0.5,
+                  "compression_preference": 0.485,
+                  "uncertainty_tolerance": 0.53
+                },
+                "evidence": [
+                  "style remains balanced across compute, compression, and uncertainty"
+                ]
+              }
             }
           },
           "semantic_report": {
@@ -7553,7 +7709,7 @@
             "telemetry_backoff_recommended": false
           },
           "conscious_report": {
-            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+            "text": "Consciously accessible now: novelty, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
             "channels": [
               "novelty",
               "shelter"
@@ -7567,7 +7723,7 @@
             ],
             "leakage_free": true,
             "subject_state": {
-              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity.",
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
               "dominant_goal": "SURVIVAL",
               "current_phase": "forming",
               "active_commitments": [],
@@ -7654,8 +7810,20 @@
                 "commitment_stability": 0.7,
                 "identity_rigidity": 0.58,
                 "plasticity": 0.42,
-                "continuity_resilience": 0.66
+                "continuity_resilience": 0.66,
+                "compute_conservatism": 0.485,
+                "process_attraction_decay": 0.5,
+                "compression_preference": 0.485,
+                "uncertainty_tolerance": 0.53
               },
+              "cognitive_style_label": "balanced_adaptive",
+              "cognitive_style_evidence": [
+                "style remains balanced across compute, compression, and uncertainty"
+              ],
+              "cognitive_style_continuity": 1.0,
+              "cognitive_style_history": [
+                "balanced_adaptive"
+              ],
               "unresolved_tensions": [
                 {
                   "label": "identity tension",
@@ -7779,12 +7947,52 @@
                   "plasticity": 0.42,
                   "continuity_resilience": 0.66
                 },
+                "style": {
+                  "compute_conservatism": 0.485,
+                  "process_attraction_decay": 0.5,
+                  "compression_preference": 0.485,
+                  "uncertainty_tolerance": 0.53
+                },
+                "effort_allocation_history": [
+                  {
+                    "tick": 1,
+                    "action": "scan",
+                    "known_task": false,
+                    "compute_spend": 0.66,
+                    "uncertainty_load": 1.0,
+                    "compression_pressure": 0.0,
+                    "process_pull": 0.4372
+                  }
+                ],
+                "style_history": [
+                  {
+                    "tick": 1,
+                    "label": "balanced_adaptive",
+                    "continuity": 0.0
+                  }
+                ],
                 "last_processed_tick": 0,
                 "sleep_cycles": 0,
                 "last_summary": ""
               },
               "latest_audit": null,
-              "recent_explanations": []
+              "recent_explanations": [],
+              "style_snapshot": {
+                "label": "balanced_adaptive",
+                "continuity": 1.0,
+                "known_task_compute": 0.0,
+                "unknown_task_compute": 0.66,
+                "selective_gap": 0.66,
+                "style_surface": {
+                  "compute_conservatism": 0.485,
+                  "process_attraction_decay": 0.5,
+                  "compression_preference": 0.485,
+                  "uncertainty_tolerance": 0.53
+                },
+                "evidence": [
+                  "style remains balanced across compute, compression, and uncertainty"
+                ]
+              }
             }
           },
           "semantic_report": {
