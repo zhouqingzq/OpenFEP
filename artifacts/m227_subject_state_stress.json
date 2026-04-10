@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-26T01:16:50+00:00",
+  "generated_at": "2026-04-10T07:33:44+00:00",
   "seed": 342,
   "failure_injection": {
     "energy": 0.12,
@@ -177,8 +177,18 @@
       "commitment_stability": 0.7,
       "identity_rigidity": 0.58,
       "plasticity": 0.42,
-      "continuity_resilience": 0.66
+      "continuity_resilience": 0.66,
+      "compute_conservatism": 0.5,
+      "process_attraction_decay": 0.5,
+      "compression_preference": 0.5,
+      "uncertainty_tolerance": 0.5
     },
+    "cognitive_style_label": "balanced_adaptive",
+    "cognitive_style_evidence": [
+      "style remains balanced across compute, compression, and uncertainty"
+    ],
+    "cognitive_style_continuity": 0.0,
+    "cognitive_style_history": [],
     "status_flags": {
       "threatened": true,
       "repairing": false,
@@ -198,7 +208,7 @@
       "protect continuity anchors",
       "forage"
     ],
-    "same_subject_basis": "Anchors held: stress-anchor-001. Current narrative phase: forming."
+    "same_subject_basis": "Anchors held: stress-anchor-001. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00."
   },
   "maintenance_update": {
     "recommended_action": "hide",
@@ -455,8 +465,20 @@
         "commitment_stability": 0.7,
         "identity_rigidity": 0.58,
         "plasticity": 0.42,
-        "continuity_resilience": 0.66
+        "continuity_resilience": 0.66,
+        "compute_conservatism": 0.5,
+        "process_attraction_decay": 0.5,
+        "compression_preference": 0.5,
+        "uncertainty_tolerance": 0.5
       },
+      "cognitive_style_label": "balanced_adaptive",
+      "cognitive_style_evidence": [
+        "style remains balanced across compute, compression, and uncertainty"
+      ],
+      "cognitive_style_continuity": 1.0,
+      "cognitive_style_history": [
+        "balanced_adaptive"
+      ],
       "status_flags": {
         "threatened": true,
         "repairing": false,
@@ -477,7 +499,7 @@
         "SURVIVAL",
         "protect continuity anchors"
       ],
-      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity."
+      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00."
     }
   }
 }

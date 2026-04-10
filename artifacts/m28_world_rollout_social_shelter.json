@@ -4,8 +4,10 @@
   "event_count": 3,
   "action_distribution": {
     "exploit_shelter": 0.05,
-    "hide": 0.4666666666666667,
-    "rest": 0.48333333333333334
+    "forage": 0.05,
+    "hide": 0.7666666666666667,
+    "rest": 0.08333333333333333,
+    "unstable_workspace_note": 0.05
   },
-  "mean_conditioned_prediction_error": 0.03597543586655632
+  "mean_conditioned_prediction_error": 0.041872076839923875
 }

@@ -7,7 +7,7 @@
       "eval_cycles": 40,
       "train_summary": {
         "world_id": "predator_river",
-        "mean_conditioned_prediction_error": 0.07690295894483877,
+        "mean_conditioned_prediction_error": 0.08700955573189915,
         "survival_score": 1.3980833333333327
       },
       "comparisons": [
@@ -20,27 +20,26 @@
             "transfer_carryover": "world_specific_homeostatic_carryover"
           },
           "transferred": {
-            "mean_conditioned_prediction_error": 0.08694742993301816,
+            "mean_conditioned_prediction_error": 0.1398207216245677,
             "survival_score": 1.803875,
             "action_distribution": {
-              "exploit_shelter": 0.075,
-              "hide": 0.75,
-              "rest": 0.175
+              "hide": 0.525,
+              "rest": 0.475
             }
           },
           "fresh": {
-            "mean_conditioned_prediction_error": 0.07865899533639291,
+            "mean_conditioned_prediction_error": 0.11234974883961661,
             "survival_score": 1.8443749999999999,
             "action_distribution": {
               "exploit_shelter": 0.025,
-              "hide": 0.45,
-              "rest": 0.525
+              "hide": 0.475,
+              "rest": 0.5
             }
           },
           "improvements": {
-            "conditioned_prediction_error_reduction": -0.1053717322625205,
+            "conditioned_prediction_error_reduction": -0.24451298795662568,
             "survival_score_lift": -0.021958658082006144,
-            "first_50_cycle_regret_reduction": -0.2068965517241379
+            "first_50_cycle_regret_reduction": -0.1578947368421053
           }
         }
       ]
@@ -52,7 +51,7 @@
       "eval_cycles": 40,
       "train_summary": {
         "world_id": "foraging_valley",
-        "mean_conditioned_prediction_error": 0.0485888285354813,
+        "mean_conditioned_prediction_error": 0.07575189502453177,
         "survival_score": 1.8087499999999999
       },
       "comparisons": [
@@ -65,27 +64,26 @@
             "transfer_carryover": "world_specific_homeostatic_carryover"
           },
           "transferred": {
-            "mean_conditioned_prediction_error": 0.0851018981168964,
-            "survival_score": 1.8611249999999997,
+            "mean_conditioned_prediction_error": 0.08956642747997777,
+            "survival_score": 1.6781249999999994,
             "action_distribution": {
-              "exploit_shelter": 0.825,
-              "hide": 0.125,
-              "rest": 0.05
+              "hide": 0.5,
+              "rest": 0.5
             }
           },
           "fresh": {
-            "mean_conditioned_prediction_error": 0.07354372105815561,
-            "survival_score": 1.5576249999999994,
+            "mean_conditioned_prediction_error": 0.0799436485218231,
+            "survival_score": 1.5134999999999994,
             "action_distribution": {
               "exploit_shelter": 0.075,
-              "hide": 0.65,
-              "rest": 0.275
+              "hide": 0.875,
+              "rest": 0.05
             }
           },
           "improvements": {
-            "conditioned_prediction_error_reduction": -0.15716062353713411,
-            "survival_score_lift": 0.19484792552764651,
-            "first_50_cycle_regret_reduction": 0.41666666666666663
+            "conditioned_prediction_error_reduction": -0.12036952448483551,
+            "survival_score_lift": 0.1087710604558969,
+            "first_50_cycle_regret_reduction": 0.1794871794871794
           }
         }
       ]

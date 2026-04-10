@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-26T01:17:04+00:00",
+  "generated_at": "2026-04-10T07:34:08+00:00",
   "mechanism": "slow_variable_learning",
   "comparison": "with_sleep_consolidated_slow_learning_vs_ablation",
   "baseline": {
@@ -12,8 +12,8 @@
     "refresh_created_targets": true
   },
   "full_mechanism": {
-    "hide_policy_score": -0.148583,
-    "forage_policy_score": -155.516329,
+    "hide_policy_score": -0.183207,
+    "forage_policy_score": -155.516538,
     "memory_threshold_delta": -0.025,
     "continuity_score": 0.5668,
     "continuity_fragile": false,

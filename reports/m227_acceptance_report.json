@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-03-26T01:16:56+00:00",
+  "generated_at": "2026-04-10T07:33:55+00:00",
   "seed_set": [
     227,
     342
@@ -108,7 +108,7 @@
             "dominant_goal": "SURVIVAL",
             "continuity_score": 0.6468,
             "continuity_anchors": [
-              "ep-000006-exploit_shelter"
+              "ep-000006-scan"
             ],
             "status_flags": {
               "threatened": false,
@@ -135,7 +135,7 @@
             "dominant_goal": "SURVIVAL",
             "continuity_score": 0.6468,
             "continuity_anchors": [
-              "ep-000006-exploit_shelter"
+              "ep-000006-scan"
             ],
             "status_flags": {
               "threatened": false,
@@ -400,8 +400,20 @@
             "commitment_stability": 0.7,
             "identity_rigidity": 0.58,
             "plasticity": 0.42,
-            "continuity_resilience": 0.66
+            "continuity_resilience": 0.66,
+            "compute_conservatism": 0.5,
+            "process_attraction_decay": 0.5,
+            "compression_preference": 0.5,
+            "uncertainty_tolerance": 0.5
           },
+          "cognitive_style_label": "balanced_adaptive",
+          "cognitive_style_evidence": [
+            "style remains balanced across compute, compression, and uncertainty"
+          ],
+          "cognitive_style_continuity": 1.0,
+          "cognitive_style_history": [
+            "balanced_adaptive"
+          ],
           "status_flags": {
             "threatened": true,
             "repairing": false,
@@ -422,7 +434,7 @@
             "SURVIVAL",
             "protect continuity anchors"
           ],
-          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity."
+          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00."
         }
       }
     },
@@ -433,23 +445,21 @@
         "anchors_recovered_after_pressure": true,
         "continuity_not_collapsed_to_zero": true,
         "phase_changes_bounded": true,
-        "min_continuity_score": 0.349483,
+        "min_continuity_score": 0.429007,
         "max_continuity_score": 0.7468,
-        "final_continuity_score": 0.711106,
+        "final_continuity_score": 0.599578,
         "max_anchor_count": 12,
         "final_anchor_count": 12,
         "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 43,
+        "threatened_cycles": 32,
         "fragile_cycles": 72,
         "distinct_phases": [
           "consolidation",
-          "exploration_phase",
           "forming",
           "goal_realignment",
           "resource_recovery"
         ],
         "bounded_distinct_phases": [
-          "exploration",
           "forming",
           "recovery"
         ],
@@ -457,20 +467,20 @@
           "cycle": 72,
           "current_phase": "consolidation",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.711106,
+          "continuity_score": 0.599578,
           "continuity_anchors": [
-            "ep-000071-exploit_shelter",
-            "ep-000061-hide-merged",
-            "ep-000059-exploit_shelter-merged",
-            "ep-000049-seek_contact",
-            "ep-000034-rest-merged",
-            "ep-000038-append_workspace_note",
-            "ep-000034-unstable_workspace_note-merged",
-            "ep-000024-hide-merged",
-            "ep-000016-exploit_shelter-merged",
-            "ep-000014-rest-merged",
-            "ep-000011-hide",
-            "ep-000006-scan"
+            "ep-000071-rest",
+            "ep-000069-rest",
+            "ep-000067-rest",
+            "ep-000065-rest",
+            "ep-000064-hide",
+            "ep-000047-rest-merged",
+            "ep-000045-hide-merged",
+            "ep-000030-exploit_shelter-merged",
+            "ep-000038-unstable_workspace_note",
+            "ep-000037-seek_contact",
+            "ep-000026-scan",
+            "ep-000013-hide"
           ],
           "status_flags": {
             "threatened": true,
@@ -489,7 +499,7 @@
             "need:maintenance",
             "repeated surprise burden"
           ],
-          "last_choice": "exploit_shelter"
+          "last_choice": "rest"
         }
       }
     },
@@ -507,8 +517,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-26T01:16:56+00:00",
-    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
+    "generated_at": "2026-04-10T07:33:55+00:00",
+    "codebase_version": "74806b6f9b25ec6029e33b90e268c733205b30fd",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -519,32 +529,32 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
-        "size_bytes": 78626,
-        "modified_at": "2026-03-26T01:16:50+00:00"
+        "size_bytes": 86196,
+        "modified_at": "2026-04-10T07:33:44+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1674,
-        "modified_at": "2026-03-26T01:16:50+00:00"
+        "modified_at": "2026-04-10T07:33:44+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
-        "size_bytes": 14088,
-        "modified_at": "2026-03-26T01:16:50+00:00"
+        "size_bytes": 15049,
+        "modified_at": "2026-04-10T07:33:44+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 18601,
-        "modified_at": "2026-03-26T01:16:56+00:00"
+        "size_bytes": 18209,
+        "modified_at": "2026-04-10T07:33:55+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-03-26T00:38:26+00:00"
+        "modified_at": "2026-04-10T07:25:30+00:00"
       }
     }
   },

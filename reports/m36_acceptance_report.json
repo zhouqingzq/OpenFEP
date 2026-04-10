@@ -1,7 +1,7 @@
 {
   "milestone_id": "M3.6",
   "status": "PASS",
-  "generated_at": "2026-04-09T13:06:29+00:00",
+  "generated_at": "2026-04-10T07:36:35+00:00",
   "seed_set": [
     31,
     32,
@@ -131,7 +131,7 @@
   ],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-04-09T00:00:00+00:00"
+    "round_started_at": "2026-04-10T07:36:35+00:00"
   },
   "recommendation": "ACCEPT"
 }

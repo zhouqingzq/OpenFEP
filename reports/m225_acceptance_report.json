@@ -3,8 +3,8 @@
   "schema_version": "m225_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-10T06:46:30+00:00",
-  "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
+  "generated_at": "2026-04-10T07:10:17+00:00",
+  "codebase_version": "74806b6f9b25ec6029e33b90e268c733205b30fd",
   "seed_set": [
     225,
     244,
@@ -1656,8 +1656,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m225_v2",
-    "generated_at": "2026-04-10T06:46:30+00:00",
-    "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
+    "generated_at": "2026-04-10T07:10:17+00:00",
+    "codebase_version": "74806b6f9b25ec6029e33b90e268c733205b30fd",
     "seed_set": [
       225,
       244,
@@ -1721,7 +1721,7 @@
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json",
         "exists": true,
-        "size_bytes": 120252,
+        "size_bytes": 121244,
         "fresh": true,
         "header_match": true
       }

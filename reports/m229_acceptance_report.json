@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.29",
   "status": "PASS",
-  "generated_at": "2026-03-26T01:17:04+00:00",
+  "generated_at": "2026-04-10T07:34:07+00:00",
   "seed_set": [
     229,
     431
@@ -203,8 +203,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-03-26T01:17:04+00:00",
-    "codebase_version": "4e7317dae7f3278bcc308e393d6fd5d58e9a1933",
+    "generated_at": "2026-04-10T07:34:07+00:00",
+    "codebase_version": "74806b6f9b25ec6029e33b90e268c733205b30fd",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
@@ -216,25 +216,25 @@
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
         "exists": true,
         "size_bytes": 21733,
-        "modified_at": "2026-03-26T01:17:04+00:00"
+        "modified_at": "2026-04-10T07:34:07+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
         "exists": true,
         "size_bytes": 1304,
-        "modified_at": "2026-03-26T01:17:04+00:00"
+        "modified_at": "2026-04-10T07:34:07+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
         "exists": true,
-        "size_bytes": 5920,
-        "modified_at": "2026-03-26T01:17:04+00:00"
+        "size_bytes": 6270,
+        "modified_at": "2026-04-10T07:34:07+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md",
         "exists": true,
         "size_bytes": 236,
-        "modified_at": "2026-03-26T01:17:04+00:00"
+        "modified_at": "2026-04-10T07:34:07+00:00"
       }
     }
   },
