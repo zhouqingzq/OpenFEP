@@ -171,6 +171,14 @@ class TestM45Acceptance(unittest.TestCase):
         self.assertTrue(forgetting_paths["source_confidence_drifted"])
         self.assertTrue(forgetting_paths["reality_confidence_drifted"])
 
+    def test_store_transition_probe_requires_identity_delta_and_neutral_guardrail(self) -> None:
+        payload = build_m45_acceptance_payload(regression_summary=_passing_regression_summary())
+        probe = payload["integration_probes"]["store_transitions_integration"]["observed"]
+
+        self.assertGreater(float(probe["identity_score_delta"]), 0.0)
+        self.assertEqual(probe["identity_null_store_level"], "short")
+        self.assertLess(float(probe["neutral_promotion_rate"]), 0.05)
+
     def test_probe_catalog_mismatch_fails_report_honesty(self) -> None:
         payload = build_m45_acceptance_payload(regression_summary=_passing_regression_summary())
         payload["probe_catalog"]["integration"] = payload["probe_catalog"]["integration"][:-1]

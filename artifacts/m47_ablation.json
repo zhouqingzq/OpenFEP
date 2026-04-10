@@ -1,0 +1,13 @@
+{
+  "comparison": "full_evidence_vs_tampered_evidence",
+  "tampered_case_count": 5,
+  "tampered_cases_failed_closed": 5,
+  "all_tampered_cases_failed_closed": true,
+  "case_ids": [
+    "tampered_effect_size",
+    "missing_gate_record",
+    "fake_random_noise_misattribution",
+    "fake_regression_pass",
+    "duplicate_source_api_call_id"
+  ]
+}

@@ -2,12 +2,12 @@
 
 - Status: FAIL
 - Recommendation: BLOCK
-- Continuity mean: 0.741215
+- Continuity mean: 0.730503
 - Restart consistency: 1.0
-- Inquiry mean active targets: 3.828571
+- Inquiry mean active targets: 3.871428
 - Reopened conflicts: 1
 - Reconciled conflicts: 1
-- Trace reactivation events: 35
+- Trace reactivation events: 15
 - Schema roundtrip: True
 - Stress evidence: True
 

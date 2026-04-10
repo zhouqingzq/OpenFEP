@@ -12,6 +12,21 @@ def _round(value: float) -> float:
     return round(float(value), 6)
 
 
+def _legacy_m36_memory_snapshot(memory: LongTermMemory) -> dict[str, object]:
+    payload = memory.to_dict()
+    for field in (
+        "agent_state_vector",
+        "memory_cognitive_style",
+        "memory_cycle_interval",
+        "memory_backend",
+        "migration_audit",
+        "last_retrieval_result",
+        "memory_store",
+    ):
+        payload.pop(field, None)
+    return payload
+
+
 @dataclass(frozen=True)
 class OpenWorldEvent:
     tick: int
@@ -419,7 +434,7 @@ def _run_subject(
         )
         if index + 1 == split_index:
             restart_payload = {
-                "memory": memory.to_dict(),
+                "memory": _legacy_m36_memory_snapshot(memory),
                 "learner": learner.to_dict(),
                 "process_valence": process_state.to_dict(),
             }
@@ -429,7 +444,7 @@ def _run_subject(
         raise RuntimeError("restart payload was not captured")
 
     final_snapshot = {
-        "memory": memory.to_dict(),
+        "memory": _legacy_m36_memory_snapshot(memory),
         "style_snapshot": learner.style_snapshot(),
         "process_valence": drives.process_valence.to_dict(),
     }
@@ -467,7 +482,7 @@ def _run_subject(
         )
 
     restart_snapshot = {
-        "memory": restored_memory.to_dict(),
+        "memory": _legacy_m36_memory_snapshot(restored_memory),
         "style_snapshot": restored_learner.style_snapshot(),
         "process_valence": restored_drives.process_valence.to_dict(),
     }

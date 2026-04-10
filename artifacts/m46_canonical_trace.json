@@ -121,7 +121,7 @@
     },
     "legacy_integration": {
       "gate": "legacy_integration",
-      "status": "PASS",
+      "status": "NOT_RUN",
       "scenario_ids": [
         "legacy_bridge_replay_batch",
         "legacy_bridge_consolidation_cycle",
@@ -129,11 +129,13 @@
       ],
       "counts": {
         "total": 3,
-        "passed": 3,
+        "passed": 2,
         "failed": 0,
-        "not_run": 0
+        "not_run": 1
       },
-      "notes": []
+      "notes": [
+        "Regression prerequisite intentionally deferred; formal acceptance conclusion must remain unissued."
+      ]
     },
     "report_honesty": {
       "gate": "report_honesty",
@@ -196,7 +198,8 @@
               "accessibility": 0.78,
               "recency": 0.909091
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "low-access",
@@ -210,7 +213,8 @@
               "accessibility": 0.01,
               "recency": 0.952381
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "negative-mood",
@@ -224,7 +228,8 @@
               "accessibility": 0.62,
               "recency": 0.833333
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "context-rich",
@@ -238,11 +243,12 @@
               "accessibility": 0.74,
               "recency": 0.869565
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "recall_hypothesis": {
-          "content": "I kept the mentor promise to Lin in the lab. | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cues:mentor, promise, lab, lin, promise",
+          "content": "candidate_set:tag-primary, low-access, negative-mood, context-rich | primary_memory_class:episodic | protected_anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cue_reconstruction:mentor, promise, lab, lin, promise",
           "primary_entry_id": "tag-primary",
           "auxiliary_entry_ids": [
             "low-access",
@@ -265,7 +271,50 @@
             "outcome"
           ],
           "competing_interpretations": null,
-          "procedure_step_outline": null
+          "procedure_step_outline": null,
+          "source_statuses": {
+            "tag-primary": "validated",
+            "low-access": "validated",
+            "negative-mood": "validated"
+          },
+          "candidate_ids": [
+            "tag-primary",
+            "low-access",
+            "negative-mood",
+            "context-rich"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "tag-primary",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 0.264649
+          },
+          "donor_blocks": []
         },
         "recall_confidence": 0.85,
         "source_trace": [
@@ -287,7 +336,18 @@
               "promise"
             ],
             "reference_cycle": 50,
-            "target_memory_class": null
+            "target_memory_class": null,
+            "agent_state_vector": {
+              "active_goals": [],
+              "recent_mood_baseline": "neutral",
+              "recent_dominant_tags": [],
+              "identity_active_themes": [],
+              "threat_level": 0.0,
+              "reward_context_active": false,
+              "social_context_active": false,
+              "last_updated": 0
+            },
+            "dominance_threshold": 0.15
           },
           "competition": {
             "primary_id": "tag-primary",
@@ -300,7 +360,50 @@
           "selected_auxiliaries": [
             "low-access",
             "negative-mood"
-          ]
+          ],
+          "validation_statuses": {
+            "tag-primary": "validated",
+            "low-access": "validated",
+            "negative-mood": "validated"
+          },
+          "candidate_ids": [
+            "tag-primary",
+            "low-access",
+            "negative-mood",
+            "context-rich"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "tag-primary",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 0.264649
+          },
+          "donor_blocks": []
         },
         "candidate_ids": [
           "tag-primary",
@@ -366,7 +469,8 @@
               "accessibility": 0.74,
               "recency": 0.869565
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "tag-primary",
@@ -380,7 +484,8 @@
               "accessibility": 0.78,
               "recency": 0.909091
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "negative-mood",
@@ -394,11 +499,12 @@
               "accessibility": 0.62,
               "recency": 0.833333
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "recall_hypothesis": {
-          "content": "We reviewed the care plan in the lab during a weekly sync. | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cues:plan, lab, weekly | competition:low-confidence alternatives preserved",
+          "content": "candidate_set:context-rich, tag-primary, negative-mood | primary_memory_class:episodic | protected_anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cue_reconstruction:plan, lab, weekly | competition_preserved:alternative interpretations remain active",
           "primary_entry_id": "context-rich",
           "auxiliary_entry_ids": [
             "tag-primary",
@@ -422,7 +528,53 @@
           "competing_interpretations": [
             "tag-primary: alternative recall via I kept the mentor promise to Lin in the lab."
           ],
-          "procedure_step_outline": null
+          "procedure_step_outline": null,
+          "source_statuses": {
+            "context-rich": "validated",
+            "tag-primary": "validated",
+            "negative-mood": "validated"
+          },
+          "candidate_ids": [
+            "context-rich",
+            "tag-primary",
+            "negative-mood"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "context-rich",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "context-rich",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "context-rich",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "context-rich",
+            "competitor_ids": [
+              "tag-primary"
+            ],
+            "confidence": "low",
+            "interference_risk": true,
+            "competing_interpretations": [
+              "tag-primary: alternative recall via I kept the mentor promise to Lin in the lab."
+            ],
+            "dominance_margin": 0.10113499999999997
+          },
+          "donor_blocks": []
         },
         "recall_confidence": 0.45,
         "source_trace": [
@@ -442,7 +594,18 @@
             ],
             "content_keywords": [],
             "reference_cycle": 50,
-            "target_memory_class": null
+            "target_memory_class": null,
+            "agent_state_vector": {
+              "active_goals": [],
+              "recent_mood_baseline": "neutral",
+              "recent_dominant_tags": [],
+              "identity_active_themes": [],
+              "threat_level": 0.0,
+              "reward_context_active": false,
+              "social_context_active": false,
+              "last_updated": 0
+            },
+            "dominance_threshold": 0.15
           },
           "competition": {
             "primary_id": "context-rich",
@@ -459,7 +622,53 @@
           "selected_auxiliaries": [
             "tag-primary",
             "negative-mood"
-          ]
+          ],
+          "validation_statuses": {
+            "context-rich": "validated",
+            "tag-primary": "validated",
+            "negative-mood": "validated"
+          },
+          "candidate_ids": [
+            "context-rich",
+            "tag-primary",
+            "negative-mood"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "context-rich",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "context-rich",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "context-rich",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "context-rich",
+            "competitor_ids": [
+              "tag-primary"
+            ],
+            "confidence": "low",
+            "interference_risk": true,
+            "competing_interpretations": [
+              "tag-primary: alternative recall via I kept the mentor promise to Lin in the lab."
+            ],
+            "dominance_margin": 0.10113499999999997
+          },
+          "donor_blocks": []
         },
         "candidate_ids": [
           "context-rich",
@@ -514,7 +723,8 @@
               "accessibility": 0.62,
               "recency": 0.833333
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "tag-primary",
@@ -528,7 +738,8 @@
               "accessibility": 0.78,
               "recency": 0.909091
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "context-rich",
@@ -542,11 +753,12 @@
               "accessibility": 0.74,
               "recency": 0.869565
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "recall_hypothesis": {
-          "content": "I worried the promise might fail under pressure. | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cues:promise, storm",
+          "content": "candidate_set:negative-mood, tag-primary, context-rich | primary_memory_class:episodic | protected_anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cue_reconstruction:promise, storm",
           "primary_entry_id": "negative-mood",
           "auxiliary_entry_ids": [
             "tag-primary",
@@ -568,7 +780,49 @@
             "outcome"
           ],
           "competing_interpretations": null,
-          "procedure_step_outline": null
+          "procedure_step_outline": null,
+          "source_statuses": {
+            "negative-mood": "validated",
+            "tag-primary": "validated",
+            "context-rich": "validated"
+          },
+          "candidate_ids": [
+            "negative-mood",
+            "tag-primary",
+            "context-rich"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "negative-mood",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "negative-mood",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "negative-mood",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "negative-mood",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 0.256637
+          },
+          "donor_blocks": []
         },
         "recall_confidence": 0.85,
         "source_trace": [
@@ -586,7 +840,18 @@
             ],
             "content_keywords": [],
             "reference_cycle": 50,
-            "target_memory_class": null
+            "target_memory_class": null,
+            "agent_state_vector": {
+              "active_goals": [],
+              "recent_mood_baseline": "neutral",
+              "recent_dominant_tags": [],
+              "identity_active_themes": [],
+              "threat_level": 0.0,
+              "reward_context_active": false,
+              "social_context_active": false,
+              "last_updated": 0
+            },
+            "dominance_threshold": 0.15
           },
           "competition": {
             "primary_id": "negative-mood",
@@ -599,7 +864,49 @@
           "selected_auxiliaries": [
             "tag-primary",
             "context-rich"
-          ]
+          ],
+          "validation_statuses": {
+            "negative-mood": "validated",
+            "tag-primary": "validated",
+            "context-rich": "validated"
+          },
+          "candidate_ids": [
+            "negative-mood",
+            "tag-primary",
+            "context-rich"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "negative-mood",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "negative-mood",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "negative-mood",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "negative-mood",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 0.256637
+          },
+          "donor_blocks": []
         },
         "candidate_ids": [
           "negative-mood",
@@ -656,7 +963,8 @@
               "accessibility": 0.78,
               "recency": 0.909091
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "low-access",
@@ -670,7 +978,8 @@
               "accessibility": 0.01,
               "recency": 0.952381
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "context-rich",
@@ -684,7 +993,8 @@
               "accessibility": 0.74,
               "recency": 0.869565
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "negative-mood",
@@ -698,11 +1008,12 @@
               "accessibility": 0.62,
               "recency": 0.833333
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "recall_hypothesis": {
-          "content": "I kept the mentor promise to Lin in the lab. | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cues:mentor, promise, lab",
+          "content": "candidate_set:tag-primary, low-access, context-rich, negative-mood | primary_memory_class:episodic | protected_anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cue_reconstruction:mentor, promise, lab",
           "primary_entry_id": "tag-primary",
           "auxiliary_entry_ids": [
             "low-access",
@@ -724,7 +1035,50 @@
             "outcome"
           ],
           "competing_interpretations": null,
-          "procedure_step_outline": null
+          "procedure_step_outline": null,
+          "source_statuses": {
+            "tag-primary": "validated",
+            "low-access": "validated",
+            "context-rich": "validated"
+          },
+          "candidate_ids": [
+            "tag-primary",
+            "low-access",
+            "context-rich",
+            "negative-mood"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "tag-primary",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 0.16250699999999996
+          },
+          "donor_blocks": []
         },
         "recall_confidence": 0.85,
         "source_trace": [
@@ -744,7 +1098,18 @@
             ],
             "content_keywords": [],
             "reference_cycle": 50,
-            "target_memory_class": null
+            "target_memory_class": null,
+            "agent_state_vector": {
+              "active_goals": [],
+              "recent_mood_baseline": "neutral",
+              "recent_dominant_tags": [],
+              "identity_active_themes": [],
+              "threat_level": 0.0,
+              "reward_context_active": false,
+              "social_context_active": false,
+              "last_updated": 0
+            },
+            "dominance_threshold": 0.15
           },
           "competition": {
             "primary_id": "tag-primary",
@@ -757,7 +1122,50 @@
           "selected_auxiliaries": [
             "low-access",
             "context-rich"
-          ]
+          ],
+          "validation_statuses": {
+            "tag-primary": "validated",
+            "low-access": "validated",
+            "context-rich": "validated"
+          },
+          "candidate_ids": [
+            "tag-primary",
+            "low-access",
+            "context-rich",
+            "negative-mood"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "tag-primary",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "tag-primary",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 0.16250699999999996
+          },
+          "donor_blocks": []
         },
         "candidate_ids": [
           "tag-primary",
@@ -814,7 +1222,8 @@
               "accessibility": 0.72,
               "recency": 0.289855
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "recall_hypothesis": {
@@ -836,7 +1245,45 @@
             "scan gauges",
             "vent pressure",
             "log readings"
-          ]
+          ],
+          "source_statuses": {
+            "procedure": "validated"
+          },
+          "candidate_ids": [
+            "procedure"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "procedure",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "procedure",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "procedure",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "procedure",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 1.0
+          },
+          "donor_blocks": []
         },
         "recall_confidence": 0.85,
         "source_trace": [
@@ -853,7 +1300,18 @@
             ],
             "content_keywords": [],
             "reference_cycle": 50,
-            "target_memory_class": "procedural"
+            "target_memory_class": "procedural",
+            "agent_state_vector": {
+              "active_goals": [],
+              "recent_mood_baseline": "neutral",
+              "recent_dominant_tags": [],
+              "identity_active_themes": [],
+              "threat_level": 0.0,
+              "reward_context_active": false,
+              "social_context_active": false,
+              "last_updated": 0
+            },
+            "dominance_threshold": 0.15
           },
           "competition": {
             "primary_id": "procedure",
@@ -863,7 +1321,45 @@
             "competing_interpretations": [],
             "dominance_margin": 1.0
           },
-          "selected_auxiliaries": []
+          "selected_auxiliaries": [],
+          "validation_statuses": {
+            "procedure": "validated"
+          },
+          "candidate_ids": [
+            "procedure"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "procedure",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "procedure",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "procedure",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "procedure",
+            "competitor_ids": [],
+            "confidence": "high",
+            "interference_risk": false,
+            "competing_interpretations": [],
+            "dominance_margin": 1.0
+          },
+          "donor_blocks": []
         },
         "candidate_ids": [
           "procedure"
@@ -918,7 +1414,8 @@
               "accessibility": 0.9,
               "recency": 0.689655
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "close-a",
@@ -932,7 +1429,8 @@
               "accessibility": 0.8,
               "recency": 0.689655
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "competition": {
@@ -992,7 +1490,8 @@
               "accessibility": 0.8,
               "recency": 0.689655
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "close-b",
@@ -1006,7 +1505,8 @@
               "accessibility": 0.78,
               "recency": 0.689655
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           },
           {
             "entry_id": "dominant",
@@ -1020,7 +1520,8 @@
               "accessibility": 0.9,
               "recency": 0.689655
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
           }
         ],
         "competition": {
@@ -2292,7 +2793,7 @@
           "relevance": 0.3,
           "salience": 0.5,
           "trace_strength": 0.53,
-          "accessibility": 0.6000000000000001,
+          "accessibility": 0.5820000000000001,
           "abstractness": 0.808,
           "source_confidence": 0.9,
           "reality_confidence": 0.75,
@@ -2348,7 +2849,7 @@
           "is_dormant": false
         },
         "numeric_delta": {
-          "accessibility": 0.2,
+          "accessibility": 0.182,
           "trace_strength": 0.03,
           "retrieval_count": 1,
           "abstractness": 0.008,
@@ -2998,7 +3499,7 @@
           "relevance": 0.3,
           "salience": 0.5,
           "trace_strength": 0.53,
-          "accessibility": 0.8,
+          "accessibility": 0.782,
           "abstractness": 0.808,
           "source_confidence": 0.9,
           "reality_confidence": 0.75,
@@ -3063,7 +3564,7 @@
           "is_dormant": false
         },
         "numeric_delta": {
-          "accessibility": 0.2,
+          "accessibility": 0.182,
           "trace_strength": 0.03,
           "retrieval_count": 1,
           "abstractness": 0.008,
@@ -3306,7 +3807,7 @@
           }
         ],
         "skeleton": {
-          "id": "f213e3a0-83dd-4b26-80fa-4c20df251d3f",
+          "id": "d59896b8-15f4-4cdd-8129-48daa4a4fdd5",
           "content": "Semantic skeleton from 3 episodes: care, mentor, promise",
           "content_hash": "0dabdf14db16686fa639cd3c53b9bb260623bb55c3b040fa564bb2c2715024e1",
           "memory_class": "semantic",
@@ -3438,24 +3939,24 @@
               "ep-5"
             ],
             "promotion_reasons": {
-              "ep-1": "short_to_mid_priority",
-              "ep-2": "short_to_mid_priority",
-              "ep-3": "short_to_mid_priority",
-              "ep-4": "short_to_mid_priority",
-              "ep-5": "short_to_mid_priority"
+              "ep-1": "short_to_mid_priority+cluster_support",
+              "ep-2": "short_to_mid_priority+cluster_support",
+              "ep-3": "short_to_mid_priority+cluster_support",
+              "ep-4": "short_to_mid_priority+cluster_support",
+              "ep-5": "short_to_mid_priority+cluster_support"
             }
           },
           "extracted_patterns": [
-            "5c79e644-7862-4387-a408-90e874ba9c58",
-            "f22801cd-9b7c-4404-8013-4d2ca8a94e7a"
+            "17b9c496-4029-4bd5-9e94-5710bac9c663",
+            "2a339dd1-27ce-4191-a45a-b1b7d5cab211"
           ],
           "replay_created_ids": [
-            "20173bc1-a688-4013-ad94-547209c22ac6",
-            "32d32871-9e47-41a0-a84e-b5426888c074",
-            "475d38c6-b823-43b7-af7b-f93e4d611d9f"
+            "5bb05107-d534-4f32-83ce-5645077c4bb4",
+            "ce0c2b2e-0aaf-40dc-88a2-632e1a75ca4c",
+            "652162c5-1fc5-4ad6-9339-8f10ce0b33f3"
           ],
           "validated_inference_ids": [
-            "20173bc1-a688-4013-ad94-547209c22ac6"
+            "5bb05107-d534-4f32-83ce-5645077c4bb4"
           ],
           "cleanup": {
             "deleted_ids": [
@@ -3483,7 +3984,7 @@
             "store_level": "mid",
             "source_type": "experience",
             "created_at": 1,
-            "last_accessed": 11,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -3495,8 +3996,8 @@
             "relevance_reward": 0.2,
             "relevance": 0.6,
             "salience": 0.72,
-            "trace_strength": 0.55,
-            "accessibility": 0.325,
+            "trace_strength": 0.5190074710902393,
+            "accessibility": 0.18196696913375568,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -3532,7 +4033,58 @@
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
-              "absorbed_by": "5c79e644-7862-4387-a408-90e874ba9c58"
+              "m45_internal": {
+                "last_decay_cycle": 40,
+                "decay_base_trace_strength": 0.5190074710902393,
+                "decay_base_accessibility": 0.279949183282701,
+                "promotion_history": [
+                  {
+                    "reason": "short_to_mid_priority+cluster_support",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 29,
+                    "old_level": "short",
+                    "new_level": "mid",
+                    "trace_before": 0.4115449621682109,
+                    "trace_after": 0.5190074710902393,
+                    "accessibility_before": 0.11728514404689881,
+                    "accessibility_after": 0.279949183282701,
+                    "trace_rate_before": 0.01,
+                    "trace_rate_after": 0.002,
+                    "access_rate_before": 0.05,
+                    "access_rate_after": 0.02,
+                    "promotion_channel": "consolidation_cycle",
+                    "consolidation_priority": 0.627,
+                    "pattern_support": 1.0,
+                    "cluster_support_count": 5,
+                    "retrieval_norm": 0.5,
+                    "identity_alignment": 0.0,
+                    "redundancy_penalty": 0.0
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "short_to_mid_priority+cluster_support",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 29,
+                  "old_level": "short",
+                  "new_level": "mid",
+                  "trace_before": 0.4115449621682109,
+                  "trace_after": 0.5190074710902393,
+                  "accessibility_before": 0.11728514404689881,
+                  "accessibility_after": 0.279949183282701,
+                  "trace_rate_before": 0.01,
+                  "trace_rate_after": 0.002,
+                  "access_rate_before": 0.05,
+                  "access_rate_after": 0.02,
+                  "promotion_channel": "consolidation_cycle",
+                  "consolidation_priority": 0.627,
+                  "pattern_support": 1.0,
+                  "cluster_support_count": 5,
+                  "retrieval_norm": 0.5,
+                  "identity_alignment": 0.0,
+                  "redundancy_penalty": 0.0
+                }
+              },
+              "absorbed_by": "17b9c496-4029-4bd5-9e94-5710bac9c663"
             },
             "derived_from": [],
             "version": 1,
@@ -3546,7 +4098,7 @@
             "store_level": "mid",
             "source_type": "experience",
             "created_at": 2,
-            "last_accessed": 12,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -3558,8 +4110,8 @@
             "relevance_reward": 0.2,
             "relevance": 0.6,
             "salience": 0.72,
-            "trace_strength": 0.55,
-            "accessibility": 0.325,
+            "trace_strength": 0.520046524739718,
+            "accessibility": 0.18564294575086485,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -3595,7 +4147,58 @@
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
-              "absorbed_by": "5c79e644-7862-4387-a408-90e874ba9c58"
+              "m45_internal": {
+                "last_decay_cycle": 40,
+                "decay_base_trace_strength": 0.520046524739718,
+                "decay_base_accessibility": 0.28560453192440743,
+                "promotion_history": [
+                  {
+                    "reason": "short_to_mid_priority+cluster_support",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 28,
+                    "old_level": "short",
+                    "new_level": "mid",
+                    "trace_before": 0.41568105780064907,
+                    "trace_after": 0.520046524739718,
+                    "accessibility_before": 0.12329848197080322,
+                    "accessibility_after": 0.28560453192440743,
+                    "trace_rate_before": 0.01,
+                    "trace_rate_after": 0.002,
+                    "access_rate_before": 0.05,
+                    "access_rate_after": 0.02,
+                    "promotion_channel": "consolidation_cycle",
+                    "consolidation_priority": 0.627,
+                    "pattern_support": 1.0,
+                    "cluster_support_count": 5,
+                    "retrieval_norm": 0.5,
+                    "identity_alignment": 0.0,
+                    "redundancy_penalty": 0.0
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "short_to_mid_priority+cluster_support",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 28,
+                  "old_level": "short",
+                  "new_level": "mid",
+                  "trace_before": 0.41568105780064907,
+                  "trace_after": 0.520046524739718,
+                  "accessibility_before": 0.12329848197080322,
+                  "accessibility_after": 0.28560453192440743,
+                  "trace_rate_before": 0.01,
+                  "trace_rate_after": 0.002,
+                  "access_rate_before": 0.05,
+                  "access_rate_after": 0.02,
+                  "promotion_channel": "consolidation_cycle",
+                  "consolidation_priority": 0.627,
+                  "pattern_support": 1.0,
+                  "cluster_support_count": 5,
+                  "retrieval_norm": 0.5,
+                  "identity_alignment": 0.0,
+                  "redundancy_penalty": 0.0
+                }
+              },
+              "absorbed_by": "17b9c496-4029-4bd5-9e94-5710bac9c663"
             },
             "derived_from": [],
             "version": 1,
@@ -3609,7 +4212,7 @@
             "store_level": "mid",
             "source_type": "experience",
             "created_at": 3,
-            "last_accessed": 13,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -3621,8 +4224,8 @@
             "relevance_reward": 0.2,
             "relevance": 0.6,
             "salience": 0.72,
-            "trace_strength": 0.55,
-            "accessibility": 0.325,
+            "trace_strength": 0.5210876585759892,
+            "accessibility": 0.18939318202154665,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -3658,7 +4261,58 @@
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
-              "absorbed_by": "5c79e644-7862-4387-a408-90e874ba9c58"
+              "m45_internal": {
+                "last_decay_cycle": 40,
+                "decay_base_trace_strength": 0.5210876585759892,
+                "decay_base_accessibility": 0.2913741261869948,
+                "promotion_history": [
+                  {
+                    "reason": "short_to_mid_priority+cluster_support",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 27,
+                    "old_level": "short",
+                    "new_level": "mid",
+                    "trace_before": 0.4198587218852693,
+                    "trace_after": 0.5210876585759892,
+                    "accessibility_before": 0.12962013032294575,
+                    "accessibility_after": 0.2913741261869948,
+                    "trace_rate_before": 0.01,
+                    "trace_rate_after": 0.002,
+                    "access_rate_before": 0.05,
+                    "access_rate_after": 0.02,
+                    "promotion_channel": "consolidation_cycle",
+                    "consolidation_priority": 0.627,
+                    "pattern_support": 1.0,
+                    "cluster_support_count": 5,
+                    "retrieval_norm": 0.5,
+                    "identity_alignment": 0.0,
+                    "redundancy_penalty": 0.0
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "short_to_mid_priority+cluster_support",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 27,
+                  "old_level": "short",
+                  "new_level": "mid",
+                  "trace_before": 0.4198587218852693,
+                  "trace_after": 0.5210876585759892,
+                  "accessibility_before": 0.12962013032294575,
+                  "accessibility_after": 0.2913741261869948,
+                  "trace_rate_before": 0.01,
+                  "trace_rate_after": 0.002,
+                  "access_rate_before": 0.05,
+                  "access_rate_after": 0.02,
+                  "promotion_channel": "consolidation_cycle",
+                  "consolidation_priority": 0.627,
+                  "pattern_support": 1.0,
+                  "cluster_support_count": 5,
+                  "retrieval_norm": 0.5,
+                  "identity_alignment": 0.0,
+                  "redundancy_penalty": 0.0
+                }
+              },
+              "absorbed_by": "17b9c496-4029-4bd5-9e94-5710bac9c663"
             },
             "derived_from": [],
             "version": 1,
@@ -3672,7 +4326,7 @@
             "store_level": "mid",
             "source_type": "experience",
             "created_at": 4,
-            "last_accessed": 14,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -3684,8 +4338,8 @@
             "relevance_reward": 0.2,
             "relevance": 0.6,
             "salience": 0.72,
-            "trace_strength": 0.55,
-            "accessibility": 0.325,
+            "trace_strength": 0.5221308767635893,
+            "accessibility": 0.1932191780903132,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -3721,7 +4375,58 @@
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
-              "absorbed_by": "5c79e644-7862-4387-a408-90e874ba9c58"
+              "m45_internal": {
+                "last_decay_cycle": 40,
+                "decay_base_trace_strength": 0.5221308767635893,
+                "decay_base_accessibility": 0.2972602739850972,
+                "promotion_history": [
+                  {
+                    "reason": "short_to_mid_priority+cluster_support",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 26,
+                    "old_level": "short",
+                    "new_level": "mid",
+                    "trace_before": 0.4240783721919615,
+                    "trace_after": 0.5221308767635893,
+                    "accessibility_before": 0.1362658965170063,
+                    "accessibility_after": 0.2972602739850972,
+                    "trace_rate_before": 0.01,
+                    "trace_rate_after": 0.002,
+                    "access_rate_before": 0.05,
+                    "access_rate_after": 0.02,
+                    "promotion_channel": "consolidation_cycle",
+                    "consolidation_priority": 0.627,
+                    "pattern_support": 1.0,
+                    "cluster_support_count": 5,
+                    "retrieval_norm": 0.5,
+                    "identity_alignment": 0.0,
+                    "redundancy_penalty": 0.0
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "short_to_mid_priority+cluster_support",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 26,
+                  "old_level": "short",
+                  "new_level": "mid",
+                  "trace_before": 0.4240783721919615,
+                  "trace_after": 0.5221308767635893,
+                  "accessibility_before": 0.1362658965170063,
+                  "accessibility_after": 0.2972602739850972,
+                  "trace_rate_before": 0.01,
+                  "trace_rate_after": 0.002,
+                  "access_rate_before": 0.05,
+                  "access_rate_after": 0.02,
+                  "promotion_channel": "consolidation_cycle",
+                  "consolidation_priority": 0.627,
+                  "pattern_support": 1.0,
+                  "cluster_support_count": 5,
+                  "retrieval_norm": 0.5,
+                  "identity_alignment": 0.0,
+                  "redundancy_penalty": 0.0
+                }
+              },
+              "absorbed_by": "17b9c496-4029-4bd5-9e94-5710bac9c663"
             },
             "derived_from": [],
             "version": 1,
@@ -3735,7 +4440,7 @@
             "store_level": "mid",
             "source_type": "experience",
             "created_at": 5,
-            "last_accessed": 15,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -3747,8 +4452,8 @@
             "relevance_reward": 0.2,
             "relevance": 0.6,
             "salience": 0.72,
-            "trace_strength": 0.55,
-            "accessibility": 0.325,
+            "trace_strength": 0.5231761834753927,
+            "accessibility": 0.19712246440660586,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -3784,7 +4489,58 @@
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
-              "absorbed_by": "5c79e644-7862-4387-a408-90e874ba9c58"
+              "m45_internal": {
+                "last_decay_cycle": 40,
+                "decay_base_trace_strength": 0.5231761834753927,
+                "decay_base_accessibility": 0.3032653298563167,
+                "promotion_history": [
+                  {
+                    "reason": "short_to_mid_priority+cluster_support",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 25,
+                    "old_level": "short",
+                    "new_level": "mid",
+                    "trace_before": 0.42834043068927274,
+                    "trace_after": 0.5231761834753927,
+                    "accessibility_before": 0.14325239843009505,
+                    "accessibility_after": 0.3032653298563167,
+                    "trace_rate_before": 0.01,
+                    "trace_rate_after": 0.002,
+                    "access_rate_before": 0.05,
+                    "access_rate_after": 0.02,
+                    "promotion_channel": "consolidation_cycle",
+                    "consolidation_priority": 0.627,
+                    "pattern_support": 1.0,
+                    "cluster_support_count": 5,
+                    "retrieval_norm": 0.5,
+                    "identity_alignment": 0.0,
+                    "redundancy_penalty": 0.0
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "short_to_mid_priority+cluster_support",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 25,
+                  "old_level": "short",
+                  "new_level": "mid",
+                  "trace_before": 0.42834043068927274,
+                  "trace_after": 0.5231761834753927,
+                  "accessibility_before": 0.14325239843009505,
+                  "accessibility_after": 0.3032653298563167,
+                  "trace_rate_before": 0.01,
+                  "trace_rate_after": 0.002,
+                  "access_rate_before": 0.05,
+                  "access_rate_after": 0.02,
+                  "promotion_channel": "consolidation_cycle",
+                  "consolidation_priority": 0.627,
+                  "pattern_support": 1.0,
+                  "cluster_support_count": 5,
+                  "retrieval_norm": 0.5,
+                  "identity_alignment": 0.0,
+                  "redundancy_penalty": 0.0
+                }
+              },
+              "absorbed_by": "17b9c496-4029-4bd5-9e94-5710bac9c663"
             },
             "derived_from": [],
             "version": 1,
@@ -3850,14 +4606,14 @@
             "is_dormant": true
           },
           {
-            "id": "5c79e644-7862-4387-a408-90e874ba9c58",
+            "id": "17b9c496-4029-4bd5-9e94-5710bac9c663",
             "content": "Semantic skeleton from 5 episodes: care, mentor, promise",
             "content_hash": "fc1095f06ae6b852ae1f4aefbee24833fdfd8af845fe25dfaf038e2a5df6dd64",
             "memory_class": "semantic",
-            "store_level": "mid",
+            "store_level": "long",
             "source_type": "experience",
             "created_at": 1,
-            "last_accessed": 15,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -3942,9 +4698,123 @@
               ],
               "lineage_type": "identity_consolidation",
               "m45_internal": {
-                "last_decay_cycle": 15,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.78,
-                "decay_base_accessibility": 0.62
+                "decay_base_accessibility": 0.62,
+                "promotion_history": [
+                  {
+                    "reason": "salience_signal+retrieval_signal+identity_alignment",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 0,
+                    "old_level": "mid",
+                    "new_level": "long",
+                    "trace_before": 0.78,
+                    "trace_after": 0.78,
+                    "accessibility_before": 0.62,
+                    "accessibility_after": 0.62,
+                    "trace_rate_before": 0.002,
+                    "trace_rate_after": 0.0002,
+                    "access_rate_before": 0.02,
+                    "access_rate_after": 0.005,
+                    "short_to_mid_threshold": 0.55,
+                    "mid_to_long_threshold": 0.72,
+                    "promotion_score_short_to_mid": 0.6604,
+                    "promotion_score_mid_to_long": 0.8252,
+                    "promotion_score_breakdown": {
+                      "salience_signal": 0.3744,
+                      "retrieval_short_signal": 0.16,
+                      "retrieval_long_signal": 0.22,
+                      "identity_signal": 0.126,
+                      "abstraction_bonus": 0.1344,
+                      "threat_snapshot_bonus": 0.0,
+                      "novelty_noise_penalty": 0.0,
+                      "rigidity_penalty": 0.0,
+                      "selectivity_bias": 0.0
+                    },
+                    "identity_match_ratio": 0.0,
+                    "identity_link_strength": 0.42,
+                    "identity_link_active": false,
+                    "identity_context_available": false,
+                    "identity_fallback_active": false,
+                    "retained_identity_priority": false,
+                    "self_relevance_multiplier": 1.0,
+                    "base_short_to_mid_score": 0.6604,
+                    "boosted_short_to_mid_score": 0.6604,
+                    "score_cap_applied": false,
+                    "promotion_channel": "memory_store_add"
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "salience_signal+retrieval_signal+identity_alignment",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 0,
+                  "old_level": "mid",
+                  "new_level": "long",
+                  "trace_before": 0.78,
+                  "trace_after": 0.78,
+                  "accessibility_before": 0.62,
+                  "accessibility_after": 0.62,
+                  "trace_rate_before": 0.002,
+                  "trace_rate_after": 0.0002,
+                  "access_rate_before": 0.02,
+                  "access_rate_after": 0.005,
+                  "short_to_mid_threshold": 0.55,
+                  "mid_to_long_threshold": 0.72,
+                  "promotion_score_short_to_mid": 0.6604,
+                  "promotion_score_mid_to_long": 0.8252,
+                  "promotion_score_breakdown": {
+                    "salience_signal": 0.3744,
+                    "retrieval_short_signal": 0.16,
+                    "retrieval_long_signal": 0.22,
+                    "identity_signal": 0.126,
+                    "abstraction_bonus": 0.1344,
+                    "threat_snapshot_bonus": 0.0,
+                    "novelty_noise_penalty": 0.0,
+                    "rigidity_penalty": 0.0,
+                    "selectivity_bias": 0.0
+                  },
+                  "identity_match_ratio": 0.0,
+                  "identity_link_strength": 0.42,
+                  "identity_link_active": false,
+                  "identity_context_available": false,
+                  "identity_fallback_active": false,
+                  "retained_identity_priority": false,
+                  "self_relevance_multiplier": 1.0,
+                  "base_short_to_mid_score": 0.6604,
+                  "boosted_short_to_mid_score": 0.6604,
+                  "score_cap_applied": false,
+                  "promotion_channel": "memory_store_add"
+                }
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.6604,
+                "mid_to_long_score": 0.8252,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.3744,
+                  "retrieval_short_signal": 0.16,
+                  "retrieval_long_signal": 0.22,
+                  "identity_signal": 0.126,
+                  "abstraction_bonus": 0.1344,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.42,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.6604,
+                "boosted_short_to_mid_score": 0.6604,
+                "score_cap_applied": false
               }
             },
             "derived_from": [
@@ -3958,14 +4828,14 @@
             "is_dormant": false
           },
           {
-            "id": "f22801cd-9b7c-4404-8013-4d2ca8a94e7a",
+            "id": "2a339dd1-27ce-4191-a45a-b1b7d5cab211",
             "content": "Inferred pattern from 5 related memories",
             "content_hash": "978dd38fddf46821f51bf7fd37fd7631fa499ebcdadc707c9fc53806cd831e9c",
             "memory_class": "inferred",
             "store_level": "mid",
             "source_type": "inference",
             "created_at": 1,
-            "last_accessed": 15,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4043,9 +4913,39 @@
               "validation_status": "unvalidated",
               "validation_discount": 0.35,
               "m45_internal": {
-                "last_decay_cycle": 15,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.58,
                 "decay_base_accessibility": 0.5
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.5004,
+                "mid_to_long_score": 0.61,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.3744,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.126,
+                  "abstraction_bonus": 0.1392,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.42,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.5004,
+                "boosted_short_to_mid_score": 0.5004,
+                "score_cap_applied": false
               }
             },
             "derived_from": [
@@ -4059,14 +4959,14 @@
             "is_dormant": false
           },
           {
-            "id": "20173bc1-a688-4013-ad94-547209c22ac6",
-            "content": "Replay hypothesis from 5c79e644-7862-4387-a408-90e874ba9c58: care / mentor / promise",
-            "content_hash": "ee529963e8c69633b71bd67a263cb726ca5e6281ee2d09b7d541d1075c1735be",
+            "id": "5bb05107-d534-4f32-83ce-5645077c4bb4",
+            "content": "Replay hypothesis from 17b9c496-4029-4bd5-9e94-5710bac9c663: care / mentor / promise",
+            "content_hash": "129d759c44cc58e3015ca619fd5ecee482acb76ca1a0a2c6068e3e8be79c49cd",
             "memory_class": "inferred",
             "store_level": "long",
             "source_type": "inference",
-            "created_at": 15,
-            "last_accessed": 15,
+            "created_at": 40,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4114,11 +5014,11 @@
             "support_count": 5,
             "counterevidence_count": 0,
             "competing_interpretations": [
-              "replay:5c79e644-7862-4387-a408-90e874ba9c58"
+              "replay:17b9c496-4029-4bd5-9e94-5710bac9c663"
             ],
             "compression_metadata": {
               "support_entry_ids": [
-                "5c79e644-7862-4387-a408-90e874ba9c58"
+                "17b9c496-4029-4bd5-9e94-5710bac9c663"
               ],
               "abstraction_reason": "constrained replay candidate",
               "predictive_use_cases": [
@@ -4128,27 +5028,57 @@
               "validation_status": "validated",
               "validation_discount": 1.0,
               "m45_internal": {
-                "last_decay_cycle": 15,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.42,
                 "decay_base_accessibility": 0.38
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.5264,
+                "mid_to_long_score": 0.624,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.4004,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.126,
+                  "abstraction_bonus": 0.1312,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.42,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.5264,
+                "boosted_short_to_mid_score": 0.5264,
+                "score_cap_applied": false
               },
               "inference_write_score": 0.6083333333333334
             },
             "derived_from": [
-              "5c79e644-7862-4387-a408-90e874ba9c58"
+              "17b9c496-4029-4bd5-9e94-5710bac9c663"
             ],
             "version": 1,
             "is_dormant": false
           },
           {
-            "id": "32d32871-9e47-41a0-a84e-b5426888c074",
+            "id": "ce0c2b2e-0aaf-40dc-88a2-632e1a75ca4c",
             "content": "Replay hypothesis from ep-2: mentor / promise / care",
             "content_hash": "de7213234f39ae337fab7ce4bdeef071e59dda3c3a2b447254a8ef6e56ebe8c8",
             "memory_class": "inferred",
             "store_level": "mid",
             "source_type": "inference",
-            "created_at": 12,
-            "last_accessed": 12,
+            "created_at": 40,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4210,9 +5140,39 @@
               "validation_status": "partially_supported",
               "validation_discount": 0.7,
               "m45_internal": {
-                "last_decay_cycle": 12,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.42,
                 "decay_base_accessibility": 0.38
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.4364,
+                "mid_to_long_score": 0.514,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.4004,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.036,
+                  "abstraction_bonus": 0.1312,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.12,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.4364,
+                "boosted_short_to_mid_score": 0.4364,
+                "score_cap_applied": false
               },
               "inference_write_score": 0.4283333333333333
             },
@@ -4223,14 +5183,14 @@
             "is_dormant": false
           },
           {
-            "id": "475d38c6-b823-43b7-af7b-f93e4d611d9f",
+            "id": "652162c5-1fc5-4ad6-9339-8f10ce0b33f3",
             "content": "Replay hypothesis from ep-1: mentor / promise / care",
             "content_hash": "52e583e657c72ac2d70d4e60dde7e396c3beba6a80e3e18bfbe3b9fd6c68444a",
             "memory_class": "inferred",
             "store_level": "mid",
             "source_type": "inference",
-            "created_at": 11,
-            "last_accessed": 11,
+            "created_at": 40,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4292,9 +5252,39 @@
               "validation_status": "partially_supported",
               "validation_discount": 0.7,
               "m45_internal": {
-                "last_decay_cycle": 11,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.42,
                 "decay_base_accessibility": 0.38
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.5264,
+                "mid_to_long_score": 0.624,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.4004,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.126,
+                  "abstraction_bonus": 0.1312,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.42,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.5264,
+                "boosted_short_to_mid_score": 0.5264,
+                "score_cap_applied": false
               },
               "inference_write_score": 0.4283333333333333
             },
@@ -4307,14 +5297,14 @@
         ],
         "extracted_entries": [
           {
-            "id": "5c79e644-7862-4387-a408-90e874ba9c58",
+            "id": "17b9c496-4029-4bd5-9e94-5710bac9c663",
             "content": "Semantic skeleton from 5 episodes: care, mentor, promise",
             "content_hash": "fc1095f06ae6b852ae1f4aefbee24833fdfd8af845fe25dfaf038e2a5df6dd64",
             "memory_class": "semantic",
-            "store_level": "mid",
+            "store_level": "long",
             "source_type": "experience",
             "created_at": 1,
-            "last_accessed": 15,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4399,9 +5389,123 @@
               ],
               "lineage_type": "identity_consolidation",
               "m45_internal": {
-                "last_decay_cycle": 15,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.78,
-                "decay_base_accessibility": 0.62
+                "decay_base_accessibility": 0.62,
+                "promotion_history": [
+                  {
+                    "reason": "salience_signal+retrieval_signal+identity_alignment",
+                    "effective_cycle": 40,
+                    "elapsed_since_baseline": 0,
+                    "old_level": "mid",
+                    "new_level": "long",
+                    "trace_before": 0.78,
+                    "trace_after": 0.78,
+                    "accessibility_before": 0.62,
+                    "accessibility_after": 0.62,
+                    "trace_rate_before": 0.002,
+                    "trace_rate_after": 0.0002,
+                    "access_rate_before": 0.02,
+                    "access_rate_after": 0.005,
+                    "short_to_mid_threshold": 0.55,
+                    "mid_to_long_threshold": 0.72,
+                    "promotion_score_short_to_mid": 0.6604,
+                    "promotion_score_mid_to_long": 0.8252,
+                    "promotion_score_breakdown": {
+                      "salience_signal": 0.3744,
+                      "retrieval_short_signal": 0.16,
+                      "retrieval_long_signal": 0.22,
+                      "identity_signal": 0.126,
+                      "abstraction_bonus": 0.1344,
+                      "threat_snapshot_bonus": 0.0,
+                      "novelty_noise_penalty": 0.0,
+                      "rigidity_penalty": 0.0,
+                      "selectivity_bias": 0.0
+                    },
+                    "identity_match_ratio": 0.0,
+                    "identity_link_strength": 0.42,
+                    "identity_link_active": false,
+                    "identity_context_available": false,
+                    "identity_fallback_active": false,
+                    "retained_identity_priority": false,
+                    "self_relevance_multiplier": 1.0,
+                    "base_short_to_mid_score": 0.6604,
+                    "boosted_short_to_mid_score": 0.6604,
+                    "score_cap_applied": false,
+                    "promotion_channel": "memory_store_add"
+                  }
+                ],
+                "last_promotion": {
+                  "reason": "salience_signal+retrieval_signal+identity_alignment",
+                  "effective_cycle": 40,
+                  "elapsed_since_baseline": 0,
+                  "old_level": "mid",
+                  "new_level": "long",
+                  "trace_before": 0.78,
+                  "trace_after": 0.78,
+                  "accessibility_before": 0.62,
+                  "accessibility_after": 0.62,
+                  "trace_rate_before": 0.002,
+                  "trace_rate_after": 0.0002,
+                  "access_rate_before": 0.02,
+                  "access_rate_after": 0.005,
+                  "short_to_mid_threshold": 0.55,
+                  "mid_to_long_threshold": 0.72,
+                  "promotion_score_short_to_mid": 0.6604,
+                  "promotion_score_mid_to_long": 0.8252,
+                  "promotion_score_breakdown": {
+                    "salience_signal": 0.3744,
+                    "retrieval_short_signal": 0.16,
+                    "retrieval_long_signal": 0.22,
+                    "identity_signal": 0.126,
+                    "abstraction_bonus": 0.1344,
+                    "threat_snapshot_bonus": 0.0,
+                    "novelty_noise_penalty": 0.0,
+                    "rigidity_penalty": 0.0,
+                    "selectivity_bias": 0.0
+                  },
+                  "identity_match_ratio": 0.0,
+                  "identity_link_strength": 0.42,
+                  "identity_link_active": false,
+                  "identity_context_available": false,
+                  "identity_fallback_active": false,
+                  "retained_identity_priority": false,
+                  "self_relevance_multiplier": 1.0,
+                  "base_short_to_mid_score": 0.6604,
+                  "boosted_short_to_mid_score": 0.6604,
+                  "score_cap_applied": false,
+                  "promotion_channel": "memory_store_add"
+                }
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.6604,
+                "mid_to_long_score": 0.8252,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.3744,
+                  "retrieval_short_signal": 0.16,
+                  "retrieval_long_signal": 0.22,
+                  "identity_signal": 0.126,
+                  "abstraction_bonus": 0.1344,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.42,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.6604,
+                "boosted_short_to_mid_score": 0.6604,
+                "score_cap_applied": false
               }
             },
             "derived_from": [
@@ -4415,14 +5519,14 @@
             "is_dormant": false
           },
           {
-            "id": "f22801cd-9b7c-4404-8013-4d2ca8a94e7a",
+            "id": "2a339dd1-27ce-4191-a45a-b1b7d5cab211",
             "content": "Inferred pattern from 5 related memories",
             "content_hash": "978dd38fddf46821f51bf7fd37fd7631fa499ebcdadc707c9fc53806cd831e9c",
             "memory_class": "inferred",
             "store_level": "mid",
             "source_type": "inference",
             "created_at": 1,
-            "last_accessed": 15,
+            "last_accessed": 40,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4500,9 +5604,39 @@
               "validation_status": "unvalidated",
               "validation_discount": 0.35,
               "m45_internal": {
-                "last_decay_cycle": 15,
+                "last_decay_cycle": 40,
                 "decay_base_trace_strength": 0.58,
                 "decay_base_accessibility": 0.5
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.5004,
+                "mid_to_long_score": 0.61,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.3744,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.126,
+                  "abstraction_bonus": 0.1392,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.42,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.5004,
+                "boosted_short_to_mid_score": 0.5004,
+                "score_cap_applied": false
               }
             },
             "derived_from": [
@@ -4524,11 +5658,11 @@
           "ep-5"
         ],
         "source_absorbed": {
-          "ep-1": "5c79e644-7862-4387-a408-90e874ba9c58",
-          "ep-2": "5c79e644-7862-4387-a408-90e874ba9c58",
-          "ep-3": "5c79e644-7862-4387-a408-90e874ba9c58",
-          "ep-4": "5c79e644-7862-4387-a408-90e874ba9c58",
-          "ep-5": "5c79e644-7862-4387-a408-90e874ba9c58"
+          "ep-1": "17b9c496-4029-4bd5-9e94-5710bac9c663",
+          "ep-2": "17b9c496-4029-4bd5-9e94-5710bac9c663",
+          "ep-3": "17b9c496-4029-4bd5-9e94-5710bac9c663",
+          "ep-4": "17b9c496-4029-4bd5-9e94-5710bac9c663",
+          "ep-5": "17b9c496-4029-4bd5-9e94-5710bac9c663"
         }
       },
       "criteria_checks": {
@@ -4576,14 +5710,14 @@
           },
           "extracted_patterns": [],
           "replay_created_ids": [
-            "a31601a8-710c-4ab5-abc4-368c38c77a25",
-            "84faf65b-4bbf-477b-bbfc-cd684c890c59",
-            "23d97ca4-1a35-4ed6-a6f5-a080485cb491"
+            "c20d7193-d465-4191-80e7-44676f3794f3",
+            "9a997193-b5c1-4585-bb6f-b43a90991eff",
+            "10250736-c77b-4334-9b29-e72007d71ec0"
           ],
           "validated_inference_ids": [
-            "a31601a8-710c-4ab5-abc4-368c38c77a25",
-            "84faf65b-4bbf-477b-bbfc-cd684c890c59",
-            "23d97ca4-1a35-4ed6-a6f5-a080485cb491"
+            "c20d7193-d465-4191-80e7-44676f3794f3",
+            "9a997193-b5c1-4585-bb6f-b43a90991eff",
+            "10250736-c77b-4334-9b29-e72007d71ec0"
           ],
           "cleanup": {
             "deleted_ids": [],
@@ -4594,14 +5728,14 @@
         },
         "validated_entries": [
           {
-            "id": "a31601a8-710c-4ab5-abc4-368c38c77a25",
+            "id": "c20d7193-d465-4191-80e7-44676f3794f3",
             "content": "Replay hypothesis from validation-source-0: mentor / promise / care",
             "content_hash": "0e5bb35e10d10c17a26c580f9e0b9965d1c236683a5e09e1647c54ec0d8dfcd1",
             "memory_class": "inferred",
             "store_level": "long",
             "source_type": "inference",
-            "created_at": 1,
-            "last_accessed": 1,
+            "created_at": 55,
+            "last_accessed": 55,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4664,9 +5798,39 @@
               "validation_status": "validated",
               "validation_discount": 1.0,
               "m45_internal": {
-                "last_decay_cycle": 1,
+                "last_decay_cycle": 55,
                 "decay_base_trace_strength": 0.42,
                 "decay_base_accessibility": 0.38
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.556,
+                "mid_to_long_score": 0.6152,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.52,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.036,
+                  "abstraction_bonus": 0.1312,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.12,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.556,
+                "boosted_short_to_mid_score": 0.556,
+                "score_cap_applied": false
               },
               "inference_write_score": 0.75
             },
@@ -4677,14 +5841,14 @@
             "is_dormant": false
           },
           {
-            "id": "84faf65b-4bbf-477b-bbfc-cd684c890c59",
+            "id": "9a997193-b5c1-4585-bb6f-b43a90991eff",
             "content": "Replay hypothesis from validation-source-2: mentor / promise / care",
             "content_hash": "9964276417c6810f90ae83059f7f89eed770aae9091bd2868bfc8d126c917441",
             "memory_class": "inferred",
             "store_level": "long",
             "source_type": "inference",
-            "created_at": 1,
-            "last_accessed": 1,
+            "created_at": 55,
+            "last_accessed": 55,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4747,9 +5911,39 @@
               "validation_status": "validated",
               "validation_discount": 1.0,
               "m45_internal": {
-                "last_decay_cycle": 1,
+                "last_decay_cycle": 55,
                 "decay_base_trace_strength": 0.42,
                 "decay_base_accessibility": 0.38
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.556,
+                "mid_to_long_score": 0.6152,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.52,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.036,
+                  "abstraction_bonus": 0.1312,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.12,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.556,
+                "boosted_short_to_mid_score": 0.556,
+                "score_cap_applied": false
               },
               "inference_write_score": 0.75
             },
@@ -4760,14 +5954,14 @@
             "is_dormant": false
           },
           {
-            "id": "23d97ca4-1a35-4ed6-a6f5-a080485cb491",
+            "id": "10250736-c77b-4334-9b29-e72007d71ec0",
             "content": "Replay hypothesis from validation-source-1: mentor / promise / care",
             "content_hash": "8f2926e57b6742727f02d114eefd4ad05b749f645ee17dfa187c5bc31c59fd96",
             "memory_class": "inferred",
             "store_level": "long",
             "source_type": "inference",
-            "created_at": 1,
-            "last_accessed": 1,
+            "created_at": 55,
+            "last_accessed": 55,
             "valence": 0.0,
             "arousal": 0.3,
             "encoding_attention": 0.4,
@@ -4830,9 +6024,39 @@
               "validation_status": "validated",
               "validation_discount": 1.0,
               "m45_internal": {
-                "last_decay_cycle": 1,
+                "last_decay_cycle": 55,
                 "decay_base_trace_strength": 0.42,
                 "decay_base_accessibility": 0.38
+              },
+              "m47_promotion_audit": {
+                "short_to_mid_score": 0.556,
+                "mid_to_long_score": 0.6152,
+                "score_thresholds": {
+                  "short_to_mid": 0.55,
+                  "mid_to_long": 0.72
+                },
+                "score_breakdown": {
+                  "salience_signal": 0.52,
+                  "retrieval_short_signal": 0.0,
+                  "retrieval_long_signal": 0.0,
+                  "identity_signal": 0.036,
+                  "abstraction_bonus": 0.1312,
+                  "threat_snapshot_bonus": 0.0,
+                  "novelty_noise_penalty": 0.0,
+                  "rigidity_penalty": 0.0,
+                  "selectivity_bias": 0.0
+                },
+                "state_identity_active": false,
+                "identity_match_ratio": 0.0,
+                "identity_link_strength": 0.12,
+                "identity_link_active": false,
+                "identity_context_available": false,
+                "identity_fallback_active": false,
+                "retained_identity_priority": false,
+                "self_relevance_multiplier": 1.0,
+                "base_short_to_mid_score": 0.556,
+                "boosted_short_to_mid_score": 0.556,
+                "score_cap_applied": false
               },
               "inference_write_score": 0.75
             },
@@ -4993,7 +6217,55 @@
             "cross_context_consistency": 0.9,
             "validation_status": "validated",
             "validation_discount": 1.0,
-            "inference_write_score": 0.9300000000000002
+            "inference_write_score": 0.9300000000000002,
+            "m47_recall_audit": {
+              "candidate_ids": [
+                "validated",
+                "base",
+                "unvalidated"
+              ],
+              "anchor_contributions": {
+                "agents": [
+                  {
+                    "entry_id": "validated",
+                    "role": "primary",
+                    "value": "lin"
+                  }
+                ],
+                "action": [
+                  {
+                    "entry_id": "validated",
+                    "role": "primary",
+                    "value": "mentor_checkin"
+                  }
+                ],
+                "outcome": [
+                  {
+                    "entry_id": "validated",
+                    "role": "primary",
+                    "value": "commitment_kept"
+                  }
+                ]
+              },
+              "competition_snapshot": {
+                "primary_id": "validated",
+                "competitor_ids": [
+                  "base"
+                ],
+                "confidence": "low",
+                "interference_risk": true,
+                "competing_interpretations": [
+                  "base: alternative recall via base"
+                ],
+                "dominance_margin": 0.07499999999999996
+              },
+              "donor_blocks": [
+                {
+                  "entry_id": "unvalidated",
+                  "reason": "unvalidated"
+                }
+              ]
+            }
           },
           "derived_from": [],
           "version": 1,
@@ -5202,20 +6474,6 @@
         },
         "retrieval_candidates": [
           {
-            "entry_id": "unvalidated",
-            "memory_class": "inferred",
-            "retrieval_score": 0.723448,
-            "content_preview": "weak hypothesis",
-            "score_breakdown": {
-              "tag_overlap": 1.0,
-              "context_overlap": 1.0,
-              "mood_match": 0.0,
-              "accessibility": 0.6,
-              "recency": 0.689655
-            },
-            "source_type": "inference"
-          },
-          {
             "entry_id": "validated",
             "memory_class": "inferred",
             "retrieval_score": 0.623448,
@@ -5225,9 +6483,11 @@
               "context_overlap": 0.333333,
               "mood_match": 0.0,
               "accessibility": 0.6,
-              "recency": 0.689655
+              "recency": 0.689655,
+              "validation_discount": 1.0
             },
-            "source_type": "inference"
+            "source_type": "inference",
+            "validation_status": "validated"
           },
           {
             "entry_id": "base",
@@ -5241,20 +6501,35 @@
               "accessibility": 0.6,
               "recency": 0.689655
             },
-            "source_type": "experience"
+            "source_type": "experience",
+            "validation_status": "validated"
+          },
+          {
+            "entry_id": "unvalidated",
+            "memory_class": "inferred",
+            "retrieval_score": 0.253207,
+            "content_preview": "weak hypothesis",
+            "score_breakdown": {
+              "tag_overlap": 1.0,
+              "context_overlap": 1.0,
+              "mood_match": 0.0,
+              "accessibility": 0.6,
+              "recency": 0.689655,
+              "validation_discount": 0.35
+            },
+            "source_type": "inference",
+            "validation_status": "unvalidated"
           }
         ],
         "recall_hypothesis": {
-          "content": "weak hypothesis | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | aux:agents=lin, action=mentor_checkin, outcome=commitment_kept | anchors:agents=lin, action=mentor_checkin, outcome=commitment_kept | cues:mentor, pattern, lab | competition:low-confidence alternatives preserved",
-          "primary_entry_id": "unvalidated",
+          "content": "candidate_set:validated, base, unvalidated | primary_memory_class:inferred | cue_reconstruction:mentor, pattern, lab | competition_preserved:alternative interpretations remain active | donor_blocks:unvalidated:unvalidated",
+          "primary_entry_id": "validated",
           "auxiliary_entry_ids": [
-            "validated",
             "base"
           ],
           "confidence": 0.45,
           "source_trace": [
-            "primary:unvalidated",
-            "auxiliary:validated",
+            "primary:validated",
             "auxiliary:base"
           ],
           "reconstructed_fields": [
@@ -5263,14 +6538,64 @@
           ],
           "protected_fields": [],
           "competing_interpretations": [
-            "validated: alternative recall via validated pattern"
+            "base: alternative recall via base"
           ],
-          "procedure_step_outline": null
+          "procedure_step_outline": null,
+          "source_statuses": {
+            "validated": "validated",
+            "base": "validated"
+          },
+          "candidate_ids": [
+            "validated",
+            "base",
+            "unvalidated"
+          ],
+          "anchor_contributions": {
+            "agents": [
+              {
+                "entry_id": "validated",
+                "role": "primary",
+                "value": "lin"
+              }
+            ],
+            "action": [
+              {
+                "entry_id": "validated",
+                "role": "primary",
+                "value": "mentor_checkin"
+              }
+            ],
+            "outcome": [
+              {
+                "entry_id": "validated",
+                "role": "primary",
+                "value": "commitment_kept"
+              }
+            ]
+          },
+          "competition_snapshot": {
+            "primary_id": "validated",
+            "competitor_ids": [
+              "base"
+            ],
+            "confidence": "low",
+            "interference_risk": true,
+            "competing_interpretations": [
+              "base: alternative recall via base"
+            ],
+            "dominance_margin": 0.07499999999999996
+          },
+          "donor_blocks": [
+            {
+              "entry_id": "unvalidated",
+              "reason": "unvalidated"
+            }
+          ]
         },
         "candidate_ids": [
-          "unvalidated",
           "validated",
-          "base"
+          "base",
+          "unvalidated"
         ]
       },
       "criteria_checks": {
@@ -5316,14 +6641,14 @@
           },
           "extracted_patterns": [],
           "replay_created_ids": [
-            "b6d6cf33-c581-408f-85fa-0fb03541a78d",
-            "b02e5dab-d770-429a-9b1a-aee000d41c90",
-            "bd830986-aefa-4634-beac-d46185992a61"
+            "cba03e55-be78-4b9c-9c70-0e437836060a",
+            "55713ee9-1237-4959-9aa8-869125d50ac0",
+            "a94fbf1d-b21c-4d6a-925c-959d5ed1007d"
           ],
           "validated_inference_ids": [
-            "b6d6cf33-c581-408f-85fa-0fb03541a78d",
-            "b02e5dab-d770-429a-9b1a-aee000d41c90",
-            "bd830986-aefa-4634-beac-d46185992a61"
+            "cba03e55-be78-4b9c-9c70-0e437836060a",
+            "55713ee9-1237-4959-9aa8-869125d50ac0",
+            "a94fbf1d-b21c-4d6a-925c-959d5ed1007d"
           ],
           "cleanup": {
             "deleted_ids": [],
@@ -5335,14 +6660,14 @@
         "validated_entries": [
           {
             "entry": {
-              "id": "b6d6cf33-c581-408f-85fa-0fb03541a78d",
+              "id": "cba03e55-be78-4b9c-9c70-0e437836060a",
               "content": "Replay hypothesis from inference-source-0: mentor / promise / care",
               "content_hash": "cee587824c67d34a3f0002a70d30afccbf0a5f636ba36da0c58144346d2e4d1b",
               "memory_class": "inferred",
               "store_level": "long",
               "source_type": "inference",
-              "created_at": 1,
-              "last_accessed": 1,
+              "created_at": 55,
+              "last_accessed": 55,
               "valence": 0.0,
               "arousal": 0.3,
               "encoding_attention": 0.4,
@@ -5405,9 +6730,39 @@
                 "validation_status": "validated",
                 "validation_discount": 1.0,
                 "m45_internal": {
-                  "last_decay_cycle": 1,
+                  "last_decay_cycle": 55,
                   "decay_base_trace_strength": 0.42,
                   "decay_base_accessibility": 0.38
+                },
+                "m47_promotion_audit": {
+                  "short_to_mid_score": 0.556,
+                  "mid_to_long_score": 0.6152,
+                  "score_thresholds": {
+                    "short_to_mid": 0.55,
+                    "mid_to_long": 0.72
+                  },
+                  "score_breakdown": {
+                    "salience_signal": 0.52,
+                    "retrieval_short_signal": 0.0,
+                    "retrieval_long_signal": 0.0,
+                    "identity_signal": 0.036,
+                    "abstraction_bonus": 0.1312,
+                    "threat_snapshot_bonus": 0.0,
+                    "novelty_noise_penalty": 0.0,
+                    "rigidity_penalty": 0.0,
+                    "selectivity_bias": 0.0
+                  },
+                  "state_identity_active": false,
+                  "identity_match_ratio": 0.0,
+                  "identity_link_strength": 0.12,
+                  "identity_link_active": false,
+                  "identity_context_available": false,
+                  "identity_fallback_active": false,
+                  "retained_identity_priority": false,
+                  "self_relevance_multiplier": 1.0,
+                  "base_short_to_mid_score": 0.556,
+                  "boosted_short_to_mid_score": 0.556,
+                  "score_cap_applied": false
                 },
                 "inference_write_score": 0.75
               },
@@ -5430,14 +6785,14 @@
           },
           {
             "entry": {
-              "id": "b02e5dab-d770-429a-9b1a-aee000d41c90",
+              "id": "55713ee9-1237-4959-9aa8-869125d50ac0",
               "content": "Replay hypothesis from inference-source-2: mentor / promise / care",
               "content_hash": "79dadf6867a64b152f927eaa9819fe39f9ee3f35177f8ee03a4c27f2b2fea421",
               "memory_class": "inferred",
               "store_level": "long",
               "source_type": "inference",
-              "created_at": 1,
-              "last_accessed": 1,
+              "created_at": 55,
+              "last_accessed": 55,
               "valence": 0.0,
               "arousal": 0.3,
               "encoding_attention": 0.4,
@@ -5500,9 +6855,39 @@
                 "validation_status": "validated",
                 "validation_discount": 1.0,
                 "m45_internal": {
-                  "last_decay_cycle": 1,
+                  "last_decay_cycle": 55,
                   "decay_base_trace_strength": 0.42,
                   "decay_base_accessibility": 0.38
+                },
+                "m47_promotion_audit": {
+                  "short_to_mid_score": 0.556,
+                  "mid_to_long_score": 0.6152,
+                  "score_thresholds": {
+                    "short_to_mid": 0.55,
+                    "mid_to_long": 0.72
+                  },
+                  "score_breakdown": {
+                    "salience_signal": 0.52,
+                    "retrieval_short_signal": 0.0,
+                    "retrieval_long_signal": 0.0,
+                    "identity_signal": 0.036,
+                    "abstraction_bonus": 0.1312,
+                    "threat_snapshot_bonus": 0.0,
+                    "novelty_noise_penalty": 0.0,
+                    "rigidity_penalty": 0.0,
+                    "selectivity_bias": 0.0
+                  },
+                  "state_identity_active": false,
+                  "identity_match_ratio": 0.0,
+                  "identity_link_strength": 0.12,
+                  "identity_link_active": false,
+                  "identity_context_available": false,
+                  "identity_fallback_active": false,
+                  "retained_identity_priority": false,
+                  "self_relevance_multiplier": 1.0,
+                  "base_short_to_mid_score": 0.556,
+                  "boosted_short_to_mid_score": 0.556,
+                  "score_cap_applied": false
                 },
                 "inference_write_score": 0.75
               },
@@ -5525,14 +6910,14 @@
           },
           {
             "entry": {
-              "id": "bd830986-aefa-4634-beac-d46185992a61",
+              "id": "a94fbf1d-b21c-4d6a-925c-959d5ed1007d",
               "content": "Replay hypothesis from inference-source-1: mentor / promise / care",
               "content_hash": "ed4e147d3a360e018a6463b4e1c60962b6ef987faa0b0ab4882a9312785ec0e2",
               "memory_class": "inferred",
               "store_level": "long",
               "source_type": "inference",
-              "created_at": 1,
-              "last_accessed": 1,
+              "created_at": 55,
+              "last_accessed": 55,
               "valence": 0.0,
               "arousal": 0.3,
               "encoding_attention": 0.4,
@@ -5595,9 +6980,39 @@
                 "validation_status": "validated",
                 "validation_discount": 1.0,
                 "m45_internal": {
-                  "last_decay_cycle": 1,
+                  "last_decay_cycle": 55,
                   "decay_base_trace_strength": 0.42,
                   "decay_base_accessibility": 0.38
+                },
+                "m47_promotion_audit": {
+                  "short_to_mid_score": 0.556,
+                  "mid_to_long_score": 0.6152,
+                  "score_thresholds": {
+                    "short_to_mid": 0.55,
+                    "mid_to_long": 0.72
+                  },
+                  "score_breakdown": {
+                    "salience_signal": 0.52,
+                    "retrieval_short_signal": 0.0,
+                    "retrieval_long_signal": 0.0,
+                    "identity_signal": 0.036,
+                    "abstraction_bonus": 0.1312,
+                    "threat_snapshot_bonus": 0.0,
+                    "novelty_noise_penalty": 0.0,
+                    "rigidity_penalty": 0.0,
+                    "selectivity_bias": 0.0
+                  },
+                  "state_identity_active": false,
+                  "identity_match_ratio": 0.0,
+                  "identity_link_strength": 0.12,
+                  "identity_link_active": false,
+                  "identity_context_available": false,
+                  "identity_fallback_active": false,
+                  "retained_identity_priority": false,
+                  "self_relevance_multiplier": 1.0,
+                  "base_short_to_mid_score": 0.556,
+                  "boosted_short_to_mid_score": 0.556,
+                  "score_cap_applied": false
                 },
                 "inference_write_score": 0.75
               },
@@ -5676,13 +7091,13 @@
             "promotion_reasons": {}
           },
           "extracted_patterns": [
-            "30e33a3b-2e8f-4370-8fd6-e25fcc11205f",
-            "7c6b447e-18f4-418e-baff-51979217bdd4"
+            "d6797946-ad6f-4bfa-8297-acb4ff2a12f9",
+            "4845c387-d1f7-4b8c-84d8-c630a1fa61de"
           ],
           "replay_created_ids": [
-            "08f96a5a-aad2-40e1-9034-b1a46642ab3e",
-            "bbd30f59-4bb0-4fe4-af77-09c738dfc82e",
-            "493422a1-4f30-4246-811f-0d1232bab4ba"
+            "f18e6ad3-932b-453c-a973-1f1d18ebc27c",
+            "2aa10ea0-2ff7-4564-9590-83d5fcc0ae3a",
+            "eaaf29c4-ba32-483d-b4b2-2fbd36a37fb9"
           ],
           "validated_inference_ids": [],
           "cleanup": {
@@ -5747,40 +7162,8 @@
         ]
       },
       "observed": {
-        "executed": true,
-        "command": [
-          "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-          "-m",
-          "pytest",
-          "tests/test_m41_acceptance.py",
-          "tests/test_m41_baselines.py",
-          "tests/test_m41_blind_classification.py",
-          "tests/test_m41_cognitive_parameters.py",
-          "tests/test_m41_decision_logging.py",
-          "tests/test_m41_explanations.py",
-          "tests/test_m41_external_dataset.py",
-          "tests/test_m41_external_validation.py",
-          "tests/test_m41_falsification.py",
-          "tests/test_m41_identifiability.py",
-          "tests/test_m41_inference.py",
-          "tests/test_m41_observables.py",
-          "tests/test_m42_acceptance.py",
-          "tests/test_m42_benchmark_adapter.py",
-          "tests/test_m42_confidence_benchmark.py",
-          "tests/test_m42_external_bundle_integration.py",
-          "tests/test_m42_reproducibility.py",
-          "tests/test_m43_acceptance.py",
-          "tests/test_m43_baselines.py",
-          "tests/test_m43_single_task_fit.py",
-          "tests/test_m44_acceptance.py",
-          "tests/test_m44_cross_task.py",
-          "tests/test_m44_igt_adapter.py",
-          "tests/test_m44_igt_aggregate.py",
-          "tests/test_m45_acceptance.py",
-          "tests/test_m45_memory_core.py",
-          "-q"
-        ],
-        "files": [
+        "reason": "Skipped by request: rebuild independent M4.6 evidence without running M4.1-M4.5 regressions.",
+        "expected_targets": [
           "tests/test_m41_acceptance.py",
           "tests/test_m41_baselines.py",
           "tests/test_m41_blind_classification.py",
@@ -5807,25 +7190,15 @@
           "tests/test_m44_igt_aggregate.py",
           "tests/test_m45_acceptance.py",
           "tests/test_m45_memory_core.py"
-        ],
-        "returncode": 0,
-        "passed": true,
-        "duration_seconds": 1631.112347,
-        "stdout_tail": [
-          "........................................... [ 33%]",
-          "................................................s....................... [ 89%]",
-          "..............                                                           [100%]",
-          "128 passed, 1 skipped, 29 subtests passed in 1626.58s (0:27:06)"
-        ],
-        "summary_line": "128 passed, 1 skipped, 29 subtests passed in 1626.58s (0:27:06)"
+        ]
       },
       "criteria_checks": {
-        "regressions_executed": true,
-        "regressions_passed": true,
-        "target_list_complete": true
+        "explicitly_skipped": true
       },
-      "status": "PASS",
-      "notes": [],
+      "status": "NOT_RUN",
+      "notes": [
+        "Regression prerequisite intentionally deferred; formal acceptance conclusion must remain unissued."
+      ],
       "source_kind": "regression_run",
       "source_api_call_id": "legacy_integration.legacy_regression_prereq.pytest.seed_none",
       "source_input_set_id": "legacy_regression_prereq",
@@ -5836,7 +7209,7 @@
       "scenario_id": "honesty_integrity_audit",
       "api": "m46_reacceptance.external_honesty_audit",
       "input_summary": {
-        "include_regressions": true
+        "include_regressions": false
       },
       "observed": {
         "gate_summaries": {
@@ -5959,7 +7332,7 @@
           },
           "legacy_integration": {
             "gate": "legacy_integration",
-            "status": "PASS",
+            "status": "NOT_RUN",
             "scenario_ids": [
               "legacy_bridge_replay_batch",
               "legacy_bridge_consolidation_cycle",
@@ -5967,11 +7340,13 @@
             ],
             "counts": {
               "total": 3,
-              "passed": 3,
+              "passed": 2,
               "failed": 0,
-              "not_run": 0
+              "not_run": 1
             },
-            "notes": []
+            "notes": [
+              "Regression prerequisite intentionally deferred; formal acceptance conclusion must remain unissued."
+            ]
           }
         },
         "record_count": 28,
@@ -5989,7 +7364,9 @@
           "inference_consolidation_validation_linkage"
         ],
         "missing_integration_scenarios": [],
-        "not_run_scenarios": [],
+        "not_run_scenarios": [
+          "legacy_regression_prereq"
+        ],
         "empty_observed_scenarios": [],
         "invalid_status_scenarios": [],
         "missing_provenance_fields": {},
@@ -6025,7 +7402,7 @@
     }
   ],
   "regression_policy": {
-    "include_regressions": true,
+    "include_regressions": false,
     "regression_targets": [
       "tests/test_m41_acceptance.py",
       "tests/test_m41_baselines.py",

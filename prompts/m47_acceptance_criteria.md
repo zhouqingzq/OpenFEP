@@ -85,3 +85,9 @@ M4.5 + M4.6 必须 PASS。
 ## 回归
 
 M4.1, M4.2, M4.3, M4.4, M4.5, M4.6 全部测试通过。
+
+## 2026-04-09 Official Status Note
+
+The current repository-wide official status for M4.7 is `INCOMPLETE / NOT_ISSUED`.
+The present blocking gate is `regression=NOT_RUN` in the acceptance builder.
+Any committed report claiming a pass state is superseded by the current builder output.

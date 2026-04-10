@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
+from pathlib import Path
 import random
+import tempfile
 import unittest
+import warnings
 
 from segmentum.agent import SegmentAgent
 from segmentum.environment import Observation
@@ -1004,6 +1008,67 @@ class SleepConsolidationTests(unittest.TestCase):
         self.assertLess(first_summary.prediction_error_after, first_summary.prediction_error_before)
         self.assertLess(second_summary.prediction_error_after, second_summary.prediction_error_before)
         self.assertLessEqual(second_summary.prediction_error_after, first_after)
+
+    def test_dual_write_invariant_keeps_store_and_legacy_ids_aligned(self) -> None:
+        memory = LongTermMemory()
+        memory.ensure_memory_store()
+
+        first = memory.store_episode(
+            cycle=1,
+            observation=baseline_observation(),
+            prediction=baseline_prediction(),
+            errors=baseline_errors(),
+            action="hide",
+            outcome={"energy_delta": -0.1, "stress_delta": 0.2, "free_energy_drop": -0.5},
+            body_state=baseline_body_state(),
+        )
+        merged = memory.maybe_store_episode(
+            cycle=2,
+            observation=baseline_observation(),
+            prediction=baseline_prediction(),
+            errors=baseline_errors(),
+            action="hide",
+            outcome={"energy_delta": -0.1, "stress_delta": 0.2, "free_energy_drop": -0.5},
+            body_state=baseline_body_state(),
+        )
+
+        self.assertTrue(first["episode_id"])
+        self.assertEqual(merged.support_delta, 1)
+        self.assertIsNotNone(memory.memory_store)
+        self.assertEqual(len(memory.episodes), len(memory.memory_store.entries))
+        self.assertEqual(
+            [str(payload.get("episode_id", "")) for payload in memory.episodes],
+            [str(payload.get("episode_id", "")) for payload in memory.memory_store.to_legacy_episodes()],
+        )
+
+    def test_long_term_memory_bootstraps_memory_store_on_legacy_snapshot(self) -> None:
+        memory = LongTermMemory()
+        memory.store_episode(
+            cycle=1,
+            observation=baseline_observation(),
+            prediction=baseline_prediction(),
+            errors=baseline_errors(),
+            action="hide",
+            outcome={"energy_delta": -0.1, "stress_delta": 0.2, "free_energy_drop": -0.5},
+            body_state=baseline_body_state(),
+        )
+        payload = memory.to_dict()
+        payload.pop("agent_state_vector", None)
+        payload.pop("memory_cognitive_style", None)
+        payload.pop("memory_cycle_interval", None)
+        payload.pop("memory_backend", None)
+        payload.pop("migration_audit", None)
+        payload["memory_store"] = None
+
+        restored = LongTermMemory.from_dict(payload, state_version="0.6")
+
+        self.assertEqual(restored.memory_backend, "memory_store")
+        self.assertEqual(restored.migration_audit.get("migration_from_version"), "0.6")
+        self.assertEqual(restored.migration_audit.get("migration_reason"), "memory_store_bootstrap")
+        self.assertEqual(restored.migration_audit.get("legacy_episode_count"), 1)
+        self.assertIn("agent_state_vector", restored.migration_audit.get("defaults_applied", []))
+        self.assertIsNotNone(restored.memory_store)
+        self.assertEqual(len(restored.episodes), len(restored.memory_store.entries))
 
 
 if __name__ == "__main__":

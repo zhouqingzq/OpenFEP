@@ -819,15 +819,60 @@ def _store_transitions_boundary_probe() -> dict[str, Any]:
 
 
 def _store_transitions_integration_probe() -> dict[str, Any]:
+    audit_fields = (
+        "identity_link_strength",
+        "identity_link_active",
+        "self_relevance_multiplier",
+        "base_short_to_mid_score",
+        "boosted_short_to_mid_score",
+        "score_cap_applied",
+    )
+
+    def _audit_excerpt(audit: dict[str, Any]) -> dict[str, Any]:
+        return {field: audit.get(field) for field in audit_fields}
+
     store = MemoryStore()
     identity_entry = _with_decay_baseline(encode_memory(_identity_event(), _identity_state(), SalienceConfig()), 12)
     identity_entry.retrieval_count = 1
     store.add(identity_entry)
     noise_entry = encode_memory(_noise_event(), _identity_state(), SalienceConfig())
     store.add(noise_entry)
+    linked_entry = _with_decay_baseline(encode_memory(_identity_event(), _identity_state(), SalienceConfig()), 12)
+    linked_entry.retrieval_count = 1
+    null_entry = _with_decay_baseline(encode_memory(_identity_event(), {}, SalienceConfig()), 12)
+    null_entry.retrieval_count = 1
+    linked_store = MemoryStore()
+    null_store = MemoryStore()
+    linked_store.add(linked_entry)
+    null_store.add(null_entry)
+    linked_promoted = linked_store.get(linked_entry.id)
+    null_promoted = null_store.get(null_entry.id)
+    linked_audit = dict(dict((linked_promoted.compression_metadata or {})).get("m47_promotion_audit", {})) if linked_promoted is not None else {}
+    null_audit = dict(dict((null_promoted.compression_metadata or {})).get("m47_promotion_audit", {})) if null_promoted is not None else {}
+    neutral_population = []
+    for index in range(20):
+        neutral_entry = encode_memory(_noise_event(), {}, SalienceConfig())
+        neutral_entry.id = f"neutral-{index}"
+        neutral_store = MemoryStore()
+        neutral_store.add(neutral_entry)
+        neutral_promoted = neutral_store.get(neutral_entry.id)
+        neutral_population.append(
+            1.0
+            if neutral_promoted is not None and neutral_promoted.store_level is not StoreLevel.SHORT
+            else 0.0
+        )
     return {
         "identity_store_level": store.get(identity_entry.id).store_level.value if store.get(identity_entry.id) is not None else None,
         "noise_store_level": store.get(noise_entry.id).store_level.value if store.get(noise_entry.id) is not None else None,
+        "identity_linked_store_level": linked_promoted.store_level.value if linked_promoted is not None else None,
+        "identity_null_store_level": null_promoted.store_level.value if null_promoted is not None else None,
+        "identity_linked_audit": _audit_excerpt(linked_audit),
+        "identity_null_audit": _audit_excerpt(null_audit),
+        "identity_linked_score": float(linked_audit.get("boosted_short_to_mid_score", linked_audit.get("short_to_mid_score", 0.0))),
+        "identity_null_score": float(null_audit.get("boosted_short_to_mid_score", null_audit.get("short_to_mid_score", 0.0))),
+        "identity_score_delta": float(linked_audit.get("boosted_short_to_mid_score", linked_audit.get("short_to_mid_score", 0.0)))
+        - float(null_audit.get("boosted_short_to_mid_score", null_audit.get("short_to_mid_score", 0.0))),
+        "neutral_promotion_rate": sum(neutral_population) / max(1, len(neutral_population)),
     }
 
 

@@ -39,6 +39,20 @@ def _identity_state() -> dict[str, object]:
     }
 
 
+def _merge_decay_baseline(entry: MemoryEntry, *, baseline_cycle: int, base_trace: float = 1.0, base_accessibility: float = 1.0) -> None:
+    metadata = dict(entry.compression_metadata or {})
+    internal = dict(metadata.get("m45_internal", {})) if isinstance(metadata.get("m45_internal"), dict) else {}
+    internal.update(
+        {
+            "last_decay_cycle": baseline_cycle,
+            "decay_base_trace_strength": base_trace,
+            "decay_base_accessibility": base_accessibility,
+        }
+    )
+    metadata["m45_internal"] = internal
+    entry.compression_metadata = metadata
+
+
 class TestM45MemoryCore(unittest.TestCase):
     def test_memory_entry_round_trip_and_version_tracking(self) -> None:
         entry = MemoryEntry(
@@ -672,13 +686,7 @@ class TestM45MemoryCore(unittest.TestCase):
         )
         identity_entry.retrieval_count = 1
         identity_entry.last_accessed = 20
-        identity_entry.compression_metadata = {
-            "m45_internal": {
-                "last_decay_cycle": 12,
-                "decay_base_trace_strength": 1.0,
-                "decay_base_accessibility": 1.0,
-            }
-        }
+        _merge_decay_baseline(identity_entry, baseline_cycle=12)
 
         semantic_entry = encode_memory(_semantic_event := {
             "content": "Repeated mentor check-ins stabilize trust over time.",
@@ -696,13 +704,7 @@ class TestM45MemoryCore(unittest.TestCase):
         semantic_entry.retrieval_count = 3
         semantic_entry.salience = 0.88
         semantic_entry.last_accessed = 26
-        semantic_entry.compression_metadata = {
-            "m45_internal": {
-                "last_decay_cycle": 16,
-                "decay_base_trace_strength": 1.0,
-                "decay_base_accessibility": 1.0,
-            }
-        }
+        _merge_decay_baseline(semantic_entry, baseline_cycle=16)
 
         store = MemoryStore()
         store.add(identity_entry)
@@ -761,6 +763,184 @@ class TestM45MemoryCore(unittest.TestCase):
             float(long_promotion.get("access_rate_before", 0.0)),
         )
         self.assertEqual(long_internal.get("last_decay_cycle"), promoted_long.last_accessed)
+
+    def test_identity_null_memory_does_not_promote_under_same_retrieval_budget(self) -> None:
+        linked_entry = encode_memory(_identity_event := {
+            "content": "I kept the weekly mentor promise to Lin.",
+            "action": "mentor_checkin",
+            "outcome": "commitment_kept",
+            "semantic_tags": ["mentor", "promise", "care"],
+            "roles": ["mentor"],
+            "relationships": ["lin"],
+            "commitments": ["weekly mentor checkin"],
+            "narrative_nodes": ["reliable mentor"],
+            "arousal": 0.18,
+            "novelty": 0.10,
+            "encoding_attention": 0.45,
+            "created_at": 12,
+        }, _identity_state(), SalienceConfig())
+        linked_entry.retrieval_count = 1
+        linked_entry.last_accessed = 20
+        _merge_decay_baseline(linked_entry, baseline_cycle=12)
+        null_entry = encode_memory(_identity_event, {}, SalienceConfig())
+        null_entry.retrieval_count = 1
+        null_entry.last_accessed = 20
+        _merge_decay_baseline(null_entry, baseline_cycle=12)
+
+        linked_store = MemoryStore()
+        null_store = MemoryStore()
+        linked_store.add(linked_entry)
+        null_store.add(null_entry)
+
+        promoted_linked = linked_store.get(linked_entry.id)
+        retained_null = null_store.get(null_entry.id)
+        linked_audit = dict(dict((promoted_linked.compression_metadata or {})).get("m47_promotion_audit", {}))
+        null_audit = dict(dict((retained_null.compression_metadata or {})).get("m47_promotion_audit", {}))
+
+        self.assertEqual(promoted_linked.store_level, StoreLevel.MID)
+        self.assertEqual(retained_null.store_level, StoreLevel.SHORT)
+        self.assertGreater(
+            float(linked_audit.get("boosted_short_to_mid_score", 0.0)),
+            float(null_audit.get("boosted_short_to_mid_score", 1.0)),
+        )
+        self.assertTrue(
+            {
+                "identity_link_strength",
+                "identity_link_active",
+                "self_relevance_multiplier",
+                "base_short_to_mid_score",
+                "boosted_short_to_mid_score",
+                "score_cap_applied",
+            }.issubset(linked_audit)
+        )
+        self.assertTrue(
+            {
+                "identity_link_strength",
+                "identity_link_active",
+                "self_relevance_multiplier",
+                "base_short_to_mid_score",
+                "boosted_short_to_mid_score",
+                "score_cap_applied",
+            }.issubset(null_audit)
+        )
+
+    def test_non_identity_scores_are_not_capped_at_identity_limit(self) -> None:
+        entry = MemoryEntry(
+            id="non-identity-cap-guard",
+            content="High-salience neutral memory",
+            created_at=1,
+            last_accessed=20,
+            arousal=0.2,
+            encoding_attention=0.2,
+            novelty=0.1,
+            relevance_goal=0.0,
+            relevance_threat=0.0,
+            relevance_self=0.0,
+            relevance_social=0.0,
+            relevance_reward=0.0,
+            relevance=0.0,
+            salience=2.0,
+            trace_strength=0.8,
+            accessibility=0.8,
+            abstractness=0.1,
+            source_confidence=0.9,
+            reality_confidence=0.9,
+            semantic_tags=["routine"],
+            context_tags=["baseline"],
+            retrieval_count=2,
+            support_count=1,
+            compression_metadata={
+                "m45_internal": {
+                    "last_decay_cycle": 12,
+                    "decay_base_trace_strength": 1.0,
+                    "decay_base_accessibility": 1.0,
+                }
+            },
+        )
+        store = MemoryStore()
+        store.add(entry)
+
+        promoted = store.get(entry.id)
+        audit = dict(dict((promoted.compression_metadata or {})).get("m47_promotion_audit", {}))
+
+        self.assertFalse(audit.get("identity_link_active"))
+        self.assertFalse(audit.get("score_cap_applied"))
+        self.assertAlmostEqual(
+            float(audit.get("base_short_to_mid_score", 0.0)),
+            float(audit.get("boosted_short_to_mid_score", -1.0)),
+        )
+        self.assertGreater(float(audit.get("boosted_short_to_mid_score", 0.0)), 0.95)
+
+    def test_identity_link_strength_uses_ratio_without_self_relevance_floor(self) -> None:
+        entry = MemoryEntry(
+            id="identity-ratio-guard",
+            content="Thin identity-adjacent trace",
+            created_at=1,
+            last_accessed=20,
+            arousal=0.2,
+            encoding_attention=0.2,
+            novelty=0.1,
+            relevance_goal=0.0,
+            relevance_threat=0.0,
+            relevance_self=0.9,
+            relevance_social=0.0,
+            relevance_reward=0.0,
+            relevance=0.9,
+            salience=0.6,
+            trace_strength=0.7,
+            accessibility=0.7,
+            abstractness=0.1,
+            source_confidence=0.9,
+            reality_confidence=0.9,
+            semantic_tags=["routine"],
+            context_tags=["baseline"],
+            retrieval_count=1,
+            support_count=1,
+            compression_metadata={
+                "dynamic_salience_audit": {"identity_match_ratio": 0.2},
+                "m45_internal": {
+                    "last_decay_cycle": 12,
+                    "decay_base_trace_strength": 1.0,
+                    "decay_base_accessibility": 1.0,
+                },
+            },
+        )
+        store = MemoryStore(agent_state_vector=_identity_state())
+        store.add(entry)
+
+        promoted = store.get(entry.id)
+        audit = dict(dict((promoted.compression_metadata or {})).get("m47_promotion_audit", {}))
+
+        self.assertAlmostEqual(float(audit.get("identity_match_ratio", -1.0)), 0.2, places=6)
+        self.assertAlmostEqual(float(audit.get("identity_link_strength", -1.0)), 0.62, places=6)
+
+    def test_neutral_population_promotion_rate_stays_near_zero(self) -> None:
+        promoted = 0
+        trials = 20
+        for index in range(trials):
+            entry = encode_memory(
+                {
+                    "content": f"Neutral maintenance trace {index}",
+                    "action": "observe_world",
+                    "outcome": "no_change",
+                    "semantic_tags": ["routine"],
+                    "context_tags": ["baseline"],
+                    "arousal": 0.05,
+                    "novelty": 0.08,
+                    "encoding_attention": 0.12,
+                    "created_at": index + 1,
+                },
+                {},
+                SalienceConfig(),
+            )
+            entry.id = f"neutral-population-{index}"
+            store = MemoryStore()
+            store.add(entry)
+            stored = store.get(entry.id)
+            if stored is not None and stored.store_level is not StoreLevel.SHORT:
+                promoted += 1
+
+        self.assertLess(promoted / trials, 0.05)
 
 
 if __name__ == "__main__":

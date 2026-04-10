@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest import mock
 
 from segmentum.m46_audit import (
     FORMAL_CONCLUSION_NOT_ISSUED,
@@ -13,6 +14,8 @@ from segmentum.m46_audit import (
     write_m46_acceptance_artifacts,
     write_m46_legacy_acceptance_artifacts,
 )
+from segmentum.m46_reacceptance import REGRESSION_TARGETS
+import segmentum.m46_reacceptance as m46_reacceptance
 
 
 class TestM46Acceptance(unittest.TestCase):
@@ -106,7 +109,18 @@ class TestM46Acceptance(unittest.TestCase):
         )
 
     def test_official_acceptance_with_regressions_fail_closes_fake_regression_and_passes_g8(self) -> None:
-        report, _, failure_injection, ablation = build_m46_acceptance_report(include_regressions=True)
+        regression_summary = {
+            "executed": True,
+            "command": [m46_reacceptance.sys.executable, "-m", "pytest", *REGRESSION_TARGETS, "-q"],
+            "files": list(REGRESSION_TARGETS),
+            "returncode": 0,
+            "passed": True,
+            "duration_seconds": 0.1,
+            "stdout_tail": [f"{len(REGRESSION_TARGETS)} passed in 0.10s"],
+            "summary_line": f"{len(REGRESSION_TARGETS)} passed in 0.10s",
+        }
+        with mock.patch.object(m46_reacceptance, "_run_regressions", return_value=regression_summary):
+            report, _, failure_injection, ablation = build_m46_acceptance_report(include_regressions=True)
         fake_regression_case = next(case for case in failure_injection["cases"] if case["case"] == "fake_regression_pass")
 
         self.assertTrue(fake_regression_case["failed_closed"])
@@ -115,6 +129,21 @@ class TestM46Acceptance(unittest.TestCase):
         self.assertTrue(ablation["all_tampered_cases_failed_closed"])
         self.assertEqual(report["gates"]["report_honesty"]["status"], "PASS")
         self.assertTrue(report["gates"]["report_honesty"]["passed"])
+
+    def test_run_regressions_targets_remain_complete(self) -> None:
+        completed = mock.Mock(returncode=0, stdout="26 passed in 0.10s\n", stderr="")
+        perf_values = iter((10.0, 10.1))
+        with (
+            mock.patch("segmentum.m46_reacceptance.subprocess.run", return_value=completed) as run_mock,
+            mock.patch("segmentum.m46_reacceptance.time.perf_counter", side_effect=lambda: next(perf_values)),
+        ):
+            summary = m46_reacceptance._run_regressions()
+
+        command = run_mock.call_args.args[0]
+        self.assertEqual(command, [m46_reacceptance.sys.executable, "-m", "pytest", *REGRESSION_TARGETS, "-q"])
+        self.assertEqual(summary["files"], REGRESSION_TARGETS)
+        self.assertTrue(summary["passed"])
+        self.assertEqual(summary["returncode"], 0)
 
     def test_legacy_writer_remains_historical_only(self) -> None:
         with TemporaryDirectory() as tmpdir:

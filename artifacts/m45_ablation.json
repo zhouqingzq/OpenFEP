@@ -1,5 +1,5 @@
 {
-  "baseline_salience": 0.32699999999999996,
-  "ablated_salience": 0.29025,
-  "identity_relevance_drop": 0.03674999999999995
+  "baseline_salience": 0.345,
+  "ablated_salience": 0.30224999999999996,
+  "identity_relevance_drop": 0.04275000000000001
 }

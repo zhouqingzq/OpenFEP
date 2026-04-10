@@ -1,0 +1,75 @@
+{
+  "suite": "acceptance_method_negative_controls",
+  "baseline_honesty_status": "PASS",
+  "case_count": 5,
+  "all_cases_failed_closed": true,
+  "cases": [
+    {
+      "case": "tampered_effect_size",
+      "tamper": "Overwrite G4 Cohen's d while leaving raw salience samples unchanged.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {
+        "threat_learning_error_aversion_contrast": [
+          "cohens_d_matches_samples"
+        ]
+      }
+    },
+    {
+      "case": "missing_gate_record",
+      "tamper": "Delete the identity continuity gate record entirely.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {}
+    },
+    {
+      "case": "fake_random_noise_misattribution",
+      "tamper": "Claim the Gy error is noise-driven and erase its borrowed-source trace.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {
+        "natural_misattribution_from_similarity": [
+          "misattribution_not_random",
+          "borrowed_sources_present"
+        ]
+      }
+    },
+    {
+      "case": "fake_regression_pass",
+      "tamper": "Replace the regression prerequisite with a synthetic PASS summary.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [],
+      "duplicate_source_api_call_ids": [],
+      "external_check_failures": {
+        "m41_to_m46_regression_prereq": [
+          "live_run_not_faked"
+        ]
+      }
+    },
+    {
+      "case": "duplicate_source_api_call_id",
+      "tamper": "Duplicate source_api_call_id across two records.",
+      "honesty_status": "FAIL",
+      "failed_closed": true,
+      "mismatched_status_records": [],
+      "mismatched_source_api_call_id_records": [
+        "dynamic_salience_state_contrast"
+      ],
+      "duplicate_source_api_call_ids": [
+        "state_vector_dynamics.state_vector_sliding_window.segmentum_m47_runtime_build_m47_runtime_snapshot.seed_47"
+      ],
+      "external_check_failures": {}
+    }
+  ]
+}

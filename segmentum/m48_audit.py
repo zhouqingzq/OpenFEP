@@ -35,9 +35,46 @@ def _git_head() -> str | None:
     return completed.stdout.strip() if completed.returncode == 0 else None
 
 
-def write_m48_acceptance_artifacts(*, round_started_at: str | None = None) -> dict[str, str]:
-    ARTIFACTS_DIR.mkdir(exist_ok=True)
-    REPORTS_DIR.mkdir(exist_ok=True)
+def _resolve_output_paths(
+    *,
+    output_root: Path | str | None = None,
+    artifacts_dir: Path | str | None = None,
+    reports_dir: Path | str | None = None,
+) -> dict[str, Path]:
+    if output_root is not None:
+        root = Path(output_root)
+        resolved_artifacts_dir = root / "artifacts"
+        resolved_reports_dir = root / "reports"
+    else:
+        resolved_artifacts_dir = Path(artifacts_dir) if artifacts_dir is not None else ARTIFACTS_DIR
+        resolved_reports_dir = Path(reports_dir) if reports_dir is not None else REPORTS_DIR
+    return {
+        "artifacts_dir": resolved_artifacts_dir,
+        "reports_dir": resolved_reports_dir,
+        "trace": resolved_artifacts_dir / M48_TRACE_PATH.name,
+        "mapping": resolved_artifacts_dir / M48_MAPPING_PATH.name,
+        "ablation": resolved_artifacts_dir / M48_ABLATION_PATH.name,
+        "stress": resolved_artifacts_dir / M48_STRESS_PATH.name,
+        "report": resolved_reports_dir / M48_REPORT_PATH.name,
+        "summary": resolved_reports_dir / M48_SUMMARY_PATH.name,
+    }
+
+
+def write_m48_acceptance_artifacts(
+    *,
+    round_started_at: str | None = None,
+    output_root: Path | str | None = None,
+    artifacts_dir: Path | str | None = None,
+    reports_dir: Path | str | None = None,
+    regressions: dict[str, object] | None = None,
+) -> dict[str, str]:
+    output_paths = _resolve_output_paths(
+        output_root=output_root,
+        artifacts_dir=artifacts_dir,
+        reports_dir=reports_dir,
+    )
+    output_paths["artifacts_dir"].mkdir(parents=True, exist_ok=True)
+    output_paths["reports_dir"].mkdir(parents=True, exist_ok=True)
     started_at = round_started_at or _now_iso()
     seed_set = [45, 145]
     canonical = simulate_open_world_projection(CognitiveStyleParameters(), seed=seed_set[0])
@@ -45,14 +82,14 @@ def write_m48_acceptance_artifacts(*, round_started_at: str | None = None) -> di
     ablated = simulate_open_world_projection(CognitiveStyleParameters(), seed=seed_set[0], ablate_style=True)
     stress = simulate_open_world_projection(CognitiveStyleParameters(), seed=seed_set[1], stress=True)
     mapping = benchmark_open_world_projection(seed=seed_set[0])
-    regressions = {
-        "m44": write_m44_acceptance_artifacts(round_started_at=started_at),
+    regression_artifacts = regressions or {
+        "m44": write_m44_acceptance_artifacts(round_started_at=started_at, output_root=output_root),
         "m36": write_m36_acceptance_artifacts(round_started_at=started_at),
     }
 
-    M48_TRACE_PATH.write_text(json.dumps(canonical, indent=2, ensure_ascii=False), encoding="utf-8")
-    M48_MAPPING_PATH.write_text(json.dumps(mapping, indent=2, ensure_ascii=False), encoding="utf-8")
-    M48_ABLATION_PATH.write_text(
+    output_paths["trace"].write_text(json.dumps(canonical, indent=2, ensure_ascii=False), encoding="utf-8")
+    output_paths["mapping"].write_text(json.dumps(mapping, indent=2, ensure_ascii=False), encoding="utf-8")
+    output_paths["ablation"].write_text(
         json.dumps(
             {
                 "full_summary": canonical["summary"],
@@ -65,7 +102,7 @@ def write_m48_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         ),
         encoding="utf-8",
     )
-    M48_STRESS_PATH.write_text(json.dumps(stress, indent=2, ensure_ascii=False), encoding="utf-8")
+    output_paths["stress"].write_text(json.dumps(stress, indent=2, ensure_ascii=False), encoding="utf-8")
 
     schema_passed = set(canonical.keys()) >= {"parameters", "logs", "summary"}
     determinism_passed = canonical == replay
@@ -98,12 +135,12 @@ def write_m48_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         "git_head": _git_head(),
         "seed_set": seed_set,
         "artifacts": {
-            "trace": str(M48_TRACE_PATH),
-            "mapping": str(M48_MAPPING_PATH),
-            "ablation": str(M48_ABLATION_PATH),
-            "stress": str(M48_STRESS_PATH),
-            "summary": str(M48_SUMMARY_PATH),
-            "regressions": regressions,
+            "trace": str(output_paths["trace"]),
+            "mapping": str(output_paths["mapping"]),
+            "ablation": str(output_paths["ablation"]),
+            "stress": str(output_paths["stress"]),
+            "summary": str(output_paths["summary"]),
+            "regressions": regression_artifacts,
         },
         "tests": {
             "milestone": ["tests/test_m48_parameter_projection.py", "tests/test_m48_failure_recovery.py", "tests/test_m48_acceptance.py"],
@@ -141,18 +178,18 @@ def write_m48_acceptance_artifacts(*, round_started_at: str | None = None) -> di
         "freshness": {"generated_this_round": True, "round_started_at": started_at},
         "recommendation": recommendation,
     }
-    M48_REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    M48_SUMMARY_PATH.write_text(
+    output_paths["report"].write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    output_paths["summary"].write_text(
         "# M4.8 Acceptance Summary\n\nPASS: open-world projection, parameter-behavior mapping, ablation, stress evidence, and M4.4/M3.6 regressions were regenerated in the current round.\n"
         if status == "PASS"
         else "# M4.8 Acceptance Summary\n\nFAIL: at least one M4.8 gating condition remains unresolved.\n",
         encoding="utf-8",
     )
     return {
-        "trace": str(M48_TRACE_PATH),
-        "mapping": str(M48_MAPPING_PATH),
-        "ablation": str(M48_ABLATION_PATH),
-        "stress": str(M48_STRESS_PATH),
-        "report": str(M48_REPORT_PATH),
-        "summary": str(M48_SUMMARY_PATH),
+        "trace": str(output_paths["trace"]),
+        "mapping": str(output_paths["mapping"]),
+        "ablation": str(output_paths["ablation"]),
+        "stress": str(output_paths["stress"]),
+        "report": str(output_paths["report"]),
+        "summary": str(output_paths["summary"]),
     }

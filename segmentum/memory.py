@@ -1,14 +1,43 @@
 from __future__ import annotations
 
 from collections import Counter
+import contextvars
+from contextlib import contextmanager
+from copy import deepcopy
 from dataclasses import dataclass, field
 from math import log, sqrt
 from statistics import mean
+import warnings
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .memory_store import MemoryStore
 from .preferences import PreferenceModel, ValueHierarchy
 from .semantic_schema import SemanticSchemaStore
+
+
+_LEGACY_MEMORY_WARNING_SUPPRESSED = contextvars.ContextVar(
+    "segmentum_legacy_memory_warning_suppressed",
+    default=False,
+)
+
+
+@contextmanager
+def suppress_legacy_memory_warnings():
+    token = _LEGACY_MEMORY_WARNING_SUPPRESSED.set(True)
+    try:
+        yield
+    finally:
+        _LEGACY_MEMORY_WARNING_SUPPRESSED.reset(token)
+
+
+def _warn_legacy_memory_path(method_name: str) -> None:
+    if _LEGACY_MEMORY_WARNING_SUPPRESSED.get():
+        return
+    warnings.warn(
+        f"LongTermMemory.{method_name} is a legacy adapter path; prefer MemoryStore-backed runtime flow.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
 
 @dataclass
@@ -328,6 +357,12 @@ class LongTermMemory:
     restart_continuity_until_cycle: int = 0
     restart_continuity_anchor_ids: list[str] = field(default_factory=list)
     latest_schema_update: dict[str, object] = field(default_factory=dict)
+    agent_state_vector: dict[str, object] = field(default_factory=dict)
+    memory_cognitive_style: dict[str, object] = field(default_factory=dict)
+    memory_cycle_interval: int = 5
+    memory_backend: str = "memory_store"
+    migration_audit: dict[str, object] = field(default_factory=dict)
+    last_retrieval_result: dict[str, object] = field(default_factory=dict)
     memory_store: MemoryStore | None = None
 
     @property
@@ -337,6 +372,112 @@ class LongTermMemory:
     @value_hierarchy.setter
     def value_hierarchy(self, model: PreferenceModel) -> None:
         self.preference_model = model
+
+    @staticmethod
+    def _normalize_memory_backend(value: object) -> str:
+        return "legacy" if str(value or "").strip().lower() == "legacy" else "memory_store"
+
+    def _memory_store_enabled(self) -> bool:
+        return self._normalize_memory_backend(self.memory_backend) == "memory_store"
+
+    def _new_memory_store(self) -> MemoryStore:
+        if self.memory_store is not None:
+            store = MemoryStore.from_dict(self.memory_store.to_dict())
+        else:
+            store = MemoryStore()
+        store.agent_state_vector = dict(self.agent_state_vector)
+        return store
+
+    def _build_memory_store_snapshot(
+        self,
+        episodes: list[dict[str, object]],
+    ) -> MemoryStore | None:
+        staged_store = self._new_memory_store()
+        staged_store.replace_legacy_group(episodes)
+        staged_store.agent_state_vector = dict(self.agent_state_vector)
+        return staged_store
+
+    def _bootstrap_memory_awareness_defaults(self) -> list[str]:
+        defaults_applied: list[str] = []
+        store = self.ensure_memory_store()
+        if not self.agent_state_vector:
+            from .memory_state import update_agent_state_vector
+
+            derived = update_agent_state_vector(
+                store,
+                window_size=max(1, int(store.state_window_size)),
+                cycle=max([self._episode_cycle(payload) for payload in self.episodes], default=0),
+                previous_state=None,
+            )
+            self.agent_state_vector = derived.to_dict()
+            defaults_applied.append("agent_state_vector")
+        if not self.memory_cognitive_style:
+            defaults_applied.append("memory_cognitive_style")
+        if not self.memory_cycle_interval:
+            self.memory_cycle_interval = 5
+            defaults_applied.append("memory_cycle_interval")
+        self.memory_backend = self._normalize_memory_backend(self.memory_backend)
+        if "memory_backend" not in defaults_applied and self.memory_backend != "memory_store":
+            defaults_applied.append("memory_backend")
+        store.agent_state_vector = dict(self.agent_state_vector)
+        return defaults_applied
+
+    def _set_migration_audit(
+        self,
+        *,
+        migration_from_version: str,
+        legacy_episode_count: int,
+        defaults_applied: list[str],
+        previous_backend: str | None = None,
+    ) -> None:
+        self.migration_audit = {
+            "migration_from_version": str(migration_from_version),
+            "migration_reason": "memory_store_bootstrap",
+            "legacy_episode_count": int(legacy_episode_count),
+            "defaults_applied": list(defaults_applied),
+            "memory_backend_before": self._normalize_memory_backend(previous_backend),
+            "memory_backend_after": self._normalize_memory_backend(self.memory_backend),
+        }
+
+    def _assert_dual_write_invariant(self) -> None:
+        if self.memory_store is None:
+            return
+        legacy_ids = [str(payload.get("episode_id", "")) for payload in self.episodes]
+        store_projection = self.memory_store.to_legacy_episodes()
+        projected_ids = [str(payload.get("episode_id", "")) for payload in store_projection]
+        if legacy_ids != projected_ids:
+            raise RuntimeError("memory store / legacy episode projection diverged")
+
+    def _commit_episode_projection(
+        self,
+        episodes: list[dict[str, object]],
+    ) -> None:
+        staged_episodes = [deepcopy(payload) for payload in episodes[-self.max_episodes :]]
+        staged_store = self._build_memory_store_snapshot(staged_episodes)
+        previous_episodes = self.episodes
+        previous_patterns = self.semantic_patterns
+        previous_store = self.memory_store
+        if staged_store is not None and previous_store is not None:
+            previous_by_id = {entry.id: entry for entry in previous_store.entries}
+            preserved_entries = []
+            for staged_entry in staged_store.entries:
+                existing = previous_by_id.get(staged_entry.id)
+                if existing is None:
+                    preserved_entries.append(staged_entry)
+                    continue
+                existing.__dict__.update(deepcopy(staged_entry.__dict__))
+                preserved_entries.append(existing)
+            staged_store.entries = preserved_entries
+        try:
+            self.episodes = staged_episodes
+            self._refresh_semantic_patterns()
+            self.memory_store = staged_store
+            self._assert_dual_write_invariant()
+        except Exception:
+            self.episodes = previous_episodes
+            self.semantic_patterns = previous_patterns
+            self.memory_store = previous_store
+            raise
 
     def ensure_memory_store(self) -> MemoryStore:
         if self.memory_store is None:
@@ -360,7 +501,9 @@ class LongTermMemory:
     ) -> MemoryStore | None:
         if not force and self.memory_store is None:
             return None
-        self.memory_store = MemoryStore.from_legacy_episodes(self.episodes)
+        self.memory_store = self._build_memory_store_snapshot(
+            [deepcopy(payload) for payload in self.episodes]
+        )
         return self.memory_store
 
     def _upsert_memory_store_episode(self, payload: dict[str, object]) -> MemoryStore | None:
@@ -421,12 +564,18 @@ class LongTermMemory:
         )
         payload = episode.to_dict()
         self._initialize_episode_payload(payload)
-        self.episodes.append(payload)
-        if len(self.episodes) > self.max_episodes:
-            self.episodes = self.episodes[-self.max_episodes :]
-        self._refresh_semantic_patterns()
-        self._upsert_memory_store_episode(payload)
-        return payload
+        staged_episodes = [deepcopy(item) for item in self.episodes]
+        staged_episodes.append(payload)
+        self._commit_episode_projection(staged_episodes)
+        stored_payload = next(
+            (
+                item
+                for item in self.episodes
+                if str(item.get("episode_id", "")) == str(payload.get("episode_id", ""))
+            ),
+            payload,
+        )
+        return stored_payload
 
     def maybe_store_episode(
         self,
@@ -492,9 +641,21 @@ class LongTermMemory:
 
         merged_payload = self._find_merge_target(episode)
         if merged_payload is not None:
-            self._merge_into_existing_episode(merged_payload, episode, gate)
-            self._refresh_semantic_patterns()
-            self._upsert_memory_store_episode(merged_payload)
+            merged_episode_id = str(merged_payload.get("episode_id", ""))
+            staged_episodes = [deepcopy(item) for item in self.episodes]
+            staged_payload = next(
+                (
+                    item
+                    for item in staged_episodes
+                    if str(item.get("episode_id", "")) == merged_episode_id
+                ),
+                None,
+            )
+            if staged_payload is None and staged_episodes:
+                staged_payload = staged_episodes[-1]
+            if staged_payload is not None:
+                self._merge_into_existing_episode(staged_payload, episode, gate)
+                self._commit_episode_projection(staged_episodes)
             return MemoryDecision(
                 value_score=episode.value_score,
                 prediction_error=episode.prediction_error,
@@ -517,11 +678,9 @@ class LongTermMemory:
 
         payload = episode.to_dict()
         self._initialize_episode_payload(payload, gate)
-        self.episodes.append(payload)
-        if len(self.episodes) > self.max_episodes:
-            self.episodes = self.episodes[-self.max_episodes :]
-        self._refresh_semantic_patterns()
-        self._upsert_memory_store_episode(payload)
+        staged_episodes = [deepcopy(item) for item in self.episodes]
+        staged_episodes.append(payload)
+        self._commit_episode_projection(staged_episodes)
         return MemoryDecision(
             value_score=episode.value_score,
             prediction_error=episode.prediction_error,
@@ -540,7 +699,103 @@ class LongTermMemory:
             gating_reasons=tuple(gate["reasons"]),
         )
 
-    def retrieve_similar_memories(
+    def _build_memory_store_query(self, current_state: dict[str, object]):
+        from .memory_retrieval import RetrievalQuery
+
+        observation = _coerce_float_dict(current_state.get("observation"))
+        prediction = _coerce_float_dict(current_state.get("prediction"))
+        errors = _coerce_float_dict(current_state.get("errors"))
+        body_state = _coerce_float_dict(current_state.get("body_state"))
+        state_snapshot = {
+            "observation": observation,
+            "prediction": prediction,
+            "errors": errors,
+            "body_state": body_state,
+        }
+        semantic_grounding = current_state.get("semantic_grounding")
+        semantic_tags: list[str] = []
+        if isinstance(semantic_grounding, dict):
+            semantic_tags.extend(
+                str(item).strip()
+                for item in semantic_grounding.get("motifs", [])
+                if str(item).strip()
+            )
+        context_tags = [
+            key
+            for key, value in {**observation, **body_state}.items()
+            if abs(float(value)) >= 0.15
+        ][:8]
+        content_keywords = [
+            key
+            for key, _ in sorted(
+                {**observation, **errors}.items(),
+                key=lambda item: abs(float(item[1])),
+                reverse=True,
+            )
+            if key
+        ][:8]
+        return RetrievalQuery(
+            semantic_tags=semantic_tags,
+            context_tags=context_tags,
+            content_keywords=content_keywords,
+            state_vector=self._build_embedding(_flatten_state_snapshot(state_snapshot)),
+            reference_cycle=self._resolve_reference_cycle(
+                current_observation=observation,
+                current_body_state=body_state,
+            ),
+        )
+
+    def _retrieve_similar_memories_memory_store(
+        self,
+        current_state: dict[str, object],
+        k: int = 3,
+    ) -> list[dict[str, object]]:
+        if not self.episodes:
+            self.last_retrieval_result = {
+                "memory_backend": "memory_store",
+                "candidates": [],
+                "recall_hypothesis": None,
+                "source_trace": [],
+                "reconstruction_trace": {},
+            }
+            return []
+        store = self.ensure_memory_store()
+        query = self._build_memory_store_query(current_state)
+        result = store.retrieve(
+            query,
+            current_mood=str(current_state.get("current_mood", "")) or None,
+            k=k,
+            agent_state=self.agent_state_vector,
+            cognitive_style=self.memory_cognitive_style,
+        )
+        projected_by_id = {
+            str(payload.get("episode_id", "")): payload
+            for payload in store.to_legacy_episodes()
+        }
+        bridged: list[dict[str, object]] = []
+        for candidate in result.candidates[:k]:
+            payload = dict(projected_by_id.get(candidate.entry_id, {}))
+            payload.setdefault("episode_id", candidate.entry_id)
+            payload.setdefault("content", candidate.entry.content)
+            payload["similarity"] = float(candidate.retrieval_score)
+            payload["vector_similarity"] = float(
+                candidate.score_breakdown.get("context_overlap", 0.0)
+            )
+            payload["schema_overlap"] = float(
+                candidate.score_breakdown.get("tag_overlap", 0.0)
+            )
+            payload["memory_class"] = candidate.memory_class
+            payload["source_type"] = candidate.source_type
+            payload["validation_status"] = candidate.validation_status
+            payload["retrieval_score_breakdown"] = dict(candidate.score_breakdown)
+            bridged.append(payload)
+        self.last_retrieval_result = {
+            "memory_backend": "memory_store",
+            **result.to_dict(),
+        }
+        return bridged
+
+    def _retrieve_similar_memories_legacy(
         self,
         current_state: dict[str, object],
         k: int = 3,
@@ -623,7 +878,34 @@ class LongTermMemory:
             item["vector_similarity"] = vector_similarity
             item["schema_overlap"] = schema_overlap
             results.append(item)
+        self.last_retrieval_result = {
+            "memory_backend": "legacy",
+            "candidates": [
+                {
+                    "entry_id": str(item.get("episode_id", "")),
+                    "retrieval_score": float(item.get("similarity", 0.0)),
+                    "score_breakdown": {
+                        "context_overlap": float(item.get("vector_similarity", 0.0)),
+                        "tag_overlap": float(item.get("schema_overlap", 0.0)),
+                    },
+                }
+                for item in results
+            ],
+            "recall_hypothesis": None,
+            "source_trace": [],
+            "reconstruction_trace": {},
+        }
         return results
+
+    def retrieve_similar_memories(
+        self,
+        current_state: dict[str, object],
+        k: int = 3,
+    ) -> list[dict[str, object]]:
+        _warn_legacy_memory_path("retrieve_similar_memories")
+        if self._memory_store_enabled():
+            return self._retrieve_similar_memories_memory_store(current_state, k=k)
+        return self._retrieve_similar_memories_legacy(current_state, k=k)
 
     def retrieve_similar(
         self,
@@ -632,21 +914,23 @@ class LongTermMemory:
         k: int = 3,
     ) -> list[dict]:
         """Backward-compatible retrieval API used by older callers and tests."""
-        return self.retrieve_similar_memories(
-            {
-                "observation": current_observation,
-                "prediction": {},
-                "errors": {},
-                "body_state": current_body_state,
-            },
-            k=k,
-        )
+        _warn_legacy_memory_path("retrieve_similar")
+        current_state = {
+            "observation": current_observation,
+            "prediction": {},
+            "errors": {},
+            "body_state": current_body_state,
+        }
+        if self._memory_store_enabled():
+            return self._retrieve_similar_memories_memory_store(current_state, k=k)
+        return self._retrieve_similar_memories_legacy(current_state, k=k)
 
     def memory_bias(
         self,
         action: str | ActionSchema,
         retrieved_memories: list[dict[str, object]],
     ) -> float:
+        _warn_legacy_memory_path("memory_bias")
         weighted_utilities: list[float] = []
         for payload in retrieved_memories:
             if action_name(payload.get("action_taken", payload.get("action", ""))) != action:
@@ -665,6 +949,32 @@ class LongTermMemory:
         action: str,
         action_history: list[str] | None = None,
     ) -> float:
+        _warn_legacy_memory_path("pattern_bias")
+        if self._memory_store_enabled() and self.memory_store is not None:
+            matching = [
+                entry
+                for entry in self.ensure_memory_store().entries
+                if action_name(entry.anchor_slots.get("action", "")) == action
+            ]
+            if not matching:
+                return 0.0
+            recurrence = min(1.0, len(matching) / max(1, len(self.memory_store.entries)))
+            mean_utility = mean(entry.valence for entry in matching)
+            bias = mean_utility * (0.40 + recurrence)
+            if action_history:
+                recent = action_history[-8:]
+                if recent:
+                    repeat_ratio = recent.count(action) / len(recent)
+                    streak = 0
+                    for previous in reversed(recent):
+                        if previous != action:
+                            break
+                        streak += 1
+                    if repeat_ratio > 0.50:
+                        bias -= (repeat_ratio - 0.50) * 0.45
+                    if streak > 3:
+                        bias -= (streak - 3) * 0.10
+            return max(-1.0, min(1.0, bias))
         summary = next(
             (
                 pattern
@@ -1059,9 +1369,7 @@ class LongTermMemory:
                 if len(compressed) >= minimum_floor:
                     break
             compressed.sort(key=self._episode_cycle)
-        self.episodes = compressed[-self.max_episodes :]
-        self._refresh_semantic_patterns()
-        self._replace_memory_store_group(self.episodes)
+        self._commit_episode_projection(compressed)
         return removed
 
     def family_coverage_summary(self) -> dict[str, object]:
@@ -1331,11 +1639,22 @@ class LongTermMemory:
             "restart_continuity_until_cycle": self.restart_continuity_until_cycle,
             "restart_continuity_anchor_ids": list(self.restart_continuity_anchor_ids),
             "latest_schema_update": dict(self.latest_schema_update),
+            "agent_state_vector": dict(self.agent_state_vector),
+            "memory_cognitive_style": dict(self.memory_cognitive_style),
+            "memory_cycle_interval": self.memory_cycle_interval,
+            "memory_backend": self._normalize_memory_backend(self.memory_backend),
+            "migration_audit": dict(self.migration_audit),
+            "last_retrieval_result": dict(self.last_retrieval_result),
             "memory_store": self.memory_store.to_dict() if self.memory_store is not None else None,
         }
 
     @classmethod
-    def from_dict(cls, payload: dict | None) -> LongTermMemory:
+    def from_dict(
+        cls,
+        payload: dict | None,
+        *,
+        state_version: str | None = None,
+    ) -> LongTermMemory:
         if not payload:
             return cls()
 
@@ -1391,6 +1710,20 @@ class LongTermMemory:
             latest_schema_update=dict(payload.get("latest_schema_update", {}))
             if isinstance(payload.get("latest_schema_update"), dict)
             else {},
+            agent_state_vector=dict(payload.get("agent_state_vector", {}))
+            if isinstance(payload.get("agent_state_vector"), dict)
+            else {},
+            memory_cognitive_style=dict(payload.get("memory_cognitive_style", {}))
+            if isinstance(payload.get("memory_cognitive_style"), dict)
+            else {},
+            memory_cycle_interval=int(payload.get("memory_cycle_interval", 5)),
+            memory_backend=cls._normalize_memory_backend(payload.get("memory_backend", "memory_store")),
+            migration_audit=dict(payload.get("migration_audit", {}))
+            if isinstance(payload.get("migration_audit"), dict)
+            else {},
+            last_retrieval_result=dict(payload.get("last_retrieval_result", {}))
+            if isinstance(payload.get("last_retrieval_result"), dict)
+            else {},
             memory_store=MemoryStore.from_dict(payload.get("memory_store", {}))
             if isinstance(payload.get("memory_store"), dict)
             else None,
@@ -1398,6 +1731,23 @@ class LongTermMemory:
         memory._rehydrate_continuity_payloads()
         if memory.memory_store is not None and not memory._memory_store_matches_episodes():
             memory._replace_memory_store_group(memory.episodes)
+        migration_version = str(state_version or "")
+        needs_bootstrap = (
+            not memory.agent_state_vector
+            or not memory.memory_cognitive_style
+            or not memory.memory_cycle_interval
+            or migration_version in {"", "0.6", "0.5", "0.4", "0.3", "0.2", "0.1"}
+        )
+        if needs_bootstrap:
+            previous_backend = memory.memory_backend
+            defaults_applied = memory._bootstrap_memory_awareness_defaults()
+            if migration_version:
+                memory._set_migration_audit(
+                    migration_from_version=migration_version,
+                    legacy_episode_count=len(memory.episodes),
+                    defaults_applied=defaults_applied,
+                    previous_backend=previous_backend,
+                )
         return memory
 
     def _build_episode(

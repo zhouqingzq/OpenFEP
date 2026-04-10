@@ -10,14 +10,15 @@
       "honesty_status": "FAIL",
       "failed_closed": true,
       "missing_integration_scenarios": [],
-      "mismatched_status_records": [],
+      "mismatched_status_records": [
+        "legacy_regression_prereq"
+      ],
       "mismatched_source_api_call_id_records": [],
       "duplicate_source_api_call_ids": [],
       "external_check_failures": {
         "legacy_regression_prereq": [
-          "regression_command_matches_expected",
-          "regression_duration_recorded",
-          "regression_summary_looks_like_pytest_output"
+          "skip_reason_present",
+          "skip_targets_match_expected"
         ]
       }
     },

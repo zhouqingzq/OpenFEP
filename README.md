@@ -18,6 +18,15 @@ Language matters because it acts as an offline simulator: it lets an agent const
 
 From that perspective, **personality** is a more natural target for FEP than intelligence itself. If personality is understood as a stable structure of prior preferences formed through long-term interaction with the environment, then FEP offers a compelling account of how personality emerges, stabilizes, and self-reinforces. On this view, personality has two layers: **temperament**, the pre-linguistic prediction-preference structure shaped through embodied interaction, and **characterological personality**, the linguistically mediated self-concept through which a person interprets, narrates, reinforces, or revises those deeper dispositions.
 
+## M4 Acceptance Status Note
+
+As of April 9, 2026, the official repository status for the memory milestones is:
+
+- `M4.6`: `INCOMPLETE / NOT_ISSUED` because the current acceptance builder still records `legacy_integration=NOT_RUN`.
+- `M4.7`: `INCOMPLETE / NOT_ISSUED` because the current acceptance builder still records `regression=NOT_RUN`.
+
+Committed acceptance artifacts should be read as canonical only when they match the current builder outputs and the artifact drift test passes.
+
 ## Core Principles
 
 - **Free energy minimization** - prediction error plus internal pressure from low energy, high stress, fatigue, and thermal imbalance.

@@ -38,8 +38,8 @@ from .tracing import JsonlTraceWriter, derive_trace_path
 from .types import DecisionDiagnostics, InterventionScore, SleepSummary
 
 
-STATE_VERSION = "0.6"
-SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.5", "0.4", "0.3", "0.2", "0.1"}
+STATE_VERSION = "0.7"
+SUPPORTED_STATE_VERSIONS = {STATE_VERSION, "0.6", "0.5", "0.4", "0.3", "0.2", "0.1"}
 RESTART_MEMORY_CONTINUITY_WINDOW = 24
 RESTART_REBIND_MIN_CYCLE = 128
 MATURE_CONTINUITY_MIN_CYCLE = 400
@@ -97,9 +97,10 @@ class SegmentRuntime:
         state_path: str | Path | None = None,
         trace_path: str | Path | None = None,
         state_load_status: str = "fresh",
+        memory_backend: str = "memory_store",
     ) -> None:
         self.world = world or SimulatedWorld()
-        self.agent = agent or SegmentAgent(rng=self.world.rng)
+        self.agent = agent or SegmentAgent(rng=self.world.rng, memory_backend=memory_backend)
         self.agent.rng = self.world.rng
         if self.agent.sleep_llm_extractor is None:
             self.agent.sleep_llm_extractor = build_sleep_llm_extractor()
@@ -150,6 +151,7 @@ class SegmentRuntime:
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
         reset_predictive_precisions: bool = False,
         enable_restart_rebind: bool = False,
+        memory_backend: str = "memory_store",
     ) -> SegmentRuntime:
         path = Path(state_path) if state_path else None
         resolved_trace_path = (
@@ -163,6 +165,7 @@ class SegmentRuntime:
                 agent=SegmentAgent(
                     rng=world.rng,
                     predictive_hyperparameters=predictive_hyperparameters,
+                    memory_backend=memory_backend,
                 ),
                 world=world,
                 state_path=path,
@@ -190,7 +193,7 @@ class SegmentRuntime:
                 JsonlTraceWriter(resolved_trace_path).reset()
             world = SimulatedWorld(seed=seed)
             runtime = cls(
-                agent=SegmentAgent(rng=world.rng),
+                agent=SegmentAgent(rng=world.rng, memory_backend=memory_backend),
                 world=world,
                 state_path=path,
                 trace_path=resolved_trace_path,
@@ -212,6 +215,7 @@ class SegmentRuntime:
             rng=world.rng,
             predictive_hyperparameters=predictive_hyperparameters,
             reset_predictive_precisions=reset_predictive_precisions,
+            state_version=str(payload.get("state_version", "")),
         )
         metrics = RunMetrics.from_dict(payload.get("metrics"))
         host_state = AgentState.from_dict(payload.get("host_state"))
@@ -247,6 +251,7 @@ class SegmentRuntime:
             state_path=path,
             trace_path=resolved_trace_path,
             state_load_status="restored",
+            memory_backend=memory_backend,
         )
         should_enable_restart_rebind = False
         restart_anchors = payload.get("restart_anchors")

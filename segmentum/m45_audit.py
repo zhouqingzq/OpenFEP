@@ -369,6 +369,10 @@ def _evaluate_acceptance(payload: dict[str, Any]) -> dict[str, Any]:
                 and _transition_passes(dict(boundary_transitions.get("identity_transition", {})), old_level="short", new_level="mid")
                 and _transition_passes(dict(boundary_transitions.get("long_transition", {})), old_level="mid", new_level="long")
                 and _store_level_rank(integration_transitions.get("identity_store_level")) > _store_level_rank(integration_transitions.get("noise_store_level"))
+                and _store_level_rank(integration_transitions.get("identity_linked_store_level")) > _store_level_rank(integration_transitions.get("identity_null_store_level"))
+                and float(integration_transitions.get("identity_score_delta", 0.0)) > 0.0
+                and integration_transitions.get("identity_null_store_level") == "short"
+                and float(integration_transitions.get("neutral_promotion_rate", 1.0)) < 0.05
             ),
             "blocking": True,
             "evidence": {"boundary": boundary_transitions, "integration": integration_transitions},

@@ -3,9 +3,9 @@
 Official M4.6 runtime acceptance artifact built from real evidence records.
 
 Mode: `official_runtime_acceptance`
-Status: `PASS`
-Formal Acceptance Conclusion: `ACCEPT`
-Recommendation: `ACCEPT`
+Status: `INCOMPLETE`
+Formal Acceptance Conclusion: `NOT_ISSUED`
+Recommendation: `DEFER`
 
 ## Gate Status
 
@@ -15,7 +15,7 @@ Recommendation: `ACCEPT`
 - G4 `reconsolidation`: `PASS` (passed=true)
 - G5 `offline_consolidation_pipeline`: `PASS` (passed=true)
 - G6 `inference_validation_gate`: `PASS` (passed=true)
-- G7 `legacy_integration`: `PASS` (passed=true)
+- G7 `legacy_integration`: `NOT_RUN` (passed=false)
 - G8 `report_honesty`: `PASS` (passed=true)
 
 ## Notes

@@ -668,3 +668,33 @@ Codex 执行要求
 当前替代方案
 风险残留点
 后续建议
+## 2026-04-09 Hotfix Addendum
+
+The M4.5 identity-retention hotfix freezes the promotion rule used by the default code path.
+
+- Token normalization: trim, lowercase, split on `[^a-z0-9_]+`.
+- `entry_tokens = semantic_tags + context_tags + content`
+- `identity_tokens = state_vector.identity_active_themes`
+- `identity_match_ratio = |shared(entry_tokens, identity_tokens)| / min(|entry_tokens|, |identity_tokens|)` when both sides are non-empty, else `0.0`.
+- This hotfix does not add synonym expansion, embeddings, or learned theme anchors.
+
+Promotion rule:
+
+- `identity_link_strength = clamp(0.6 * relevance_self + 0.4 * identity_match_ratio)`
+- `identity_link_active = identity_link_strength >= identity_priority_threshold`, with the state-backed path preferred and an entry-level fallback used only when no current identity state is available.
+- The self-relevance multiplier applies only on the `short -> mid` branch.
+- Ordering is fixed: compute the base score first, apply `novelty_noise_penalty`, then apply the multiplier.
+- `boosted_short_to_mid = min(score_cap, base_short_to_mid * (1 + alpha * identity_link_strength))`
+- `alpha = 0.35`
+- `score_cap = 0.95`
+- `mid -> long` promotion must use the unboosted base score.
+
+Required audit fields:
+
+- `identity_match_ratio`
+- `identity_link_strength`
+- `identity_link_active`
+- `self_relevance_multiplier`
+- `base_short_to_mid_score`
+- `boosted_short_to_mid_score`
+- `score_cap_applied`

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import random
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -18,6 +19,10 @@ from .memory_decay import (
     trace_decay_rate,
 )
 from .memory_model import MemoryClass, MemoryEntry, SourceType, StoreLevel
+
+
+_LOGGER = logging.getLogger(__name__)
+_PROMOTION_METADATA_WARNING_EMITTED = False
 
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
@@ -60,6 +65,19 @@ def _internal_metadata(entry: MemoryEntry) -> dict[str, object]:
         internal = {}
         entry.compression_metadata["m45_internal"] = internal
     return internal
+
+
+def _warn_missing_promotion_evidence(entry: MemoryEntry, missing_sections: list[str]) -> None:
+    global _PROMOTION_METADATA_WARNING_EMITTED
+    if _PROMOTION_METADATA_WARNING_EMITTED:
+        return
+    _LOGGER.warning(
+        "Promotion is running in fallback mode because encoding evidence is missing "
+        "(entry_id=%s, missing=%s); identity signal degraded.",
+        entry.id,
+        ",".join(missing_sections),
+    )
+    _PROMOTION_METADATA_WARNING_EMITTED = True
 
 
 def _effective_cycle(entry: MemoryEntry, baseline_cycle: int) -> int:
@@ -338,7 +356,7 @@ class MemoryStore:
         current_state: dict[str, object] | None = None,
         cognitive_style: dict[str, object] | object | None = None,
     ) -> None:
-        from .memory_state import normalize_agent_state
+        from .memory_state import identity_match_ratio_for_entry, normalize_agent_state
 
         internal, baseline_cycle, base_trace, base_access = _ensure_decay_baseline(entry)
         effective_cycle = _effective_cycle(entry, baseline_cycle)
@@ -348,6 +366,35 @@ class MemoryStore:
         selectivity = _style_value(cognitive_style, "attention_selectivity", 0.0)
         rigidity = _style_value(cognitive_style, "update_rigidity", 0.0)
         identity_active = 1.0 if state_vector.identity_active_themes else 0.0
+        encoding_audit = dict(dict(entry.compression_metadata or {}).get("encoding_audit", {}))
+        dynamic_salience_audit = dict(
+            dict(entry.compression_metadata or {}).get("dynamic_salience_audit", {})
+        )
+        missing_evidence: list[str] = []
+        if not encoding_audit:
+            missing_evidence.append("encoding_audit")
+        if not dynamic_salience_audit:
+            missing_evidence.append("dynamic_salience_audit")
+        if missing_evidence:
+            _warn_missing_promotion_evidence(entry, missing_evidence)
+        retained_identity_priority = "identity_continuity_priority" in list(
+            dict(encoding_audit.get("retention_priority", {})).get("reasons", [])
+        )
+        encoded_identity_match_ratio = _coerce_float(
+            dynamic_salience_audit.get("identity_match_ratio"),
+            0.0,
+        )
+        identity_match_ratio = max(
+            identity_match_ratio_for_entry(entry, state_vector),
+            encoded_identity_match_ratio,
+        )
+        identity_context_available = bool(state_vector.identity_active_themes)
+        identity_fallback_active = entry.relevance_self >= self.identity_priority_threshold
+        identity_link_strength = _clamp((entry.relevance_self * 0.6) + (identity_match_ratio * 0.4))
+        identity_link_active = (
+            (identity_context_available or retained_identity_priority or identity_fallback_active)
+            and identity_link_strength >= self.identity_priority_threshold
+        )
         threat_snapshot_bonus = (
             0.14
             if (
@@ -369,11 +416,17 @@ class MemoryStore:
         retrieval_short = min(1.0, entry.retrieval_count / max(1, self.short_to_mid_retrieval_threshold))
         retrieval_long = min(1.0, entry.retrieval_count / max(1, self.mid_to_long_retrieval_threshold))
         identity_bonus = entry.relevance_self * (0.18 + (0.10 * identity_active))
+        abstraction_bonus = (
+            entry.abstractness * 0.16
+            if entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED}
+            else 0.0
+        )
         score_breakdown = {
             "salience_signal": round(entry.salience * 0.52, 6),
             "retrieval_short_signal": round(retrieval_short * 0.16, 6),
             "retrieval_long_signal": round(retrieval_long * 0.22, 6),
             "identity_signal": round(identity_bonus, 6),
+            "abstraction_bonus": round(abstraction_bonus, 6),
             "threat_snapshot_bonus": round(threat_snapshot_bonus, 6),
             "novelty_noise_penalty": round(novelty_noise_penalty, 6),
             "rigidity_penalty": round(rigidity * 0.08, 6),
@@ -388,9 +441,18 @@ class MemoryStore:
             - score_breakdown["novelty_noise_penalty"]
             - score_breakdown["rigidity_penalty"]
         )
+        self_relevance_multiplier = 1.0 + (0.35 * identity_link_strength) if identity_link_active else 1.0
+        unbounded_short_to_mid_score = short_to_mid_score * self_relevance_multiplier
+        boosted_short_to_mid_score = (
+            min(0.95, unbounded_short_to_mid_score)
+            if identity_link_active
+            else short_to_mid_score
+        )
+        score_cap_applied = identity_link_active and boosted_short_to_mid_score < unbounded_short_to_mid_score
         mid_to_long_score = (
             (entry.salience * 0.44)
             + score_breakdown["retrieval_long_signal"]
+            + score_breakdown["abstraction_bonus"]
             + (entry.relevance_self * (0.22 + (0.10 * identity_active)))
             + (threat_snapshot_bonus * 0.85)
             - novelty_noise_penalty
@@ -410,14 +472,24 @@ class MemoryStore:
         if entry.compression_metadata is None:
             entry.compression_metadata = {}
         entry.compression_metadata["m47_promotion_audit"] = {
-            "short_to_mid_score": round(short_to_mid_score, 6),
+            "short_to_mid_score": round(boosted_short_to_mid_score, 6),
             "mid_to_long_score": round(mid_to_long_score, 6),
             "score_thresholds": dict(score_thresholds),
             "score_breakdown": dict(score_breakdown),
             "state_identity_active": bool(identity_active),
+            "identity_match_ratio": round(identity_match_ratio, 6),
+            "identity_link_strength": round(identity_link_strength, 6),
+            "identity_link_active": bool(identity_link_active),
+            "identity_context_available": bool(identity_context_available),
+            "identity_fallback_active": bool(identity_fallback_active),
+            "retained_identity_priority": bool(retained_identity_priority),
+            "self_relevance_multiplier": round(self_relevance_multiplier, 6),
+            "base_short_to_mid_score": round(short_to_mid_score, 6),
+            "boosted_short_to_mid_score": round(boosted_short_to_mid_score, 6),
+            "score_cap_applied": bool(score_cap_applied),
         }
 
-        if new_level is StoreLevel.SHORT and short_to_mid_score >= score_thresholds["short_to_mid"]:
+        if new_level is StoreLevel.SHORT and boosted_short_to_mid_score >= score_thresholds["short_to_mid"]:
             new_level = StoreLevel.MID
         if new_level is StoreLevel.MID and mid_to_long_score >= score_thresholds["mid_to_long"]:
             new_level = StoreLevel.LONG
@@ -433,9 +505,19 @@ class MemoryStore:
             promotion_context={
                 "short_to_mid_threshold": score_thresholds["short_to_mid"],
                 "mid_to_long_threshold": score_thresholds["mid_to_long"],
-                "promotion_score_short_to_mid": round(short_to_mid_score, 6),
+                "promotion_score_short_to_mid": round(boosted_short_to_mid_score, 6),
                 "promotion_score_mid_to_long": round(mid_to_long_score, 6),
                 "promotion_score_breakdown": dict(score_breakdown),
+                "identity_match_ratio": round(identity_match_ratio, 6),
+                "identity_link_strength": round(identity_link_strength, 6),
+                "identity_link_active": bool(identity_link_active),
+                "identity_context_available": bool(identity_context_available),
+                "identity_fallback_active": bool(identity_fallback_active),
+                "retained_identity_priority": bool(retained_identity_priority),
+                "self_relevance_multiplier": round(self_relevance_multiplier, 6),
+                "base_short_to_mid_score": round(short_to_mid_score, 6),
+                "boosted_short_to_mid_score": round(boosted_short_to_mid_score, 6),
+                "score_cap_applied": bool(score_cap_applied),
                 "promotion_channel": "memory_store_add",
             },
         )
