@@ -50,21 +50,34 @@ class GenerativeWorldModel:
 
         state_projection = memory_context.get("state_projection", {})
         state_delta = memory_context.get("state_delta", {})
+        prior_projection = memory_context.get("prior_projection", state_projection)
+        prior_delta = memory_context.get("prior_delta", state_delta)
+        residual_prior = memory_context.get("residual_prior", {})
         blend = float(memory_context.get("prediction_blend", 0.20))
         delta_gain = float(memory_context.get("delta_gain", 0.35))
+        residual_gain = float(memory_context.get("residual_gain", 0.0))
         if not isinstance(state_projection, dict):
             state_projection = {}
         if not isinstance(state_delta, dict):
             state_delta = {}
+        if not isinstance(prior_projection, dict):
+            prior_projection = state_projection
+        if not isinstance(prior_delta, dict):
+            prior_delta = state_delta
+        if not isinstance(residual_prior, dict):
+            residual_prior = {}
 
         adjusted = {}
         for key, value in baseline.items():
-            projection = float(state_projection.get(key, value))
-            delta = float(state_delta.get(key, 0.0))
+            projection = float(prior_projection.get(key, state_projection.get(key, value)))
+            delta = float(prior_delta.get(key, state_delta.get(key, 0.0)))
+            residual_target = float(residual_prior.get(key, projection))
+            residual_offset = residual_target - projection if key in residual_prior else 0.0
             adjusted[key] = clamp(
                 (value * (1.0 - blend))
                 + (projection * blend)
                 + (delta * delta_gain)
+                + (residual_offset * residual_gain)
             )
 
         delta = {
@@ -77,6 +90,19 @@ class GenerativeWorldModel:
             "prediction_after_memory": dict(adjusted),
             "prediction_delta": delta,
             "memory_context_summary": str(memory_context.get("summary", "")),
+            "prior_projection": {
+                key: float(prior_projection.get(key, state_projection.get(key, baseline[key])))
+                for key in baseline
+            },
+            "prior_delta": {
+                key: float(prior_delta.get(key, state_delta.get(key, 0.0)))
+                for key in baseline
+            },
+            "residual_prior": {
+                key: float(residual_prior.get(key, 0.0))
+                for key in baseline
+                if key in residual_prior
+            },
         }
         return adjusted
 

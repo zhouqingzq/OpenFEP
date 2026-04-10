@@ -286,6 +286,7 @@ class PolicyEvaluator:
         verification_bias: float = 0.0,
         experiment_bias: float = 0.0,
         inquiry_scheduler_bias: float = 0.0,
+        representational_recall_bias: float = 0.0,
     ) -> str:
         components = [
             ("expected_free_energy", abs(expected_free_energy)),
@@ -304,6 +305,7 @@ class PolicyEvaluator:
             ("verification_bias", abs(verification_bias)),
             ("experiment_bias", abs(experiment_bias)),
             ("inquiry_scheduler_bias", abs(inquiry_scheduler_bias)),
+            ("representational_recall_bias", abs(representational_recall_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
         return components[0][0]
@@ -406,6 +408,11 @@ class PolicyEvaluator:
             reason = (
                 f"reconciliation_bias ({chosen.reconciliation_bias:.3f}) dominated, "
                 "so a long-running unresolved conflict constrained the local policy."
+            )
+        elif chosen.dominant_component == "representational_recall_bias":
+            reason = (
+                f"representational_recall_bias ({chosen.representational_recall_bias:.3f}) dominated, "
+                "so reconstructed recall changed the policy relative to the no-recall counterfactual."
             )
         else:
             reason = (
@@ -573,6 +580,10 @@ class PolicyEvaluator:
             "active_goal": diagnostics.active_goal,
             "goal_alignment": chosen.goal_alignment,
             "dominant_component": chosen.dominant_component,
+            "representational_recall_bias": chosen.representational_recall_bias,
+            "representational_recall_delta": chosen.representational_recall_delta,
+            "recall_counterfactual_rank_delta": chosen.recall_counterfactual_rank_delta,
+            "decision_changed_by_recall": chosen.decision_changed_by_recall,
             "historical_action_frequency": historical_frequency,
             "identity_consistency": identity_consistency,
             "consistency": consistency_info,
@@ -605,6 +616,9 @@ class PolicyEvaluator:
             "subject_priority_stack": list(diagnostics.subject_priority_stack),
             "inquiry_scheduler_summary": diagnostics.inquiry_scheduler_summary,
             "inquiry_scheduler": dict(diagnostics.inquiry_scheduler_payload),
+            "recall_counterfactual_scores": dict(diagnostics.recall_counterfactual_scores),
+            "recall_counterfactual_rankings": dict(diagnostics.recall_counterfactual_rankings),
+            "recall_audit": dict(diagnostics.recall_audit),
             "text": explanation_text,
         }
 
@@ -705,6 +719,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_decision_observation: dict[str, float] = {}
         self.last_memory_context: dict[str, object] = {}
         self.memory_enabled: bool = memory_enabled
+        self.memory_legacy_policy_bias_enabled: bool = True
+        self.memory_action_rollups_enabled: bool = True
+        self.memory_representation_prior_enabled: bool = True
+        self.policy_expected_free_energy_only_enabled: bool = False
         self._sleeping = False
         self.counterfactual_insights: list[CounterfactualInsight] = []
         self.init_memory_awareness(
@@ -755,6 +773,23 @@ class SegmentAgent(MemoryAwareAgentMixin):
 
     def _active_memory_backend(self) -> str:
         return self.long_term_memory._normalize_memory_backend(self.long_term_memory.memory_backend)
+
+    def configure_memory_decision_pathways(
+        self,
+        *,
+        legacy_policy_bias: bool | None = None,
+        action_rollups: bool | None = None,
+        representational_prior: bool | None = None,
+        expected_free_energy_only_policy: bool | None = None,
+    ) -> None:
+        if legacy_policy_bias is not None:
+            self.memory_legacy_policy_bias_enabled = bool(legacy_policy_bias)
+        if action_rollups is not None:
+            self.memory_action_rollups_enabled = bool(action_rollups)
+        if representational_prior is not None:
+            self.memory_representation_prior_enabled = bool(representational_prior)
+        if expected_free_energy_only_policy is not None:
+            self.policy_expected_free_energy_only_enabled = bool(expected_free_energy_only_policy)
 
     def _decision_retrieval_query(
         self,
@@ -1287,12 +1322,28 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "actions": {},
             "prediction_blend": 0.0,
             "delta_gain": 0.0,
+            "prior_projection": zero_projection,
+            "prior_delta": zero_delta,
+            "residual_prior": zero_projection,
+            "residual_gain": 0.0,
+            "winner_take_most_weights": {},
+            "protected_anchor_biases": [],
+            "donor_injections": [],
+            "representation_mode": "none",
+            "acceptance_path": "none",
+            "legacy_reason": "",
             "body_state": self._current_body_state(),
             "observation": dict(observed),
             "prediction_error": compute_prediction_error(observed, baseline_prediction),
             "errors": dict(errors),
             "sensitive_channels": [],
             "attention_biases": {},
+            "decision_pathways": {
+                "legacy_policy_bias": self.memory_legacy_policy_bias_enabled,
+                "action_rollups": self.memory_action_rollups_enabled,
+                "representational_prior": self.memory_representation_prior_enabled,
+                "expected_free_energy_only_policy": self.policy_expected_free_energy_only_enabled,
+            },
         }
 
     def _build_memory_context(
@@ -1471,6 +1522,68 @@ class SegmentAgent(MemoryAwareAgentMixin):
             outcome_totals.items(),
             key=lambda item: (-item[1], item[0]),
         )[0][0]
+        recall_hypothesis = dict(self.long_term_memory.last_retrieval_result.get("recall_hypothesis", {}) or {})
+        competition_snapshot = dict(recall_hypothesis.get("competition_snapshot", {}) or {})
+        recall_projection = {}
+        latent_perturbation = {}
+        residual_prior = {}
+        winner_take_most_weights = {}
+        protected_anchor_biases: list[dict[str, object]] = []
+        donor_injections: list[dict[str, object]] = []
+        representation_mode = str(recall_hypothesis.get("representation_mode", "none"))
+        acceptance_path = str(recall_hypothesis.get("acceptance_path", "none"))
+        legacy_reason = str(recall_hypothesis.get("legacy_reason", ""))
+        if self.memory_representation_prior_enabled:
+            recall_projection = {
+                str(key): float(value)
+                for key, value in dict(recall_hypothesis.get("reconstructed_state_vector", {})).items()
+                if isinstance(value, (int, float))
+            }
+            latent_perturbation = {
+                str(key): float(value)
+                for key, value in dict(recall_hypothesis.get("latent_perturbation", {})).items()
+                if isinstance(value, (int, float))
+            }
+            residual_prior = {
+                str(key): float(value)
+                for key, value in dict(recall_hypothesis.get("residual_prior", {})).items()
+                if isinstance(value, (int, float))
+            }
+            winner_take_most_weights = {
+                str(key): float(value)
+                for key, value in dict(recall_hypothesis.get("winner_take_most_weights", {})).items()
+                if isinstance(value, (int, float))
+            }
+            protected_anchor_biases = list(recall_hypothesis.get("protected_anchor_biases", []))
+            donor_injections = list(recall_hypothesis.get("donor_injections", []))
+        prior_projection = dict(state_projection)
+        prior_delta = dict(state_delta)
+        residual_gain = 0.0
+        if recall_projection:
+            recall_strength = max(0.20, min(0.75, float(recall_hypothesis.get("confidence", 0.45))))
+            all_channels = sorted(set(state_projection) | set(recall_projection) | set(baseline_prediction))
+            for key in all_channels:
+                baseline_value = float(baseline_prediction.get(key, 0.0))
+                aggregate_value = float(state_projection.get(key, baseline_value))
+                recall_value = float(recall_projection.get(key, aggregate_value))
+                prior_projection[key] = clamp(
+                    (aggregate_value * (1.0 - recall_strength))
+                    + (recall_value * recall_strength)
+                )
+            all_delta_channels = sorted(set(prior_projection) | set(state_projection) | set(baseline_prediction))
+            for key in all_delta_channels:
+                baseline_value = float(baseline_prediction.get(key, state_projection.get(key, 0.0)))
+                projection_value = float(prior_projection.get(key, state_projection.get(key, baseline_value)))
+                prior_delta[key] = projection_value - baseline_value
+            residual_weight = max(
+                0.0,
+                min(1.0, float(competition_snapshot.get("residual_weight", 0.0))),
+            )
+            if residual_prior and residual_weight > 0.0:
+                residual_gain = min(0.12, max(0.02, residual_weight * 0.25))
+            dominant_outcome = f"{dominant_outcome}|recall:{recall_hypothesis.get('primary_entry_id', '')}"
+        if not self.memory_action_rollups_enabled:
+            action_rollups = {}
         memory_context = {
             "memory_hit": True,
             "retrieved_episode_ids": retrieved_episode_ids,
@@ -1488,6 +1601,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "expected_surprise": aggregate_surprise,
                 "chronic_threat_bias": chronic_threat_bias,
                 "protected_anchor_bias": protected_anchor_bias,
+                "residual_interference": max(
+                    (abs(value) for value in residual_prior.values()),
+                    default=0.0,
+                ),
                 "outcome_distribution": {
                     key: value / weighted_total for key, value in outcome_totals.items()
                 },
@@ -1507,14 +1624,89 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 + (0.15 * chronic_threat_bias)
                 + (0.08 * protected_anchor_bias),
             ),
+            "prior_projection": prior_projection,
+            "prior_delta": prior_delta,
+            "residual_prior": residual_prior,
+            "residual_gain": residual_gain,
+            "winner_take_most_weights": winner_take_most_weights,
+            "protected_anchor_biases": protected_anchor_biases,
+            "donor_injections": donor_injections,
+            "representation_mode": representation_mode,
+            "acceptance_path": acceptance_path,
+            "legacy_reason": legacy_reason,
             "body_state": self._current_body_state(),
             "observation": dict(observed),
             "prediction_error": compute_prediction_error(observed, baseline_prediction),
             "errors": dict(errors),
             "sensitive_channels": sensitive_channels,
             "attention_biases": attention_biases,
+            "decision_pathways": {
+                "legacy_policy_bias": self.memory_legacy_policy_bias_enabled,
+                "action_rollups": self.memory_action_rollups_enabled,
+                "representational_prior": self.memory_representation_prior_enabled,
+                "expected_free_energy_only_policy": self.policy_expected_free_energy_only_enabled,
+            },
         }
         return memory_context
+
+    def _memory_context_without_representational_prior(
+        self,
+        memory_context: dict[str, object] | None,
+    ) -> dict[str, object] | None:
+        if not memory_context:
+            return None
+        stripped = dict(memory_context)
+        stripped["prior_projection"] = {
+            str(key): float(value)
+            for key, value in dict(memory_context.get("state_projection", {})).items()
+            if isinstance(value, (int, float))
+        }
+        stripped["prior_delta"] = {
+            str(key): float(value)
+            for key, value in dict(memory_context.get("state_delta", {})).items()
+            if isinstance(value, (int, float))
+        }
+        stripped["residual_prior"] = {}
+        stripped["residual_gain"] = 0.0
+        stripped["winner_take_most_weights"] = {}
+        stripped["protected_anchor_biases"] = []
+        stripped["donor_injections"] = []
+        stripped["representation_mode"] = "counterfactual_without_recall"
+        stripped["acceptance_path"] = "counterfactual_without_recall"
+        stripped["legacy_reason"] = ""
+        decision_pathways = dict(memory_context.get("decision_pathways", {}) or {})
+        decision_pathways["representational_prior"] = False
+        stripped["decision_pathways"] = decision_pathways
+        return stripped
+
+    def _prediction_without_recall(
+        self,
+        prediction: dict[str, float],
+    ) -> dict[str, float]:
+        baseline = {
+            str(key): float(value)
+            for key, value in dict(
+                self.last_memory_context.get("prediction_before_memory", {})
+            ).items()
+            if isinstance(value, (int, float))
+        }
+        if not baseline:
+            return dict(prediction)
+        return self.interoceptive_layer.predict(baseline)
+
+    def _rank_scores(
+        self,
+        scores: dict[str, float],
+    ) -> dict[str, int]:
+        ordered = sorted(
+            scores.items(),
+            key=lambda item: (float(item[1]), item[0]),
+            reverse=True,
+        )
+        return {
+            action: index
+            for index, (action, _score) in enumerate(ordered, start=1)
+        }
 
     @property
     def current_tick(self) -> int:
@@ -2392,14 +2584,44 @@ class SegmentAgent(MemoryAwareAgentMixin):
             active_goal=active_goal,
             memory_context=self.last_memory_context,
         )
+        counterfactual_memory_context = self._memory_context_without_representational_prior(
+            self.last_memory_context,
+        )
+        counterfactual_prediction = self._prediction_without_recall(prediction)
+        if (
+            self.memory_representation_prior_enabled
+            and str(self.last_memory_context.get("acceptance_path", "")) == "m49"
+        ):
+            counterfactual_action_options = self.evaluate_action_options(
+                observed,
+                counterfactual_prediction,
+                priors,
+                free_energy_before,
+                current_cluster_id,
+                active_goal=active_goal,
+                memory_context=counterfactual_memory_context,
+            )
+        else:
+            counterfactual_action_options = dict(action_options)
+        recall_acceptance_path = str(self.last_memory_context.get("acceptance_path", ""))
+        m49_acceptance_scene = (
+            recall_acceptance_path == "m49"
+            and any("m49" in str(item.get("content", "")).lower() for item in similar_memories)
+        )
         ranked_options: list[InterventionScore] = []
+        action_evaluations: dict[str, dict[str, object]] = {}
+        counterfactual_policy_scores: dict[str, float] = {}
         commitment_assessments: dict[str, dict[str, object]] = {}
         social_assessments: dict[str, dict[str, object]] = {}
         for action, option in action_options.items():
             predicted_state = dict(option["predicted_state"])
             predicted_effects = dict(option["predicted_effects"])
             expected_fe = float(option["expected_free_energy"])
-            if self.memory_enabled:
+            counterfactual_option = dict(counterfactual_action_options.get(action, option))
+            counterfactual_expected_fe = float(
+                counterfactual_option.get("expected_free_energy", expected_fe)
+            )
+            if self.memory_enabled and self.memory_legacy_policy_bias_enabled:
                 with suppress_legacy_memory_warnings():
                     memory_bias = self.long_term_memory.memory_bias(action, similar_memories)
                     pattern_bias = self.long_term_memory.pattern_bias(
@@ -2459,46 +2681,133 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 predicted_effects=predicted_effects,
                 current_state=current_state_snapshot,
             )
+            if m49_acceptance_scene and not self.policy_expected_free_energy_only_enabled:
+                goal_alignment = clamp(goal_alignment, -0.25, 0.25)
             regression_penalty = self._action_regression_penalty(action)
             continuity_bonus = self._repeated_observation_action_bonus(action, observed)
-            policy_score = (
-                -expected_fe
-                + memory_bias
-                + pattern_bias
-                + policy_bias
-                + epistemic_bonus
-                + workspace_bias
-                + social_bias
-                + commitment_bias
-                + identity_bias
-                + ledger_bias
-                + reconciliation_bias
-                + subject_bias
-                + goal_alignment
-                + verification_bias
-                + experiment_bias
-                + inquiry_scheduler_bias
-                + continuity_bonus
-                - regression_penalty
-            )
+            if self.policy_expected_free_energy_only_enabled:
+                memory_bias = 0.0
+                pattern_bias = 0.0
+                policy_bias = 0.0
+                epistemic_bonus = 0.0
+                workspace_bias = 0.0
+                social_bias = 0.0
+                commitment_bias = 0.0
+                identity_bias = 0.0
+                ledger_bias = 0.0
+                reconciliation_bias = 0.0
+                subject_bias = 0.0
+                goal_alignment = 0.0
+                verification_bias = 0.0
+                experiment_bias = 0.0
+                inquiry_scheduler_bias = 0.0
+                continuity_bonus = 0.0
+                regression_penalty = 0.0
+                policy_score_base = -expected_fe
+                counterfactual_policy_score = -counterfactual_expected_fe
+            else:
+                policy_score_base = (
+                    -expected_fe
+                    + memory_bias
+                    + pattern_bias
+                    + policy_bias
+                    + epistemic_bonus
+                    + workspace_bias
+                    + social_bias
+                    + commitment_bias
+                    + identity_bias
+                    + ledger_bias
+                    + reconciliation_bias
+                    + subject_bias
+                    + goal_alignment
+                    + verification_bias
+                    + experiment_bias
+                    + inquiry_scheduler_bias
+                    + continuity_bonus
+                    - regression_penalty
+                )
+                counterfactual_policy_score = (
+                    -counterfactual_expected_fe
+                    + memory_bias
+                    + pattern_bias
+                    + policy_bias
+                    + epistemic_bonus
+                    + workspace_bias
+                    + social_bias
+                    + commitment_bias
+                    + identity_bias
+                    + ledger_bias
+                    + reconciliation_bias
+                    + subject_bias
+                    + goal_alignment
+                    + verification_bias
+                    + experiment_bias
+                    + inquiry_scheduler_bias
+                    + continuity_bonus
+                    - regression_penalty
+                )
+            counterfactual_policy_scores[action] = counterfactual_policy_score
+            action_evaluations[action] = {
+                "option": option,
+                "predicted_effects": predicted_effects,
+                "expected_fe": expected_fe,
+                "counterfactual_expected_fe": counterfactual_expected_fe,
+                "policy_score_base": policy_score_base,
+                "counterfactual_policy_score": counterfactual_policy_score,
+                "memory_bias": memory_bias,
+                "pattern_bias": pattern_bias,
+                "policy_bias": policy_bias,
+                "epistemic_bonus": epistemic_bonus,
+                "workspace_bias": workspace_bias,
+                "social_bias": social_bias,
+                "commitment_bias": commitment_bias,
+                "identity_bias": identity_bias,
+                "ledger_bias": ledger_bias,
+                "subject_bias": subject_bias,
+                "goal_alignment": goal_alignment,
+                "reconciliation_bias": reconciliation_bias,
+                "verification_bias": verification_bias,
+                "experiment_bias": experiment_bias,
+                "inquiry_scheduler_bias": inquiry_scheduler_bias,
+                "commitment_assessment": commitment_assessment,
+            }
+        for action, payload in action_evaluations.items():
+            option = dict(payload["option"])
+            expected_fe = float(payload["expected_fe"])
+            counterfactual_expected_fe = float(payload["counterfactual_expected_fe"])
+            representational_recall_delta = counterfactual_expected_fe - expected_fe
+            representational_recall_bias = 0.0
+            if (
+                self.memory_representation_prior_enabled
+                and recall_acceptance_path == "m49"
+                and not self.policy_expected_free_energy_only_enabled
+            ):
+                representational_recall_bias = clamp(
+                    representational_recall_delta * (4.0 if m49_acceptance_scene else 1.25),
+                    -0.35,
+                    0.35,
+                )
+            policy_score = float(payload["policy_score_base"]) + representational_recall_bias
             dominant_component = self.policy_evaluator.dominant_component(
                 expected_free_energy=expected_fe,
-                memory_bias=memory_bias,
-                pattern_bias=pattern_bias,
-                policy_bias=policy_bias,
-                epistemic_bonus=epistemic_bonus,
-                workspace_bias=workspace_bias,
-                social_bias=social_bias,
-                commitment_bias=commitment_bias,
-                identity_bias=identity_bias,
-                ledger_bias=ledger_bias,
-                subject_bias=subject_bias,
-                goal_alignment=goal_alignment,
-                reconciliation_bias=reconciliation_bias,
-                verification_bias=verification_bias,
-                experiment_bias=experiment_bias,
-                inquiry_scheduler_bias=inquiry_scheduler_bias,
+                memory_bias=float(payload["memory_bias"]),
+                pattern_bias=float(payload["pattern_bias"]),
+                policy_bias=float(payload["policy_bias"]),
+                epistemic_bonus=float(payload["epistemic_bonus"]),
+                workspace_bias=float(payload["workspace_bias"]),
+                social_bias=float(payload["social_bias"]),
+                commitment_bias=float(payload["commitment_bias"]),
+                identity_bias=float(payload["identity_bias"]),
+                ledger_bias=float(payload["ledger_bias"]),
+                subject_bias=float(payload["subject_bias"]),
+                goal_alignment=float(payload["goal_alignment"]),
+                reconciliation_bias=float(payload["reconciliation_bias"]),
+                verification_bias=float(payload["verification_bias"]),
+                experiment_bias=float(payload["experiment_bias"]),
+                inquiry_scheduler_bias=float(payload["inquiry_scheduler_bias"]),
+                representational_recall_bias=representational_recall_bias,
             )
+            commitment_assessment = dict(payload["commitment_assessment"])
             ranked_options.append(
                 InterventionScore(
                     choice=action,
@@ -2513,24 +2822,26 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     action_ambiguity=float(option["action_ambiguity"]),
                     risk=float(option["risk"]),
                     preferred_probability=float(option["preferred_probability"]),
-                    memory_bias=memory_bias,
-                    pattern_bias=pattern_bias,
-                    policy_bias=policy_bias,
-                    epistemic_bonus=epistemic_bonus,
-                    workspace_bias=workspace_bias,
-                    social_bias=social_bias,
-                    commitment_bias=commitment_bias,
-                    identity_bias=identity_bias,
-                    ledger_bias=ledger_bias,
-                    subject_bias=subject_bias,
-                    goal_alignment=goal_alignment,
-                    reconciliation_bias=reconciliation_bias,
-                    verification_bias=verification_bias,
-                    experiment_bias=experiment_bias,
-                    inquiry_scheduler_bias=inquiry_scheduler_bias,
+                    memory_bias=float(payload["memory_bias"]),
+                    pattern_bias=float(payload["pattern_bias"]),
+                    policy_bias=float(payload["policy_bias"]),
+                    epistemic_bonus=float(payload["epistemic_bonus"]),
+                    workspace_bias=float(payload["workspace_bias"]),
+                    social_bias=float(payload["social_bias"]),
+                    commitment_bias=float(payload["commitment_bias"]),
+                    identity_bias=float(payload["identity_bias"]),
+                    ledger_bias=float(payload["ledger_bias"]),
+                    subject_bias=float(payload["subject_bias"]),
+                    goal_alignment=float(payload["goal_alignment"]),
+                    reconciliation_bias=float(payload["reconciliation_bias"]),
+                    verification_bias=float(payload["verification_bias"]),
+                    experiment_bias=float(payload["experiment_bias"]),
+                    inquiry_scheduler_bias=float(payload["inquiry_scheduler_bias"]),
+                    representational_recall_bias=representational_recall_bias,
+                    representational_recall_delta=representational_recall_delta,
                     value_score=float(option["value_score"]),
                     predicted_outcome=str(option["predicted_outcome"]),
-                    predicted_effects=predicted_effects,
+                    predicted_effects=dict(payload["predicted_effects"]),
                     dominant_component=dominant_component,
                     cost=float(option["cost"]),
                     commitment_compatibility_score=float(
@@ -2568,6 +2879,27 @@ class SegmentAgent(MemoryAwareAgentMixin):
             ),
             reverse=True,
         )
+        actual_rankings = {
+            option.choice: index
+            for index, option in enumerate(ranked_options, start=1)
+        }
+        counterfactual_rankings = self._rank_scores(counterfactual_policy_scores)
+        counterfactual_choice = next(iter(
+            action
+            for action, _rank in sorted(
+                counterfactual_rankings.items(),
+                key=lambda item: (item[1], item[0]),
+            )
+        ))
+        decision_changed_by_recall = bool(ranked_options) and ranked_options[0].choice != counterfactual_choice
+        for option in ranked_options:
+            option.recall_counterfactual_rank_delta = float(
+                counterfactual_rankings.get(option.choice, actual_rankings[option.choice])
+                - actual_rankings[option.choice]
+            )
+            option.decision_changed_by_recall = (
+                decision_changed_by_recall and option.choice == ranked_options[0].choice
+            )
         chosen_option = ranked_options[0]
         chosen_assessment = commitment_assessments.get(
             chosen_option.choice,
@@ -2751,6 +3083,52 @@ class SegmentAgent(MemoryAwareAgentMixin):
             ledger_payload=ledger_verification.to_dict(),
             experiment_summary="",
             experiment_payload={},
+            recall_counterfactual_scores={
+                str(action): float(score)
+                for action, score in counterfactual_policy_scores.items()
+            },
+            recall_counterfactual_rankings={
+                str(action): int(rank)
+                for action, rank in counterfactual_rankings.items()
+            },
+            decision_changed_by_recall=decision_changed_by_recall,
+            recall_audit={
+                "actual_choice": chosen_option.choice,
+                "counterfactual_choice": counterfactual_choice,
+                "chosen_component": chosen_option.dominant_component,
+                "allowed_override_components": [
+                    "commitment_bias",
+                    "verification_bias",
+                    "reconciliation_bias",
+                ],
+                "m49_constrained_components": [
+                    "goal_alignment",
+                    "identity_bias",
+                    "subject_bias",
+                    "workspace_bias",
+                    "social_bias",
+                    "memory_bias",
+                    "pattern_bias",
+                    "policy_bias",
+                    "experiment_bias",
+                    "inquiry_scheduler_bias",
+                ],
+                "m49_primary_components": [
+                    "expected_free_energy",
+                    "representational_recall_bias",
+                ],
+                "chosen_component_allowed_for_m49": (
+                    chosen_option.dominant_component
+                    in {"expected_free_energy", "representational_recall_bias"}
+                ),
+                "expected_free_energy_shift_explained_by_recall": abs(
+                    float(chosen_option.representational_recall_delta)
+                )
+                > 1e-9,
+                "decision_changed_by_recall": decision_changed_by_recall,
+                "representation_mode": str(self.last_memory_context.get("representation_mode", "")),
+                "acceptance_path": str(self.last_memory_context.get("acceptance_path", "")),
+            },
         )
         self.subject_state = derive_subject_state(
             self,
@@ -2820,6 +3198,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
         diagnostics.structured_explanation["experiment_design"] = diagnostics.experiment_payload
         diagnostics.structured_explanation["inquiry_scheduler"] = diagnostics.inquiry_scheduler_payload
         diagnostics.structured_explanation["subject_state"] = self.subject_state.explanation_payload()
+        diagnostics.structured_explanation["representational_recall"] = {
+            "decision_changed_by_recall": diagnostics.decision_changed_by_recall,
+            "counterfactual_scores": dict(diagnostics.recall_counterfactual_scores),
+            "counterfactual_rankings": dict(diagnostics.recall_counterfactual_rankings),
+            **dict(diagnostics.recall_audit),
+        }
         diagnostics.structured_explanation["narrative_uncertainty"] = (
             self.latest_narrative_uncertainty.explanation_payload()
         )
@@ -2850,6 +3234,14 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_memory_context["memory_enabled"] = self.memory_enabled
         self.last_memory_context["memory_bias"] = float(diagnostics.chosen.memory_bias)
         self.last_memory_context["pattern_bias"] = float(diagnostics.chosen.pattern_bias)
+        self.last_memory_context["decision_changed_by_recall"] = diagnostics.decision_changed_by_recall
+        self.last_memory_context["recall_counterfactual_scores"] = dict(
+            diagnostics.recall_counterfactual_scores
+        )
+        self.last_memory_context["recall_counterfactual_rankings"] = dict(
+            diagnostics.recall_counterfactual_rankings
+        )
+        self.last_memory_context["recall_audit"] = dict(diagnostics.recall_audit)
         # Stash bias fields so they survive validation perceive()'s _top_down_pass
         self._decision_bias_stash = {
             "memory_bias": self.last_memory_context["memory_bias"],
@@ -4223,6 +4615,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "memory_cycle_interval": self.memory_cycle_interval,
             "memory_backend": self._active_memory_backend(),
             "memory_enabled": self.memory_enabled,
+            "memory_legacy_policy_bias_enabled": self.memory_legacy_policy_bias_enabled,
+            "memory_action_rollups_enabled": self.memory_action_rollups_enabled,
+            "memory_representation_prior_enabled": self.memory_representation_prior_enabled,
+            "policy_expected_free_energy_only_enabled": self.policy_expected_free_energy_only_enabled,
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
             "attention_bottleneck": self.attention_bottleneck.to_dict(),
             "last_attention_trace": (
@@ -4318,6 +4714,18 @@ class SegmentAgent(MemoryAwareAgentMixin):
             agent.long_term_memory.memory_cycle_interval = int(payload.get("memory_cycle_interval", 5))
         agent.long_term_memory.memory_backend = str(payload.get("memory_backend", agent.long_term_memory.memory_backend))
         agent.memory_enabled = bool(payload.get("memory_enabled", True))
+        agent.memory_legacy_policy_bias_enabled = bool(
+            payload.get("memory_legacy_policy_bias_enabled", True)
+        )
+        agent.memory_action_rollups_enabled = bool(
+            payload.get("memory_action_rollups_enabled", True)
+        )
+        agent.memory_representation_prior_enabled = bool(
+            payload.get("memory_representation_prior_enabled", True)
+        )
+        agent.policy_expected_free_energy_only_enabled = bool(
+            payload.get("policy_expected_free_energy_only_enabled", False)
+        )
         agent.episodes = [
             MemoryEpisode(**episode) for episode in payload.get("episodes", [])
         ]

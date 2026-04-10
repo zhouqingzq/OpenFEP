@@ -387,6 +387,10 @@ class InterventionScore:
     verification_bias: float = 0.0
     experiment_bias: float = 0.0
     inquiry_scheduler_bias: float = 0.0
+    representational_recall_bias: float = 0.0
+    representational_recall_delta: float = 0.0
+    recall_counterfactual_rank_delta: float = 0.0
+    decision_changed_by_recall: bool = False
 
     def policy_components(self) -> dict[str, float]:
         return {
@@ -406,6 +410,7 @@ class InterventionScore:
             "verification_bias": self.verification_bias,
             "experiment_bias": self.experiment_bias,
             "inquiry_scheduler_bias": self.inquiry_scheduler_bias,
+            "representational_recall_bias": self.representational_recall_bias,
         }
 
 
@@ -468,3 +473,7 @@ class DecisionDiagnostics:
     subject_priority_stack: list[dict[str, object]] = field(default_factory=list)
     inquiry_scheduler_summary: str = ""
     inquiry_scheduler_payload: dict[str, object] = field(default_factory=dict)
+    recall_counterfactual_scores: dict[str, float] = field(default_factory=dict)
+    recall_counterfactual_rankings: dict[str, int] = field(default_factory=dict)
+    decision_changed_by_recall: bool = False
+    recall_audit: dict[str, object] = field(default_factory=dict)
