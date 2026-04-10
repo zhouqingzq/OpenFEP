@@ -16,9 +16,15 @@ from .memory import (
     LIFECYCLE_PROTECTED_IDENTITY_CRITICAL,
     LongTermMemory,
     MemoryDecision,
+    _flatten_state_snapshot,
     compute_prediction_error,
     compute_total_surprise,
+    suppress_legacy_memory_warnings,
 )
+from .memory_retrieval import RetrievalQuery
+from .memory_state import AgentStateVector, MemoryAwareAgentMixin
+from .m4_cognitive_style import CognitiveStyleParameters
+from .memory_encoding import SalienceConfig
 from .narrative_types import EmbodiedNarrativeEpisode
 from .predictive_coding import (
     HierarchicalInference,
@@ -625,7 +631,7 @@ class DecisionLoop:
         return list(self.phase_names)
 
 
-class SegmentAgent:
+class SegmentAgent(MemoryAwareAgentMixin):
     """A survival-first digital segment with drives, long-term memory, and dream replay."""
 
     def __init__(
@@ -635,6 +641,10 @@ class SegmentAgent:
         sleep_llm_extractor: Callable[[list[SleepRule], list[dict[str, object]]], list[SleepRule]]
         | None = None,
         action_registry: ActionRegistry | None = None,
+        memory_backend: str = "memory_store",
+        memory_cognitive_style: CognitiveStyleParameters | dict[str, object] | None = None,
+        memory_cycle_interval: int = 5,
+        memory_salience_config: SalienceConfig | None = None,
     ) -> None:
         self.rng = rng or random.Random()
         self.energy = 0.80
@@ -651,6 +661,7 @@ class SegmentAgent:
         self.action_registry = action_registry or build_default_action_registry()
         self.long_term_memory = AutobiographicalMemory()
         self.autobiographical_memory = self.long_term_memory
+        self.long_term_memory.memory_backend = self.long_term_memory._normalize_memory_backend(memory_backend)
         self.identity_traits = IdentityTraits()
         self.self_model = build_default_self_model()
         self.self_model.capability_model = CapabilityModel(
@@ -694,6 +705,14 @@ class SegmentAgent:
         self.last_memory_context: dict[str, object] = {}
         self._sleeping = False
         self.counterfactual_insights: list[CounterfactualInsight] = []
+        self.init_memory_awareness(
+            memory_store=self.long_term_memory.ensure_memory_store(),
+            state_vector=AgentStateVector.from_dict(dict(self.long_term_memory.agent_state_vector)),
+            cognitive_style=memory_cognitive_style or dict(self.long_term_memory.memory_cognitive_style),
+            memory_cycle_interval=memory_cycle_interval or self.long_term_memory.memory_cycle_interval,
+            salience_config=memory_salience_config,
+        )
+        self.sync_memory_awareness_to_long_term_memory()
 
         # M2.7: Precision manipulation, defense strategy, and metacognitive layer
         self.precision_manipulator = PrecisionManipulator()
@@ -724,6 +743,100 @@ class SegmentAgent:
             reset_precisions=True,
         )
         self._sync_self_model_body_schema()
+
+    def sync_memory_awareness_to_long_term_memory(self) -> None:
+        self.memory_store = self.long_term_memory.memory_store
+        self.long_term_memory.agent_state_vector = self.agent_state_vector.to_dict()
+        self.long_term_memory.memory_cognitive_style = self.memory_cognitive_style.to_dict()
+        self.long_term_memory.memory_cycle_interval = self.memory_cycle_interval
+        self.long_term_memory.memory_backend = self._active_memory_backend()
+
+    def _active_memory_backend(self) -> str:
+        return self.long_term_memory._normalize_memory_backend(self.long_term_memory.memory_backend)
+
+    def _decision_retrieval_query(
+        self,
+        observed: dict[str, float],
+        baseline_prediction: dict[str, float],
+        baseline_errors: dict[str, float],
+    ) -> RetrievalQuery:
+        semantic_tags: list[str] = []
+        context_tags = [
+            key
+            for key, value in {**observed, **self._current_body_state()}.items()
+            if abs(float(value)) >= 0.15
+        ][:8]
+        content_keywords = [
+            key
+            for key, _ in sorted(
+                {**observed, **baseline_errors}.items(),
+                key=lambda item: abs(float(item[1])),
+                reverse=True,
+            )
+            if key
+        ][:8]
+        return RetrievalQuery(
+            semantic_tags=semantic_tags,
+            context_tags=context_tags,
+            content_keywords=content_keywords,
+            state_vector=self.long_term_memory._build_embedding(
+                _flatten_state_snapshot(
+                    {
+                        "observation": dict(observed),
+                        "prediction": dict(baseline_prediction),
+                        "errors": dict(baseline_errors),
+                        "body_state": self._current_body_state(),
+                    }
+                )
+            ),
+            reference_cycle=self.cycle,
+        )
+
+    def _retrieve_decision_memories(
+        self,
+        *,
+        observed: dict[str, float],
+        baseline_prediction: dict[str, float],
+        baseline_errors: dict[str, float],
+        current_state_snapshot: dict[str, object],
+        k: int,
+    ) -> list[dict[str, object]]:
+        if self._active_memory_backend() != "memory_store":
+            with suppress_legacy_memory_warnings():
+                return self.long_term_memory.retrieve_similar_memories(
+                    current_state_snapshot,
+                    k=k,
+                )
+        self.sync_memory_awareness_to_long_term_memory()
+        query = self._decision_retrieval_query(observed, baseline_prediction, baseline_errors)
+        result = self.retrieve_for_decision(
+            query,
+            self.cycle,
+            current_mood=self.agent_state_vector.recent_mood_baseline,
+            k=k,
+        )
+        projected_by_id = {
+            str(payload.get("episode_id", "")): payload
+            for payload in self.memory_store.to_legacy_episodes()
+        }
+        similar_memories: list[dict[str, object]] = []
+        for candidate in result.candidates[:k]:
+            payload = dict(projected_by_id.get(candidate.entry_id, {}))
+            payload.setdefault("episode_id", candidate.entry_id)
+            payload.setdefault("content", candidate.entry.content)
+            payload["similarity"] = float(candidate.retrieval_score)
+            payload["vector_similarity"] = float(candidate.score_breakdown.get("context_overlap", 0.0))
+            payload["schema_overlap"] = float(candidate.score_breakdown.get("tag_overlap", 0.0))
+            payload["memory_class"] = candidate.memory_class
+            payload["source_type"] = candidate.source_type
+            payload["validation_status"] = candidate.validation_status
+            payload["retrieval_score_breakdown"] = dict(candidate.score_breakdown)
+            similar_memories.append(payload)
+        self.long_term_memory.last_retrieval_result = {
+            "memory_backend": "memory_store",
+            **result.to_dict(),
+        }
+        return similar_memories
 
     def configure_attention_bottleneck(
         self,
@@ -1605,8 +1718,11 @@ class SegmentAgent:
             "errors": baseline_errors,
             "body_state": self._current_body_state(),
         }
-        similar_memories = self.long_term_memory.retrieve_similar_memories(
-            current_state_snapshot,
+        similar_memories = self._retrieve_decision_memories(
+            observed=observed,
+            baseline_prediction=baseline_prediction,
+            baseline_errors=baseline_errors,
+            current_state_snapshot=current_state_snapshot,
             k=3,
         )
         memory_context = self._build_memory_context(
@@ -1637,6 +1753,11 @@ class SegmentAgent:
                 self.world_model.last_prediction_details.get("prediction_delta", {})
             ),
             "retrieved_memories": similar_memories,
+            "memory_backend": self._active_memory_backend(),
+            "recall_hypothesis": dict(self.long_term_memory.last_retrieval_result.get("recall_hypothesis", {}) or {}),
+            "reconstruction_trace": dict(
+                self.long_term_memory.last_retrieval_result.get("reconstruction_trace", {}) or {}
+            ),
         }
         interoceptive_prediction = self.interoceptive_layer.predict(sensorimotor_prediction)
         return (
@@ -2214,11 +2335,12 @@ class SegmentAgent:
             predicted_state = dict(option["predicted_state"])
             predicted_effects = dict(option["predicted_effects"])
             expected_fe = float(option["expected_free_energy"])
-            memory_bias = self.long_term_memory.memory_bias(action, similar_memories)
-            pattern_bias = self.long_term_memory.pattern_bias(
-                action,
-                action_history=self.action_history,
-            )
+            with suppress_legacy_memory_warnings():
+                memory_bias = self.long_term_memory.memory_bias(action, similar_memories)
+                pattern_bias = self.long_term_memory.pattern_bias(
+                    action,
+                    action_history=self.action_history,
+                )
             policy_bias = self.world_model.get_policy_bias(current_cluster_id, action)
             epistemic_bonus = self.world_model.get_epistemic_bonus(
                 current_cluster_id,
@@ -2963,6 +3085,7 @@ class SegmentAgent:
             )
         finally:
             self.long_term_memory.surprise_threshold = original_surprise_threshold
+        self.sync_memory_awareness_to_long_term_memory()
         if not memory_decision.episode_created:
             recent_episode_actions = {
                 action_name(payload.get("action_taken", payload.get("action", "")))
@@ -3003,6 +3126,7 @@ class SegmentAgent:
                     episode_id=str(payload.get("episode_id", "")) or None,
                     gating_reasons=tuple(list(memory_decision.gating_reasons) + ["action_novelty_trace"]),
                 )
+                self.sync_memory_awareness_to_long_term_memory()
         if memory_decision.episode_created:
             self.episodes.append(
                 MemoryEpisode(
@@ -3104,6 +3228,7 @@ class SegmentAgent:
             )
         finally:
             self.long_term_memory.surprise_threshold = original_surprise_threshold
+        self.sync_memory_awareness_to_long_term_memory()
         target_payload = None
         if memory_decision.episode_created and self.long_term_memory.episodes:
             target_payload = self.long_term_memory.episodes[-1]
@@ -3976,6 +4101,7 @@ class SegmentAgent:
         return summary
 
     def to_dict(self) -> dict:
+        self.sync_memory_awareness_to_long_term_memory()
         self._sync_self_model_body_schema()
         return {
             "energy": self.energy,
@@ -4016,6 +4142,10 @@ class SegmentAgent:
             "last_body_state_snapshot": dict(self.last_body_state_snapshot),
             "last_decision_choice": self.last_decision_choice,
             "last_decision_observation": dict(self.last_decision_observation),
+            "agent_state_vector": self.agent_state_vector.to_dict(),
+            "memory_cognitive_style": self.memory_cognitive_style.to_dict(),
+            "memory_cycle_interval": self.memory_cycle_interval,
+            "memory_backend": self._active_memory_backend(),
             "predictive_coding_hyperparameters": self.predictive_coding_hyperparameters().to_dict(),
             "attention_bottleneck": self.attention_bottleneck.to_dict(),
             "last_attention_trace": (
@@ -4056,8 +4186,18 @@ class SegmentAgent:
         rng: random.Random | None = None,
         predictive_hyperparameters: PredictiveCodingHyperparameters | None = None,
         reset_predictive_precisions: bool = False,
+        state_version: str | None = None,
     ) -> SegmentAgent:
-        agent = cls(rng=rng)
+        agent = cls(
+            rng=rng,
+            memory_backend=str(payload.get("memory_backend", "memory_store")) if isinstance(payload, dict) else "memory_store",
+            memory_cognitive_style=dict(payload.get("memory_cognitive_style", {}))
+            if isinstance(payload, dict) and isinstance(payload.get("memory_cognitive_style"), dict)
+            else None,
+            memory_cycle_interval=int(payload.get("memory_cycle_interval", 5))
+            if isinstance(payload, dict)
+            else 5,
+        )
         if not payload:
             if predictive_hyperparameters is not None:
                 agent.configure_predictive_coding(
@@ -4089,9 +4229,17 @@ class SegmentAgent:
         else:
             agent.action_registry = build_default_action_registry()
         agent.long_term_memory = AutobiographicalMemory.from_dict(
-            payload.get("long_term_memory")
+            payload.get("long_term_memory"),
+            state_version=state_version,
         )
         agent.autobiographical_memory = agent.long_term_memory
+        if isinstance(payload.get("agent_state_vector"), dict):
+            agent.long_term_memory.agent_state_vector = dict(payload.get("agent_state_vector", {}))
+        if isinstance(payload.get("memory_cognitive_style"), dict):
+            agent.long_term_memory.memory_cognitive_style = dict(payload.get("memory_cognitive_style", {}))
+        if "memory_cycle_interval" in payload:
+            agent.long_term_memory.memory_cycle_interval = int(payload.get("memory_cycle_interval", 5))
+        agent.long_term_memory.memory_backend = str(payload.get("memory_backend", agent.long_term_memory.memory_backend))
         agent.episodes = [
             MemoryEpisode(**episode) for episode in payload.get("episodes", [])
         ]
@@ -4333,6 +4481,13 @@ class SegmentAgent:
             import ast
 
             agent.rng.setstate(ast.literal_eval(rng_state))
+        agent.init_memory_awareness(
+            memory_store=agent.long_term_memory.ensure_memory_store(),
+            state_vector=AgentStateVector.from_dict(dict(agent.long_term_memory.agent_state_vector)),
+            cognitive_style=dict(agent.long_term_memory.memory_cognitive_style),
+            memory_cycle_interval=agent.long_term_memory.memory_cycle_interval,
+        )
+        agent.sync_memory_awareness_to_long_term_memory()
         agent._sync_self_model_body_schema()
         if not agent.subject_state.core_identity_summary and not agent.subject_state.subject_priority_stack:
             agent.subject_state = derive_subject_state(agent, previous_state=agent.subject_state)

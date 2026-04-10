@@ -8,6 +8,7 @@ import random
 import tempfile
 from pathlib import Path
 import unittest
+import warnings
 
 from segmentum.daemon import HeartbeatDaemon
 from segmentum.interoception import InteroceptionReading
@@ -112,6 +113,24 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
 
         self.assertEqual(continuous_snapshot, resumed_snapshot)
 
+    def test_sync_memory_awareness_preserves_authoritative_memory_store(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=31, reset=True)
+        runtime.run(cycles=12, verbose=False)
+
+        agent = runtime.agent
+        self.assertGreater(len(agent.long_term_memory.episodes), 0)
+        self.assertIs(agent.memory_store, agent.long_term_memory.memory_store)
+
+        entries_before = len(agent.long_term_memory.memory_store.entries)
+        self.assertGreater(entries_before, 0)
+        self.assertEqual(entries_before, len(agent.long_term_memory.episodes))
+
+        agent.sync_memory_awareness_to_long_term_memory()
+
+        self.assertIs(agent.memory_store, agent.long_term_memory.memory_store)
+        self.assertEqual(len(agent.memory_store.entries), entries_before)
+        self.assertEqual(len(agent.memory_store.entries), len(agent.long_term_memory.episodes))
+
     def test_runtime_persists_and_recovers_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             state_path = Path(tmp_dir) / "segment_state.json"
@@ -187,6 +206,20 @@ class SegmentRuntimePersistenceTests(unittest.TestCase):
             self.assertGreaterEqual(second_summary["cycles_completed"], 5)
             self.assertEqual(reloaded.agent.cycle, 5)
             self.assertGreaterEqual(len(reloaded.agent.long_term_memory.episodes), 3)
+
+    def test_default_runtime_uses_memory_store_without_deprecation_warnings(self) -> None:
+        runtime = SegmentRuntime.load_or_create(seed=19, reset=True)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            runtime.step(verbose=False)
+
+        deprecations = [warning for warning in caught if issubclass(warning.category, DeprecationWarning)]
+        self.assertEqual(deprecations, [])
+        self.assertEqual(runtime.agent.long_term_memory.memory_backend, "memory_store")
+        self.assertEqual(runtime.agent.last_memory_context.get("memory_backend"), "memory_store")
+        self.assertIn("recall_hypothesis", runtime.agent.last_memory_context)
+        self.assertIn("reconstruction_trace", runtime.agent.last_memory_context)
 
     def test_sleep_does_not_compress_active_memory_below_recovery_floor(self) -> None:
         runtime = SegmentRuntime.load_or_create(seed=11, reset=True)
