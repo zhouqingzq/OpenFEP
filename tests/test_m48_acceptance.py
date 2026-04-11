@@ -20,7 +20,12 @@ class TestM48Acceptance(unittest.TestCase):
         report, evidence = build_m48_acceptance_report(seed=42, cycles=20)
 
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["formal_acceptance_conclusion"], "ACCEPT")
+        self.assertEqual(report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
+        self.assertTrue(report["structural_pass"])
+        self.assertTrue(report["behavioral_pass"])
+        self.assertFalse(report["phenomenological_pass"])
+        self.assertFalse(report["three_layer_accept_ready"])
+        self.assertEqual(report["missing_layers"], ["phenomenological_pass"])
         self.assertEqual(report["artifact_lineage"], "official_runtime_evidence")
         self.assertEqual(set(report["gate_summaries"]), set(GATE_ORDER))
         self.assertEqual(report["failed_gates"], [])
@@ -40,12 +45,13 @@ class TestM48Acceptance(unittest.TestCase):
             summary = Path(outputs["summary"]).read_text(encoding="utf-8")
 
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["formal_acceptance_conclusion"], "ACCEPT")
+        self.assertEqual(report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
         self.assertTrue(report["freshness"]["generated_in_this_run"])
         self.assertEqual(len(ablation_evidence["enabled"]["trace"]), 20)
         self.assertEqual(len(ablation_evidence["disabled"]["trace"]), 20)
         self.assertIn("M4.8 Official Acceptance Summary", summary)
-        self.assertIn("Formal Acceptance Conclusion: `ACCEPT`", summary)
+        self.assertIn("Formal Acceptance Conclusion: `PARTIAL_ACCEPT`", summary)
+        self.assertIn("phenomenological_pass=False", summary)
         self.assertIn("G3 `ablation_contrast`: `PASS`", summary)
 
 

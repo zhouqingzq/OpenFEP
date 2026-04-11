@@ -197,17 +197,17 @@ Every M4 milestone's evidence is classified into one or more layers:
 | M4.6 | Yes | No | No |
 | M4.7 | Yes | No | No |
 | M4.8 | Yes | Yes | No |
-| M4.9 | Yes | Planned | No |
+| M4.9 | Yes | Conservative pending separate layer-(b) acceptance | No |
 | M4.10 | Yes | Yes | Pending M4.11 |
-| M4.11 | Planned | Planned | Planned |
+| M4.11 | Inherits M4.10 | Inherits M4.8/M4.10 | Targets natural-rollout phenomenology |
 
-M4.5-M4.7 currently satisfy only layer (a), structural self-consistency. Their behavioral claims (e.g., "memory regulation shapes decisions") depend on M4.8 ablation evidence for layer (b) validation. M4.10 currently has structural and behavioral evidence, but remains `PARTIAL_ACCEPT` because the phenomenological layer is explicitly pending M4.11.
+M4.5-M4.7 currently satisfy only layer (a), structural self-consistency. Their behavioral claims (e.g., "memory regulation shapes decisions") depend on M4.8 ablation evidence for layer (b) validation. M4.8 targets layer (b), behavioral causation via ablation contrast. M4.10 targets layer (b) upstream of recall through dynamical encoding and consolidation. M4.11 targets layer (c), phenomenological fit via natural rollout serial position, retention curve, schema intrusion, and identity continuity probes with paired negative controls. The honesty / fail-closed audit remains a safety net, not the primary grader.
 
 ## 2026-04-11 Status Alignment
 
 - `M4.6` official acceptance is currently `INCOMPLETE / NOT_ISSUED`. The blocking gap is `legacy_integration=NOT_RUN` in the current acceptance builder.
 - `M4.7` official acceptance is currently `INCOMPLETE / NOT_ISSUED`. The blocking gap is `regression=NOT_RUN` in the current acceptance builder. Runtime snapshot demoted to `diagnostic_only` pending M4.8 ablation proof.
 - `M4.8` and `M4.9` were redefined on 2026-04-10. Previous content (cross-context transfer and longitudinal stability) was removed as insufficient and non-actionable. The new definitions target ablation contrast and representation-level reconstruction respectively.
-- `M4.8` acceptance: `NOT_ISSUED` until all six gates pass.
+- `M4.8` acceptance: `PASS / PARTIAL_ACCEPT`; it proves layer (a)+(b), but lacks layer (c).
 - `M4.10` acceptance: `PASS / PARTIAL_ACCEPT`, not full three-layer `ACCEPT`; `phenomenological_pass` remains `pending(M4.11)`.
-- `M4.11` acceptance: `NOT_ISSUED` until the natural-rollout phenomenology gates and paired negative controls pass.
+- `M4.11` acceptance: full `ACCEPT` only when the natural-rollout phenomenology gates, paired negative controls, and honesty safety net all pass.

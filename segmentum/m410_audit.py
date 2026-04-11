@@ -12,6 +12,7 @@ from .memory_consolidation import (
     compress_episodic_cluster_to_semantic_skeleton,
     constrained_replay,
 )
+from .m4_acceptance import final_conclusion
 from .memory_encoding import EncodingDynamics, EncodingDynamicsInput
 from .memory_model import MemoryClass, MemoryEntry
 from .memory_store import MemoryStore
@@ -475,12 +476,13 @@ def build_m410_acceptance_report(*, seed: int = 4, cycles: int = 20) -> tuple[di
         failed_gates.append("m48_behavioral_inheritance")
     status = "PASS" if not failed_gates else "FAIL"
     head = _git_head()
-    if failed:
-        formal_conclusion = "NOT_ACCEPTED"
-    elif not m48_ok:
-        formal_conclusion = "NOT_ACCEPTED"
-    else:
-        formal_conclusion = "PARTIAL_ACCEPT"
+    phenomenological_pass = "pending(M4.11)"
+    layer_conclusion = final_conclusion(
+        structural_pass=structural_pass,
+        behavioral_pass=behavioral_pass,
+        phenomenological_pass=phenomenological_pass,
+    )
+    formal_conclusion = layer_conclusion.formal_acceptance_conclusion
     behavioral_basis = (
         "inherits M4.8 default-path ablation contrast; re-verified on this tree via "
         "tests/test_m48_ablation_contrast.py and tests/test_m48_acceptance.py "
@@ -495,8 +497,9 @@ def build_m410_acceptance_report(*, seed: int = 4, cycles: int = 20) -> tuple[di
         "behavioral_pass": behavioral_pass,
         "behavioral_pass_basis": behavioral_basis,
         "behavioral_inheritance_pytest": m48_pytest,
-        "phenomenological_pass": "pending(M4.11)",
-        "three_layer_accept_ready": False,
+        "phenomenological_pass": phenomenological_pass,
+        "three_layer_accept_ready": layer_conclusion.three_layer_accept_ready,
+        "missing_layers": list(layer_conclusion.missing_layers),
         "gate_order": list(GATE_ORDER),
         "gate_summaries": gate_summaries,
         "failed_gates": failed_gates,

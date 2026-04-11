@@ -11,6 +11,7 @@ from typing import Any
 from .agent import SegmentAgent
 from .m47_audit import build_m47_acceptance_report
 from .m47_reacceptance import build_m47_reacceptance_report
+from .m4_acceptance import final_conclusion
 from .runtime import SegmentRuntime
 
 
@@ -514,6 +515,14 @@ def build_m48_acceptance_report(*, seed: int = 42, cycles: int = 20) -> tuple[di
         for gate in GATE_ORDER
     }
     all_passed = all(summary["status"] == STATUS_PASS for summary in gate_summaries.values())
+    structural_pass = all_passed
+    behavioral_pass = all_passed
+    phenomenological_pass = False
+    layer_conclusion = final_conclusion(
+        structural_pass=structural_pass,
+        behavioral_pass=behavioral_pass,
+        phenomenological_pass=phenomenological_pass,
+    )
     report = {
         "milestone_id": "M4.8",
         "mode": "official_runtime_acceptance",
@@ -523,14 +532,24 @@ def build_m48_acceptance_report(*, seed: int = 42, cycles: int = 20) -> tuple[di
         "git_head": _git_head(),
         "status": "PASS" if all_passed else "INCOMPLETE",
         "acceptance_state": "acceptance_issued" if all_passed else "acceptance_not_issued",
-        "recommendation": "ACCEPT" if all_passed else "REPAIR",
-        "formal_acceptance_conclusion": "ACCEPT" if all_passed else FORMAL_CONCLUSION_NOT_ISSUED,
+        "recommendation": layer_conclusion.formal_acceptance_conclusion if all_passed else "REPAIR",
+        "formal_acceptance_conclusion": (
+            layer_conclusion.formal_acceptance_conclusion
+            if all_passed
+            else FORMAL_CONCLUSION_NOT_ISSUED
+        ),
+        "structural_pass": structural_pass,
+        "behavioral_pass": behavioral_pass,
+        "phenomenological_pass": phenomenological_pass,
+        "three_layer_accept_ready": layer_conclusion.three_layer_accept_ready,
+        "missing_layers": list(layer_conclusion.missing_layers),
         "gate_summaries": gate_summaries,
         "evidence_records": records,
         "failed_gates": [gate for gate, summary in gate_summaries.items() if summary["status"] != STATUS_PASS],
         "notes": [
             "M4.8 proves behavioral causation via same-seed memory ablation contrast.",
             "Per-cycle rollout evidence is required; last_memory_context alone is insufficient.",
+            "Under the M4.11 three-layer standard, M4.8 is layer (a)+(b) evidence and is not a full memory-milestone ACCEPT by itself.",
         ],
     }
     return report, ablation_evidence
@@ -543,6 +562,11 @@ def _write_summary(report: dict[str, object], *, summary_path: Path) -> None:
         f"Generated at: `{report['generated_at']}`",
         f"Status: `{report['status']}`",
         f"Formal Acceptance Conclusion: `{report['formal_acceptance_conclusion']}`",
+        (
+            f"Three-layer ledger: `structural_pass={report['structural_pass']}`, "
+            f"`behavioral_pass={report['behavioral_pass']}`, "
+            f"`phenomenological_pass={report['phenomenological_pass']}`"
+        ),
         "",
         "## Gate Status",
         "",

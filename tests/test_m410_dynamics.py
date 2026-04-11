@@ -119,6 +119,7 @@ class TestM410Dynamics(unittest.TestCase):
         self.assertTrue(report["behavioral_pass"])
         self.assertEqual(report["phenomenological_pass"], "pending(M4.11)")
         self.assertFalse(report["three_layer_accept_ready"])
+        self.assertEqual(report["missing_layers"], ["phenomenological_pass"])
         self.assertIn("inherits M4.8", report["behavioral_pass_basis"])
         self.assertIn("test_m48_ablation_contrast.py", report["behavioral_pass_basis"])
         self.assertEqual(report["behavioral_inheritance_pytest"]["exit_code"], 0)
