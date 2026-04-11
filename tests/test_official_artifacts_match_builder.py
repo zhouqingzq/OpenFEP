@@ -15,6 +15,7 @@ from segmentum.m45_audit import M45_REPORT_PATH, write_m45_acceptance_artifacts
 from segmentum.m45_acceptance_data import REGRESSION_TARGETS as M45_REGRESSION_TARGETS
 from segmentum.m46_audit import M46_REPORT_PATH, write_m46_acceptance_artifacts
 from segmentum.m47_audit import M47_REPORT_PATH, write_m47_acceptance_artifacts
+from segmentum.m410_audit import M410_REPORT_PATH, write_m410_acceptance_artifacts
 
 
 FIXED_STARTED_AT = "2026-04-09T00:00:00+00:00"
@@ -37,6 +38,7 @@ UUID_SUBSTRING_PATTERN = re.compile(
     re.IGNORECASE,
 )
 HASH_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$", re.IGNORECASE)
+HASH_SUBSTRING_PATTERN = re.compile(r"\b(?:[0-9a-f]{40}|[0-9a-f]{64})\b", re.IGNORECASE)
 M45_SYNTHETIC_REGRESSION_SUMMARY = {
     "executed": True,
     "command": ["synthetic", "pytest"],
@@ -80,6 +82,7 @@ def _normalize_json(value, *, key: str | None = None):  # noqa: ANN001
         if HASH_PATTERN.match(value):
             return "<normalized-hash>"
         value = UUID_SUBSTRING_PATTERN.sub("<normalized-uuid>", value)
+        value = HASH_SUBSTRING_PATTERN.sub("<normalized-hash>", value)
         normalized = value.replace("\\", "/")
         suffix = Path(normalized).suffix.lower()
         if suffix in {".json", ".jsonl", ".md"} and ("/" in normalized or "\\" in value):
@@ -182,3 +185,8 @@ class TestOfficialArtifactsMatchBuilder(unittest.TestCase):
         self.assertEqual(committed["acceptance_state"], generated["acceptance_state"])
         self.assertEqual(committed["recommendation"], generated["recommendation"])
 
+    def test_m410_report_matches_builder(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            outputs = write_m410_acceptance_artifacts(output_root=tmpdir)
+            generated = _read_json(Path(outputs["report"]))
+        self._assert_report_matches("m410", M410_REPORT_PATH, generated)

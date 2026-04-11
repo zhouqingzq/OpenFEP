@@ -10,7 +10,7 @@ Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Gen
 
 ## Summary
 
-M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while M4.5-M4.7 now cover the staged human-like memory system. M4.8 targets ablation-contrast proof that memory causally changes agent behavior, and M4.9 targets representation-level recall reconstruction that constrains subsequent cognition.
+M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while M4.5-M4.7 now cover the staged human-like memory system. M4.8 targets ablation-contrast proof that memory causally changes agent behavior, M4.9 targets representation-level recall reconstruction that constrains subsequent cognition, and M4.10 targets dynamical encoding/consolidation upstream of recall.
 
 FEP remains relatively marginal in mainstream AGI engineering. The dominant practical path has centered on scaling laws, RLHF, and architecture search rather than FEP, not only because FEP is often criticized as difficult to falsify, but because it has not yet produced a system that surpasses Transformers on standard benchmarks. In its conventional form, FEP explains how a system maintains its own existence; it does not, by itself, explain the core powers of language such as compositionality, recursion, and pragmatic reasoning across contexts.
 
@@ -20,10 +20,11 @@ From that perspective, **personality** is a more natural target for FEP than int
 
 ## M4 Acceptance Status Note
 
-As of April 9, 2026, the official repository status for the memory milestones is:
+As of April 11, 2026, the official repository status for the memory milestones is:
 
 - `M4.6`: `INCOMPLETE / NOT_ISSUED` because the current acceptance builder still records `legacy_integration=NOT_RUN`.
 - `M4.7`: `INCOMPLETE / NOT_ISSUED` because the current acceptance builder still records `regression=NOT_RUN`.
+- `M4.10`: `PASS / PARTIAL_ACCEPT` with `structural_pass=True`, `behavioral_pass=True`, and `phenomenological_pass='pending(M4.11)'`. It is not a full three-layer `ACCEPT` until M4.11 supplies the phenomenological evidence.
 
 Committed acceptance artifacts should be read as canonical only when they match the current builder outputs and the artifact drift test passes.
 
@@ -192,6 +193,8 @@ The current M4 roadmap aims to turn cognitive style from a narrative description
 - `M4.7` integrates memory dynamics with cognitive style and validates behavior-level differentiation.
 - `M4.8` proves memory causally changes default agent behavior via ablation contrast (decision entropy, option distribution, approach/avoidance bias divergence under `memory_enabled=True/False`).
 - `M4.9` replaces string-assembly recall with representation-level reconstruction: recall becomes a state-vector perturbation, competing memories resolve via softmax with residual interference, and DRM/misinformation A/B pairs produce measurable post-recall decision drift.
+- `M4.10` replaces keyword-table salience and template-string consolidation with error-driven encoding, shared attention-budget competition, centroid/residual semantic consolidation, and replay re-encoding.
+- `M4.11` is the pending phenomenology layer: long-horizon free rollout with paired negative controls for serial position, retention curve shape, schema intrusion, and identity continuity under perturbation.
 
 Open-world tool integration is treated as an `M5` concern. The purpose of M4 is to establish cross-context cognitive-style validity under controlled conditions before moving to noisy real-tool environments.
 

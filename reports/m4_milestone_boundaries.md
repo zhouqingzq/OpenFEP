@@ -19,6 +19,8 @@ aligned across the repository.
 | `M4.7` | Integrate dynamic memory regulation with cognitive style and verify behavior-level effects. | AgentStateVector regulation, style-memory coupling, behavioral scenarios, subtype differentiation, integration traces. | Controlled-environment transfer, longitudinal stability, open-world tooling. |
 | `M4.8` | Prove memory causally changes default agent behavior via ablation contrast. | Same-seed `memory_enabled=True/False` rollout produces significant, reproducible divergence in decision entropy, option distribution, and approach/avoidance bias; divergence direction aligns with MemoryEntry valence/threat. | Representation-level reconstruction, encoding dynamics, long-run phenomenological validation. |
 | `M4.9` | Replace string-assembly recall with representation-level reconstruction that constrains subsequent cognition. | Recall output is a state-vector perturbation (not text); donor blocks inject measurable prior bias; competing memories produce winner-take-most softmax with residual interference; DRM/misinformation A/B pair shows post-recall decision drift toward donor. | Encoding dynamics, consolidation dynamics, long-run phenomenological validation. |
+| `M4.10` | Replace keyword-table salience and template-string consolidation with dynamical encoding and consolidation. | Encoding strength comes from prediction error, surprise, arousal, and a shared attention budget; semantic memories expose centroid/residual fields; replay re-encodes episodes and updates centroid/residual state. | Long-run phenomenological validation and human-parameter parity. |
+| `M4.11` | Validate natural rollout phenomenology without curated corpora. | Long-horizon free rollout plus paired negative controls for serial position, logarithmic retention, representational schema intrusion, and identity continuity under perturbation. | Curated-corpus grading, keyword/string intrusion detection, and acceptance without negative controls. |
 
 ## Naming Rules
 
@@ -181,27 +183,31 @@ Every M4 milestone's evidence is classified into one or more layers:
 | --- | --- | --- | --- |
 | **(a)** | Structural self-consistency | Artifact roundtrips, schema integrity, evaluator truth tables agree with outputs. | Existing M4.1–M4.7 standard. |
 | **(b)** | Behavioral causation | A mechanism *causally changes* agent behavior, demonstrated via controlled ablation contrast (same seed, flag on/off). | M4.8 standard. |
-| **(c)** | Phenomenological alignment | Classical memory phenomena (primacy, recency, spacing, interference, mood-congruent recall) emerge naturally from the architecture without being hard-coded. | Future M4.10+ standard. |
+| **(c)** | Phenomenological alignment | Classical memory phenomena emerge naturally from the architecture without being hard-coded and collapse under paired negative controls. | M4.11 standard. |
 
 ### Current layer coverage
 
 | Milestone | Layer (a) | Layer (b) | Layer (c) |
 | --- | --- | --- | --- |
-| M4.1 | Yes | — | — |
-| M4.2 | Yes | — | — |
-| M4.3 | Yes | — | — |
-| M4.4 | Yes | — | — |
-| M4.5 | Yes | — | — |
-| M4.6 | Yes | — | — |
-| M4.7 | Yes | — | — |
-| M4.8 | Yes | Yes | — |
-| M4.9 | Yes | Planned | — |
+| M4.1 | Yes | No | No |
+| M4.2 | Yes | No | No |
+| M4.3 | Yes | No | No |
+| M4.4 | Yes | No | No |
+| M4.5 | Yes | No | No |
+| M4.6 | Yes | No | No |
+| M4.7 | Yes | No | No |
+| M4.8 | Yes | Yes | No |
+| M4.9 | Yes | Planned | No |
+| M4.10 | Yes | Yes | Pending M4.11 |
+| M4.11 | Planned | Planned | Planned |
 
-M4.5–M4.7 currently satisfy only layer (a) — structural self-consistency. Their behavioral claims (e.g., "memory regulation shapes decisions") depend on M4.8 ablation evidence for layer (b) validation.
+M4.5-M4.7 currently satisfy only layer (a), structural self-consistency. Their behavioral claims (e.g., "memory regulation shapes decisions") depend on M4.8 ablation evidence for layer (b) validation. M4.10 currently has structural and behavioral evidence, but remains `PARTIAL_ACCEPT` because the phenomenological layer is explicitly pending M4.11.
 
-## 2026-04-10 Status Alignment
+## 2026-04-11 Status Alignment
 
 - `M4.6` official acceptance is currently `INCOMPLETE / NOT_ISSUED`. The blocking gap is `legacy_integration=NOT_RUN` in the current acceptance builder.
 - `M4.7` official acceptance is currently `INCOMPLETE / NOT_ISSUED`. The blocking gap is `regression=NOT_RUN` in the current acceptance builder. Runtime snapshot demoted to `diagnostic_only` pending M4.8 ablation proof.
 - `M4.8` and `M4.9` were redefined on 2026-04-10. Previous content (cross-context transfer and longitudinal stability) was removed as insufficient and non-actionable. The new definitions target ablation contrast and representation-level reconstruction respectively.
 - `M4.8` acceptance: `NOT_ISSUED` until all six gates pass.
+- `M4.10` acceptance: `PASS / PARTIAL_ACCEPT`, not full three-layer `ACCEPT`; `phenomenological_pass` remains `pending(M4.11)`.
+- `M4.11` acceptance: `NOT_ISSUED` until the natural-rollout phenomenology gates and paired negative controls pass.

@@ -1,8 +1,20 @@
 {
+  "behavioral_inheritance_pytest": {
+    "argv": [
+      "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "pytest",
+      "E:\\workspace\\segments\\tests\\test_m48_ablation_contrast.py",
+      "E:\\workspace\\segments\\tests\\test_m48_acceptance.py",
+      "-q",
+      "--tb=no"
+    ],
+    "exit_code": 0
+  },
   "behavioral_pass": true,
-  "behavioral_pass_basis": "inherits M4.8 default-path ablation contrast; not re-executed in this M4.10 audit",
+  "behavioral_pass_basis": "inherits M4.8 default-path ablation contrast; re-verified on this tree via tests/test_m48_ablation_contrast.py and tests/test_m48_acceptance.py (pytest exit_code=0, git a2268ca008e9197bd0d6dc286dbbe2f1aed9de87); not re-executed as a separate acceptance artifact in this M4.10 audit.",
   "failed_gates": [],
-  "formal_acceptance_conclusion": "ACCEPT",
+  "formal_acceptance_conclusion": "PARTIAL_ACCEPT",
   "gate_order": [
     "encoding_dynamics_not_keywords",
     "attention_budget_competition",
@@ -47,20 +59,20 @@
     },
     "replay_reencoding": {
       "replay_semantic_refresh_updated_ids": [
-        "8a657d70-7b86-4703-87bf-3d0dd21aa095",
-        "b39442ac-18be-4180-b5df-f47657c382fe",
-        "9253f5c8-d162-4425-93df-85fdede8d047",
-        "b3dff0db-b32e-43e2-8a70-abccd62ba029"
+        "aee7242b-cd26-4a1a-8226-9382bfbc884c",
+        "42c0b583-ff8c-4f7b-8c30-c24210cdc263",
+        "a776a9d8-cd83-4bb1-8e69-f53f03ee493f",
+        "91742be9-46f5-4e23-9739-d9b4d5af82b6"
       ],
       "status": "PASS",
       "synthetic_drift_support_passed": true
     },
     "semantic_centroid_consolidation": {
       "semantic_dynamic_ids": [
-        "8a657d70-7b86-4703-87bf-3d0dd21aa095",
-        "b39442ac-18be-4180-b5df-f47657c382fe",
-        "9253f5c8-d162-4425-93df-85fdede8d047",
-        "b3dff0db-b32e-43e2-8a70-abccd62ba029"
+        "aee7242b-cd26-4a1a-8226-9382bfbc884c",
+        "42c0b583-ff8c-4f7b-8c30-c24210cdc263",
+        "a776a9d8-cd83-4bb1-8e69-f53f03ee493f",
+        "91742be9-46f5-4e23-9739-d9b4d5af82b6"
       ],
       "status": "PASS"
     }
@@ -68,5 +80,6 @@
   "milestone_id": "M4.10",
   "phenomenological_pass": "pending(M4.11)",
   "status": "PASS",
-  "structural_pass": true
+  "structural_pass": true,
+  "three_layer_accept_ready": false
 }

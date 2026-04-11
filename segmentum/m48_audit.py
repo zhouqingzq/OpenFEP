@@ -487,8 +487,8 @@ def _gate_layer_model_documented() -> dict[str, object]:
                 "Phenomenological alignment",
             )
         ),
-        "m45_to_m47_layer_a_only_documented": "M4.5–M4.7 currently satisfy only layer (a)" in content,
-        "m48_row_annotated": "| M4.8 | Yes | Yes | — |" in content,
+        "m45_to_m47_layer_a_only_documented": "M4.5-M4.7 currently satisfy only layer (a)" in content,
+        "m48_row_annotated": "| M4.8 | Yes | Yes | No |" in content,
     }
     return _record(
         gate=GATE_LAYER_MODEL,
