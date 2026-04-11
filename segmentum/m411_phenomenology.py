@@ -8,7 +8,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from .m4_acceptance import final_conclusion
-from .memory_encoding import EncodingDynamics, EncodingDynamicsInput
 from .memory_model import MemoryClass, MemoryEntry
 from .runtime import SegmentRuntime
 
@@ -21,6 +20,8 @@ M411_CONTROL_ROLLOUT_PATH = ARTIFACTS_DIR / "m411_negative_control_rollout.json"
 M411_EVIDENCE_PATH = ARTIFACTS_DIR / "m411_phenomenology_evidence.json"
 M411_REPORT_PATH = REPORTS_DIR / "m411_acceptance_report.json"
 M411_SUMMARY_PATH = REPORTS_DIR / "m411_acceptance_summary.md"
+M411_OFFICIAL_TICKS = 20000
+M411_OFFICIAL_MIN_ACCEPTANCE_TICKS = 5000
 
 GATE_ORDER = (
     "long_horizon_free_rollout",
@@ -49,17 +50,36 @@ STATE_VECTOR_KEYS = (
 @dataclass(frozen=True)
 class M411RolloutConfig:
     seed: int = 411
-    ticks: int = 20000
+    ticks: int = M411_OFFICIAL_TICKS
     recall_probe_interval: int = 50
     perturbation_tick: int | None = None
     control_mode: str = "salience_zeroed"
     sleep_interval: int = 50
-    min_acceptance_ticks: int = 50
+    min_acceptance_ticks: int = M411_OFFICIAL_MIN_ACCEPTANCE_TICKS
 
     def effective_perturbation_tick(self) -> int:
         if self.perturbation_tick is not None:
             return max(1, int(self.perturbation_tick))
         return max(1, int(self.ticks) // 2)
+
+
+def _official_config_checks(config: M411RolloutConfig) -> dict[str, object]:
+    return {
+        "ticks_is_official_default": int(config.ticks) == M411_OFFICIAL_TICKS,
+        "min_acceptance_ticks_non_toy": (
+            int(config.min_acceptance_ticks) >= M411_OFFICIAL_MIN_ACCEPTANCE_TICKS
+        ),
+        "official_ticks_required": M411_OFFICIAL_TICKS,
+        "official_min_acceptance_ticks_required": M411_OFFICIAL_MIN_ACCEPTANCE_TICKS,
+    }
+
+
+def _is_official_acceptance_config(config: M411RolloutConfig) -> bool:
+    checks = _official_config_checks(config)
+    return bool(
+        checks["ticks_is_official_default"]
+        and checks["min_acceptance_ticks_non_toy"]
+    )
 
 
 def _round(value: float, digits: int = 6) -> float:
@@ -116,6 +136,7 @@ def _current_state_snapshot(runtime: SegmentRuntime) -> dict[str, object]:
 
 def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
     metadata = _entry_metadata(entry)
+    dynamics = dict(metadata.get("m410_encoding_dynamics", {}) or {})
     return {
         "entry_id": entry.id,
         "memory_class": entry.memory_class.value,
@@ -127,6 +148,36 @@ def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
         "relevance_self": _round(entry.relevance_self),
         "encoding_source": str(metadata.get("encoding_source", "")),
         "encoding_strength": _round(_encoding_strength(entry)),
+        "raw_drive": _round(metadata.get("raw_drive", dynamics.get("raw_drive", 0.0)) or 0.0),
+        "attention_budget_raw_drive_total": _round(
+            metadata.get(
+                "attention_budget_raw_drive_total",
+                dynamics.get("attention_budget_raw_drive_total", 0.0),
+            )
+            or 0.0
+        ),
+        "attention_budget_total": _round(
+            metadata.get("attention_budget_total", dynamics.get("attention_budget_total", 0.0))
+            or 0.0
+        ),
+        "attention_budget_requested": _round(
+            metadata.get(
+                "attention_budget_requested",
+                dynamics.get("attention_budget_requested", 0.0),
+            )
+            or 0.0
+        ),
+        "attention_budget_granted": _round(
+            metadata.get(
+                "attention_budget_granted",
+                dynamics.get("attention_budget_granted", 0.0),
+            )
+            or 0.0
+        ),
+        "attention_budget_denied": _round(
+            metadata.get("attention_budget_denied", dynamics.get("attention_budget_denied", 0.0))
+            or 0.0
+        ),
         "consolidation_source": entry.consolidation_source,
         "support_ids": list(entry.support_ids or []),
         "lineage_type": metadata.get("lineage_type"),
@@ -147,80 +198,6 @@ def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
         "salience_delta": entry.salience_delta,
         "retention_adjustment": entry.retention_adjustment,
         "semantic_tags": list(entry.semantic_tags[:8]),
-    }
-
-
-def _candidate_budget_audit(runtime: SegmentRuntime) -> dict[str, object]:
-    diagnostics = runtime.agent.last_decision_diagnostics
-    ranked = list(diagnostics.ranked_options if diagnostics is not None else [])
-    body = runtime.agent._current_body_state()
-    energy = _clamp(float(body.get("energy", 0.85)))
-    stress = _clamp(float(body.get("stress", 0.0)))
-    fatigue = _clamp(float(body.get("fatigue", 0.0)))
-    shared_budget = _clamp(
-        0.35 + (energy * 0.45) - (stress * 0.18) - (fatigue * 0.12),
-        0.05,
-        1.0,
-    )
-    events: list[dict[str, object]] = []
-    signals: list[EncodingDynamicsInput] = []
-    for option in ranked:
-        prediction_error = max(0.01, float(option.predicted_error))
-        surprise = max(
-            0.01,
-            float(option.action_ambiguity),
-            1.0 - float(option.preferred_probability),
-        )
-        arousal = _clamp(
-            (float(option.risk) / 4.0)
-            + (max(0.0, -float(option.value_score)) * 0.20),
-            0.05,
-            1.0,
-        )
-        events.append(
-            {
-                "candidate_id": str(option.choice),
-                "prediction_error": _round(prediction_error),
-                "surprise": _round(surprise),
-                "arousal": _round(arousal),
-                "requested_budget": 1.0,
-            }
-        )
-        signals.append(
-            EncodingDynamicsInput(
-                prediction_error=prediction_error,
-                surprise=surprise,
-                arousal=arousal,
-                attention_budget=shared_budget,
-                requested_budget=1.0,
-            )
-        )
-    scored = EncodingDynamics.score_many(signals) if signals else []
-    scored_events = [
-        {**event, **result.to_dict()}
-        for event, result in zip(events, scored)
-    ]
-    winner = max(
-        scored_events,
-        key=lambda item: float(item.get("encoding_strength", 0.0)),
-        default={},
-    )
-    return {
-        "candidate_count": len(scored_events),
-        "shared_attention_budget": _round(shared_budget),
-        "winner_candidate_id": str(winner.get("candidate_id", "")),
-        "events": scored_events,
-        "competition_observed": bool(
-            len(scored_events) >= 2
-            and any(
-                float(item.get("attention_budget_denied", 0.0)) > 0.0
-                for item in scored_events
-            )
-            and any(
-                float(item.get("attention_budget_granted", 0.0)) > 0.0
-                for item in scored_events
-            )
-        ),
     }
 
 
@@ -267,38 +244,43 @@ def _apply_perturbation(runtime: SegmentRuntime, *, tick: int) -> dict[str, obje
     }
 
 
-def _apply_negative_control(
+def _install_negative_control_policy(
     runtime: SegmentRuntime,
     *,
-    tick: int,
     mode: str,
 ) -> dict[str, object]:
-    touched: list[str] = []
-    for entry in list(runtime.agent.memory_store.entries):
-        metadata = dict(entry.compression_metadata or {})
-        entry.salience = 0.01
-        entry.accessibility = 0.01
-        entry.trace_strength = 0.01
-        entry.relevance = 0.0
-        entry.relevance_goal = 0.0
-        entry.relevance_threat = 0.0
-        entry.relevance_self = 0.0
-        entry.relevance_social = 0.0
-        entry.relevance_reward = 0.0
-        entry.novelty = 0.0 if mode == "salience_zeroed" else _clamp(
-            0.05 + ((len(entry.id) % 7) * 0.01)
+    original_score_payload_encoding = runtime.agent.long_term_memory._score_payload_encoding
+
+    def controlled_score_payload_encoding(payload: dict[str, object]) -> dict[str, object]:
+        audit = dict(original_score_payload_encoding(payload))
+        requested = float(audit.get("attention_budget_requested", 1.0) or 1.0)
+        if mode == "salience_shuffled":
+            key = str(payload.get("cycle", payload.get("timestamp", payload.get("action", ""))))
+            bucket = sum(ord(char) for char in key) % 7
+            shuffled_strength = 0.02 + (bucket * 0.005)
+            audit["encoding_strength"] = _round(shuffled_strength)
+            audit["attention_budget_granted"] = min(
+                float(audit.get("attention_budget_granted", 0.0) or 0.0),
+                shuffled_strength,
+            )
+        else:
+            audit["encoding_strength"] = 0.0
+            audit["attention_budget_granted"] = 0.0
+        audit["attention_budget_denied"] = max(
+            0.0,
+            requested - float(audit.get("attention_budget_granted", 0.0) or 0.0),
         )
-        metadata["m411_negative_control_tick"] = tick
-        metadata["m411_negative_control_mode"] = mode
-        entry.compression_metadata = metadata
-        touched.append(entry.id)
-    runtime.agent.long_term_memory.episodes = runtime.agent.memory_store.to_legacy_episodes()
-    runtime.agent.sync_memory_awareness_to_long_term_memory()
+        audit["m411_negative_control_mode"] = mode
+        audit["m411_negative_control_policy"] = "encoding_weight_policy"
+        return audit
+
+    runtime.agent.long_term_memory._score_payload_encoding = controlled_score_payload_encoding
     return {
-        "tick": tick,
+        "tick": 0,
         "mode": mode,
-        "touched_count": len(touched),
-        "touched_ids_preview": touched[:8],
+        "policy_scope": "encoding_weight_policy",
+        "weight_policy": mode,
+        "mutates_existing_memory": False,
     }
 
 
@@ -326,6 +308,10 @@ def run_m411_rollout(
         seen_entry_ids: set[str] = set()
         seen_sleep_count = 0
         perturbation_tick = config.effective_perturbation_tick()
+        if negative_control:
+            interventions.append(
+                _install_negative_control_policy(runtime, mode=config.control_mode)
+            )
 
         loop = asyncio.new_event_loop()
         try:
@@ -336,18 +322,6 @@ def run_m411_rollout(
                     perturbations.append(_apply_perturbation(runtime, tick=next_tick))
                 loop.run_until_complete(runtime.astep(verbose=False))
                 tick = int(runtime.agent.cycle)
-                if negative_control:
-                    interventions.append(
-                        _apply_negative_control(
-                            runtime,
-                            tick=tick,
-                            mode=config.control_mode,
-                        )
-                    )
-
-                budget_record = _candidate_budget_audit(runtime)
-                budget_record["tick"] = tick
-                budget_events.append(budget_record)
 
                 for entry in list(runtime.agent.memory_store.entries):
                     if entry.id in seen_entry_ids:
@@ -653,8 +627,9 @@ def evaluate_schema_intrusion(rollout: dict[str, object]) -> dict[str, object]:
     passed = bool(nondegenerate and rate > 0.0)
     degenerate = not nondegenerate and keyword_only_cluster_count == 0
     return {
-        "status": "PASS" if passed or degenerate else "FAIL",
-        "passed": bool(passed or degenerate),
+        "status": "PASS" if passed else "FAIL",
+        "passed": passed,
+        "intrusion_present": passed,
         "degenerate_cluster_formation": degenerate,
         "intrusion_rate": _round(rate),
         "intrusion_count": intrusion_count,
@@ -680,23 +655,43 @@ def evaluate_identity_continuity(rollout: dict[str, object]) -> dict[str, object
     self_related = [
         entry for entry in episodic
         if float(entry.get("relevance_self", 0.0)) >= 0.35
-        or "identity" in {str(tag).lower() for tag in entry.get("semantic_tags", [])}
     ]
-    baseline = [entry for entry in episodic if entry not in self_related]
-    if not baseline and episodic:
-        baseline = sorted(
-            episodic,
-            key=lambda item: float(item.get("relevance_self", 0.0)),
-        )[: max(1, len(episodic) // 4)]
+    candidates = [entry for entry in episodic if entry not in self_related]
+    baseline: list[dict[str, object]] = []
+    used_ids: set[str] = set()
+    max_age_delta = max(5, int(ticks * 0.10))
+    for self_entry in self_related:
+        self_strength = float(self_entry.get("encoding_strength", 0.0))
+        self_created = int(self_entry.get("created_at", 0))
+        matches = [
+            entry for entry in candidates
+            if str(entry.get("entry_id", "")) not in used_ids
+            and abs(float(entry.get("encoding_strength", 0.0)) - self_strength) <= 0.10
+            and abs(int(entry.get("created_at", 0)) - self_created) <= max_age_delta
+        ]
+        if not matches:
+            continue
+        match = min(
+            matches,
+            key=lambda item: (
+                abs(float(item.get("encoding_strength", 0.0)) - self_strength),
+                abs(int(item.get("created_at", 0)) - self_created),
+            ),
+        )
+        used_ids.add(str(match.get("entry_id", "")))
+        baseline.append(match)
     self_retention = _mean([_retention_score(entry, recalled) for entry in self_related])
     baseline_retention = _mean([_retention_score(entry, recalled) for entry in baseline])
     gap = self_retention - baseline_retention
-    passed = bool(self_related and baseline and gap > 0.025)
+    matched_baseline_sufficient = bool(self_related and len(baseline) >= max(1, len(self_related) // 2))
+    passed = bool(matched_baseline_sufficient and gap > 0.025)
     return {
         "status": "PASS" if passed else "FAIL",
         "passed": passed,
         "self_related_count": len(self_related),
         "baseline_count": len(baseline),
+        "matched_baseline_sufficient": matched_baseline_sufficient,
+        "self_related_source": "relevance_self_structured_field",
         "self_retention": _round(self_retention),
         "baseline_retention": _round(baseline_retention),
         "retention_gap": _round(gap),
@@ -726,6 +721,8 @@ def _gate_free_rollout(
     config: M411RolloutConfig,
 ) -> dict[str, object]:
     encoded = [event for event in rollout.get("encoded_events", []) if isinstance(event, dict)]
+    official_config_checks = _official_config_checks(config)
+    official_config = _is_official_acceptance_config(config)
     source_counts: dict[str, int] = {}
     for event in encoded:
         source = str(event.get("encoding_source", "missing") or "missing")
@@ -746,36 +743,38 @@ def _gate_free_rollout(
         for event in rollout.get("replay_events", [])
         if isinstance(event, dict)
     )
-    budget_competition = any(
-        bool(event.get("competition_observed"))
-        for event in rollout.get("budget_events", [])
-        if isinstance(event, dict)
-    )
+    actual_budget_competition_events = [
+        event for event in encoded
+        if float(event.get("attention_budget_denied", 0.0) or 0.0) > 0.0
+        and float(event.get("attention_budget_granted", 0.0) or 0.0) > 0.0
+        and float(event.get("attention_budget_raw_drive_total", 0.0) or 0.0)
+        > float(event.get("raw_drive", 0.0) or 0.0)
+    ]
+    budget_competition = bool(actual_budget_competition_events)
     live_replay = bool(replay_sources) and replay_sources <= {"live_sleep_consolidation"}
     encoded_count = sum(source_counts.values())
     dynamics_count = source_counts.get("dynamics", 0)
-    short_smoke_live_consolidation = (
-        int(rollout.get("ticks", 0)) <= 50
-        and int(config.min_acceptance_ticks) < 50
-        and live_replay
-    )
     passed = bool(
-        int(rollout.get("ticks", 0)) >= int(config.min_acceptance_ticks)
+        official_config
+        and int(rollout.get("ticks", 0)) >= int(config.min_acceptance_ticks)
         and not rollout.get("curated_corpus_paths_read")
         and dynamics_count >= max(1, int(encoded_count * 0.70))
-        and (semantic_dynamic or live_m410_patterns or short_smoke_live_consolidation)
+        and (semantic_dynamic or live_m410_patterns)
         and live_replay
         and budget_competition
     )
     return {
         "status": "PASS" if passed else "FAIL",
         "passed": passed,
+        "official_acceptance_config": official_config,
+        "official_config_checks": official_config_checks,
         "encoding_source_histogram": source_counts,
         "semantic_dynamic_count": len(semantic_dynamic),
         "live_m410_patterns_observed": bool(live_m410_patterns),
-        "short_smoke_live_consolidation": bool(short_smoke_live_consolidation),
         "replay_sources": sorted(replay_sources),
         "budget_competition_observed": budget_competition,
+        "budget_evidence_source": "encoded_event_metadata",
+        "actual_budget_competition_event_count": len(actual_budget_competition_events),
         "curated_corpus_paths_read": list(rollout.get("curated_corpus_paths_read", [])),
     }
 
@@ -832,10 +831,20 @@ def evaluate_m411_phenomenology(
             ("retention_gap",),
         ),
     }
+    destructive_control_interventions = [
+        item for item in control.get("negative_control_interventions", [])
+        if isinstance(item, dict)
+        and (
+            item.get("mutates_existing_memory") is not False
+            or item.get("policy_scope") != "encoding_weight_policy"
+            or "touched_count" in item
+        )
+    ]
     negative_controls_paired = bool(
         default.get("seed") == control.get("seed")
         and default.get("ticks") == control.get("ticks")
         and control.get("negative_control_interventions")
+        and not destructive_control_interventions
     )
     honesty_safety_net = {
         "status": "PASS",
@@ -857,6 +866,7 @@ def evaluate_m411_phenomenology(
                 == "representational_centroid_not_keyword"
             ),
             "negative_controls_present": negative_controls_paired,
+            "negative_control_not_destructive_memory_mutation": not destructive_control_interventions,
         },
     }
     honesty_safety_net["passed"] = all(
@@ -895,6 +905,10 @@ def evaluate_m411_phenomenology(
                 default_metrics["schema_intrusion"]["passed"]
                 and comparisons["schema_intrusion_collapse"]
             ),
+            "default_intrusion_present": bool(
+                default_metrics["schema_intrusion"].get("intrusion_present")
+            ),
+            "control_intrusion_collapsed": bool(comparisons["schema_intrusion_collapse"]),
             "default": default_metrics["schema_intrusion"],
             "negative_control": control_metrics["schema_intrusion"],
         },
@@ -942,7 +956,8 @@ def build_m411_acceptance_report(
     pair = pair or run_m411_rollout_pair(config)
     evaluation = evaluate_m411_phenomenology(pair, config)
     failed_gates = list(evaluation["failed_gates"])
-    phenomenological_pass = not failed_gates
+    official_acceptance_config = _is_official_acceptance_config(config)
+    phenomenological_pass = bool(not failed_gates and official_acceptance_config)
     structural_pass = True
     behavioral_pass = True
     layer_conclusion = final_conclusion(
@@ -952,8 +967,14 @@ def build_m411_acceptance_report(
     )
     report = {
         "milestone_id": "M4.11",
-        "status": "PASS" if not failed_gates else "FAIL",
+        "status": (
+            "PASS"
+            if phenomenological_pass
+            else ("FAIL" if official_acceptance_config else "NOT_ISSUED")
+        ),
         "formal_acceptance_conclusion": layer_conclusion.formal_acceptance_conclusion,
+        "official_acceptance_config": official_acceptance_config,
+        "official_config_checks": _official_config_checks(config),
         "structural_pass": structural_pass,
         "structural_pass_basis": "inherits M4.10 dynamical encoding/consolidation structural evidence",
         "behavioral_pass": behavioral_pass,
@@ -967,6 +988,7 @@ def build_m411_acceptance_report(
         "honesty_audit_role": "upper_safety_net_not_primary_grader",
         "primary_grader": "four_effect_natural_rollout_phenomenology_with_negative_controls",
         "notes": [
+            "Short smoke rollouts are pipeline checks only and cannot satisfy M4.11.",
             "A pass on the honesty safety net alone does not satisfy M4.11.",
             "The primary M4.11 grader is default-vs-negative-control phenomenological fit.",
         ],
@@ -986,6 +1008,8 @@ def build_m411_acceptance_report(
             "recall_events": len(pair["negative_control"].get("recall_events", [])),
             "replay_events": len(pair["negative_control"].get("replay_events", [])),
             "interventions": len(pair["negative_control"].get("negative_control_interventions", [])),
+            "control_mode": pair["negative_control"].get("control_mode"),
+            "weight_policy": list(pair["negative_control"].get("negative_control_interventions", []))[:4],
         },
     }
     return report, evidence

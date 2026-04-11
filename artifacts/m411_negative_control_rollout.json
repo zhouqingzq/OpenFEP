@@ -1,0 +1,4447 @@
+{
+  "milestone_id": "M4.11",
+  "run_kind": "negative_control",
+  "seed": 411,
+  "ticks": 30,
+  "recall_probe_interval": 6,
+  "perturbation_tick": 15,
+  "control_mode": "salience_zeroed",
+  "curated_corpus_paths_read": [],
+  "curated_corpus_prohibited_path": "data/m47_corpus.json",
+  "encoded_events": [
+    {
+      "entry_id": "ep-000001-hide",
+      "memory_class": "episodic",
+      "created_at": 1,
+      "last_accessed": 1,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.63395,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.504637,
+        0.322312,
+        0.616621,
+        0.423407,
+        0.527314,
+        0.202482,
+        0.459834,
+        0.295634,
+        0.464575,
+        0.428441,
+        0.501148,
+        0.341349,
+        0.015681,
+        0.026678,
+        0.152046,
+        -0.001762,
+        0.009158,
+        -0.138866
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "hazard_response",
+        "hide",
+        "identity",
+        "survival_threat",
+        "threat"
+      ],
+      "tick": 1
+    },
+    {
+      "entry_id": "ep-000002-rest",
+      "memory_class": "episodic",
+      "created_at": 2,
+      "last_accessed": 2,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.65525,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.536153,
+        0.104978,
+        0.501674,
+        0.530838,
+        0.378563,
+        0.254593,
+        0.481431,
+        0.277363,
+        0.546622,
+        0.422918,
+        0.491111,
+        0.281912,
+        0.019153,
+        -0.172386,
+        -0.044948,
+        0.037772,
+        -0.039392,
+        -0.027319
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 2
+    },
+    {
+      "entry_id": "ep-000004-rest",
+      "memory_class": "episodic",
+      "created_at": 4,
+      "last_accessed": 4,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.69785,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.339515,
+        0.06677,
+        0.457572,
+        0.467568,
+        0.417119,
+        0.31428,
+        0.490636,
+        0.1827,
+        0.549355,
+        0.447314,
+        0.448029,
+        0.258575,
+        -0.151121,
+        -0.11593,
+        -0.032124,
+        0.020254,
+        -0.010818,
+        0.019497
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 4
+    },
+    {
+      "entry_id": "ep-000006-scan",
+      "memory_class": "episodic",
+      "created_at": 6,
+      "last_accessed": 6,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.69815,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.360087,
+        0.0,
+        0.60914,
+        0.471216,
+        0.485576,
+        0.331283,
+        0.442372,
+        0.15224,
+        0.543454,
+        0.45044,
+        0.439418,
+        0.267328,
+        -0.082285,
+        -0.15224,
+        0.02299,
+        0.020776,
+        0.016155,
+        0.022384
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "resource_gain",
+        "resource_opportunity",
+        "scan"
+      ],
+      "tick": 6
+    },
+    {
+      "entry_id": "ep-000007-scan",
+      "memory_class": "episodic",
+      "created_at": 7,
+      "last_accessed": 7,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.67895,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.340518,
+        0.087377,
+        0.674973,
+        0.432152,
+        0.45202,
+        0.434175,
+        0.409449,
+        0.095551,
+        0.550481,
+        0.454984,
+        0.435354,
+        0.279728,
+        -0.068931,
+        -0.002861,
+        0.124492,
+        -0.022832,
+        0.005833,
+        0.054056
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_loss",
+        "routine_monitoring",
+        "scan",
+        "threat"
+      ],
+      "tick": 7
+    },
+    {
+      "entry_id": "ep-000008-rest",
+      "memory_class": "episodic",
+      "created_at": 8,
+      "last_accessed": 8,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.70025,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.353252,
+        0.024655,
+        0.745271,
+        0.489773,
+        0.505473,
+        0.324981,
+        0.377119,
+        0.08317,
+        0.604698,
+        0.454404,
+        0.433721,
+        0.297021,
+        -0.008354,
+        -0.058515,
+        0.140573,
+        0.012379,
+        0.071752,
+        0.009786
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 8
+    },
+    {
+      "entry_id": "ep-000010-rest",
+      "memory_class": "episodic",
+      "created_at": 10,
+      "last_accessed": 10,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.73385,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.312092,
+        0.114295,
+        0.757141,
+        0.473973,
+        0.678231,
+        0.261392,
+        0.353702,
+        0.07266,
+        0.682193,
+        0.455469,
+        0.478035,
+        0.306752,
+        -0.014563,
+        0.041635,
+        0.074948,
+        0.006476,
+        0.200196,
+        -0.015876
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 10
+    },
+    {
+      "entry_id": "ep-000006-scan-merged",
+      "memory_class": "episodic",
+      "created_at": 6,
+      "last_accessed": 7,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.68855,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.350303,
+        0.043689,
+        0.642057,
+        0.451684,
+        0.468798,
+        0.382729,
+        0.42591,
+        0.123896,
+        0.546968,
+        0.452712,
+        0.437386,
+        0.273528,
+        -0.075608,
+        -0.077551,
+        0.073741,
+        -0.001028,
+        0.010994,
+        0.03822
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "scan",
+        "threat"
+      ],
+      "tick": 12
+    },
+    {
+      "entry_id": "ep-000010-rest-merged",
+      "memory_class": "episodic",
+      "created_at": 11,
+      "last_accessed": 12,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.74315,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.271002,
+        0.15116,
+        0.735346,
+        0.475246,
+        0.69502,
+        0.234329,
+        0.344028,
+        0.081487,
+        0.702469,
+        0.457366,
+        0.514078,
+        0.304944,
+        -0.025559,
+        0.069673,
+        0.032877,
+        0.006258,
+        0.180942,
+        -0.024715
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "threat"
+      ],
+      "tick": 12
+    },
+    {
+      "entry_id": "ep-000013-seek_contact",
+      "memory_class": "episodic",
+      "created_at": 13,
+      "last_accessed": 13,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.76655,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.294134,
+        0.169916,
+        0.710836,
+        0.466491,
+        0.362279,
+        0.345507,
+        0.350913,
+        0.163962,
+        0.697119,
+        0.452335,
+        0.560836,
+        0.282058,
+        -0.019873,
+        0.002084,
+        0.013717,
+        0.004954,
+        -0.198557,
+        0.063449
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "seek_contact",
+        "threat"
+      ],
+      "tick": 13
+    },
+    {
+      "entry_id": "ep-000014-exploit_shelter",
+      "memory_class": "episodic",
+      "created_at": 14,
+      "last_accessed": 14,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.74435,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.219973,
+        0.256,
+        0.730311,
+        0.405426,
+        0.374347,
+        0.441307,
+        0.315368,
+        0.133303,
+        0.732889,
+        0.458892,
+        0.51467,
+        0.298258,
+        -0.033389,
+        0.042944,
+        -0.002578,
+        -0.018713,
+        -0.140323,
+        0.143049
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "exploit_shelter",
+        "resource_gain",
+        "resource_opportunity"
+      ],
+      "tick": 14
+    },
+    {
+      "entry_id": "ep-000015-exploit_shelter",
+      "memory_class": "episodic",
+      "created_at": 15,
+      "last_accessed": 15,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.57845,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.177387,
+        0.448067,
+        1.0,
+        0.595839,
+        0.6211,
+        0.354764,
+        0.288469,
+        0.161293,
+        0.758962,
+        0.456615,
+        0.497048,
+        0.325162,
+        -0.111082,
+        0.100371,
+        0.241038,
+        0.048729,
+        0.124052,
+        0.010361
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "exploit_shelter",
+        "hazard_response",
+        "identity",
+        "integrity_loss",
+        "threat"
+      ],
+      "tick": 15
+    },
+    {
+      "entry_id": "ep-000016-rest",
+      "memory_class": "episodic",
+      "created_at": 16,
+      "last_accessed": 16,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.59975,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.079844,
+        0.341383,
+        1.0,
+        0.76078,
+        0.364618,
+        0.291866,
+        0.243297,
+        0.226283,
+        0.838713,
+        0.48167,
+        0.479693,
+        0.335863,
+        -0.163452,
+        0.040285,
+        0.161287,
+        0.097689,
+        -0.115075,
+        -0.015399
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 16
+    },
+    {
+      "entry_id": "ep-000018-rest",
+      "memory_class": "episodic",
+      "created_at": 18,
+      "last_accessed": 18,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.64235,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.0,
+        0.348277,
+        0.946741,
+        0.749082,
+        0.388783,
+        0.385801,
+        0.164766,
+        0.254837,
+        0.873509,
+        0.540238,
+        0.457722,
+        0.333924,
+        -0.164766,
+        0.09344,
+        0.073232,
+        0.073095,
+        -0.024129,
+        0.018157
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 18
+    },
+    {
+      "entry_id": "ep-000020-rest",
+      "memory_class": "episodic",
+      "created_at": 20,
+      "last_accessed": 20,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.68495,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.0,
+        0.452797,
+        1.0,
+        0.738248,
+        0.575945,
+        0.386144,
+        0.118179,
+        0.295989,
+        0.917715,
+        0.624383,
+        0.454899,
+        0.326074,
+        -0.118179,
+        0.156808,
+        0.082285,
+        0.039853,
+        0.042366,
+        0.021025
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 20
+    },
+    {
+      "entry_id": "ep-000014-exploit_shelter-merged",
+      "memory_class": "episodic",
+      "created_at": 14,
+      "last_accessed": 15,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.6614,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.19868,
+        0.352034,
+        0.865155,
+        0.500633,
+        0.497724,
+        0.398036,
+        0.301919,
+        0.147298,
+        0.745925,
+        0.457753,
+        0.505859,
+        0.31171,
+        -0.072235,
+        0.071657,
+        0.11923,
+        0.015008,
+        -0.008135,
+        0.076705
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "exploit_shelter",
+        "hazard_response",
+        "identity",
+        "integrity_loss",
+        "threat"
+      ],
+      "tick": 22
+    },
+    {
+      "entry_id": "ep-000016-rest-merged",
+      "memory_class": "episodic",
+      "created_at": 18,
+      "last_accessed": 20,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.64235,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.026615,
+        0.380819,
+        0.982247,
+        0.74937,
+        0.443115,
+        0.354603,
+        0.175414,
+        0.259036,
+        0.876646,
+        0.548763,
+        0.464105,
+        0.331954,
+        -0.148799,
+        0.096844,
+        0.105601,
+        0.070212,
+        -0.032279,
+        0.007927
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "threat"
+      ],
+      "tick": 22
+    },
+    {
+      "entry_id": "ep-000022-scan",
+      "memory_class": "episodic",
+      "created_at": 22,
+      "last_accessed": 22,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.68705,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.069926,
+        0.403204,
+        0.87362,
+        0.766981,
+        0.593376,
+        0.397396,
+        0.089398,
+        0.309586,
+        0.91352,
+        0.659351,
+        0.459158,
+        0.329114,
+        -0.019472,
+        0.093618,
+        -0.0399,
+        0.03767,
+        0.046976,
+        0.023899
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": 0.077187,
+      "salience_delta": 0.1736376,
+      "retention_adjustment": 0.1736376,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "scan",
+        "threat"
+      ],
+      "tick": 22
+    },
+    {
+      "entry_id": "ep-000023-rest",
+      "memory_class": "episodic",
+      "created_at": 23,
+      "last_accessed": 23,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.77315,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.056957,
+        0.453167,
+        1.0,
+        0.768842,
+        0.656575,
+        0.350423,
+        0.10273,
+        0.348112,
+        0.913571,
+        0.667891,
+        0.490004,
+        0.333922,
+        -0.045773,
+        0.105055,
+        0.086429,
+        0.035333,
+        0.0583,
+        0.005776
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 23
+    },
+    {
+      "entry_id": "ep-000018-rest-merged",
+      "memory_class": "episodic",
+      "created_at": 20,
+      "last_accessed": 23,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.70895,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.041786,
+        0.416993,
+        0.991124,
+        0.759106,
+        0.549845,
+        0.352513,
+        0.139072,
+        0.303574,
+        0.895108,
+        0.608327,
+        0.477054,
+        0.332938,
+        -0.097286,
+        0.10095,
+        0.096015,
+        0.052773,
+        0.01301,
+        0.006852
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "threat"
+      ],
+      "tick": 24
+    },
+    {
+      "entry_id": "ep-000025-rest",
+      "memory_class": "episodic",
+      "created_at": 25,
+      "last_accessed": 25,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.053025,
+        0.440517,
+        1.0,
+        0.681867,
+        0.210746,
+        0.314168,
+        0.100845,
+        0.384504,
+        0.91677,
+        0.677887,
+        0.506955,
+        0.333617,
+        -0.04782,
+        0.056013,
+        0.08323,
+        0.001393,
+        -0.103673,
+        -0.006807
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "rest",
+        "threat"
+      ],
+      "tick": 25
+    },
+    {
+      "entry_id": "ep-000027-rest",
+      "memory_class": "episodic",
+      "created_at": 27,
+      "last_accessed": 27,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.0,
+        0.407798,
+        0.888087,
+        0.712392,
+        0.263885,
+        0.261063,
+        0.056626,
+        0.444059,
+        0.957544,
+        0.723888,
+        0.453533,
+        0.322032,
+        -0.019819,
+        -0.036262,
+        -0.069456,
+        -0.011496,
+        -0.066377,
+        -0.021339
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "maintenance",
+        "recovery",
+        "resource_gain",
+        "resource_opportunity",
+        "rest"
+      ],
+      "tick": 27
+    },
+    {
+      "entry_id": "ep-000029-rest",
+      "memory_class": "episodic",
+      "created_at": 29,
+      "last_accessed": 29,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 0.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.024259,
+        0.499775,
+        0.87038,
+        0.756941,
+        0.402586,
+        0.262666,
+        0.053157,
+        0.445213,
+        0.934154,
+        0.711017,
+        0.415044,
+        0.303635,
+        -0.028898,
+        0.054562,
+        -0.063774,
+        0.016073,
+        -0.00436,
+        -0.014339
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "resource_loss",
+        "rest"
+      ],
+      "tick": 29
+    },
+    {
+      "entry_id": "ep-000030-rest",
+      "memory_class": "episodic",
+      "created_at": 30,
+      "last_accessed": 30,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.047331,
+        0.339528,
+        0.912488,
+        0.708677,
+        0.471255,
+        0.188274,
+        0.036674,
+        0.481899,
+        0.932445,
+        0.729688,
+        0.389374,
+        0.284403,
+        0.010658,
+        -0.142371,
+        -0.019956,
+        -0.007354,
+        0.028658,
+        -0.033645
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "rest",
+        "threat"
+      ],
+      "tick": 30
+    }
+  ],
+  "consolidation_events": [
+    {
+      "entry_id": "910bc794-e96c-4306-ac53-99da85d749a3",
+      "memory_class": "semantic",
+      "created_at": 6,
+      "last_accessed": 20,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "ep-000010-rest-merged",
+        "ep-000016-rest",
+        "ep-000018-rest",
+        "ep-000020-rest"
+      ],
+      "lineage_type": "identity_consolidation",
+      "has_centroid": true,
+      "centroid": [
+        0.14023,
+        0.267461,
+        0.864829,
+        0.635008,
+        0.498633,
+        0.336174,
+        0.259236,
+        0.196498,
+        0.775875,
+        0.511274,
+        0.468756,
+        0.314867,
+        -0.109513,
+        0.056531,
+        0.084684,
+        0.043173,
+        0.01902,
+        0.007457,
+        0.0,
+        0.05,
+        0.05
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.400925,
+      "residual_norm_var": 0.007672,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "semantic centroid display",
+        "threat",
+        "unknown"
+      ],
+      "tick": 22
+    },
+    {
+      "entry_id": "dff7ec38-9752-45b8-9b4f-c472c271e487",
+      "memory_class": "inferred",
+      "created_at": 6,
+      "last_accessed": 20,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "ep-000010-rest-merged",
+        "ep-000016-rest",
+        "ep-000018-rest",
+        "ep-000020-rest"
+      ],
+      "lineage_type": "pattern_extraction",
+      "has_centroid": true,
+      "centroid": [
+        0.14023,
+        0.267461,
+        0.864829,
+        0.635008,
+        0.498633,
+        0.336174,
+        0.259236,
+        0.196498,
+        0.775875,
+        0.511274,
+        0.468756,
+        0.314867,
+        -0.109513,
+        0.056531,
+        0.084684,
+        0.043173,
+        0.01902,
+        0.007457,
+        0.0,
+        0.05,
+        0.05
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.400925,
+      "residual_norm_var": 0.007672,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "inferred centroid display",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "scan",
+        "threat",
+        "unknown"
+      ],
+      "tick": 22
+    },
+    {
+      "entry_id": "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+      "memory_class": "semantic",
+      "created_at": 6,
+      "last_accessed": 24,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "ep-000010-rest-merged",
+        "ep-000016-rest-merged",
+        "ep-000023-rest"
+      ],
+      "lineage_type": "identity_consolidation",
+      "has_centroid": true,
+      "centroid": [
+        0.176219,
+        0.257209,
+        0.839912,
+        0.611285,
+        0.565877,
+        0.330521,
+        0.26202,
+        0.203133,
+        0.759913,
+        0.531683,
+        0.476393,
+        0.311087,
+        -0.073935,
+        0.048505,
+        0.074662,
+        0.027694,
+        0.054489,
+        0.006802,
+        0.06055,
+        0.080275,
+        0.080275
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.443319,
+      "residual_norm_var": 0.002584,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "semantic centroid display",
+        "threat",
+        "unknown"
+      ],
+      "tick": 24
+    },
+    {
+      "entry_id": "5613bca6-e7d6-4497-ab4d-d74caa821813",
+      "memory_class": "inferred",
+      "created_at": 6,
+      "last_accessed": 24,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "910bc794-e96c-4306-ac53-99da85d749a3",
+        "ep-000010-rest-merged",
+        "ep-000016-rest-merged",
+        "ep-000023-rest"
+      ],
+      "lineage_type": "pattern_extraction",
+      "has_centroid": true,
+      "centroid": [
+        0.203106,
+        0.225252,
+        0.80967,
+        0.581721,
+        0.569084,
+        0.326123,
+        0.28661,
+        0.183045,
+        0.732874,
+        0.516354,
+        0.476261,
+        0.306717,
+        -0.069264,
+        0.038016,
+        0.070391,
+        0.022678,
+        0.062785,
+        0.006792,
+        0.07266,
+        0.08633,
+        0.08633
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.421291,
+      "residual_norm_var": 0.005885,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "inferred centroid display",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "scan",
+        "semantic centroid display",
+        "threat"
+      ],
+      "tick": 24
+    }
+  ],
+  "recall_events": [
+    {
+      "tick": 6,
+      "candidate_ids": [
+        "ep-000006-scan",
+        "ep-000004-rest",
+        "ep-000002-rest",
+        "ep-000001-hide"
+      ],
+      "candidate_classes": [
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic"
+      ],
+      "recall_confidence": 0.45,
+      "recall_hypothesis": {
+        "content": "representation_recall:ep-000006-scan | winner=0.254 | residual=0.746 | protected_biases:agents:social=0.042, agents:danger=0.042, action:novelty=0.042, action:danger=0.042 | donor_vector:ep-000004-rest:food=0.012, ep-000002-rest:danger=0.031, ep-000002-rest:temperature=0.013, ep-000001-hide:danger=0.036 | cue_focus:food, novelty, novelty, danger",
+        "primary_entry_id": "ep-000006-scan",
+        "auxiliary_entry_ids": [
+          "ep-000004-rest",
+          "ep-000002-rest"
+        ],
+        "confidence": 0.45,
+        "source_trace": [
+          "primary:ep-000006-scan",
+          "auxiliary:ep-000004-rest",
+          "auxiliary:ep-000002-rest"
+        ],
+        "reconstructed_fields": [
+          "auxiliary_detail_blend",
+          "query_focus",
+          "context_focus"
+        ],
+        "protected_fields": [
+          "agents",
+          "action",
+          "outcome"
+        ],
+        "competing_interpretations": [
+          "residual:ep-000004-rest:0.250",
+          "residual:ep-000001-hide:0.248",
+          "residual:ep-000002-rest:0.248"
+        ],
+        "procedure_step_outline": null,
+        "source_statuses": {
+          "ep-000006-scan": "validated",
+          "ep-000004-rest": "validated",
+          "ep-000002-rest": "validated"
+        },
+        "candidate_ids": [
+          "ep-000006-scan",
+          "ep-000004-rest",
+          "ep-000002-rest",
+          "ep-000001-hide"
+        ],
+        "anchor_contributions": {
+          "time": [
+            {
+              "entry_id": "ep-000006-scan",
+              "role": "primary",
+              "value": "6"
+            },
+            {
+              "entry_id": "ep-000004-rest",
+              "role": "auxiliary",
+              "value": "4"
+            },
+            {
+              "entry_id": "ep-000002-rest",
+              "role": "auxiliary",
+              "value": "2"
+            }
+          ],
+          "action": [
+            {
+              "entry_id": "ep-000006-scan",
+              "role": "primary",
+              "value": "scan"
+            }
+          ],
+          "outcome": [
+            {
+              "entry_id": "ep-000006-scan",
+              "role": "primary",
+              "value": "resource_gain"
+            }
+          ]
+        },
+        "competition_snapshot": {
+          "primary_id": "ep-000006-scan",
+          "competitor_ids": [
+            "ep-000004-rest",
+            "ep-000001-hide",
+            "ep-000002-rest"
+          ],
+          "confidence": "low",
+          "interference_risk": true,
+          "competing_interpretations": [
+            "residual:ep-000004-rest:0.250",
+            "residual:ep-000001-hide:0.248",
+            "residual:ep-000002-rest:0.248"
+          ],
+          "dominance_margin": 0.0043490000000000195,
+          "competition_weights": {
+            "ep-000001-hide": 0.248309,
+            "ep-000002-rest": 0.248178,
+            "ep-000004-rest": 0.249582,
+            "ep-000006-scan": 0.253931
+          },
+          "competition_logits": {
+            "ep-000006-scan": {
+              "cue_match": 0.137502,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.358751
+            },
+            "ep-000004-rest": {
+              "cue_match": 0.134943,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.343835
+            },
+            "ep-000002-rest": {
+              "cue_match": 0.134107,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.332053
+            },
+            "ep-000001-hide": {
+              "cue_match": 0.134185,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.327093
+            }
+          },
+          "residual_weight": 0.746069
+        },
+        "donor_blocks": [],
+        "reconstructed_state_vector": {
+          "danger": 0.220264,
+          "food": 0.467352,
+          "novelty": 0.526854,
+          "shelter": 0.437367,
+          "social": 0.286311,
+          "temperature": 0.469724
+        },
+        "latent_perturbation": {
+          "danger": 0.068023,
+          "food": 0.02498,
+          "novelty": -0.0166,
+          "shelter": -0.013073,
+          "social": 0.018983,
+          "temperature": 0.030306
+        },
+        "residual_prior": {
+          "danger": 0.251777,
+          "food": 0.477322,
+          "novelty": 0.520229,
+          "shelter": 0.432917,
+          "social": 0.293887,
+          "temperature": 0.480039
+        },
+        "winner_take_most_weights": {
+          "ep-000001-hide": 0.248309,
+          "ep-000002-rest": 0.248178,
+          "ep-000004-rest": 0.249582,
+          "ep-000006-scan": 0.253931
+        },
+        "protected_anchor_biases": [
+          {
+            "anchor_type": "agents",
+            "dimension": "social",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "agents",
+            "dimension": "danger",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "novelty",
+            "source_slot_value": "scan",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'scan' maps to state dimensions novelty, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "danger",
+            "source_slot_value": "scan",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'scan' maps to state dimensions novelty, danger"
+          },
+          {
+            "anchor_type": "outcome",
+            "dimension": "food",
+            "source_slot_value": "resource_gain",
+            "magnitude": 0.042,
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food"
+          }
+        ],
+        "donor_injections": [
+          {
+            "entry_id": "ep-000004-rest",
+            "dimension": "food",
+            "amount": 0.012046,
+            "weight": 0.249582,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000002-rest",
+            "dimension": "danger",
+            "amount": 0.031053,
+            "weight": 0.248178,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000002-rest",
+            "dimension": "temperature",
+            "amount": 0.012829,
+            "weight": 0.248178,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "danger",
+            "amount": 0.035606,
+            "weight": 0.248309,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'hide' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=hide"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "novelty",
+            "amount": -0.019586,
+            "weight": 0.248309,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=1"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "temperature",
+            "amount": 0.015328,
+            "weight": 0.248309,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "social",
+            "amount": 0.01838,
+            "weight": 0.248309,
+            "mode": "residual_prior",
+            "anchor_type": "agents",
+            "semantic_reason": "agents anchor maps to state dimensions social, danger",
+            "content_source": "anchor:agents=None"
+          }
+        ],
+        "representation_mode": "representational",
+        "acceptance_path": "m49",
+        "legacy_reason": null
+      }
+    },
+    {
+      "tick": 12,
+      "candidate_ids": [
+        "ep-000010-rest-merged",
+        "ep-000006-scan-merged",
+        "ep-000001-hide"
+      ],
+      "candidate_classes": [
+        "episodic",
+        "episodic",
+        "episodic"
+      ],
+      "recall_confidence": 0.45,
+      "recall_hypothesis": {
+        "content": "representation_recall:ep-000010-rest-merged | winner=0.334 | residual=0.666 | protected_biases:agents:social=0.042, agents:danger=0.042, action:shelter=0.042, action:danger=0.042 | donor_vector:ep-000006-scan-merged:food=0.027, ep-000006-scan-merged:danger=0.014, ep-000006-scan-merged:novelty=-0.052, ep-000006-scan-merged:temperature=-0.025 | cue_focus:food, danger, temperature, novelty",
+        "primary_entry_id": "ep-000010-rest-merged",
+        "auxiliary_entry_ids": [
+          "ep-000006-scan-merged",
+          "ep-000001-hide"
+        ],
+        "confidence": 0.45,
+        "source_trace": [
+          "primary:ep-000010-rest-merged",
+          "auxiliary:ep-000006-scan-merged",
+          "auxiliary:ep-000001-hide"
+        ],
+        "reconstructed_fields": [
+          "auxiliary_detail_blend",
+          "query_focus",
+          "context_focus"
+        ],
+        "protected_fields": [
+          "agents",
+          "action",
+          "outcome"
+        ],
+        "competing_interpretations": [
+          "residual:ep-000001-hide:0.334",
+          "residual:ep-000006-scan-merged:0.332"
+        ],
+        "procedure_step_outline": null,
+        "source_statuses": {
+          "ep-000010-rest-merged": "validated",
+          "ep-000006-scan-merged": "validated",
+          "ep-000001-hide": "validated"
+        },
+        "candidate_ids": [
+          "ep-000010-rest-merged",
+          "ep-000006-scan-merged",
+          "ep-000001-hide"
+        ],
+        "anchor_contributions": {
+          "time": [
+            {
+              "entry_id": "ep-000010-rest-merged",
+              "role": "primary",
+              "value": "11"
+            },
+            {
+              "entry_id": "ep-000006-scan-merged",
+              "role": "auxiliary",
+              "value": "6"
+            },
+            {
+              "entry_id": "ep-000001-hide",
+              "role": "auxiliary",
+              "value": "1"
+            }
+          ],
+          "action": [
+            {
+              "entry_id": "ep-000010-rest-merged",
+              "role": "primary",
+              "value": "rest"
+            }
+          ],
+          "outcome": [
+            {
+              "entry_id": "ep-000010-rest-merged",
+              "role": "primary",
+              "value": "resource_gain"
+            }
+          ]
+        },
+        "competition_snapshot": {
+          "primary_id": "ep-000010-rest-merged",
+          "competitor_ids": [
+            "ep-000001-hide",
+            "ep-000006-scan-merged"
+          ],
+          "confidence": "low",
+          "interference_risk": true,
+          "competing_interpretations": [
+            "residual:ep-000001-hide:0.334",
+            "residual:ep-000006-scan-merged:0.332"
+          ],
+          "dominance_margin": 0.0004210000000000047,
+          "competition_weights": {
+            "ep-000001-hide": 0.333764,
+            "ep-000006-scan-merged": 0.332051,
+            "ep-000010-rest-merged": 0.334185
+          },
+          "competition_logits": {
+            "ep-000010-rest-merged": {
+              "cue_match": 0.132848,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.356424
+            },
+            "ep-000006-scan-merged": {
+              "cue_match": 0.131899,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.32595
+            },
+            "ep-000001-hide": {
+              "cue_match": 0.132661,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.303104
+            }
+          },
+          "residual_weight": 0.665815
+        },
+        "donor_blocks": [],
+        "reconstructed_state_vector": {
+          "danger": 0.159857,
+          "food": 0.407104,
+          "novelty": 0.571434,
+          "shelter": 0.446637,
+          "social": 0.306591,
+          "temperature": 0.484297
+        },
+        "latent_perturbation": {
+          "danger": 0.07837,
+          "food": 0.063076,
+          "novelty": -0.131035,
+          "shelter": -0.010729,
+          "social": 0.001647,
+          "temperature": -0.029781
+        },
+        "residual_prior": {
+          "danger": 0.209986,
+          "food": 0.442916,
+          "novelty": 0.505665,
+          "shelter": 0.440545,
+          "social": 0.307526,
+          "temperature": 0.469349
+        },
+        "winner_take_most_weights": {
+          "ep-000001-hide": 0.333764,
+          "ep-000006-scan-merged": 0.332051,
+          "ep-000010-rest-merged": 0.334185
+        },
+        "protected_anchor_biases": [
+          {
+            "anchor_type": "agents",
+            "dimension": "social",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "agents",
+            "dimension": "danger",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "shelter",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "danger",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "outcome",
+            "dimension": "food",
+            "source_slot_value": "resource_gain",
+            "magnitude": 0.042,
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food"
+          }
+        ],
+        "donor_injections": [
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "food",
+            "amount": 0.027189,
+            "weight": 0.332051,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "danger",
+            "amount": 0.014082,
+            "weight": 0.332051,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'scan' maps to state dimensions novelty, danger",
+            "content_source": "anchor:action=scan"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "novelty",
+            "amount": -0.051635,
+            "weight": 0.332051,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'scan' maps to state dimensions novelty, danger",
+            "content_source": "anchor:action=scan"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "temperature",
+            "amount": -0.025465,
+            "weight": 0.332051,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "social",
+            "amount": -0.010432,
+            "weight": 0.332051,
+            "mode": "residual_prior",
+            "anchor_type": "agents",
+            "semantic_reason": "agents anchor maps to state dimensions social, danger",
+            "content_source": "anchor:agents=None"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "food",
+            "amount": 0.038652,
+            "weight": 0.333764,
+            "mode": "residual_prior",
+            "anchor_type": "state_vector",
+            "semantic_reason": "donor prior directly perturbed state dimension 'food'",
+            "content_source": "prediction.food"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "danger",
+            "amount": 0.071474,
+            "weight": 0.333764,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'hide' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=hide"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "novelty",
+            "amount": -0.079401,
+            "weight": 0.333764,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=1"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "social",
+            "amount": 0.012151,
+            "weight": 0.333764,
+            "mode": "residual_prior",
+            "anchor_type": "agents",
+            "semantic_reason": "agents anchor maps to state dimensions social, danger",
+            "content_source": "anchor:agents=None"
+          }
+        ],
+        "representation_mode": "representational",
+        "acceptance_path": "m49",
+        "legacy_reason": null
+      }
+    },
+    {
+      "tick": 18,
+      "candidate_ids": [
+        "ep-000018-rest",
+        "ep-000016-rest",
+        "ep-000015-exploit_shelter",
+        "ep-000014-exploit_shelter",
+        "ep-000013-seek_contact",
+        "ep-000010-rest-merged",
+        "ep-000006-scan-merged",
+        "ep-000001-hide"
+      ],
+      "candidate_classes": [
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic"
+      ],
+      "recall_confidence": 0.45,
+      "recall_hypothesis": {
+        "content": "representation_recall:ep-000016-rest | winner=0.131 | residual=0.869 | protected_biases:agents:social=0.042, agents:danger=0.042, action:shelter=0.042, action:danger=0.042 | donor_vector:ep-000018-rest:food=-0.010, ep-000015-exploit_shelter:novelty=-0.010, ep-000014-exploit_shelter:danger=-0.011, ep-000014-exploit_shelter:novelty=-0.013 | cue_focus:danger, novelty, novelty, food",
+        "primary_entry_id": "ep-000016-rest",
+        "auxiliary_entry_ids": [
+          "ep-000016-rest",
+          "ep-000015-exploit_shelter"
+        ],
+        "confidence": 0.45,
+        "source_trace": [
+          "primary:ep-000016-rest",
+          "auxiliary:ep-000016-rest",
+          "auxiliary:ep-000015-exploit_shelter"
+        ],
+        "reconstructed_fields": [
+          "auxiliary_detail_blend",
+          "query_focus",
+          "context_focus"
+        ],
+        "protected_fields": [
+          "agents",
+          "action",
+          "outcome"
+        ],
+        "competing_interpretations": [
+          "residual:ep-000018-rest:0.129",
+          "residual:ep-000015-exploit_shelter:0.129",
+          "residual:ep-000013-seek_contact:0.123",
+          "residual:ep-000014-exploit_shelter:0.123",
+          "residual:ep-000010-rest-merged:0.122",
+          "residual:ep-000006-scan-merged:0.122",
+          "residual:ep-000001-hide:0.120"
+        ],
+        "procedure_step_outline": null,
+        "source_statuses": {
+          "ep-000016-rest": "validated",
+          "ep-000015-exploit_shelter": "validated"
+        },
+        "candidate_ids": [
+          "ep-000018-rest",
+          "ep-000016-rest",
+          "ep-000015-exploit_shelter",
+          "ep-000014-exploit_shelter",
+          "ep-000013-seek_contact",
+          "ep-000010-rest-merged",
+          "ep-000006-scan-merged",
+          "ep-000001-hide"
+        ],
+        "anchor_contributions": {
+          "time": [
+            {
+              "entry_id": "ep-000016-rest",
+              "role": "primary",
+              "value": "16"
+            },
+            {
+              "entry_id": "ep-000015-exploit_shelter",
+              "role": "auxiliary",
+              "value": "15"
+            }
+          ],
+          "action": [
+            {
+              "entry_id": "ep-000016-rest",
+              "role": "primary",
+              "value": "rest"
+            }
+          ],
+          "outcome": [
+            {
+              "entry_id": "ep-000016-rest",
+              "role": "primary",
+              "value": "resource_gain"
+            }
+          ]
+        },
+        "competition_snapshot": {
+          "primary_id": "ep-000016-rest",
+          "competitor_ids": [
+            "ep-000018-rest",
+            "ep-000015-exploit_shelter",
+            "ep-000013-seek_contact",
+            "ep-000014-exploit_shelter",
+            "ep-000010-rest-merged",
+            "ep-000006-scan-merged",
+            "ep-000001-hide"
+          ],
+          "confidence": "low",
+          "interference_risk": true,
+          "competing_interpretations": [
+            "residual:ep-000018-rest:0.129",
+            "residual:ep-000015-exploit_shelter:0.129",
+            "residual:ep-000013-seek_contact:0.123",
+            "residual:ep-000014-exploit_shelter:0.123",
+            "residual:ep-000010-rest-merged:0.122",
+            "residual:ep-000006-scan-merged:0.122",
+            "residual:ep-000001-hide:0.120"
+          ],
+          "dominance_margin": 0.0011719999999999786,
+          "competition_weights": {
+            "ep-000001-hide": 0.120417,
+            "ep-000006-scan-merged": 0.122145,
+            "ep-000010-rest-merged": 0.122397,
+            "ep-000013-seek_contact": 0.123049,
+            "ep-000014-exploit_shelter": 0.122889,
+            "ep-000015-exploit_shelter": 0.129193,
+            "ep-000016-rest": 0.130541,
+            "ep-000018-rest": 0.129369
+          },
+          "competition_logits": {
+            "ep-000018-rest": {
+              "cue_match": 0.134754,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.357377
+            },
+            "ep-000016-rest": {
+              "cue_match": 0.13609,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.344409
+            },
+            "ep-000015-exploit_shelter": {
+              "cue_match": 0.134552,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.337711
+            },
+            "ep-000014-exploit_shelter": {
+              "cue_match": 0.127141,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.328571
+            },
+            "ep-000013-seek_contact": {
+              "cue_match": 0.127334,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.323667
+            },
+            "ep-000010-rest-merged": {
+              "cue_match": 0.126547,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.318658
+            },
+            "ep-000006-scan-merged": {
+              "cue_match": 0.126242,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.299895
+            },
+            "ep-000001-hide": {
+              "cue_match": 0.12413,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.283146
+            }
+          },
+          "residual_weight": 0.869459
+        },
+        "donor_blocks": [],
+        "reconstructed_state_vector": {
+          "danger": 0.184445,
+          "food": 0.318485,
+          "novelty": 0.70512,
+          "shelter": 0.467309,
+          "social": 0.313242,
+          "temperature": 0.495
+        },
+        "latent_perturbation": {
+          "danger": -0.041838,
+          "food": 0.075188,
+          "novelty": -0.133593,
+          "shelter": -0.01436,
+          "social": -0.022621,
+          "temperature": 0.015307
+        },
+        "residual_prior": {
+          "danger": 0.173751,
+          "food": 0.333565,
+          "novelty": 0.685062,
+          "shelter": 0.464429,
+          "social": 0.308705,
+          "temperature": 0.497298
+        },
+        "winner_take_most_weights": {
+          "ep-000001-hide": 0.120417,
+          "ep-000006-scan-merged": 0.122145,
+          "ep-000010-rest-merged": 0.122397,
+          "ep-000013-seek_contact": 0.123049,
+          "ep-000014-exploit_shelter": 0.122889,
+          "ep-000015-exploit_shelter": 0.129193,
+          "ep-000016-rest": 0.130541,
+          "ep-000018-rest": 0.129369
+        },
+        "protected_anchor_biases": [
+          {
+            "anchor_type": "agents",
+            "dimension": "social",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "agents",
+            "dimension": "danger",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "shelter",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "danger",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "outcome",
+            "dimension": "food",
+            "source_slot_value": "resource_gain",
+            "magnitude": 0.042,
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food"
+          }
+        ],
+        "donor_injections": [
+          {
+            "entry_id": "ep-000018-rest",
+            "dimension": "food",
+            "amount": -0.010159,
+            "weight": 0.129369,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000015-exploit_shelter",
+            "dimension": "novelty",
+            "amount": -0.010303,
+            "weight": 0.129193,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=15"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter",
+            "dimension": "danger",
+            "amount": -0.011426,
+            "weight": 0.122889,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'exploit_shelter' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=exploit_shelter"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter",
+            "dimension": "novelty",
+            "amount": -0.013005,
+            "weight": 0.122889,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=14"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "food",
+            "amount": 0.013242,
+            "weight": 0.123049,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_loss' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_loss"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "novelty",
+            "amount": -0.017423,
+            "weight": 0.123049,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=13"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "food",
+            "amount": 0.012329,
+            "weight": 0.122397,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "danger",
+            "amount": -0.017723,
+            "weight": 0.122397,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "novelty",
+            "amount": -0.016676,
+            "weight": 0.122397,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=11"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "food",
+            "amount": 0.022305,
+            "weight": 0.122145,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "danger",
+            "amount": -0.012506,
+            "weight": 0.122145,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'scan' maps to state dimensions novelty, danger",
+            "content_source": "anchor:action=scan"
+          },
+          {
+            "entry_id": "ep-000006-scan-merged",
+            "dimension": "novelty",
+            "amount": -0.035635,
+            "weight": 0.122145,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'scan' maps to state dimensions novelty, danger",
+            "content_source": "anchor:action=scan"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "food",
+            "amount": 0.026075,
+            "weight": 0.120417,
+            "mode": "residual_prior",
+            "anchor_type": "state_vector",
+            "semantic_reason": "donor prior directly perturbed state dimension 'food'",
+            "content_source": "prediction.food"
+          },
+          {
+            "entry_id": "ep-000001-hide",
+            "dimension": "novelty",
+            "amount": -0.045053,
+            "weight": 0.120417,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=1"
+          }
+        ],
+        "representation_mode": "representational",
+        "acceptance_path": "m49",
+        "legacy_reason": null
+      }
+    },
+    {
+      "tick": 24,
+      "candidate_ids": [
+        "ep-000018-rest-merged",
+        "ep-000022-scan",
+        "ep-000014-exploit_shelter-merged",
+        "ep-000013-seek_contact",
+        "910bc794-e96c-4306-ac53-99da85d749a3",
+        "5613bca6-e7d6-4497-ab4d-d74caa821813",
+        "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+        "ep-000010-rest-merged"
+      ],
+      "candidate_classes": [
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "semantic",
+        "inferred",
+        "semantic",
+        "episodic"
+      ],
+      "recall_confidence": 0.45,
+      "recall_hypothesis": {
+        "content": "representation_recall:ep-000018-rest-merged | winner=0.160 | residual=0.840 | protected_biases:agents:social=0.042, agents:danger=0.042, action:shelter=0.042, action:danger=0.042 | donor_vector:ep-000014-exploit_shelter-merged:food=0.026, ep-000014-exploit_shelter-merged:danger=-0.025, ep-000014-exploit_shelter-merged:novelty=-0.024, ep-000014-exploit_shelter-merged:shelter=-0.024 | cue_focus:danger, novelty, novelty, danger",
+        "primary_entry_id": "ep-000018-rest-merged",
+        "auxiliary_entry_ids": [
+          "ep-000022-scan",
+          "ep-000014-exploit_shelter-merged"
+        ],
+        "confidence": 0.45,
+        "source_trace": [
+          "primary:ep-000018-rest-merged",
+          "auxiliary:ep-000022-scan",
+          "auxiliary:ep-000014-exploit_shelter-merged"
+        ],
+        "reconstructed_fields": [
+          "auxiliary_detail_blend",
+          "query_focus",
+          "context_focus"
+        ],
+        "protected_fields": [
+          "agents",
+          "action",
+          "outcome"
+        ],
+        "competing_interpretations": [
+          "residual:ep-000014-exploit_shelter-merged:0.158",
+          "residual:ep-000022-scan:0.156",
+          "residual:ep-000013-seek_contact:0.153",
+          "residual:ep-000010-rest-merged:0.151"
+        ],
+        "procedure_step_outline": null,
+        "source_statuses": {
+          "ep-000018-rest-merged": "validated",
+          "ep-000022-scan": "validated",
+          "ep-000014-exploit_shelter-merged": "validated"
+        },
+        "candidate_ids": [
+          "ep-000018-rest-merged",
+          "ep-000022-scan",
+          "ep-000014-exploit_shelter-merged",
+          "ep-000013-seek_contact",
+          "910bc794-e96c-4306-ac53-99da85d749a3",
+          "5613bca6-e7d6-4497-ab4d-d74caa821813",
+          "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+          "ep-000010-rest-merged"
+        ],
+        "anchor_contributions": {
+          "time": [
+            {
+              "entry_id": "ep-000018-rest-merged",
+              "role": "primary",
+              "value": "20"
+            },
+            {
+              "entry_id": "ep-000022-scan",
+              "role": "auxiliary",
+              "value": "22"
+            },
+            {
+              "entry_id": "ep-000014-exploit_shelter-merged",
+              "role": "auxiliary",
+              "value": "14"
+            }
+          ],
+          "action": [
+            {
+              "entry_id": "ep-000018-rest-merged",
+              "role": "primary",
+              "value": "rest"
+            }
+          ],
+          "outcome": [
+            {
+              "entry_id": "ep-000018-rest-merged",
+              "role": "primary",
+              "value": "resource_gain"
+            }
+          ]
+        },
+        "competition_snapshot": {
+          "primary_id": "ep-000018-rest-merged",
+          "competitor_ids": [
+            "ep-000014-exploit_shelter-merged",
+            "ep-000022-scan",
+            "ep-000013-seek_contact",
+            "ep-000010-rest-merged"
+          ],
+          "confidence": "low",
+          "interference_risk": true,
+          "competing_interpretations": [
+            "residual:ep-000014-exploit_shelter-merged:0.158",
+            "residual:ep-000022-scan:0.156",
+            "residual:ep-000013-seek_contact:0.153",
+            "residual:ep-000010-rest-merged:0.151"
+          ],
+          "dominance_margin": 0.0013180000000000136,
+          "competition_weights": {
+            "46c31fe8-a3b9-4c32-96f5-83f7910f22a6": 0.07367,
+            "5613bca6-e7d6-4497-ab4d-d74caa821813": 0.07367,
+            "910bc794-e96c-4306-ac53-99da85d749a3": 0.07367,
+            "ep-000010-rest-merged": 0.151409,
+            "ep-000013-seek_contact": 0.152931,
+            "ep-000014-exploit_shelter-merged": 0.158458,
+            "ep-000018-rest-merged": 0.159776,
+            "ep-000022-scan": 0.156415
+          },
+          "competition_logits": {
+            "ep-000018-rest-merged": {
+              "cue_match": 0.134692,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.350203
+            },
+            "ep-000022-scan": {
+              "cue_match": 0.131542,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.342135
+            },
+            "ep-000014-exploit_shelter-merged": {
+              "cue_match": 0.133465,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.310181
+            },
+            "ep-000013-seek_contact": {
+              "cue_match": 0.128205,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.300877
+            },
+            "910bc794-e96c-4306-ac53-99da85d749a3": {
+              "cue_match": 0.02,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.3
+            },
+            "5613bca6-e7d6-4497-ab4d-d74caa821813": {
+              "cue_match": 0.02,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.3
+            },
+            "46c31fe8-a3b9-4c32-96f5-83f7910f22a6": {
+              "cue_match": 0.02,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.3
+            },
+            "ep-000010-rest-merged": {
+              "cue_match": 0.126723,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.297112
+            }
+          },
+          "residual_weight": 0.840224
+        },
+        "donor_blocks": [],
+        "reconstructed_state_vector": {
+          "danger": 0.205631,
+          "food": 0.244969,
+          "novelty": 0.786276,
+          "shelter": 0.526963,
+          "social": 0.312163,
+          "temperature": 0.504442
+        },
+        "latent_perturbation": {
+          "danger": -0.097944,
+          "food": 0.105897,
+          "novelty": -0.108833,
+          "shelter": -0.081364,
+          "social": -0.020775,
+          "temperature": 0.027388
+        },
+        "residual_prior": {
+          "danger": 0.176316,
+          "food": 0.270632,
+          "novelty": 0.76558,
+          "shelter": 0.507245,
+          "social": 0.307128,
+          "temperature": 0.50965
+        },
+        "winner_take_most_weights": {
+          "46c31fe8-a3b9-4c32-96f5-83f7910f22a6": 0.07367,
+          "5613bca6-e7d6-4497-ab4d-d74caa821813": 0.07367,
+          "910bc794-e96c-4306-ac53-99da85d749a3": 0.07367,
+          "ep-000010-rest-merged": 0.151409,
+          "ep-000013-seek_contact": 0.152931,
+          "ep-000014-exploit_shelter-merged": 0.158458,
+          "ep-000018-rest-merged": 0.159776,
+          "ep-000022-scan": 0.156415
+        },
+        "protected_anchor_biases": [
+          {
+            "anchor_type": "agents",
+            "dimension": "social",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "agents",
+            "dimension": "danger",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "shelter",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "danger",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "outcome",
+            "dimension": "food",
+            "source_slot_value": "resource_gain",
+            "magnitude": 0.042,
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food"
+          }
+        ],
+        "donor_injections": [
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "food",
+            "amount": 0.025804,
+            "weight": 0.158458,
+            "mode": "residual_prior",
+            "anchor_type": "state_vector",
+            "semantic_reason": "donor prior directly perturbed state dimension 'food'",
+            "content_source": "prediction.food"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "danger",
+            "amount": -0.024763,
+            "weight": 0.158458,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'exploit_shelter' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=exploit_shelter"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "novelty",
+            "amount": -0.023639,
+            "weight": 0.158458,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=14"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "shelter",
+            "amount": -0.02386,
+            "weight": 0.158458,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'exploit_shelter' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=exploit_shelter"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "food",
+            "amount": 0.032397,
+            "weight": 0.152931,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_loss' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_loss"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "danger",
+            "amount": -0.021351,
+            "weight": 0.152931,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'seek_contact' maps to state dimensions social, danger",
+            "content_source": "anchor:action=seek_contact"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "novelty",
+            "amount": -0.030279,
+            "weight": 0.152931,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=13"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "shelter",
+            "amount": -0.023856,
+            "weight": 0.152931,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "temperature",
+            "amount": 0.012813,
+            "weight": 0.152931,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "food",
+            "amount": 0.031032,
+            "weight": 0.151409,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "danger",
+            "amount": -0.033626,
+            "weight": 0.151409,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "novelty",
+            "amount": -0.029167,
+            "weight": 0.151409,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=11"
+          },
+          {
+            "entry_id": "ep-000010-rest-merged",
+            "dimension": "shelter",
+            "amount": -0.022857,
+            "weight": 0.151409,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          }
+        ],
+        "representation_mode": "representational",
+        "acceptance_path": "m49",
+        "legacy_reason": null
+      }
+    },
+    {
+      "tick": 30,
+      "candidate_ids": [
+        "ep-000030-rest",
+        "ep-000029-rest",
+        "ep-000027-rest",
+        "ep-000025-rest",
+        "ep-000018-rest-merged",
+        "ep-000022-scan",
+        "ep-000014-exploit_shelter-merged",
+        "ep-000013-seek_contact"
+      ],
+      "candidate_classes": [
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic",
+        "episodic"
+      ],
+      "recall_confidence": 0.45,
+      "recall_hypothesis": {
+        "content": "representation_recall:ep-000018-rest-merged | winner=0.129 | residual=0.871 | protected_biases:agents:social=0.042, agents:danger=0.042, action:shelter=0.042, action:danger=0.042 | donor_vector:ep-000030-rest:food=-0.013, ep-000030-rest:danger=0.022, ep-000030-rest:shelter=0.015, ep-000030-rest:temperature=-0.011 | cue_focus:danger, novelty, shelter, social",
+        "primary_entry_id": "ep-000018-rest-merged",
+        "auxiliary_entry_ids": [
+          "ep-000029-rest",
+          "ep-000027-rest"
+        ],
+        "confidence": 0.45,
+        "source_trace": [
+          "primary:ep-000018-rest-merged",
+          "auxiliary:ep-000029-rest",
+          "auxiliary:ep-000027-rest"
+        ],
+        "reconstructed_fields": [
+          "auxiliary_detail_blend",
+          "query_focus",
+          "context_focus"
+        ],
+        "protected_fields": [
+          "agents",
+          "action",
+          "outcome"
+        ],
+        "competing_interpretations": [
+          "residual:ep-000014-exploit_shelter-merged:0.126",
+          "residual:ep-000022-scan:0.126",
+          "residual:ep-000025-rest:0.126",
+          "residual:ep-000029-rest:0.125",
+          "residual:ep-000030-rest:0.124",
+          "residual:ep-000027-rest:0.123",
+          "residual:ep-000013-seek_contact:0.122"
+        ],
+        "procedure_step_outline": null,
+        "source_statuses": {
+          "ep-000018-rest-merged": "validated",
+          "ep-000029-rest": "validated",
+          "ep-000027-rest": "validated"
+        },
+        "candidate_ids": [
+          "ep-000030-rest",
+          "ep-000029-rest",
+          "ep-000027-rest",
+          "ep-000025-rest",
+          "ep-000018-rest-merged",
+          "ep-000022-scan",
+          "ep-000014-exploit_shelter-merged",
+          "ep-000013-seek_contact"
+        ],
+        "anchor_contributions": {
+          "time": [
+            {
+              "entry_id": "ep-000018-rest-merged",
+              "role": "primary",
+              "value": "20"
+            },
+            {
+              "entry_id": "ep-000029-rest",
+              "role": "auxiliary",
+              "value": "29"
+            },
+            {
+              "entry_id": "ep-000027-rest",
+              "role": "auxiliary",
+              "value": "27"
+            }
+          ],
+          "action": [
+            {
+              "entry_id": "ep-000018-rest-merged",
+              "role": "primary",
+              "value": "rest"
+            }
+          ],
+          "outcome": [
+            {
+              "entry_id": "ep-000018-rest-merged",
+              "role": "primary",
+              "value": "resource_gain"
+            }
+          ]
+        },
+        "competition_snapshot": {
+          "primary_id": "ep-000018-rest-merged",
+          "competitor_ids": [
+            "ep-000014-exploit_shelter-merged",
+            "ep-000022-scan",
+            "ep-000025-rest",
+            "ep-000029-rest",
+            "ep-000030-rest",
+            "ep-000027-rest",
+            "ep-000013-seek_contact"
+          ],
+          "confidence": "low",
+          "interference_risk": true,
+          "competing_interpretations": [
+            "residual:ep-000014-exploit_shelter-merged:0.126",
+            "residual:ep-000022-scan:0.126",
+            "residual:ep-000025-rest:0.126",
+            "residual:ep-000029-rest:0.125",
+            "residual:ep-000030-rest:0.124",
+            "residual:ep-000027-rest:0.123",
+            "residual:ep-000013-seek_contact:0.122"
+          ],
+          "dominance_margin": 0.0023340000000000027,
+          "competition_weights": {
+            "ep-000013-seek_contact": 0.122139,
+            "ep-000014-exploit_shelter-merged": 0.126229,
+            "ep-000018-rest-merged": 0.128563,
+            "ep-000022-scan": 0.125895,
+            "ep-000025-rest": 0.125673,
+            "ep-000027-rest": 0.123283,
+            "ep-000029-rest": 0.124624,
+            "ep-000030-rest": 0.123594
+          },
+          "competition_logits": {
+            "ep-000030-rest": {
+              "cue_match": 0.128806,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.354403
+            },
+            "ep-000029-rest": {
+              "cue_match": 0.130036,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.347875
+            },
+            "ep-000027-rest": {
+              "cue_match": 0.128433,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.347074
+            },
+            "ep-000025-rest": {
+              "cue_match": 0.131277,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.325639
+            },
+            "ep-000018-rest-merged": {
+              "cue_match": 0.134646,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.318434
+            },
+            "ep-000022-scan": {
+              "cue_match": 0.131539,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.312912
+            },
+            "ep-000014-exploit_shelter-merged": {
+              "cue_match": 0.131931,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.29168
+            },
+            "ep-000013-seek_contact": {
+              "cue_match": 0.127052,
+              "salience": 0.0,
+              "accessibility": 0.05,
+              "retrieval_score": 0.284607
+            }
+          },
+          "residual_weight": 0.871437
+        },
+        "donor_blocks": [],
+        "reconstructed_state_vector": {
+          "danger": 0.332117,
+          "food": 0.140839,
+          "novelty": 0.874313,
+          "shelter": 0.626673,
+          "social": 0.313505,
+          "temperature": 0.470964
+        },
+        "latent_perturbation": {
+          "danger": 0.028542,
+          "food": 0.001767,
+          "novelty": -0.020796,
+          "shelter": 0.018346,
+          "social": -0.019433,
+          "temperature": -0.006091
+        },
+        "residual_prior": {
+          "danger": 0.339331,
+          "food": 0.141189,
+          "novelty": 0.871245,
+          "shelter": 0.630302,
+          "social": 0.30966,
+          "temperature": 0.470065
+        },
+        "winner_take_most_weights": {
+          "ep-000013-seek_contact": 0.122139,
+          "ep-000014-exploit_shelter-merged": 0.126229,
+          "ep-000018-rest-merged": 0.128563,
+          "ep-000022-scan": 0.125895,
+          "ep-000025-rest": 0.125673,
+          "ep-000027-rest": 0.123283,
+          "ep-000029-rest": 0.124624,
+          "ep-000030-rest": 0.123594
+        },
+        "protected_anchor_biases": [
+          {
+            "anchor_type": "agents",
+            "dimension": "social",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "agents",
+            "dimension": "danger",
+            "source_slot_value": null,
+            "magnitude": 0.042,
+            "semantic_reason": "agents anchor maps to state dimensions social, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "shelter",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "action",
+            "dimension": "danger",
+            "source_slot_value": "rest",
+            "magnitude": 0.042,
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger"
+          },
+          {
+            "anchor_type": "outcome",
+            "dimension": "food",
+            "source_slot_value": "resource_gain",
+            "magnitude": 0.042,
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food"
+          }
+        ],
+        "donor_injections": [
+          {
+            "entry_id": "ep-000030-rest",
+            "dimension": "food",
+            "amount": -0.012656,
+            "weight": 0.123594,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_loss' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_loss"
+          },
+          {
+            "entry_id": "ep-000030-rest",
+            "dimension": "danger",
+            "amount": 0.02204,
+            "weight": 0.123594,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000030-rest",
+            "dimension": "shelter",
+            "amount": 0.015,
+            "weight": 0.123594,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000030-rest",
+            "dimension": "temperature",
+            "amount": -0.010837,
+            "weight": 0.123594,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000029-rest",
+            "dimension": "food",
+            "amount": -0.010707,
+            "weight": 0.124624,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_loss' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_loss"
+          },
+          {
+            "entry_id": "ep-000029-rest",
+            "dimension": "danger",
+            "amount": 0.017652,
+            "weight": 0.124624,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000029-rest",
+            "dimension": "shelter",
+            "amount": 0.012798,
+            "weight": 0.124624,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000027-rest",
+            "dimension": "food",
+            "amount": -0.010164,
+            "weight": 0.123283,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_gain' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_gain"
+          },
+          {
+            "entry_id": "ep-000027-rest",
+            "dimension": "danger",
+            "amount": 0.017319,
+            "weight": 0.123283,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000027-rest",
+            "dimension": "shelter",
+            "amount": 0.014247,
+            "weight": 0.123283,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000025-rest",
+            "dimension": "danger",
+            "amount": 0.010171,
+            "weight": 0.125673,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'rest' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=rest"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "food",
+            "amount": 0.020556,
+            "weight": 0.126229,
+            "mode": "residual_prior",
+            "anchor_type": "state_vector",
+            "semantic_reason": "donor prior directly perturbed state dimension 'food'",
+            "content_source": "prediction.food"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "danger",
+            "amount": -0.019727,
+            "weight": 0.126229,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'exploit_shelter' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=exploit_shelter"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "novelty",
+            "amount": -0.018831,
+            "weight": 0.126229,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=14"
+          },
+          {
+            "entry_id": "ep-000014-exploit_shelter-merged",
+            "dimension": "shelter",
+            "amount": -0.019007,
+            "weight": 0.126229,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'exploit_shelter' maps to state dimensions shelter, danger",
+            "content_source": "anchor:action=exploit_shelter"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "food",
+            "amount": 0.025874,
+            "weight": 0.122139,
+            "mode": "residual_prior",
+            "anchor_type": "outcome",
+            "semantic_reason": "outcome value 'resource_loss' maps to state dimensions food",
+            "content_source": "anchor:outcome=resource_loss"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "danger",
+            "amount": -0.017052,
+            "weight": 0.122139,
+            "mode": "residual_prior",
+            "anchor_type": "action",
+            "semantic_reason": "action value 'seek_contact' maps to state dimensions social, danger",
+            "content_source": "anchor:action=seek_contact"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "novelty",
+            "amount": -0.024182,
+            "weight": 0.122139,
+            "mode": "residual_prior",
+            "anchor_type": "time",
+            "semantic_reason": "time anchor maps to state dimensions novelty, temperature",
+            "content_source": "anchor:time=13"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "shelter",
+            "amount": -0.019053,
+            "weight": 0.122139,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          },
+          {
+            "entry_id": "ep-000013-seek_contact",
+            "dimension": "temperature",
+            "amount": 0.010233,
+            "weight": 0.122139,
+            "mode": "residual_prior",
+            "anchor_type": "place",
+            "semantic_reason": "place anchor maps to state dimensions shelter, temperature",
+            "content_source": "anchor:place=None"
+          }
+        ],
+        "representation_mode": "representational",
+        "acceptance_path": "m49",
+        "legacy_reason": null
+      }
+    }
+  ],
+  "replay_events": [
+    {
+      "tick": 22,
+      "sleep_cycle_id": 2,
+      "source": "live_sleep_consolidation",
+      "replay_reencoded_ids": [
+        "ep-000015-exploit_shelter",
+        "ep-000001-hide",
+        "ep-000022-scan"
+      ],
+      "m410_memory_store_consolidation": {
+        "upgrade": {
+          "promoted_ids": [],
+          "promotion_reasons": {}
+        },
+        "extracted_patterns": [
+          "910bc794-e96c-4306-ac53-99da85d749a3",
+          "dff7ec38-9752-45b8-9b4f-c472c271e487"
+        ],
+        "replay_reencoded_ids": [
+          "ep-000015-exploit_shelter",
+          "ep-000001-hide",
+          "ep-000022-scan"
+        ],
+        "validated_inference_ids": [
+          "dff7ec38-9752-45b8-9b4f-c472c271e487"
+        ],
+        "cleanup": {
+          "deleted_ids": [],
+          "dormant_ids": [
+            "ep-000006-scan-merged",
+            "ep-000010-rest-merged",
+            "ep-000013-seek_contact",
+            "ep-000014-exploit_shelter",
+            "ep-000016-rest",
+            "ep-000018-rest",
+            "ep-000020-rest"
+          ],
+          "absorbed_ids": [
+            "ep-000006-scan-merged",
+            "ep-000010-rest-merged",
+            "ep-000016-rest",
+            "ep-000018-rest",
+            "ep-000020-rest"
+          ],
+          "confidence_drift_ids": []
+        }
+      }
+    },
+    {
+      "tick": 24,
+      "sleep_cycle_id": 3,
+      "source": "live_sleep_consolidation",
+      "replay_reencoded_ids": [
+        "ep-000022-scan",
+        "ep-000010-rest-merged",
+        "ep-000001-hide"
+      ],
+      "m410_memory_store_consolidation": {
+        "upgrade": {
+          "promoted_ids": [
+            "910bc794-e96c-4306-ac53-99da85d749a3"
+          ],
+          "promotion_reasons": {
+            "910bc794-e96c-4306-ac53-99da85d749a3": "mid_to_long_stability+stable_abstraction_support"
+          }
+        },
+        "extracted_patterns": [
+          "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+          "5613bca6-e7d6-4497-ab4d-d74caa821813"
+        ],
+        "replay_reencoded_ids": [
+          "ep-000022-scan",
+          "ep-000010-rest-merged",
+          "ep-000001-hide"
+        ],
+        "validated_inference_ids": [
+          "5613bca6-e7d6-4497-ab4d-d74caa821813"
+        ],
+        "cleanup": {
+          "deleted_ids": [],
+          "dormant_ids": [
+            "ep-000006-scan-merged",
+            "910bc794-e96c-4306-ac53-99da85d749a3",
+            "dff7ec38-9752-45b8-9b4f-c472c271e487",
+            "ep-000013-seek_contact",
+            "ep-000014-exploit_shelter-merged",
+            "ep-000016-rest-merged",
+            "ep-000023-rest"
+          ],
+          "absorbed_ids": [
+            "ep-000006-scan-merged",
+            "ep-000010-rest-merged",
+            "ep-000016-rest-merged",
+            "ep-000023-rest"
+          ],
+          "confidence_drift_ids": []
+        }
+      }
+    }
+  ],
+  "budget_events": [],
+  "negative_control_interventions": [
+    {
+      "tick": 0,
+      "mode": "salience_zeroed",
+      "policy_scope": "encoding_weight_policy",
+      "weight_policy": "salience_zeroed",
+      "mutates_existing_memory": false
+    }
+  ],
+  "perturbations": [
+    {
+      "tick": 15,
+      "perturbation_type": "homeostatic_identity_environment_shift",
+      "world": {
+        "seed": 411,
+        "food_density": 0.1548727592084262,
+        "threat_density": 0.47505777807858685,
+        "novelty_density": 0.9907499880627366,
+        "shelter_density": 0.5799779176482773,
+        "temperature": 0.6169438038349112,
+        "social_density": 0.2673188544370457,
+        "tick": 14,
+        "rng_state": "(3, (2255609550, 1906546363, 912014022, 937271060, 2162453605, 524877252, 1464151951, 2988505686, 850262007, 2144516281, 2623826648, 1651208762, 3659040895, 585758965, 3788414822, 1506916483, 3461448504, 2085937475, 2461692923, 4175931463, 2103684326, 3173817657, 181703498, 4131475659, 340895456, 1205787503, 855968053, 4274922984, 4268211991, 670774887, 3751698112, 3898329210, 3637103109, 1789820475, 1214809504, 3302218961, 2205890876, 974619811, 3091686655, 3834187395, 3131985979, 3637948259, 1254887946, 3136919845, 4031159891, 558088396, 4051558309, 624155622, 1250880181, 4202224719, 2371061585, 3337947229, 294457273, 2251329596, 1082521036, 3187027712, 3124185418, 3638623571, 1002768686, 886283694, 593355075, 3084446169, 3898909007, 1395416647, 3527879686, 191918230, 359598065, 6985306, 3710795113, 2620520497, 2220182615, 2000118933, 1178457048, 1346876871, 2357099759, 4096914091, 4012101610, 2669329416, 2764448472, 2497676522, 934605964, 1216358314, 3358019372, 4183763023, 444009644, 1963644055, 391247066, 1544252803, 505463656, 4051610462, 3946429129, 3374772405, 3876928249, 4293922891, 2871711445, 2247801784, 3818682773, 552076228, 2610816625, 925419053, 2103951200, 3335902342, 2372380963, 2176832696, 2113548990, 358393151, 2083386625, 2025143736, 1371397665, 1729833949, 1754278476, 307510386, 1773323808, 2666592548, 320163140, 3204943800, 2776072205, 3987121054, 2367863923, 881678692, 2791473512, 723715042, 559889137, 1778567814, 1928044052, 917973228, 3516962790, 4152409997, 3766121064, 4168664725, 1036336341, 1126391463, 2368386117, 3702988624, 2136754683, 4039407349, 651534057, 2520191539, 483197077, 3102664256, 1101218094, 2921693489, 3773022139, 4197246957, 2930824146, 4024101939, 191143813, 2865657090, 4097041914, 2988657967, 1246909307, 3093546595, 4038587709, 3811258810, 4199112392, 1797780169, 507410857, 78459420, 1177193984, 1212981198, 810413143, 2588736844, 2927536289, 3386673180, 460287106, 534731413, 507531053, 4115418859, 1682665165, 1596824461, 2964562654, 230408708, 1216402415, 1106573088, 3039230420, 4201918833, 2099424472, 3664455355, 3415876274, 3919136793, 2772979195, 2390596902, 3145186390, 1477406218, 825538781, 1239987156, 1041534323, 21018709, 1229584500, 2387469320, 3201353805, 449297484, 4138375723, 1118838620, 4038901018, 3785143651, 1407932054, 2754608680, 2034447600, 884022473, 3943690747, 1925150696, 2711010183, 2497246331, 1191463164, 456947448, 2358218138, 2055945497, 951066261, 486039829, 757722862, 2467100598, 2685034713, 615316146, 2380370350, 903372490, 1468636347, 2680812756, 4223151760, 3743578402, 4078987133, 1990160200, 1833180547, 3044870100, 4126332387, 2087404368, 1243630427, 3171605969, 1575911408, 4275020947, 1612633639, 1854659151, 3950115915, 1933876819, 2474302660, 252737154, 338227511, 358397221, 3119623401, 1216081455, 2910009723, 237283615, 2224412845, 3353156525, 3882283987, 1232962034, 1491632310, 1366388154, 3187464413, 3581629057, 1656502528, 765128215, 1279311366, 69166270, 1551734132, 3767520746, 1816608074, 2734403350, 3436827264, 3780941957, 2968931198, 2802808080, 1946123461, 3385164958, 2909987785, 1923246342, 829858391, 153080611, 3664360832, 2608898827, 1199693143, 920507346, 2678096115, 1163291890, 1940954567, 3110603392, 3286797399, 22025253, 3084729069, 3493242171, 400911791, 3844828335, 900292719, 3514643534, 2201757789, 3091352602, 1524939249, 1394923051, 1860231238, 151962633, 928510611, 78232532, 3720602341, 3910788348, 4101857242, 1041379039, 4149569118, 1209400807, 1214543679, 213998250, 2986072721, 514091678, 2815674592, 1234058894, 488826062, 3137523831, 4062278606, 1174287678, 338650930, 1462544863, 2008406025, 467302503, 2169356467, 3053662508, 3584913410, 730076067, 1963254690, 3997870456, 3212241940, 2792628415, 323018984, 1557578331, 297619361, 3643346324, 3661084446, 735539774, 2875700769, 3948151715, 2023298676, 2333357732, 44546427, 4134941100, 1758987059, 3509454878, 1100202643, 734328942, 666539942, 1938594903, 2362813458, 708557921, 1924261094, 1487291630, 2917304022, 514923875, 1683329890, 141500888, 713807229, 97853444, 277010729, 66821756, 1746044780, 2693500124, 2815725026, 1019757997, 2052597614, 1579577037, 1243482105, 1455779303, 1759175144, 1041974213, 2191999854, 3802236982, 331043431, 1008887406, 3325802760, 2145872381, 3260214084, 3759336480, 2929490099, 4246638849, 342631088, 925529668, 2296625912, 2150734409, 899098356, 2381795422, 3995418844, 2209038056, 96813910, 397990214, 1247711030, 809600294, 567100554, 1682062407, 2827651507, 3828318307, 1463694874, 1256108720, 880162944, 2886695677, 4041503144, 1845761607, 2246079657, 2585510414, 1854293997, 1735813382, 2930149361, 1921295996, 3445904479, 2003596704, 989551134, 3960348264, 2571950014, 253299354, 840420189, 2074635015, 2730446084, 1490336316, 372775454, 2566309880, 3773301964, 1860193015, 1814032665, 4210968786, 2070038430, 4089917952, 3580600249, 284074621, 3199860400, 3472775753, 927572616, 1265709593, 2485954579, 2233288374, 470775930, 3571208918, 3474684149, 971140374, 2587364180, 2802053031, 3158895702, 415121690, 3581631447, 353648861, 4261969971, 3964251538, 2998627194, 4088458666, 2022439045, 212084980, 369234067, 1979331052, 1261526792, 371958005, 212644134, 1455136958, 3704312285, 1536831373, 1469247135, 3219175753, 2488375261, 2581459553, 3029163886, 2540380574, 418615883, 4211491156, 895572254, 3792892455, 3577440066, 647052523, 2617590568, 352928321, 1560883596, 3469955813, 3197076265, 2348921770, 1469440709, 4224744359, 2969434793, 887791541, 4124820220, 1426144574, 3138143331, 2931978209, 3435785466, 3652468064, 3647754317, 346136541, 3083754739, 921162842, 2526486640, 2106440885, 1007285516, 1236005576, 780344799, 3031258501, 4056596744, 3971661361, 1603629797, 3203752183, 2049035691, 1392438624, 2140173701, 2531963150, 1847322573, 3959541234, 9829761, 522570461, 3709393751, 2445990155, 1433529573, 1768908455, 115190471, 3345028159, 3288452567, 1107609840, 2188256087, 3164044657, 1532315747, 1291654660, 1173203025, 3238352235, 780248758, 3679445961, 636895659, 4169869558, 1771899044, 3921226255, 4182281106, 782058149, 4192354407, 1400044028, 1765017520, 4273520301, 573483985, 329244964, 528652732, 4169460639, 2317881359, 2245120292, 3069573999, 909375306, 4189159288, 2997193276, 2352387323, 2004961956, 3719449865, 3412444253, 408919691, 4116552387, 3595451305, 124401740, 2975947201, 3005109983, 2422373344, 2552563569, 483789632, 3193238328, 1981632335, 385748053, 3422955579, 4158353249, 1902829693, 2054800514, 2385019468, 3856331718, 43795609, 1427723120, 3486191128, 1504116417, 2570246789, 3735503548, 2402375499, 2955151135, 472701985, 678612009, 3018394428, 4253423983, 1873161144, 4192839220, 2318374991, 1152004713, 3539155989, 3657121787, 151473268, 1057640203, 631643677, 1643792128, 1672674172, 86335248, 4271992683, 2176701510, 1332986935, 323621800, 1724660259, 3771241497, 1760259438, 1188555575, 1103154920, 2823910075, 2239311471, 67793101, 3879831745, 2184163046, 1029398892, 3061539327, 3984784923, 1240409345, 2204573885, 2584846440, 3628738244, 1799675723, 980714987, 3247356757, 3173093184, 257906873, 2664831824, 2741747223, 3274236774, 1911594558, 3433604231, 3743517644, 3690388584, 811066232, 3227076600, 1672272759, 2302358692, 1743645783, 2072336074, 1197850904, 1589613665, 3448104622, 2863128821, 3986581654, 536), None)"
+      },
+      "body": {
+        "cycle": 14.0,
+        "energy": 0.81,
+        "stress": 0.32,
+        "fatigue": 0.42000000000000004,
+        "temperature": 0.5339362807713258,
+        "dopamine": 0.014520958389495716
+      }
+    }
+  ],
+  "final_entries": [
+    {
+      "entry_id": "ep-000001-hide",
+      "memory_class": "episodic",
+      "created_at": 1,
+      "last_accessed": 1,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.63395,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.504637,
+        0.322312,
+        0.616621,
+        0.423407,
+        0.527314,
+        0.202482,
+        0.459834,
+        0.295634,
+        0.464575,
+        0.428441,
+        0.501148,
+        0.341349,
+        0.015681,
+        0.026678,
+        0.152046,
+        -0.001762,
+        0.009158,
+        -0.138866
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": 0.065599,
+      "salience_delta": 0.16251920000000003,
+      "retention_adjustment": 0.16251920000000003,
+      "semantic_tags": [
+        "hazard_response",
+        "hide",
+        "identity",
+        "survival_threat",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000006-scan-merged",
+      "memory_class": "episodic",
+      "created_at": 6,
+      "last_accessed": 7,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.68855,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.350303,
+        0.043689,
+        0.642057,
+        0.451684,
+        0.468798,
+        0.382729,
+        0.42591,
+        0.123896,
+        0.546968,
+        0.452712,
+        0.437386,
+        0.273528,
+        -0.075608,
+        -0.077551,
+        0.073741,
+        -0.001028,
+        0.010994,
+        0.03822
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "scan",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "910bc794-e96c-4306-ac53-99da85d749a3",
+      "memory_class": "semantic",
+      "created_at": 6,
+      "last_accessed": 24,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "ep-000010-rest-merged"
+      ],
+      "lineage_type": "identity_consolidation",
+      "has_centroid": true,
+      "centroid": [
+        0.310652,
+        0.097424,
+        0.688701,
+        0.463465,
+        0.581909,
+        0.308529,
+        0.384969,
+        0.102691,
+        0.624718,
+        0.455039,
+        0.475732,
+        0.289236,
+        -0.050583,
+        -0.003939,
+        0.053309,
+        0.002615,
+        0.095968,
+        0.006753,
+        0.1211,
+        0.11055,
+        0.11055
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.267678,
+      "residual_norm_var": 0.0,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "semantic centroid display",
+        "threat",
+        "unknown"
+      ]
+    },
+    {
+      "entry_id": "dff7ec38-9752-45b8-9b4f-c472c271e487",
+      "memory_class": "inferred",
+      "created_at": 6,
+      "last_accessed": 20,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "ep-000010-rest-merged"
+      ],
+      "lineage_type": "pattern_extraction",
+      "has_centroid": true,
+      "centroid": [
+        0.310652,
+        0.097424,
+        0.688701,
+        0.463465,
+        0.581909,
+        0.308529,
+        0.384969,
+        0.102691,
+        0.624718,
+        0.455039,
+        0.475732,
+        0.289236,
+        -0.050583,
+        -0.003939,
+        0.053309,
+        0.002615,
+        0.095968,
+        0.006753,
+        0.1211,
+        0.11055,
+        0.11055
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.267678,
+      "residual_norm_var": 0.0,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "inferred centroid display",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "scan",
+        "threat",
+        "unknown"
+      ]
+    },
+    {
+      "entry_id": "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+      "memory_class": "semantic",
+      "created_at": 6,
+      "last_accessed": 24,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "ep-000010-rest-merged",
+        "ep-000016-rest-merged",
+        "ep-000023-rest"
+      ],
+      "lineage_type": "identity_consolidation",
+      "has_centroid": true,
+      "centroid": [
+        0.176219,
+        0.257209,
+        0.839912,
+        0.611285,
+        0.565877,
+        0.330521,
+        0.26202,
+        0.203133,
+        0.759913,
+        0.531683,
+        0.476393,
+        0.311087,
+        -0.073935,
+        0.048505,
+        0.074662,
+        0.027694,
+        0.054489,
+        0.006802,
+        0.06055,
+        0.080275,
+        0.080275
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.443319,
+      "residual_norm_var": 0.002584,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "semantic centroid display",
+        "threat",
+        "unknown"
+      ]
+    },
+    {
+      "entry_id": "5613bca6-e7d6-4497-ab4d-d74caa821813",
+      "memory_class": "inferred",
+      "created_at": 6,
+      "last_accessed": 24,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "None",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.0,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 0.0,
+      "consolidation_source": "dynamics",
+      "support_ids": [
+        "ep-000006-scan-merged",
+        "910bc794-e96c-4306-ac53-99da85d749a3",
+        "ep-000010-rest-merged",
+        "ep-000016-rest-merged",
+        "ep-000023-rest"
+      ],
+      "lineage_type": "pattern_extraction",
+      "has_centroid": true,
+      "centroid": [
+        0.203106,
+        0.225252,
+        0.80967,
+        0.581721,
+        0.569084,
+        0.326123,
+        0.28661,
+        0.183045,
+        0.732874,
+        0.516354,
+        0.476261,
+        0.306717,
+        -0.069264,
+        0.038016,
+        0.070391,
+        0.022678,
+        0.062785,
+        0.006792,
+        0.07266,
+        0.08633,
+        0.08633
+      ],
+      "state_vector": [],
+      "residual_norm_mean": 0.421291,
+      "residual_norm_var": 0.005885,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "inferred centroid display",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "scan",
+        "semantic centroid display",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000010-rest-merged",
+      "memory_class": "episodic",
+      "created_at": 11,
+      "last_accessed": 12,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.74315,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.271002,
+        0.15116,
+        0.735346,
+        0.475246,
+        0.69502,
+        0.234329,
+        0.344028,
+        0.081487,
+        0.702469,
+        0.457366,
+        0.514078,
+        0.304944,
+        -0.025559,
+        0.069673,
+        0.032877,
+        0.006258,
+        0.180942,
+        -0.024715
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": 0.174574103716053,
+      "salience_delta": 0.2421992829728424,
+      "retention_adjustment": 0.2421992829728424,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000013-seek_contact",
+      "memory_class": "episodic",
+      "created_at": 13,
+      "last_accessed": 13,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.76655,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.294134,
+        0.169916,
+        0.710836,
+        0.466491,
+        0.362279,
+        0.345507,
+        0.350913,
+        0.163962,
+        0.697119,
+        0.452335,
+        0.560836,
+        0.282058,
+        -0.019873,
+        0.002084,
+        0.013717,
+        0.004954,
+        -0.198557,
+        0.063449
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "seek_contact",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000014-exploit_shelter-merged",
+      "memory_class": "episodic",
+      "created_at": 14,
+      "last_accessed": 15,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.6614,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.19868,
+        0.352034,
+        0.865155,
+        0.500633,
+        0.497724,
+        0.398036,
+        0.301919,
+        0.147298,
+        0.745925,
+        0.457753,
+        0.505859,
+        0.31171,
+        -0.072235,
+        0.071657,
+        0.11923,
+        0.015008,
+        -0.008135,
+        0.076705
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "exploit_shelter",
+        "hazard_response",
+        "identity",
+        "integrity_loss",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000018-rest-merged",
+      "memory_class": "episodic",
+      "created_at": 20,
+      "last_accessed": 23,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.70895,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.041786,
+        0.416993,
+        0.991124,
+        0.759106,
+        0.549845,
+        0.352513,
+        0.139072,
+        0.303574,
+        0.895108,
+        0.608327,
+        0.477054,
+        0.332938,
+        -0.097286,
+        0.10095,
+        0.096015,
+        0.052773,
+        0.01301,
+        0.006852
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000022-scan",
+      "memory_class": "episodic",
+      "created_at": 22,
+      "last_accessed": 22,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.68705,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.069926,
+        0.403204,
+        0.87362,
+        0.766981,
+        0.593376,
+        0.397396,
+        0.089398,
+        0.309586,
+        0.91352,
+        0.659351,
+        0.459158,
+        0.329114,
+        -0.019472,
+        0.093618,
+        -0.0399,
+        0.03767,
+        0.046976,
+        0.023899
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": 0.077187,
+      "salience_delta": 0.1736376,
+      "retention_adjustment": 0.1736376,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "scan",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000025-rest",
+      "memory_class": "episodic",
+      "created_at": 25,
+      "last_accessed": 25,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.053025,
+        0.440517,
+        1.0,
+        0.681867,
+        0.210746,
+        0.314168,
+        0.100845,
+        0.384504,
+        0.91677,
+        0.677887,
+        0.506955,
+        0.333617,
+        -0.04782,
+        0.056013,
+        0.08323,
+        0.001393,
+        -0.103673,
+        -0.006807
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "rest",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000027-rest",
+      "memory_class": "episodic",
+      "created_at": 27,
+      "last_accessed": 29,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.0,
+        0.407798,
+        0.888087,
+        0.712392,
+        0.263885,
+        0.261063,
+        0.056626,
+        0.444059,
+        0.957544,
+        0.723888,
+        0.453533,
+        0.322032,
+        -0.019819,
+        -0.036262,
+        -0.069456,
+        -0.011496,
+        -0.066377,
+        -0.021339
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "identity",
+        "resource_gain",
+        "resource_opportunity",
+        "rest",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000029-rest",
+      "memory_class": "episodic",
+      "created_at": 29,
+      "last_accessed": 29,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.024259,
+        0.499775,
+        0.87038,
+        0.756941,
+        0.402586,
+        0.262666,
+        0.053157,
+        0.445213,
+        0.934154,
+        0.711017,
+        0.415044,
+        0.303635,
+        -0.028898,
+        0.054562,
+        -0.063774,
+        0.016073,
+        -0.00436,
+        -0.014339
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "rest",
+        "threat"
+      ]
+    },
+    {
+      "entry_id": "ep-000030-rest",
+      "memory_class": "episodic",
+      "created_at": 30,
+      "last_accessed": 30,
+      "salience": 0.0,
+      "accessibility": 0.05,
+      "trace_strength": 0.05,
+      "relevance_self": 1.0,
+      "encoding_source": "dynamics",
+      "encoding_strength": 0.0,
+      "raw_drive": 0.0,
+      "attention_budget_raw_drive_total": 0.0,
+      "attention_budget_total": 0.78875,
+      "attention_budget_requested": 0.0,
+      "attention_budget_granted": 0.0,
+      "attention_budget_denied": 1.0,
+      "consolidation_source": null,
+      "support_ids": [],
+      "lineage_type": null,
+      "has_centroid": false,
+      "centroid": [],
+      "state_vector": [
+        0.047331,
+        0.339528,
+        0.912488,
+        0.708677,
+        0.471255,
+        0.188274,
+        0.036674,
+        0.481899,
+        0.932445,
+        0.729688,
+        0.389374,
+        0.284403,
+        0.010658,
+        -0.142371,
+        -0.019956,
+        -0.007354,
+        0.028658,
+        -0.033645
+      ],
+      "residual_norm_mean": null,
+      "residual_norm_var": null,
+      "replay_second_pass_error": null,
+      "salience_delta": null,
+      "retention_adjustment": null,
+      "semantic_tags": [
+        "environmental_shift",
+        "identity",
+        "resource_loss",
+        "rest",
+        "threat"
+      ]
+    }
+  ]
+}

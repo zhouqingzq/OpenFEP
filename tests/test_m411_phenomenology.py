@@ -40,35 +40,37 @@ class TestM411Phenomenology(unittest.TestCase):
         self.assertEqual(default["curated_corpus_prohibited_path"], "data/m47_corpus.json")
         self.assertEqual(default["seed"], control["seed"])
         self.assertTrue(control["negative_control_interventions"])
+        self.assertTrue(
+            all(
+                intervention["mutates_existing_memory"] is False
+                for intervention in control["negative_control_interventions"]
+            )
+        )
         self.assertTrue(default["encoded_events"])
         self.assertTrue(default["replay_events"])
         self.assertTrue(
             all(event["source"] == "live_sleep_consolidation" for event in default["replay_events"])
         )
 
-    def test_tick_level_budget_competition_is_logged(self) -> None:
-        competition_events = [
-            event for event in self.pair["default"]["budget_events"]
-            if event["competition_observed"]
-        ]
+    def test_smoke_rollout_is_pipeline_only_and_cannot_accept(self) -> None:
+        report, _ = build_m411_acceptance_report(config=SMOKE_CONFIG, pair=self.pair)
 
-        self.assertTrue(competition_events)
-        first = competition_events[0]
-        self.assertTrue(first["winner_candidate_id"])
-        self.assertTrue(any(row["attention_budget_denied"] > 0.0 for row in first["events"]))
-        self.assertTrue(any(row["attention_budget_granted"] > 0.0 for row in first["events"]))
-
-    def test_four_effect_gates_pass_with_negative_control_collapse(self) -> None:
-        self.assertEqual(self.evaluation["failed_gates"], [])
-        for gate in (
-            "serial_position_effect",
-            "retention_curve_fit",
-            "schema_intrusion",
-            "identity_continuity",
-            "negative_controls",
-        ):
-            self.assertEqual(self.evaluation["gate_summaries"][gate]["status"], "PASS")
-        self.assertTrue(all(self.evaluation["comparisons"].values()))
+        self.assertEqual(report["status"], "NOT_ISSUED")
+        self.assertEqual(report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
+        self.assertFalse(report["phenomenological_pass"])
+        self.assertFalse(report["official_acceptance_config"])
+        self.assertIn("long_horizon_free_rollout", self.evaluation["failed_gates"])
+        self.assertFalse(
+            self.evaluation["gate_summaries"]["long_horizon_free_rollout"][
+                "budget_competition_observed"
+            ]
+        )
+        self.assertEqual(
+            self.evaluation["gate_summaries"]["long_horizon_free_rollout"][
+                "budget_evidence_source"
+            ],
+            "encoded_event_metadata",
+        )
 
     def test_tampered_negative_control_fails(self) -> None:
         tampered = deepcopy(self.pair)
@@ -80,6 +82,27 @@ class TestM411Phenomenology(unittest.TestCase):
         evaluation = evaluate_m411_phenomenology(tampered, SMOKE_CONFIG)
 
         self.assertIn("negative_controls", evaluation["failed_gates"])
+        self.assertEqual(evaluation["gate_summaries"]["honesty_safety_net"]["status"], "FAIL")
+
+    def test_destructive_negative_control_fails_honesty_audit(self) -> None:
+        tampered = deepcopy(self.pair)
+        tampered["negative_control"]["negative_control_interventions"] = [
+            {
+                "tick": 1,
+                "mode": "salience_zeroed",
+                "touched_count": 4,
+                "mutates_existing_memory": True,
+            }
+        ]
+
+        evaluation = evaluate_m411_phenomenology(tampered, SMOKE_CONFIG)
+
+        self.assertIn("negative_controls", evaluation["failed_gates"])
+        self.assertFalse(
+            evaluation["gate_summaries"]["honesty_safety_net"]["checks"][
+                "negative_control_not_destructive_memory_mutation"
+            ]
+        )
 
     def test_out_of_band_replay_fails_closed(self) -> None:
         tampered = deepcopy(self.pair)
@@ -125,14 +148,63 @@ class TestM411Phenomenology(unittest.TestCase):
         self.assertEqual(schema["keyword_only_cluster_count"], 1)
         self.assertIn("schema_intrusion", evaluation["failed_gates"])
 
-    def test_report_uses_three_layer_acceptance(self) -> None:
+    def test_default_schema_degeneracy_does_not_pass_intrusion_gate(self) -> None:
+        tampered = deepcopy(self.pair)
+        tampered["default"]["final_entries"] = [
+            entry for entry in tampered["default"]["final_entries"]
+            if entry["memory_class"] == "episodic"
+        ]
+
+        evaluation = evaluate_m411_phenomenology(tampered, SMOKE_CONFIG)
+
+        schema = evaluation["gate_summaries"]["schema_intrusion"]
+        self.assertEqual(schema["default"]["status"], "FAIL")
+        self.assertTrue(schema["default"]["degenerate_cluster_formation"])
+        self.assertFalse(schema["default_intrusion_present"])
+        self.assertIn("schema_intrusion", evaluation["failed_gates"])
+
+    def test_identity_tag_without_structured_self_relevance_is_not_self_related(self) -> None:
+        tampered = deepcopy(self.pair)
+        tampered["default"]["final_entries"] = [
+            {
+                "entry_id": "semantic-tag-only",
+                "memory_class": "episodic",
+                "created_at": 1,
+                "salience": 0.8,
+                "accessibility": 0.8,
+                "trace_strength": 0.8,
+                "relevance_self": 0.0,
+                "encoding_strength": 0.8,
+                "semantic_tags": ["identity"],
+            },
+            {
+                "entry_id": "matched-baseline",
+                "memory_class": "episodic",
+                "created_at": 2,
+                "salience": 0.8,
+                "accessibility": 0.8,
+                "trace_strength": 0.8,
+                "relevance_self": 0.0,
+                "encoding_strength": 0.8,
+                "semantic_tags": [],
+            },
+        ]
+
+        evaluation = evaluate_m411_phenomenology(tampered, SMOKE_CONFIG)
+
+        identity = evaluation["gate_summaries"]["identity_continuity"]["default"]
+        self.assertEqual(identity["self_related_count"], 0)
+        self.assertEqual(identity["self_related_source"], "relevance_self_structured_field")
+        self.assertEqual(identity["status"], "FAIL")
+
+    def test_report_uses_three_layer_acceptance_without_smoke_acceptance(self) -> None:
         report, evidence = build_m411_acceptance_report(config=SMOKE_CONFIG, pair=self.pair)
 
-        self.assertEqual(report["formal_acceptance_conclusion"], "ACCEPT")
+        self.assertEqual(report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
         self.assertTrue(report["structural_pass"])
         self.assertTrue(report["behavioral_pass"])
-        self.assertTrue(report["phenomenological_pass"])
-        self.assertTrue(report["three_layer_accept_ready"])
+        self.assertFalse(report["phenomenological_pass"])
+        self.assertFalse(report["three_layer_accept_ready"])
         self.assertEqual(report["honesty_audit_role"], "upper_safety_net_not_primary_grader")
         self.assertIn("evaluation", evidence)
         self.assertEqual(
@@ -176,9 +248,9 @@ class TestM411Phenomenology(unittest.TestCase):
             report = json.loads(Path(outputs["report"]).read_text(encoding="utf-8"))
             summary = Path(outputs["summary"]).read_text(encoding="utf-8")
 
-        self.assertEqual(report["formal_acceptance_conclusion"], "ACCEPT")
+        self.assertEqual(report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
         self.assertIn("M4.11 Acceptance Summary", summary)
-        self.assertIn("phenomenological_pass=True", summary)
+        self.assertIn("phenomenological_pass=False", summary)
 
 
 if __name__ == "__main__":

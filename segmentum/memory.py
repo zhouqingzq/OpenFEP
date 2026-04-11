@@ -2135,6 +2135,10 @@ class LongTermMemory:
         payload["fep_prediction_error"] = float(encoding_audit.get("fep_prediction_error", raw_pe))
         payload["surprise"] = float(encoding_audit.get("surprise", payload.get("total_surprise", 0.0)))
         payload["arousal"] = float(encoding_audit.get("arousal", self._episode_arousal(payload)))
+        payload["raw_drive"] = float(encoding_audit.get("raw_drive", 0.0))
+        payload["attention_budget_raw_drive_total"] = float(
+            encoding_audit.get("attention_budget_raw_drive_total", 0.0)
+        )
         payload["attention_budget_total"] = float(encoding_audit.get("attention_budget_total", 0.0))
         payload["attention_budget_granted"] = float(encoding_audit.get("attention_budget_granted", 0.0))
         payload["attention_budget_denied"] = float(encoding_audit.get("attention_budget_denied", 0.0))
@@ -2277,6 +2281,8 @@ class LongTermMemory:
                 ("fep_prediction_error", "fep_prediction_error"),
                 ("surprise", "surprise"),
                 ("arousal", "arousal"),
+                ("raw_drive", "raw_drive"),
+                ("attention_budget_raw_drive_total", "attention_budget_raw_drive_total"),
                 ("attention_budget_total", "attention_budget_total"),
                 ("attention_budget_granted", "attention_budget_granted"),
                 ("attention_budget_denied", "attention_budget_denied"),

@@ -1,0 +1,307 @@
+{
+  "milestone_id": "M4.11",
+  "status": "NOT_ISSUED",
+  "formal_acceptance_conclusion": "PARTIAL_ACCEPT",
+  "official_acceptance_config": false,
+  "official_config_checks": {
+    "ticks_is_official_default": false,
+    "min_acceptance_ticks_non_toy": false,
+    "official_ticks_required": 20000,
+    "official_min_acceptance_ticks_required": 5000
+  },
+  "structural_pass": true,
+  "structural_pass_basis": "inherits M4.10 dynamical encoding/consolidation structural evidence",
+  "behavioral_pass": true,
+  "behavioral_pass_basis": "inherits M4.8 default-path ablation contrast and M4.10 upstream dynamical behavior",
+  "phenomenological_pass": false,
+  "three_layer_accept_ready": false,
+  "missing_layers": [
+    "phenomenological_pass"
+  ],
+  "gate_order": [
+    "long_horizon_free_rollout",
+    "serial_position_effect",
+    "retention_curve_fit",
+    "schema_intrusion",
+    "identity_continuity",
+    "negative_controls",
+    "three_layer_acceptance_taxonomy",
+    "honesty_safety_net"
+  ],
+  "gate_summaries": {
+    "long_horizon_free_rollout": {
+      "status": "FAIL",
+      "passed": false,
+      "official_acceptance_config": false,
+      "official_config_checks": {
+        "ticks_is_official_default": false,
+        "min_acceptance_ticks_non_toy": false,
+        "official_ticks_required": 20000,
+        "official_min_acceptance_ticks_required": 5000
+      },
+      "encoding_source_histogram": {
+        "dynamics": 21
+      },
+      "semantic_dynamic_count": 0,
+      "live_m410_patterns_observed": false,
+      "replay_sources": [
+        "live_sleep_consolidation"
+      ],
+      "budget_competition_observed": false,
+      "budget_evidence_source": "encoded_event_metadata",
+      "actual_budget_competition_event_count": 0,
+      "curated_corpus_paths_read": []
+    },
+    "serial_position_effect": {
+      "status": "FAIL",
+      "passed": false,
+      "default": {
+        "status": "PASS",
+        "passed": true,
+        "list_count": 2,
+        "primacy_score": 0.028394,
+        "recency_score": 0.032648,
+        "first_mean": 0.347688,
+        "middle_mean": 0.319293,
+        "last_mean": 0.351942
+      },
+      "negative_control": {
+        "status": "PASS",
+        "passed": true,
+        "list_count": 2,
+        "primacy_score": 0.053,
+        "recency_score": 0.0405,
+        "first_mean": 0.225,
+        "middle_mean": 0.172,
+        "last_mean": 0.2125
+      }
+    },
+    "retention_curve_fit": {
+      "status": "PASS",
+      "passed": true,
+      "default": {
+        "status": "PASS",
+        "passed": true,
+        "bucket_count": 5,
+        "buckets": [
+          {
+            "lag": 2.0,
+            "retention": 0.515829
+          },
+          {
+            "lag": 7.5,
+            "retention": 0.44603
+          },
+          {
+            "lag": 12.0,
+            "retention": 0.428218
+          },
+          {
+            "lag": 16.5,
+            "retention": 0.390311
+          },
+          {
+            "lag": 23.666667,
+            "retention": 0.542646
+          }
+        ],
+        "linear_sse": 0.015824,
+        "log_sse": 0.015319,
+        "log_advantage": 0.000505,
+        "degenerate": false
+      },
+      "negative_control": {
+        "status": "FAIL",
+        "passed": false,
+        "bucket_count": 5,
+        "buckets": [
+          {
+            "lag": 1.0,
+            "retention": 0.23
+          },
+          {
+            "lag": 4.0,
+            "retention": 0.23
+          },
+          {
+            "lag": 9.0,
+            "retention": 0.27
+          },
+          {
+            "lag": 16.5,
+            "retention": 0.23
+          },
+          {
+            "lag": 24.0,
+            "retention": 0.283333
+          }
+        ],
+        "linear_sse": 0.001601,
+        "log_sse": 0.001691,
+        "log_advantage": -8.9e-05,
+        "degenerate": false
+      }
+    },
+    "schema_intrusion": {
+      "status": "FAIL",
+      "passed": false,
+      "default_intrusion_present": false,
+      "control_intrusion_collapsed": false,
+      "default": {
+        "status": "FAIL",
+        "passed": false,
+        "intrusion_present": false,
+        "degenerate_cluster_formation": true,
+        "intrusion_rate": 0.0,
+        "intrusion_count": 0,
+        "cluster_count": 0,
+        "nondegenerate_cluster_count": 0,
+        "keyword_only_cluster_count": 0,
+        "identification_criterion": "representational_centroid_not_keyword",
+        "clusters_preview": []
+      },
+      "negative_control": {
+        "status": "PASS",
+        "passed": true,
+        "intrusion_present": true,
+        "degenerate_cluster_formation": false,
+        "intrusion_rate": 0.75,
+        "intrusion_count": 3,
+        "cluster_count": 4,
+        "nondegenerate_cluster_count": 4,
+        "keyword_only_cluster_count": 0,
+        "identification_criterion": "representational_centroid_not_keyword",
+        "clusters_preview": [
+          {
+            "entry_id": "910bc794-e96c-4306-ac53-99da85d749a3",
+            "support_ids": [
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged"
+            ],
+            "nearest_support_distance": 0.222831,
+            "mean_support_distance": 0.222832,
+            "residual_norm_mean": 0.267678,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          },
+          {
+            "entry_id": "dff7ec38-9752-45b8-9b4f-c472c271e487",
+            "support_ids": [
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged"
+            ],
+            "nearest_support_distance": 0.222831,
+            "mean_support_distance": 0.222832,
+            "residual_norm_mean": 0.267678,
+            "recalled": false,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          },
+          {
+            "entry_id": "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+            "support_ids": [
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged",
+              "ep-000016-rest-merged",
+              "ep-000023-rest"
+            ],
+            "nearest_support_distance": 0.359698,
+            "mean_support_distance": 0.434759,
+            "residual_norm_mean": 0.443319,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          },
+          {
+            "entry_id": "5613bca6-e7d6-4497-ab4d-d74caa821813",
+            "support_ids": [
+              "ep-000006-scan-merged",
+              "910bc794-e96c-4306-ac53-99da85d749a3",
+              "ep-000010-rest-merged",
+              "ep-000016-rest-merged",
+              "ep-000023-rest"
+            ],
+            "nearest_support_distance": 0.300396,
+            "mean_support_distance": 0.370801,
+            "residual_norm_mean": 0.421291,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          }
+        ]
+      }
+    },
+    "identity_continuity": {
+      "status": "FAIL",
+      "passed": false,
+      "default": {
+        "status": "FAIL",
+        "passed": false,
+        "self_related_count": 4,
+        "baseline_count": 0,
+        "matched_baseline_sufficient": false,
+        "self_related_source": "relevance_self_structured_field",
+        "self_retention": 0.554257,
+        "baseline_retention": 0.0,
+        "retention_gap": 0.554257,
+        "significance_statistic": 0.554257,
+        "perturbation_tick": 15
+      },
+      "negative_control": {
+        "status": "FAIL",
+        "passed": false,
+        "self_related_count": 5,
+        "baseline_count": 0,
+        "matched_baseline_sufficient": false,
+        "self_related_source": "relevance_self_structured_field",
+        "self_retention": 0.262,
+        "baseline_retention": 0.0,
+        "retention_gap": 0.262,
+        "significance_statistic": 0.262,
+        "perturbation_tick": 15
+      }
+    },
+    "negative_controls": {
+      "status": "FAIL",
+      "passed": false,
+      "comparisons": {
+        "serial_position_collapse": false,
+        "retention_curve_collapse": true,
+        "schema_intrusion_collapse": false,
+        "identity_continuity_collapse": true
+      }
+    },
+    "three_layer_acceptance_taxonomy": {
+      "status": "PASS",
+      "passed": true,
+      "fields": [
+        "structural_pass",
+        "behavioral_pass",
+        "phenomenological_pass"
+      ]
+    },
+    "honesty_safety_net": {
+      "status": "PASS",
+      "passed": true,
+      "role": "upper_safety_net_not_primary_grader",
+      "checks": {
+        "curated_corpus_not_read": true,
+        "replay_not_out_of_band": true,
+        "schema_intrusion_not_keyword": true,
+        "negative_controls_present": true,
+        "negative_control_not_destructive_memory_mutation": true
+      }
+    }
+  },
+  "failed_gates": [
+    "long_horizon_free_rollout",
+    "serial_position_effect",
+    "schema_intrusion",
+    "identity_continuity",
+    "negative_controls"
+  ],
+  "honesty_audit_role": "upper_safety_net_not_primary_grader",
+  "primary_grader": "four_effect_natural_rollout_phenomenology_with_negative_controls",
+  "notes": [
+    "Short smoke rollouts are pipeline checks only and cannot satisfy M4.11.",
+    "A pass on the honesty safety net alone does not satisfy M4.11.",
+    "The primary M4.11 grader is default-vs-negative-control phenomenological fit."
+  ]
+}

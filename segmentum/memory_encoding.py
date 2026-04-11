@@ -45,6 +45,7 @@ class EncodingDynamicsResult:
     surprise: float
     arousal: float
     raw_drive: float
+    raw_drive_total: float
     raw_strength: float
     attention_budget_total: float
     attention_budget_requested: float
@@ -60,6 +61,7 @@ class EncodingDynamicsResult:
             "surprise": round(self.surprise, 6),
             "arousal": round(self.arousal, 6),
             "raw_drive": round(self.raw_drive, 6),
+            "attention_budget_raw_drive_total": round(self.raw_drive_total, 6),
             "raw_strength": round(self.raw_strength, 6),
             "attention_budget_total": round(self.attention_budget_total, 6),
             "attention_budget_requested": round(self.attention_budget_requested, 6),
@@ -99,6 +101,7 @@ class EncodingDynamics:
             surprise=_clamp(signal.surprise),
             arousal=_clamp(signal.arousal),
             raw_drive=raw_drive,
+            raw_drive_total=total_raw_drive,
             raw_strength=raw_strength,
             attention_budget_total=budget_total,
             attention_budget_requested=requested,
@@ -255,6 +258,7 @@ class FallbackHeuristic:
             surprise=_clamp(_coerce_float(raw_input.get("surprise", raw_input.get("total_surprise")), strength)),
             arousal=_clamp(arousal),
             raw_drive=strength,
+            raw_drive_total=strength,
             raw_strength=strength,
             attention_budget_total=requested,
             attention_budget_requested=requested,
