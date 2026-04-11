@@ -1,0 +1,68 @@
+{
+  "failed_gates": [],
+  "formal_acceptance_conclusion": "ACCEPT",
+  "gate_order": [
+    "encoding_dynamics_not_keywords",
+    "attention_budget_competition",
+    "heuristic_fallback_auditable",
+    "semantic_centroid_consolidation",
+    "replay_reencoding",
+    "default_path_evidence",
+    "milestone_docs_superseded"
+  ],
+  "gate_summaries": {
+    "attention_budget_competition": {
+      "status": "PASS"
+    },
+    "default_path_evidence": {
+      "status": "PASS"
+    },
+    "encoding_dynamics_not_keywords": {
+      "checks": {
+        "keywords": {
+          "fallback_block": {
+            "end": 282,
+            "start": 180
+          },
+          "passed": true,
+          "path": "E:\\workspace\\segments\\segmentum\\memory_encoding.py",
+          "violations": []
+        },
+        "templates": {
+          "banned_hits": [],
+          "passed": true,
+          "path": "E:\\workspace\\segments\\segmentum\\memory_consolidation.py"
+        }
+      },
+      "status": "PASS"
+    },
+    "heuristic_fallback_auditable": {
+      "heuristic_share": 0.0,
+      "status": "PASS"
+    },
+    "milestone_docs_superseded": {
+      "status": "PASS"
+    },
+    "replay_reencoding": {
+      "replay_semantic_refresh_updated_ids": [
+        "fe02317d-4953-48d0-8159-4767a4cf151b",
+        "46115b9b-22f4-4178-ab49-b09f62d78822",
+        "c509f813-ad77-4d3e-b93a-be6af80141e3",
+        "e5967311-2073-4849-8bce-fac0144fa833"
+      ],
+      "status": "PASS",
+      "synthetic_drift_support_passed": true
+    },
+    "semantic_centroid_consolidation": {
+      "semantic_dynamic_ids": [
+        "fe02317d-4953-48d0-8159-4767a4cf151b",
+        "46115b9b-22f4-4178-ab49-b09f62d78822",
+        "c509f813-ad77-4d3e-b93a-be6af80141e3",
+        "e5967311-2073-4849-8bce-fac0144fa833"
+      ],
+      "status": "PASS"
+    }
+  },
+  "milestone_id": "M4.10",
+  "status": "PASS"
+}

@@ -578,7 +578,7 @@ def _evaluate_legacy_acceptance_payload(payload: dict[str, Any]) -> dict[str, An
             "passed": bool(
                 consolidation.get("upgrade_promoted_ids")
                 and consolidation.get("extracted_pattern_ids")
-                and consolidation.get("replay_created_ids")
+                and consolidation.get("replay_reencoded_ids")
                 and "cleanup-short" in consolidation.get("cleanup_deleted_ids", [])
                 and consolidation.get("semantic_created") is True
                 and consolidation.get("inferred_created") is True

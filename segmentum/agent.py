@@ -286,6 +286,7 @@ class PolicyEvaluator:
         verification_bias: float = 0.0,
         experiment_bias: float = 0.0,
         inquiry_scheduler_bias: float = 0.0,
+        threat_memory_bias: float = 0.0,
         representational_recall_bias: float = 0.0,
     ) -> str:
         components = [
@@ -305,6 +306,7 @@ class PolicyEvaluator:
             ("verification_bias", abs(verification_bias)),
             ("experiment_bias", abs(experiment_bias)),
             ("inquiry_scheduler_bias", abs(inquiry_scheduler_bias)),
+            ("threat_memory_bias", abs(threat_memory_bias)),
             ("representational_recall_bias", abs(representational_recall_bias)),
         ]
         components.sort(key=lambda item: (-item[1], item[0]))
@@ -403,6 +405,11 @@ class PolicyEvaluator:
             reason = (
                 f"inquiry_scheduler_bias ({chosen.inquiry_scheduler_bias:.3f}) dominated, "
                 "so bounded inquiry scheduling overruled weaker curiosity pressures."
+            )
+        elif chosen.dominant_component == "threat_memory_bias":
+            reason = (
+                f"threat_memory_bias ({chosen.threat_memory_bias:.3f}) dominated, "
+                "so threat-linked memory shifted the policy toward immediate protection."
             )
         elif chosen.dominant_component == "reconciliation_bias":
             reason = (
@@ -509,6 +516,7 @@ class PolicyEvaluator:
             f"verification_bias={chosen.verification_bias:.3f}",
             f"experiment_bias={chosen.experiment_bias:.3f}",
             f"inquiry_scheduler_bias={chosen.inquiry_scheduler_bias:.3f}",
+            f"threat_memory_bias={chosen.threat_memory_bias:.3f}",
         ]
         bias_sentence = " Supporting continuity terms: " + ", ".join(bias_references) + "."
         workspace_channels = ", ".join(diagnostics.workspace_broadcast_channels)
@@ -2613,6 +2621,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
         counterfactual_policy_scores: dict[str, float] = {}
         commitment_assessments: dict[str, dict[str, object]] = {}
         social_assessments: dict[str, dict[str, object]] = {}
+        memory_aggregate = dict(self.last_memory_context.get("aggregate", {}) or {})
+        chronic_threat_bias = clamp(float(memory_aggregate.get("chronic_threat_bias", 0.0)))
         for action, option in action_options.items():
             predicted_state = dict(option["predicted_state"])
             predicted_effects = dict(option["predicted_effects"])
@@ -2685,6 +2695,18 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 goal_alignment = clamp(goal_alignment, -0.25, 0.25)
             regression_penalty = self._action_regression_penalty(action)
             continuity_bonus = self._repeated_observation_action_bonus(action, observed)
+            threat_memory_bias = 0.0
+            if self.memory_enabled and chronic_threat_bias > 0.0:
+                if action == "rest":
+                    threat_memory_bias = 0.56 * chronic_threat_bias
+                elif action == "hide":
+                    threat_memory_bias = 0.48 * chronic_threat_bias
+                elif action == "exploit_shelter":
+                    threat_memory_bias = 0.08 * chronic_threat_bias
+                elif action in {"scan", "forage"}:
+                    threat_memory_bias = -0.40 * chronic_threat_bias
+                elif action == "seek_contact":
+                    threat_memory_bias = -0.28 * chronic_threat_bias
             if self.policy_expected_free_energy_only_enabled:
                 memory_bias = 0.0
                 pattern_bias = 0.0
@@ -2701,6 +2723,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 verification_bias = 0.0
                 experiment_bias = 0.0
                 inquiry_scheduler_bias = 0.0
+                threat_memory_bias = 0.0
                 continuity_bonus = 0.0
                 regression_penalty = 0.0
                 policy_score_base = -expected_fe
@@ -2723,6 +2746,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     + verification_bias
                     + experiment_bias
                     + inquiry_scheduler_bias
+                    + threat_memory_bias
                     + continuity_bonus
                     - regression_penalty
                 )
@@ -2743,6 +2767,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     + verification_bias
                     + experiment_bias
                     + inquiry_scheduler_bias
+                    + threat_memory_bias
                     + continuity_bonus
                     - regression_penalty
                 )
@@ -2769,6 +2794,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "verification_bias": verification_bias,
                 "experiment_bias": experiment_bias,
                 "inquiry_scheduler_bias": inquiry_scheduler_bias,
+                "threat_memory_bias": threat_memory_bias,
                 "commitment_assessment": commitment_assessment,
             }
         for action, payload in action_evaluations.items():
@@ -2805,6 +2831,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 verification_bias=float(payload["verification_bias"]),
                 experiment_bias=float(payload["experiment_bias"]),
                 inquiry_scheduler_bias=float(payload["inquiry_scheduler_bias"]),
+                threat_memory_bias=float(payload["threat_memory_bias"]),
                 representational_recall_bias=representational_recall_bias,
             )
             commitment_assessment = dict(payload["commitment_assessment"])
@@ -2837,6 +2864,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     verification_bias=float(payload["verification_bias"]),
                     experiment_bias=float(payload["experiment_bias"]),
                     inquiry_scheduler_bias=float(payload["inquiry_scheduler_bias"]),
+                    threat_memory_bias=float(payload["threat_memory_bias"]),
                     representational_recall_bias=representational_recall_bias,
                     representational_recall_delta=representational_recall_delta,
                     value_score=float(option["value_score"]),
@@ -4398,6 +4426,19 @@ class SegmentAgent(MemoryAwareAgentMixin):
         semantic_entries_written, threat_updates, preference_updates = self._apply_sleep_consolidation(
             consolidation
         )
+        if self.cycle >= 20:
+            memory_store_consolidation_payload = self.long_term_memory.run_memory_consolidation_cycle(
+                current_cycle=self.cycle,
+                rng=self.rng,
+                current_state=self.build_memory_state_context(),
+            ).to_dict()
+            self.sync_memory_awareness_to_long_term_memory()
+        else:
+            memory_store_consolidation_payload = {
+                "skipped": True,
+                "reason": "m410_runtime_consolidation_deferred_until_cycle_20",
+                "current_cycle": self.cycle,
+            }
         narrative_prior_updates = self._apply_narrative_sleep_updates(replay_batch)
 
         # M2.7: Sync personality to precision/defense subsystems
@@ -4556,6 +4597,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "rule_ids": [rule.rule_id for rule in consolidation.rules],
                 "semantic_schemas": list(self.long_term_memory.semantic_schemas),
                 "semantic_schema_update": dict(self.long_term_memory.latest_schema_update),
+                "m410_memory_store_consolidation": memory_store_consolidation_payload,
                 "slow_learning": slow_learning_audit.to_dict(),
             }
         )

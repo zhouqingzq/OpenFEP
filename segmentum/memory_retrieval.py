@@ -119,7 +119,14 @@ def _cosine_similarity(left: list[float], right: list[float]) -> float:
 
 
 def _entry_state_vector(entry: MemoryEntry) -> list[float]:
+    if entry.centroid:
+        return [float(item) for item in entry.centroid]
+    if entry.state_vector:
+        return [float(item) for item in entry.state_vector]
     metadata = dict(entry.compression_metadata or {})
+    centroid = metadata.get("centroid")
+    if isinstance(centroid, list):
+        return [float(item) for item in centroid]
     explicit = metadata.get("state_vector")
     if isinstance(explicit, list):
         return [float(item) for item in explicit]
@@ -421,6 +428,8 @@ def _resolve_donor_semantic_trace(
 
 
 def _keyword_overlap(query_keywords: list[str], entry: MemoryEntry) -> float:
+    if entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED}:
+        return 0.0
     keywords = _token_set(query_keywords)
     if not keywords:
         return 0.0

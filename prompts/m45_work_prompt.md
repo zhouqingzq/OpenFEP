@@ -698,3 +698,6 @@ Required audit fields:
 - `base_short_to_mid_score`
 - `boosted_short_to_mid_score`
 - `score_cap_applied`
+## M4.10 Supersession Note
+
+Sections in this document that describe keyword-table salience, template-string semantic skeletons, inferred-pattern text, or text-only replay are superseded by M4.10. After M4.10, acceptance follows dynamic encoding, attention-budget competition, centroid/residual semantic consolidation, and replay re-encoding.

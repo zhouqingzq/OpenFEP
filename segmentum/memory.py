@@ -10,6 +10,7 @@ from statistics import mean
 import warnings
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .memory_encoding import EncodingDynamics, EncodingDynamicsInput
 from .memory_store import MemoryStore
 from .preferences import PreferenceModel, ValueHierarchy
 from .semantic_schema import SemanticSchemaStore
@@ -600,6 +601,30 @@ class LongTermMemory:
             outcome=outcome,
         )
         gate = self._score_episode_candidate(episode)
+        encoding_probe = episode.to_dict()
+        encoding_probe.update(gate)
+        encoding_audit = self._score_payload_encoding(encoding_probe)
+        gate["encoding_audit"] = encoding_audit
+        if (
+            float(encoding_audit.get("encoding_strength", 0.0)) <= 0.0
+            and not gate["identity_critical"]
+        ):
+            return MemoryDecision(
+                value_score=episode.value_score,
+                prediction_error=episode.prediction_error,
+                total_surprise=episode.total_surprise,
+                episode_created=False,
+                predicted_outcome=episode.predicted_outcome,
+                preferred_probability=episode.preferred_probability,
+                risk=episode.risk,
+                preference_log_value=episode.preference_log_value,
+                episode_score=gate["episode_score"],
+                value_relevance=gate["value_relevance"],
+                policy_delta=gate["policy_delta"],
+                threat_significance=gate["threat_significance"],
+                redundancy_penalty=gate["redundancy_penalty"],
+                gating_reasons=tuple([*gate["reasons"], "encoding_budget_denied"]),
+            )
         if (
             episode.total_surprise <= self.surprise_threshold
             and gate["episode_score"] < self.episode_score_threshold
@@ -1793,6 +1818,52 @@ class LongTermMemory:
         ordered_keys = _state_vector_order()
         return [float(state_vector.get(key, 0.0)) for key in ordered_keys]
 
+    def _episode_arousal(self, payload: dict[str, object]) -> float:
+        body = _coerce_float_dict(payload.get("body_state"))
+        if not body:
+            snapshot = payload.get("state_snapshot")
+            if isinstance(snapshot, dict):
+                body = _coerce_float_dict(snapshot.get("body_state"))
+        energy_debt = max(0.0, 1.0 - float(body.get("energy", 0.85)))
+        stress = max(0.0, float(body.get("stress", 0.0)))
+        fatigue = max(0.0, float(body.get("fatigue", 0.0)))
+        thermal = abs(float(body.get("temperature", 0.5)) - 0.5)
+        surprise = _clamp(float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0))))
+        return _clamp((surprise * 0.45) + (stress * 0.25) + (fatigue * 0.15) + (energy_debt * 0.10) + (thermal * 0.20))
+
+    def _episode_attention_budget(self, payload: dict[str, object]) -> float:
+        explicit = payload.get("available_attention_budget", payload.get("attention_budget"))
+        if explicit is not None:
+            return max(0.0, _coerce_float(explicit, 0.0))
+        body = _coerce_float_dict(payload.get("body_state"))
+        if not body:
+            snapshot = payload.get("state_snapshot")
+            if isinstance(snapshot, dict):
+                body = _coerce_float_dict(snapshot.get("body_state"))
+        energy = _clamp(float(body.get("energy", 0.85)))
+        stress = _clamp(float(body.get("stress", 0.0)))
+        fatigue = _clamp(float(body.get("fatigue", 0.0)))
+        return _clamp(0.35 + (energy * 0.45) - (stress * 0.18) - (fatigue * 0.12), 0.05, 1.0)
+
+    def _score_payload_encoding(self, payload: dict[str, object]) -> dict[str, object]:
+        prediction_error = _clamp(float(payload.get("prediction_error", payload.get("fep_prediction_error", 0.0))))
+        surprise = _clamp(float(payload.get("total_surprise", payload.get("weighted_surprise", payload.get("surprise", prediction_error)))))
+        arousal = self._episode_arousal(payload)
+        requested = _clamp(float(payload.get("encoding_attention", payload.get("attention_budget_requested", 1.0))), 0.05, 1.0)
+        result = EncodingDynamics.score(
+            EncodingDynamicsInput(
+                prediction_error=prediction_error,
+                surprise=surprise,
+                arousal=arousal,
+                attention_budget=self._episode_attention_budget(payload),
+                requested_budget=requested,
+                raw_drive_total=payload.get("attention_budget_raw_drive_total")
+                if isinstance(payload.get("attention_budget_raw_drive_total"), (int, float))
+                else None,
+            )
+        )
+        return result.to_dict()
+
     def _needs_cluster_rebuild(self) -> bool:
         if len(self.cluster_centroids) != len(self.cluster_counts):
             return True
@@ -2058,6 +2129,16 @@ class LongTermMemory:
         explicit_identity_critical = bool(payload.get("identity_critical", False))
         identity_critical = explicit_identity_critical
         raw_pe = float(payload.get("prediction_error", 0.0))
+        encoding_audit = dict(gate.get("encoding_audit", {})) if gate is not None else self._score_payload_encoding(payload)
+        payload["encoding_source"] = str(encoding_audit.get("encoding_source", "dynamics"))
+        payload["encoding_strength"] = float(encoding_audit.get("encoding_strength", 0.0))
+        payload["fep_prediction_error"] = float(encoding_audit.get("fep_prediction_error", raw_pe))
+        payload["surprise"] = float(encoding_audit.get("surprise", payload.get("total_surprise", 0.0)))
+        payload["arousal"] = float(encoding_audit.get("arousal", self._episode_arousal(payload)))
+        payload["attention_budget_total"] = float(encoding_audit.get("attention_budget_total", 0.0))
+        payload["attention_budget_granted"] = float(encoding_audit.get("attention_budget_granted", 0.0))
+        payload["attention_budget_denied"] = float(encoding_audit.get("attention_budget_denied", 0.0))
+        payload["m410_encoding_dynamics"] = encoding_audit
         if gate is not None:
             payload["episode_score"] = float(gate.get("episode_score", 0.0))
             payload["value_relevance"] = float(gate.get("value_relevance", 0.0))
@@ -2097,6 +2178,10 @@ class LongTermMemory:
             details={
                 "support_count": int(payload.get("support_count", 1)),
                 "episode_family": payload.get("episode_family"),
+                "encoding_source": payload.get("encoding_source"),
+                "encoding_strength": payload.get("encoding_strength"),
+                "attention_budget_granted": payload.get("attention_budget_granted"),
+                "attention_budget_denied": payload.get("attention_budget_denied"),
             },
         )
         self._record_memory_lifecycle_event(
@@ -2184,6 +2269,21 @@ class LongTermMemory:
             float(payload.get("redundancy_penalty", 0.0)),
             float(gate["redundancy_penalty"]),
         )
+        encoding_audit = dict(gate.get("encoding_audit", {}))
+        if encoding_audit:
+            for key, audit_key in (
+                ("encoding_source", "encoding_source"),
+                ("encoding_strength", "encoding_strength"),
+                ("fep_prediction_error", "fep_prediction_error"),
+                ("surprise", "surprise"),
+                ("arousal", "arousal"),
+                ("attention_budget_total", "attention_budget_total"),
+                ("attention_budget_granted", "attention_budget_granted"),
+                ("attention_budget_denied", "attention_budget_denied"),
+            ):
+                if audit_key in encoding_audit:
+                    payload[key] = encoding_audit[audit_key]
+            payload["m410_encoding_dynamics"] = encoding_audit
         reasons = list(payload.get("gating_reasons", []))
         for reason in list(gate["reasons"]) + ["support_increment"]:
             if reason not in reasons:
@@ -2452,6 +2552,41 @@ class LongTermMemory:
         merged_payload["first_seen_cycle"] = first_seen_cycle
         merged_payload["last_seen_cycle"] = last_seen_cycle
         merged_payload["compressed_count"] = len(payloads)
+        encoding_sources = [
+            str(payload.get("encoding_source"))
+            for payload in payloads
+            if payload.get("encoding_source") in {"dynamics", "heuristic"}
+        ]
+        if encoding_sources:
+            merged_payload["encoding_source"] = (
+                "dynamics" if "dynamics" in encoding_sources else "heuristic"
+            )
+            for key in (
+                "encoding_strength",
+                "fep_prediction_error",
+                "surprise",
+                "arousal",
+                "attention_budget_total",
+                "attention_budget_granted",
+                "attention_budget_denied",
+            ):
+                values = [
+                    float(payload[key])
+                    for payload in payloads
+                    if isinstance(payload.get(key), (int, float))
+                ]
+                if values:
+                    merged_payload[key] = mean(values)
+            merged_payload["m410_encoding_dynamics"] = {
+                "encoding_source": merged_payload["encoding_source"],
+                "encoding_strength": float(merged_payload.get("encoding_strength", merged.salience if hasattr(merged, "salience") else merged.total_surprise)),
+                "fep_prediction_error": float(merged_payload.get("fep_prediction_error", merged.prediction_error)),
+                "surprise": float(merged_payload.get("surprise", merged.total_surprise)),
+                "arousal": float(merged_payload.get("arousal", merged.total_surprise)),
+                "attention_budget_total": float(merged_payload.get("attention_budget_total", 0.0)),
+                "attention_budget_granted": float(merged_payload.get("attention_budget_granted", 0.0)),
+                "attention_budget_denied": float(merged_payload.get("attention_budget_denied", 0.0)),
+            }
         if protected_payloads:
             reference = max(
                 protected_payloads,

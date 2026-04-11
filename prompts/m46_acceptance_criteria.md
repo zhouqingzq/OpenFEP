@@ -101,3 +101,6 @@ M4.1, M4.2, M4.3, M4.4, M4.5 全部测试通过。
 The current repository-wide official status for M4.6 is `INCOMPLETE / NOT_ISSUED`.
 The present blocking gate is `legacy_integration=NOT_RUN` in the acceptance builder.
 Any committed report claiming a pass state is superseded by the current builder output.
+## M4.10 Supersession Note
+
+Sections in this document that describe keyword-table salience, template-string semantic skeletons, inferred-pattern text, or text-only replay are superseded by M4.10. After M4.10, acceptance follows dynamic encoding, attention-budget competition, centroid/residual semantic consolidation, and replay re-encoding.

@@ -391,7 +391,7 @@ class TestM46MemoryCore(unittest.TestCase):
         report = store.run_consolidation_cycle(current_cycle=40, rng=random.Random(0), current_state=_state())
         self.assertTrue(report.upgrade.promoted_ids)
         self.assertTrue(report.extracted_patterns)
-        self.assertTrue(report.replay_created_ids)
+        self.assertTrue(report.replay_reencoded_ids)
         self.assertIn("cleanup-short", report.cleanup.deleted_ids)
         extracted_entries = [store.get(entry_id) for entry_id in report.extracted_patterns]
         self.assertTrue(any(entry.memory_class is MemoryClass.SEMANTIC for entry in extracted_entries if entry is not None))

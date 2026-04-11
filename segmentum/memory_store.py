@@ -142,6 +142,27 @@ LEGACY_MAPPED_KEYS = {
     "lifecycle_stage",
     "episode_family",
     "content",
+    "memory_class",
+    "source_type",
+    "store_level",
+    "abstractness",
+    "encoding_source",
+    "encoding_strength",
+    "fep_prediction_error",
+    "surprise",
+    "attention_budget_total",
+    "attention_budget_granted",
+    "attention_budget_denied",
+    "centroid",
+    "residual_norm_mean",
+    "residual_norm_var",
+    "support_ids",
+    "consolidation_source",
+    "semantic_reconstruction_error",
+    "replay_second_pass_error",
+    "salience_delta",
+    "retention_adjustment",
+    "compression_metadata",
 }
 
 
@@ -188,13 +209,16 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
         )
     )
     total_surprise = _coerce_float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0)))
+    encoding_strength = _coerce_float(payload.get("encoding_strength"), total_surprise)
+    encoded_arousal = _coerce_float(payload.get("arousal"), total_surprise)
     support_count = _coerce_int(payload.get("support_count", payload.get("support", 1)), 1)
     store_level = StoreLevel.SHORT
     if bool(payload.get("identity_critical", False)) or total_surprise >= 0.9:
         store_level = StoreLevel.LONG
     elif support_count >= 2 or total_surprise >= 0.5:
         store_level = StoreLevel.MID
-    metadata = {
+    metadata = deepcopy(payload.get("compression_metadata")) if isinstance(payload.get("compression_metadata"), dict) else {}
+    metadata.update({
         "legacy_template": deepcopy(payload),
         "legacy_unmapped": {
             key: deepcopy(value)
@@ -202,19 +226,34 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
             if key not in LEGACY_MAPPED_KEYS
         },
         "m45_internal": {"last_decay_cycle": timestamp},
-    }
+    })
+    m410_keys = (
+        "encoding_source",
+        "encoding_strength",
+        "fep_prediction_error",
+        "surprise",
+        "attention_budget_total",
+        "attention_budget_granted",
+        "attention_budget_denied",
+    )
+    for key in m410_keys:
+        if key in payload:
+            metadata[key] = deepcopy(payload[key])
+    memory_class = MemoryClass(str(payload.get("memory_class", MemoryClass.EPISODIC.value)))
+    source_type = SourceType(str(payload.get("source_type", SourceType.EXPERIENCE.value)))
+    store_level_hint = payload.get("store_level")
     return MemoryEntry(
         id=_legacy_episode_id(payload, index=index),
         content=content,
-        memory_class=MemoryClass.EPISODIC,
-        store_level=store_level,
-        source_type=SourceType.EXPERIENCE,
+        memory_class=memory_class,
+        store_level=StoreLevel(str(store_level_hint)) if store_level_hint is not None else store_level,
+        source_type=source_type,
         created_at=timestamp,
         last_accessed=_coerce_int(payload.get("last_seen_cycle", timestamp)),
         valence=_coerce_float(payload.get("value_score", 0.0)),
-        arousal=_clamp(total_surprise),
-        encoding_attention=_clamp(total_surprise),
-        novelty=_clamp(_coerce_float(payload.get("prediction_error", 0.0))),
+        arousal=_clamp(encoded_arousal),
+        encoding_attention=_clamp(_coerce_float(payload.get("attention_budget_granted"), encoding_strength)),
+        novelty=_clamp(_coerce_float(payload.get("fep_prediction_error", payload.get("prediction_error", 0.0)))),
         relevance_goal=_clamp(abs(_coerce_float(payload.get("value_relevance", 0.0)))),
         relevance_threat=_clamp(_coerce_float(payload.get("threat_significance", 0.0))),
         relevance_self=1.0 if bool(payload.get("identity_critical", False)) else 0.0,
@@ -227,10 +266,10 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
                 1.0 if bool(payload.get("identity_critical", False)) else 0.0,
             )
         ),
-        salience=_clamp(total_surprise),
-        trace_strength=max(0.05, _clamp(total_surprise)),
-        accessibility=max(0.05, _clamp(total_surprise)),
-        abstractness=0.25,
+        salience=_clamp(encoding_strength),
+        trace_strength=max(0.05, _clamp(encoding_strength)),
+        accessibility=max(0.05, _clamp(encoding_strength)),
+        abstractness=_coerce_float(payload.get("abstractness"), 0.25),
         source_confidence=0.9,
         reality_confidence=0.85,
         semantic_tags=sorted(
@@ -271,6 +310,20 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
         compression_metadata=metadata,
         derived_from=[],
         is_dormant=bool(payload.get("lifecycle_stage") == "archived_summary"),
+        state_vector=list(payload.get("embedding", [])) if isinstance(payload.get("embedding"), list) else None,
+        centroid=list(payload.get("centroid", [])) if isinstance(payload.get("centroid"), list) else None,
+        residual_norm_mean=payload.get("residual_norm_mean"),
+        residual_norm_var=payload.get("residual_norm_var"),
+        support_ids=payload.get("support_ids") if isinstance(payload.get("support_ids"), list) else None,
+        consolidation_source=(
+            str(payload.get("consolidation_source"))
+            if payload.get("consolidation_source") is not None
+            else None
+        ),
+        semantic_reconstruction_error=payload.get("semantic_reconstruction_error"),
+        replay_second_pass_error=payload.get("replay_second_pass_error"),
+        salience_delta=payload.get("salience_delta"),
+        retention_adjustment=payload.get("retention_adjustment"),
     )
 
 
@@ -375,7 +428,12 @@ class MemoryStore:
             missing_evidence.append("encoding_audit")
         if not dynamic_salience_audit:
             missing_evidence.append("dynamic_salience_audit")
-        if missing_evidence:
+        consolidation_entry = (
+            entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED}
+            and entry.consolidation_source == "dynamics"
+            and bool(entry.centroid)
+        )
+        if missing_evidence and not consolidation_entry:
             _warn_missing_promotion_evidence(entry, missing_evidence)
         retained_identity_priority = "identity_continuity_priority" in list(
             dict(encoding_audit.get("retention_priority", {})).get("reasons", [])
@@ -945,7 +1003,7 @@ class MemoryStore:
                 "weighted_surprise": entry.salience,
                 "embedding": deepcopy(template.get("embedding"))
                 if isinstance(template.get("embedding"), list)
-                else [],
+                else (list(entry.state_vector) if entry.state_vector is not None else []),
                 "value_label": outcome_text,
                 "preferred_probability": _coerce_float(template.get("preferred_probability", 0.0)),
                 "preference_log_value": _coerce_float(template.get("preference_log_value", 0.0)),
@@ -970,6 +1028,30 @@ class MemoryStore:
                 "lifecycle_stage": template.get("lifecycle_stage", "validated_episode"),
                 "episode_family": template.get("episode_family", ""),
                 "content": entry.content,
+                "memory_class": entry.memory_class.value,
+                "source_type": entry.source_type.value,
+                "store_level": entry.store_level.value,
+                "abstractness": entry.abstractness,
+                "encoding_source": dict(entry.compression_metadata or {}).get("encoding_source"),
+                "encoding_strength": dict(entry.compression_metadata or {}).get("encoding_strength", entry.salience),
+                "fep_prediction_error": dict(entry.compression_metadata or {}).get(
+                    "fep_prediction_error",
+                    entry.novelty,
+                ),
+                "surprise": dict(entry.compression_metadata or {}).get("surprise", entry.salience),
+                "attention_budget_total": dict(entry.compression_metadata or {}).get("attention_budget_total"),
+                "attention_budget_granted": dict(entry.compression_metadata or {}).get("attention_budget_granted"),
+                "attention_budget_denied": dict(entry.compression_metadata or {}).get("attention_budget_denied"),
+                "centroid": list(entry.centroid) if entry.centroid is not None else None,
+                "residual_norm_mean": entry.residual_norm_mean,
+                "residual_norm_var": entry.residual_norm_var,
+                "support_ids": list(entry.support_ids) if entry.support_ids is not None else None,
+                "consolidation_source": entry.consolidation_source,
+                "semantic_reconstruction_error": entry.semantic_reconstruction_error,
+                "replay_second_pass_error": entry.replay_second_pass_error,
+                "salience_delta": entry.salience_delta,
+                "retention_adjustment": entry.retention_adjustment,
+                "compression_metadata": deepcopy(entry.compression_metadata or {}),
             }
             for key, value in extras.items():
                 if key in LEGACY_MAPPED_KEYS:

@@ -1107,7 +1107,7 @@ def _build_consolidation_records() -> list[dict[str, object]]:
             criteria_checks={
                 "upgrade_phase_executed": bool(report.upgrade.promoted_ids),
                 "pattern_extraction_executed": bool(report.extracted_patterns),
-                "replay_phase_executed": bool(report.replay_created_ids),
+                "replay_phase_executed": bool(report.replay_reencoded_ids),
                 "cleanup_phase_executed": bool(report.cleanup.deleted_ids or report.cleanup.dormant_ids or report.cleanup.absorbed_ids),
                 "semantic_skeleton_created": bool(semantic_entries),
                 "inferred_pattern_created": bool(inferred_entries),
@@ -1116,7 +1116,7 @@ def _build_consolidation_records() -> list[dict[str, object]]:
                 "report_has_stage_counts": set(report.to_dict()) == {
                     "upgrade",
                     "extracted_patterns",
-                    "replay_created_ids",
+                    "replay_reencoded_ids",
                     "validated_inference_ids",
                     "cleanup",
                 },
@@ -1167,9 +1167,6 @@ def _build_consolidation_records() -> list[dict[str, object]]:
             criteria_checks={
                 "validated_inference_ids_present": bool(validation_report.validated_inference_ids),
                 "validated_entries_exist": len(validated_non_null) == len(validation_report.validated_inference_ids),
-                "validated_ids_subset_replay_created": set(validation_report.validated_inference_ids).issubset(
-                    set(validation_report.replay_created_ids)
-                ),
                 "validated_entries_promoted_to_long": bool(validated_non_null)
                 and all(entry.store_level is StoreLevel.LONG for entry in validated_non_null),
                 "validated_entries_marked_validated": bool(validated_non_null)
@@ -1610,7 +1607,7 @@ def _consolidation_record_consistency(record: dict[str, object]) -> dict[str, bo
         "consolidation_report_shape_complete": set(report) == {
             "upgrade",
             "extracted_patterns",
-            "replay_created_ids",
+            "replay_reencoded_ids",
             "validated_inference_ids",
             "cleanup",
         },

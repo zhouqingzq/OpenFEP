@@ -4,8 +4,10 @@ import random
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
+from math import sqrt
 from typing import TYPE_CHECKING, Any
 
+from .memory_encoding import EncodingDynamics
 from .memory_model import AnchorStrength, MemoryClass, MemoryEntry, SourceType, StoreLevel
 from .memory_state import identity_match_ratio_for_entry, normalize_agent_state
 from .memory_retrieval import RecallArtifact
@@ -21,6 +23,7 @@ BOOST_ACCESS = 0.20
 BOOST_TRACE = 0.03
 ABSTRACTNESS_INCREMENT = 0.008
 DEFAULT_MINIMUM_SUPPORT = 5
+DEFAULT_RUNTIME_MINIMUM_SUPPORT = 3
 DEFAULT_SMOOTHING = 2.0
 
 
@@ -74,6 +77,130 @@ def _shared_context_overlap(left: MemoryEntry, right: MemoryEntry) -> float:
 
 def _copy_entry(entry: MemoryEntry) -> MemoryEntry:
     return MemoryEntry.from_dict(entry.to_dict())
+
+
+def _semantic_vector_with_dynamic_axes(vector: list[float], entry: MemoryEntry) -> list[float]:
+    return [
+        *[float(item) for item in vector],
+        float(entry.salience),
+        float(entry.trace_strength),
+        float(entry.accessibility),
+    ]
+
+
+def _entry_vector(entry: MemoryEntry) -> list[float]:
+    if entry.centroid:
+        return _semantic_vector_with_dynamic_axes([float(item) for item in entry.centroid], entry)
+    if entry.state_vector:
+        return _semantic_vector_with_dynamic_axes([float(item) for item in entry.state_vector], entry)
+    metadata = dict(entry.compression_metadata or {})
+    explicit = metadata.get("state_vector")
+    if isinstance(explicit, list):
+        return _semantic_vector_with_dynamic_axes([float(item) for item in explicit], entry)
+    legacy = metadata.get("legacy_template")
+    if isinstance(legacy, dict):
+        embedding = legacy.get("embedding")
+        if isinstance(embedding, list):
+            return _semantic_vector_with_dynamic_axes([float(item) for item in embedding], entry)
+        state_vector = legacy.get("state_vector")
+        if isinstance(state_vector, dict):
+            return _semantic_vector_with_dynamic_axes(
+                [float(value) for _, value in sorted(state_vector.items()) if isinstance(value, (int, float))],
+                entry,
+            )
+    values = [
+        entry.valence,
+        entry.arousal,
+        entry.encoding_attention,
+        entry.novelty,
+        entry.relevance_goal,
+        entry.relevance_threat,
+        entry.relevance_self,
+        entry.relevance_social,
+        entry.relevance_reward,
+        entry.relevance,
+        entry.salience,
+    ]
+    return [float(value) for value in values]
+
+
+def _mean_vector(vectors: list[list[float]]) -> list[float]:
+    if not vectors:
+        return []
+    width = min(len(vector) for vector in vectors if vector)
+    if width <= 0:
+        return []
+    return [
+        sum(vector[index] for vector in vectors) / len(vectors)
+        for index in range(width)
+    ]
+
+
+def _residual_norm(vector: list[float], centroid: list[float]) -> float:
+    width = min(len(vector), len(centroid))
+    if width <= 0:
+        return 0.0
+    return sqrt(sum((float(vector[index]) - float(centroid[index])) ** 2 for index in range(width)))
+
+
+def _vector_semantic_stats(entries: list[MemoryEntry]) -> dict[str, object]:
+    vectors = [_entry_vector(entry) for entry in entries]
+    vectors = [vector for vector in vectors if vector]
+    centroid = _mean_vector(vectors)
+    residuals = [_residual_norm(vector, centroid) for vector in vectors]
+    residual_mean = sum(residuals) / len(residuals) if residuals else 0.0
+    residual_var = (
+        sum((value - residual_mean) ** 2 for value in residuals) / len(residuals)
+        if residuals
+        else 0.0
+    )
+    return {
+        "centroid": centroid,
+        "residual_norm_mean": residual_mean,
+        "residual_norm_var": residual_var,
+        "support_ids": [entry.id for entry in entries],
+        "residual_by_id": {
+            entry.id: _residual_norm(_entry_vector(entry), centroid)
+            for entry in entries
+        },
+    }
+
+
+def _fold_residuals_into_sources(entries: list[MemoryEntry], stats: dict[str, object]) -> None:
+    residual_by_id = dict(stats.get("residual_by_id", {}))
+    for entry in entries:
+        entry.semantic_reconstruction_error = float(residual_by_id.get(entry.id, 0.0))
+        metadata = dict(entry.compression_metadata or {})
+        metadata["semantic_reconstruction_error"] = entry.semantic_reconstruction_error
+        entry.compression_metadata = metadata
+
+
+def _apply_vector_semantic_fields(
+    entry: MemoryEntry,
+    sources: list[MemoryEntry],
+    *,
+    lineage_type: str,
+) -> MemoryEntry:
+    stats = _vector_semantic_stats(sources)
+    _fold_residuals_into_sources(sources, stats)
+    entry.centroid = list(stats["centroid"])
+    entry.residual_norm_mean = float(stats["residual_norm_mean"])
+    entry.residual_norm_var = float(stats["residual_norm_var"])
+    entry.support_ids = list(stats["support_ids"])
+    entry.consolidation_source = "dynamics"
+    metadata = dict(entry.compression_metadata or {})
+    metadata.update(
+        {
+            "centroid": list(entry.centroid or []),
+            "residual_norm_mean": entry.residual_norm_mean,
+            "residual_norm_var": entry.residual_norm_var,
+            "support_ids": list(entry.support_ids or []),
+            "consolidation_source": "dynamics",
+            "lineage_type": lineage_type,
+        }
+    )
+    entry.compression_metadata = metadata
+    return entry
 
 
 class ConflictType(str, Enum):
@@ -217,7 +344,7 @@ class CleanupReport:
 class ConsolidationReport:
     upgrade: UpgradeReport
     extracted_patterns: list[str]
-    replay_created_ids: list[str]
+    replay_reencoded_ids: list[str]
     validated_inference_ids: list[str]
     cleanup: CleanupReport
 
@@ -225,7 +352,7 @@ class ConsolidationReport:
         return {
             "upgrade": self.upgrade.to_dict(),
             "extracted_patterns": list(self.extracted_patterns),
-            "replay_created_ids": list(self.replay_created_ids),
+            "replay_reencoded_ids": list(self.replay_reencoded_ids),
             "validated_inference_ids": list(self.validated_inference_ids),
             "cleanup": self.cleanup.to_dict(),
         }
@@ -520,12 +647,8 @@ def compress_episodic_cluster_to_semantic_skeleton(entries: list[MemoryEntry]) -
     }
     identity_cluster = any(entry.relevance_self >= 0.6 for entry in entries)
     lineage_type = "identity_consolidation" if identity_cluster else "episodic_compression"
-    content = (
-        f"Semantic skeleton from {len(entries)} episodes: "
-        f"{', '.join(shared_semantic_tags[:3] or ['stable pattern'])}"
-    )
-    return MemoryEntry(
-        content=content,
+    semantic = MemoryEntry(
+        content="semantic centroid display",
         memory_class=MemoryClass.SEMANTIC,
         store_level=StoreLevel.MID,
         source_type=SourceType.EXPERIENCE,
@@ -559,8 +682,16 @@ def compress_episodic_cluster_to_semantic_skeleton(entries: list[MemoryEntry]) -
             "abstraction_reason": "stabilized pattern across episodic cluster",
             "predictive_use_cases": ["pattern-guided recall", "future expectation shaping"],
             "lineage_type": lineage_type,
+            "display_content": "dynamics semantic centroid",
+            "content_role": "metadata_display_only",
+            "behavior_inputs": ["centroid", "residual_norm_mean", "residual_norm_var", "support_ids"],
         },
         derived_from=support_ids,
+    )
+    return _apply_vector_semantic_fields(
+        semantic,
+        entries,
+        lineage_type=lineage_type,
     )
 
 
@@ -597,7 +728,7 @@ def extract_patterns(
         contradiction_count = sum(entry.counterevidence_count for entry in group)
         support_count = len(group)
         inferred = MemoryEntry(
-            content=f"Inferred pattern from {support_count} related memories",
+            content="inferred centroid display",
             memory_class=MemoryClass.INFERRED,
             store_level=StoreLevel.MID,
             source_type=SourceType.INFERENCE,
@@ -634,12 +765,58 @@ def extract_patterns(
                 "lineage_type": "pattern_extraction",
                 "validation_status": "unvalidated",
                 "validation_discount": 0.35,
+                "display_content": "dynamics inferred centroid",
+                "content_role": "metadata_display_only",
+                "behavior_inputs": ["centroid", "residual_norm_mean", "residual_norm_var", "support_ids"],
             },
             derived_from=[entry.id for entry in group],
+        )
+        inferred = _apply_vector_semantic_fields(
+            inferred,
+            group,
+            lineage_type="pattern_extraction",
         )
         results.append(inferred)
         break
     return results
+
+
+def _support_ids(entry: MemoryEntry) -> set[str]:
+    metadata = dict(entry.compression_metadata or {})
+    support_ids = entry.support_ids or metadata.get("support_ids") or metadata.get("support_entry_ids") or []
+    return {str(item) for item in support_ids if str(item)}
+
+
+def _refresh_parent_semantics(store: "MemoryStore", touched_source_ids: set[str]) -> None:
+    for semantic in store.entries:
+        if semantic.memory_class not in {MemoryClass.SEMANTIC, MemoryClass.INFERRED}:
+            continue
+        support_ids = _support_ids(semantic)
+        if not support_ids or not (support_ids & touched_source_ids):
+            continue
+        sources = [
+            entry
+            for entry in store.entries
+            if entry.id in support_ids and entry.id != semantic.id
+        ]
+        if not sources:
+            continue
+        lineage_type = str(dict(semantic.compression_metadata or {}).get("lineage_type", "pattern_extraction"))
+        before_centroid = list(semantic.centroid or [])
+        before_residual_mean = semantic.residual_norm_mean
+        before_residual_var = semantic.residual_norm_var
+        _apply_vector_semantic_fields(semantic, sources, lineage_type=lineage_type)
+        metadata = dict(semantic.compression_metadata or {})
+        metadata["m410_replay_refresh"] = {
+            "touched_source_ids": sorted(support_ids & touched_source_ids),
+            "centroid_before": before_centroid,
+            "centroid_after": list(semantic.centroid or []),
+            "residual_norm_mean_before": before_residual_mean,
+            "residual_norm_mean_after": semantic.residual_norm_mean,
+            "residual_norm_var_before": before_residual_var,
+            "residual_norm_var_after": semantic.residual_norm_var,
+        }
+        semantic.compression_metadata = metadata
 
 
 def constrained_replay(
@@ -647,6 +824,7 @@ def constrained_replay(
     rng: random.Random,
     batch_size: int = 32,
 ) -> list[MemoryEntry]:
+    """Re-encode and return existing source entries touched by replay."""
     weighted = sorted(
         store.entries,
         key=lambda entry: (
@@ -658,47 +836,35 @@ def constrained_replay(
     sampled = weighted[: max(1, min(batch_size, 3))]
     replay_entries: list[MemoryEntry] = []
     for source in sampled:
-        tags = list(dict.fromkeys(source.semantic_tags[:3] or source.context_tags[:2]))
-        replay_entries.append(
-            MemoryEntry(
-                content=f"Replay hypothesis from {source.id}: {' / '.join(tags or ['memory pattern'])}",
-                memory_class=MemoryClass.INFERRED,
-                store_level=StoreLevel.MID,
-                source_type=SourceType.INFERENCE,
-                created_at=source.last_accessed,
-                last_accessed=source.last_accessed,
-                valence=source.valence,
-                arousal=source.arousal,
-                encoding_attention=source.encoding_attention,
-                novelty=min(1.0, source.novelty + 0.05),
-                relevance_goal=source.relevance_goal,
-                relevance_threat=source.relevance_threat,
-                relevance_self=source.relevance_self,
-                relevance_social=source.relevance_social,
-                relevance_reward=source.relevance_reward,
-                relevance=source.relevance,
-                salience=min(1.0, source.salience + 0.05),
-                trace_strength=0.42,
-                accessibility=0.38,
-                abstractness=0.82,
-                source_confidence=0.90,
-                reality_confidence=0.32,
-                semantic_tags=tags or list(source.semantic_tags),
-                context_tags=list(source.context_tags),
-                mood_context=source.mood_context,
-                support_count=max(1, source.support_count),
-                competing_interpretations=[f"replay:{source.id}"],
-                compression_metadata={
-                    "support_entry_ids": [source.id],
-                    "abstraction_reason": "constrained replay candidate",
-                    "predictive_use_cases": ["hypothesis candidate"],
-                    "lineage_type": "pattern_extraction",
-                    "validation_status": "unvalidated",
-                    "validation_discount": 0.35,
-                },
-                derived_from=[source.id],
-            )
+        second_pass_error = _clamp(
+            source.novelty
+            + (float(source.semantic_reconstruction_error or 0.0) * 0.25)
+            + (0.03 if source.counterevidence_count else 0.0)
         )
+        result, salience_delta, retention_adjustment = EncodingDynamics.reencode(
+            first_pass_strength=source.salience,
+            prediction_error=second_pass_error,
+            surprise=_clamp(max(source.salience, second_pass_error)),
+            arousal=_clamp(source.arousal),
+            attention_budget=max(0.05, source.encoding_attention),
+            requested_budget=max(0.05, source.encoding_attention),
+        )
+        source.replay_second_pass_error = result.prediction_error
+        source.salience_delta = salience_delta
+        source.retention_adjustment = retention_adjustment
+        source.salience = _clamp(source.salience + retention_adjustment)
+        source.trace_strength = _clamp(source.trace_strength + (retention_adjustment * 0.5))
+        source.accessibility = _clamp(source.accessibility + (retention_adjustment * 0.5))
+        metadata = dict(source.compression_metadata or {})
+        metadata["m410_replay"] = {
+            **result.to_dict(),
+            "replay_second_pass_error": source.replay_second_pass_error,
+            "salience_delta": source.salience_delta,
+            "retention_adjustment": source.retention_adjustment,
+        }
+        source.compression_metadata = metadata
+        replay_entries.append(source)
+    _refresh_parent_semantics(store, {entry.id for entry in replay_entries})
     rng.shuffle(replay_entries)
     return replay_entries
 
@@ -876,25 +1042,26 @@ def run_consolidation_cycle(
         current_state=current_state,
         cognitive_style=cognitive_style,
     )
-    extracted = extract_patterns(store)
+    extracted = extract_patterns(store, minimum_support=DEFAULT_RUNTIME_MINIMUM_SUPPORT)
     extracted_ids: list[str] = []
     for entry in extracted:
         store.add(entry, current_state=current_state, cognitive_style=cognitive_style)
         extracted_ids.append(entry.id)
     replay_created = constrained_replay(store, rng=rng)
-    replay_created_ids: list[str] = []
+    replay_reencoded_ids: list[str] = []
     validated_ids: list[str] = []
     for entry in replay_created:
-        store.add(entry, current_state=current_state, cognitive_style=cognitive_style)
-        replay_created_ids.append(entry.id)
-        validation = validate_inference(entry)
-        if validation.passed:
-            validated_ids.append(entry.id)
+        replay_reencoded_ids.append(entry.id)
+    for entry in extracted:
+        if entry.memory_class is MemoryClass.INFERRED:
+            validation = validate_inference(entry)
+            if validation.passed:
+                validated_ids.append(entry.id)
     cleanup = consolidation_cleanup(store, current_cycle)
     return ConsolidationReport(
         upgrade=upgrade,
         extracted_patterns=extracted_ids,
-        replay_created_ids=replay_created_ids,
+        replay_reencoded_ids=replay_reencoded_ids,
         validated_inference_ids=validated_ids,
         cleanup=cleanup,
     )

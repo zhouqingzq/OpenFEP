@@ -387,6 +387,7 @@ class InterventionScore:
     verification_bias: float = 0.0
     experiment_bias: float = 0.0
     inquiry_scheduler_bias: float = 0.0
+    threat_memory_bias: float = 0.0
     representational_recall_bias: float = 0.0
     representational_recall_delta: float = 0.0
     recall_counterfactual_rank_delta: float = 0.0
@@ -410,6 +411,7 @@ class InterventionScore:
             "verification_bias": self.verification_bias,
             "experiment_bias": self.experiment_bias,
             "inquiry_scheduler_bias": self.inquiry_scheduler_bias,
+            "threat_memory_bias": self.threat_memory_bias,
             "representational_recall_bias": self.representational_recall_bias,
         }
 

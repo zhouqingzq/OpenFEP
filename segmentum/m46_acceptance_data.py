@@ -449,7 +449,7 @@ def _consolidation_boundary_probe() -> dict[str, Any]:
     return {
         "upgrade_promoted_ids": list(report.upgrade.promoted_ids),
         "extracted_pattern_ids": list(report.extracted_patterns),
-        "replay_created_ids": list(report.replay_created_ids),
+        "replay_reencoded_ids": list(report.replay_reencoded_ids),
         "validated_inference_ids": list(report.validated_inference_ids),
         "cleanup_deleted_ids": list(report.cleanup.deleted_ids),
         "semantic_created": any(entry is not None and entry.memory_class is MemoryClass.SEMANTIC for entry in extracted),

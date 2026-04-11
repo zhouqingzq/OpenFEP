@@ -70,6 +70,27 @@ def _coerce_float_list(value: Any) -> list[float]:
     return [_coerce_float(item) for item in value]
 
 
+def _coerce_str_list_or_none(value: Any) -> list[str] | None:
+    if value is None:
+        return None
+    return _coerce_str_list(value)
+
+
+def _coerce_float_list_or_none(value: Any) -> list[float] | None:
+    if value is None:
+        return None
+    return _coerce_float_list(value)
+
+
+def _coerce_optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _normalize_anchor_slots(payload: dict[str, Any] | None) -> dict[str, str | None]:
     base = {key: None for key in REQUIRED_ANCHOR_KEYS}
     if isinstance(payload, dict):
@@ -170,6 +191,16 @@ class MemoryEntry:
     derived_from: list[str] = field(default_factory=list)
     version: int = 1
     is_dormant: bool = False
+    state_vector: list[float] | None = None
+    centroid: list[float] | None = None
+    residual_norm_mean: float | None = None
+    residual_norm_var: float | None = None
+    support_ids: list[str] | None = None
+    consolidation_source: str | None = None
+    semantic_reconstruction_error: float | None = None
+    replay_second_pass_error: float | None = None
+    salience_delta: float | None = None
+    retention_adjustment: float | None = None
 
     def __post_init__(self) -> None:
         if not self.id:
@@ -193,6 +224,17 @@ class MemoryEntry:
         )
         self.execution_contexts = _coerce_str_list(self.execution_contexts)
         self.derived_from = _coerce_str_list(self.derived_from)
+        self.state_vector = _coerce_float_list_or_none(self.state_vector)
+        self.centroid = _coerce_float_list_or_none(self.centroid)
+        self.support_ids = _coerce_str_list_or_none(self.support_ids)
+        self.residual_norm_mean = _coerce_optional_float(self.residual_norm_mean)
+        self.residual_norm_var = _coerce_optional_float(self.residual_norm_var)
+        self.semantic_reconstruction_error = _coerce_optional_float(self.semantic_reconstruction_error)
+        self.replay_second_pass_error = _coerce_optional_float(self.replay_second_pass_error)
+        self.salience_delta = _coerce_optional_float(self.salience_delta)
+        self.retention_adjustment = _coerce_optional_float(self.retention_adjustment)
+        if self.consolidation_source is not None:
+            self.consolidation_source = str(self.consolidation_source)
         if self.competing_interpretations is not None:
             self.competing_interpretations = _coerce_str_list(self.competing_interpretations)
         if self.compression_metadata is not None and not isinstance(self.compression_metadata, dict):
@@ -266,6 +308,16 @@ class MemoryEntry:
             "derived_from": list(self.derived_from),
             "version": self.version,
             "is_dormant": bool(self.is_dormant),
+            "state_vector": list(self.state_vector) if self.state_vector is not None else None,
+            "centroid": list(self.centroid) if self.centroid is not None else None,
+            "residual_norm_mean": self.residual_norm_mean,
+            "residual_norm_var": self.residual_norm_var,
+            "support_ids": list(self.support_ids) if self.support_ids is not None else None,
+            "consolidation_source": self.consolidation_source,
+            "semantic_reconstruction_error": self.semantic_reconstruction_error,
+            "replay_second_pass_error": self.replay_second_pass_error,
+            "salience_delta": self.salience_delta,
+            "retention_adjustment": self.retention_adjustment,
         }
 
     @classmethod
@@ -318,4 +370,22 @@ class MemoryEntry:
             derived_from=_coerce_str_list(payload.get("derived_from", [])),
             version=_coerce_int(payload.get("version", 1)),
             is_dormant=bool(payload.get("is_dormant", False)),
+            state_vector=_coerce_float_list_or_none(payload.get("state_vector")),
+            centroid=_coerce_float_list_or_none(payload.get("centroid")),
+            residual_norm_mean=_coerce_optional_float(payload.get("residual_norm_mean")),
+            residual_norm_var=_coerce_optional_float(payload.get("residual_norm_var")),
+            support_ids=_coerce_str_list_or_none(payload.get("support_ids")),
+            consolidation_source=(
+                str(payload.get("consolidation_source"))
+                if payload.get("consolidation_source") is not None
+                else None
+            ),
+            semantic_reconstruction_error=_coerce_optional_float(
+                payload.get("semantic_reconstruction_error")
+            ),
+            replay_second_pass_error=_coerce_optional_float(
+                payload.get("replay_second_pass_error")
+            ),
+            salience_delta=_coerce_optional_float(payload.get("salience_delta")),
+            retention_adjustment=_coerce_optional_float(payload.get("retention_adjustment")),
         )

@@ -324,12 +324,12 @@ class TestM46Reacceptance(unittest.TestCase):
 
         self.assertTrue(report.upgrade.promoted_ids)
         self.assertTrue(report.extracted_patterns)
-        self.assertTrue(report.replay_created_ids)
+        self.assertTrue(report.replay_reencoded_ids)
         self.assertTrue(report.cleanup.deleted_ids or report.cleanup.dormant_ids or report.cleanup.absorbed_ids)
         self.assertIn("cleanup-short", report.cleanup.deleted_ids)
         self.assertEqual(
             set(report.to_dict()),
-            {"upgrade", "extracted_patterns", "replay_created_ids", "validated_inference_ids", "cleanup"},
+            {"upgrade", "extracted_patterns", "replay_reencoded_ids", "validated_inference_ids", "cleanup"},
         )
 
         extracted_entries = [store.get(entry_id) for entry_id in report.extracted_patterns]

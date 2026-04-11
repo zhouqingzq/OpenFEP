@@ -194,6 +194,9 @@ def _rollout_trace(*, memory_enabled: bool, seed: int = 42, cycles: int = 20) ->
                 "memory_hit": bool(context.get("memory_hit", False)),
                 "memory_bias": float(context.get("memory_bias", 0.0)),
                 "pattern_bias": float(context.get("pattern_bias", 0.0)),
+                "threat_memory_bias": float(
+                    diagnostics.chosen.threat_memory_bias if diagnostics is not None else 0.0
+                ),
                 "chronic_threat_bias": float(aggregate.get("chronic_threat_bias", 0.0)),
                 "protected_anchor_bias": float(aggregate.get("protected_anchor_bias", 0.0)),
                 "state_delta": state_delta,
@@ -383,7 +386,9 @@ def _gate_ablation_contrast(ablation_evidence: dict[str, object]) -> dict[str, o
             abs_tol=1e-6,
         ),
         "threat_cycles_present": int(comparison["enabled_threat_cycle_count"]) > 0,
-        "avoidance_increases_under_threat": float(comparison["enabled_avoidance_ratio_under_threat"])
+        "avoidance_changes_under_threat": float(
+            comparison["enabled_avoidance_ratio_under_threat"]
+        )
         > float(comparison["disabled_avoidance_ratio_under_threat"]),
         "enabled_has_nonzero_state_delta": any(
             float(row["max_abs_state_delta"]) > 0.05 for row in enabled["trace"]

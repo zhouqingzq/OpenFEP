@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from segmentum.agent import SegmentAgent
-from segmentum.m48_audit import build_m48_ablation_evidence
+from segmentum.m48_audit import _gate_ablation_contrast, build_m48_ablation_evidence
 from segmentum.runtime import SegmentRuntime
 
 
@@ -115,6 +115,7 @@ class TestM48AblationContrast(unittest.TestCase):
         self.assertEqual(len(disabled["trace"]), 20)
         self.assertIn("memory_bias", enabled["trace"][0])
         self.assertIn("pattern_bias", enabled["trace"][0])
+        self.assertIn("threat_memory_bias", enabled["trace"][0])
         self.assertIn("state_delta", enabled["trace"][0])
 
     def test_same_seed_negative_control_is_identical(self) -> None:
@@ -173,6 +174,22 @@ class TestM48AblationContrast(unittest.TestCase):
             float(comparison["enabled_avoidance_ratio_under_threat"]),
             float(comparison["disabled_avoidance_ratio_under_threat"]),
         )
+
+    def test_ablation_gate_fails_when_avoidance_direction_reverses(self) -> None:
+        tampered = {
+            "enabled": dict(self.ablation["enabled"]),
+            "disabled": dict(self.ablation["disabled"]),
+            "negative_control": dict(self.ablation["negative_control"]),
+            "comparison": {
+                **dict(self.ablation["comparison"]),
+                "enabled_avoidance_ratio_under_threat": 0.20,
+                "disabled_avoidance_ratio_under_threat": 0.40,
+            },
+        }
+
+        record = _gate_ablation_contrast(tampered)
+        self.assertFalse(record["criteria_checks"]["avoidance_changes_under_threat"])
+        self.assertEqual(record["status"], "FAIL")
 
 
 if __name__ == "__main__":
