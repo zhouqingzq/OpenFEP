@@ -1,4 +1,6 @@
 {
+  "behavioral_pass": true,
+  "behavioral_pass_basis": "inherits M4.8 default-path ablation contrast; not re-executed in this M4.10 audit",
   "failed_gates": [],
   "formal_acceptance_conclusion": "ACCEPT",
   "gate_order": [
@@ -45,24 +47,26 @@
     },
     "replay_reencoding": {
       "replay_semantic_refresh_updated_ids": [
-        "fe02317d-4953-48d0-8159-4767a4cf151b",
-        "46115b9b-22f4-4178-ab49-b09f62d78822",
-        "c509f813-ad77-4d3e-b93a-be6af80141e3",
-        "e5967311-2073-4849-8bce-fac0144fa833"
+        "8a657d70-7b86-4703-87bf-3d0dd21aa095",
+        "b39442ac-18be-4180-b5df-f47657c382fe",
+        "9253f5c8-d162-4425-93df-85fdede8d047",
+        "b3dff0db-b32e-43e2-8a70-abccd62ba029"
       ],
       "status": "PASS",
       "synthetic_drift_support_passed": true
     },
     "semantic_centroid_consolidation": {
       "semantic_dynamic_ids": [
-        "fe02317d-4953-48d0-8159-4767a4cf151b",
-        "46115b9b-22f4-4178-ab49-b09f62d78822",
-        "c509f813-ad77-4d3e-b93a-be6af80141e3",
-        "e5967311-2073-4849-8bce-fac0144fa833"
+        "8a657d70-7b86-4703-87bf-3d0dd21aa095",
+        "b39442ac-18be-4180-b5df-f47657c382fe",
+        "9253f5c8-d162-4425-93df-85fdede8d047",
+        "b3dff0db-b32e-43e2-8a70-abccd62ba029"
       ],
       "status": "PASS"
     }
   },
   "milestone_id": "M4.10",
-  "status": "PASS"
+  "phenomenological_pass": "pending(M4.11)",
+  "status": "PASS",
+  "structural_pass": true
 }

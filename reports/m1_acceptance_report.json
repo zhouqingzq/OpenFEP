@@ -2,7 +2,7 @@
   "milestone_id": "M1",
   "title": "Core Survival Agent Foundations",
   "status": "PASS",
-  "generated_at": "2026-04-10T06:27:19+00:00",
+  "generated_at": "2026-04-11T05:25:53+00:00",
   "seed_set": [
     7,
     23,
@@ -70,7 +70,7 @@
   ],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-04-10T06:27:19+00:00"
+    "round_started_at": "2026-04-11T05:25:53+00:00"
   },
   "recommendation": "ACCEPT_RECONSTRUCTED_SCOPE",
   "canonical_files": [

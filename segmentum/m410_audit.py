@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import random
+import subprocess
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
@@ -35,6 +37,38 @@ M410_SUMMARY_PATH = REPORTS_DIR / "m410_acceptance_summary.md"
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
+
+
+def _git_head() -> str | None:
+    completed = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=_repo_root(),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.stdout.strip() if completed.returncode == 0 else None
+
+
+def _run_m48_behavioral_inheritance_pytest() -> dict[str, Any]:
+    root = _repo_root()
+    targets = [
+        root / "tests" / "test_m48_ablation_contrast.py",
+        root / "tests" / "test_m48_acceptance.py",
+    ]
+    cmd = [sys.executable, "-m", "pytest", *[str(p) for p in targets], "-q", "--tb=no"]
+    try:
+        completed = subprocess.run(
+            cmd,
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=600,
+            check=False,
+        )
+        return {"exit_code": completed.returncode, "argv": cmd}
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        return {"exit_code": -1, "argv": cmd, "error": str(exc)}
 
 
 def _source_path(relative: str) -> Path:
@@ -432,13 +466,40 @@ def build_m410_acceptance_report(*, seed: int = 4, cycles: int = 20) -> tuple[di
         "milestone_docs_superseded": {"status": "PASS" if docs["passed"] else "FAIL"},
     }
     failed = [gate for gate in GATE_ORDER if gate_summaries[gate]["status"] != "PASS"]
+    structural_pass = not bool(failed)
+    m48_pytest = _run_m48_behavioral_inheritance_pytest()
+    m48_ok = int(m48_pytest.get("exit_code", -1)) == 0
+    behavioral_pass = structural_pass and m48_ok
+    failed_gates = list(failed)
+    if structural_pass and not m48_ok:
+        failed_gates.append("m48_behavioral_inheritance")
+    status = "PASS" if not failed_gates else "FAIL"
+    head = _git_head()
+    if failed:
+        formal_conclusion = "NOT_ACCEPTED"
+    elif not m48_ok:
+        formal_conclusion = "NOT_ACCEPTED"
+    else:
+        formal_conclusion = "PARTIAL_ACCEPT"
+    behavioral_basis = (
+        "inherits M4.8 default-path ablation contrast; re-verified on this tree via "
+        "tests/test_m48_ablation_contrast.py and tests/test_m48_acceptance.py "
+        f"(pytest exit_code={m48_pytest.get('exit_code')}, git {head or 'unknown'}); "
+        "not re-executed as a separate acceptance artifact in this M4.10 audit."
+    )
     report = {
         "milestone_id": "M4.10",
-        "status": "PASS" if not failed else "FAIL",
-        "formal_acceptance_conclusion": "ACCEPT" if not failed else "NOT_ACCEPTED",
+        "status": status,
+        "formal_acceptance_conclusion": formal_conclusion,
+        "structural_pass": structural_pass,
+        "behavioral_pass": behavioral_pass,
+        "behavioral_pass_basis": behavioral_basis,
+        "behavioral_inheritance_pytest": m48_pytest,
+        "phenomenological_pass": "pending(M4.11)",
+        "three_layer_accept_ready": False,
         "gate_order": list(GATE_ORDER),
         "gate_summaries": gate_summaries,
-        "failed_gates": failed,
+        "failed_gates": failed_gates,
     }
     evidence = {
         "static_keywords": static_keywords,
@@ -472,7 +533,11 @@ def write_m410_acceptance_artifacts(
         "# M4.10 Acceptance Summary",
         "",
         f"- Status: {report['status']}",
-        f"- Formal Acceptance Conclusion: `{report['formal_acceptance_conclusion']}`",
+        f"- Formal Acceptance Conclusion: `{report['formal_acceptance_conclusion']}` "
+        f"(full three-layer `ACCEPT` awaits M4.11 phenomenology; Gate 7 rule).",
+        f"- Three-layer ledger: `structural_pass={report['structural_pass']}`, "
+        f"`behavioral_pass={report['behavioral_pass']}` ({report['behavioral_pass_basis']}), "
+        f"`phenomenological_pass={report['phenomenological_pass']!r}`",
         f"- Failed gates: {', '.join(report['failed_gates']) if report['failed_gates'] else 'none'}",
     ]
     summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

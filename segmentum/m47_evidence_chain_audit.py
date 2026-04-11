@@ -283,6 +283,7 @@ def build_m47_evidence_chain_audit(
     acceptance_report = _read_json(output_paths["acceptance_report"])
     reacceptance_report = _read_json(output_paths["reacceptance_evidence"])
     records_by_scenario = _records_by_scenario(list(reacceptance_report["evidence_records"]))
+    snapshot = reacceptance_report["runtime_snapshot"]
 
     gate_results: list[dict[str, Any]] = []
     for spec in requirement_map:
@@ -291,15 +292,20 @@ def build_m47_evidence_chain_audit(
             for scenario_id in spec["required_scenario_ids"]
             for field in spec["required_observed_fields"]
         )
-        gate_summary_status = reacceptance_report["gate_summaries"][spec["gate"]]["status"]
-        executed_scope_status = (
-            "HONEST_NOT_RUN_BLOCKING_FORMAL_ISSUANCE"
-            if spec["gate"] == GATE_REGRESSION and gate_summary_status == STATUS_NOT_RUN
-            else ("SATISFIED" if fields_present and gate_summary_status == "PASS" else "UNSATISFIED")
-        )
-        acceptance_requirement_met = (
-            True if spec["gate"] == GATE_REGRESSION else fields_present and gate_summary_status == "PASS"
-        )
+        gate_summary = reacceptance_report["gate_summaries"][spec["gate"]]
+        gate_summary_status = gate_summary["status"]
+        demoted = bool(snapshot.get("diagnostic_only")) and bool(gate_summary.get("behavioral_claims_demoted"))
+        if spec["gate"] == GATE_REGRESSION and gate_summary_status == STATUS_NOT_RUN:
+            executed_scope_status = "HONEST_NOT_RUN_BLOCKING_FORMAL_ISSUANCE"
+            acceptance_requirement_met = True
+        elif demoted and spec["gate"] != GATE_REGRESSION:
+            acceptance_requirement_met = fields_present
+            executed_scope_status = "SATISFIED" if fields_present else "UNSATISFIED"
+        else:
+            executed_scope_status = (
+                "SATISFIED" if fields_present and gate_summary_status == "PASS" else "UNSATISFIED"
+            )
+            acceptance_requirement_met = fields_present and gate_summary_status == "PASS"
         gate_results.append(
             {
                 "gate": spec["gate"],

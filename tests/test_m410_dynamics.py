@@ -114,7 +114,14 @@ class TestM410Dynamics(unittest.TestCase):
     def test_acceptance_report_and_artifact_writer(self) -> None:
         report, evidence = build_m410_acceptance_report(seed=4, cycles=20)
         self.assertEqual(report["status"], "PASS")
-        self.assertEqual(report["formal_acceptance_conclusion"], "ACCEPT")
+        self.assertEqual(report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
+        self.assertTrue(report["structural_pass"])
+        self.assertTrue(report["behavioral_pass"])
+        self.assertEqual(report["phenomenological_pass"], "pending(M4.11)")
+        self.assertFalse(report["three_layer_accept_ready"])
+        self.assertIn("inherits M4.8", report["behavioral_pass_basis"])
+        self.assertIn("test_m48_ablation_contrast.py", report["behavioral_pass_basis"])
+        self.assertEqual(report["behavioral_inheritance_pytest"]["exit_code"], 0)
         self.assertEqual(tuple(report["gate_order"]), GATE_ORDER)
         self.assertEqual(report["failed_gates"], [])
         self.assertEqual(evidence["default_path"]["invalid_encoding_source_ids"], [])
@@ -134,8 +141,15 @@ class TestM410Dynamics(unittest.TestCase):
             written_evidence = json.loads(Path(outputs["evidence"]).read_text(encoding="utf-8"))
             summary = Path(outputs["summary"]).read_text(encoding="utf-8")
         self.assertEqual(written_report["status"], "PASS")
+        self.assertEqual(written_report["formal_acceptance_conclusion"], "PARTIAL_ACCEPT")
+        self.assertTrue(written_report["structural_pass"])
+        self.assertEqual(written_report["phenomenological_pass"], "pending(M4.11)")
+        self.assertEqual(written_report["behavioral_inheritance_pytest"]["exit_code"], 0)
         self.assertTrue(written_evidence["default_path"]["semantic_dynamic_ids"])
         self.assertIn("M4.10 Acceptance Summary", summary)
+        self.assertIn("PARTIAL_ACCEPT", summary)
+        self.assertIn("structural_pass", summary)
+        self.assertIn("phenomenological_pass", summary)
 
     def test_formula_is_exposed_on_entry_point(self) -> None:
         result = EncodingDynamics.score(

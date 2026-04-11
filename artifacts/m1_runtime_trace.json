@@ -9,9 +9,9 @@
     "telemetry_error_count": 0,
     "persistence_error_count": 0,
     "memory_hit_rate": 0.75,
-    "avg_free_energy_before": 0.7319904771325315,
-    "avg_free_energy_after": 0.843964907191685,
-    "avg_free_energy_drop": 0.030156466734300558,
+    "avg_free_energy_before": 0.6336281149029337,
+    "avg_free_energy_after": 0.6833016587302785,
+    "avg_free_energy_drop": 0.016030275958242607,
     "min_energy": 0.81,
     "max_stress": 0.10999999999999999,
     "action_counts": {

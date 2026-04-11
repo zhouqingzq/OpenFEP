@@ -19,7 +19,11 @@ from .m47_reacceptance import (
     _all_gate_records,
     _build_honesty_record,
     _gate_summary,
+    blocking_failed_gate_names,
+    blocking_not_run_gate_names,
     build_m47_evidence_records,
+    iter_blocking_gate_summaries,
+    rollup_evidence_rebuild_status,
 )
 from .m47_runtime import M47_RUNTIME_SNAPSHOT_PATH, build_m47_runtime_snapshot
 
@@ -91,7 +95,11 @@ def _failure_injection_case(
     raw_records: list[dict[str, Any]],
     include_regressions: bool,
 ) -> dict[str, Any]:
-    honesty_record = _build_honesty_record(deepcopy(raw_records), include_regressions=include_regressions)
+    honesty_record = _build_honesty_record(
+        deepcopy(raw_records),
+        include_regressions=include_regressions,
+        diagnostic_only=False,
+    )
     observed = dict(honesty_record.get("observed", {}))
     return {
         "case": case_id,
@@ -223,10 +231,14 @@ def _gate_payload(
     }
 
 
-def _official_status_and_conclusion(gates: dict[str, dict[str, Any]]) -> tuple[str, str, str, str]:
-    if any(gate["status"] == STATUS_FAIL or (name == GATE_HONESTY and gate["passed"] is False) for name, gate in gates.items()):
+def _official_status_and_conclusion(
+    gates: dict[str, dict[str, Any]],
+    gate_summaries: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
+) -> tuple[str, str, str, str]:
+    if blocking_failed_gate_names(gates, gate_summaries, snapshot):
         return "FAIL", "REJECT", "REJECT", "REJECT"
-    if any(gate["status"] == STATUS_NOT_RUN for gate in gates.values()):
+    if blocking_not_run_gate_names(gates, gate_summaries, snapshot):
         return "INCOMPLETE", "DEFER", "DEFER", FORMAL_CONCLUSION_NOT_ISSUED
     return "PASS", "ACCEPT", "ACCEPT", "ACCEPT"
 
@@ -241,9 +253,14 @@ def _headline_metrics(evidence_report: dict[str, Any], failure_injection: dict[s
     }
 
 
-def _findings_for_gates(gates: dict[str, dict[str, Any]]) -> list[dict[str, str]]:
+def _findings_for_gates(
+    gates: dict[str, dict[str, Any]],
+    gate_summaries: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
+) -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
-    for gate_name, gate in gates.items():
+    for gate_name, _ in iter_blocking_gate_summaries(gate_summaries, snapshot):
+        gate = gates[gate_name]
         if gate["status"] == STATUS_FAIL or (gate_name == GATE_HONESTY and gate["passed"] is False):
             findings.append(
                 {
@@ -282,16 +299,14 @@ def build_m47_acceptance_report(
         for gate in GATE_ORDER
         if gate != GATE_HONESTY
     }
-    honesty_record = _build_honesty_record(evidence_records, include_regressions=include_regressions)
+    honesty_record = _build_honesty_record(
+        evidence_records,
+        include_regressions=include_regressions,
+        diagnostic_only=bool(snapshot.get("diagnostic_only")),
+    )
     evidence_records.append(honesty_record)
     gate_summaries[GATE_HONESTY] = _gate_summary(GATE_HONESTY, [honesty_record])
-    gate_statuses = [summary["status"] for summary in gate_summaries.values()]
-    if any(status == STATUS_FAIL for status in gate_statuses):
-        evidence_rebuild_status = STATUS_FAIL
-    elif any(status == STATUS_NOT_RUN for status in gate_statuses):
-        evidence_rebuild_status = "INCOMPLETE"
-    else:
-        evidence_rebuild_status = "PASS"
+    evidence_rebuild_status = rollup_evidence_rebuild_status(gate_summaries, snapshot)
     evidence_report = {
         "milestone_id": "M4.7",
         "mode": "independent_evidence_rebuild",
@@ -334,13 +349,11 @@ def build_m47_acceptance_report(
         )
         for gate_name in GATE_ORDER
     }
-    status, acceptance_state, recommendation, formal_conclusion = _official_status_and_conclusion(gates)
-    failed_gates = [
-        name
-        for name, gate in gates.items()
-        if gate["status"] == STATUS_FAIL or (name == GATE_HONESTY and gate["passed"] is False)
-    ]
-    not_run_gates = [name for name, gate in gates.items() if gate["status"] == STATUS_NOT_RUN]
+    status, acceptance_state, recommendation, formal_conclusion = _official_status_and_conclusion(
+        gates, evidence_report["gate_summaries"], snapshot
+    )
+    failed_gates = blocking_failed_gate_names(gates, evidence_report["gate_summaries"], snapshot)
+    not_run_gates = blocking_not_run_gate_names(gates, evidence_report["gate_summaries"], snapshot)
     report = {
         "milestone_id": "M4.7",
         "mode": "official_runtime_acceptance",
@@ -358,7 +371,7 @@ def build_m47_acceptance_report(
         "gates": gates,
         "failed_gates": failed_gates,
         "not_run_gates": not_run_gates,
-        "findings": _findings_for_gates(gates),
+        "findings": _findings_for_gates(gates, evidence_report["gate_summaries"], snapshot),
         "headline_metrics": _headline_metrics(evidence_report, failure_injection),
         "regression_policy": evidence_report["regression_policy"],
         "anti_degeneration_addendum": evidence_report["anti_degeneration_addendum"],

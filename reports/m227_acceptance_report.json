@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-04-10T07:33:55+00:00",
+  "generated_at": "2026-04-11T06:09:20+00:00",
   "seed_set": [
     227,
     342
@@ -46,9 +46,9 @@
             "cycle": 8,
             "current_phase": "forming",
             "dominant_goal": "SURVIVAL",
-            "continuity_score": 0.6468,
+            "continuity_score": 0.6968,
             "continuity_anchors": [
-              "ep-000006-scan",
+              "ep-000006-rest",
               "ep-000001-hide"
             ],
             "status_flags": {
@@ -68,15 +68,15 @@
               "need:maintenance",
               "repeated surprise burden"
             ],
-            "last_choice": "rest"
+            "last_choice": "scan"
           },
           "signature_b": {
             "cycle": 8,
             "current_phase": "forming",
             "dominant_goal": "SURVIVAL",
-            "continuity_score": 0.6468,
+            "continuity_score": 0.6968,
             "continuity_anchors": [
-              "ep-000006-scan",
+              "ep-000006-rest",
               "ep-000001-hide"
             ],
             "status_flags": {
@@ -96,7 +96,7 @@
               "need:maintenance",
               "repeated surprise burden"
             ],
-            "last_choice": "rest"
+            "last_choice": "scan"
           }
         },
         {
@@ -445,14 +445,14 @@
         "anchors_recovered_after_pressure": true,
         "continuity_not_collapsed_to_zero": true,
         "phase_changes_bounded": true,
-        "min_continuity_score": 0.429007,
-        "max_continuity_score": 0.7468,
-        "final_continuity_score": 0.599578,
+        "min_continuity_score": 0.504332,
+        "max_continuity_score": 0.78154,
+        "final_continuity_score": 0.666481,
         "max_anchor_count": 12,
         "final_anchor_count": 12,
         "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 32,
-        "fragile_cycles": 72,
+        "threatened_cycles": 25,
+        "fragile_cycles": 71,
         "distinct_phases": [
           "consolidation",
           "forming",
@@ -467,20 +467,20 @@
           "cycle": 72,
           "current_phase": "consolidation",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.599578,
+          "continuity_score": 0.666481,
           "continuity_anchors": [
-            "ep-000071-rest",
-            "ep-000069-rest",
-            "ep-000067-rest",
-            "ep-000065-rest",
-            "ep-000064-hide",
-            "ep-000047-rest-merged",
-            "ep-000045-hide-merged",
-            "ep-000030-exploit_shelter-merged",
-            "ep-000038-unstable_workspace_note",
-            "ep-000037-seek_contact",
-            "ep-000026-scan",
-            "ep-000013-hide"
+            "ep-000072-exploit_shelter",
+            "ep-000057-exploit_shelter-merged",
+            "d5a5d8c6-23c5-4757-b7c0-58c602b8ed8b",
+            "5bf546c7-dc83-479f-a16b-e7e899dd6fd0",
+            "ep-000069-scan",
+            "ep-000050-rest-merged",
+            "849c602b-2ee7-4550-90c5-641ed9a3b33c",
+            "0e822390-d561-4423-aba4-a669dbfcd8f9",
+            "f241e265-28e1-4a4c-ab40-9b67940bf6fe",
+            "ep-000049-hide",
+            "de1e6d44-c3ef-4ae9-8fa3-16d262c2f2f0",
+            "83af982b-15fd-4dc4-b9d8-3a8dbb5dd27b"
           ],
           "status_flags": {
             "threatened": true,
@@ -497,9 +497,9 @@
             "continuity-relevant tension",
             "maintenance pressure",
             "need:maintenance",
-            "repeated surprise burden"
+            "unresolved maintenance discrepancy"
           ],
-          "last_choice": "rest"
+          "last_choice": "exploit_shelter"
         }
       }
     },
@@ -517,8 +517,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-04-10T07:33:55+00:00",
-    "codebase_version": "74806b6f9b25ec6029e33b90e268c733205b30fd",
+    "generated_at": "2026-04-11T06:09:20+00:00",
+    "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -529,32 +529,32 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
-        "size_bytes": 86196,
-        "modified_at": "2026-04-10T07:33:44+00:00"
+        "size_bytes": 86113,
+        "modified_at": "2026-04-11T06:08:59+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1674,
-        "modified_at": "2026-04-10T07:33:44+00:00"
+        "modified_at": "2026-04-11T06:08:59+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
         "size_bytes": 15049,
-        "modified_at": "2026-04-10T07:33:44+00:00"
+        "modified_at": "2026-04-11T06:08:59+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 18209,
-        "modified_at": "2026-04-10T07:33:55+00:00"
+        "size_bytes": 19057,
+        "modified_at": "2026-04-11T06:09:20+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-04-10T07:25:30+00:00"
+        "modified_at": "2026-04-10T07:33:55+00:00"
       }
     }
   },

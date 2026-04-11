@@ -595,10 +595,10 @@
     "invalid_encoding_source_ids": [],
     "passed": true,
     "replay_semantic_refresh_updated_ids": [
-      "fe02317d-4953-48d0-8159-4767a4cf151b",
-      "46115b9b-22f4-4178-ab49-b09f62d78822",
-      "c509f813-ad77-4d3e-b93a-be6af80141e3",
-      "e5967311-2073-4849-8bce-fac0144fa833"
+      "8a657d70-7b86-4703-87bf-3d0dd21aa095",
+      "b39442ac-18be-4180-b5df-f47657c382fe",
+      "9253f5c8-d162-4425-93df-85fdede8d047",
+      "b3dff0db-b32e-43e2-8a70-abccd62ba029"
     ],
     "replay_semantic_refreshes": [
       {
@@ -648,7 +648,7 @@
           0.08933933333333333,
           0.08933933333333333
         ],
-        "entry_id": "fe02317d-4953-48d0-8159-4767a4cf151b",
+        "entry_id": "8a657d70-7b86-4703-87bf-3d0dd21aa095",
         "residual_norm_mean_after": 0.0,
         "residual_norm_mean_before": 0.36955856960783856,
         "residual_norm_var_after": 0.0,
@@ -704,7 +704,7 @@
           0.08933933333333333,
           0.08933933333333333
         ],
-        "entry_id": "46115b9b-22f4-4178-ab49-b09f62d78822",
+        "entry_id": "b39442ac-18be-4180-b5df-f47657c382fe",
         "residual_norm_mean_after": 0.0,
         "residual_norm_mean_before": 0.36955856960783856,
         "residual_norm_var_after": 0.0,
@@ -760,7 +760,7 @@
           0.08343075,
           0.08343075
         ],
-        "entry_id": "c509f813-ad77-4d3e-b93a-be6af80141e3",
+        "entry_id": "9253f5c8-d162-4425-93df-85fdede8d047",
         "residual_norm_mean_after": 0.46539999418028705,
         "residual_norm_mean_before": 0.37394566865122425,
         "residual_norm_var_after": 0.0,
@@ -816,7 +816,7 @@
           0.08540027777777777,
           0.08540027777777777
         ],
-        "entry_id": "e5967311-2073-4849-8bce-fac0144fa833",
+        "entry_id": "b3dff0db-b32e-43e2-8a70-abccd62ba029",
         "residual_norm_mean_after": 0.41368888371581075,
         "residual_norm_mean_before": 0.2769967915934994,
         "residual_norm_var_after": 0.02139231156375422,
@@ -837,7 +837,7 @@
       {
         "consolidation_source": "dynamics",
         "content_role": "metadata_display_only",
-        "entry_id": "fe02317d-4953-48d0-8159-4767a4cf151b",
+        "entry_id": "8a657d70-7b86-4703-87bf-3d0dd21aa095",
         "has_centroid": true,
         "has_residual": true,
         "memory_class": "semantic",
@@ -848,7 +848,7 @@
       {
         "consolidation_source": "dynamics",
         "content_role": "metadata_display_only",
-        "entry_id": "46115b9b-22f4-4178-ab49-b09f62d78822",
+        "entry_id": "b39442ac-18be-4180-b5df-f47657c382fe",
         "has_centroid": true,
         "has_residual": true,
         "memory_class": "inferred",
@@ -859,7 +859,7 @@
       {
         "consolidation_source": "dynamics",
         "content_role": "metadata_display_only",
-        "entry_id": "c509f813-ad77-4d3e-b93a-be6af80141e3",
+        "entry_id": "9253f5c8-d162-4425-93df-85fdede8d047",
         "has_centroid": true,
         "has_residual": true,
         "memory_class": "semantic",
@@ -871,22 +871,22 @@
       {
         "consolidation_source": "dynamics",
         "content_role": "metadata_display_only",
-        "entry_id": "e5967311-2073-4849-8bce-fac0144fa833",
+        "entry_id": "b3dff0db-b32e-43e2-8a70-abccd62ba029",
         "has_centroid": true,
         "has_residual": true,
         "memory_class": "inferred",
         "support_ids": [
-          "fe02317d-4953-48d0-8159-4767a4cf151b",
+          "8a657d70-7b86-4703-87bf-3d0dd21aa095",
           "ep-000012-unstable_workspace_note",
           "ep-000017-scan-merged"
         ]
       }
     ],
     "semantic_dynamic_ids": [
-      "fe02317d-4953-48d0-8159-4767a4cf151b",
-      "46115b9b-22f4-4178-ab49-b09f62d78822",
-      "c509f813-ad77-4d3e-b93a-be6af80141e3",
-      "e5967311-2073-4849-8bce-fac0144fa833"
+      "8a657d70-7b86-4703-87bf-3d0dd21aa095",
+      "b39442ac-18be-4180-b5df-f47657c382fe",
+      "9253f5c8-d162-4425-93df-85fdede8d047",
+      "b3dff0db-b32e-43e2-8a70-abccd62ba029"
     ],
     "semantic_missing_centroid_ids": [],
     "semantic_missing_residual_ids": [],
@@ -1050,7 +1050,7 @@
       ],
       "encoding_attention": 0.9,
       "execution_contexts": [],
-      "id": "cc462cd7-322d-4c74-b50d-425306555e8d",
+      "id": "612bd6e8-118e-4228-8e89-5eadbfa9c7cc",
       "is_dormant": false,
       "last_accessed": 0,
       "memory_class": "semantic",

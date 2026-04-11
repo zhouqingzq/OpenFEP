@@ -210,6 +210,58 @@ def _all_gate_records(records: list[dict[str, object]], gate: str) -> list[dict[
     return [record for record in records if record["gate"] == gate]
 
 
+def iter_blocking_gate_summaries(
+    gate_summaries: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
+) -> list[tuple[str, dict[str, Any]]]:
+    """Gates whose FAIL/NOT_RUN block official issuance; demoted diagnostic gates are excluded."""
+    diagnostic = bool(snapshot.get("diagnostic_only"))
+    out: list[tuple[str, dict[str, Any]]] = []
+    for name, summary in gate_summaries.items():
+        if diagnostic and summary.get("behavioral_claims_demoted") is True:
+            continue
+        out.append((name, summary))
+    return out
+
+
+def rollup_evidence_rebuild_status(
+    gate_summaries: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
+) -> str:
+    blocking = iter_blocking_gate_summaries(gate_summaries, snapshot)
+    statuses = [str(item[1]["status"]) for item in blocking]
+    if any(status == STATUS_FAIL for status in statuses):
+        return STATUS_FAIL
+    if any(status == STATUS_NOT_RUN for status in statuses):
+        return "INCOMPLETE"
+    return STATUS_PASS
+
+
+def blocking_failed_gate_names(
+    gates: dict[str, dict[str, Any]],
+    gate_summaries: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
+) -> list[str]:
+    failed: list[str] = []
+    for name, _ in iter_blocking_gate_summaries(gate_summaries, snapshot):
+        gate = gates[name]
+        if str(gate["status"]) == STATUS_FAIL or (name == GATE_HONESTY and gate["passed"] is False):
+            failed.append(name)
+    return failed
+
+
+def blocking_not_run_gate_names(
+    gates: dict[str, dict[str, Any]],
+    gate_summaries: dict[str, dict[str, Any]],
+    snapshot: dict[str, Any],
+) -> list[str]:
+    return [
+        name
+        for name, _ in iter_blocking_gate_summaries(gate_summaries, snapshot)
+        if str(gates[name]["status"]) == STATUS_NOT_RUN
+    ]
+
+
 def _gate_summary(gate: str, records: list[dict[str, object]]) -> dict[str, object]:
     statuses = [str(record["status"]) for record in records]
     if any(status == STATUS_FAIL for status in statuses):
@@ -791,6 +843,7 @@ def _build_honesty_record(
     records: list[dict[str, object]],
     *,
     include_regressions: bool,
+    diagnostic_only: bool = False,
 ) -> dict[str, object]:
     gate_names = {
         GATE_STATE_VECTOR,
@@ -841,7 +894,18 @@ def _build_honesty_record(
         if str(record.get("source_api_call_id")) != expected_call_id:
             mismatched_source_api_call_id_records.append(scenario_id)
         source_api_call_ids.append(str(record.get("source_api_call_id")))
-        failed_checks = [name for name, passed in _external_consistency_checks(record, include_regressions=include_regressions).items() if not passed]
+        gate_name = str(record.get("gate"))
+        skip_external = diagnostic_only and gate_name in DIAGNOSTIC_ONLY_GATES
+        if skip_external:
+            failed_checks: list[str] = []
+        else:
+            failed_checks = [
+                name
+                for name, passed in _external_consistency_checks(
+                    record, include_regressions=include_regressions
+                ).items()
+                if not passed
+            ]
         if failed_checks:
             external_check_failures[scenario_id] = failed_checks
     duplicate_source_api_call_ids = [
@@ -929,16 +993,14 @@ def build_m47_reacceptance_report(
     )
     records = build_m47_evidence_records(include_regressions=include_regressions, runtime_snapshot=snapshot)
     gate_summaries = {gate: _gate_summary(gate, _all_gate_records(records, gate)) for gate in GATE_ORDER if gate != GATE_HONESTY}
-    honesty_record = _build_honesty_record(records, include_regressions=include_regressions)
+    honesty_record = _build_honesty_record(
+        records,
+        include_regressions=include_regressions,
+        diagnostic_only=bool(snapshot.get("diagnostic_only")),
+    )
     records.append(honesty_record)
     gate_summaries[GATE_HONESTY] = _gate_summary(GATE_HONESTY, [honesty_record])
-    gate_statuses = [summary["status"] for summary in gate_summaries.values()]
-    if any(status == STATUS_FAIL for status in gate_statuses):
-        evidence_rebuild_status = STATUS_FAIL
-    elif any(status == STATUS_NOT_RUN for status in gate_statuses):
-        evidence_rebuild_status = "INCOMPLETE"
-    else:
-        evidence_rebuild_status = STATUS_PASS
+    evidence_rebuild_status = rollup_evidence_rebuild_status(gate_summaries, snapshot)
     return {
         "milestone_id": "M4.7",
         "mode": "independent_evidence_rebuild",

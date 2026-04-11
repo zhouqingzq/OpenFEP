@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.26",
   "schema_version": "m226_v1",
-  "generated_at": "2026-04-10T07:33:40+00:00",
+  "generated_at": "2026-04-11T06:08:55+00:00",
   "checks": [
     {
       "check_id": "cross_001_narrative_vs_transfer",

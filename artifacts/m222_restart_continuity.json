@@ -28,10 +28,10 @@
       "avoidance_similarity": 1.0,
       "preference_similarity": 1.0,
       "anchor_restore_score": 1.0,
-      "action_distribution_similarity": 0.75,
+      "action_distribution_similarity": 0.791667,
       "anchor_distribution_similarity": 0.5,
       "top_action_similarity": 0.0,
-      "rebind_consistency": 0.5,
+      "rebind_consistency": 0.0,
       "maintenance_anchor_similarity": 1.0,
       "restart_divergence": 0.0
     },
@@ -112,7 +112,7 @@
         "protected_mode_ticks_remaining": 0,
         "recovery_rebound_active": false,
         "recovery_rebound_ticks_remaining": 0,
-        "policy_shift_strength": 0.252,
+        "policy_shift_strength": 0.0,
         "suppressed_actions": [],
         "recovery_focus": [],
         "chronic_debt_pressure": 0.0,
@@ -131,7 +131,7 @@
     },
     "action_diversity_continuity": {
       "pre_entropy": 1.207519,
-      "post_entropy": 1.999218,
+      "post_entropy": 1.595079,
       "pre_window_cycles": 12,
       "post_window_cycles": 12
     }

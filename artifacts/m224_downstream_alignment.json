@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-04-10T06:49:40+00:00",
-  "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9",
+  "generated_at": "2026-04-11T05:34:02+00:00",
+  "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71",
   "seed_set": [
     224,
     243,
@@ -891,6 +891,7 @@
         },
         "consistency_classification": "irrelevant",
         "current_commitments": [],
+        "decision_changed_by_recall": false,
         "dominant_component": "workspace_bias",
         "experiment_design": {
           "active_plans": [],
@@ -1525,6 +1526,66 @@
           "suppressed_actions": []
         },
         "reason": "workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences.",
+        "recall_audit": {
+          "acceptance_path": "none",
+          "actual_choice": "scan",
+          "allowed_override_components": [
+            "commitment_bias",
+            "verification_bias",
+            "reconciliation_bias"
+          ],
+          "chosen_component": "workspace_bias",
+          "chosen_component_allowed_for_m49": false,
+          "counterfactual_choice": "scan",
+          "decision_changed_by_recall": false,
+          "expected_free_energy_shift_explained_by_recall": false,
+          "m49_constrained_components": [
+            "goal_alignment",
+            "identity_bias",
+            "subject_bias",
+            "workspace_bias",
+            "social_bias",
+            "memory_bias",
+            "pattern_bias",
+            "policy_bias",
+            "experiment_bias",
+            "inquiry_scheduler_bias"
+          ],
+          "m49_primary_components": [
+            "expected_free_energy",
+            "representational_recall_bias"
+          ],
+          "representation_mode": "none"
+        },
+        "recall_counterfactual_rank_delta": 0.0,
+        "recall_counterfactual_rankings": {
+          "append_workspace_note": 6,
+          "delete_workspace_note": 10,
+          "exploit_shelter": 2,
+          "fetch_remote_status": 8,
+          "forage": 12,
+          "hide": 3,
+          "rest": 4,
+          "scan": 1,
+          "seek_contact": 9,
+          "thermoregulate": 11,
+          "unstable_workspace_note": 5,
+          "write_workspace_note": 7
+        },
+        "recall_counterfactual_scores": {
+          "append_workspace_note": 0.40676484347511843,
+          "delete_workspace_note": 0.008240017475118488,
+          "exploit_shelter": 1.1144575122351184,
+          "fetch_remote_status": 0.21184001747511844,
+          "forage": -155.17175757134916,
+          "hide": 0.9058855348751184,
+          "rest": 0.7246423172351185,
+          "scan": 1.2228924198751183,
+          "seek_contact": 0.14451456487511838,
+          "thermoregulate": -155.16130284358917,
+          "unstable_workspace_note": 0.40676484347511843,
+          "write_workspace_note": 0.36486484347511844
+        },
         "reconciliation": {
           "active_threads": [
             {
@@ -2262,6 +2323,67 @@
         "repair_policy": "",
         "repair_result": {},
         "repair_triggered": false,
+        "representational_recall": {
+          "acceptance_path": "none",
+          "actual_choice": "scan",
+          "allowed_override_components": [
+            "commitment_bias",
+            "verification_bias",
+            "reconciliation_bias"
+          ],
+          "chosen_component": "workspace_bias",
+          "chosen_component_allowed_for_m49": false,
+          "counterfactual_choice": "scan",
+          "counterfactual_rankings": {
+            "append_workspace_note": 6,
+            "delete_workspace_note": 10,
+            "exploit_shelter": 2,
+            "fetch_remote_status": 8,
+            "forage": 12,
+            "hide": 3,
+            "rest": 4,
+            "scan": 1,
+            "seek_contact": 9,
+            "thermoregulate": 11,
+            "unstable_workspace_note": 5,
+            "write_workspace_note": 7
+          },
+          "counterfactual_scores": {
+            "append_workspace_note": 0.40676484347511843,
+            "delete_workspace_note": 0.008240017475118488,
+            "exploit_shelter": 1.1144575122351184,
+            "fetch_remote_status": 0.21184001747511844,
+            "forage": -155.17175757134916,
+            "hide": 0.9058855348751184,
+            "rest": 0.7246423172351185,
+            "scan": 1.2228924198751183,
+            "seek_contact": 0.14451456487511838,
+            "thermoregulate": -155.16130284358917,
+            "unstable_workspace_note": 0.40676484347511843,
+            "write_workspace_note": 0.36486484347511844
+          },
+          "decision_changed_by_recall": false,
+          "expected_free_energy_shift_explained_by_recall": false,
+          "m49_constrained_components": [
+            "goal_alignment",
+            "identity_bias",
+            "subject_bias",
+            "workspace_bias",
+            "social_bias",
+            "memory_bias",
+            "pattern_bias",
+            "policy_bias",
+            "experiment_bias",
+            "inquiry_scheduler_bias"
+          ],
+          "m49_primary_components": [
+            "expected_free_energy",
+            "representational_recall_bias"
+          ],
+          "representation_mode": "none"
+        },
+        "representational_recall_bias": 0.0,
+        "representational_recall_delta": 0.0,
         "self_inconsistency_error": 0.5,
         "severity_level": "none",
         "social_alerts": [],
@@ -2500,7 +2622,7 @@
           "socially_destabilized": false,
           "threatened": false
         },
-        "text": "I chose scan. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences. The overall expected free energy was lower than exploit_shelter (0.210 vs 0.222), and scan scored 1.223 versus exploit_shelter at 1.114. My globally accessible focus was constrained to: novelty, shelter. I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=1.072, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+        "text": "I chose scan. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences. The overall expected free energy was lower than exploit_shelter (0.210 vs 0.222), and scan scored 1.223 versus exploit_shelter at 1.114. My globally accessible focus was constrained to: novelty, shelter. I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=1.072, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000, threat_memory_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
         "verification": {
           "action_update": {
             "created_targets": [],
@@ -2737,7 +2859,7 @@
           "current_prediction_error": 0.27099860133333337,
           "epistemic_bonus": 0.0,
           "expected_free_energy": 0.2101876614448816,
-          "explanation": "My most urgent unresolved discrepancy is unresolved self inconsistency (high, recurrence=1). This tension has persisted across 1 chapter(s) and is active. I am not actively verifying any prediction right now. Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. I chose scan. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences. The overall expected free energy was lower than exploit_shelter (0.210 vs 0.222), and scan scored 1.223 versus exploit_shelter at 1.114. My globally accessible focus was constrained to: novelty, shelter. I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=1.072, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+          "explanation": "My most urgent unresolved discrepancy is unresolved self inconsistency (high, recurrence=1). This tension has persisted across 1 chapter(s) and is active. I am not actively verifying any prediction right now. Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. I chose scan. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences. The overall expected free energy was lower than exploit_shelter (0.210 vs 0.222), and scan scored 1.223 versus exploit_shelter at 1.114. My globally accessible focus was constrained to: novelty, shelter. I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=1.072, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000, threat_memory_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
           "explanation_details": {
             "action": "scan",
             "active_goal": "SURVIVAL",
@@ -2755,6 +2877,7 @@
             },
             "consistency_classification": "irrelevant",
             "current_commitments": [],
+            "decision_changed_by_recall": false,
             "dominant_component": "workspace_bias",
             "experiment_design": {
               "active_plans": [],
@@ -3389,6 +3512,66 @@
               "suppressed_actions": []
             },
             "reason": "workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences.",
+            "recall_audit": {
+              "acceptance_path": "none",
+              "actual_choice": "scan",
+              "allowed_override_components": [
+                "commitment_bias",
+                "verification_bias",
+                "reconciliation_bias"
+              ],
+              "chosen_component": "workspace_bias",
+              "chosen_component_allowed_for_m49": false,
+              "counterfactual_choice": "scan",
+              "decision_changed_by_recall": false,
+              "expected_free_energy_shift_explained_by_recall": false,
+              "m49_constrained_components": [
+                "goal_alignment",
+                "identity_bias",
+                "subject_bias",
+                "workspace_bias",
+                "social_bias",
+                "memory_bias",
+                "pattern_bias",
+                "policy_bias",
+                "experiment_bias",
+                "inquiry_scheduler_bias"
+              ],
+              "m49_primary_components": [
+                "expected_free_energy",
+                "representational_recall_bias"
+              ],
+              "representation_mode": "none"
+            },
+            "recall_counterfactual_rank_delta": 0.0,
+            "recall_counterfactual_rankings": {
+              "append_workspace_note": 6,
+              "delete_workspace_note": 10,
+              "exploit_shelter": 2,
+              "fetch_remote_status": 8,
+              "forage": 12,
+              "hide": 3,
+              "rest": 4,
+              "scan": 1,
+              "seek_contact": 9,
+              "thermoregulate": 11,
+              "unstable_workspace_note": 5,
+              "write_workspace_note": 7
+            },
+            "recall_counterfactual_scores": {
+              "append_workspace_note": 0.40676484347511843,
+              "delete_workspace_note": 0.008240017475118488,
+              "exploit_shelter": 1.1144575122351184,
+              "fetch_remote_status": 0.21184001747511844,
+              "forage": -155.17175757134916,
+              "hide": 0.9058855348751184,
+              "rest": 0.7246423172351185,
+              "scan": 1.2228924198751183,
+              "seek_contact": 0.14451456487511838,
+              "thermoregulate": -155.16130284358917,
+              "unstable_workspace_note": 0.40676484347511843,
+              "write_workspace_note": 0.36486484347511844
+            },
             "reconciliation": {
               "active_threads": [
                 {
@@ -4126,6 +4309,67 @@
             "repair_policy": "",
             "repair_result": {},
             "repair_triggered": false,
+            "representational_recall": {
+              "acceptance_path": "none",
+              "actual_choice": "scan",
+              "allowed_override_components": [
+                "commitment_bias",
+                "verification_bias",
+                "reconciliation_bias"
+              ],
+              "chosen_component": "workspace_bias",
+              "chosen_component_allowed_for_m49": false,
+              "counterfactual_choice": "scan",
+              "counterfactual_rankings": {
+                "append_workspace_note": 6,
+                "delete_workspace_note": 10,
+                "exploit_shelter": 2,
+                "fetch_remote_status": 8,
+                "forage": 12,
+                "hide": 3,
+                "rest": 4,
+                "scan": 1,
+                "seek_contact": 9,
+                "thermoregulate": 11,
+                "unstable_workspace_note": 5,
+                "write_workspace_note": 7
+              },
+              "counterfactual_scores": {
+                "append_workspace_note": 0.40676484347511843,
+                "delete_workspace_note": 0.008240017475118488,
+                "exploit_shelter": 1.1144575122351184,
+                "fetch_remote_status": 0.21184001747511844,
+                "forage": -155.17175757134916,
+                "hide": 0.9058855348751184,
+                "rest": 0.7246423172351185,
+                "scan": 1.2228924198751183,
+                "seek_contact": 0.14451456487511838,
+                "thermoregulate": -155.16130284358917,
+                "unstable_workspace_note": 0.40676484347511843,
+                "write_workspace_note": 0.36486484347511844
+              },
+              "decision_changed_by_recall": false,
+              "expected_free_energy_shift_explained_by_recall": false,
+              "m49_constrained_components": [
+                "goal_alignment",
+                "identity_bias",
+                "subject_bias",
+                "workspace_bias",
+                "social_bias",
+                "memory_bias",
+                "pattern_bias",
+                "policy_bias",
+                "experiment_bias",
+                "inquiry_scheduler_bias"
+              ],
+              "m49_primary_components": [
+                "expected_free_energy",
+                "representational_recall_bias"
+              ],
+              "representation_mode": "none"
+            },
+            "representational_recall_bias": 0.0,
+            "representational_recall_delta": 0.0,
             "self_inconsistency_error": 0.5,
             "severity_level": "none",
             "social_alerts": [],
@@ -4364,7 +4608,7 @@
               "socially_destabilized": false,
               "threatened": false
             },
-            "text": "I chose scan. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences. The overall expected free energy was lower than exploit_shelter (0.210 vs 0.222), and scan scored 1.223 versus exploit_shelter at 1.114. My globally accessible focus was constrained to: novelty, shelter. I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=1.072, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+            "text": "I chose scan. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. workspace_bias (1.072) dominated, so globally broadcast contents overruled weaker local preferences. The overall expected free energy was lower than exploit_shelter (0.210 vs 0.222), and scan scored 1.223 versus exploit_shelter at 1.114. My globally accessible focus was constrained to: novelty, shelter. I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: workspace_bias. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=1.072, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000, threat_memory_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
             "verification": {
               "action_update": {
                 "created_targets": [],
@@ -9450,6 +9694,7 @@
         },
         "consistency_classification": "irrelevant",
         "current_commitments": [],
+        "decision_changed_by_recall": false,
         "dominant_component": "goal_alignment",
         "experiment_design": {
           "active_plans": [],
@@ -10013,6 +10258,66 @@
           "suppressed_actions": []
         },
         "reason": "goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL.",
+        "recall_audit": {
+          "acceptance_path": "none",
+          "actual_choice": "hide",
+          "allowed_override_components": [
+            "commitment_bias",
+            "verification_bias",
+            "reconciliation_bias"
+          ],
+          "chosen_component": "goal_alignment",
+          "chosen_component_allowed_for_m49": false,
+          "counterfactual_choice": "hide",
+          "decision_changed_by_recall": false,
+          "expected_free_energy_shift_explained_by_recall": false,
+          "m49_constrained_components": [
+            "goal_alignment",
+            "identity_bias",
+            "subject_bias",
+            "workspace_bias",
+            "social_bias",
+            "memory_bias",
+            "pattern_bias",
+            "policy_bias",
+            "experiment_bias",
+            "inquiry_scheduler_bias"
+          ],
+          "m49_primary_components": [
+            "expected_free_energy",
+            "representational_recall_bias"
+          ],
+          "representation_mode": "none"
+        },
+        "recall_counterfactual_rank_delta": 0.0,
+        "recall_counterfactual_rankings": {
+          "append_workspace_note": 5,
+          "delete_workspace_note": 10,
+          "exploit_shelter": 2,
+          "fetch_remote_status": 7,
+          "forage": 12,
+          "hide": 1,
+          "rest": 3,
+          "scan": 8,
+          "seek_contact": 9,
+          "thermoregulate": 11,
+          "unstable_workspace_note": 4,
+          "write_workspace_note": 6
+        },
+        "recall_counterfactual_scores": {
+          "append_workspace_note": 0.40676484347511843,
+          "delete_workspace_note": 0.008240017475118488,
+          "exploit_shelter": 0.7287045122351183,
+          "fetch_remote_status": 0.21184001747511844,
+          "forage": -155.43986957134916,
+          "hide": 0.9578665348751183,
+          "rest": 0.7246423172351185,
+          "scan": 0.1504434198751184,
+          "seek_contact": 0.14451456487511838,
+          "thermoregulate": -155.16130284358917,
+          "unstable_workspace_note": 0.40676484347511843,
+          "write_workspace_note": 0.36486484347511844
+        },
         "reconciliation": {
           "active_threads": [
             {
@@ -10748,6 +11053,67 @@
         "repair_policy": "",
         "repair_result": {},
         "repair_triggered": false,
+        "representational_recall": {
+          "acceptance_path": "none",
+          "actual_choice": "hide",
+          "allowed_override_components": [
+            "commitment_bias",
+            "verification_bias",
+            "reconciliation_bias"
+          ],
+          "chosen_component": "goal_alignment",
+          "chosen_component_allowed_for_m49": false,
+          "counterfactual_choice": "hide",
+          "counterfactual_rankings": {
+            "append_workspace_note": 5,
+            "delete_workspace_note": 10,
+            "exploit_shelter": 2,
+            "fetch_remote_status": 7,
+            "forage": 12,
+            "hide": 1,
+            "rest": 3,
+            "scan": 8,
+            "seek_contact": 9,
+            "thermoregulate": 11,
+            "unstable_workspace_note": 4,
+            "write_workspace_note": 6
+          },
+          "counterfactual_scores": {
+            "append_workspace_note": 0.40676484347511843,
+            "delete_workspace_note": 0.008240017475118488,
+            "exploit_shelter": 0.7287045122351183,
+            "fetch_remote_status": 0.21184001747511844,
+            "forage": -155.43986957134916,
+            "hide": 0.9578665348751183,
+            "rest": 0.7246423172351185,
+            "scan": 0.1504434198751184,
+            "seek_contact": 0.14451456487511838,
+            "thermoregulate": -155.16130284358917,
+            "unstable_workspace_note": 0.40676484347511843,
+            "write_workspace_note": 0.36486484347511844
+          },
+          "decision_changed_by_recall": false,
+          "expected_free_energy_shift_explained_by_recall": false,
+          "m49_constrained_components": [
+            "goal_alignment",
+            "identity_bias",
+            "subject_bias",
+            "workspace_bias",
+            "social_bias",
+            "memory_bias",
+            "pattern_bias",
+            "policy_bias",
+            "experiment_bias",
+            "inquiry_scheduler_bias"
+          ],
+          "m49_primary_components": [
+            "expected_free_energy",
+            "representational_recall_bias"
+          ],
+          "representation_mode": "none"
+        },
+        "representational_recall_bias": 0.0,
+        "representational_recall_delta": 0.0,
         "self_inconsistency_error": 0.5,
         "severity_level": "none",
         "social_alerts": [],
@@ -10983,7 +11349,7 @@
           "socially_destabilized": false,
           "threatened": false
         },
-        "text": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.162 vs 0.222), and hide scored 0.958 versus exploit_shelter at 0.729.I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+        "text": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.162 vs 0.222), and hide scored 0.958 versus exploit_shelter at 0.729.I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000, threat_memory_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
         "verification": {
           "action_update": {
             "created_targets": [],
@@ -11204,7 +11570,7 @@
           "current_prediction_error": 0.27099860133333337,
           "epistemic_bonus": 0.0,
           "expected_free_energy": 0.16192546644488165,
-          "explanation": "My most urgent unresolved discrepancy is unresolved self inconsistency (high, recurrence=1). This tension has persisted across 1 chapter(s) and is active. I am not actively verifying any prediction right now. Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.162 vs 0.222), and hide scored 0.958 versus exploit_shelter at 0.729.I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+          "explanation": "My most urgent unresolved discrepancy is unresolved self inconsistency (high, recurrence=1). This tension has persisted across 1 chapter(s) and is active. I am not actively verifying any prediction right now. Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.162 vs 0.222), and hide scored 0.958 versus exploit_shelter at 0.729.I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000, threat_memory_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
           "explanation_details": {
             "action": "hide",
             "active_goal": "SURVIVAL",
@@ -11222,6 +11588,7 @@
             },
             "consistency_classification": "irrelevant",
             "current_commitments": [],
+            "decision_changed_by_recall": false,
             "dominant_component": "goal_alignment",
             "experiment_design": {
               "active_plans": [],
@@ -11785,6 +12152,66 @@
               "suppressed_actions": []
             },
             "reason": "goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL.",
+            "recall_audit": {
+              "acceptance_path": "none",
+              "actual_choice": "hide",
+              "allowed_override_components": [
+                "commitment_bias",
+                "verification_bias",
+                "reconciliation_bias"
+              ],
+              "chosen_component": "goal_alignment",
+              "chosen_component_allowed_for_m49": false,
+              "counterfactual_choice": "hide",
+              "decision_changed_by_recall": false,
+              "expected_free_energy_shift_explained_by_recall": false,
+              "m49_constrained_components": [
+                "goal_alignment",
+                "identity_bias",
+                "subject_bias",
+                "workspace_bias",
+                "social_bias",
+                "memory_bias",
+                "pattern_bias",
+                "policy_bias",
+                "experiment_bias",
+                "inquiry_scheduler_bias"
+              ],
+              "m49_primary_components": [
+                "expected_free_energy",
+                "representational_recall_bias"
+              ],
+              "representation_mode": "none"
+            },
+            "recall_counterfactual_rank_delta": 0.0,
+            "recall_counterfactual_rankings": {
+              "append_workspace_note": 5,
+              "delete_workspace_note": 10,
+              "exploit_shelter": 2,
+              "fetch_remote_status": 7,
+              "forage": 12,
+              "hide": 1,
+              "rest": 3,
+              "scan": 8,
+              "seek_contact": 9,
+              "thermoregulate": 11,
+              "unstable_workspace_note": 4,
+              "write_workspace_note": 6
+            },
+            "recall_counterfactual_scores": {
+              "append_workspace_note": 0.40676484347511843,
+              "delete_workspace_note": 0.008240017475118488,
+              "exploit_shelter": 0.7287045122351183,
+              "fetch_remote_status": 0.21184001747511844,
+              "forage": -155.43986957134916,
+              "hide": 0.9578665348751183,
+              "rest": 0.7246423172351185,
+              "scan": 0.1504434198751184,
+              "seek_contact": 0.14451456487511838,
+              "thermoregulate": -155.16130284358917,
+              "unstable_workspace_note": 0.40676484347511843,
+              "write_workspace_note": 0.36486484347511844
+            },
             "reconciliation": {
               "active_threads": [
                 {
@@ -12520,6 +12947,67 @@
             "repair_policy": "",
             "repair_result": {},
             "repair_triggered": false,
+            "representational_recall": {
+              "acceptance_path": "none",
+              "actual_choice": "hide",
+              "allowed_override_components": [
+                "commitment_bias",
+                "verification_bias",
+                "reconciliation_bias"
+              ],
+              "chosen_component": "goal_alignment",
+              "chosen_component_allowed_for_m49": false,
+              "counterfactual_choice": "hide",
+              "counterfactual_rankings": {
+                "append_workspace_note": 5,
+                "delete_workspace_note": 10,
+                "exploit_shelter": 2,
+                "fetch_remote_status": 7,
+                "forage": 12,
+                "hide": 1,
+                "rest": 3,
+                "scan": 8,
+                "seek_contact": 9,
+                "thermoregulate": 11,
+                "unstable_workspace_note": 4,
+                "write_workspace_note": 6
+              },
+              "counterfactual_scores": {
+                "append_workspace_note": 0.40676484347511843,
+                "delete_workspace_note": 0.008240017475118488,
+                "exploit_shelter": 0.7287045122351183,
+                "fetch_remote_status": 0.21184001747511844,
+                "forage": -155.43986957134916,
+                "hide": 0.9578665348751183,
+                "rest": 0.7246423172351185,
+                "scan": 0.1504434198751184,
+                "seek_contact": 0.14451456487511838,
+                "thermoregulate": -155.16130284358917,
+                "unstable_workspace_note": 0.40676484347511843,
+                "write_workspace_note": 0.36486484347511844
+              },
+              "decision_changed_by_recall": false,
+              "expected_free_energy_shift_explained_by_recall": false,
+              "m49_constrained_components": [
+                "goal_alignment",
+                "identity_bias",
+                "subject_bias",
+                "workspace_bias",
+                "social_bias",
+                "memory_bias",
+                "pattern_bias",
+                "policy_bias",
+                "experiment_bias",
+                "inquiry_scheduler_bias"
+              ],
+              "m49_primary_components": [
+                "expected_free_energy",
+                "representational_recall_bias"
+              ],
+              "representation_mode": "none"
+            },
+            "representational_recall_bias": 0.0,
+            "representational_recall_delta": 0.0,
             "self_inconsistency_error": 0.5,
             "severity_level": "none",
             "social_alerts": [],
@@ -12755,7 +13243,7 @@
               "socially_destabilized": false,
               "threatened": false
             },
-            "text": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.162 vs 0.222), and hide scored 0.958 versus exploit_shelter at 0.729.I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
+            "text": "I chose hide. This action predicted outcome 'resource_gain'. According to my preference model this outcome has high preferred probability (0.99), resulting in low risk (0.007). My active goal is SURVIVAL, so I favored actions aligned with it. goal_alignment (1.000) dominated, so the action best served my active goal SURVIVAL. The overall expected free energy was lower than exploit_shelter (0.162 vs 0.222), and hide scored 0.958 versus exploit_shelter at 0.729.I still expect environment_state on temperature, but it remains unverified. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active. Inquiry scheduler: Inquiry scheduler promoted inquiry:tension:identity_tension because shared priority surface promoted this candidate. My current subject state is forming-dominant. Primary goal: SURVIVAL. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. Style remains balanced adaptive with continuity 0.00. This choice deviates from my usual pattern (dominant strategy: expected_free_energy). Reason for deviation: goal_alignment. Supporting continuity terms: memory_bias=0.000, pattern_bias=0.000, policy_bias=0.000, workspace_bias=0.000, social_bias=0.000, commitment_bias=0.000, ledger_bias=0.000, subject_bias=0.000, reconciliation_bias=0.000, verification_bias=0.000, experiment_bias=0.000, inquiry_scheduler_bias=0.000, threat_memory_bias=0.000. This aligns with my resource_conservatism=0.55 and risk_aversion=0.65.",
             "verification": {
               "action_update": {
                 "created_targets": [],
@@ -17434,16 +17922,16 @@
         },
         {
           "cycle": 2,
-          "choice": "scan",
-          "workspace_bias": 0.36,
+          "choice": "rest",
+          "workspace_bias": 0.0,
           "workspace_broadcast_channels": [
             "novelty",
-            "food"
+            "social"
           ],
           "workspace_suppressed_channels": [
-            "social",
             "conflict",
             "continuity",
+            "food",
             "energy",
             "fatigue",
             "stress",
@@ -17453,16 +17941,16 @@
             "danger"
           ],
           "conscious_report": {
-            "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+            "text": "Consciously accessible now: novelty, social. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
             "channels": [
               "novelty",
-              "food"
+              "social"
             ],
             "carry_over_channels": [],
             "suppressed_channels": [
-              "social",
               "conflict",
               "continuity",
+              "food",
               "energy",
               "fatigue",
               "stress",
@@ -17473,13 +17961,13 @@
             ],
             "leakage_free": true,
             "subject_state": {
-              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
               "dominant_goal": "SURVIVAL",
               "current_phase": "forming",
               "active_commitments": [],
               "dominant_workspace_contents": [
                 "novelty",
-                "food"
+                "social"
               ],
               "active_social_focus": [],
               "status_flags": {
@@ -17523,8 +18011,7 @@
                   "preferred_actions": [],
                   "avoid_actions": [],
                   "evidence": [
-                    "memory_surprise=15.102",
-                    "memory_surprise=15.134"
+                    "memory_surprise=15.102"
                   ]
                 },
                 {
@@ -17554,10 +18041,10 @@
                 "identity_rigidity": 0.58,
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66,
-                "compute_conservatism": 0.485,
+                "compute_conservatism": 0.5,
                 "process_attraction_decay": 0.475,
-                "compression_preference": 0.485,
-                "uncertainty_tolerance": 0.51
+                "compression_preference": 0.5,
+                "uncertainty_tolerance": 0.48
               },
               "cognitive_style_label": "balanced_adaptive",
               "cognitive_style_evidence": [
@@ -17586,8 +18073,7 @@
                   "intensity": 1.0,
                   "repair_target": "critical",
                   "evidence": [
-                    "memory_surprise=15.102",
-                    "memory_surprise=15.134"
+                    "memory_surprise=15.102"
                   ]
                 },
                 {
@@ -17628,7 +18114,6 @@
               },
               "continuity_score": 0.7468,
               "continuity_anchors": [
-                "ep-000002-scan",
                 "ep-000001-hide"
               ]
             },
@@ -17700,10 +18185,10 @@
                   "continuity_resilience": 0.66
                 },
                 "style": {
-                  "compute_conservatism": 0.485,
+                  "compute_conservatism": 0.5,
                   "process_attraction_decay": 0.475,
-                  "compression_preference": 0.485,
-                  "uncertainty_tolerance": 0.51
+                  "compression_preference": 0.5,
+                  "uncertainty_tolerance": 0.48
                 },
                 "effort_allocation_history": [
                   {
@@ -17717,9 +18202,9 @@
                   },
                   {
                     "tick": 2,
-                    "action": "scan",
+                    "action": "rest",
                     "known_task": false,
-                    "compute_spend": 0.66,
+                    "compute_spend": 0.18,
                     "uncertainty_load": 0.46188,
                     "compression_pressure": 0.0,
                     "process_pull": 0.8
@@ -17747,13 +18232,13 @@
                 "label": "balanced_adaptive",
                 "continuity": 1.0,
                 "known_task_compute": 0.0,
-                "unknown_task_compute": 0.45,
-                "selective_gap": 0.45,
+                "unknown_task_compute": 0.21,
+                "selective_gap": 0.21,
                 "style_surface": {
-                  "compute_conservatism": 0.485,
+                  "compute_conservatism": 0.5,
                   "process_attraction_decay": 0.475,
-                  "compression_preference": 0.485,
-                  "uncertainty_tolerance": 0.51
+                  "compression_preference": 0.5,
+                  "uncertainty_tolerance": 0.48
                 },
                 "evidence": [
                   "style remains balanced across compute, compression, and uncertainty"
@@ -17768,17 +18253,16 @@
           "workspace_maintenance_priority": {
             "priority_gain": 0.35,
             "active_tasks": [
-              "energy_recovery",
               "continuity_guard",
               "reconciliation_review"
             ],
-            "recommended_action": "forage"
+            "recommended_action": "rest"
           }
         },
         {
           "cycle": 3,
           "choice": "rest",
-          "workspace_bias": -0.026775,
+          "workspace_bias": -0.024148,
           "workspace_broadcast_channels": [
             "novelty",
             "food"
@@ -17789,390 +18273,32 @@
             "danger",
             "conflict",
             "continuity",
-            "shelter",
+            "social",
             "temperature",
+            "shelter",
             "social"
           ],
           "conscious_report": {
-            "text": "Consciously accessible now: novelty, food. Carry-over still accessible: novelty. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+            "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
             "channels": [
               "novelty",
               "food"
             ],
-            "carry_over_channels": [
-              "novelty"
-            ],
+            "carry_over_channels": [],
             "suppressed_channels": [
               "maintenance",
               "stress",
               "danger",
               "conflict",
               "continuity",
-              "shelter",
+              "social",
               "temperature",
+              "shelter",
               "social"
             ],
             "leakage_free": true,
             "subject_state": {
-              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
-              "dominant_goal": "SURVIVAL",
-              "current_phase": "forming",
-              "active_commitments": [],
-              "dominant_workspace_contents": [
-                "novelty",
-                "food"
-              ],
-              "active_social_focus": [],
-              "status_flags": {
-                "threatened": false,
-                "repairing": false,
-                "overloaded": true,
-                "socially_destabilized": false,
-                "narrative_ambiguity_active": false,
-                "active_inquiry": false,
-                "inquiry_deferred": false,
-                "continuity_fragile": false,
-                "long_horizon_conflict": true
-              },
-              "priority_stack": [
-                {
-                  "label": "maintenance pressure",
-                  "weight": 1.0,
-                  "priority_type": "maintenance",
-                  "preferred_actions": [],
-                  "avoid_actions": [],
-                  "evidence": [
-                    "reconcile:conflict:identity_action:identity_tension:1",
-                    "reconcile:conflict:self_expectation_falsification:none:1",
-                    "reconcile:conflict:continuity_anchor:continuity:1"
-                  ]
-                },
-                {
-                  "label": "need:maintenance",
-                  "weight": 1.0,
-                  "priority_type": "need",
-                  "preferred_actions": [],
-                  "avoid_actions": [],
-                  "evidence": [
-                    "active homeostatic protection"
-                  ]
-                },
-                {
-                  "label": "repeated surprise burden",
-                  "weight": 1.0,
-                  "priority_type": "surprise_burden",
-                  "preferred_actions": [],
-                  "avoid_actions": [],
-                  "evidence": [
-                    "memory_surprise=15.102",
-                    "memory_surprise=15.134"
-                  ]
-                },
-                {
-                  "label": "unresolved maintenance discrepancy",
-                  "weight": 1.0,
-                  "priority_type": "maintenance_overload",
-                  "preferred_actions": [],
-                  "avoid_actions": [],
-                  "evidence": [
-                    "resource_guard",
-                    "reconcile:conflict:continuity_anchor:continuity:1"
-                  ]
-                }
-              ],
-              "slow_biases": {
-                "caution_bias": 0.5,
-                "threat_sensitivity": 0.5,
-                "trust_stance": 0.5,
-                "exploration_posture": 0.5,
-                "social_approach": 0.5,
-                "survival_weight": 0.72,
-                "social_weight": 0.5,
-                "exploration_weight": 0.46,
-                "maintenance_weight": 0.62,
-                "hierarchy_stability": 0.68,
-                "commitment_stability": 0.7,
-                "identity_rigidity": 0.58,
-                "plasticity": 0.42,
-                "continuity_resilience": 0.66,
-                "compute_conservatism": 0.485,
-                "process_attraction_decay": 0.45,
-                "compression_preference": 0.485,
-                "uncertainty_tolerance": 0.49
-              },
-              "cognitive_style_label": "balanced_adaptive",
-              "cognitive_style_evidence": [
-                "style remains balanced across compute, compression, and uncertainty",
-                "process attraction decayed slowly"
-              ],
-              "cognitive_style_continuity": 1.0,
-              "cognitive_style_history": [
-                "balanced_adaptive",
-                "balanced_adaptive",
-                "balanced_adaptive"
-              ],
-              "unresolved_tensions": [
-                {
-                  "label": "unresolved maintenance discrepancy",
-                  "tension_type": "maintenance_overload",
-                  "intensity": 1.08,
-                  "repair_target": "SURVIVAL",
-                  "evidence": [
-                    "resource_guard",
-                    "reconcile:conflict:continuity_anchor:continuity:1"
-                  ]
-                },
-                {
-                  "label": "maintenance pressure",
-                  "tension_type": "maintenance",
-                  "intensity": 1.0,
-                  "repair_target": "rest",
-                  "evidence": [
-                    "reconcile:conflict:identity_action:identity_tension:1",
-                    "reconcile:conflict:self_expectation_falsification:none:1",
-                    "reconcile:conflict:continuity_anchor:continuity:1"
-                  ]
-                },
-                {
-                  "label": "repeated surprise burden",
-                  "tension_type": "surprise_burden",
-                  "intensity": 1.0,
-                  "repair_target": "critical",
-                  "evidence": [
-                    "memory_surprise=15.102",
-                    "memory_surprise=15.134"
-                  ]
-                },
-                {
-                  "label": "unresolved self inconsistency",
-                  "tension_type": "identity_tension",
-                  "intensity": 0.73,
-                  "repair_target": "SURVIVAL",
-                  "evidence": [
-                    "none"
-                  ]
-                }
-              ],
-              "narrative_uncertainties": [],
-              "active_inquiries": [],
-              "deferred_inquiries": [],
-              "ambiguity_profile": {
-                "total_unknown_count": 0.0,
-                "decision_relevant_unknown_count": 0.0,
-                "competing_hypothesis_count": 0.0,
-                "latent_cause_count": 0.0,
-                "surface_cue_count": 0.0,
-                "interpretive_competition": 0.0,
-                "latent_cause_uncertainty_burden": 0.0,
-                "social_ambiguity_burden": 0.0,
-                "trust_ambiguity_burden": 0.0,
-                "environment_ambiguity_burden": 0.0,
-                "retained_uncertainty_burden": 0.0
-              },
-              "continuity_score": 0.813467,
-              "continuity_anchors": [
-                "ep-000002-scan",
-                "ep-000001-hide"
-              ]
-            },
-            "verification": {
-              "summary": "I am not actively verifying any prediction right now.",
-              "verification_motive": "",
-              "unresolved_reason": "",
-              "prioritized_target": null,
-              "active_targets": [],
-              "recent_outcomes": [],
-              "recent_evidence": [],
-              "recent_falsifications": [],
-              "counts": {
-                "active_targets": 0,
-                "archived_targets": 0,
-                "evidence_events": 0
-              }
-            },
-            "narrative_experiment": {
-              "summary": "No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
-              "chosen_action_reason": "",
-              "active_plans": [],
-              "deferred_plans": [],
-              "rejected_plans": [],
-              "candidates": [],
-              "predictions": [],
-              "discrimination_targets": []
-            },
-            "narrative_uncertainty": {
-              "summary": "",
-              "profile": {
-                "total_unknown_count": 0,
-                "decision_relevant_unknown_count": 0,
-                "competing_hypothesis_count": 0,
-                "latent_cause_count": 0,
-                "surface_cue_count": 0,
-                "interpretive_competition": 0.0,
-                "latent_cause_uncertainty_burden": 0.0,
-                "social_ambiguity_burden": 0.0,
-                "trust_ambiguity_burden": 0.0,
-                "environment_ambiguity_burden": 0.0,
-                "retained_uncertainty_burden": 0.0
-              },
-              "top_unknowns": [],
-              "hypotheses_by_unknown": {},
-              "surface_cues": [],
-              "latent_causes": []
-            },
-            "slow_learning": {
-              "state": {
-                "traits": {
-                  "caution_bias": 0.5,
-                  "threat_sensitivity": 0.5,
-                  "trust_stance": 0.5,
-                  "exploration_posture": 0.5,
-                  "social_approach": 0.5
-                },
-                "values": {
-                  "survival_weight": 0.72,
-                  "social_weight": 0.5,
-                  "exploration_weight": 0.46,
-                  "maintenance_weight": 0.62,
-                  "hierarchy_stability": 0.68
-                },
-                "identity": {
-                  "commitment_stability": 0.7,
-                  "identity_rigidity": 0.58,
-                  "plasticity": 0.42,
-                  "continuity_resilience": 0.66
-                },
-                "style": {
-                  "compute_conservatism": 0.485,
-                  "process_attraction_decay": 0.45,
-                  "compression_preference": 0.485,
-                  "uncertainty_tolerance": 0.49
-                },
-                "effort_allocation_history": [
-                  {
-                    "tick": 1,
-                    "action": "hide",
-                    "known_task": false,
-                    "compute_spend": 0.24,
-                    "uncertainty_load": 0.587904,
-                    "compression_pressure": 0.0,
-                    "process_pull": 0.4372
-                  },
-                  {
-                    "tick": 2,
-                    "action": "scan",
-                    "known_task": false,
-                    "compute_spend": 0.66,
-                    "uncertainty_load": 0.46188,
-                    "compression_pressure": 0.0,
-                    "process_pull": 0.8
-                  },
-                  {
-                    "tick": 3,
-                    "action": "rest",
-                    "known_task": false,
-                    "compute_spend": 0.18,
-                    "uncertainty_load": 0.580785,
-                    "compression_pressure": 0.0,
-                    "process_pull": 0.8
-                  }
-                ],
-                "style_history": [
-                  {
-                    "tick": 1,
-                    "label": "balanced_adaptive",
-                    "continuity": 0.0
-                  },
-                  {
-                    "tick": 2,
-                    "label": "balanced_adaptive",
-                    "continuity": 1.0
-                  },
-                  {
-                    "tick": 3,
-                    "label": "balanced_adaptive",
-                    "continuity": 1.0
-                  }
-                ],
-                "last_processed_tick": 0,
-                "sleep_cycles": 0,
-                "last_summary": ""
-              },
-              "latest_audit": null,
-              "recent_explanations": [],
-              "style_snapshot": {
-                "label": "balanced_adaptive",
-                "continuity": 1.0,
-                "known_task_compute": 0.0,
-                "unknown_task_compute": 0.36,
-                "selective_gap": 0.36,
-                "style_surface": {
-                  "compute_conservatism": 0.485,
-                  "process_attraction_decay": 0.45,
-                  "compression_preference": 0.485,
-                  "uncertainty_tolerance": 0.49
-                },
-                "evidence": [
-                  "style remains balanced across compute, compression, and uncertainty",
-                  "process attraction decayed slowly"
-                ]
-              }
-            }
-          },
-          "semantic_report": {
-            "semantic_leakage_free": true,
-            "matched_aliases": {}
-          },
-          "workspace_maintenance_priority": {
-            "priority_gain": 0.35,
-            "active_tasks": [
-              "energy_recovery",
-              "continuity_guard",
-              "reconciliation_review"
-            ],
-            "recommended_action": "forage"
-          }
-        },
-        {
-          "cycle": 4,
-          "choice": "rest",
-          "workspace_bias": -0.023706,
-          "workspace_broadcast_channels": [
-            "novelty",
-            "food"
-          ],
-          "workspace_suppressed_channels": [
-            "maintenance",
-            "stress",
-            "danger",
-            "conflict",
-            "continuity",
-            "shelter",
-            "temperature",
-            "social"
-          ],
-          "conscious_report": {
-            "text": "Consciously accessible now: novelty, food. Carry-over still accessible: novelty. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 8 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
-            "channels": [
-              "novelty",
-              "food"
-            ],
-            "carry_over_channels": [
-              "novelty"
-            ],
-            "suppressed_channels": [
-              "maintenance",
-              "stress",
-              "danger",
-              "conflict",
-              "continuity",
-              "shelter",
-              "temperature",
-              "social"
-            ],
-            "leakage_free": true,
-            "subject_state": {
-              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: unresolved maintenance discrepancy, maintenance pressure. Current style: balanced adaptive. Anchors held: ep-000002-scan, ep-000001-hide. Current narrative phase: forming. 8 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
               "dominant_goal": "SURVIVAL",
               "current_phase": "forming",
               "active_commitments": [],
@@ -18200,7 +18326,7 @@
                   "preferred_actions": [],
                   "avoid_actions": [],
                   "evidence": [
-                    "reconcile:conflict:continuity_anchor:continuity_instability:1",
+                    "reconcile:conflict:identity_action:identity_tension:1",
                     "reconcile:conflict:self_expectation_falsification:none:1",
                     "reconcile:conflict:continuity_anchor:continuity:1"
                   ]
@@ -18222,19 +18348,17 @@
                   "preferred_actions": [],
                   "avoid_actions": [],
                   "evidence": [
-                    "memory_surprise=15.102",
-                    "memory_surprise=15.134"
+                    "memory_surprise=15.102"
                   ]
                 },
                 {
-                  "label": "unresolved maintenance discrepancy",
-                  "weight": 1.0,
-                  "priority_type": "maintenance_overload",
+                  "label": "unresolved self inconsistency",
+                  "weight": 0.73,
+                  "priority_type": "identity_tension",
                   "preferred_actions": [],
                   "avoid_actions": [],
                   "evidence": [
-                    "resource_guard",
-                    "reconcile:conflict:continuity_anchor:continuity:1"
+                    "none"
                   ]
                 }
               ],
@@ -18253,10 +18377,10 @@
                 "identity_rigidity": 0.58,
                 "plasticity": 0.42,
                 "continuity_resilience": 0.66,
-                "compute_conservatism": 0.485,
-                "process_attraction_decay": 0.425,
-                "compression_preference": 0.485,
-                "uncertainty_tolerance": 0.47
+                "compute_conservatism": 0.5,
+                "process_attraction_decay": 0.45,
+                "compression_preference": 0.5,
+                "uncertainty_tolerance": 0.48
               },
               "cognitive_style_label": "balanced_adaptive",
               "cognitive_style_evidence": [
@@ -18267,27 +18391,16 @@
               "cognitive_style_history": [
                 "balanced_adaptive",
                 "balanced_adaptive",
-                "balanced_adaptive",
                 "balanced_adaptive"
               ],
               "unresolved_tensions": [
-                {
-                  "label": "unresolved maintenance discrepancy",
-                  "tension_type": "maintenance_overload",
-                  "intensity": 1.08,
-                  "repair_target": "SURVIVAL",
-                  "evidence": [
-                    "resource_guard",
-                    "reconcile:conflict:continuity_anchor:continuity:1"
-                  ]
-                },
                 {
                   "label": "maintenance pressure",
                   "tension_type": "maintenance",
                   "intensity": 1.0,
                   "repair_target": "rest",
                   "evidence": [
-                    "reconcile:conflict:continuity_anchor:continuity_instability:1",
+                    "reconcile:conflict:identity_action:identity_tension:1",
                     "reconcile:conflict:self_expectation_falsification:none:1",
                     "reconcile:conflict:continuity_anchor:continuity:1"
                   ]
@@ -18298,17 +18411,26 @@
                   "intensity": 1.0,
                   "repair_target": "critical",
                   "evidence": [
-                    "memory_surprise=15.102",
-                    "memory_surprise=15.134"
+                    "memory_surprise=15.102"
                   ]
                 },
                 {
                   "label": "unresolved self inconsistency",
                   "tension_type": "identity_tension",
-                  "intensity": 0.88,
+                  "intensity": 0.73,
                   "repair_target": "SURVIVAL",
                   "evidence": [
                     "none"
+                  ]
+                },
+                {
+                  "label": "continuity-relevant tension",
+                  "tension_type": "continuity_instability",
+                  "intensity": 0.6632,
+                  "repair_target": "critical",
+                  "evidence": [
+                    "continuity_score_drop",
+                    "ep-000001-hide"
                   ]
                 }
               ],
@@ -18328,9 +18450,8 @@
                 "environment_ambiguity_burden": 0.0,
                 "retained_uncertainty_burden": 0.0
               },
-              "continuity_score": 0.7468,
+              "continuity_score": 0.680133,
               "continuity_anchors": [
-                "ep-000002-scan",
                 "ep-000001-hide"
               ]
             },
@@ -18402,10 +18523,10 @@
                   "continuity_resilience": 0.66
                 },
                 "style": {
-                  "compute_conservatism": 0.485,
-                  "process_attraction_decay": 0.425,
-                  "compression_preference": 0.485,
-                  "uncertainty_tolerance": 0.47
+                  "compute_conservatism": 0.5,
+                  "process_attraction_decay": 0.45,
+                  "compression_preference": 0.5,
+                  "uncertainty_tolerance": 0.48
                 },
                 "effort_allocation_history": [
                   {
@@ -18419,9 +18540,9 @@
                   },
                   {
                     "tick": 2,
-                    "action": "scan",
+                    "action": "rest",
                     "known_task": false,
-                    "compute_spend": 0.66,
+                    "compute_spend": 0.18,
                     "uncertainty_load": 0.46188,
                     "compression_pressure": 0.0,
                     "process_pull": 0.8
@@ -18431,16 +18552,368 @@
                     "action": "rest",
                     "known_task": false,
                     "compute_spend": 0.18,
-                    "uncertainty_load": 0.580785,
+                    "uncertainty_load": 0.420785,
+                    "compression_pressure": 0.0,
+                    "process_pull": 0.8
+                  }
+                ],
+                "style_history": [
+                  {
+                    "tick": 1,
+                    "label": "balanced_adaptive",
+                    "continuity": 0.0
+                  },
+                  {
+                    "tick": 2,
+                    "label": "balanced_adaptive",
+                    "continuity": 1.0
+                  },
+                  {
+                    "tick": 3,
+                    "label": "balanced_adaptive",
+                    "continuity": 1.0
+                  }
+                ],
+                "last_processed_tick": 0,
+                "sleep_cycles": 0,
+                "last_summary": ""
+              },
+              "latest_audit": null,
+              "recent_explanations": [],
+              "style_snapshot": {
+                "label": "balanced_adaptive",
+                "continuity": 1.0,
+                "known_task_compute": 0.0,
+                "unknown_task_compute": 0.2,
+                "selective_gap": 0.2,
+                "style_surface": {
+                  "compute_conservatism": 0.5,
+                  "process_attraction_decay": 0.45,
+                  "compression_preference": 0.5,
+                  "uncertainty_tolerance": 0.48
+                },
+                "evidence": [
+                  "style remains balanced across compute, compression, and uncertainty",
+                  "process attraction decayed slowly"
+                ]
+              }
+            }
+          },
+          "semantic_report": {
+            "semantic_leakage_free": true,
+            "matched_aliases": {}
+          },
+          "workspace_maintenance_priority": {
+            "priority_gain": 0.35,
+            "active_tasks": [
+              "energy_recovery",
+              "continuity_guard",
+              "reconciliation_review"
+            ],
+            "recommended_action": "forage"
+          }
+        },
+        {
+          "cycle": 4,
+          "choice": "rest",
+          "workspace_bias": -0.024897,
+          "workspace_broadcast_channels": [
+            "novelty",
+            "food"
+          ],
+          "workspace_suppressed_channels": [
+            "maintenance",
+            "stress",
+            "conflict",
+            "continuity",
+            "danger",
+            "social",
+            "shelter",
+            "temperature"
+          ],
+          "conscious_report": {
+            "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+            "channels": [
+              "novelty",
+              "food"
+            ],
+            "carry_over_channels": [],
+            "suppressed_channels": [
+              "maintenance",
+              "stress",
+              "conflict",
+              "continuity",
+              "danger",
+              "social",
+              "shelter",
+              "temperature"
+            ],
+            "leakage_free": true,
+            "subject_state": {
+              "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+              "dominant_goal": "SURVIVAL",
+              "current_phase": "forming",
+              "active_commitments": [],
+              "dominant_workspace_contents": [
+                "novelty",
+                "food"
+              ],
+              "active_social_focus": [],
+              "status_flags": {
+                "threatened": false,
+                "repairing": false,
+                "overloaded": true,
+                "socially_destabilized": false,
+                "narrative_ambiguity_active": false,
+                "active_inquiry": false,
+                "inquiry_deferred": false,
+                "continuity_fragile": true,
+                "long_horizon_conflict": true
+              },
+              "priority_stack": [
+                {
+                  "label": "maintenance pressure",
+                  "weight": 1.0,
+                  "priority_type": "maintenance",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "reconcile:conflict:identity_action:identity_tension:1",
+                    "reconcile:conflict:self_expectation_falsification:none:1",
+                    "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
+                  ]
+                },
+                {
+                  "label": "need:maintenance",
+                  "weight": 1.0,
+                  "priority_type": "need",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "active homeostatic protection"
+                  ]
+                },
+                {
+                  "label": "repeated surprise burden",
+                  "weight": 1.0,
+                  "priority_type": "surprise_burden",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "memory_surprise=15.102"
+                  ]
+                },
+                {
+                  "label": "unresolved self inconsistency",
+                  "weight": 0.88,
+                  "priority_type": "identity_tension",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "none"
+                  ]
+                }
+              ],
+              "slow_biases": {
+                "caution_bias": 0.5,
+                "threat_sensitivity": 0.5,
+                "trust_stance": 0.5,
+                "exploration_posture": 0.5,
+                "social_approach": 0.5,
+                "survival_weight": 0.72,
+                "social_weight": 0.5,
+                "exploration_weight": 0.46,
+                "maintenance_weight": 0.62,
+                "hierarchy_stability": 0.68,
+                "commitment_stability": 0.7,
+                "identity_rigidity": 0.58,
+                "plasticity": 0.42,
+                "continuity_resilience": 0.66,
+                "compute_conservatism": 0.525,
+                "process_attraction_decay": 0.465,
+                "compression_preference": 0.5,
+                "uncertainty_tolerance": 0.48
+              },
+              "cognitive_style_label": "balanced_adaptive",
+              "cognitive_style_evidence": [
+                "style remains balanced across compute, compression, and uncertainty"
+              ],
+              "cognitive_style_continuity": 1.0,
+              "cognitive_style_history": [
+                "balanced_adaptive",
+                "balanced_adaptive",
+                "balanced_adaptive",
+                "balanced_adaptive"
+              ],
+              "unresolved_tensions": [
+                {
+                  "label": "maintenance pressure",
+                  "tension_type": "maintenance",
+                  "intensity": 1.0,
+                  "repair_target": "rest",
+                  "evidence": [
+                    "reconcile:conflict:identity_action:identity_tension:1",
+                    "reconcile:conflict:self_expectation_falsification:none:1",
+                    "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
+                  ]
+                },
+                {
+                  "label": "repeated surprise burden",
+                  "tension_type": "surprise_burden",
+                  "intensity": 1.0,
+                  "repair_target": "critical",
+                  "evidence": [
+                    "memory_surprise=15.102"
+                  ]
+                },
+                {
+                  "label": "unresolved self inconsistency",
+                  "tension_type": "identity_tension",
+                  "intensity": 0.88,
+                  "repair_target": "SURVIVAL",
+                  "evidence": [
+                    "none"
+                  ]
+                },
+                {
+                  "label": "continuity-relevant tension",
+                  "tension_type": "continuity_instability",
+                  "intensity": 0.8132,
+                  "repair_target": "critical",
+                  "evidence": [
+                    "continuity_score_drop",
+                    "ep-000001-hide"
+                  ]
+                }
+              ],
+              "narrative_uncertainties": [],
+              "active_inquiries": [],
+              "deferred_inquiries": [],
+              "ambiguity_profile": {
+                "total_unknown_count": 0.0,
+                "decision_relevant_unknown_count": 0.0,
+                "competing_hypothesis_count": 0.0,
+                "latent_cause_count": 0.0,
+                "surface_cue_count": 0.0,
+                "interpretive_competition": 0.0,
+                "latent_cause_uncertainty_burden": 0.0,
+                "social_ambiguity_burden": 0.0,
+                "trust_ambiguity_burden": 0.0,
+                "environment_ambiguity_burden": 0.0,
+                "retained_uncertainty_burden": 0.0
+              },
+              "continuity_score": 0.6468,
+              "continuity_anchors": [
+                "ep-000001-hide"
+              ]
+            },
+            "verification": {
+              "summary": "I am not actively verifying any prediction right now.",
+              "verification_motive": "",
+              "unresolved_reason": "",
+              "prioritized_target": null,
+              "active_targets": [],
+              "recent_outcomes": [],
+              "recent_evidence": [],
+              "recent_falsifications": [],
+              "counts": {
+                "active_targets": 0,
+                "archived_targets": 0,
+                "evidence_events": 0
+              }
+            },
+            "narrative_experiment": {
+              "summary": "No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+              "chosen_action_reason": "",
+              "active_plans": [],
+              "deferred_plans": [],
+              "rejected_plans": [],
+              "candidates": [],
+              "predictions": [],
+              "discrimination_targets": []
+            },
+            "narrative_uncertainty": {
+              "summary": "",
+              "profile": {
+                "total_unknown_count": 0,
+                "decision_relevant_unknown_count": 0,
+                "competing_hypothesis_count": 0,
+                "latent_cause_count": 0,
+                "surface_cue_count": 0,
+                "interpretive_competition": 0.0,
+                "latent_cause_uncertainty_burden": 0.0,
+                "social_ambiguity_burden": 0.0,
+                "trust_ambiguity_burden": 0.0,
+                "environment_ambiguity_burden": 0.0,
+                "retained_uncertainty_burden": 0.0
+              },
+              "top_unknowns": [],
+              "hypotheses_by_unknown": {},
+              "surface_cues": [],
+              "latent_causes": []
+            },
+            "slow_learning": {
+              "state": {
+                "traits": {
+                  "caution_bias": 0.5,
+                  "threat_sensitivity": 0.5,
+                  "trust_stance": 0.5,
+                  "exploration_posture": 0.5,
+                  "social_approach": 0.5
+                },
+                "values": {
+                  "survival_weight": 0.72,
+                  "social_weight": 0.5,
+                  "exploration_weight": 0.46,
+                  "maintenance_weight": 0.62,
+                  "hierarchy_stability": 0.68
+                },
+                "identity": {
+                  "commitment_stability": 0.7,
+                  "identity_rigidity": 0.58,
+                  "plasticity": 0.42,
+                  "continuity_resilience": 0.66
+                },
+                "style": {
+                  "compute_conservatism": 0.525,
+                  "process_attraction_decay": 0.465,
+                  "compression_preference": 0.5,
+                  "uncertainty_tolerance": 0.48
+                },
+                "effort_allocation_history": [
+                  {
+                    "tick": 1,
+                    "action": "hide",
+                    "known_task": false,
+                    "compute_spend": 0.24,
+                    "uncertainty_load": 0.587904,
+                    "compression_pressure": 0.0,
+                    "process_pull": 0.4372
+                  },
+                  {
+                    "tick": 2,
+                    "action": "rest",
+                    "known_task": false,
+                    "compute_spend": 0.18,
+                    "uncertainty_load": 0.46188,
+                    "compression_pressure": 0.0,
+                    "process_pull": 0.8
+                  },
+                  {
+                    "tick": 3,
+                    "action": "rest",
+                    "known_task": false,
+                    "compute_spend": 0.18,
+                    "uncertainty_load": 0.420785,
                     "compression_pressure": 0.0,
                     "process_pull": 0.8
                   },
                   {
                     "tick": 4,
                     "action": "rest",
-                    "known_task": false,
+                    "known_task": true,
                     "compute_spend": 0.18,
-                    "uncertainty_load": 0.609016,
+                    "uncertainty_load": 0.449016,
                     "compression_pressure": 0.0,
                     "process_pull": 0.8
                   }
@@ -18476,18 +18949,17 @@
               "style_snapshot": {
                 "label": "balanced_adaptive",
                 "continuity": 1.0,
-                "known_task_compute": 0.0,
-                "unknown_task_compute": 0.315,
-                "selective_gap": 0.315,
+                "known_task_compute": 0.18,
+                "unknown_task_compute": 0.2,
+                "selective_gap": 0.02,
                 "style_surface": {
-                  "compute_conservatism": 0.485,
-                  "process_attraction_decay": 0.425,
-                  "compression_preference": 0.485,
-                  "uncertainty_tolerance": 0.47
+                  "compute_conservatism": 0.525,
+                  "process_attraction_decay": 0.465,
+                  "compression_preference": 0.5,
+                  "uncertainty_tolerance": 0.48
                 },
                 "evidence": [
-                  "style remains balanced across compute, compression, and uncertainty",
-                  "process attraction decayed slowly"
+                  "style remains balanced across compute, compression, and uncertainty"
                 ]
               }
             }
@@ -18500,6 +18972,7 @@
             "priority_gain": 0.35,
             "active_tasks": [
               "energy_recovery",
+              "continuity_guard",
               "reconciliation_review"
             ],
             "recommended_action": "forage"
@@ -18849,7 +19322,7 @@
                 },
                 {
                   "label": "maintenance pressure",
-                  "weight": 0.819868,
+                  "weight": 0.804988,
                   "priority_type": "maintenance",
                   "preferred_actions": [],
                   "avoid_actions": [],
@@ -18861,7 +19334,7 @@
                 },
                 {
                   "label": "need:maintenance",
-                  "weight": 0.819868,
+                  "weight": 0.804988,
                   "priority_type": "need",
                   "preferred_actions": [],
                   "avoid_actions": [],
@@ -18928,7 +19401,7 @@
                 {
                   "label": "maintenance pressure",
                   "tension_type": "maintenance",
-                  "intensity": 0.819868,
+                  "intensity": 0.804988,
                   "repair_target": "rest",
                   "evidence": [
                     "reconcile:conflict:continuity_anchor:continuity:1",
@@ -19159,7 +19632,7 @@
                 },
                 {
                   "label": "maintenance pressure",
-                  "weight": 0.815927,
+                  "weight": 0.804808,
                   "priority_type": "maintenance",
                   "preferred_actions": [],
                   "avoid_actions": [],
@@ -19171,7 +19644,7 @@
                 },
                 {
                   "label": "need:maintenance",
-                  "weight": 0.815927,
+                  "weight": 0.804808,
                   "priority_type": "need",
                   "preferred_actions": [],
                   "avoid_actions": [],
@@ -19234,7 +19707,7 @@
                 {
                   "label": "maintenance pressure",
                   "tension_type": "maintenance",
-                  "intensity": 0.815927,
+                  "intensity": 0.804808,
                   "repair_target": "rest",
                   "evidence": [
                     "reconcile:conflict:identity_action:identity_tension:1",
@@ -19492,8 +19965,19 @@
                   ]
                 },
                 {
+                  "label": "continuity-relevant tension",
+                  "weight": 0.8132,
+                  "priority_type": "continuity_instability",
+                  "preferred_actions": [],
+                  "avoid_actions": [],
+                  "evidence": [
+                    "continuity_score_drop",
+                    "ep-000001-hide"
+                  ]
+                },
+                {
                   "label": "maintenance pressure",
-                  "weight": 0.816023,
+                  "weight": 0.804852,
                   "priority_type": "maintenance",
                   "preferred_actions": [],
                   "avoid_actions": [],
@@ -19501,16 +19985,6 @@
                     "reconcile:conflict:identity_action:identity_tension:1",
                     "reconcile:conflict:self_expectation_falsification:none:1",
                     "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
-                  ]
-                },
-                {
-                  "label": "need:maintenance",
-                  "weight": 0.816023,
-                  "priority_type": "need",
-                  "preferred_actions": [],
-                  "avoid_actions": [],
-                  "evidence": [
-                    "active homeostatic protection"
                   ]
                 }
               ],
@@ -19565,17 +20039,6 @@
                   ]
                 },
                 {
-                  "label": "maintenance pressure",
-                  "tension_type": "maintenance",
-                  "intensity": 0.816023,
-                  "repair_target": "rest",
-                  "evidence": [
-                    "reconcile:conflict:identity_action:identity_tension:1",
-                    "reconcile:conflict:self_expectation_falsification:none:1",
-                    "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
-                  ]
-                },
-                {
                   "label": "continuity-relevant tension",
                   "tension_type": "continuity_instability",
                   "intensity": 0.8132,
@@ -19583,6 +20046,17 @@
                   "evidence": [
                     "continuity_score_drop",
                     "ep-000001-hide"
+                  ]
+                },
+                {
+                  "label": "maintenance pressure",
+                  "tension_type": "maintenance",
+                  "intensity": 0.804852,
+                  "repair_target": "rest",
+                  "evidence": [
+                    "reconcile:conflict:identity_action:identity_tension:1",
+                    "reconcile:conflict:self_expectation_falsification:none:1",
+                    "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
                   ]
                 }
               ],

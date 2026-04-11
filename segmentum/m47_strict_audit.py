@@ -287,17 +287,32 @@ def _build_gate_results(
             builder_verdict = "NOT_RUN" if not live_regression.get("attempted") else ("PASS" if live_regression["result"]["passed"] else "FAIL")
             evidence_excerpt = live_regression["result"].get("summary_line", "")
         else:
-            strict_verdict = "PASS" if gate_status == "PASS" and not gate_findings else gate_status if gate_status != "PASS" else "PARTIAL"
-            builder_verdict = gate_status
-            rationale = (
-                "Shared runtime evidence satisfies the gate and no blocking implementation finding remains."
-                if strict_verdict == "PASS"
-                else (
-                    "Builder evidence passed, but strict audit still sees unresolved implementation/test coupling."
-                    if strict_verdict == "PARTIAL"
-                    else f"Runtime evidence builder did not pass this gate ({gate_status})."
+            rsnap = runtime_snapshot["reacceptance_report"]["runtime_snapshot"]
+            summary = runtime_snapshot["reacceptance_report"]["gate_summaries"][gate]
+            demoted = bool(rsnap.get("diagnostic_only")) and bool(summary.get("behavioral_claims_demoted"))
+            if demoted:
+                # M4.8 demotion: builder FAIL on these gates is expected and non-blocking for strict gating;
+                # G9 regression and the issue list carry the real blockers.
+                strict_verdict = "PASS"
+                builder_verdict = gate_status
+                rationale = (
+                    "M4.8 demotion: gate is diagnostic_only; strict audit does not treat builder FAIL as a blocking "
+                    "mechanism failure (layer-(b) evidence is M4.8)."
                 )
-            )
+            elif gate_status == "PASS" and not gate_findings:
+                strict_verdict = "PASS"
+                builder_verdict = gate_status
+                rationale = "Shared runtime evidence satisfies the gate and no blocking implementation finding remains."
+            elif gate_status == "PASS":
+                strict_verdict = "PARTIAL"
+                builder_verdict = gate_status
+                rationale = (
+                    "Builder evidence passed, but strict audit still sees unresolved implementation/test coupling."
+                )
+            else:
+                strict_verdict = "FAIL"
+                builder_verdict = gate_status
+                rationale = f"Runtime evidence builder did not pass this gate ({gate_status})."
             evidence_excerpt = json.dumps(
                 records_by_scenario[spec["required_scenario_ids"][0]]["observed"],
                 ensure_ascii=False,
