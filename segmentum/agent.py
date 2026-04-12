@@ -869,9 +869,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
             current_mood=self.agent_state_vector.recent_mood_baseline,
             k=k,
         )
+        candidate_ids = {c.entry_id for c in result.candidates[:k]}
         projected_by_id = {
             str(payload.get("episode_id", "")): payload
-            for payload in self.memory_store.to_legacy_episodes()
+            for payload in self.memory_store.to_legacy_episodes(entry_ids=candidate_ids)
         }
         similar_memories: list[dict[str, object]] = []
         for candidate in result.candidates[:k]:

@@ -972,9 +972,10 @@ class MemoryStore:
         store.replace_legacy_group(episodes)
         return store
 
-    def to_legacy_episodes(self) -> list[dict[str, object]]:
+    def to_legacy_episodes(self, *, entry_ids: set[str] | None = None) -> list[dict[str, object]]:
         payloads: list[dict[str, object]] = []
-        for entry in self.entries:
+        entries = self.entries if entry_ids is None else [e for e in self.entries if e.id in entry_ids]
+        for entry in entries:
             template = _legacy_template(entry)
             extras = _legacy_unmapped(entry)
             action = entry.anchor_slots.get("action") or str(
@@ -1054,7 +1055,7 @@ class MemoryStore:
                 "replay_second_pass_error": entry.replay_second_pass_error,
                 "salience_delta": entry.salience_delta,
                 "retention_adjustment": entry.retention_adjustment,
-                "compression_metadata": deepcopy(entry.compression_metadata or {}),
+                "compression_metadata": dict(entry.compression_metadata or {}),
             }
             for key, value in extras.items():
                 if key in LEGACY_MAPPED_KEYS:

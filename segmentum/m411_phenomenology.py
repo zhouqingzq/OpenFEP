@@ -294,7 +294,7 @@ def _build_budget_competition_event(
     if len(ranked) < 2:
         return None
     attention_budget = float(
-        runtime.agent.long_term_memory._episode_attention_budget(
+        runtime.agent.long_term_memory.episode_attention_budget(
             {"body_state": runtime.agent._current_body_state()}
         )
     )

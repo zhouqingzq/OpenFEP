@@ -444,16 +444,15 @@ class LongTermMemory:
         if self.memory_store is None:
             return
         legacy_ids = [str(payload.get("episode_id", "")) for payload in self.episodes]
-        store_projection = self.memory_store.to_legacy_episodes()
-        projected_ids = [str(payload.get("episode_id", "")) for payload in store_projection]
-        if legacy_ids != projected_ids:
+        store_ids = [entry.id for entry in self.memory_store.entries]
+        if legacy_ids != store_ids:
             raise RuntimeError("memory store / legacy episode projection diverged")
 
     def _commit_episode_projection(
         self,
         episodes: list[dict[str, object]],
     ) -> None:
-        staged_episodes = [deepcopy(payload) for payload in episodes[-self.max_episodes :]]
+        staged_episodes = list(episodes[-self.max_episodes :])
         staged_store = self._build_memory_store_snapshot(staged_episodes)
         previous_episodes = self.episodes
         previous_patterns = self.semantic_patterns
@@ -466,7 +465,7 @@ class LongTermMemory:
                 if existing is None:
                     preserved_entries.append(staged_entry)
                     continue
-                existing.__dict__.update(deepcopy(staged_entry.__dict__))
+                existing.__dict__.update(staged_entry.__dict__)
                 preserved_entries.append(existing)
             staged_store.entries = preserved_entries
         try:
@@ -565,7 +564,7 @@ class LongTermMemory:
         )
         payload = episode.to_dict()
         self._initialize_episode_payload(payload)
-        staged_episodes = [deepcopy(item) for item in self.episodes]
+        staged_episodes = list(self.episodes)
         staged_episodes.append(payload)
         self._commit_episode_projection(staged_episodes)
         stored_payload = next(
@@ -667,7 +666,7 @@ class LongTermMemory:
         merged_payload = self._find_merge_target(episode)
         if merged_payload is not None:
             merged_episode_id = str(merged_payload.get("episode_id", ""))
-            staged_episodes = [deepcopy(item) for item in self.episodes]
+            staged_episodes = list(self.episodes)
             staged_payload = next(
                 (
                     item
@@ -703,7 +702,7 @@ class LongTermMemory:
 
         payload = episode.to_dict()
         self._initialize_episode_payload(payload, gate)
-        staged_episodes = [deepcopy(item) for item in self.episodes]
+        staged_episodes = list(self.episodes)
         staged_episodes.append(payload)
         self._commit_episode_projection(staged_episodes)
         return MemoryDecision(
@@ -793,9 +792,10 @@ class LongTermMemory:
             agent_state=self.agent_state_vector,
             cognitive_style=self.memory_cognitive_style,
         )
+        candidate_ids = {c.entry_id for c in result.candidates[:k]}
         projected_by_id = {
             str(payload.get("episode_id", "")): payload
-            for payload in store.to_legacy_episodes()
+            for payload in store.to_legacy_episodes(entry_ids=candidate_ids)
         }
         bridged: list[dict[str, object]] = []
         for candidate in result.candidates[:k]:
@@ -1831,7 +1831,7 @@ class LongTermMemory:
         surprise = _clamp(float(payload.get("total_surprise", payload.get("weighted_surprise", 0.0))))
         return _clamp((surprise * 0.45) + (stress * 0.25) + (fatigue * 0.15) + (energy_debt * 0.10) + (thermal * 0.20))
 
-    def _episode_attention_budget(self, payload: dict[str, object]) -> float:
+    def episode_attention_budget(self, payload: dict[str, object]) -> float:
         explicit = payload.get("available_attention_budget", payload.get("attention_budget"))
         if explicit is not None:
             return max(0.0, _coerce_float(explicit, 0.0))
@@ -1855,7 +1855,7 @@ class LongTermMemory:
                 prediction_error=prediction_error,
                 surprise=surprise,
                 arousal=arousal,
-                attention_budget=self._episode_attention_budget(payload),
+                attention_budget=self.episode_attention_budget(payload),
                 requested_budget=requested,
                 raw_drive_total=payload.get("attention_budget_raw_drive_total")
                 if isinstance(payload.get("attention_budget_raw_drive_total"), (int, float))
