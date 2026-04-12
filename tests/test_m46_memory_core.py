@@ -9,6 +9,7 @@ from segmentum.memory_consolidation import (
     ReconsolidationUpdateType,
     ReconstructionConfig,
     compress_episodic_cluster_to_semantic_skeleton,
+    extract_patterns,
     maybe_reconstruct,
     reconsolidate,
     validate_inference,
@@ -466,6 +467,74 @@ class TestM46MemoryCore(unittest.TestCase):
         self.assertEqual(metadata["lineage_type"], "episodic_compression")
         self.assertEqual(metadata["support_entry_ids"], [entry.id for entry in entries])
         self.assertTrue(metadata["stable_structure"])
+
+    def test_extract_patterns_bridges_semantic_neighbors_with_detail_intrusion_room(self) -> None:
+        group_a = [
+            _entry(
+                entry_id="repair-a",
+                content="I repaired the mentor promise in the archive after a quiet check-in.",
+                semantic_tags=["mentor", "promise", "repair"],
+                context_tags=["archive", "repair"],
+                created_at=1,
+                last_accessed=11,
+                support_count=2,
+                compression_metadata={"state_vector": [0.10, 0.15, 0.90]},
+                anchor_slots={"action": "repair_promise", "outcome": "trust_restored", "agents": "lin"},
+            ),
+            _entry(
+                entry_id="repair-b",
+                content="I restored the mentor promise in the lab with a careful apology.",
+                semantic_tags=["mentor", "promise", "repair"],
+                context_tags=["lab", "repair"],
+                created_at=2,
+                last_accessed=12,
+                support_count=2,
+                compression_metadata={"state_vector": [0.18, 0.20, 0.84]},
+                anchor_slots={"action": "repair_promise", "outcome": "trust_restored", "agents": "lin"},
+            ),
+        ]
+        group_b = [
+            _entry(
+                entry_id="betrayal-a",
+                content="The mentor promise kept breaking after a field betrayal, leaving a scar.",
+                semantic_tags=["mentor", "promise", "betrayal"],
+                context_tags=["field", "betrayal"],
+                created_at=3,
+                last_accessed=13,
+                support_count=2,
+                compression_metadata={"state_vector": [0.72, 0.66, 0.24]},
+                anchor_slots={"action": "carry_betrayal", "outcome": "trust_fragile", "agents": "lin"},
+            ),
+            _entry(
+                entry_id="betrayal-b",
+                content="A second betrayal around the mentor promise made the same pattern feel familiar.",
+                semantic_tags=["mentor", "promise", "betrayal"],
+                context_tags=["field", "memory"],
+                created_at=4,
+                last_accessed=14,
+                support_count=2,
+                compression_metadata={"state_vector": [0.78, 0.70, 0.18]},
+                anchor_slots={"action": "carry_betrayal", "outcome": "trust_fragile", "agents": "lin"},
+            ),
+        ]
+        store = MemoryStore(entries=[*group_a, *group_b])
+
+        extracted = extract_patterns(store, minimum_support=3)
+
+        cross_group = [
+            entry
+            for entry in extracted
+            if entry.centroid
+            and {"repair-a", "repair-b"} & set(entry.support_ids or [])
+            and {"betrayal-a", "betrayal-b"} & set(entry.support_ids or [])
+        ]
+        self.assertTrue(cross_group)
+        semantic = next(
+            entry for entry in cross_group if entry.memory_class is MemoryClass.SEMANTIC
+        )
+        self.assertEqual(semantic.source_type, SourceType.EXPERIENCE)
+        self.assertTrue(semantic.support_ids)
+        self.assertGreater(float(semantic.residual_norm_mean or 0.0), 0.05)
 
 
 if __name__ == "__main__":

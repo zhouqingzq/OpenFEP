@@ -151,6 +151,7 @@ LEGACY_MAPPED_KEYS = {
     "fep_prediction_error",
     "surprise",
     "attention_budget_total",
+    "attention_budget_requested",
     "attention_budget_granted",
     "attention_budget_denied",
     "centroid",
@@ -233,6 +234,7 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
         "fep_prediction_error",
         "surprise",
         "attention_budget_total",
+        "attention_budget_requested",
         "attention_budget_granted",
         "attention_budget_denied",
     )
@@ -1040,6 +1042,7 @@ class MemoryStore:
                 ),
                 "surprise": dict(entry.compression_metadata or {}).get("surprise", entry.salience),
                 "attention_budget_total": dict(entry.compression_metadata or {}).get("attention_budget_total"),
+                "attention_budget_requested": dict(entry.compression_metadata or {}).get("attention_budget_requested"),
                 "attention_budget_granted": dict(entry.compression_metadata or {}).get("attention_budget_granted"),
                 "attention_budget_denied": dict(entry.compression_metadata or {}).get("attention_budget_denied"),
                 "centroid": list(entry.centroid) if entry.centroid is not None else None,

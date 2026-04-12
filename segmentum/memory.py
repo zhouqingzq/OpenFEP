@@ -2140,6 +2140,9 @@ class LongTermMemory:
             encoding_audit.get("attention_budget_raw_drive_total", 0.0)
         )
         payload["attention_budget_total"] = float(encoding_audit.get("attention_budget_total", 0.0))
+        payload["attention_budget_requested"] = float(
+            encoding_audit.get("attention_budget_requested", 0.0)
+        )
         payload["attention_budget_granted"] = float(encoding_audit.get("attention_budget_granted", 0.0))
         payload["attention_budget_denied"] = float(encoding_audit.get("attention_budget_denied", 0.0))
         payload["m410_encoding_dynamics"] = encoding_audit
@@ -2284,6 +2287,7 @@ class LongTermMemory:
                 ("raw_drive", "raw_drive"),
                 ("attention_budget_raw_drive_total", "attention_budget_raw_drive_total"),
                 ("attention_budget_total", "attention_budget_total"),
+                ("attention_budget_requested", "attention_budget_requested"),
                 ("attention_budget_granted", "attention_budget_granted"),
                 ("attention_budget_denied", "attention_budget_denied"),
             ):
@@ -2573,6 +2577,7 @@ class LongTermMemory:
                 "surprise",
                 "arousal",
                 "attention_budget_total",
+                "attention_budget_requested",
                 "attention_budget_granted",
                 "attention_budget_denied",
             ):
@@ -2590,6 +2595,7 @@ class LongTermMemory:
                 "surprise": float(merged_payload.get("surprise", merged.total_surprise)),
                 "arousal": float(merged_payload.get("arousal", merged.total_surprise)),
                 "attention_budget_total": float(merged_payload.get("attention_budget_total", 0.0)),
+                "attention_budget_requested": float(merged_payload.get("attention_budget_requested", 0.0)),
                 "attention_budget_granted": float(merged_payload.get("attention_budget_granted", 0.0)),
                 "attention_budget_denied": float(merged_payload.get("attention_budget_denied", 0.0)),
             }

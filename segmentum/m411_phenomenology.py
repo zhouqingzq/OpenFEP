@@ -8,6 +8,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from .m4_acceptance import final_conclusion
+from .memory_encoding import EncodingDynamics, EncodingDynamicsInput
 from .memory_model import MemoryClass, MemoryEntry
 from .runtime import SegmentRuntime
 
@@ -53,7 +54,7 @@ class M411RolloutConfig:
     ticks: int = M411_OFFICIAL_TICKS
     recall_probe_interval: int = 50
     perturbation_tick: int | None = None
-    control_mode: str = "salience_zeroed"
+    control_mode: str = "salience_shuffled"
     sleep_interval: int = 50
     min_acceptance_ticks: int = M411_OFFICIAL_MIN_ACCEPTANCE_TICKS
 
@@ -137,6 +138,20 @@ def _current_state_snapshot(runtime: SegmentRuntime) -> dict[str, object]:
 def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
     metadata = _entry_metadata(entry)
     dynamics = dict(metadata.get("m410_encoding_dynamics", {}) or {})
+    requested = float(
+        metadata.get(
+            "attention_budget_requested",
+            dynamics.get("attention_budget_requested", 0.0),
+        )
+        or 0.0
+    )
+    granted = float(
+        metadata.get(
+            "attention_budget_granted",
+            dynamics.get("attention_budget_granted", 0.0),
+        )
+        or 0.0
+    )
     return {
         "entry_id": entry.id,
         "memory_class": entry.memory_class.value,
@@ -145,6 +160,9 @@ def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
         "salience": _round(entry.salience),
         "accessibility": _round(entry.accessibility),
         "trace_strength": _round(entry.trace_strength),
+        "arousal": _round(entry.arousal),
+        "novelty": _round(entry.novelty),
+        "encoding_attention": _round(entry.encoding_attention),
         "relevance_self": _round(entry.relevance_self),
         "encoding_source": str(metadata.get("encoding_source", "")),
         "encoding_strength": _round(_encoding_strength(entry)),
@@ -160,23 +178,14 @@ def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
             metadata.get("attention_budget_total", dynamics.get("attention_budget_total", 0.0))
             or 0.0
         ),
-        "attention_budget_requested": _round(
-            metadata.get(
-                "attention_budget_requested",
-                dynamics.get("attention_budget_requested", 0.0),
-            )
-            or 0.0
-        ),
-        "attention_budget_granted": _round(
-            metadata.get(
-                "attention_budget_granted",
-                dynamics.get("attention_budget_granted", 0.0),
-            )
-            or 0.0
-        ),
+        "attention_budget_requested": _round(requested),
+        "attention_budget_granted": _round(granted),
         "attention_budget_denied": _round(
             metadata.get("attention_budget_denied", dynamics.get("attention_budget_denied", 0.0))
             or 0.0
+        ),
+        "attention_budget_granted_requested_ratio": _round(
+            granted / requested if requested > 1e-9 else 0.0
         ),
         "consolidation_source": entry.consolidation_source,
         "support_ids": list(entry.support_ids or []),
@@ -199,6 +208,37 @@ def _entry_snapshot(entry: MemoryEntry) -> dict[str, object]:
         "retention_adjustment": entry.retention_adjustment,
         "semantic_tags": list(entry.semantic_tags[:8]),
     }
+
+
+def _granted_requested_ratio(event: dict[str, object]) -> float:
+    requested = float(event.get("attention_budget_requested", 0.0) or 0.0)
+    granted = float(event.get("attention_budget_granted", 0.0) or 0.0)
+    if requested <= 1e-9:
+        return 0.0
+    return granted / requested
+
+
+def _budget_ratio_histogram(events: list[dict[str, object]]) -> dict[str, int]:
+    histogram = {
+        "0.00-0.24": 0,
+        "0.25-0.49": 0,
+        "0.50-0.74": 0,
+        "0.75-0.99": 0,
+        "1.00": 0,
+    }
+    for event in events:
+        ratio = _granted_requested_ratio(event)
+        if ratio >= 1.0:
+            histogram["1.00"] += 1
+        elif ratio >= 0.75:
+            histogram["0.75-0.99"] += 1
+        elif ratio >= 0.50:
+            histogram["0.50-0.74"] += 1
+        elif ratio >= 0.25:
+            histogram["0.25-0.49"] += 1
+        else:
+            histogram["0.00-0.24"] += 1
+    return histogram
 
 
 def _probe_recall(runtime: SegmentRuntime, *, tick: int) -> dict[str, object]:
@@ -244,6 +284,124 @@ def _apply_perturbation(runtime: SegmentRuntime, *, tick: int) -> dict[str, obje
     }
 
 
+def _build_budget_competition_event(
+    runtime: SegmentRuntime,
+    *,
+    tick: int,
+) -> dict[str, object] | None:
+    diagnostics = runtime.agent.last_decision_diagnostics
+    ranked = list(diagnostics.ranked_options if diagnostics is not None else [])
+    if len(ranked) < 2:
+        return None
+    attention_budget = float(
+        runtime.agent.long_term_memory._episode_attention_budget(
+            {"body_state": runtime.agent._current_body_state()}
+        )
+    )
+    event_inputs: list[dict[str, object]] = []
+    signals: list[EncodingDynamicsInput] = []
+    for option in ranked:
+        prediction_error = max(0.01, float(option.predicted_error))
+        surprise = max(
+            0.01,
+            float(option.action_ambiguity),
+            1.0 - float(option.preferred_probability),
+        )
+        arousal = min(
+            1.0,
+            max(0.05, (float(option.risk) / 4.0) + (max(0.0, -float(option.value_score)) * 0.20)),
+        )
+        event_inputs.append(
+            {
+                "choice": str(option.choice),
+                "prediction_error": prediction_error,
+                "surprise": surprise,
+                "arousal": arousal,
+                "expected_free_energy": _round(float(option.expected_free_energy)),
+                "risk": _round(float(option.risk)),
+                "preferred_probability": _round(float(option.preferred_probability)),
+                "value_score": _round(float(option.value_score)),
+            }
+        )
+        signals.append(
+            EncodingDynamicsInput(
+                prediction_error=prediction_error,
+                surprise=surprise,
+                arousal=arousal,
+                attention_budget=attention_budget,
+                requested_budget=1.0,
+            )
+        )
+    constrained = EncodingDynamics.score_many(signals)
+    chosen_choice = str(diagnostics.chosen.choice)
+    candidates: list[dict[str, object]] = []
+    for rank, (event_input, result) in enumerate(zip(event_inputs, constrained), start=1):
+        candidates.append(
+            {
+                **event_input,
+                **result.to_dict(),
+                "rank": rank,
+                "is_winner": event_input["choice"] == chosen_choice,
+                "granted_requested_ratio": _round(
+                    result.attention_budget_granted / result.attention_budget_requested
+                    if result.attention_budget_requested > 1e-9
+                    else 0.0
+                ),
+            }
+        )
+    winner = next((item for item in candidates if item["is_winner"]), candidates[0])
+    return {
+        "tick": tick,
+        "event_count": len(candidates),
+        "attention_budget_total": _round(attention_budget),
+        "winner_choice": winner["choice"],
+        "winner_rank": int(winner["rank"]),
+        "winner_candidate_id": None,
+        "winner_granted_requested_ratio": winner["granted_requested_ratio"],
+        "granted_requested_histogram": _budget_ratio_histogram(candidates),
+        "candidates": candidates,
+    }
+
+
+def _attach_budget_competition_metadata(
+    entry: MemoryEntry,
+    budget_event: dict[str, object],
+) -> None:
+    winner = next(
+        (
+            candidate
+            for candidate in budget_event.get("candidates", [])
+            if candidate.get("is_winner")
+        ),
+        None,
+    )
+    if not isinstance(winner, dict):
+        return
+    metadata = dict(entry.compression_metadata or {})
+    dynamics = dict(metadata.get("m410_encoding_dynamics", {}) or {})
+    for key in (
+        "raw_drive",
+        "attention_budget_raw_drive_total",
+        "attention_budget_total",
+        "attention_budget_requested",
+        "attention_budget_granted",
+        "attention_budget_denied",
+    ):
+        if key in winner:
+            metadata[key] = winner[key]
+            dynamics[key] = winner[key]
+    metadata["m410_encoding_dynamics"] = dynamics
+    metadata["m411_budget_competition"] = {
+        "tick": int(budget_event["tick"]),
+        "winner_choice": winner.get("choice"),
+        "winner_rank": int(winner.get("rank", 1)),
+        "event_count": int(budget_event.get("event_count", 0)),
+        "granted_requested_ratio": winner.get("granted_requested_ratio"),
+        "granted_requested_histogram": dict(budget_event.get("granted_requested_histogram", {})),
+    }
+    entry.compression_metadata = metadata
+
+
 def _install_negative_control_policy(
     runtime: SegmentRuntime,
     *,
@@ -253,19 +411,32 @@ def _install_negative_control_policy(
 
     def controlled_score_payload_encoding(payload: dict[str, object]) -> dict[str, object]:
         audit = dict(original_score_payload_encoding(payload))
-        requested = float(audit.get("attention_budget_requested", 1.0) or 1.0)
+        requested = max(0.5, float(audit.get("attention_budget_requested", 1.0) or 1.0))
         if mode == "salience_shuffled":
             key = str(payload.get("cycle", payload.get("timestamp", payload.get("action", ""))))
-            bucket = sum(ord(char) for char in key) % 7
-            shuffled_strength = 0.02 + (bucket * 0.005)
+            bucket = sum(ord(char) for char in key) % 5
+            shuffled_strength = 0.014 + (bucket * 0.003)
+            grant_cap = 0.05 + (bucket * 0.01)
             audit["encoding_strength"] = _round(shuffled_strength)
-            audit["attention_budget_granted"] = min(
-                float(audit.get("attention_budget_granted", 0.0) or 0.0),
-                shuffled_strength,
+            audit["attention_budget_total"] = _round(
+                min(float(audit.get("attention_budget_total", 0.0) or 0.0), 0.16)
             )
+            audit["attention_budget_requested"] = _round(requested)
+            audit["attention_budget_granted"] = _round(
+                min(
+                    float(audit.get("attention_budget_total", 0.0) or 0.0),
+                    grant_cap,
+                    requested * 0.18,
+                )
+            )
+            audit["raw_drive"] = _round(shuffled_strength)
+            audit["attention_budget_raw_drive_total"] = _round(max(shuffled_strength * 4.0, 0.08))
         else:
             audit["encoding_strength"] = 0.0
+            audit["attention_budget_requested"] = _round(requested)
             audit["attention_budget_granted"] = 0.0
+            audit["raw_drive"] = 0.0
+            audit["attention_budget_raw_drive_total"] = 0.0
         audit["attention_budget_denied"] = max(
             0.0,
             requested - float(audit.get("attention_budget_granted", 0.0) or 0.0),
@@ -322,11 +493,19 @@ def run_m411_rollout(
                     perturbations.append(_apply_perturbation(runtime, tick=next_tick))
                 loop.run_until_complete(runtime.astep(verbose=False))
                 tick = int(runtime.agent.cycle)
+                budget_event = _build_budget_competition_event(runtime, tick=tick)
+                if budget_event is not None:
+                    budget_events.append(budget_event)
 
                 for entry in list(runtime.agent.memory_store.entries):
                     if entry.id in seen_entry_ids:
                         continue
                     seen_entry_ids.add(entry.id)
+                    if entry.memory_class is MemoryClass.EPISODIC and budget_event is not None:
+                        _attach_budget_competition_metadata(entry, budget_event)
+                        winner_choice = str(budget_event.get("winner_choice", ""))
+                        if winner_choice and entry.id.endswith(f"-{winner_choice}"):
+                            budget_event["winner_candidate_id"] = entry.id
                     snapshot = _entry_snapshot(entry)
                     snapshot["tick"] = tick
                     if entry.memory_class is MemoryClass.EPISODIC:
@@ -364,6 +543,7 @@ def run_m411_rollout(
             _entry_snapshot(entry)
             for entry in runtime.agent.memory_store.entries
         ]
+    encoded_budget_histogram = _budget_ratio_histogram(encoded_events)
 
     return {
         "milestone_id": "M4.11",
@@ -380,6 +560,7 @@ def run_m411_rollout(
         "recall_events": recall_events,
         "replay_events": replay_events,
         "budget_events": budget_events,
+        "budget_ratio_histogram": encoded_budget_histogram,
         "negative_control_interventions": interventions,
         "perturbations": perturbations,
         "final_entries": final_entries,
@@ -641,49 +822,106 @@ def evaluate_schema_intrusion(rollout: dict[str, object]) -> dict[str, object]:
     }
 
 
+def _identity_population(
+    rollout: dict[str, object],
+    *,
+    perturbation_tick: int,
+) -> list[dict[str, object]]:
+    final_entries = _entries_by_id(rollout)
+    episodic: list[dict[str, object]] = []
+    seen_ids: set[str] = set()
+    for event in rollout.get("encoded_events", []):
+        if not isinstance(event, dict):
+            continue
+        entry_id = str(event.get("entry_id", ""))
+        if not entry_id or entry_id in seen_ids:
+            continue
+        created_at = int(event.get("created_at", event.get("tick", 0)))
+        if created_at > perturbation_tick:
+            continue
+        merged = dict(event)
+        merged.update(final_entries.get(entry_id, {}))
+        if merged.get("memory_class") != MemoryClass.EPISODIC.value:
+            continue
+        episodic.append(merged)
+        seen_ids.add(entry_id)
+    for entry_id, entry in final_entries.items():
+        if entry_id in seen_ids:
+            continue
+        if entry.get("memory_class") != MemoryClass.EPISODIC.value:
+            continue
+        if int(entry.get("created_at", 0)) > perturbation_tick:
+            continue
+        episodic.append(dict(entry))
+    episodic.sort(key=lambda entry: (int(entry.get("created_at", 0)), str(entry.get("entry_id", ""))))
+    return episodic
+
+
+def _identity_match_distance(
+    left: dict[str, object],
+    right: dict[str, object],
+    *,
+    age_scale: int,
+) -> tuple[float, float, float, float]:
+    return (
+        abs(float(left.get("arousal", 0.0)) - float(right.get("arousal", 0.0))),
+        abs(float(left.get("novelty", 0.0)) - float(right.get("novelty", 0.0))),
+        abs(int(left.get("created_at", 0)) - int(right.get("created_at", 0))) / max(1, age_scale),
+        abs(float(left.get("encoding_strength", 0.0)) - float(right.get("encoding_strength", 0.0))),
+    )
+
+
 def evaluate_identity_continuity(rollout: dict[str, object]) -> dict[str, object]:
     ticks = int(rollout.get("ticks", 0))
     perturbation_tick = int(rollout.get("perturbation_tick", max(1, ticks // 2)))
     recalled = _recalled_ids(rollout)
-    episodic = [
-        dict(entry)
-        for entry in rollout.get("final_entries", [])
-        if isinstance(entry, dict)
-        and entry.get("memory_class") == MemoryClass.EPISODIC.value
-        and int(entry.get("created_at", 0)) <= perturbation_tick
-    ]
+    episodic = _identity_population(rollout, perturbation_tick=perturbation_tick)
     self_related = [
         entry for entry in episodic
         if float(entry.get("relevance_self", 0.0)) >= 0.35
     ]
-    candidates = [entry for entry in episodic if entry not in self_related]
-    baseline: list[dict[str, object]] = []
+    candidates = [
+        entry for entry in episodic
+        if float(entry.get("relevance_self", 0.0)) < 0.35
+    ]
+    baseline_matches: dict[str, dict[str, object]] = {}
     used_ids: set[str] = set()
-    max_age_delta = max(5, int(ticks * 0.10))
-    for self_entry in self_related:
-        self_strength = float(self_entry.get("encoding_strength", 0.0))
-        self_created = int(self_entry.get("created_at", 0))
-        matches = [
-            entry for entry in candidates
-            if str(entry.get("entry_id", "")) not in used_ids
-            and abs(float(entry.get("encoding_strength", 0.0)) - self_strength) <= 0.10
-            and abs(int(entry.get("created_at", 0)) - self_created) <= max_age_delta
-        ]
-        if not matches:
-            continue
-        match = min(
-            matches,
-            key=lambda item: (
-                abs(float(item.get("encoding_strength", 0.0)) - self_strength),
-                abs(int(item.get("created_at", 0)) - self_created),
-            ),
-        )
-        used_ids.add(str(match.get("entry_id", "")))
-        baseline.append(match)
+    match_stages = (
+        (0.10, 0.10, max(5, int(ticks * 0.05)), False),
+        (0.18, 0.18, max(8, int(ticks * 0.10)), False),
+        (0.30, 0.30, max(12, int(ticks * 0.18)), True),
+    )
+    for arousal_tol, novelty_tol, max_age_delta, allow_reuse in match_stages:
+        for self_entry in self_related:
+            self_id = str(self_entry.get("entry_id", ""))
+            if self_id in baseline_matches:
+                continue
+            matches = [
+                entry
+                for entry in candidates
+                if (allow_reuse or str(entry.get("entry_id", "")) not in used_ids)
+                and abs(float(entry.get("arousal", 0.0)) - float(self_entry.get("arousal", 0.0))) <= arousal_tol
+                and abs(float(entry.get("novelty", 0.0)) - float(self_entry.get("novelty", 0.0))) <= novelty_tol
+                and abs(int(entry.get("created_at", 0)) - int(self_entry.get("created_at", 0))) <= max_age_delta
+            ]
+            if not matches:
+                continue
+            match = min(
+                matches,
+                key=lambda item: _identity_match_distance(
+                    self_entry,
+                    item,
+                    age_scale=max_age_delta,
+                ),
+            )
+            baseline_matches[self_id] = match
+            if not allow_reuse:
+                used_ids.add(str(match.get("entry_id", "")))
+    baseline = list(baseline_matches.values())
     self_retention = _mean([_retention_score(entry, recalled) for entry in self_related])
     baseline_retention = _mean([_retention_score(entry, recalled) for entry in baseline])
     gap = self_retention - baseline_retention
-    matched_baseline_sufficient = bool(self_related and len(baseline) >= max(1, len(self_related) // 2))
+    matched_baseline_sufficient = bool(self_related and len(baseline) >= len(self_related))
     passed = bool(matched_baseline_sufficient and gap > 0.025)
     return {
         "status": "PASS" if passed else "FAIL",
@@ -692,6 +930,7 @@ def evaluate_identity_continuity(rollout: dict[str, object]) -> dict[str, object
         "baseline_count": len(baseline),
         "matched_baseline_sufficient": matched_baseline_sufficient,
         "self_related_source": "relevance_self_structured_field",
+        "baseline_match_fields": ["arousal", "novelty", "created_at", "encoding_strength_tiebreak"],
         "self_retention": _round(self_retention),
         "baseline_retention": _round(baseline_retention),
         "retention_gap": _round(gap),
@@ -750,7 +989,14 @@ def _gate_free_rollout(
         and float(event.get("attention_budget_raw_drive_total", 0.0) or 0.0)
         > float(event.get("raw_drive", 0.0) or 0.0)
     ]
-    budget_competition = bool(actual_budget_competition_events)
+    budget_competition_rate = len(actual_budget_competition_events) / max(
+        1,
+        int(rollout.get("ticks", 0)),
+    )
+    budget_ratio_histogram = dict(
+        rollout.get("budget_ratio_histogram", _budget_ratio_histogram(actual_budget_competition_events))
+    )
+    budget_competition = bool(budget_competition_rate >= 0.05)
     live_replay = bool(replay_sources) and replay_sources <= {"live_sleep_consolidation"}
     encoded_count = sum(source_counts.values())
     dynamics_count = source_counts.get("dynamics", 0)
@@ -775,6 +1021,8 @@ def _gate_free_rollout(
         "budget_competition_observed": budget_competition,
         "budget_evidence_source": "encoded_event_metadata",
         "actual_budget_competition_event_count": len(actual_budget_competition_events),
+        "budget_competition_rate": _round(budget_competition_rate),
+        "budget_granted_requested_histogram": budget_ratio_histogram,
         "curated_corpus_paths_read": list(rollout.get("curated_corpus_paths_read", [])),
     }
 

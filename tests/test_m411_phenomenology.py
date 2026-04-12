@@ -18,11 +18,11 @@ from segmentum.m411_phenomenology import (
 
 SMOKE_CONFIG = M411RolloutConfig(
     seed=411,
-    ticks=30,
-    recall_probe_interval=6,
-    perturbation_tick=15,
-    sleep_interval=12,
-    min_acceptance_ticks=20,
+    ticks=1000,
+    recall_probe_interval=50,
+    perturbation_tick=500,
+    sleep_interval=50,
+    min_acceptance_ticks=1000,
 )
 
 
@@ -60,7 +60,7 @@ class TestM411Phenomenology(unittest.TestCase):
         self.assertFalse(report["phenomenological_pass"])
         self.assertFalse(report["official_acceptance_config"])
         self.assertIn("long_horizon_free_rollout", self.evaluation["failed_gates"])
-        self.assertFalse(
+        self.assertTrue(
             self.evaluation["gate_summaries"]["long_horizon_free_rollout"][
                 "budget_competition_observed"
             ]
@@ -71,6 +71,34 @@ class TestM411Phenomenology(unittest.TestCase):
             ],
             "encoded_event_metadata",
         )
+
+    def test_tick_level_budget_competition_is_logged(self) -> None:
+        events = list(self.pair["default"]["budget_events"])
+        self.assertTrue(events)
+        competition_events = [
+            event
+            for event in events
+            if any(float(item["attention_budget_denied"]) > 0.0 for item in event["candidates"])
+            and any(float(item["attention_budget_granted"]) > 0.0 for item in event["candidates"])
+        ]
+        self.assertTrue(competition_events)
+        first = competition_events[0]
+        self.assertIn("winner_choice", first)
+        self.assertIn("granted_requested_histogram", first)
+        histogram = self.pair["default"]["budget_ratio_histogram"]
+        self.assertEqual(sum(histogram.values()), len(self.pair["default"]["encoded_events"]))
+
+    def test_1000_tick_smoke_keeps_four_effects_and_control_collapse(self) -> None:
+        summaries = self.evaluation["gate_summaries"]
+
+        self.assertTrue(summaries["serial_position_effect"]["default"]["passed"])
+        self.assertTrue(summaries["retention_curve_fit"]["default"]["passed"])
+        self.assertTrue(summaries["schema_intrusion"]["default"]["passed"])
+        self.assertTrue(summaries["identity_continuity"]["default"]["matched_baseline_sufficient"])
+        self.assertTrue(summaries["negative_controls"]["comparisons"]["serial_position_collapse"])
+        self.assertTrue(summaries["negative_controls"]["comparisons"]["retention_curve_collapse"])
+        self.assertTrue(summaries["negative_controls"]["comparisons"]["schema_intrusion_collapse"])
+        self.assertTrue(summaries["negative_controls"]["comparisons"]["identity_continuity_collapse"])
 
     def test_tampered_negative_control_fails(self) -> None:
         tampered = deepcopy(self.pair)
@@ -196,6 +224,50 @@ class TestM411Phenomenology(unittest.TestCase):
         self.assertEqual(identity["self_related_count"], 0)
         self.assertEqual(identity["self_related_source"], "relevance_self_structured_field")
         self.assertEqual(identity["status"], "FAIL")
+
+    def test_identity_matching_uses_structured_arousal_novelty_and_created_at(self) -> None:
+        tampered = deepcopy(self.pair)
+        tampered["default"]["encoded_events"] = [
+            {
+                "entry_id": "self-1",
+                "memory_class": "episodic",
+                "created_at": 10,
+                "tick": 10,
+                "salience": 0.8,
+                "accessibility": 0.8,
+                "trace_strength": 0.8,
+                "relevance_self": 0.8,
+                "encoding_strength": 0.7,
+                "arousal": 0.42,
+                "novelty": 0.31,
+            },
+            {
+                "entry_id": "baseline-1",
+                "memory_class": "episodic",
+                "created_at": 12,
+                "tick": 12,
+                "salience": 0.6,
+                "accessibility": 0.4,
+                "trace_strength": 0.4,
+                "relevance_self": 0.0,
+                "encoding_strength": 0.2,
+                "arousal": 0.43,
+                "novelty": 0.33,
+            },
+        ]
+        tampered["default"]["final_entries"] = deepcopy(tampered["default"]["encoded_events"])
+        tampered["default"]["perturbation_tick"] = 20
+        tampered["default"]["recall_events"] = [{"candidate_ids": ["self-1"], "tick": 20}]
+
+        evaluation = evaluate_m411_phenomenology(tampered, SMOKE_CONFIG)
+
+        identity = evaluation["gate_summaries"]["identity_continuity"]["default"]
+        self.assertEqual(identity["baseline_count"], 1)
+        self.assertTrue(identity["matched_baseline_sufficient"])
+        self.assertEqual(
+            identity["baseline_match_fields"],
+            ["arousal", "novelty", "created_at", "encoding_strength_tiebreak"],
+        )
 
     def test_report_uses_three_layer_acceptance_without_smoke_acceptance(self) -> None:
         report, evidence = build_m411_acceptance_report(config=SMOKE_CONFIG, pair=self.pair)

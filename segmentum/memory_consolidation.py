@@ -25,6 +25,10 @@ ABSTRACTNESS_INCREMENT = 0.008
 DEFAULT_MINIMUM_SUPPORT = 5
 DEFAULT_RUNTIME_MINIMUM_SUPPORT = 3
 DEFAULT_SMOOTHING = 2.0
+PATTERN_BRIDGE_MIN_SCORE = 0.42
+PATTERN_SEMANTIC_MIN_OVERLAP = 0.20
+PATTERN_CONTEXT_MIN_OVERLAP = 0.15
+PATTERN_VECTOR_DISTANCE_MAX = 1.05
 
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
@@ -73,6 +77,47 @@ def _shared_context_overlap(left: MemoryEntry, right: MemoryEntry) -> float:
     if not left_tags or not right_tags:
         return 0.0
     return len(left_tags & right_tags) / max(len(left_tags | right_tags), 1)
+
+
+def _entry_distance(left: MemoryEntry, right: MemoryEntry) -> float:
+    left_vector = _entry_vector(left)
+    right_vector = _entry_vector(right)
+    width = min(len(left_vector), len(right_vector))
+    if width <= 0:
+        return float("inf")
+    return _residual_norm(left_vector[:width], right_vector[:width])
+
+
+def _entry_similarity(left: MemoryEntry, right: MemoryEntry) -> float:
+    distance = _entry_distance(left, right)
+    if distance == float("inf"):
+        return 0.0
+    return 1.0 / (1.0 + distance)
+
+
+def _bridge_score(left: MemoryEntry, right: MemoryEntry) -> float:
+    semantic = _shared_semantic_overlap(left, right)
+    context = _shared_context_overlap(left, right)
+    vector_similarity = _entry_similarity(left, right)
+    return (semantic * 0.55) + (context * 0.15) + (vector_similarity * 0.30)
+
+
+def _pattern_neighbor(left: MemoryEntry, right: MemoryEntry) -> bool:
+    semantic = _shared_semantic_overlap(left, right)
+    context = _shared_context_overlap(left, right)
+    distance = _entry_distance(left, right)
+    vector_similarity = _entry_similarity(left, right)
+    if semantic >= 0.50:
+        return True
+    if semantic >= PATTERN_SEMANTIC_MIN_OVERLAP and distance <= PATTERN_VECTOR_DISTANCE_MAX:
+        return True
+    if semantic >= PATTERN_SEMANTIC_MIN_OVERLAP and context >= PATTERN_CONTEXT_MIN_OVERLAP:
+        return True
+    return bool(
+        _bridge_score(left, right) >= PATTERN_BRIDGE_MIN_SCORE
+        and semantic > 0.0
+        and vector_similarity >= 0.45
+    )
 
 
 def _copy_entry(entry: MemoryEntry) -> MemoryEntry:
@@ -390,7 +435,7 @@ def _borrow_candidates(
     config: ReconstructionConfig,
 ) -> list[MemoryEntry]:
     derived_ids = set(primary.derived_from)
-    ranked: list[tuple[tuple[float, float, float, float], MemoryEntry]] = []
+    ranked: list[tuple[tuple[float, float, float, float, float, float], MemoryEntry]] = []
     for entry in candidates:
         if entry.id == primary.id:
             continue
@@ -399,9 +444,25 @@ def _borrow_candidates(
             continue
         derived_score = 1.0 if entry.id in derived_ids else 0.0
         semantic_score = _shared_semantic_overlap(primary, entry)
+        bridge_score = _bridge_score(primary, entry)
+        vector_score = _entry_similarity(primary, entry)
         mood_score = 1.0 if primary.mood_context and primary.mood_context == entry.mood_context else 0.0
         context_score = _shared_context_overlap(primary, entry)
-        ranked.append(((derived_score, semantic_score, mood_score, context_score), entry))
+        if derived_score <= 0.0 and semantic_score < 0.15 and vector_score < 0.45 and context_score < 0.15:
+            continue
+        ranked.append(
+            (
+                (
+                    derived_score,
+                    bridge_score,
+                    semantic_score,
+                    vector_score,
+                    mood_score,
+                    context_score + min(1.0, entry.support_count / 6.0),
+                ),
+                entry,
+            )
+        )
     ranked.sort(key=lambda item: item[0], reverse=True)
     return [entry for _, entry in ranked[: config.maximum_borrow_sources]]
 
@@ -593,7 +654,7 @@ def reconsolidate(
             current_state=current_state,
         )
         reconstruction_blocked = update_rigidity >= 0.85
-        if identity_match >= 0.50 and entry.relevance_self >= 0.45:
+        if identity_match >= 0.72 and entry.relevance_self >= 0.60:
             reconstruction_blocked = True
         if error_aversion >= 0.60 and entry.valence < 0.0:
             reconstruction_blocked = True
@@ -635,7 +696,21 @@ def compress_episodic_cluster_to_semantic_skeleton(entries: list[MemoryEntry]) -
     support_ids = [entry.id for entry in entries]
     shared_semantic_tags = sorted(set(entries[0].semantic_tags).intersection(*[set(entry.semantic_tags) for entry in entries[1:]]))
     if not shared_semantic_tags:
-        shared_semantic_tags = sorted({tag for entry in entries for tag in entry.semantic_tags[:2]})[:4]
+        tag_counts: dict[str, int] = {}
+        for entry in entries:
+            for tag in entry.semantic_tags:
+                tag_counts[tag] = tag_counts.get(tag, 0) + 1
+        minimum_shared = max(2, int(round(len(entries) * 0.5)))
+        shared_semantic_tags = [
+            tag
+            for tag, _count in sorted(
+                tag_counts.items(),
+                key=lambda item: (-item[1], item[0]),
+            )
+            if tag_counts[tag] >= minimum_shared
+        ][:4]
+    if not shared_semantic_tags:
+        shared_semantic_tags = sorted({tag for entry in entries for tag in entry.semantic_tags[:3]})[:4]
     shared_context_tags = sorted(set(entries[0].context_tags).intersection(*[set(entry.context_tags) for entry in entries[1:]]))
     action_values = sorted({entry.anchor_slots.get("action") for entry in entries if entry.anchor_slots.get("action")})
     outcome_values = sorted({entry.anchor_slots.get("outcome") for entry in entries if entry.anchor_slots.get("outcome")})
@@ -700,13 +775,39 @@ def _group_pattern_candidates(
     *,
     minimum_support: int,
 ) -> list[list[MemoryEntry]]:
-    buckets: dict[str, list[MemoryEntry]] = {}
-    for entry in store.entries:
-        if entry.memory_class is MemoryClass.PROCEDURAL or len(entry.semantic_tags) < 2:
+    eligible = [
+        entry
+        for entry in store.entries
+        if entry.memory_class is not MemoryClass.PROCEDURAL and len(entry.semantic_tags) >= 2
+    ]
+    eligible.sort(key=lambda entry: (entry.created_at, entry.id))
+    groups: list[list[MemoryEntry]] = []
+    visited: set[str] = set()
+    for seed in eligible:
+        if seed.id in visited:
             continue
-        key = "|".join(sorted(entry.semantic_tags[:2]))
-        buckets.setdefault(key, []).append(entry)
-    return [entries for entries in buckets.values() if len(entries) >= minimum_support]
+        component: list[MemoryEntry] = []
+        frontier = [seed]
+        visited.add(seed.id)
+        while frontier:
+            current = frontier.pop()
+            component.append(current)
+            for candidate in eligible:
+                if candidate.id in visited:
+                    continue
+                if _pattern_neighbor(current, candidate):
+                    visited.add(candidate.id)
+                    frontier.append(candidate)
+        if len(component) >= minimum_support:
+            component.sort(key=lambda entry: (entry.created_at, entry.id))
+            groups.append(component)
+    groups.sort(
+        key=lambda entries: (
+            min(entry.created_at for entry in entries),
+            "|".join(entry.id for entry in entries[:2]),
+        )
+    )
+    return groups
 
 
 def extract_patterns(
