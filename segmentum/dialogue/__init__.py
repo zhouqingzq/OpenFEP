@@ -15,6 +15,7 @@ from .channel_registry import (
 from .observation import DialogueObservation
 from .observer import DialogueObserver
 from .precision_bounds import ChannelPrecisionBounds
+from .world import DialogueWorld
 
 __all__ = [
     "ChannelPrecisionBounds",
@@ -26,6 +27,7 @@ __all__ = [
     "DialogueChannelSpec",
     "DialogueObservation",
     "DialogueObserver",
+    "DialogueWorld",
     "ObservabilityTier",
     "get_channel_spec",
     "get_tier_bounds",

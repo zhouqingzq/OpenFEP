@@ -1,0 +1,83 @@
+{
+  "milestone_id": "M5.2",
+  "title": "Dialogue Personality Implantation Lifecycle",
+  "status": "PASS_WITH_RISKS",
+  "recommendation": "CONDITIONAL_ACCEPT",
+  "generated_at": "2026-04-13",
+  "artifacts": {
+    "acceptance": "artifacts/m52_acceptance.json",
+    "sample_user_data": "artifacts/m52_sample_user_data.json",
+    "sample_agent_state": "artifacts/m52_implantation_output/31_agent_state.json",
+    "sample_snapshots": "artifacts/m52_implantation_output/31_snapshots.json",
+    "sample_maturity_report": "artifacts/m52_implantation_output/31_maturity_report.json"
+  },
+  "evidence": {
+    "script_run": {
+      "command": "py scripts/run_m52_implantation.py --user-data artifacts/m52_sample_user_data.json --output artifacts/m52_implantation_output --sleep-every 1 --maturity-threshold 0.02",
+      "result": "pass",
+      "acceptance_payload": {
+        "uid": 31,
+        "ticks": 4,
+        "sleep_cycles": 1,
+        "matured": false,
+        "maturity_tick": null
+      }
+    },
+    "tests": {
+      "command": "py -m pytest tests/test_m52_implantation.py -q",
+      "result": "6 passed"
+    }
+  },
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Lifecycle loop runs end-to-end",
+      "status": "PASS",
+      "evidence": "implant_personality() drives observe->decision->integrate->verify->sleep and emits state/snapshot artifacts."
+    },
+    {
+      "id": "G2",
+      "name": "Critical bug fixes landed",
+      "status": "PASS",
+      "evidence": "free_energy_after is now wired from decision result; maturity report threshold/window uses config-consistent values."
+    },
+    {
+      "id": "G3",
+      "name": "Data robustness baseline",
+      "status": "PASS",
+      "evidence": "DialogueWorld now guards integer parsing and malformed payload test passes."
+    },
+    {
+      "id": "G4",
+      "name": "Real exported user replay",
+      "status": "BLOCKED",
+      "evidence": "No users/<uid>.json export was found in this workspace; validation used m50-like reconstructed sample sessions."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "area": "dialogue/prediction_bridge",
+      "summary": "Prediction bridge still uses static confidence/horizon and one-step expected state copy, which is concept-heavy scaffolding."
+    },
+    {
+      "severity": "medium",
+      "area": "dialogue/signal_extractors",
+      "summary": "Signal extraction remains rule/keyword based and lacks calibration against real corpora."
+    },
+    {
+      "severity": "medium",
+      "area": "dialogue/world",
+      "summary": "Replay is inbound-only (counterpart turns), so full turn-taking dynamics are not modeled."
+    }
+  ],
+  "residual_risks": [
+    "Maturity may appear unstable across true user distributions until at least one real exported dataset replay is validated.",
+    "Heuristic extractors can drift on domain/language shift and have no calibration guardrail in M5.2."
+  ],
+  "next_actions_before_full_accept": [
+    "Run implantation on at least one real users/<uid>.json dataset and archive the exact command + artifact hash.",
+    "Add one regression test using a real anonymized user export fixture.",
+    "Define acceptance thresholds for minimum ticks/sleeps and expected maturity behavior by cohort."
+  ]
+}

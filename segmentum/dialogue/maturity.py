@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+import math
+from statistics import mean
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..agent import SegmentAgent
+    from .lifecycle import ImplantationConfig
+
+
+@dataclass(slots=True)
+class PersonalitySnapshot:
+    sleep_cycle: int
+    tick: int
+    slow_traits: dict[str, float]
+    narrative_priors: dict[str, float]
+    precision_debt: dict[str, float]
+    defense_distribution: dict[str, int]
+    memory_stats: dict[str, int]
+    maturity_distance: float = 0.0
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+def _vector(snapshot: PersonalitySnapshot) -> list[float]:
+    ordered: list[float] = []
+    for bucket in (
+        snapshot.slow_traits,
+        snapshot.narrative_priors,
+        snapshot.precision_debt,
+    ):
+        ordered.extend(float(bucket[key]) for key in sorted(bucket))
+    ordered.extend(float(snapshot.memory_stats.get(key, 0)) for key in sorted(snapshot.memory_stats))
+    ordered.extend(float(snapshot.defense_distribution.get(key, 0)) for key in sorted(snapshot.defense_distribution))
+    return ordered
+
+
+def personality_distance(a: PersonalitySnapshot, b: PersonalitySnapshot) -> float:
+    left = _vector(a)
+    right = _vector(b)
+    if not left or not right:
+        return 0.0
+    numerator = sum(x * y for x, y in zip(left, right))
+    norm_left = math.sqrt(sum(x * x for x in left))
+    norm_right = math.sqrt(sum(y * y for y in right))
+    if norm_left <= 1e-9 or norm_right <= 1e-9:
+        return 0.0
+    cosine = max(-1.0, min(1.0, numerator / (norm_left * norm_right)))
+    return round(max(0.0, 1.0 - cosine), 6)
+
+
+def capture_personality_snapshot(agent: "SegmentAgent", sleep_cycle: int) -> PersonalitySnapshot:
+    precision_report = agent.precision_manipulator.to_dict()
+    debts = precision_report.get("channel_debts", {})
+    defense_history = precision_report.get("strategy_history", [])
+    defense_distribution: dict[str, int] = {}
+    for item in defense_history[-128:]:
+        strategy = str(item.get("strategy", ""))
+        if not strategy:
+            continue
+        defense_distribution[strategy] = defense_distribution.get(strategy, 0) + 1
+    memory_stats = {
+        "episodic": len(agent.long_term_memory.episodes),
+        "semantic": len(agent.long_term_memory.semantic_schemas),
+        "procedural": len(agent.action_history),
+    }
+    return PersonalitySnapshot(
+        sleep_cycle=int(sleep_cycle),
+        tick=int(agent.cycle),
+        slow_traits=agent.slow_variable_learner.state.traits.to_dict(),
+        narrative_priors=agent.self_model.narrative_priors.to_dict(),
+        precision_debt={str(k): float(v) for k, v in dict(debts).items()},
+        defense_distribution=defense_distribution,
+        memory_stats=memory_stats,
+        maturity_distance=0.0,
+    )
+
+
+def is_mature(
+    snapshots: list[PersonalitySnapshot],
+    config: "ImplantationConfig",
+) -> bool:
+    if len(snapshots) < max(2, int(config.maturity_window)):
+        return False
+    distances = [item.maturity_distance for item in snapshots[-int(config.maturity_window) :]]
+    return all(float(distance) < float(config.maturity_threshold) for distance in distances)
+
+
+def maturity_report(
+    snapshots: list[PersonalitySnapshot],
+    *,
+    threshold: float = 0.02,
+    window: int = 3,
+) -> dict[str, object]:
+    if not snapshots:
+        return {"snapshots": 0, "matured": False}
+    distances = [item.maturity_distance for item in snapshots]
+    required_window = max(2, int(window))
+    mature_index = None
+    if len(distances) >= required_window:
+        for idx in range(required_window - 1, len(distances)):
+            candidate = distances[idx - required_window + 1 : idx + 1]
+            if all(float(value) < float(threshold) for value in candidate):
+                mature_index = idx
+                break
+    return {
+        "snapshots": len(snapshots),
+        "mean_distance": round(mean(distances), 6),
+        "max_distance": round(max(distances), 6),
+        "min_distance": round(min(distances), 6),
+        "matured": mature_index is not None,
+        "maturity_snapshot_index": mature_index,
+        "threshold": round(float(threshold), 6),
+        "window": required_window,
+        "distance_trace": [round(float(item), 6) for item in distances],
+        "final_slow_traits": snapshots[-1].slow_traits,
+        "final_narrative_priors": snapshots[-1].narrative_priors,
+    }

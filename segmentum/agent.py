@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import random
 from statistics import mean, pvariance
-from typing import Callable
+from typing import Callable, Mapping
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .action_registry import ActionRegistry, build_default_action_registry
@@ -76,9 +76,22 @@ from .precision_manipulation import PrecisionManipulator
 from .defense_strategy import DefenseStrategySelector
 from .metacognitive import MetaCognitiveLayer
 from .workspace import GlobalWorkspace, GlobalWorkspaceState
+from .dialogue.memory_bridge import (
+    dialogue_observation_to_memory_fields,
+    dialogue_state_vector_metadata,
+    encode_dialogue_state_vector,
+)
 
 
-def observation_dict(observation: Observation) -> dict[str, float]:
+def observation_dict(observation: Observation | Mapping[str, object]) -> dict[str, float]:
+    if isinstance(observation, Mapping):
+        values: dict[str, float] = {}
+        for key, value in observation.items():
+            try:
+                values[str(key)] = float(value)
+            except (TypeError, ValueError):
+                continue
+        return values
     return asdict(observation)
 
 
@@ -1870,7 +1883,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
 
     def perceive(
         self,
-        observation: Observation,
+        observation: Observation | Mapping[str, object],
         *,
         apply_attention: bool = True,
     ) -> tuple[
@@ -1881,9 +1894,17 @@ class SegmentAgent(MemoryAwareAgentMixin):
         HierarchicalInference,
     ]:
         """Perceive the world, generate predictions, compute errors."""
+        observed = observation_dict(observation)
+        self._ensure_predictive_modalities(observed)
         # Update drive urgencies
-        novelty_deficit = 1.0 - observation.novelty
-        social_isolation = 1.0 - observation.social
+        novelty_signal = clamp(
+            float(observed.get("novelty", observed.get("topic_novelty", 0.5)))
+        )
+        social_signal = clamp(
+            float(observed.get("social", observed.get("relationship_depth", 0.5)))
+        )
+        novelty_deficit = 1.0 - novelty_signal
+        social_isolation = 1.0 - social_signal
         self.drive_system.update_urgencies(
             self.energy,
             self.stress,
@@ -1893,8 +1914,6 @@ class SegmentAgent(MemoryAwareAgentMixin):
             novelty_deficit,
             personality_modulation=self._personality_drive_modulation,
         )
-
-        observed = observation_dict(observation)
         (
             strategic_prior,
             strategic_prediction,
@@ -1937,6 +1956,16 @@ class SegmentAgent(MemoryAwareAgentMixin):
             hierarchy.interoceptive_update.error_precision,
         )
         return observed, interoceptive_prediction, errors, free_energy, hierarchy
+
+    def _ensure_predictive_modalities(self, observed: Mapping[str, float]) -> None:
+        if not observed:
+            return
+        modalities = tuple(sorted(str(key) for key in observed if str(key)))
+        if not modalities:
+            return
+        self.interoceptive_layer.belief_state.ensure_modalities(modalities)
+        self.world_model.sensorimotor_layer.belief_state.ensure_modalities(modalities)
+        self.strategic_layer.belief_state.ensure_modalities(modalities)
 
     def _top_down_pass(
         self,
@@ -2500,7 +2529,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
 
     def decision_cycle(
         self,
-        observation: Observation,
+        observation: Observation | Mapping[str, object],
     ) -> dict[str, object]:
         if self._sleeping:
             raise RuntimeError(
@@ -3293,6 +3322,34 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "diagnostics": diagnostics,
         }
 
+    def decision_cycle_from_dict(
+        self,
+        observation: dict[str, float],
+        *,
+        context: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        """Run the full decision cycle from dict observations."""
+        if context:
+            self.social_memory.observe_counterpart(
+                other_id=str(context.get("partner_uid", "unknown")),
+                tick=self.cycle,
+                appraisal=context.get("appraisal")
+                if isinstance(context.get("appraisal"), Mapping)
+                else {},
+                metadata=context,
+                event_type=str(context.get("event_type", "dialogue_turn")),
+            )
+        result = self.decision_cycle(observation)
+        if self.long_term_memory.episodes:
+            latest = self.long_term_memory.episodes[-1]
+            fields = dialogue_observation_to_memory_fields(observation, context)
+            latest.update(fields)
+            latest["state_vector"] = encode_dialogue_state_vector(observation)
+            compression = dict(latest.get("compression_metadata", {}) or {})
+            compression["dialogue_state_vector"] = dialogue_state_vector_metadata()
+            latest["compression_metadata"] = compression
+        return result
+
     def conscious_report(self) -> dict[str, object]:
         if self.last_decision_diagnostics is None:
             return {
@@ -3838,18 +3895,25 @@ class SegmentAgent(MemoryAwareAgentMixin):
 
     def estimate_action_prediction_error(
         self,
-        observation: Observation,
+        observation: Observation | Mapping[str, object],
         action: str,
         *,
         include_slow_weights: bool = True,
     ) -> tuple[float, int | None]:
         observed = observation_dict(observation)
+        self._ensure_predictive_modalities(observed)
         drive_urgencies = {
             drive.name: drive.urgency for drive in self.drive_system.drives
         }
         try:
-            novelty_deficit = 1.0 - observation.novelty
-            social_isolation = 1.0 - observation.social
+            novelty_signal = clamp(
+                float(observed.get("novelty", observed.get("topic_novelty", 0.5)))
+            )
+            social_signal = clamp(
+                float(observed.get("social", observed.get("relationship_depth", 0.5)))
+            )
+            novelty_deficit = 1.0 - novelty_signal
+            social_isolation = 1.0 - social_signal
             self.drive_system.update_urgencies(
                 self.energy,
                 self.stress,
@@ -3939,13 +4003,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     self.temperature = float(
                         body_state.get("temperature", self.temperature)
                     )
-                try:
-                    prediction_error, _ = self.estimate_action_prediction_error(
-                        Observation(**observation_payload),
-                        action,
-                    )
-                except TypeError:
-                    continue
+                prediction_error, _ = self.estimate_action_prediction_error(
+                    observation_payload,
+                    action,
+                )
                 replay_errors.append(prediction_error)
         finally:
             self.energy = body_snapshot["energy"]
