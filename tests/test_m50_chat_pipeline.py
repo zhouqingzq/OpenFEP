@@ -28,6 +28,18 @@ def test_parser_parse_line_and_invalid() -> None:
     assert parse_line("bad log line") is None
 
 
+def test_parser_parse_line_with_ansi_codes() -> None:
+    ansi_line = (
+        "\x1b[38;5;70m2024-12-31-23:05:57 INFO   MessageSender::OnData "
+        "\x1b[38;5;70mmessage type: 0, sender uid: 3575261, reciever uid: 4298754, body: [捂嘴笑]\x1b[0m"
+    )
+    msg = parse_line(ansi_line)
+    assert msg is not None
+    assert msg.msg_type == 0
+    assert msg.sender_uid == 3575261
+    assert msg.receiver_uid == 4298754
+
+
 def test_parser_parse_file_streaming(tmp_path: Path) -> None:
     path = tmp_path / "sample.log"
     path.write_text(

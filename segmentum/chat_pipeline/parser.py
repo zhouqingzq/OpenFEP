@@ -8,6 +8,7 @@ import re
 from typing import Iterator
 
 LOGGER = logging.getLogger(__name__)
+ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
 LINE_RE = re.compile(
     r"^(?P<timestamp>\d{4}[-/]\d{2}[-/]\d{2}[- ]\d{2}[:\-]\d{2}[:\-]\d{2})\s+"
@@ -54,7 +55,8 @@ def parse_line(line: str) -> ChatMessage | None:
     raw_line = line.rstrip("\n")
     if not raw_line:
         return None
-    match = LINE_RE.match(raw_line)
+    cleaned_line = ANSI_ESCAPE_RE.sub("", raw_line)
+    match = LINE_RE.match(cleaned_line)
     if match is None:
         return None
     timestamp = _parse_timestamp(match.group("timestamp"))

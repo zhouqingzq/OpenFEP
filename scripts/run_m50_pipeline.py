@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 import json
 from pathlib import Path
 import time
+import sys
 
 from segmentum.chat_pipeline.exporter import export_user_dataset
 from segmentum.chat_pipeline.parser import parse_line
@@ -20,7 +21,7 @@ def _iter_input_files(input_path: Path) -> list[Path]:
     return sorted(files)
 
 
-def _parse_messages(files: list[Path]) -> tuple[list, dict[str, int]]:
+def _parse_messages(files: list[Path], *, progress_every: int = 100_000) -> tuple[list, dict[str, int]]:
     messages = []
     total_lines = 0
     parse_failed = 0
@@ -32,11 +33,20 @@ def _parse_messages(files: list[Path]) -> tuple[list, dict[str, int]]:
                 parsed = parse_line(line)
                 if parsed is None:
                     parse_failed += 1
-                    continue
-                if parsed.msg_type != 0:
+                elif parsed.msg_type != 0:
                     non_text_filtered += 1
-                    continue
-                messages.append(parsed)
+                else:
+                    messages.append(parsed)
+                if progress_every > 0 and total_lines % progress_every == 0:
+                    print(
+                        (
+                            f"[m5.0] progress lines={total_lines} "
+                            f"parsed_success={len(messages)} "
+                            f"parsed_failed={parse_failed} "
+                            f"non_text_filtered={non_text_filtered}"
+                        ),
+                        file=sys.stderr,
+                    )
     stats = {
         "total_lines": total_lines,
         "parsed_success": len(messages),
@@ -80,10 +90,11 @@ def run_pipeline(
     min_messages: int,
     min_partners: int,
     normalize: str | None,
+    progress_every: int = 100_000,
 ) -> dict[str, object]:
     t0 = time.perf_counter()
     files = _iter_input_files(input_path)
-    messages, parse_stats = _parse_messages(files)
+    messages, parse_stats = _parse_messages(files, progress_every=progress_every)
 
     sessions = build_sessions(messages)
     total_sessions = sum(len(v) for v in sessions.values())
@@ -145,6 +156,12 @@ def main() -> None:
         choices=["simplified", "traditional", "none"],
         help="Chinese normalization target",
     )
+    parser.add_argument(
+        "--progress-every",
+        type=int,
+        default=100000,
+        help="Print progress every N lines (0 to disable)",
+    )
     args = parser.parse_args()
     normalize = None if args.normalize == "none" else args.normalize
     report = run_pipeline(
@@ -153,6 +170,7 @@ def main() -> None:
         min_messages=args.min_messages,
         min_partners=args.min_partners,
         normalize=normalize,
+        progress_every=args.progress_every,
     )
     acceptance = {
         "milestone": "M5.0",
