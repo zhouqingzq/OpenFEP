@@ -1,0 +1,12 @@
+{
+  "milestone": "M5.0",
+  "status": "implemented",
+  "notes": [
+    "Core chat pipeline modules are implemented.",
+    "Unit and integration tests in tests/test_m50_chat_pipeline.py pass."
+  ],
+  "validation": {
+    "tests_command": "py -m pytest tests/test_m50_chat_pipeline.py",
+    "tests_passed": true
+  }
+}
