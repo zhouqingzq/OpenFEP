@@ -106,6 +106,7 @@ def test_export_and_end_to_end_pipeline(tmp_path: Path) -> None:
             [
                 _line("2023-10-22-12:00:00", 1, 2, "你好"),
                 _line("2023-10-22-12:01:00", 2, 1, "哈哈"),
+                _line("2023-10-22-12:01:30", 1, 2, "image payload", msg_type=2),
                 _line("2023-10-22-12:02:00", 1, 3, "hello"),
                 _line("2023-10-22-12:03:00", 3, 1, "world"),
                 "BROKEN",
@@ -122,8 +123,9 @@ def test_export_and_end_to_end_pipeline(tmp_path: Path) -> None:
         min_partners=2,
         normalize=None,
     )
-    assert report["total_lines"] == 5
+    assert report["total_lines"] == 6
     assert report["parsed_failed"] == 1
+    assert report["non_text_filtered"] == 1
     assert report["qualified_users"] == 1
 
     user_file = output_dir / "users" / "1.json"

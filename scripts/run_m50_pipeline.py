@@ -24,6 +24,7 @@ def _parse_messages(files: list[Path]) -> tuple[list, dict[str, int]]:
     messages = []
     total_lines = 0
     parse_failed = 0
+    non_text_filtered = 0
     for file_path in files:
         with file_path.open("r", encoding="utf-8", errors="replace") as handle:
             for line in handle:
@@ -32,11 +33,15 @@ def _parse_messages(files: list[Path]) -> tuple[list, dict[str, int]]:
                 if parsed is None:
                     parse_failed += 1
                     continue
+                if parsed.msg_type != 0:
+                    non_text_filtered += 1
+                    continue
                 messages.append(parsed)
     stats = {
         "total_lines": total_lines,
         "parsed_success": len(messages),
         "parsed_failed": parse_failed,
+        "non_text_filtered": non_text_filtered,
     }
     return messages, stats
 
