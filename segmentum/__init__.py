@@ -188,6 +188,15 @@ from .memory_consolidation import (
     run_consolidation_cycle,
     validate_inference,
 )
+from .dialogue import (
+    ChannelPrecisionBounds,
+    DIALOGUE_CHANNEL_NAMES,
+    DIALOGUE_CHANNELS,
+    DialogueChannelSpec,
+    DialogueObservation,
+    DialogueObserver,
+    ObservabilityTier,
+)
 from .m45_audit import write_m45_acceptance_artifacts
 
 __all__ = [
@@ -345,5 +354,12 @@ __all__ = [
     "decay_accessibility",
     "decay_trace_strength",
     "MemoryStore",
+    "ChannelPrecisionBounds",
+    "DIALOGUE_CHANNEL_NAMES",
+    "DIALOGUE_CHANNELS",
+    "DialogueChannelSpec",
+    "DialogueObservation",
+    "DialogueObserver",
+    "ObservabilityTier",
     "write_m45_acceptance_artifacts",
 ]

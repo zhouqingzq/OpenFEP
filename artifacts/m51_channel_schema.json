@@ -1,0 +1,53 @@
+{
+  "channels": [
+    {
+      "default_precision": 0.75,
+      "description": "What the interlocutor actually said.",
+      "name": "semantic_content",
+      "precision_ceiling": 0.9,
+      "precision_floor": 0.6,
+      "tier": 1
+    },
+    {
+      "default_precision": 0.75,
+      "description": "Embedding-distance proxy for how novel the topic is.",
+      "name": "topic_novelty",
+      "precision_ceiling": 0.9,
+      "precision_floor": 0.6,
+      "tier": 1
+    },
+    {
+      "default_precision": 0.35,
+      "description": "Estimated valence/arousal from sentiment-like cues.",
+      "name": "emotional_tone",
+      "precision_ceiling": 0.5,
+      "precision_floor": 0.25,
+      "tier": 2
+    },
+    {
+      "default_precision": 0.35,
+      "description": "Estimated disagreement/confrontation pressure.",
+      "name": "conflict_tension",
+      "precision_ceiling": 0.5,
+      "precision_floor": 0.25,
+      "tier": 2
+    },
+    {
+      "default_precision": 0.1,
+      "description": "Slow latent estimate of trust/intimacy with partner.",
+      "name": "relationship_depth",
+      "precision_ceiling": 0.2,
+      "precision_floor": 0.05,
+      "tier": 3
+    },
+    {
+      "default_precision": 0.1,
+      "description": "Latent estimate of interlocutor unstated motives.",
+      "name": "hidden_intent",
+      "precision_ceiling": 0.2,
+      "precision_floor": 0.05,
+      "tier": 3
+    }
+  ],
+  "milestone": "M5.1"
+}

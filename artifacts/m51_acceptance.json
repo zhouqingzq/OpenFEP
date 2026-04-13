@@ -1,0 +1,19 @@
+{
+  "milestone": "M5.1",
+  "status": "completed",
+  "summary": {
+    "artifacts": [
+      "artifacts/m51_channel_schema.json",
+      "artifacts/m51_signal_extraction_sample.json"
+    ],
+    "new_tests": [
+      "tests/test_m51_dialogue_channels.py"
+    ]
+  },
+  "validation": {
+    "compatibility_tests_command": "py -m pytest tests/test_m50_chat_pipeline.py",
+    "compatibility_tests_passed": true,
+    "m51_tests_command": "py -m pytest tests/test_m51_dialogue_channels.py",
+    "m51_tests_passed": true
+  }
+}

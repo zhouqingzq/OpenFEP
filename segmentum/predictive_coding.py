@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from statistics import mean
+from typing import Iterable
 
 from .environment import clamp
 
 
-MODALITIES: tuple[str, ...] = (
+DEFAULT_MODALITIES: tuple[str, ...] = (
     "food",
     "danger",
     "novelty",
@@ -16,19 +17,30 @@ MODALITIES: tuple[str, ...] = (
 )
 
 
-def default_beliefs() -> dict[str, float]:
+def _normalize_modalities(modalities: Iterable[str] | None) -> tuple[str, ...]:
+    if modalities is None:
+        return DEFAULT_MODALITIES
+    values = tuple(str(item) for item in modalities if str(item))
+    return values or DEFAULT_MODALITIES
+
+
+def default_beliefs(modalities: Iterable[str] | None = None) -> dict[str, float]:
+    keys = _normalize_modalities(modalities)
     return {
-        "food": 0.50,
-        "danger": 0.30,
-        "novelty": 0.50,
-        "shelter": 0.40,
-        "temperature": 0.50,
-        "social": 0.30,
+        key: (
+            0.30
+            if key in {"danger", "social"}
+            else (0.40 if key == "shelter" else 0.50)
+        )
+        for key in keys
     }
 
 
-def default_precisions(value: float) -> dict[str, float]:
-    return {key: value for key in MODALITIES}
+def default_precisions(
+    value: float,
+    modalities: Iterable[str] | None = None,
+) -> dict[str, float]:
+    return {key: value for key in _normalize_modalities(modalities)}
 
 
 @dataclass
@@ -371,10 +383,27 @@ class BayesianBeliefState:
     max_precision: float = 3.00
     digestion_threshold: float = 0.10
     precision_decay: float = 0.02
+    channel_precision_bounds: dict[str, tuple[float, float]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.precisions:
-            self.precisions = default_precisions(self.initial_precision)
+            self.precisions = default_precisions(
+                self.initial_precision,
+                modalities=self.beliefs.keys(),
+            )
+        self.ensure_modalities(tuple(self.beliefs.keys()))
+
+    def ensure_modalities(
+        self,
+        modalities: Iterable[str],
+        *,
+        baseline_belief: float = 0.5,
+    ) -> None:
+        for key in _normalize_modalities(modalities):
+            if key not in self.beliefs:
+                self.beliefs[key] = baseline_belief
+            if key not in self.precisions:
+                self.precisions[key] = self.initial_precision
 
     def hyperparameters(self) -> LayerHyperparameters:
         return LayerHyperparameters(
@@ -403,7 +432,10 @@ class BayesianBeliefState:
         self.digestion_threshold = hyperparameters.digestion_threshold
         self.precision_decay = hyperparameters.precision_decay
         if reset_precisions or not self.precisions:
-            self.precisions = default_precisions(self.initial_precision)
+            self.precisions = default_precisions(
+                self.initial_precision,
+                modalities=self.beliefs.keys(),
+            )
 
     def predict(
         self,
@@ -442,18 +474,24 @@ class BayesianBeliefState:
 
         for key, observed in incoming_observation.items():
             prior_precision = self.precisions.get(key, self.base_error_precision)
+            channel_min, channel_max = self.channel_precision_bounds.get(
+                key,
+                (self.min_precision, self.max_precision),
+            )
+            effective_min = max(self.min_precision, channel_min)
+            effective_max = min(self.max_precision, channel_max)
             innovation = observed - prediction.get(key, belief_before.get(key, 0.5))
             observation_precision = clamp(
                 self.base_error_precision + (abs(innovation) * self.error_precision_scale),
-                self.min_precision,
-                self.max_precision,
+                effective_min,
+                effective_max,
             )
             gain = observation_precision / (prior_precision + observation_precision)
             posterior_mean = clamp(belief_before.get(key, 0.5) + (gain * innovation))
             posterior_precision = clamp(
                 prior_precision + (gain * observation_precision) - self.precision_decay,
-                self.min_precision,
-                self.max_precision,
+                effective_min,
+                effective_max,
             )
             remaining_error = innovation * (1.0 - gain)
             transmitted_error = (
@@ -519,6 +557,10 @@ class BayesianBeliefState:
             "max_precision": self.max_precision,
             "digestion_threshold": self.digestion_threshold,
             "precision_decay": self.precision_decay,
+            "channel_precision_bounds": {
+                key: [float(bounds[0]), float(bounds[1])]
+                for key, bounds in self.channel_precision_bounds.items()
+            },
         }
 
 
@@ -545,8 +587,18 @@ class InteroceptiveBeliefState(BayesianBeliefState):
             reset_precisions=True,
         )
         state.precisions = dict(
-            payload.get("precisions", default_precisions(state.initial_precision))
+            payload.get(
+                "precisions",
+                default_precisions(state.initial_precision, modalities=state.beliefs.keys()),
+            )
         )
+        raw_bounds = payload.get("channel_precision_bounds", {})
+        if isinstance(raw_bounds, dict):
+            state.channel_precision_bounds = {
+                str(key): (float(value[0]), float(value[1]))
+                for key, value in raw_bounds.items()
+                if isinstance(value, (list, tuple)) and len(value) == 2
+            }
         return state
 
 
@@ -573,8 +625,18 @@ class SensorimotorBeliefState(BayesianBeliefState):
             reset_precisions=True,
         )
         state.precisions = dict(
-            payload.get("precisions", default_precisions(state.initial_precision))
+            payload.get(
+                "precisions",
+                default_precisions(state.initial_precision, modalities=state.beliefs.keys()),
+            )
         )
+        raw_bounds = payload.get("channel_precision_bounds", {})
+        if isinstance(raw_bounds, dict):
+            state.channel_precision_bounds = {
+                str(key): (float(value[0]), float(value[1]))
+                for key, value in raw_bounds.items()
+                if isinstance(value, (list, tuple)) and len(value) == 2
+            }
         return state
 
 
@@ -601,8 +663,18 @@ class StrategicBeliefState(BayesianBeliefState):
             reset_precisions=True,
         )
         state.precisions = dict(
-            payload.get("precisions", default_precisions(state.initial_precision))
+            payload.get(
+                "precisions",
+                default_precisions(state.initial_precision, modalities=state.beliefs.keys()),
+            )
         )
+        raw_bounds = payload.get("channel_precision_bounds", {})
+        if isinstance(raw_bounds, dict):
+            state.channel_precision_bounds = {
+                str(key): (float(value[0]), float(value[1]))
+                for key, value in raw_bounds.items()
+                if isinstance(value, (list, tuple)) and len(value) == 2
+            }
         return state
 
 

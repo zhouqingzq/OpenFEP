@@ -122,6 +122,20 @@ class AttentionBottleneck:
         if not isinstance(attention_biases, Mapping):
             attention_biases = {}
 
+        configured_threat_channels = set(THREAT_CHANNELS)
+        configured_social_channels = set(SOCIAL_CHANNELS)
+        configured_novelty_channels = {
+            str(item)
+            for item in memory_context.get("novelty_channels", [])
+            if str(item)
+        }
+        configured_threat_channels.update(
+            str(item) for item in memory_context.get("threat_channels", []) if str(item)
+        )
+        configured_social_channels.update(
+            str(item) for item in memory_context.get("social_channels", []) if str(item)
+        )
+
         all_channels = sorted(set(observation) | set(prediction) | set(errors))
         for channel in all_channels:
             observed_value = float(observation.get(channel, 0.0))
@@ -129,18 +143,18 @@ class AttentionBottleneck:
             error_value = abs(float(errors.get(channel, observed_value - predicted_value)))
             score = error_value * self.surprise_weight
 
-            if "novel" in channel:
+            if "novel" in channel or channel in configured_novelty_channels:
                 score += observed_value * self.novelty_weight
                 score += max(0.0, controllability_prior) * (
                     0.14 + observed_value * 0.24
                 )
-            if channel in THREAT_CHANNELS:
+            if channel in configured_threat_channels:
                 score += observed_value * self.threat_weight
                 score += trauma_bias * (0.38 + observed_value * 0.40)
                 score += chronic_threat_bias * (0.15 + observed_value * 0.20)
             if channel in CONTAMINATION_CHANNELS:
                 score += contamination_sensitivity * observed_value * 0.25
-            if channel in SOCIAL_CHANNELS:
+            if channel in configured_social_channels:
                 score += max(0.0, trust_prior) * (0.16 + observed_value * 0.34)
                 score += max(0.0, -trust_prior) * (1.0 - observed_value) * 0.10
             if channel == "shelter":

@@ -1,0 +1,49 @@
+{
+  "milestone": "M5.1",
+  "samples": [
+    {
+      "channels": {
+        "conflict_tension": 0.41,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.128,
+        "relationship_depth": 0.093,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      "history": [],
+      "partner_uid": 101,
+      "text": "你现在方便聊一下吗？"
+    },
+    {
+      "channels": {
+        "conflict_tension": 0.12,
+        "emotional_tone": 0.64,
+        "hidden_intent": 0.119,
+        "relationship_depth": 0.106,
+        "semantic_content": 0.75,
+        "topic_novelty": 0.5
+      },
+      "history": [
+        "你现在方便聊一下吗？"
+      ],
+      "partner_uid": 101,
+      "text": "谢谢你回复，我们一起看看计划。"
+    },
+    {
+      "channels": {
+        "conflict_tension": 0.58,
+        "emotional_tone": 0.36,
+        "hidden_intent": 0.151,
+        "relationship_depth": 0.115,
+        "semantic_content": 0.83,
+        "topic_novelty": 0.66
+      },
+      "history": [
+        "你现在方便聊一下吗？",
+        "谢谢你回复，我们一起看看计划。"
+      ],
+      "partner_uid": 101,
+      "text": "你为什么一直回避这个问题？"
+    }
+  ]
+}
