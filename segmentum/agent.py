@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import random
@@ -869,13 +869,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
             current_mood=self.agent_state_vector.recent_mood_baseline,
             k=k,
         )
-        candidate_ids = {c.entry_id for c in result.candidates[:k]}
-        projected_by_id = {
-            str(payload.get("episode_id", "")): payload
-            for payload in self.memory_store.to_legacy_episodes(entry_ids=candidate_ids)
-        }
+        top_candidates = result.candidates[:k]
+        projected_by_id = self.memory_store.legacy_payloads_for_entries(
+            [c.entry for c in top_candidates]
+        )
         similar_memories: list[dict[str, object]] = []
-        for candidate in result.candidates[:k]:
+        for candidate in top_candidates:
             payload = dict(projected_by_id.get(candidate.entry_id, {}))
             payload.setdefault("episode_id", candidate.entry_id)
             payload.setdefault("content", candidate.entry.content)

@@ -176,13 +176,13 @@ def _legacy_unmapped(entry: MemoryEntry) -> dict[str, object]:
     return deepcopy(payload)
 
 
-def _legacy_template(entry: MemoryEntry) -> dict[str, object]:
+def _legacy_template(entry: MemoryEntry, *, copy: bool = True) -> dict[str, object]:
     if not isinstance(entry.compression_metadata, dict):
         return {}
     payload = entry.compression_metadata.get("legacy_template")
     if not isinstance(payload, dict):
         return {}
-    return deepcopy(payload)
+    return deepcopy(payload) if copy else payload
 
 
 def _legacy_episode_id(payload: dict[str, object], index: int = 0) -> str:
@@ -191,7 +191,7 @@ def _legacy_episode_id(payload: dict[str, object], index: int = 0) -> str:
 
 
 def _legacy_payload_matches(entry: MemoryEntry, payload: dict[str, object]) -> bool:
-    return _legacy_template(entry) == deepcopy(payload)
+    return _legacy_template(entry, copy=False) == payload
 
 
 def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> MemoryEntry:
@@ -972,94 +972,98 @@ class MemoryStore:
         store.replace_legacy_group(episodes)
         return store
 
+    def _entry_to_legacy_payload(self, entry: MemoryEntry) -> dict[str, object]:
+        template = _legacy_template(entry)
+        extras = _legacy_unmapped(entry)
+        action = entry.anchor_slots.get("action") or str(
+            template.get("action", template.get("action_taken", "unknown"))
+        )
+        outcome_text = entry.anchor_slots.get("outcome") or str(
+            template.get("predicted_outcome", template.get("value_label", entry.content))
+        )
+        base_payload = {
+            "episode_id": entry.id,
+            "timestamp": entry.created_at,
+            "cycle": entry.created_at,
+            "state_vector": deepcopy(template.get("state_vector"))
+            if isinstance(template.get("state_vector"), dict)
+            else {},
+            "state_snapshot": deepcopy(template.get("state_snapshot"))
+            if isinstance(template.get("state_snapshot"), dict)
+            else {},
+            "action_taken": _update_legacy_action_payload(template.get("action_taken"), action),
+            "action": action,
+            "outcome_state": _update_legacy_outcome_payload(template.get("outcome_state"), outcome_text),
+            "outcome": _update_legacy_outcome_payload(template.get("outcome"), outcome_text),
+            "predicted_outcome": outcome_text,
+            "prediction_error": entry.novelty,
+            "risk": _coerce_float(template.get("risk", 0.0)),
+            "value_score": entry.valence,
+            "total_surprise": entry.salience,
+            "weighted_surprise": entry.salience,
+            "embedding": deepcopy(template.get("embedding"))
+            if isinstance(template.get("embedding"), list)
+            else (list(entry.state_vector) if entry.state_vector is not None else []),
+            "value_label": outcome_text,
+            "preferred_probability": _coerce_float(template.get("preferred_probability", 0.0)),
+            "preference_log_value": _coerce_float(template.get("preference_log_value", 0.0)),
+            "observation": deepcopy(template.get("observation"))
+            if isinstance(template.get("observation"), dict)
+            else {},
+            "prediction": deepcopy(template.get("prediction"))
+            if isinstance(template.get("prediction"), dict)
+            else {},
+            "errors": deepcopy(template.get("errors"))
+            if isinstance(template.get("errors"), dict)
+            else {},
+            "body_state": deepcopy(template.get("body_state"))
+            if isinstance(template.get("body_state"), dict)
+            else {},
+            "support_count": entry.support_count,
+            "support": entry.support_count,
+            "last_seen_cycle": entry.last_accessed,
+            "identity_critical": entry.relevance_self >= self.identity_priority_threshold,
+            "continuity_tags": list(entry.semantic_tags),
+            "gating_reasons": list(entry.context_tags),
+            "lifecycle_stage": template.get("lifecycle_stage", "validated_episode"),
+            "episode_family": template.get("episode_family", ""),
+            "content": entry.content,
+            "memory_class": entry.memory_class.value,
+            "source_type": entry.source_type.value,
+            "store_level": entry.store_level.value,
+            "abstractness": entry.abstractness,
+            "encoding_source": dict(entry.compression_metadata or {}).get("encoding_source"),
+            "encoding_strength": dict(entry.compression_metadata or {}).get("encoding_strength", entry.salience),
+            "fep_prediction_error": dict(entry.compression_metadata or {}).get(
+                "fep_prediction_error",
+                entry.novelty,
+            ),
+            "surprise": dict(entry.compression_metadata or {}).get("surprise", entry.salience),
+            "attention_budget_total": dict(entry.compression_metadata or {}).get("attention_budget_total"),
+            "attention_budget_requested": dict(entry.compression_metadata or {}).get("attention_budget_requested"),
+            "attention_budget_granted": dict(entry.compression_metadata or {}).get("attention_budget_granted"),
+            "attention_budget_denied": dict(entry.compression_metadata or {}).get("attention_budget_denied"),
+            "centroid": list(entry.centroid) if entry.centroid is not None else None,
+            "residual_norm_mean": entry.residual_norm_mean,
+            "residual_norm_var": entry.residual_norm_var,
+            "support_ids": list(entry.support_ids) if entry.support_ids is not None else None,
+            "consolidation_source": entry.consolidation_source,
+            "semantic_reconstruction_error": entry.semantic_reconstruction_error,
+            "replay_second_pass_error": entry.replay_second_pass_error,
+            "salience_delta": entry.salience_delta,
+            "retention_adjustment": entry.retention_adjustment,
+            "compression_metadata": dict(entry.compression_metadata or {}),
+        }
+        for key, value in extras.items():
+            if key in LEGACY_MAPPED_KEYS:
+                continue
+            base_payload[key] = deepcopy(value)
+        return base_payload
+
     def to_legacy_episodes(self, *, entry_ids: set[str] | None = None) -> list[dict[str, object]]:
-        payloads: list[dict[str, object]] = []
         entries = self.entries if entry_ids is None else [e for e in self.entries if e.id in entry_ids]
-        for entry in entries:
-            template = _legacy_template(entry)
-            extras = _legacy_unmapped(entry)
-            action = entry.anchor_slots.get("action") or str(
-                template.get("action", template.get("action_taken", "unknown"))
-            )
-            outcome_text = entry.anchor_slots.get("outcome") or str(
-                template.get("predicted_outcome", template.get("value_label", entry.content))
-            )
-            base_payload = {
-                "episode_id": entry.id,
-                "timestamp": entry.created_at,
-                "cycle": entry.created_at,
-                "state_vector": deepcopy(template.get("state_vector"))
-                if isinstance(template.get("state_vector"), dict)
-                else {},
-                "state_snapshot": deepcopy(template.get("state_snapshot"))
-                if isinstance(template.get("state_snapshot"), dict)
-                else {},
-                "action_taken": _update_legacy_action_payload(template.get("action_taken"), action),
-                "action": action,
-                "outcome_state": _update_legacy_outcome_payload(template.get("outcome_state"), outcome_text),
-                "outcome": _update_legacy_outcome_payload(template.get("outcome"), outcome_text),
-                "predicted_outcome": outcome_text,
-                "prediction_error": entry.novelty,
-                "risk": _coerce_float(template.get("risk", 0.0)),
-                "value_score": entry.valence,
-                "total_surprise": entry.salience,
-                "weighted_surprise": entry.salience,
-                "embedding": deepcopy(template.get("embedding"))
-                if isinstance(template.get("embedding"), list)
-                else (list(entry.state_vector) if entry.state_vector is not None else []),
-                "value_label": outcome_text,
-                "preferred_probability": _coerce_float(template.get("preferred_probability", 0.0)),
-                "preference_log_value": _coerce_float(template.get("preference_log_value", 0.0)),
-                "observation": deepcopy(template.get("observation"))
-                if isinstance(template.get("observation"), dict)
-                else {},
-                "prediction": deepcopy(template.get("prediction"))
-                if isinstance(template.get("prediction"), dict)
-                else {},
-                "errors": deepcopy(template.get("errors"))
-                if isinstance(template.get("errors"), dict)
-                else {},
-                "body_state": deepcopy(template.get("body_state"))
-                if isinstance(template.get("body_state"), dict)
-                else {},
-                "support_count": entry.support_count,
-                "support": entry.support_count,
-                "last_seen_cycle": entry.last_accessed,
-                "identity_critical": entry.relevance_self >= self.identity_priority_threshold,
-                "continuity_tags": list(entry.semantic_tags),
-                "gating_reasons": list(entry.context_tags),
-                "lifecycle_stage": template.get("lifecycle_stage", "validated_episode"),
-                "episode_family": template.get("episode_family", ""),
-                "content": entry.content,
-                "memory_class": entry.memory_class.value,
-                "source_type": entry.source_type.value,
-                "store_level": entry.store_level.value,
-                "abstractness": entry.abstractness,
-                "encoding_source": dict(entry.compression_metadata or {}).get("encoding_source"),
-                "encoding_strength": dict(entry.compression_metadata or {}).get("encoding_strength", entry.salience),
-                "fep_prediction_error": dict(entry.compression_metadata or {}).get(
-                    "fep_prediction_error",
-                    entry.novelty,
-                ),
-                "surprise": dict(entry.compression_metadata or {}).get("surprise", entry.salience),
-                "attention_budget_total": dict(entry.compression_metadata or {}).get("attention_budget_total"),
-                "attention_budget_requested": dict(entry.compression_metadata or {}).get("attention_budget_requested"),
-                "attention_budget_granted": dict(entry.compression_metadata or {}).get("attention_budget_granted"),
-                "attention_budget_denied": dict(entry.compression_metadata or {}).get("attention_budget_denied"),
-                "centroid": list(entry.centroid) if entry.centroid is not None else None,
-                "residual_norm_mean": entry.residual_norm_mean,
-                "residual_norm_var": entry.residual_norm_var,
-                "support_ids": list(entry.support_ids) if entry.support_ids is not None else None,
-                "consolidation_source": entry.consolidation_source,
-                "semantic_reconstruction_error": entry.semantic_reconstruction_error,
-                "replay_second_pass_error": entry.replay_second_pass_error,
-                "salience_delta": entry.salience_delta,
-                "retention_adjustment": entry.retention_adjustment,
-                "compression_metadata": dict(entry.compression_metadata or {}),
-            }
-            for key, value in extras.items():
-                if key in LEGACY_MAPPED_KEYS:
-                    continue
-                base_payload[key] = deepcopy(value)
-            payloads.append(base_payload)
-        return payloads
+        return [self._entry_to_legacy_payload(entry) for entry in entries]
+
+    def legacy_payloads_for_entries(self, entries: list[MemoryEntry]) -> dict[str, dict[str, object]]:
+        """Build legacy payloads only for the given entries, keyed by entry id."""
+        return {entry.id: self._entry_to_legacy_payload(entry) for entry in entries}

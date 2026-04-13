@@ -10625,8 +10625,8 @@
   "bundle": {
     "benchmark_id": "iowa_gambling_task",
     "version": "1.0.0",
-    "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\manifest.json",
-    "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\iowa_gambling_task_external.jsonl",
+    "manifest_path": "/Users/admin/git/OpenFEP/external_benchmark_registry/iowa_gambling_task/manifest.json",
+    "data_path": "/Users/admin/git/OpenFEP/external_benchmark_registry/iowa_gambling_task/iowa_gambling_task_external.jsonl",
     "source_type": "external_bundle",
     "source_label": "igt dataset",
     "benchmark_slice": "iowa_gambling_task_external_bundle",

@@ -44583,8 +44583,8 @@
   "bundle": {
     "benchmark_id": "confidence_database",
     "version": "1.0.0",
-    "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\confidence_database\\manifest.json",
-    "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\confidence_database\\confidence_database_external.jsonl",
+    "manifest_path": "/Users/admin/git/OpenFEP/external_benchmark_registry/confidence_database/manifest.json",
+    "data_path": "/Users/admin/git/OpenFEP/external_benchmark_registry/confidence_database/confidence_database_external.jsonl",
     "source_type": "external_bundle",
     "source_label": "Confidence Database",
     "benchmark_slice": "confidence_database_external_bundle",

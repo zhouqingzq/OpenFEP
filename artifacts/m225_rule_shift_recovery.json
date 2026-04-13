@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.25",
   "schema_version": "m225_v2",
-  "generated_at": "2026-04-11T05:50:16+00:00",
-  "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71",
+  "generated_at": "2026-04-13T01:50:21+00:00",
+  "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
   "seed_set": [
     225,
     244,
@@ -1618,11 +1618,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -1646,11 +1646,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040974,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040974,
             "coherence": 0.04492,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -1674,11 +1674,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.019129,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.019129,
             "coherence": 0.031429,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -1702,11 +1702,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.015906,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.015906,
             "coherence": 0.016821,
+            "commitment_alignment": 0.0,
             "stress": -0.0504
           },
           "trace_cycle": 4
@@ -1730,11 +1730,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007597,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -1758,11 +1758,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011323,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -1786,11 +1786,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008324,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -1814,11 +1814,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010703,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -1842,11 +1842,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008055,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -1870,11 +1870,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.014923,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -1898,11 +1898,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.011,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003211,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -1926,11 +1926,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.001047,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -3953,11 +3953,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 1
@@ -3981,11 +3981,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040974,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.040974,
             "coherence": -0.009037,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 2
@@ -4009,11 +4009,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.046542,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 3
@@ -4037,11 +4037,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.042831,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 4
@@ -4065,11 +4065,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.000837,
             "energy": 0.1424,
             "fatigue": -0.19992,
+            "temperature": 0.000837,
             "coherence": 0.106758,
+            "commitment_alignment": 0.0,
             "stress": -0.16984
           },
           "trace_cycle": 5
@@ -4093,11 +4093,11 @@
             "commitment_alignment": 0.530904
           },
           "delta": {
-            "commitment_alignment": 0.030904,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.073255,
+            "commitment_alignment": 0.030904,
             "stress": 0.16016
           },
           "trace_cycle": 6
@@ -4121,11 +4121,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.469096,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": 0.041419,
+            "commitment_alignment": 0.469096,
             "stress": 0.11016
           },
           "trace_cycle": 7
@@ -4149,11 +4149,11 @@
             "commitment_alignment": 0.527457
           },
           "delta": {
-            "commitment_alignment": -0.472543,
-            "temperature": -0.010593,
             "energy": 0.1624,
             "fatigue": -0.22492,
+            "temperature": -0.010593,
             "coherence": 0.052825,
+            "commitment_alignment": -0.472543,
             "stress": -0.24984
           },
           "trace_cycle": 8
@@ -4177,11 +4177,11 @@
             "commitment_alignment": 0.51938
           },
           "delta": {
-            "commitment_alignment": -0.008077,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.073215,
+            "commitment_alignment": -0.008077,
             "stress": 0.16016
           },
           "trace_cycle": 9
@@ -4205,11 +4205,11 @@
             "commitment_alignment": 0.870336
           },
           "delta": {
-            "commitment_alignment": 0.350956,
-            "temperature": -0.011352,
             "energy": 0.1624,
             "fatigue": -0.22492,
+            "temperature": -0.011352,
             "coherence": 0.204403,
+            "commitment_alignment": 0.350956,
             "stress": -0.24984
           },
           "trace_cycle": 10
@@ -4233,11 +4233,11 @@
             "commitment_alignment": 0.723996
           },
           "delta": {
-            "commitment_alignment": -0.14634,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.098359,
+            "commitment_alignment": -0.14634,
             "stress": 0.16016
           },
           "trace_cycle": 11
@@ -4261,11 +4261,11 @@
             "commitment_alignment": 0.789917
           },
           "delta": {
-            "commitment_alignment": 0.065921,
-            "temperature": -0.027587,
             "energy": 0.1246,
             "fatigue": -0.19992,
+            "temperature": -0.027587,
             "coherence": 0.112005,
+            "commitment_alignment": 0.065921,
             "stress": -0.16984
           },
           "trace_cycle": 12
@@ -6288,11 +6288,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -6316,11 +6316,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040974,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040974,
             "coherence": 0.046751,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -6344,11 +6344,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008815,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -6372,11 +6372,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011029,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -6400,11 +6400,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01188,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -6428,11 +6428,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.016618,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.016618,
             "coherence": 0.026883,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 6
@@ -6456,11 +6456,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007073,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -6484,11 +6484,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011691,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -6512,11 +6512,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.021,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.004528,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -6540,11 +6540,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.000543,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -6568,11 +6568,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.019832,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 11
@@ -6596,11 +6596,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.004296,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -8623,11 +8623,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -8651,11 +8651,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040974,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040974,
             "coherence": 0.045461,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -8679,11 +8679,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.019129,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.019129,
             "coherence": 0.031241,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -8707,11 +8707,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.015906,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.015906,
             "coherence": 0.015686,
+            "commitment_alignment": 0.0,
             "stress": -0.0504
           },
           "trace_cycle": 4
@@ -8735,11 +8735,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.015601,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 5
@@ -8763,11 +8763,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0395,
             "fatigue": 0.0356,
+            "temperature": 0.0,
             "coherence": -0.051689,
+            "commitment_alignment": 0.0,
             "stress": 0.11564
           },
           "trace_cycle": 6
@@ -8791,11 +8791,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.008265,
             "energy": 0.2005,
             "fatigue": -0.32,
+            "temperature": -0.008265,
             "coherence": 0.137187,
+            "commitment_alignment": 0.0,
             "stress": -0.17564
           },
           "trace_cycle": 7
@@ -8819,11 +8819,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.5,
-            "temperature": 0.002605,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": 0.002605,
             "coherence": 0.083541,
+            "commitment_alignment": 0.5,
             "stress": 0.0
           },
           "trace_cycle": 8
@@ -8847,11 +8847,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.012196,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.012196,
             "coherence": -0.008284,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 9
@@ -8875,11 +8875,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.02729,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.02729,
             "coherence": -0.008075,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 10
@@ -8903,11 +8903,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.029353,
             "energy": 0.039,
             "fatigue": -0.32,
+            "temperature": -0.029353,
             "coherence": 0.020292,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 11
@@ -8931,11 +8931,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.036189,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.036189,
             "coherence": -0.007121,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 12
@@ -10958,11 +10958,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 1
@@ -10986,11 +10986,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040974,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.040974,
             "coherence": 0.017124,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 2
@@ -11014,11 +11014,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.019628,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 3
@@ -11042,11 +11042,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.016835,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 4
@@ -11070,11 +11070,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.045528,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 5
@@ -11098,11 +11098,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.020773,
             "energy": -0.01,
             "fatigue": 0.11,
+            "temperature": 0.020773,
             "coherence": 0.003525,
+            "commitment_alignment": 0.0,
             "stress": -0.04
           },
           "trace_cycle": 6
@@ -11126,11 +11126,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.006878,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.006878,
             "coherence": 0.001066,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 7
@@ -11154,11 +11154,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.017634,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 8
@@ -11182,11 +11182,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.08,
+            "temperature": 0.0,
             "coherence": -0.021512,
+            "commitment_alignment": 0.0,
             "stress": 0.08
           },
           "trace_cycle": 9
@@ -11210,11 +11210,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.021723,
             "energy": 0.162,
             "fatigue": -0.32,
+            "temperature": -0.021723,
             "coherence": 0.151598,
+            "commitment_alignment": 0.0,
             "stress": -0.285
           },
           "trace_cycle": 10
@@ -11238,11 +11238,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.5,
-            "temperature": -0.041429,
             "energy": -0.053,
             "fatigue": 0.11,
+            "temperature": -0.041429,
             "coherence": 0.064505,
+            "commitment_alignment": 0.5,
             "stress": 0.0
           },
           "trace_cycle": 11
@@ -11266,11 +11266,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.039601,
             "energy": -0.053,
             "fatigue": 0.11,
+            "temperature": -0.039601,
             "coherence": -0.022669,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 12
@@ -13293,11 +13293,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -13321,11 +13321,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.025731,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.025731,
             "coherence": 0.043134,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -13349,11 +13349,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.017901,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.017901,
             "coherence": 0.030993,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -13377,11 +13377,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007084,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -13405,11 +13405,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011143,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -13433,11 +13433,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.015498,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -13461,11 +13461,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.005817,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -13489,11 +13489,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01392,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -13517,11 +13517,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016886,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 9
@@ -13545,11 +13545,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.022,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008503,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -13573,11 +13573,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.006826,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -13601,11 +13601,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.001318,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -15628,11 +15628,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 1
@@ -15656,11 +15656,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.025731,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.025731,
             "coherence": -0.011083,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 2
@@ -15684,11 +15684,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.044415,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 3
@@ -15712,11 +15712,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.026914,
             "energy": 0.1474,
             "fatigue": -0.19992,
+            "temperature": 0.026914,
             "coherence": 0.10626,
+            "commitment_alignment": 0.0,
             "stress": -0.16984
           },
           "trace_cycle": 4
@@ -15740,11 +15740,11 @@
             "commitment_alignment": 0.880083
           },
           "delta": {
-            "commitment_alignment": 0.380083,
-            "temperature": 0.022941,
             "energy": -0.0726,
             "fatigue": 0.19008,
+            "temperature": 0.022941,
             "coherence": 0.019837,
+            "commitment_alignment": 0.380083,
             "stress": 0.06016
           },
           "trace_cycle": 5
@@ -15768,11 +15768,11 @@
             "commitment_alignment": 0.880345
           },
           "delta": {
-            "commitment_alignment": 0.000262,
-            "temperature": -0.00612,
             "energy": 0.1424,
             "fatigue": -0.19992,
+            "temperature": -0.00612,
             "coherence": 0.105867,
+            "commitment_alignment": 0.000262,
             "stress": -0.16984
           },
           "trace_cycle": 6
@@ -15796,11 +15796,11 @@
             "commitment_alignment": 0.500155
           },
           "delta": {
-            "commitment_alignment": -0.38019,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.144727,
+            "commitment_alignment": -0.38019,
             "stress": 0.16016
           },
           "trace_cycle": 7
@@ -15824,11 +15824,11 @@
             "commitment_alignment": 0.49923
           },
           "delta": {
-            "commitment_alignment": -0.000925,
-            "temperature": -0.01232,
             "energy": 0.1524,
             "fatigue": -0.17992,
+            "temperature": -0.01232,
             "coherence": 0.087716,
+            "commitment_alignment": -0.000925,
             "stress": -0.06984
           },
           "trace_cycle": 8
@@ -15852,11 +15852,11 @@
             "commitment_alignment": 0.755705
           },
           "delta": {
-            "commitment_alignment": 0.256475,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": 0.002868,
+            "commitment_alignment": 0.256475,
             "stress": 0.11016
           },
           "trace_cycle": 9
@@ -15880,11 +15880,11 @@
             "commitment_alignment": 0.838621
           },
           "delta": {
-            "commitment_alignment": 0.082916,
-            "temperature": -0.021007,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": -0.021007,
             "coherence": -0.007539,
+            "commitment_alignment": 0.082916,
             "stress": 0.00016
           },
           "trace_cycle": 10
@@ -15908,11 +15908,11 @@
             "commitment_alignment": 0.83764
           },
           "delta": {
-            "commitment_alignment": -0.000981,
-            "temperature": -0.021877,
             "energy": 0.118,
             "fatigue": -0.20992,
+            "temperature": -0.021877,
             "coherence": 0.115381,
+            "commitment_alignment": -0.000981,
             "stress": -0.22984
           },
           "trace_cycle": 11
@@ -15936,11 +15936,11 @@
             "commitment_alignment": 0.782576
           },
           "delta": {
-            "commitment_alignment": -0.055064,
-            "temperature": -0.024657,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": -0.024657,
             "coherence": -0.028546,
+            "commitment_alignment": -0.055064,
             "stress": 0.00016
           },
           "trace_cycle": 12
@@ -17963,11 +17963,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -17991,11 +17991,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.025731,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.025731,
             "coherence": 0.045964,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -18019,11 +18019,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.017901,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.017901,
             "coherence": 0.030074,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -18047,11 +18047,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006963,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -18075,11 +18075,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011152,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -18103,11 +18103,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01584,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -18131,11 +18131,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.00505,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -18159,11 +18159,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013917,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -18187,11 +18187,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016816,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 9
@@ -18215,11 +18215,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.022,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008553,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -18243,11 +18243,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.006263,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -18271,11 +18271,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.00102,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -20298,11 +20298,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -20326,11 +20326,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.025731,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.025731,
             "coherence": 0.042532,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -20354,11 +20354,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.017901,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.017901,
             "coherence": 0.030272,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -20382,11 +20382,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009632,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -20410,11 +20410,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010682,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -20438,11 +20438,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0395,
             "fatigue": 0.0356,
+            "temperature": 0.0,
             "coherence": -0.044487,
+            "commitment_alignment": 0.0,
             "stress": 0.11564
           },
           "trace_cycle": 6
@@ -20466,11 +20466,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.020074,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -20494,11 +20494,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.009904,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 8
@@ -20522,11 +20522,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.010856,
             "energy": 0.1515,
             "fatigue": -0.32,
+            "temperature": -0.010856,
             "coherence": 0.146173,
+            "commitment_alignment": 0.0,
             "stress": -0.30604
           },
           "trace_cycle": 9
@@ -20550,11 +20550,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.5,
-            "temperature": -0.018427,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.018427,
             "coherence": 0.079503,
+            "commitment_alignment": 0.5,
             "stress": 0.0
           },
           "trace_cycle": 10
@@ -20578,11 +20578,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.038257,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.038257,
             "coherence": -0.011535,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 11
@@ -20606,11 +20606,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.037877,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.037877,
             "coherence": 0.000468,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 12
@@ -22633,11 +22633,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 1
@@ -22661,11 +22661,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.025731,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.025731,
             "coherence": 0.015205,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 2
@@ -22689,11 +22689,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.018637,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 3
@@ -22717,11 +22717,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.037304,
             "energy": -0.05,
             "fatigue": 0.11,
+            "temperature": 0.037304,
             "coherence": -0.023621,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 4
@@ -22745,11 +22745,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.022942,
             "energy": -0.05,
             "fatigue": 0.11,
+            "temperature": 0.022942,
             "coherence": -0.022954,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 5
@@ -22773,11 +22773,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.008623,
             "energy": -0.01,
             "fatigue": 0.11,
+            "temperature": 0.008623,
             "coherence": 0.007086,
+            "commitment_alignment": 0.0,
             "stress": -0.04
           },
           "trace_cycle": 6
@@ -22801,11 +22801,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.01986,
             "energy": 0.215,
             "fatigue": -0.31,
+            "temperature": -0.01986,
             "coherence": 0.126441,
+            "commitment_alignment": 0.0,
             "stress": -0.15
           },
           "trace_cycle": 7
@@ -22829,11 +22829,11 @@
             "commitment_alignment": 0.527761
           },
           "delta": {
-            "commitment_alignment": 0.027761,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.0364,
+            "commitment_alignment": 0.027761,
             "stress": 0.1
           },
           "trace_cycle": 8
@@ -22857,11 +22857,11 @@
             "commitment_alignment": 0.525583
           },
           "delta": {
-            "commitment_alignment": -0.002178,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.040834,
+            "commitment_alignment": -0.002178,
             "stress": 0.1
           },
           "trace_cycle": 9
@@ -22885,11 +22885,11 @@
             "commitment_alignment": 0.877229
           },
           "delta": {
-            "commitment_alignment": 0.351646,
-            "temperature": -0.030665,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": -0.030665,
             "coherence": 0.066933,
+            "commitment_alignment": 0.351646,
             "stress": -0.06
           },
           "trace_cycle": 10
@@ -22913,11 +22913,11 @@
             "commitment_alignment": 0.873942
           },
           "delta": {
-            "commitment_alignment": -0.003287,
-            "temperature": -0.037083,
             "energy": 0.162,
             "fatigue": -0.32,
+            "temperature": -0.037083,
             "coherence": 0.13834,
+            "commitment_alignment": -0.003287,
             "stress": -0.2304
           },
           "trace_cycle": 11
@@ -22941,11 +22941,11 @@
             "commitment_alignment": 0.803386
           },
           "delta": {
-            "commitment_alignment": -0.070556,
-            "temperature": -0.053961,
             "energy": -0.053,
             "fatigue": 0.11,
+            "temperature": -0.053961,
             "coherence": -0.04033,
+            "commitment_alignment": -0.070556,
             "stress": 0.0
           },
           "trace_cycle": 12
@@ -24968,11 +24968,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -24996,11 +24996,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.03993,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.03993,
             "coherence": 0.040695,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -25024,11 +25024,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010459,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -25052,11 +25052,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010516,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -25080,11 +25080,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014503,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -25108,11 +25108,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.00774,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -25136,11 +25136,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016957,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -25164,11 +25164,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007888,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -25192,11 +25192,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.023,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006993,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -25220,11 +25220,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.00517,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -25248,11 +25248,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.0025,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -25276,11 +25276,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.007605,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -27303,11 +27303,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 1
@@ -27331,11 +27331,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.03993,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.03993,
             "coherence": -0.013467,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 2
@@ -27359,11 +27359,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.044498,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 3
@@ -27387,11 +27387,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.004739,
             "energy": 0.1424,
             "fatigue": -0.19992,
+            "temperature": 0.004739,
             "coherence": 0.107977,
+            "commitment_alignment": 0.0,
             "stress": -0.16984
           },
           "trace_cycle": 4
@@ -27415,11 +27415,11 @@
             "commitment_alignment": 0.529887
           },
           "delta": {
-            "commitment_alignment": 0.029887,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.068746,
+            "commitment_alignment": 0.029887,
             "stress": 0.16016
           },
           "trace_cycle": 5
@@ -27443,11 +27443,11 @@
             "commitment_alignment": 0.527544
           },
           "delta": {
-            "commitment_alignment": -0.002343,
-            "temperature": -0.004881,
             "energy": 0.1524,
             "fatigue": -0.17992,
+            "temperature": -0.004881,
             "coherence": 0.086762,
+            "commitment_alignment": -0.002343,
             "stress": -0.06984
           },
           "trace_cycle": 6
@@ -27471,11 +27471,11 @@
             "commitment_alignment": 0.903417
           },
           "delta": {
-            "commitment_alignment": 0.375873,
-            "temperature": 0.002952,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.002952,
             "coherence": 0.040495,
+            "commitment_alignment": 0.375873,
             "stress": 0.00016
           },
           "trace_cycle": 7
@@ -27499,11 +27499,11 @@
             "commitment_alignment": 0.903459
           },
           "delta": {
-            "commitment_alignment": 4.2e-05,
-            "temperature": -0.009721,
             "energy": 0.1512,
             "fatigue": -0.20992,
+            "temperature": -0.009721,
             "coherence": 0.126982,
+            "commitment_alignment": 4.2e-05,
             "stress": -0.22984
           },
           "trace_cycle": 8
@@ -27527,11 +27527,11 @@
             "commitment_alignment": 0.703986
           },
           "delta": {
-            "commitment_alignment": -0.199473,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.104827,
+            "commitment_alignment": -0.199473,
             "stress": 0.16016
           },
           "trace_cycle": 9
@@ -27555,11 +27555,11 @@
             "commitment_alignment": 0.906262
           },
           "delta": {
-            "commitment_alignment": 0.202276,
-            "temperature": -0.009834,
             "energy": 0.0626,
             "fatigue": -0.20992,
+            "temperature": -0.009834,
             "coherence": 0.128764,
+            "commitment_alignment": 0.202276,
             "stress": -0.22984
           },
           "trace_cycle": 10
@@ -27583,11 +27583,11 @@
             "commitment_alignment": 0.789998
           },
           "delta": {
-            "commitment_alignment": -0.116264,
-            "temperature": -0.021719,
             "energy": -0.0726,
             "fatigue": 0.19008,
+            "temperature": -0.021719,
             "coherence": -0.069769,
+            "commitment_alignment": -0.116264,
             "stress": 0.06016
           },
           "trace_cycle": 11
@@ -27611,11 +27611,11 @@
             "commitment_alignment": 0.788011
           },
           "delta": {
-            "commitment_alignment": -0.001987,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.043663,
+            "commitment_alignment": -0.001987,
             "stress": 0.11016
           },
           "trace_cycle": 12
@@ -29638,11 +29638,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -29666,11 +29666,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.03993,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.03993,
             "coherence": 0.039963,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -29694,11 +29694,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011476,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -29722,11 +29722,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010449,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -29750,11 +29750,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014635,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -29778,11 +29778,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007722,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -29806,11 +29806,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016986,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -29834,11 +29834,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007781,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -29862,11 +29862,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.023,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007053,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -29890,11 +29890,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.005006,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -29918,11 +29918,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.002611,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -29946,11 +29946,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.00775,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -31973,11 +31973,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -32001,11 +32001,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.03993,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.03993,
             "coherence": 0.040674,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -32029,11 +32029,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009931,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -32057,11 +32057,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011744,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -32085,11 +32085,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013796,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -32113,11 +32113,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0395,
             "fatigue": 0.0356,
+            "temperature": 0.0,
             "coherence": -0.050837,
+            "commitment_alignment": 0.0,
             "stress": 0.11564
           },
           "trace_cycle": 6
@@ -32141,11 +32141,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.017387,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -32169,11 +32169,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.023167,
             "energy": -0.01,
             "fatigue": 0.11,
+            "temperature": -0.023167,
             "coherence": 0.004427,
+            "commitment_alignment": 0.0,
             "stress": -0.04
           },
           "trace_cycle": 8
@@ -32197,11 +32197,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.002434,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": -0.002434,
             "coherence": 0.030821,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 9
@@ -32225,11 +32225,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.016359,
             "energy": 0.1225,
             "fatigue": -0.29,
+            "temperature": -0.016359,
             "coherence": 0.107362,
+            "commitment_alignment": 0.0,
             "stress": -0.21604
           },
           "trace_cycle": 10
@@ -32253,11 +32253,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.5,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.090584,
+            "commitment_alignment": 0.5,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -32281,11 +32281,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.003481,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -34308,11 +34308,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 1
@@ -34336,11 +34336,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.03993,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.03993,
             "coherence": 0.012789,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 2
@@ -34364,11 +34364,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.018063,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 3
@@ -34392,11 +34392,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.011711,
             "energy": -0.05,
             "fatigue": 0.11,
+            "temperature": 0.011711,
             "coherence": -0.020484,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 4
@@ -34420,11 +34420,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.046353,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 5
@@ -34448,11 +34448,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016885,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 6
@@ -34476,11 +34476,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.001219,
             "energy": 0.185,
             "fatigue": -0.305,
+            "temperature": -0.001219,
             "coherence": 0.163993,
+            "commitment_alignment": 0.0,
             "stress": -0.31
           },
           "trace_cycle": 7
@@ -34504,11 +34504,11 @@
             "commitment_alignment": 0.519003
           },
           "delta": {
-            "commitment_alignment": 0.019003,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.042286,
+            "commitment_alignment": 0.019003,
             "stress": 0.1
           },
           "trace_cycle": 8
@@ -34532,11 +34532,11 @@
             "commitment_alignment": 0.861531
           },
           "delta": {
-            "commitment_alignment": 0.342528,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.047259,
+            "commitment_alignment": 0.342528,
             "stress": 0.05
           },
           "trace_cycle": 9
@@ -34560,11 +34560,11 @@
             "commitment_alignment": 0.85437
           },
           "delta": {
-            "commitment_alignment": -0.007161,
-            "temperature": -0.021943,
             "energy": -0.05,
             "fatigue": 0.11,
+            "temperature": -0.021943,
             "coherence": -0.023184,
+            "commitment_alignment": -0.007161,
             "stress": 0.0
           },
           "trace_cycle": 10
@@ -34588,11 +34588,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.14563,
-            "temperature": -0.014996,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": -0.014996,
             "coherence": 0.032643,
+            "commitment_alignment": 0.14563,
             "stress": -0.06
           },
           "trace_cycle": 11
@@ -34616,11 +34616,11 @@
             "commitment_alignment": 0.854987
           },
           "delta": {
-            "commitment_alignment": -0.145013,
-            "temperature": -0.029511,
             "energy": 0.162,
             "fatigue": -0.32,
+            "temperature": -0.029511,
             "coherence": 0.103441,
+            "commitment_alignment": -0.145013,
             "stress": -0.2204
           },
           "trace_cycle": 12
@@ -36643,11 +36643,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -36671,11 +36671,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040048,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040048,
             "coherence": 0.037994,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -36699,11 +36699,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007692,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -36727,11 +36727,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.00826,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -36755,11 +36755,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01405,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -36783,11 +36783,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011773,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -36811,11 +36811,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018643,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -36839,11 +36839,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01408,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -36867,11 +36867,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.024,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006805,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -36895,11 +36895,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.003663,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -36923,11 +36923,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018326,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 11
@@ -36951,11 +36951,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.007192,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -38978,11 +38978,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 1
@@ -39006,11 +39006,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040048,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.040048,
             "coherence": -0.016413,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 2
@@ -39034,11 +39034,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.046532,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 3
@@ -39062,11 +39062,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.046044,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 4
@@ -39090,11 +39090,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.040474,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 5
@@ -39118,11 +39118,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.005961,
             "energy": 0.2124,
             "fatigue": -0.22492,
+            "temperature": -0.005961,
             "coherence": 0.161486,
+            "commitment_alignment": 0.0,
             "stress": -0.24984
           },
           "trace_cycle": 6
@@ -39146,11 +39146,11 @@
             "commitment_alignment": 0.876651
           },
           "delta": {
-            "commitment_alignment": 0.376651,
-            "temperature": -0.007586,
             "energy": -0.0726,
             "fatigue": 0.19008,
+            "temperature": -0.007586,
             "coherence": 0.01853,
+            "commitment_alignment": 0.376651,
             "stress": 0.06016
           },
           "trace_cycle": 7
@@ -39174,11 +39174,11 @@
             "commitment_alignment": 0.523276
           },
           "delta": {
-            "commitment_alignment": -0.353375,
-            "temperature": 0.00057,
             "energy": 0.1924,
             "fatigue": -0.22992,
+            "temperature": 0.00057,
             "coherence": 0.035614,
+            "commitment_alignment": -0.353375,
             "stress": -0.08984
           },
           "trace_cycle": 8
@@ -39202,11 +39202,11 @@
             "commitment_alignment": 0.908305
           },
           "delta": {
-            "commitment_alignment": 0.385029,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": 0.030465,
+            "commitment_alignment": 0.385029,
             "stress": 0.11016
           },
           "trace_cycle": 9
@@ -39230,11 +39230,11 @@
             "commitment_alignment": 0.80393
           },
           "delta": {
-            "commitment_alignment": -0.104375,
-            "temperature": -0.011302,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": -0.011302,
             "coherence": -0.040319,
+            "commitment_alignment": -0.104375,
             "stress": 0.00016
           },
           "trace_cycle": 10
@@ -39258,11 +39258,11 @@
             "commitment_alignment": 0.918262
           },
           "delta": {
-            "commitment_alignment": 0.114332,
-            "temperature": -0.019697,
             "energy": 0.1424,
             "fatigue": -0.19992,
+            "temperature": -0.019697,
             "coherence": 0.127419,
+            "commitment_alignment": 0.114332,
             "stress": -0.16984
           },
           "trace_cycle": 11
@@ -39286,11 +39286,11 @@
             "commitment_alignment": 0.45
           },
           "delta": {
-            "commitment_alignment": -0.468262,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.155143,
+            "commitment_alignment": -0.468262,
             "stress": 0.16016
           },
           "trace_cycle": 12
@@ -41313,11 +41313,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -41341,11 +41341,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040048,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040048,
             "coherence": 0.040825,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -41369,11 +41369,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006311,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -41397,11 +41397,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008343,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -41425,11 +41425,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014745,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -41453,11 +41453,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011311,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -41481,11 +41481,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018488,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -41509,11 +41509,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013618,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -41537,11 +41537,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.024,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006862,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -41565,11 +41565,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.017451,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -41593,11 +41593,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.005293,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -41621,11 +41621,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.005836,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -43648,11 +43648,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -43676,11 +43676,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040048,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040048,
             "coherence": 0.038052,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -43704,11 +43704,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008426,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -43732,11 +43732,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009164,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -43760,11 +43760,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.012699,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -43788,11 +43788,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0395,
             "fatigue": 0.0356,
+            "temperature": 0.0,
             "coherence": -0.045208,
+            "commitment_alignment": 0.0,
             "stress": 0.11564
           },
           "trace_cycle": 6
@@ -43816,11 +43816,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006604,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -43844,11 +43844,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.013224,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 8
@@ -43872,11 +43872,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010707,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -43900,11 +43900,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007499,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -43928,11 +43928,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009205,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -43956,11 +43956,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0035,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.00486,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -45983,11 +45983,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 1
@@ -46011,11 +46011,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040048,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.040048,
             "coherence": 0.010581,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 2
@@ -46039,11 +46039,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.020184,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 3
@@ -46067,11 +46067,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.020155,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 4
@@ -46095,11 +46095,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.01379,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 5
@@ -46123,11 +46123,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.014352,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 6
@@ -46151,11 +46151,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.045582,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 7
@@ -46179,11 +46179,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.003274,
             "energy": -0.05,
             "fatigue": 0.11,
+            "temperature": 0.003274,
             "coherence": -0.01948,
+            "commitment_alignment": 0.0,
             "stress": 0.0
           },
           "trace_cycle": 8
@@ -46207,11 +46207,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.010994,
             "energy": 0.185,
             "fatigue": -0.29,
+            "temperature": -0.010994,
             "coherence": 0.15884,
+            "commitment_alignment": 0.0,
             "stress": -0.29
           },
           "trace_cycle": 9
@@ -46235,11 +46235,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.5,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.067052,
+            "commitment_alignment": 0.5,
             "stress": 0.05
           },
           "trace_cycle": 10
@@ -46263,11 +46263,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.017762,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 11
@@ -46291,11 +46291,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.017062,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 12
@@ -48318,11 +48318,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -48346,11 +48346,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043645,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043645,
             "coherence": 0.036708,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -48374,11 +48374,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013646,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -48402,11 +48402,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006472,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -48430,11 +48430,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009933,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -48458,11 +48458,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013884,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -48486,11 +48486,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.023014,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -48514,11 +48514,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014885,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -48542,11 +48542,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.012,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003812,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -48570,11 +48570,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018055,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -48598,11 +48598,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.003766,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -48626,11 +48626,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.001905,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -50653,11 +50653,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 1
@@ -50681,11 +50681,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043645,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.043645,
             "coherence": -0.017696,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 2
@@ -50709,11 +50709,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.040681,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 3
@@ -50737,11 +50737,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.004574,
             "energy": 0.1524,
             "fatigue": -0.17992,
+            "temperature": -0.004574,
             "coherence": 0.0796,
+            "commitment_alignment": 0.0,
             "stress": -0.06984
           },
           "trace_cycle": 4
@@ -50765,11 +50765,11 @@
             "commitment_alignment": 0.872859
           },
           "delta": {
-            "commitment_alignment": 0.372859,
-            "temperature": 0.012632,
             "energy": -0.0726,
             "fatigue": 0.19008,
+            "temperature": 0.012632,
             "coherence": 0.024086,
+            "commitment_alignment": 0.372859,
             "stress": 0.06016
           },
           "trace_cycle": 5
@@ -50793,11 +50793,11 @@
             "commitment_alignment": 0.527618
           },
           "delta": {
-            "commitment_alignment": -0.345241,
-            "temperature": -0.006991,
             "energy": 0.1524,
             "fatigue": -0.17992,
+            "temperature": -0.006991,
             "coherence": 0.014381,
+            "commitment_alignment": -0.345241,
             "stress": -0.06984
           },
           "trace_cycle": 6
@@ -50821,11 +50821,11 @@
             "commitment_alignment": 0.79189
           },
           "delta": {
-            "commitment_alignment": 0.264272,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": 0.001253,
+            "commitment_alignment": 0.264272,
             "stress": 0.11016
           },
           "trace_cycle": 7
@@ -50849,11 +50849,11 @@
             "commitment_alignment": 0.792092
           },
           "delta": {
-            "commitment_alignment": 0.000202,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.041958,
+            "commitment_alignment": 0.000202,
             "stress": 0.11016
           },
           "trace_cycle": 8
@@ -50877,11 +50877,11 @@
             "commitment_alignment": 0.896282
           },
           "delta": {
-            "commitment_alignment": 0.10419,
-            "temperature": -0.008909,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": -0.008909,
             "coherence": 0.00582,
+            "commitment_alignment": 0.10419,
             "stress": 0.00016
           },
           "trace_cycle": 9
@@ -50905,11 +50905,11 @@
             "commitment_alignment": 0.490034
           },
           "delta": {
-            "commitment_alignment": -0.406248,
-            "temperature": -0.021216,
             "energy": 0.1624,
             "fatigue": -0.22492,
+            "temperature": -0.021216,
             "coherence": 0.05999,
+            "commitment_alignment": -0.406248,
             "stress": -0.24984
           },
           "trace_cycle": 10
@@ -50933,11 +50933,11 @@
             "commitment_alignment": 0.649294
           },
           "delta": {
-            "commitment_alignment": 0.15926,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.046322,
+            "commitment_alignment": 0.15926,
             "stress": 0.16016
           },
           "trace_cycle": 11
@@ -50961,11 +50961,11 @@
             "commitment_alignment": 0.734047
           },
           "delta": {
-            "commitment_alignment": 0.084753,
-            "temperature": -0.02171,
             "energy": 0.1056,
             "fatigue": -0.21492,
+            "temperature": -0.02171,
             "coherence": 0.116677,
+            "commitment_alignment": 0.084753,
             "stress": -0.18984
           },
           "trace_cycle": 12
@@ -52988,11 +52988,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -53016,11 +53016,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043645,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043645,
             "coherence": 0.038553,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -53044,11 +53044,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014091,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -53072,11 +53072,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.00595,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -53100,11 +53100,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010106,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -53128,11 +53128,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.012122,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -53156,11 +53156,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.021496,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -53184,11 +53184,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.015063,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -53212,11 +53212,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.012,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003739,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -53240,11 +53240,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018321,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -53268,11 +53268,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.002054,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -53296,11 +53296,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.001185,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -55323,11 +55323,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -55351,11 +55351,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043645,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043645,
             "coherence": 0.03576,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -55379,11 +55379,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013807,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -55407,11 +55407,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008235,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -55435,11 +55435,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009864,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -55463,11 +55463,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0395,
             "fatigue": 0.0356,
+            "temperature": 0.0,
             "coherence": -0.045914,
+            "commitment_alignment": 0.0,
             "stress": 0.11564
           },
           "trace_cycle": 6
@@ -55491,11 +55491,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.021553,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -55519,11 +55519,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.011917,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 8
@@ -55547,11 +55547,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.022869,
             "energy": -0.01,
             "fatigue": 0.11,
+            "temperature": -0.022869,
             "coherence": 0.005876,
+            "commitment_alignment": 0.0,
             "stress": -0.04
           },
           "trace_cycle": 9
@@ -55575,11 +55575,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.009851,
             "energy": 0.1215,
             "fatigue": -0.295,
+            "temperature": -0.009851,
             "coherence": 0.128357,
+            "commitment_alignment": 0.0,
             "stress": -0.29
           },
           "trace_cycle": 10
@@ -55603,11 +55603,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.5,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.088709,
+            "commitment_alignment": 0.5,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -55631,11 +55631,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.003965,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -57658,11 +57658,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 1
@@ -57686,11 +57686,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043645,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.043645,
             "coherence": 0.008661,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 2
@@ -57714,11 +57714,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.014348,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 3
@@ -57742,11 +57742,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.048898,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 4
@@ -57770,11 +57770,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.040039,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 5
@@ -57798,11 +57798,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.004904,
             "energy": -0.01,
             "fatigue": 0.11,
+            "temperature": -0.004904,
             "coherence": 0.006157,
+            "commitment_alignment": 0.0,
             "stress": -0.04
           },
           "trace_cycle": 6
@@ -57826,11 +57826,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.008584,
             "energy": 0.185,
             "fatigue": -0.305,
+            "temperature": -0.008584,
             "coherence": 0.156768,
+            "commitment_alignment": 0.0,
             "stress": -0.31
           },
           "trace_cycle": 7
@@ -57854,11 +57854,11 @@
             "commitment_alignment": 0.522967
           },
           "delta": {
-            "commitment_alignment": 0.022967,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.033852,
+            "commitment_alignment": 0.022967,
             "stress": 0.1
           },
           "trace_cycle": 8
@@ -57882,11 +57882,11 @@
             "commitment_alignment": 0.863118
           },
           "delta": {
-            "commitment_alignment": 0.340151,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.044567,
+            "commitment_alignment": 0.340151,
             "stress": 0.05
           },
           "trace_cycle": 9
@@ -57910,11 +57910,11 @@
             "commitment_alignment": 0.519243
           },
           "delta": {
-            "commitment_alignment": -0.343875,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.103516,
+            "commitment_alignment": -0.343875,
             "stress": 0.1
           },
           "trace_cycle": 10
@@ -57938,11 +57938,11 @@
             "commitment_alignment": 1.0
           },
           "delta": {
-            "commitment_alignment": 0.480757,
-            "temperature": -0.022276,
             "energy": 0.185,
             "fatigue": -0.29,
+            "temperature": -0.022276,
             "coherence": 0.243246,
+            "commitment_alignment": 0.480757,
             "stress": -0.29
           },
           "trace_cycle": 11
@@ -57966,11 +57966,11 @@
             "commitment_alignment": 0.783743
           },
           "delta": {
-            "commitment_alignment": -0.216257,
-            "temperature": -0.028298,
             "energy": -0.05,
             "fatigue": 0.11,
+            "temperature": -0.028298,
             "coherence": -0.064824,
+            "commitment_alignment": -0.216257,
             "stress": 0.0
           },
           "trace_cycle": 12
@@ -59993,11 +59993,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -60021,11 +60021,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043927,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043927,
             "coherence": 0.04266,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -60049,11 +60049,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007807,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -60077,11 +60077,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010184,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -60105,11 +60105,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009552,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -60133,11 +60133,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.012747,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -60161,11 +60161,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.019459,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -60189,11 +60189,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010553,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -60217,11 +60217,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.013,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003536,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -60245,11 +60245,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.015019,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -60273,11 +60273,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.005497,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -60301,11 +60301,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.002393,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -62328,11 +62328,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 1
@@ -62356,11 +62356,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043927,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": 0.043927,
             "coherence": -0.011694,
+            "commitment_alignment": 0.0,
             "stress": 0.00016
           },
           "trace_cycle": 2
@@ -62384,11 +62384,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.047188,
+            "commitment_alignment": 0.0,
             "stress": 0.11016
           },
           "trace_cycle": 3
@@ -62412,11 +62412,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.004658,
             "energy": 0.1574,
             "fatigue": -0.17992,
+            "temperature": -0.004658,
             "coherence": 0.085978,
+            "commitment_alignment": 0.0,
             "stress": -0.06984
           },
           "trace_cycle": 4
@@ -62440,11 +62440,11 @@
             "commitment_alignment": 0.529248
           },
           "delta": {
-            "commitment_alignment": 0.029248,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.061566,
+            "commitment_alignment": 0.029248,
             "stress": 0.16016
           },
           "trace_cycle": 5
@@ -62468,11 +62468,11 @@
             "commitment_alignment": 0.87543
           },
           "delta": {
-            "commitment_alignment": 0.346182,
-            "temperature": 0.010476,
             "energy": 0.1424,
             "fatigue": -0.19992,
+            "temperature": 0.010476,
             "coherence": 0.169231,
+            "commitment_alignment": 0.346182,
             "stress": -0.16984
           },
           "trace_cycle": 6
@@ -62496,11 +62496,11 @@
             "commitment_alignment": 0.710896
           },
           "delta": {
-            "commitment_alignment": -0.164534,
-            "temperature": 0.0,
             "energy": -0.0626,
             "fatigue": 0.21008,
+            "temperature": 0.0,
             "coherence": -0.110743,
+            "commitment_alignment": -0.164534,
             "stress": 0.16016
           },
           "trace_cycle": 7
@@ -62524,11 +62524,11 @@
             "commitment_alignment": 0.713467
           },
           "delta": {
-            "commitment_alignment": 0.002571,
-            "temperature": -0.006403,
             "energy": 0.1462,
             "fatigue": -0.17992,
+            "temperature": -0.006403,
             "coherence": 0.082322,
+            "commitment_alignment": 0.002571,
             "stress": -0.06984
           },
           "trace_cycle": 8
@@ -62552,11 +62552,11 @@
             "commitment_alignment": 0.795774
           },
           "delta": {
-            "commitment_alignment": 0.082307,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.024056,
+            "commitment_alignment": 0.082307,
             "stress": 0.11016
           },
           "trace_cycle": 9
@@ -62580,11 +62580,11 @@
             "commitment_alignment": 0.789981
           },
           "delta": {
-            "commitment_alignment": -0.005793,
-            "temperature": -0.02567,
             "energy": -0.0526,
             "fatigue": 0.18008,
+            "temperature": -0.02567,
             "coherence": -0.023444,
+            "commitment_alignment": -0.005793,
             "stress": 0.00016
           },
           "trace_cycle": 10
@@ -62608,11 +62608,11 @@
             "commitment_alignment": 0.786054
           },
           "delta": {
-            "commitment_alignment": -0.003927,
-            "temperature": -0.017331,
             "energy": 0.0852,
             "fatigue": -0.20992,
+            "temperature": -0.017331,
             "coherence": 0.099485,
+            "commitment_alignment": -0.003927,
             "stress": -0.22984
           },
           "trace_cycle": 11
@@ -62636,11 +62636,11 @@
             "commitment_alignment": 0.840886
           },
           "delta": {
-            "commitment_alignment": 0.054832,
-            "temperature": 0.0,
             "energy": -0.0326,
             "fatigue": 0.06008,
+            "temperature": 0.0,
             "coherence": -0.037403,
+            "commitment_alignment": 0.054832,
             "stress": 0.11016
           },
           "trace_cycle": 12
@@ -64663,11 +64663,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -64691,11 +64691,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043927,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043927,
             "coherence": 0.043487,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -64719,11 +64719,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009318,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -64747,11 +64747,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009581,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -64775,11 +64775,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009782,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -64803,11 +64803,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.012688,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -64831,11 +64831,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006079,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -64859,11 +64859,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.014965,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 8
@@ -64887,11 +64887,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.013,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003145,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -64915,11 +64915,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.000367,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -64943,11 +64943,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.004734,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -64971,11 +64971,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.004688,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -66998,11 +66998,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -67026,11 +67026,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043927,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043927,
             "coherence": 0.043899,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -67054,11 +67054,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010082,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -67082,11 +67082,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018424,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 4
@@ -67110,11 +67110,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.013911,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 5
@@ -67138,11 +67138,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.006284,
             "energy": 0.133,
             "fatigue": -0.2244,
+            "temperature": -0.006284,
             "coherence": 0.102479,
+            "commitment_alignment": 0.0,
             "stress": -0.16436
           },
           "trace_cycle": 6
@@ -67166,11 +67166,11 @@
             "commitment_alignment": 0.851908
           },
           "delta": {
-            "commitment_alignment": 0.351908,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": 0.038893,
+            "commitment_alignment": 0.351908,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -67194,11 +67194,11 @@
             "commitment_alignment": 0.855833
           },
           "delta": {
-            "commitment_alignment": 0.003925,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.0153,
+            "commitment_alignment": 0.003925,
             "stress": 0.06
           },
           "trace_cycle": 8
@@ -67222,11 +67222,11 @@
             "commitment_alignment": 0.803899
           },
           "delta": {
-            "commitment_alignment": -0.051934,
-            "temperature": -0.016549,
             "energy": 0.0,
             "fatigue": 0.1,
+            "temperature": -0.016549,
             "coherence": 0.021441,
+            "commitment_alignment": -0.051934,
             "stress": -0.1
           },
           "trace_cycle": 9
@@ -67250,11 +67250,11 @@
             "commitment_alignment": 0.8035
           },
           "delta": {
-            "commitment_alignment": -0.000399,
-            "temperature": -0.014114,
             "energy": 0.0,
             "fatigue": -0.32,
+            "temperature": -0.014114,
             "coherence": 0.036005,
+            "commitment_alignment": -0.000399,
             "stress": -0.13604
           },
           "trace_cycle": 10
@@ -67278,11 +67278,11 @@
             "commitment_alignment": 0.802836
           },
           "delta": {
-            "commitment_alignment": -0.000664,
-            "temperature": -0.041951,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.041951,
             "coherence": -0.00439,
+            "commitment_alignment": -0.000664,
             "stress": 0.0
           },
           "trace_cycle": 11
@@ -67306,11 +67306,11 @@
             "commitment_alignment": 0.795621
           },
           "delta": {
-            "commitment_alignment": -0.007215,
-            "temperature": -0.031297,
             "energy": -0.013,
             "fatigue": 0.11,
+            "temperature": -0.031297,
             "coherence": -0.004195,
+            "commitment_alignment": -0.007215,
             "stress": 0.0
           },
           "trace_cycle": 12
@@ -69333,11 +69333,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 1
@@ -69361,11 +69361,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043927,
             "energy": -0.03,
             "fatigue": 0.1,
+            "temperature": 0.043927,
             "coherence": 0.014632,
+            "commitment_alignment": 0.0,
             "stress": -0.06
           },
           "trace_cycle": 2
@@ -69389,11 +69389,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.020032,
+            "commitment_alignment": 0.0,
             "stress": 0.05
           },
           "trace_cycle": 3
@@ -69417,11 +69417,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.045388,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 4
@@ -69445,11 +69445,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.04089,
+            "commitment_alignment": 0.0,
             "stress": 0.1
           },
           "trace_cycle": 5
@@ -69473,11 +69473,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.002323,
             "energy": -0.01,
             "fatigue": 0.11,
+            "temperature": -0.002323,
             "coherence": 0.005789,
+            "commitment_alignment": 0.0,
             "stress": -0.04
           },
           "trace_cycle": 6
@@ -69501,11 +69501,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": -0.00753,
             "energy": 0.185,
             "fatigue": -0.305,
+            "temperature": -0.00753,
             "coherence": 0.158771,
+            "commitment_alignment": 0.0,
             "stress": -0.31
           },
           "trace_cycle": 7
@@ -69529,11 +69529,11 @@
             "commitment_alignment": 0.524488
           },
           "delta": {
-            "commitment_alignment": 0.024488,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.036643,
+            "commitment_alignment": 0.024488,
             "stress": 0.1
           },
           "trace_cycle": 8
@@ -69557,11 +69557,11 @@
             "commitment_alignment": 0.523746
           },
           "delta": {
-            "commitment_alignment": -0.000742,
-            "temperature": 0.0,
             "energy": -0.04,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.044537,
+            "commitment_alignment": -0.000742,
             "stress": 0.1
           },
           "trace_cycle": 9
@@ -69585,11 +69585,11 @@
             "commitment_alignment": 0.856892
           },
           "delta": {
-            "commitment_alignment": 0.333146,
-            "temperature": 0.0,
             "energy": -0.01,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.043714,
+            "commitment_alignment": 0.333146,
             "stress": 0.05
           },
           "trace_cycle": 10
@@ -69613,11 +69613,11 @@
             "commitment_alignment": 0.45
           },
           "delta": {
-            "commitment_alignment": -0.406892,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.08,
+            "temperature": 0.0,
             "coherence": -0.090864,
+            "commitment_alignment": -0.406892,
             "stress": 0.08
           },
           "trace_cycle": 11
@@ -69641,11 +69641,11 @@
             "commitment_alignment": 0.854412
           },
           "delta": {
-            "commitment_alignment": 0.404412,
-            "temperature": -0.03973,
             "energy": 0.162,
             "fatigue": -0.32,
+            "temperature": -0.03973,
             "coherence": 0.219268,
+            "commitment_alignment": 0.404412,
             "stress": -0.285
           },
           "trace_cycle": 12
@@ -71670,11 +71670,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -71698,11 +71698,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040974,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040974,
             "coherence": 0.04492,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -71726,11 +71726,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.019129,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.019129,
             "coherence": 0.031429,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -71754,11 +71754,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.015906,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.015906,
             "coherence": 0.016821,
+            "commitment_alignment": 0.0,
             "stress": -0.0504
           },
           "trace_cycle": 4
@@ -71782,11 +71782,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007597,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -71810,11 +71810,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011323,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -71838,11 +71838,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008324,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -71866,11 +71866,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010703,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -71894,11 +71894,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008055,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -71922,11 +71922,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.014923,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -71950,11 +71950,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.011,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003211,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -71978,11 +71978,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.001047,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -74005,11 +74005,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -74033,11 +74033,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.025731,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.025731,
             "coherence": 0.043134,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -74061,11 +74061,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.017901,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.017901,
             "coherence": 0.030993,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 3
@@ -74089,11 +74089,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007084,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -74117,11 +74117,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011143,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -74145,11 +74145,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.015498,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -74173,11 +74173,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.005817,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 7
@@ -74201,11 +74201,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01392,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -74229,11 +74229,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016886,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 9
@@ -74257,11 +74257,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.022,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.008503,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -74285,11 +74285,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.006826,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -74313,11 +74313,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.001318,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -76340,11 +76340,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -76368,11 +76368,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.03993,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.03993,
             "coherence": 0.040695,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -76396,11 +76396,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010459,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -76424,11 +76424,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010516,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -76452,11 +76452,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014503,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -76480,11 +76480,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.00774,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -76508,11 +76508,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.016957,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -76536,11 +76536,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007888,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -76564,11 +76564,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.023,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006993,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -76592,11 +76592,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.00517,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -76620,11 +76620,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.0025,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -76648,11 +76648,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.007605,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -78675,11 +78675,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -78703,11 +78703,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.040048,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.040048,
             "coherence": 0.037994,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -78731,11 +78731,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007692,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -78759,11 +78759,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.00826,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -78787,11 +78787,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01405,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -78815,11 +78815,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.011773,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -78843,11 +78843,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018643,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -78871,11 +78871,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.01408,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -78899,11 +78899,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.024,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006805,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -78927,11 +78927,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.003663,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 10
@@ -78955,11 +78955,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018326,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 11
@@ -78983,11 +78983,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.007192,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -81010,11 +81010,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -81038,11 +81038,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043645,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043645,
             "coherence": 0.036708,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -81066,11 +81066,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013646,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -81094,11 +81094,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.006472,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -81122,11 +81122,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009933,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -81150,11 +81150,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.013884,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -81178,11 +81178,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.023014,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -81206,11 +81206,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.014885,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -81234,11 +81234,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.012,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003812,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -81262,11 +81262,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.018055,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -81290,11 +81290,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.003766,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -81318,11 +81318,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.001905,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12
@@ -83345,11 +83345,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0056,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.0056,
             "coherence": 0.0,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 1
@@ -83373,11 +83373,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.043927,
             "energy": 0.01,
             "fatigue": 0.1,
+            "temperature": 0.043927,
             "coherence": 0.04266,
+            "commitment_alignment": 0.0,
             "stress": -0.1
           },
           "trace_cycle": 2
@@ -83401,11 +83401,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.007807,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 3
@@ -83429,11 +83429,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010184,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 4
@@ -83457,11 +83457,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.009552,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 5
@@ -83485,11 +83485,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.012747,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 6
@@ -83513,11 +83513,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.019459,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 7
@@ -83541,11 +83541,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.03,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.010553,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 8
@@ -83569,11 +83569,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.013,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": 0.003536,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 9
@@ -83597,11 +83597,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": 0.13,
+            "temperature": 0.0,
             "coherence": -0.015019,
+            "commitment_alignment": 0.0,
             "stress": 0.06
           },
           "trace_cycle": 10
@@ -83625,11 +83625,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.005497,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 11
@@ -83653,11 +83653,11 @@
             "commitment_alignment": 0.5
           },
           "delta": {
-            "commitment_alignment": 0.0,
-            "temperature": 0.0,
             "energy": 0.0,
             "fatigue": -0.02,
+            "temperature": 0.0,
             "coherence": -0.002393,
+            "commitment_alignment": 0.0,
             "stress": 0.01
           },
           "trace_cycle": 12

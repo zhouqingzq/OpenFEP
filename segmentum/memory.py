@@ -444,8 +444,8 @@ class LongTermMemory:
         if self.memory_store is None:
             return
         legacy_ids = [str(payload.get("episode_id", "")) for payload in self.episodes]
-        store_ids = [entry.id for entry in self.memory_store.entries]
-        if legacy_ids != store_ids:
+        projected_ids = [entry.id for entry in self.memory_store.entries]
+        if legacy_ids != projected_ids:
             raise RuntimeError("memory store / legacy episode projection diverged")
 
     def _commit_episode_projection(
@@ -792,13 +792,12 @@ class LongTermMemory:
             agent_state=self.agent_state_vector,
             cognitive_style=self.memory_cognitive_style,
         )
-        candidate_ids = {c.entry_id for c in result.candidates[:k]}
-        projected_by_id = {
-            str(payload.get("episode_id", "")): payload
-            for payload in store.to_legacy_episodes(entry_ids=candidate_ids)
-        }
+        top_candidates = result.candidates[:k]
+        projected_by_id = store.legacy_payloads_for_entries(
+            [c.entry for c in top_candidates]
+        )
         bridged: list[dict[str, object]] = []
-        for candidate in result.candidates[:k]:
+        for candidate in top_candidates:
             payload = dict(projected_by_id.get(candidate.entry_id, {}))
             payload.setdefault("episode_id", candidate.entry_id)
             payload.setdefault("content", candidate.entry.content)

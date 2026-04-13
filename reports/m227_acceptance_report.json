@@ -1,18 +1,18 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-04-11T06:09:20+00:00",
+  "generated_at": "2026-04-13T02:26:39+00:00",
   "seed_set": [
     227,
     342
   ],
   "artifacts": {
-    "specification": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
-    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
-    "stress": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
-    "soak": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
-    "summary": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md"
+    "specification": "/Users/admin/git/OpenFEP/reports/m227_milestone_spec.md",
+    "canonical_trace": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_trace.jsonl",
+    "ablation": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_ablation.json",
+    "stress": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_stress.json",
+    "soak": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_soak.json",
+    "summary": "/Users/admin/git/OpenFEP/reports/m227_acceptance_summary.md"
   },
   "tests": {
     "milestone": [
@@ -447,11 +447,11 @@
         "phase_changes_bounded": true,
         "min_continuity_score": 0.504332,
         "max_continuity_score": 0.78154,
-        "final_continuity_score": 0.666481,
+        "final_continuity_score": 0.649815,
         "max_anchor_count": 12,
         "final_anchor_count": 12,
         "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 25,
+        "threatened_cycles": 23,
         "fragile_cycles": 71,
         "distinct_phases": [
           "consolidation",
@@ -467,23 +467,23 @@
           "cycle": 72,
           "current_phase": "consolidation",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.666481,
+          "continuity_score": 0.649815,
           "continuity_anchors": [
-            "ep-000072-exploit_shelter",
-            "ep-000057-exploit_shelter-merged",
-            "d5a5d8c6-23c5-4757-b7c0-58c602b8ed8b",
-            "5bf546c7-dc83-479f-a16b-e7e899dd6fd0",
+            "ep-000071-rest",
+            "72251b26-1f76-4f13-9734-3c11d9efea68",
+            "3694c760-2ec9-483e-bc6e-ba2a0634f0e1",
+            "1f4ec6f3-4ef4-428d-9252-930f1260dab6",
             "ep-000069-scan",
             "ep-000050-rest-merged",
-            "849c602b-2ee7-4550-90c5-641ed9a3b33c",
-            "0e822390-d561-4423-aba4-a669dbfcd8f9",
-            "f241e265-28e1-4a4c-ab40-9b67940bf6fe",
-            "ep-000049-hide",
-            "de1e6d44-c3ef-4ae9-8fa3-16d262c2f2f0",
-            "83af982b-15fd-4dc4-b9d8-3a8dbb5dd27b"
+            "ep-000057-exploit_shelter-merged",
+            "606bf359-378b-494b-8a4e-db60178e9b3d",
+            "538f7a5a-e7f3-4413-97bc-a23b4812d2c3",
+            "b9640593-98df-40d8-b688-de0d277c8c48",
+            "98da396e-0a12-474b-8170-1912193d5ed1",
+            "ep-000049-hide"
           ],
           "status_flags": {
-            "threatened": true,
+            "threatened": false,
             "repairing": false,
             "overloaded": true,
             "socially_destabilized": false,
@@ -499,7 +499,7 @@
             "need:maintenance",
             "unresolved maintenance discrepancy"
           ],
-          "last_choice": "exploit_shelter"
+          "last_choice": "rest"
         }
       }
     },
@@ -517,44 +517,44 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-04-11T06:09:20+00:00",
-    "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71",
+    "generated_at": "2026-04-13T02:26:39+00:00",
+    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
     "artifact_records": {
       "specification": {
-        "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
+        "path": "/Users/admin/git/OpenFEP/reports/m227_milestone_spec.md",
         "exists": true,
         "size_bytes": 2349,
-        "modified_at": "2026-03-21T13:18:29+00:00"
+        "modified_at": "2026-04-12T06:59:44+00:00"
       },
       "canonical_trace": {
-        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_trace.jsonl",
         "exists": true,
-        "size_bytes": 86113,
-        "modified_at": "2026-04-11T06:08:59+00:00"
+        "size_bytes": 86097,
+        "modified_at": "2026-04-13T02:26:21+00:00"
       },
       "ablation": {
-        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_ablation.json",
         "exists": true,
-        "size_bytes": 1674,
-        "modified_at": "2026-04-11T06:08:59+00:00"
+        "size_bytes": 1613,
+        "modified_at": "2026-04-13T02:26:21+00:00"
       },
       "stress": {
-        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_stress.json",
         "exists": true,
-        "size_bytes": 15049,
-        "modified_at": "2026-04-11T06:08:59+00:00"
+        "size_bytes": 14545,
+        "modified_at": "2026-04-13T02:26:21+00:00"
       },
       "soak": {
-        "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 19057,
-        "modified_at": "2026-04-11T06:09:20+00:00"
+        "size_bytes": 18264,
+        "modified_at": "2026-04-13T02:26:39+00:00"
       },
       "summary": {
-        "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
+        "path": "/Users/admin/git/OpenFEP/reports/m227_acceptance_summary.md",
         "exists": true,
-        "size_bytes": 215,
-        "modified_at": "2026-04-10T07:33:55+00:00"
+        "size_bytes": 208,
+        "modified_at": "2026-04-12T06:59:44+00:00"
       }
     }
   },

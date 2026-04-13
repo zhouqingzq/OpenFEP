@@ -1,10 +1,10 @@
 {
   "milestone_id": "M2.25",
   "schema_version": "m225_v2",
-  "status": "FAIL",
-  "recommendation": "REJECT",
-  "generated_at": "2026-04-11T05:50:16+00:00",
-  "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71",
+  "status": "PASS",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-04-13T01:50:21+00:00",
+  "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
   "seed_set": [
     225,
     244,
@@ -1172,7 +1172,7 @@
   "artifacts": {
     "transfer_graph": {
       "artifact_id": "transfer_graph",
-      "path": "E:\\workspace\\segments\\artifacts\\m225_transfer_graph.json",
+      "path": "/Users/admin/git/OpenFEP/artifacts/m225_transfer_graph.json",
       "protocol": "transfer_graph",
       "episode_count": 48,
       "trace_count": 0,
@@ -1182,7 +1182,7 @@
     },
     "holdout_transfer": {
       "artifact_id": "holdout_transfer",
-      "path": "E:\\workspace\\segments\\artifacts\\m225_holdout_transfer.json",
+      "path": "/Users/admin/git/OpenFEP/artifacts/m225_holdout_transfer.json",
       "protocol": "holdout_transfer",
       "episode_count": 90,
       "trace_count": 1080,
@@ -1196,7 +1196,7 @@
     },
     "rule_shift_recovery": {
       "artifact_id": "rule_shift_recovery",
-      "path": "E:\\workspace\\segments\\artifacts\\m225_rule_shift_recovery.json",
+      "path": "/Users/admin/git/OpenFEP/artifacts/m225_rule_shift_recovery.json",
       "protocol": "rule_shift_recovery",
       "episode_count": 30,
       "trace_count": 360,
@@ -1210,7 +1210,7 @@
     },
     "social_deception": {
       "artifact_id": "social_deception",
-      "path": "E:\\workspace\\segments\\artifacts\\m225_social_deception.json",
+      "path": "/Users/admin/git/OpenFEP/artifacts/m225_social_deception.json",
       "protocol": "social_deception",
       "episode_count": 60,
       "trace_count": 720,
@@ -1224,7 +1224,7 @@
     },
     "adapter_degradation": {
       "artifact_id": "adapter_degradation",
-      "path": "E:\\workspace\\segments\\artifacts\\m225_adapter_degradation.json",
+      "path": "/Users/admin/git/OpenFEP/artifacts/m225_adapter_degradation.json",
       "protocol": "adapter_degradation",
       "episode_count": 30,
       "trace_count": 360,
@@ -1238,7 +1238,7 @@
     },
     "identity_preservation": {
       "artifact_id": "identity_preservation",
-      "path": "E:\\workspace\\segments\\artifacts\\m225_identity_preservation.json",
+      "path": "/Users/admin/git/OpenFEP/artifacts/m225_identity_preservation.json",
       "protocol": "identity_preservation",
       "episode_count": 240,
       "trace_count": 0,
@@ -1399,7 +1399,7 @@
     {
       "name": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "category": "pytest",
-      "status": "failed",
+      "status": "passed",
       "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "nodeid": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "suite": "tests/test_m225_freshness_guards.py"
@@ -1583,7 +1583,7 @@
     {
       "name": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "category": "pytest",
-      "status": "failed",
+      "status": "passed",
       "details": "pytest call phase outcome for tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "nodeid": "tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass",
       "suite": "tests/test_m225_freshness_guards.py"
@@ -1647,16 +1647,7 @@
       "details": "Write/readback freshness verification after artifact emission."
     }
   ],
-  "findings": [
-    {
-      "severity": "S1 major",
-      "title": "Report includes non-passing pytest evidence",
-      "evidence": [
-        "tests.tests/test_m225_freshness_guards.py::test_missing_schema_or_freshness_cannot_finalize_to_pass=failed"
-      ],
-      "containment": "Formal acceptance requires every listed pytest evidence item to be completed and passed."
-    }
-  ],
+  "findings": [],
   "residual_risks": [
     "The runtime is still a bounded simulated replay layer, not an external live environment integration.",
     "Failure attribution uses the local self-model and does not yet cover multi-adapter contention across heterogeneous tools.",
@@ -1665,8 +1656,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m225_v2",
-    "generated_at": "2026-04-11T05:50:16+00:00",
-    "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71",
+    "generated_at": "2026-04-13T01:50:21+00:00",
+    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
     "seed_set": [
       225,
       244,
@@ -1676,61 +1667,61 @@
       438
     ],
     "artifact_paths": {
-      "transfer_graph": "E:\\workspace\\segments\\artifacts\\m225_transfer_graph.json",
-      "holdout_transfer": "E:\\workspace\\segments\\artifacts\\m225_holdout_transfer.json",
-      "rule_shift_recovery": "E:\\workspace\\segments\\artifacts\\m225_rule_shift_recovery.json",
-      "social_deception": "E:\\workspace\\segments\\artifacts\\m225_social_deception.json",
-      "adapter_degradation": "E:\\workspace\\segments\\artifacts\\m225_adapter_degradation.json",
-      "identity_preservation": "E:\\workspace\\segments\\artifacts\\m225_identity_preservation.json",
-      "report": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json"
+      "transfer_graph": "/Users/admin/git/OpenFEP/artifacts/m225_transfer_graph.json",
+      "holdout_transfer": "/Users/admin/git/OpenFEP/artifacts/m225_holdout_transfer.json",
+      "rule_shift_recovery": "/Users/admin/git/OpenFEP/artifacts/m225_rule_shift_recovery.json",
+      "social_deception": "/Users/admin/git/OpenFEP/artifacts/m225_social_deception.json",
+      "adapter_degradation": "/Users/admin/git/OpenFEP/artifacts/m225_adapter_degradation.json",
+      "identity_preservation": "/Users/admin/git/OpenFEP/artifacts/m225_identity_preservation.json",
+      "report": "/Users/admin/git/OpenFEP/reports/m225_acceptance_report.json"
     },
     "artifacts": {
       "transfer_graph": {
-        "path": "E:\\workspace\\segments\\artifacts\\m225_transfer_graph.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m225_transfer_graph.json",
         "exists": true,
-        "size_bytes": 48075,
+        "size_bytes": 46844,
         "fresh": true,
         "header_match": true
       },
       "holdout_transfer": {
-        "path": "E:\\workspace\\segments\\artifacts\\m225_holdout_transfer.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m225_holdout_transfer.json",
         "exists": true,
-        "size_bytes": 9664083,
+        "size_bytes": 9471947,
         "fresh": true,
         "header_match": true
       },
       "rule_shift_recovery": {
-        "path": "E:\\workspace\\segments\\artifacts\\m225_rule_shift_recovery.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m225_rule_shift_recovery.json",
         "exists": true,
-        "size_bytes": 4079780,
+        "size_bytes": 3995686,
         "fresh": true,
         "header_match": true
       },
       "social_deception": {
-        "path": "E:\\workspace\\segments\\artifacts\\m225_social_deception.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m225_social_deception.json",
         "exists": true,
-        "size_bytes": 5300767,
+        "size_bytes": 5202151,
         "fresh": true,
         "header_match": true
       },
       "adapter_degradation": {
-        "path": "E:\\workspace\\segments\\artifacts\\m225_adapter_degradation.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m225_adapter_degradation.json",
         "exists": true,
-        "size_bytes": 4312690,
+        "size_bytes": 4223288,
         "fresh": true,
         "header_match": true
       },
       "identity_preservation": {
-        "path": "E:\\workspace\\segments\\artifacts\\m225_identity_preservation.json",
+        "path": "/Users/admin/git/OpenFEP/artifacts/m225_identity_preservation.json",
         "exists": true,
-        "size_bytes": 258921,
+        "size_bytes": 251699,
         "fresh": true,
         "header_match": true
       },
       "report": {
-        "path": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json",
+        "path": "/Users/admin/git/OpenFEP/reports/m225_acceptance_report.json",
         "exists": true,
-        "size_bytes": 121114,
+        "size_bytes": 117432,
         "fresh": true,
         "header_match": true
       }

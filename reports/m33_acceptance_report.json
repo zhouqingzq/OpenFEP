@@ -1,16 +1,16 @@
 {
   "milestone_id": "M3.3",
   "status": "PASS",
-  "generated_at": "2026-04-11T06:14:23+00:00",
+  "generated_at": "2026-04-13T02:30:14+00:00",
   "seed_set": [
     33,
     133
   ],
   "artifacts": {
-    "trace": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_trace.json",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_ablation.json",
-    "stress": "E:\\workspace\\segments\\artifacts\\m33_semantic_prediction_stress.json",
-    "summary": "E:\\workspace\\segments\\reports\\m33_acceptance_summary.md"
+    "trace": "/Users/admin/git/OpenFEP/artifacts/m33_semantic_prediction_trace.json",
+    "ablation": "/Users/admin/git/OpenFEP/artifacts/m33_semantic_prediction_ablation.json",
+    "stress": "/Users/admin/git/OpenFEP/artifacts/m33_semantic_prediction_stress.json",
+    "summary": "/Users/admin/git/OpenFEP/reports/m33_acceptance_summary.md"
   },
   "tests": {
     "milestone": [
@@ -47,7 +47,7 @@
   "residual_risks": [],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-04-11T06:14:23+00:00"
+    "round_started_at": "2026-04-13T02:30:14+00:00"
   },
   "recommendation": "ACCEPT"
 }

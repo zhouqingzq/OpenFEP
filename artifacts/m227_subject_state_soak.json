@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-11T06:09:40+00:00",
+  "generated_at": "2026-04-13T02:26:55+00:00",
   "seed": 227,
   "cycles": 72,
   "phase_samples": [
@@ -134,9 +134,9 @@
           "ep-000030-exploit_shelter",
           "ep-000029-rest",
           "ep-000024-rest-merged",
+          "3668ba41-66e7-4093-9141-f76534abec50",
+          "1276c3ef-db11-4faf-a1e9-48f498d14b8d",
           "ep-000014-rest-merged",
-          "866f2c21-0ea5-4bb6-b059-f421c17b1628",
-          "1391f92f-7591-454b-9754-854db8038bd1",
           "ep-000017-exploit_shelter-merged",
           "ep-000011-hide-merged",
           "ep-000009-scan",
@@ -175,13 +175,13 @@
         "continuity_score": 0.662273,
         "continuity_anchors": [
           "ep-000029-rest-merged",
-          "4d970c95-914a-4ba1-83c2-b1c4f3fd7251",
-          "0a90b5ff-3a9b-43c7-9a3c-795505d67dbd",
-          "94573beb-7718-4649-8cf9-72839075d4bf",
-          "b86e7580-f530-49bc-b6bb-de18c55cca45",
-          "866f2c21-0ea5-4bb6-b059-f421c17b1628",
+          "7ff51b56-63cc-4a99-b228-640820ffde26",
+          "7a5fb26c-9d5e-487e-ad84-fbf6ae6b65b1",
+          "5c1250ce-ab6d-4962-8643-cf6522cb8650",
+          "2fbd80e8-4927-436d-92e2-35cb064e2e33",
+          "1276c3ef-db11-4faf-a1e9-48f498d14b8d",
           "ep-000020-exploit_shelter-merged",
-          "1391f92f-7591-454b-9754-854db8038bd1",
+          "3668ba41-66e7-4093-9141-f76534abec50",
           "ep-000011-hide-merged",
           "ep-000009-scan",
           "ep-000003-rest-merged",
@@ -216,18 +216,18 @@
         "cycle": 48,
         "current_phase": "consolidation",
         "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.633213,
+        "continuity_score": 0.628928,
         "continuity_anchors": [
-          "a350c3ad-43c6-4b80-b97d-d1947e1bfad9",
-          "94573beb-7718-4649-8cf9-72839075d4bf",
+          "a70d525d-001d-4ba5-8882-6f5e13ddcf8e",
+          "5c1250ce-ab6d-4962-8643-cf6522cb8650",
+          "1026d4c7-f9da-46c3-8738-bb1f73d35d64",
           "ep-000025-exploit_shelter-merged",
           "ep-000029-rest-merged",
-          "4d970c95-914a-4ba1-83c2-b1c4f3fd7251",
-          "38280f17-cdc7-4023-bcc3-4c3f01f22194",
-          "0a90b5ff-3a9b-43c7-9a3c-795505d67dbd",
-          "b86e7580-f530-49bc-b6bb-de18c55cca45",
-          "866f2c21-0ea5-4bb6-b059-f421c17b1628",
-          "1391f92f-7591-454b-9754-854db8038bd1",
+          "7ff51b56-63cc-4a99-b228-640820ffde26",
+          "7a5fb26c-9d5e-487e-ad84-fbf6ae6b65b1",
+          "2fbd80e8-4927-436d-92e2-35cb064e2e33",
+          "1276c3ef-db11-4faf-a1e9-48f498d14b8d",
+          "3668ba41-66e7-4093-9141-f76534abec50",
           "ep-000011-hide-merged",
           "ep-000009-scan"
         ],
@@ -268,12 +268,12 @@
           "ep-000052-rest",
           "ep-000050-rest",
           "ep-000049-hide",
-          "a350c3ad-43c6-4b80-b97d-d1947e1bfad9",
-          "94573beb-7718-4649-8cf9-72839075d4bf",
+          "a70d525d-001d-4ba5-8882-6f5e13ddcf8e",
+          "5c1250ce-ab6d-4962-8643-cf6522cb8650",
+          "1026d4c7-f9da-46c3-8738-bb1f73d35d64",
           "ep-000025-exploit_shelter-merged",
           "ep-000029-rest-merged",
-          "4d970c95-914a-4ba1-83c2-b1c4f3fd7251",
-          "38280f17-cdc7-4023-bcc3-4c3f01f22194"
+          "7ff51b56-63cc-4a99-b228-640820ffde26"
         ],
         "status_flags": {
           "threatened": false,
@@ -307,17 +307,17 @@
         "continuity_score": 0.669106,
         "continuity_anchors": [
           "ep-000064-exploit_shelter",
-          "ep-000062-exploit_shelter",
-          "f7ee448f-bae7-4fb7-bf4c-40428d1ac39c",
           "ep-000051-exploit_shelter-merged",
-          "0cf4620b-da82-48d6-a2db-af9b1236a0af",
+          "ep-000062-exploit_shelter",
+          "fb59face-c829-48ff-91f7-21f8b8eccace",
+          "d5db3e4c-00cb-430a-baf4-cbf6cacc751a",
+          "5c63ad55-f889-4605-8908-b1198479f442",
+          "730472dd-a3ba-40cf-b48a-df16e0b7b2dd",
+          "1026d4c7-f9da-46c3-8738-bb1f73d35d64",
           "ep-000036-rest-merged",
           "ep-000049-hide",
-          "ed5e171c-7a13-4ed1-a2d1-af7c31700b56",
-          "8e4fbfad-5d53-4415-aad5-bff132e4c81d",
-          "a350c3ad-43c6-4b80-b97d-d1947e1bfad9",
-          "94573beb-7718-4649-8cf9-72839075d4bf",
-          "4d970c95-914a-4ba1-83c2-b1c4f3fd7251"
+          "a70d525d-001d-4ba5-8882-6f5e13ddcf8e",
+          "5c1250ce-ab6d-4962-8643-cf6522cb8650"
         ],
         "status_flags": {
           "threatened": true,
@@ -348,23 +348,23 @@
         "cycle": 72,
         "current_phase": "consolidation",
         "dominant_goal": "INTEGRITY",
-        "continuity_score": 0.666481,
+        "continuity_score": 0.649815,
         "continuity_anchors": [
-          "ep-000072-exploit_shelter",
-          "ep-000057-exploit_shelter-merged",
-          "ed5e171c-7a13-4ed1-a2d1-af7c31700b56",
-          "35bff102-22bf-4b5a-bffd-077b8c55790d",
+          "ep-000071-rest",
+          "ef6d7e85-eb2a-45aa-9203-cb775dbeba5a",
+          "d5db3e4c-00cb-430a-baf4-cbf6cacc751a",
+          "b12e8e19-80a2-4c4a-92e8-2f56360c0fa2",
           "ep-000069-scan",
           "ep-000050-rest-merged",
-          "f7ee448f-bae7-4fb7-bf4c-40428d1ac39c",
-          "0cf4620b-da82-48d6-a2db-af9b1236a0af",
-          "ep-000049-hide",
-          "c35b63dd-bf30-4baa-97fb-195628f8d98f",
-          "8e4fbfad-5d53-4415-aad5-bff132e4c81d",
-          "a350c3ad-43c6-4b80-b97d-d1947e1bfad9"
+          "ep-000057-exploit_shelter-merged",
+          "fb59face-c829-48ff-91f7-21f8b8eccace",
+          "5c63ad55-f889-4605-8908-b1198479f442",
+          "730472dd-a3ba-40cf-b48a-df16e0b7b2dd",
+          "1026d4c7-f9da-46c3-8738-bb1f73d35d64",
+          "ep-000049-hide"
         ],
         "status_flags": {
-          "threatened": true,
+          "threatened": false,
           "repairing": false,
           "overloaded": true,
           "socially_destabilized": false,
@@ -380,11 +380,11 @@
           "need:maintenance",
           "unresolved maintenance discrepancy"
         ],
-        "last_choice": "exploit_shelter"
+        "last_choice": "rest"
       },
-      "energy": 0.987,
+      "energy": 1.0,
       "stress": 0.0,
-      "fatigue": 0.54
+      "fatigue": 0.32
     }
   ],
   "continuity_scores": [
@@ -435,7 +435,7 @@
     0.694495,
     0.69836,
     0.70206,
-    0.633213,
+    0.628928,
     0.700356,
     0.700356,
     0.700356,
@@ -445,10 +445,10 @@
     0.700356,
     0.692023,
     0.68369,
-    0.652208,
+    0.647922,
     0.680065,
     0.680065,
-    0.65744,
+    0.63744,
     0.669106,
     0.669106,
     0.669106,
@@ -457,9 +457,9 @@
     0.669106,
     0.660773,
     0.660773,
-    0.660773,
-    0.643148,
-    0.666481
+    0.629481,
+    0.649815,
+    0.649815
   ],
   "anchor_counts": [
     1,
@@ -686,11 +686,11 @@
   "summary": {
     "min_continuity_score": 0.504332,
     "max_continuity_score": 0.78154,
-    "final_continuity_score": 0.666481,
+    "final_continuity_score": 0.649815,
     "max_anchor_count": 12,
     "final_anchor_count": 12,
     "non_empty_anchor_cycles": 72,
-    "threatened_cycles": 25,
+    "threatened_cycles": 23,
     "fragile_cycles": 71,
     "distinct_phases": [
       "consolidation",
@@ -706,23 +706,23 @@
       "cycle": 72,
       "current_phase": "consolidation",
       "dominant_goal": "INTEGRITY",
-      "continuity_score": 0.666481,
+      "continuity_score": 0.649815,
       "continuity_anchors": [
-        "ep-000072-exploit_shelter",
-        "ep-000057-exploit_shelter-merged",
-        "ed5e171c-7a13-4ed1-a2d1-af7c31700b56",
-        "35bff102-22bf-4b5a-bffd-077b8c55790d",
+        "ep-000071-rest",
+        "ef6d7e85-eb2a-45aa-9203-cb775dbeba5a",
+        "d5db3e4c-00cb-430a-baf4-cbf6cacc751a",
+        "b12e8e19-80a2-4c4a-92e8-2f56360c0fa2",
         "ep-000069-scan",
         "ep-000050-rest-merged",
-        "f7ee448f-bae7-4fb7-bf4c-40428d1ac39c",
-        "0cf4620b-da82-48d6-a2db-af9b1236a0af",
-        "ep-000049-hide",
-        "c35b63dd-bf30-4baa-97fb-195628f8d98f",
-        "8e4fbfad-5d53-4415-aad5-bff132e4c81d",
-        "a350c3ad-43c6-4b80-b97d-d1947e1bfad9"
+        "ep-000057-exploit_shelter-merged",
+        "fb59face-c829-48ff-91f7-21f8b8eccace",
+        "5c63ad55-f889-4605-8908-b1198479f442",
+        "730472dd-a3ba-40cf-b48a-df16e0b7b2dd",
+        "1026d4c7-f9da-46c3-8738-bb1f73d35d64",
+        "ep-000049-hide"
       ],
       "status_flags": {
-        "threatened": true,
+        "threatened": false,
         "repairing": false,
         "overloaded": true,
         "socially_destabilized": false,
@@ -738,7 +738,7 @@
         "need:maintenance",
         "unresolved maintenance discrepancy"
       ],
-      "last_choice": "exploit_shelter"
+      "last_choice": "rest"
     }
   },
   "checks": {

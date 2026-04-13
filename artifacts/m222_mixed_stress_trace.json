@@ -1496,7 +1496,7 @@
             "reconcile:conflict:continuity_anchor:ep-000016-hide|ep-000017-hide|ep-000019-scan:20",
             "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
             "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:afb588c0-dd59-4cba-878c-f5a379fe7633|cb7f18c5-a620-43c5-869a-ea9cc30cf24c|ep-000020-exploit_shelter:21",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "shelter_security",
@@ -1571,7 +1571,7 @@
           "active_tasks": [
             "reconcile:conflict:continuity_anchor:ep-000016-hide|ep-000017-hide|ep-000019-scan:20",
             "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:afb588c0-dd59-4cba-878c-f5a379fe7633|cb7f18c5-a620-43c5-869a-ea9cc30cf24c|ep-000020-exploit_shelter:21",
             "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
@@ -1646,9 +1646,9 @@
         "agenda": {
           "active_tasks": [
             "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:afb588c0-dd59-4cba-878c-f5a379fe7633|cb7f18c5-a620-43c5-869a-ea9cc30cf24c|ep-000020-exploit_shelter:21",
             "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:ep-000018-scan-merged|ep-000020-exploit_shelter|ep-000022-exploit_shelter:23",
+            "reconcile:conflict:continuity_anchor:cb7f18c5-a620-43c5-869a-ea9cc30cf24c|ep-000020-exploit_shelter|ep-000022-exploit_shelter:23",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "fatigue_recovery",

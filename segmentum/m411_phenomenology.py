@@ -5,6 +5,8 @@ from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
+import sys
+import time
 from tempfile import TemporaryDirectory
 
 from .m4_acceptance import final_conclusion
@@ -463,7 +465,7 @@ def run_m411_rollout(
     config = config or M411RolloutConfig()
     with TemporaryDirectory() as tmp_dir:
         runtime = SegmentRuntime.load_or_create(
-            state_path=Path(tmp_dir) / "segment_state.json",
+            state_path=None,
             seed=config.seed,
             reset=True,
             memory_enabled=True,
@@ -485,14 +487,30 @@ def run_m411_rollout(
             )
 
         loop = asyncio.new_event_loop()
+        total_ticks = max(0, int(config.ticks))
+        run_label = "negative_control" if negative_control else "default"
+        _t0 = time.monotonic()
         try:
             asyncio.set_event_loop(loop)
-            for _ in range(max(0, int(config.ticks))):
+            for _step_i in range(total_ticks):
                 next_tick = runtime.agent.cycle + 1
                 if next_tick == perturbation_tick:
                     perturbations.append(_apply_perturbation(runtime, tick=next_tick))
                 loop.run_until_complete(runtime.astep(verbose=False))
                 tick = int(runtime.agent.cycle)
+                if (_step_i + 1) % 50 == 0 or _step_i + 1 == total_ticks:
+                    _elapsed = time.monotonic() - _t0
+                    _rate = (_step_i + 1) / _elapsed if _elapsed > 0 else 0
+                    _eta = (total_ticks - _step_i - 1) / _rate if _rate > 0 else 0
+                    _mem_count = len(runtime.agent.memory_store.entries)
+                    print(
+                        f"\r  [{run_label}] {_step_i + 1}/{total_ticks} "
+                        f"({_elapsed:.1f}s elapsed, {_rate:.1f} tick/s, "
+                        f"ETA {_eta:.0f}s, {_mem_count} entries)",
+                        end="",
+                        file=sys.stderr,
+                        flush=True,
+                    )
                 budget_event = _build_budget_competition_event(runtime, tick=tick)
                 if budget_event is not None:
                     budget_events.append(budget_event)
@@ -537,6 +555,7 @@ def run_m411_rollout(
                 if tick % max(1, int(config.recall_probe_interval)) == 0:
                     recall_events.append(_probe_recall(runtime, tick=tick))
         finally:
+            print(file=sys.stderr)
             asyncio.set_event_loop(None)
             loop.close()
         final_entries = [

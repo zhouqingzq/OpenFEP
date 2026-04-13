@@ -1,5 +1,5 @@
 {
-  "benchmark_root": "E:\\workspace\\segments\\external_benchmark_registry",
+  "benchmark_root": "/Users/admin/git/OpenFEP/external_benchmark_registry",
   "tasks": {
     "confidence_database": {
       "mode": "acceptance-grade",

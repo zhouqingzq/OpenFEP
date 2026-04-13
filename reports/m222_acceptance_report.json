@@ -2,17 +2,17 @@
   "milestone_id": "M2.22",
   "status": "FAIL",
   "recommendation": "REJECT",
-  "generated_at": "2026-04-11T05:27:15+00:00",
+  "generated_at": "2026-04-13T01:23:00+00:00",
   "seed_set": [
     222
   ],
   "artifacts": {
-    "summary": "E:\\workspace\\segments\\artifacts\\m222_long_horizon_summary.json",
-    "mixed_trace": "E:\\workspace\\segments\\artifacts\\m222_mixed_stress_trace.json",
-    "restart": "E:\\workspace\\segments\\artifacts\\m222_restart_continuity.json",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m222_ablation_comparison.json",
-    "resource_guard": "E:\\workspace\\segments\\artifacts\\m222_resource_guard.json",
-    "report": "E:\\workspace\\segments\\reports\\m222_acceptance_report.json"
+    "summary": "/Users/admin/git/OpenFEP/artifacts/m222_long_horizon_summary.json",
+    "mixed_trace": "/Users/admin/git/OpenFEP/artifacts/m222_mixed_stress_trace.json",
+    "restart": "/Users/admin/git/OpenFEP/artifacts/m222_restart_continuity.json",
+    "ablation": "/Users/admin/git/OpenFEP/artifacts/m222_ablation_comparison.json",
+    "resource_guard": "/Users/admin/git/OpenFEP/artifacts/m222_resource_guard.json",
+    "report": "/Users/admin/git/OpenFEP/reports/m222_acceptance_report.json"
   },
   "tests": {
     "milestone_suite": [
@@ -1487,8 +1487,8 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 0.916667,
-            "mean_free_energy": 0.789074,
-            "free_energy_spike_rate": 0.291667,
+            "mean_free_energy": 0.823165,
+            "free_energy_spike_rate": 0.458333,
             "action_entropy": 1.408223,
             "dominant_action_share": 0.708333,
             "max_action_streak": 5,
@@ -1501,7 +1501,7 @@
             "catastrophic_failure_rate": 0.0,
             "chronic_debt_recovery_score": 1.0,
             "trace_compaction_effectiveness": 1.0,
-            "identity_drift_score": 0.389033,
+            "identity_drift_score": 0.386408,
             "homeostatic_balance_score": 0.916879,
             "governance_probe_count": 1,
             "external_action_count": 1,
@@ -1518,9 +1518,9 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.7339782407882308,
-            "avg_free_energy_after": 0.7890737649840056,
-            "avg_free_energy_drop": 0.025682566998445233,
+            "avg_free_energy_before": 0.77077469609288,
+            "avg_free_energy_after": 0.8231646942861309,
+            "avg_free_energy_drop": 0.027068721202158464,
             "min_energy": 0.16787245511790383,
             "max_stress": 0.7699999999999992,
             "action_counts": {
@@ -1554,11 +1554,11 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.789074,
+          "mean": 0.823165,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.291667,
+          "mean": 0.458333,
           "std": 0.0
         },
         "action_entropy": {
@@ -1610,7 +1610,7 @@
           "std": 0.0
         },
         "identity_drift_score": {
-          "mean": 0.389033,
+          "mean": 0.386408,
           "std": 0.0
         },
         "homeostatic_balance_score": {
@@ -2384,6 +2384,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m222_v1",
-    "codebase_version": "0423e6609a5e472bce6513b08f66dcc092ad5d71"
+    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248"
   }
 }

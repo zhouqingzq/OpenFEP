@@ -2,13 +2,19 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, field
+import heapq
 from math import exp, sqrt
 from typing import TYPE_CHECKING, Any
 
 from .action_schema import action_name
 from .m4_cognitive_style import CognitiveStyleParameters
 from .memory_model import AnchorStrength, MemoryClass, MemoryEntry
-from .memory_state import identity_match_ratio_for_entry, normalize_agent_state
+from .memory_state import (
+    _overlap_ratio as _identity_overlap_ratio,
+    _tokenize as _identity_tokenize,
+    identity_match_ratio_for_entry,
+    normalize_agent_state,
+)
 
 if TYPE_CHECKING:
     from .memory_store import MemoryStore
@@ -101,6 +107,22 @@ def _content_tokens(text: str) -> set[str]:
     }
 
 
+@dataclass(frozen=True)
+class _QueryTokenCache:
+    """Pre-computed token sets for a single retrieval query (constant across all entries)."""
+    semantic_tags: frozenset[str]
+    content_keywords: frozenset[str]
+    context_tags: frozenset[str]
+
+    @classmethod
+    def build(cls, query: "RetrievalQuery") -> _QueryTokenCache:
+        return cls(
+            semantic_tags=frozenset(_token_set(query.semantic_tags)),
+            content_keywords=frozenset(_token_set(query.content_keywords)),
+            context_tags=frozenset(_token_set(query.context_tags)),
+        )
+
+
 def _jaccard_overlap(left: set[str], right: set[str]) -> float:
     if not left or not right:
         return 0.0
@@ -118,12 +140,16 @@ def _cosine_similarity(left: list[float], right: list[float]) -> float:
     return dot_product / (left_norm * right_norm)
 
 
-def _entry_state_vector(entry: MemoryEntry) -> list[float]:
+def _entry_state_vector(
+    entry: MemoryEntry,
+    metadata: dict[str, object] | None = None,
+) -> list[float]:
     if entry.centroid:
         return [float(item) for item in entry.centroid]
     if entry.state_vector:
         return [float(item) for item in entry.state_vector]
-    metadata = dict(entry.compression_metadata or {})
+    if metadata is None:
+        metadata = dict(entry.compression_metadata or {})
     centroid = metadata.get("centroid")
     if isinstance(centroid, list):
         return [float(item) for item in centroid]
@@ -427,18 +453,35 @@ def _resolve_donor_semantic_trace(
     )
 
 
-def _keyword_overlap(query_keywords: list[str], entry: MemoryEntry) -> float:
+def _keyword_overlap(
+    query_keywords: list[str],
+    entry: MemoryEntry,
+    *,
+    cached_keywords: frozenset[str] | None = None,
+) -> float:
     if entry.memory_class in {MemoryClass.SEMANTIC, MemoryClass.INFERRED}:
         return 0.0
-    keywords = _token_set(query_keywords)
+    keywords = cached_keywords if cached_keywords is not None else _token_set(query_keywords)
     if not keywords:
         return 0.0
     return _jaccard_overlap(keywords, _content_tokens(entry.content))
 
 
-def _tag_overlap(query: "RetrievalQuery", entry: MemoryEntry) -> float:
-    semantic_overlap = _jaccard_overlap(_token_set(query.semantic_tags), _token_set(entry.semantic_tags))
-    keyword_overlap = _keyword_overlap(query.content_keywords, entry)
+def _tag_overlap(
+    query: "RetrievalQuery",
+    entry: MemoryEntry,
+    *,
+    qcache: _QueryTokenCache | None = None,
+    entry_semantic_tokens: set[str] | None = None,
+) -> float:
+    q_sem = qcache.semantic_tags if qcache is not None else _token_set(query.semantic_tags)
+    e_sem = entry_semantic_tokens if entry_semantic_tokens is not None else _token_set(entry.semantic_tags)
+    semantic_overlap = _jaccard_overlap(q_sem, e_sem)
+    keyword_overlap = _keyword_overlap(
+        query.content_keywords,
+        entry,
+        cached_keywords=qcache.content_keywords if qcache is not None else None,
+    )
     if semantic_overlap <= 0.0:
         return keyword_overlap * 0.6
     if keyword_overlap <= 0.0:
@@ -446,9 +489,18 @@ def _tag_overlap(query: "RetrievalQuery", entry: MemoryEntry) -> float:
     return _clamp((semantic_overlap * 0.75) + (keyword_overlap * 0.25))
 
 
-def _context_overlap(query: "RetrievalQuery", entry: MemoryEntry) -> float:
-    tag_overlap = _jaccard_overlap(_token_set(query.context_tags), _token_set(entry.context_tags))
-    vector_overlap = _cosine_similarity(query.state_vector, _entry_state_vector(entry))
+def _context_overlap(
+    query: "RetrievalQuery",
+    entry: MemoryEntry,
+    metadata: dict[str, object] | None = None,
+    *,
+    qcache: _QueryTokenCache | None = None,
+    entry_context_tokens: set[str] | None = None,
+) -> float:
+    q_ctx = qcache.context_tags if qcache is not None else _token_set(query.context_tags)
+    e_ctx = entry_context_tokens if entry_context_tokens is not None else _token_set(entry.context_tags)
+    tag_overlap = _jaccard_overlap(q_ctx, e_ctx)
+    vector_overlap = _cosine_similarity(query.state_vector, _entry_state_vector(entry, metadata))
     if not query.context_tags:
         return _clamp(vector_overlap)
     if not query.state_vector:
@@ -1008,9 +1060,18 @@ def _score_entry(
     *,
     agent_state=None,
     cognitive_style: CognitiveStyleParameters | dict[str, object] | None = None,
+    qcache: _QueryTokenCache | None = None,
+    identity_tokens: set[str] | None = None,
 ) -> ScoredCandidate:
-    tag_score = _tag_overlap(query, entry)
-    context_score = _context_overlap(query, entry)
+    meta = dict(entry.compression_metadata or {})
+    entry_semantic_tokens = _token_set(entry.semantic_tags)
+    entry_context_tokens = _token_set(entry.context_tags)
+    tag_score = _tag_overlap(
+        query, entry, qcache=qcache, entry_semantic_tokens=entry_semantic_tokens,
+    )
+    context_score = _context_overlap(
+        query, entry, metadata=meta, qcache=qcache, entry_context_tokens=entry_context_tokens,
+    )
     mood_score = _mood_match(current_mood, entry)
     accessibility_score = _clamp(entry.accessibility)
     recency_score = _recency_bonus(entry, query.reference_cycle)
@@ -1018,12 +1079,16 @@ def _score_entry(
     attention_selectivity = _clamp(_style_value(cognitive_style, "attention_selectivity", 0.0))
     novelty_bonus = exploration_bias * 0.2 * (1.0 / (1.0 + max(0, entry.retrieval_count)))
     specificity_bonus = attention_selectivity * 0.12 * tag_score
-    identity_alignment = identity_match_ratio_for_entry(entry, agent_state) * 0.15
-    validation_status = str(dict(entry.compression_metadata or {}).get("validation_status", "validated"))
+    if identity_tokens is not None:
+        entry_id_tokens = _identity_tokenize(entry.semantic_tags, entry.context_tags, entry.content)
+        identity_alignment = _identity_overlap_ratio(entry_id_tokens, identity_tokens) * 0.15
+    else:
+        identity_alignment = identity_match_ratio_for_entry(entry, agent_state) * 0.15
+    validation_status = str(meta.get("validation_status", "validated"))
     validation_discount = 1.0
     if entry.memory_class is MemoryClass.INFERRED:
         validation_discount = _clamp(
-            float(dict(entry.compression_metadata or {}).get("validation_discount", 0.35)),
+            float(meta.get("validation_discount", 0.35)),
             0.0,
             1.0,
         )
@@ -1087,21 +1152,23 @@ def retrieve(
 ) -> RetrievalResult:
     normalized_state = normalize_agent_state(agent_state or getattr(store, "agent_state_vector", None))
     attention_selectivity = _clamp(_style_value(cognitive_style, "attention_selectivity", 0.0))
-    ranked = sorted(
-        [
-            _score_entry(
-                query,
-                entry,
-                current_mood,
-                agent_state=normalized_state,
-                cognitive_style=cognitive_style,
-            )
-            for entry in _filter_entries(query, store)
-        ],
-        key=lambda item: (item.retrieval_score, item.entry.trace_strength, item.entry.id),
-        reverse=True,
-    )
-    top_candidates = ranked[: max(0, int(k))]
+    qcache = _QueryTokenCache.build(query)
+    id_tokens = _identity_tokenize(normalized_state.identity_active_themes)
+    _sort_key = lambda item: (item.retrieval_score, item.entry.trace_strength, item.entry.id)
+    scored = [
+        _score_entry(
+            query,
+            entry,
+            current_mood,
+            agent_state=normalized_state,
+            cognitive_style=cognitive_style,
+            qcache=qcache,
+            identity_tokens=id_tokens,
+        )
+        for entry in _filter_entries(query, store)
+    ]
+    effective_k = max(0, int(k))
+    top_candidates = heapq.nlargest(effective_k, scored, key=_sort_key)
     dominance_threshold = max(0.03, DEFAULT_DOMINANCE_THRESHOLD - (attention_selectivity * 0.15))
     competition = compete_candidates(top_candidates, dominance_threshold=dominance_threshold)
     recall_hypothesis: RecallArtifact | None = None
