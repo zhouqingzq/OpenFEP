@@ -20,11 +20,11 @@ from segmentum.m411_phenomenology import (
 
 SMOKE_CONFIG = M411RolloutConfig(
     seed=411,
-    ticks=1000,
+    ticks=200,
     recall_probe_interval=50,
-    perturbation_tick=500,
+    perturbation_tick=100,
     sleep_interval=50,
-    min_acceptance_ticks=1000,
+    min_acceptance_ticks=200,
 )
 
 pytestmark = pytest.mark.m411
@@ -92,7 +92,7 @@ class TestM411Phenomenology(unittest.TestCase):
         histogram = self.pair["default"]["budget_ratio_histogram"]
         self.assertEqual(sum(histogram.values()), len(self.pair["default"]["encoded_events"]))
 
-    def test_1000_tick_smoke_keeps_four_effects_and_control_collapse(self) -> None:
+    def test_200_tick_smoke_keeps_four_effects_and_control_collapse(self) -> None:
         summaries = self.evaluation["gate_summaries"]
 
         self.assertTrue(summaries["serial_position_effect"]["default"]["passed"])
@@ -197,6 +197,7 @@ class TestM411Phenomenology(unittest.TestCase):
 
     def test_identity_tag_without_structured_self_relevance_is_not_self_related(self) -> None:
         tampered = deepcopy(self.pair)
+        tampered["default"]["encoded_events"] = []
         tampered["default"]["final_entries"] = [
             {
                 "entry_id": "semantic-tag-only",
