@@ -194,6 +194,23 @@ def _legacy_payload_matches(entry: MemoryEntry, payload: dict[str, object]) -> b
     return _legacy_template(entry, copy=False) == payload
 
 
+def _sanitize_legacy_compression_metadata(metadata: object) -> dict[str, object]:
+    if not isinstance(metadata, dict):
+        return {}
+    sanitized = deepcopy(metadata)
+    sanitized.pop("legacy_template", None)
+    sanitized.pop("legacy_unmapped", None)
+    return sanitized
+
+
+def _payload_without_recursive_legacy(payload: dict[str, object]) -> dict[str, object]:
+    sanitized = deepcopy(payload)
+    sanitized["compression_metadata"] = _sanitize_legacy_compression_metadata(
+        sanitized.get("compression_metadata")
+    )
+    return sanitized
+
+
 def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> MemoryEntry:
     timestamp = _coerce_int(payload.get("timestamp", payload.get("cycle", 0)))
     action = str(payload.get("action", "unknown"))
@@ -218,9 +235,10 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
         store_level = StoreLevel.LONG
     elif support_count >= 2 or total_surprise >= 0.5:
         store_level = StoreLevel.MID
-    metadata = deepcopy(payload.get("compression_metadata")) if isinstance(payload.get("compression_metadata"), dict) else {}
+    metadata = _sanitize_legacy_compression_metadata(payload.get("compression_metadata"))
+    sanitized_payload = _payload_without_recursive_legacy(payload)
     metadata.update({
-        "legacy_template": deepcopy(payload),
+        "legacy_template": sanitized_payload,
         "legacy_unmapped": {
             key: deepcopy(value)
             for key, value in payload.items()
@@ -1052,7 +1070,7 @@ class MemoryStore:
             "replay_second_pass_error": entry.replay_second_pass_error,
             "salience_delta": entry.salience_delta,
             "retention_adjustment": entry.retention_adjustment,
-            "compression_metadata": dict(entry.compression_metadata or {}),
+            "compression_metadata": _sanitize_legacy_compression_metadata(entry.compression_metadata),
         }
         for key, value in extras.items():
             if key in LEGACY_MAPPED_KEYS:
