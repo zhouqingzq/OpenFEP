@@ -76,7 +76,11 @@ from .precision_manipulation import PrecisionManipulator
 from .defense_strategy import DefenseStrategySelector
 from .metacognitive import MetaCognitiveLayer
 from .workspace import GlobalWorkspace, GlobalWorkspaceState
-from .dialogue.actions import is_dialogue_action, is_dialogue_channel_observation
+from .dialogue.actions import (
+    DIALOGUE_ACTION_STRATEGY_MAP,
+    is_dialogue_action,
+    is_dialogue_channel_observation,
+)
 from .dialogue.memory_bridge import (
     dialogue_observation_to_memory_fields,
     dialogue_state_vector_metadata,
@@ -199,6 +203,34 @@ class PolicyEvaluator:
                 prior_bias += narrative_priors.controllability_prior * (
                     0.12 + max(0.0, 0.50 - danger) * 0.30
                 )
+        if is_dialogue_action(action):
+            strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "explore")
+            trauma = max(0.0, narrative_priors.trauma_bias)
+            trust = narrative_priors.trust_prior
+            control = narrative_priors.controllability_prior
+            contamination = max(0.0, narrative_priors.contamination_sensitivity)
+            if strategy == "explore":
+                prior_bias += (trust * 0.08) + (control * 0.06)
+                prior_bias -= (trauma * 0.05) + (contamination * 0.04)
+                if action == "ask_question":
+                    prior_bias += (trust * 0.04) + (control * 0.03)
+                elif action == "share_opinion":
+                    prior_bias += (control * 0.04) - (trauma * 0.03)
+            elif strategy == "exploit":
+                prior_bias += (trust * 0.12) + (max(0.0, control) * 0.05)
+                prior_bias -= trauma * 0.03
+                if action in {"agree", "empathize", "elaborate"}:
+                    prior_bias += trust * 0.05
+                if action == "joke":
+                    prior_bias -= contamination * 0.03
+            else:
+                prior_bias += (trauma * 0.12) + (contamination * 0.08)
+                prior_bias += max(0.0, -trust) * 0.06
+                prior_bias -= max(0.0, control) * 0.04
+                if action in {"deflect", "minimal_response", "disengage"}:
+                    prior_bias += trauma * 0.03
+                if action == "disagree":
+                    prior_bias += max(0.0, -trust) * 0.04
 
         # M2.6: Personality-driven policy bias
         personality_bias = self.self_model.personality_profile.policy_bias(action, danger)
@@ -255,11 +287,14 @@ class PolicyEvaluator:
 
         bias = 0.0
         action_lower = action.lower()
+        lexical_match = False
         for pattern in narrative.behavioral_patterns:
             if action_lower in pattern.lower():
                 bias += 0.25
+                lexical_match = True
         if narrative.core_identity and action_lower in narrative.core_identity.lower():
             bias += 0.20
+            lexical_match = True
 
         # Risk-profile coupling: a risk-seeking identity penalises
         # overly cautious actions and favours active ones.
@@ -268,6 +303,42 @@ class PolicyEvaluator:
                 bias -= 0.25
             elif action in ("forage", "scan", "exploit_shelter"):
                 bias += 0.15
+        if is_dialogue_action(action):
+            core_identity = (narrative.core_identity or "").lower()
+            strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "explore")
+            if "risk-seeking" in core_identity:
+                if strategy == "explore":
+                    bias += 0.08
+                elif strategy == "escape":
+                    bias -= 0.06
+                else:
+                    bias += 0.03
+            if "risk-averse" in core_identity or "cautious" in core_identity:
+                if strategy == "escape":
+                    bias += 0.06
+                elif strategy == "explore":
+                    bias -= 0.04
+                else:
+                    bias += 0.02
+            if "trust" in core_identity or "prosocial" in core_identity:
+                if strategy == "exploit":
+                    bias += 0.05
+                elif strategy == "explore":
+                    bias += 0.03
+                else:
+                    bias -= 0.03
+            if "guarded" in core_identity or "withdraw" in core_identity:
+                if strategy == "escape":
+                    bias += 0.05
+                else:
+                    bias -= 0.03
+            if not lexical_match and abs(bias) < 1e-9:
+                if strategy == "explore":
+                    bias += 0.02
+                elif strategy == "exploit":
+                    bias += 0.015
+                else:
+                    bias -= 0.015
 
         return max(-0.6, min(0.6, bias))
 

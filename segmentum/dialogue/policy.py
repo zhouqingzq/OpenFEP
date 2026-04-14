@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping
 
 from .actions import DIALOGUE_ACTION_NAMES, DIALOGUE_ACTION_STRATEGY_MAP, is_dialogue_action
 
@@ -27,3 +27,53 @@ class DialoguePolicyEvaluator:
 
     def strategy_for(self, action: str) -> str:
         return DIALOGUE_ACTION_STRATEGY_MAP.get(action, "explore")
+
+    def evaluate_actions(
+        self,
+        observation: Mapping[str, float],
+        dialogue_context: Mapping[str, object] | None = None,
+    ) -> dict[str, float]:
+        """Return dialogue action -> expected free energy (lower is better)."""
+        ctx = dict(dialogue_context or {})
+        ctx.setdefault("event_type", "dialogue_turn")
+        # Use an isolated shadow agent so facade evaluation stays read-only.
+        shadow = type(self._agent).from_dict(self._agent.to_dict())
+        result = shadow.decision_cycle_from_dict(dict(observation), context=ctx)
+        diagnostics = result.get("diagnostics")
+        if diagnostics is None:
+            return {}
+        scores: dict[str, float] = {}
+        for option in getattr(diagnostics, "ranked_options", []):
+            action = str(getattr(option, "choice", ""))
+            if not is_dialogue_action(action):
+                continue
+            try:
+                scores[action] = float(getattr(option, "expected_free_energy"))
+            except (TypeError, ValueError):
+                continue
+        if not scores:
+            return {}
+        return {
+            name: scores[name]
+            for name in DIALOGUE_ACTION_NAMES
+            if name in scores
+        }
+
+    def select_action(
+        self,
+        observation: Mapping[str, float],
+        dialogue_context: Mapping[str, object] | None = None,
+    ) -> str:
+        """Pick the minimum-EFE dialogue action from ``evaluate_actions``."""
+        scores = self.evaluate_actions(observation, dialogue_context)
+        if not scores:
+            return "ask_question"
+        return min(
+            scores,
+            key=lambda action: (
+                scores[action],
+                DIALOGUE_ACTION_NAMES.index(action)
+                if action in DIALOGUE_ACTION_NAMES
+                else len(DIALOGUE_ACTION_NAMES),
+            ),
+        )

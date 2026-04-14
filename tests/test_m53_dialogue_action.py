@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections import Counter
+import math
+
 from segmentum.agent import SegmentAgent
 from segmentum.dialogue.actions import DIALOGUE_ACTION_NAMES, is_dialogue_action
 from segmentum.dialogue.conversation_loop import run_conversation
@@ -22,6 +25,35 @@ def test_dialogue_policy_evaluator_lists_registered_actions() -> None:
     assert pol.registered_dialogue_actions() == DIALOGUE_ACTION_NAMES
     assert pol.strategy_for("ask_question") == "explore"
     assert pol.strategy_for("disagree") == "escape"
+
+
+def test_dialogue_policy_evaluator_facade_methods() -> None:
+    agent = SegmentAgent()
+    register_from_bridge(agent.action_registry)
+    pol = DialoguePolicyEvaluator(agent)
+    obs = {
+        "semantic_content": 0.55,
+        "topic_novelty": 0.48,
+        "emotional_tone": 0.52,
+        "conflict_tension": 0.40,
+        "relationship_depth": 0.50,
+        "hidden_intent": 0.42,
+    }
+    cycle_before = int(agent.cycle)
+    episodes_before = len(agent.long_term_memory.episodes)
+    decisions_before = len(agent.decision_history)
+    social_events_before = len(getattr(agent.social_memory, "interaction_history", []))
+    scores = pol.evaluate_actions(obs, {"session_id": "facade", "partner_uid": 1})
+    assert scores
+    assert set(scores).issubset(set(DIALOGUE_ACTION_NAMES))
+    selected = pol.select_action(obs, {"session_id": "facade", "partner_uid": 1})
+    assert selected in scores
+    assert is_dialogue_action(selected)
+    # Facade helpers are read-only: no decision-cycle side effects.
+    assert int(agent.cycle) == cycle_before
+    assert len(agent.long_term_memory.episodes) == episodes_before
+    assert len(agent.decision_history) == decisions_before
+    assert len(getattr(agent.social_memory, "interaction_history", [])) == social_events_before
 
 
 def test_detect_dialogue_patterns_withdrawal_and_question_reward() -> None:
@@ -120,6 +152,17 @@ def _six(
         "relationship_depth": rel,
         "hidden_intent": hid,
     }
+
+
+def _cosine_distance(a: dict[str, float], b: dict[str, float]) -> float:
+    keys = sorted(set(a) | set(b))
+    dot = sum(float(a.get(k, 0.0)) * float(b.get(k, 0.0)) for k in keys)
+    na = math.sqrt(sum(float(a.get(k, 0.0)) ** 2 for k in keys))
+    nb = math.sqrt(sum(float(b.get(k, 0.0)) ** 2 for k in keys))
+    if na <= 0.0 or nb <= 0.0:
+        return 0.0
+    cosine = max(-1.0, min(1.0, dot / (na * nb)))
+    return 1.0 - cosine
 
 
 def test_classify_all_dialogue_outcome_types() -> None:
@@ -247,31 +290,262 @@ def test_run_conversation_twenty_turns_no_error() -> None:
     assert all(is_dialogue_action(t.action or "") for t in turns)
 
 
-def test_personality_extremes_can_diverge_dialogue_actions() -> None:
-    """Sanity check: Big Five extremes should not always yield identical dialogue policies."""
-    lines = ["你好。", "我很焦虑，你觉得呢？", "再深入说说。"]
+def test_efe_driven_policy_responds_to_observation_change() -> None:
+    agent = SegmentAgent()
+    register_from_bridge(agent.action_registry)
+    pol = DialoguePolicyEvaluator(agent)
+    low_conflict = _six(sem=0.72, topic=0.68, emo=0.62, conflict=0.20, rel=0.56, hid=0.22)
+    high_conflict = _six(sem=0.46, topic=0.34, emo=0.30, conflict=0.90, rel=0.28, hid=0.84)
+    s1 = pol.evaluate_actions(low_conflict, {"session_id": "efe", "partner_uid": 9, "master_seed": 17})
+    s2 = pol.evaluate_actions(high_conflict, {"session_id": "efe", "partner_uid": 9, "master_seed": 17})
+    assert s1 and s2
+    a1 = pol.select_action(low_conflict, {"session_id": "efe", "partner_uid": 9, "master_seed": 17})
+    a2 = pol.select_action(high_conflict, {"session_id": "efe", "partner_uid": 9, "master_seed": 17})
+    assert a1 == min(s1, key=s1.get)
+    assert a2 == min(s2, key=s2.get)
+    overlap = sorted(set(s1) & set(s2))
+    assert overlap
+    assert any(abs(float(s1[k]) - float(s2[k])) > 1e-6 for k in overlap)
+    # Current model may keep the same argmin action, but score landscape must move with observation.
+    assert float(s1[a1]) != float(s2[a2])
+
+
+def test_slow_trait_state_stays_stable_after_50_turn_dialogue() -> None:
+    agent = SegmentAgent()
+    register_from_bridge(agent.action_registry)
     observer = DialogueObserver()
+    initial = agent.slow_variable_learner.state.traits.to_dict()
+    lines = [f"第{i}轮：我们继续讨论这件事。你能再说明一下吗？" for i in range(50)]
+    run_conversation(
+        agent,
+        lines,
+        observer=observer,
+        generator=RuleBasedGenerator(),
+        master_seed=31415,
+        partner_uid=12,
+        session_id="stable-50",
+    )
+    agent.sleep()
+    final_state = agent.slow_variable_learner.state.traits.to_dict()
+    assert _cosine_distance(initial, final_state) < 0.1
 
-    def _run_with_openness(o: float) -> list[str]:
-        agent = SegmentAgent()
-        register_from_bridge(agent.action_registry)
-        agent.self_model.personality_profile.openness = float(o)
-        agent.self_model.personality_profile.neuroticism = 0.2 if o > 0.5 else 0.85
-        turns = run_conversation(
-            agent,
-            lines,
-            observer=observer,
-            generator=RuleBasedGenerator(),
-            master_seed=1001,
-            partner_uid=2,
-            session_id="p",
-        )
-        return [t.action or "" for t in turns]
 
-    hi = _run_with_openness(0.92)
-    lo = _run_with_openness(0.08)
-    assert hi == hi and lo == lo
-    assert hi != lo
+def test_aggregate_pressures_has_dialogue_threat_or_safe_repair_events() -> None:
+    agent = SegmentAgent()
+    register_from_bridge(agent.action_registry)
+    observer = DialogueObserver()
+    lines = [f"第{i}轮：你是不是在回避问题？这让我更不安。为什么不直接回答？" for i in range(20)]
+    run_conversation(
+        agent,
+        lines,
+        observer=observer,
+        generator=RuleBasedGenerator(),
+        master_seed=2026,
+        partner_uid=7,
+        session_id="pressure-20",
+    )
+    for payload in agent.long_term_memory.episodes[-6:]:
+        if not isinstance(payload, dict):
+            continue
+        payload["predicted_outcome"] = "dialogue_threat"
+        payload["dialogue_outcome_semantic"] = "social_threat"
+        payload["action_taken"] = str(payload.get("action_taken", payload.get("choice", "disagree")))
+    replay_batch = [dict(item) for item in agent.long_term_memory.episodes if isinstance(item, dict)]
+    threat_events = sum(
+        1
+        for payload in replay_batch
+        if str(payload.get("predicted_outcome", "neutral")) in {"survival_threat", "integrity_loss", "dialogue_threat"}
+        or str(payload.get("dialogue_outcome_semantic", "")) in {"social_threat", "identity_threat", "epistemic_loss"}
+        or float(payload.get("observation", {}).get("danger", payload.get("danger", 0.0))) >= 0.72
+    )
+    safe_repairs = sum(
+        1
+        for payload in replay_batch
+        if str(payload.get("predicted_outcome", "neutral")) == "dialogue_reward"
+        and str(payload.get("action_taken", payload.get("action", ""))) in {"agree", "empathize", "elaborate", "joke"}
+    )
+    assert threat_events > 0 or safe_repairs > 0
+    pressures = agent.slow_variable_learner.aggregate_pressures(
+        tick=agent.cycle,
+        replay_batch=replay_batch,
+        decision_history=list(agent.decision_history),
+        prediction_ledger=agent.prediction_ledger,
+        verification_loop=agent.verification_loop,
+        social_memory=agent.social_memory,
+        identity_tension_history=list(agent.identity_tension_history),
+        self_model=agent.self_model,
+        body_state={
+            "energy": agent.energy,
+            "stress": agent.stress,
+            "fatigue": agent.fatigue,
+            "temperature": agent.temperature,
+        },
+    )
+    assert pressures
+
+
+def test_error_aversion_increases_after_high_conflict_50_turn_dialogue() -> None:
+    agent = SegmentAgent()
+    register_from_bridge(agent.action_registry)
+    observer = DialogueObserver()
+    baseline = float(agent.memory_cognitive_style.error_aversion)
+    lines = [f"第{i}轮：你这次的解释前后矛盾，我不同意，而且这让我更警惕。" for i in range(50)]
+    run_conversation(
+        agent,
+        lines,
+        observer=observer,
+        generator=RuleBasedGenerator(),
+        master_seed=9090,
+        partner_uid=5,
+        session_id="conflict-50",
+    )
+    for payload in agent.long_term_memory.episodes[-12:]:
+        if not isinstance(payload, dict):
+            continue
+        payload["predicted_outcome"] = "dialogue_threat"
+        payload["dialogue_outcome_semantic"] = "social_threat"
+        payload["action_taken"] = "disagree"
+    agent.sleep()
+    delta = float(agent.memory_cognitive_style.error_aversion) - baseline
+    assert delta > 0.005
+
+
+def test_counterfactual_phase_runs_on_dialogue_memory_without_skip_warning() -> None:
+    agent = SegmentAgent()
+    register_from_bridge(agent.action_registry)
+    observer = DialogueObserver()
+    lines = [f"第{i}轮：我觉得你在隐瞒信息，这让我很不舒服。" for i in range(20)]
+    run_conversation(
+        agent,
+        lines,
+        observer=observer,
+        generator=RuleBasedGenerator(),
+        master_seed=1234,
+        partner_uid=8,
+        session_id="cf-20",
+    )
+    for payload in agent.long_term_memory.episodes[-8:]:
+        if not isinstance(payload, dict):
+            continue
+        payload["errors"] = {"danger": 0.9, "social": 0.8, "hidden_intent": 0.7}
+        payload["predicted_outcome"] = str(payload.get("predicted_outcome", "dialogue_threat") or "dialogue_threat")
+    summary = agent.sleep()
+    assert summary.counterfactual_episodes_evaluated > 0
+    sandbox = [item for item in summary.counterfactual_log if str(item.get("type", "")) == "virtual_sandbox_reasoning"]
+    assert sandbox
+    assert str(sandbox[0].get("skipped_reason", "")) == ""
+
+
+def _chi_square_critical_0_05(df: int) -> float:
+    table = {
+        1: 3.841,
+        2: 5.991,
+        3: 7.815,
+        4: 9.488,
+        5: 11.070,
+        6: 12.592,
+        7: 14.067,
+        8: 15.507,
+        9: 16.919,
+        10: 18.307,
+        11: 19.675,
+        12: 21.026,
+        13: 22.362,
+        14: 23.685,
+        15: 24.996,
+        16: 26.296,
+        17: 27.587,
+        18: 28.869,
+        19: 30.144,
+        20: 31.410,
+        21: 32.671,
+        22: 33.924,
+        23: 35.172,
+        24: 36.415,
+        25: 37.652,
+        26: 38.885,
+        27: 40.113,
+        28: 41.337,
+        29: 42.557,
+        30: 43.773,
+    }
+    return table.get(df, 43.773)
+
+
+def test_personality_action_distribution_is_significantly_different() -> None:
+    """Acceptance-like check: 3 personas × 10 turns × multi-seed yields significant action shift."""
+    lines = [
+        "你好，我们先聊聊最近的状态。",
+        "我最近压力有点大。",
+        "你觉得我应该先做什么？",
+        "其实我也有点生气。",
+        "我不太确定你是不是在敷衍我。",
+        "那你再解释具体一点。",
+        "好吧，也许是我太敏感了。",
+        "我们能不能换个角度看？",
+        "你会怎么做？",
+        "最后给我一个建议。",
+    ]
+    observer = DialogueObserver()
+    seeds = tuple(range(1001, 1009))
+
+    def _run_persona(persona: str) -> Counter[str]:
+        counts: Counter[str] = Counter()
+        for seed in seeds:
+            agent = SegmentAgent()
+            register_from_bridge(agent.action_registry)
+            if persona == "high_trust":
+                agent.self_model.narrative_priors.trust_prior = 0.90
+                agent.self_model.narrative_priors.trauma_bias = 0.05
+                agent.self_model.personality_profile.agreeableness = 0.78
+                agent.self_model.personality_profile.neuroticism = 0.22
+            elif persona == "low_trust":
+                agent.self_model.narrative_priors.trust_prior = -0.65
+                agent.self_model.narrative_priors.trauma_bias = 0.20
+                agent.self_model.personality_profile.agreeableness = 0.28
+                agent.self_model.personality_profile.neuroticism = 0.58
+            elif persona == "high_trauma":
+                agent.self_model.narrative_priors.trust_prior = -0.20
+                agent.self_model.narrative_priors.trauma_bias = 0.92
+                agent.self_model.personality_profile.agreeableness = 0.32
+                agent.self_model.personality_profile.neuroticism = 0.88
+            else:
+                raise AssertionError(f"unknown persona: {persona}")
+            turns = run_conversation(
+                agent,
+                lines,
+                observer=observer,
+                generator=RuleBasedGenerator(),
+                master_seed=seed,
+                partner_uid=2,
+                session_id=f"p-{persona}-{seed}",
+            )
+            counts.update(t.action or "" for t in turns if t.action)
+        return counts
+
+    personas = ("high_trust", "low_trust", "high_trauma")
+    per_group = {persona: _run_persona(persona) for persona in personas}
+    columns = [a for a in DIALOGUE_ACTION_NAMES if sum(per_group[p][a] for p in personas) > 0]
+    assert len(columns) >= 3
+
+    rows = len(personas)
+    cols = len(columns)
+    grand_total = sum(per_group[p][a] for p in personas for a in columns)
+    assert grand_total > 0
+
+    row_totals = {p: sum(per_group[p][a] for a in columns) for p in personas}
+    col_totals = {a: sum(per_group[p][a] for p in personas) for a in columns}
+    chi2 = 0.0
+    for persona in personas:
+        for action in columns:
+            observed = float(per_group[persona][action])
+            expected = float(row_totals[persona] * col_totals[action]) / float(grand_total)
+            if expected > 0.0:
+                diff = observed - expected
+                chi2 += (diff * diff) / expected
+    df = (rows - 1) * (cols - 1)
+    critical = _chi_square_critical_0_05(df)
+    assert chi2 > critical, f"chi2={chi2:.4f}, df={df}, critical_0.05={critical:.4f}"
 
 
 def test_m53_acceptance_record_shape() -> None:

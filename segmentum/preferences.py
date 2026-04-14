@@ -23,6 +23,17 @@ LABEL_ALIASES = {
     "resource_loss": "resource_loss",
     "neutral": "neutral",
     "resource_gain": "resource_gain",
+    # Dialogue bridges (M5.3): map dialogue outcomes into canonical C-matrix labels.
+    "dialogue_threat": "survival_threat",
+    "dialogue_reward": "resource_gain",
+    "dialogue_epistemic_gain": "resource_gain",
+    "dialogue_epistemic_loss": "resource_loss",
+    "social_threat": "integrity_loss",
+    "identity_threat": "integrity_loss",
+    "social_reward": "resource_gain",
+    "identity_affirm": "resource_gain",
+    "epistemic_gain": "resource_gain",
+    "epistemic_loss": "resource_loss",
 }
 
 
