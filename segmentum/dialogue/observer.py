@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from .channel_registry import DIALOGUE_CHANNELS, DIALOGUE_CHANNEL_NAMES, DialogueChannelSpec
 from .observation import DialogueObservation
@@ -13,6 +14,22 @@ from .signal_extractors import (
     SignalExtractor,
     TopicNoveltyExtractor,
 )
+
+
+def normalize_conversation_history(conversation_history: list[Any]) -> list[str]:
+    """Normalize mixed transcript history into a plain text turn list."""
+    normalized: list[str] = []
+    for turn in conversation_history:
+        if isinstance(turn, str):
+            text = turn
+        elif isinstance(turn, dict):
+            text = turn.get("text", "")
+        else:
+            text = ""
+        text = str(text).strip()
+        if text:
+            normalized.append(text)
+    return normalized
 
 
 def _default_extractors() -> dict[str, SignalExtractor]:
@@ -41,7 +58,7 @@ class DialogueObserver:
     def observe(
         self,
         current_turn: str,
-        conversation_history: list[str],
+        conversation_history: list[Any],
         partner_uid: int,
         session_context: dict[str, object],
         session_id: str,
@@ -49,12 +66,13 @@ class DialogueObserver:
         speaker_uid: int,
         timestamp: datetime | None = None,
     ) -> DialogueObservation:
+        flat_history = normalize_conversation_history(conversation_history)
         channels: dict[str, float] = {}
         for channel in DIALOGUE_CHANNEL_NAMES:
             channels[channel] = float(
                 self.extractors[channel].extract(
                     current_turn=current_turn,
-                    conversation_history=conversation_history,
+                    conversation_history=flat_history,
                     partner_uid=partner_uid,
                     session_context=session_context,
                 )
