@@ -33,6 +33,17 @@
     "epistemic_loss",
     "neutral"
   ],
+  "acceptance_11_12_13": {
+    "11_outcome_label_source": "synthetic_injection_in_tests",
+    "12_outcome_label_source": "synthetic_injection_in_tests",
+    "13_outcome_label_source": "synthetic_injection_in_tests",
+    "notes": "Dialogue outcome labels for acceptance checks 11/12/13 are injected in test payloads to validate learning-loop plumbing."
+  },
+  "generator_scope": {
+    "rule_based_personality_style_mapping": "not_implemented_in_m53",
+    "rule_based_current_behavior": "personality bucket participates in deterministic template index selection only",
+    "llm_generator": "deferred_to_m56"
+  },
   "tests": {
     "module": "tests/test_m53_dialogue_action.py",
     "notes": "Includes 20-turn smoke, outcome classification matrix, inject_outcome_semantics, cognitive_style_bridge heuristics."

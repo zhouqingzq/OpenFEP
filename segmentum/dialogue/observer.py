@@ -22,15 +22,18 @@ def normalize_conversation_history(
     conversation_history: Sequence[str | TranscriptUtterance | Mapping[str, object]],
 ) -> list[str]:
     """M5.3: accept legacy list[str] or role-tagged utterances; extractors still see flat text."""
-    flat: list[str] = []
+    normalized: list[str] = []
     for item in conversation_history:
         if isinstance(item, str):
-            flat.append(item)
+            text = item
         elif isinstance(item, Mapping):
-            flat.append(str(item.get("text", "")))
+            text = item.get("text", "")
         else:
-            flat.append(str(item))
-    return flat
+            text = ""
+        text = str(text).strip()
+        if text:
+            normalized.append(text)
+    return normalized
 
 
 def _default_extractors() -> dict[str, SignalExtractor]:
@@ -67,13 +70,13 @@ class DialogueObserver:
         speaker_uid: int,
         timestamp: datetime | None = None,
     ) -> DialogueObservation:
-        history_flat = normalize_conversation_history(conversation_history)
+        flat_history = normalize_conversation_history(conversation_history)
         channels: dict[str, float] = {}
         for channel in DIALOGUE_CHANNEL_NAMES:
             channels[channel] = float(
                 self.extractors[channel].extract(
                     current_turn=current_turn,
-                    conversation_history=history_flat,
+                    conversation_history=flat_history,
                     partner_uid=partner_uid,
                     session_context=session_context,
                 )

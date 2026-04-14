@@ -344,6 +344,7 @@ def test_aggregate_pressures_has_dialogue_threat_or_safe_repair_events() -> None
         partner_uid=7,
         session_id="pressure-20",
     )
+    assert any(str(ep.get("dialogue_outcome_semantic", "")) != "" for ep in agent.long_term_memory.episodes if isinstance(ep, dict))
     for payload in agent.long_term_memory.episodes[-6:]:
         if not isinstance(payload, dict):
             continue

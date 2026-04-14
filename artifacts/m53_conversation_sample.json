@@ -1,9 +1,9 @@
 [
   {
     "turn_index": 0,
-    "action": "hide",
-    "text": "请继续。",
-    "strategy": null,
+    "action": "agree",
+    "text": "有道理，我跟你的看法一致。",
+    "strategy": "exploit",
     "outcome": "neutral",
     "observation": {
       "semantic_content": 1.0,
@@ -16,13 +16,13 @@
   },
   {
     "turn_index": 1,
-    "action": "hide",
-    "text": "请继续。",
-    "strategy": null,
+    "action": "agree",
+    "text": "有道理，我跟你的看法一致。",
+    "strategy": "exploit",
     "outcome": "neutral",
     "observation": {
-      "semantic_content": 1.0,
-      "topic_novelty": 1.0,
+      "semantic_content": 0.9,
+      "topic_novelty": 0.666667,
       "emotional_tone": 0.333333,
       "conflict_tension": 0.0,
       "relationship_depth": 0.1425,
@@ -31,13 +31,13 @@
   },
   {
     "turn_index": 2,
-    "action": "hide",
-    "text": "我在。",
-    "strategy": null,
+    "action": "agree",
+    "text": "我同意。",
+    "strategy": "exploit",
     "outcome": null,
     "observation": {
-      "semantic_content": 1.0,
-      "topic_novelty": 1.0,
+      "semantic_content": 0.956522,
+      "topic_novelty": 0.75,
       "emotional_tone": 0.5,
       "conflict_tension": 0.1125,
       "relationship_depth": 0.151667,

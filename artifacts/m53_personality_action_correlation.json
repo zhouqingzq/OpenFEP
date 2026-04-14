@@ -1,0 +1,82 @@
+{
+  "milestone": "M5.3",
+  "artifact": "m53_personality_action_correlation",
+  "sample_config": {
+    "personas": [
+      "high_trust",
+      "low_trust",
+      "high_trauma"
+    ],
+    "seed_start_inclusive": 1001,
+    "seed_end_exclusive": 1009,
+    "num_seeds": 8,
+    "turns_per_seed": 10,
+    "dialogue_lines": [
+      "你好，我们先聊聊最近的状态。",
+      "我最近压力有点大。",
+      "你觉得我应该先做什么？",
+      "其实我也有点生气。",
+      "我不太确定你是不是在敷衍我。",
+      "那你再解释具体一点。",
+      "好吧，也许是我太敏感了。",
+      "我们能不能换个角度看？",
+      "你会怎么做？",
+      "最后给我一个建议。"
+    ]
+  },
+  "action_columns_with_observations": [
+    "elaborate",
+    "agree",
+    "deflect",
+    "minimal_response"
+  ],
+  "persona_action_counts": {
+    "high_trust": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 32,
+      "agree": 48,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "low_trust": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 0,
+      "agree": 0,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 40,
+      "minimal_response": 40,
+      "disengage": 0
+    },
+    "high_trauma": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 0,
+      "agree": 0,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 40,
+      "minimal_response": 40,
+      "disengage": 0
+    }
+  },
+  "chi_square": {
+    "chi2": 239.99999999999994,
+    "df": 6,
+    "p_value": 5.6134851547720476e-49,
+    "critical_0_05": 12.592,
+    "significant_at_0_05_using_critical_table": true,
+    "significant_at_0_05_using_p_value": true
+  }
+}
