@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Mapping
 
 from .observer import DialogueObserver
+from .types import TranscriptUtterance
 
 
 def _parse_ts(value: object) -> datetime:
@@ -31,6 +32,8 @@ class DialogueTurn:
     timestamp: datetime
     turn_index: int
     session_turn_count: int
+    #: Last user (self) utterance in this session before this partner message; not six-channel encoded.
+    prior_self_body: str = ""
 
 
 class DialogueWorld:
@@ -44,7 +47,7 @@ class DialogueWorld:
         seed: int = 42,
         world_id: str = "dialogue",
     ) -> None:
-        del seed
+        self._decision_master_seed = int(seed)
         self.world_id = world_id
         self.user_uid = _parse_int(user_dataset.get("uid", 0), 0)
         self.observer = observer
@@ -54,7 +57,7 @@ class DialogueWorld:
         self._session_boundary = False
         self._last_partner_uid: int | None = None
         self._last_turn: DialogueTurn | None = None
-        self._history_by_partner: dict[int, list[str]] = {}
+        self._history_by_partner: dict[int, list[TranscriptUtterance]] = {}
 
     @property
     def exhausted(self) -> bool:
@@ -74,6 +77,7 @@ class DialogueWorld:
             "partner_uid": turn.partner_uid,
             "speaker_uid": turn.speaker_uid,
             "body": turn.body,
+            "prior_self_body": turn.prior_self_body,
             "timestamp": turn.timestamp.isoformat(),
             "turn_index": turn.turn_index,
             "session_turn_count": turn.session_turn_count,
@@ -103,7 +107,7 @@ class DialogueWorld:
             self._session_boundary = False
             return False
         history = self._history_by_partner.setdefault(turn.partner_uid, [])
-        history.append(turn.body)
+        history.append(TranscriptUtterance(role="interlocutor", text=turn.body))
         history[:] = history[-80:]
         self._last_turn = turn
         self._cursor += 1
@@ -138,22 +142,26 @@ class DialogueWorld:
             turns = session.get("turns", [])
             if not isinstance(turns, list):
                 continue
+            indexed_turns = [(idx, item) for idx, item in enumerate(turns) if isinstance(item, Mapping)]
+            indexed_turns.sort(key=lambda pair: (_parse_ts(pair[1].get("timestamp")), pair[0]))
+            last_self_body = ""
             inbound_index = 0
-            for turn in turns:
-                if not isinstance(turn, Mapping):
-                    continue
+            for _, turn in indexed_turns:
                 sender_uid = _parse_int(turn.get("sender_uid", partner_uid), partner_uid)
+                body = str(turn.get("body", ""))
                 if sender_uid == self.user_uid:
+                    last_self_body = body
                     continue
                 rows.append(
                     DialogueTurn(
                         session_id=session_id,
                         partner_uid=sender_uid,
                         speaker_uid=sender_uid,
-                        body=str(turn.get("body", "")),
+                        body=body,
                         timestamp=_parse_ts(turn.get("timestamp")),
                         turn_index=inbound_index,
                         session_turn_count=len(turns),
+                        prior_self_body=last_self_body,
                     )
                 )
                 inbound_index += 1

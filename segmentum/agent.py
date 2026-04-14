@@ -76,11 +76,13 @@ from .precision_manipulation import PrecisionManipulator
 from .defense_strategy import DefenseStrategySelector
 from .metacognitive import MetaCognitiveLayer
 from .workspace import GlobalWorkspace, GlobalWorkspaceState
+from .dialogue.actions import is_dialogue_action, is_dialogue_channel_observation
 from .dialogue.memory_bridge import (
     dialogue_observation_to_memory_fields,
     dialogue_state_vector_metadata,
     encode_dialogue_state_vector,
 )
+from .dialogue.seed_utils import derive_subseed
 
 
 def observation_dict(observation: Observation | Mapping[str, object]) -> dict[str, float]:
@@ -745,6 +747,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.memory_representation_prior_enabled: bool = True
         self.policy_expected_free_energy_only_enabled: bool = False
         self._sleeping = False
+        self._dialogue_decision_context: dict[str, object] | None = None
         self.counterfactual_insights: list[CounterfactualInsight] = []
         self.init_memory_awareness(
             memory_store=self.long_term_memory.ensure_memory_store(),
@@ -2493,6 +2496,13 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "applied_memory_context": bool(memory_refinement["applied_memory"]),
         }
 
+    def _use_dialogue_action_subspace(self, observed: dict[str, float]) -> bool:
+        """M5.3: restrict candidates to dialogue actions for dialogue turns or channel vectors."""
+        ctx = getattr(self, "_dialogue_decision_context", None)
+        if isinstance(ctx, dict) and str(ctx.get("event_type", "")) == "dialogue_turn":
+            return True
+        return is_dialogue_channel_observation(observed)
+
     def evaluate_action_options(
         self,
         observed: dict[str, float],
@@ -2513,6 +2523,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
         )
         if not candidate_actions:
             candidate_actions = [action.name for action in available_actions]
+        if self._use_dialogue_action_subspace(observed):
+            filtered = [a for a in candidate_actions if is_dialogue_action(a)]
+            if not filtered:
+                filtered = [action.name for action in available_actions if is_dialogue_action(action.name)]
+            if filtered:
+                candidate_actions = filtered
         options: dict[str, dict[str, object]] = {}
         for action in candidate_actions:
             options[action] = self._project_action(
@@ -2928,14 +2944,34 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     if option.choice == "forage" and option.policy_score > best_safe:
                         option.policy_score = best_safe - 0.10
 
-        ranked_options.sort(
-            key=lambda option: (
-                option.policy_score,
-                -option.expected_free_energy,
-                option.choice,
-            ),
-            reverse=True,
-        )
+        tb_seed: int | None
+        if self._use_dialogue_action_subspace(observed):
+            ctx = getattr(self, "_dialogue_decision_context", None)
+            try:
+                raw_ms = ctx.get("master_seed", 0) if isinstance(ctx, dict) else 0
+                tb_seed = int(raw_ms)
+            except (TypeError, ValueError):
+                tb_seed = 0
+        else:
+            tb_seed = None
+        if tb_seed is not None:
+            ranked_options.sort(
+                key=lambda option: (
+                    option.policy_score,
+                    -option.expected_free_energy,
+                    derive_subseed(tb_seed, "policy_tiebreak", self.cycle, option.choice),
+                ),
+                reverse=True,
+            )
+        else:
+            ranked_options.sort(
+                key=lambda option: (
+                    option.policy_score,
+                    -option.expected_free_energy,
+                    option.choice,
+                ),
+                reverse=True,
+            )
         actual_rankings = {
             option.choice: index
             for index, option in enumerate(ranked_options, start=1)
@@ -3329,26 +3365,30 @@ class SegmentAgent(MemoryAwareAgentMixin):
         context: dict[str, object] | None = None,
     ) -> dict[str, object]:
         """Run the full decision cycle from dict observations."""
-        if context:
-            self.social_memory.observe_counterpart(
-                other_id=str(context.get("partner_uid", "unknown")),
-                tick=self.cycle,
-                appraisal=context.get("appraisal")
-                if isinstance(context.get("appraisal"), Mapping)
-                else {},
-                metadata=context,
-                event_type=str(context.get("event_type", "dialogue_turn")),
-            )
-        result = self.decision_cycle(observation)
-        if self.long_term_memory.episodes:
-            latest = self.long_term_memory.episodes[-1]
-            fields = dialogue_observation_to_memory_fields(observation, context)
-            latest.update(fields)
-            latest["state_vector"] = encode_dialogue_state_vector(observation)
-            compression = dict(latest.get("compression_metadata", {}) or {})
-            compression["dialogue_state_vector"] = dialogue_state_vector_metadata()
-            latest["compression_metadata"] = compression
-        return result
+        self._dialogue_decision_context = dict(context) if context is not None else {}
+        try:
+            if context:
+                self.social_memory.observe_counterpart(
+                    other_id=str(context.get("partner_uid", "unknown")),
+                    tick=self.cycle,
+                    appraisal=context.get("appraisal")
+                    if isinstance(context.get("appraisal"), Mapping)
+                    else {},
+                    metadata=context,
+                    event_type=str(context.get("event_type", "dialogue_turn")),
+                )
+            result = self.decision_cycle(observation)
+            if self.long_term_memory.episodes:
+                latest = self.long_term_memory.episodes[-1]
+                fields = dialogue_observation_to_memory_fields(observation, context)
+                latest.update(fields)
+                latest["state_vector"] = encode_dialogue_state_vector(observation)
+                compression = dict(latest.get("compression_metadata", {}) or {})
+                compression["dialogue_state_vector"] = dialogue_state_vector_metadata()
+                latest["compression_metadata"] = compression
+            return result
+        finally:
+            self._dialogue_decision_context = None
 
     def conscious_report(self) -> dict[str, object]:
         if self.last_decision_diagnostics is None:
@@ -4597,6 +4637,30 @@ class SegmentAgent(MemoryAwareAgentMixin):
             ]
         )
         slow_learning_rejections = len(slow_learning_audit.updates) - slow_learning_updates
+
+        from segmentum.dialogue.cognitive_style_bridge import (
+            apply_cognitive_style_drift_budget,
+            detect_dialogue_patterns,
+            dialogue_patterns_to_cognitive_pressure,
+            merge_cognitive_style,
+        )
+
+        dialogue_patterns = detect_dialogue_patterns(replay_batch, list(self.decision_history))
+        if dialogue_patterns:
+            if not hasattr(self, "_m53_style_baseline"):
+                setattr(self, "_m53_style_baseline", dict(self.memory_cognitive_style.to_dict()))
+            baseline = getattr(self, "_m53_style_baseline")
+            raw_style_pressure = dialogue_patterns_to_cognitive_pressure(dialogue_patterns)
+            applied_style = apply_cognitive_style_drift_budget(
+                raw_style_pressure,
+                baseline,
+                self.memory_cognitive_style.to_dict(),
+            )
+            self.memory_cognitive_style = merge_cognitive_style(
+                self.memory_cognitive_style,
+                applied_style,
+            )
+            self.long_term_memory.memory_cognitive_style = self.memory_cognitive_style.to_dict()
 
         summary = SleepSummary(
             average_free_energy_drop=mean(gains) if gains else 0.0,

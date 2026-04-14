@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import Mapping
 
 from ..action_registry import ActionRegistry
-from ..action_schema import ActionSchema
 from ..prediction_ledger import PredictionHypothesis, PredictionLedger
 from ..verification import VerificationLoop
+
+from .actions import DIALOGUE_ACTIONS
 
 
 DIALOGUE_PREDICTION_TYPES: dict[str, dict[str, object]] = {
@@ -30,14 +31,6 @@ DIALOGUE_PREDICTION_TYPES: dict[str, dict[str, object]] = {
         "confidence": 0.15,
     },
 }
-
-
-DIALOGUE_ACTIONS: tuple[ActionSchema, ...] = (
-    ActionSchema(name="listen_reflect", cost_estimate=0.08),
-    ActionSchema(name="ask_clarification", cost_estimate=0.10),
-    ActionSchema(name="share_perspective", cost_estimate=0.12),
-    ActionSchema(name="deescalate_tension", cost_estimate=0.14),
-)
 
 
 def _expected_state(
@@ -66,7 +59,7 @@ def register_dialogue_predictions(
             expected_horizon=1,
             created_tick=int(tick),
             source_module="dialogue_bridge",
-            maintenance_context="scan",
+            maintenance_context="dialogue_hypothesis",
         )
         ledger.predictions.append(hypothesis)
         created.append(prediction_id)
@@ -93,6 +86,25 @@ def verify_dialogue_predictions(
     for prediction_id in update.falsified_predictions:
         outcomes[prediction_id] = "falsified"
     return outcomes
+
+
+def dialogue_verification_tick_counts(outcomes: Mapping[str, str]) -> tuple[int, int]:
+    """Count ledger outcomes from one verify_dialogue_predictions call (monitoring only)."""
+    confirmed = sum(1 for value in outcomes.values() if value == "confirmed")
+    falsified = sum(1 for value in outcomes.values() if value == "falsified")
+    return confirmed, falsified
+
+
+def dialogue_verification_period_summary(confirmed: int, falsified: int) -> dict[str, object]:
+    """Aggregate confirmation vs falsification for a snapshot (e.g. ticks since last snapshot)."""
+    total = int(confirmed) + int(falsified)
+    rate = round(float(falsified) / float(total), 6) if total else 0.0
+    return {
+        "confirmed": int(confirmed),
+        "falsified": int(falsified),
+        "total": total,
+        "falsification_rate": float(rate),
+    }
 
 
 def register_dialogue_actions(registry: ActionRegistry) -> None:

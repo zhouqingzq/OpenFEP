@@ -11,6 +11,8 @@ from .maturity import (
     personality_distance,
 )
 from .prediction_bridge import (
+    dialogue_verification_period_summary,
+    dialogue_verification_tick_counts,
     register_dialogue_actions,
     register_dialogue_predictions,
     verify_dialogue_predictions,
@@ -56,11 +58,15 @@ def implant_personality(
     sessions_since_sleep = 0
     total_ticks = 0
     maturity_tick: int | None = None
+    verify_confirmed = 0
+    verify_falsified = 0
     while not world.exhausted:
         if config.max_ticks is not None and total_ticks >= int(config.max_ticks):
             break
         observation = world.observe()
-        context = world.current_turn
+        context = dict(world.current_turn)
+        context["event_type"] = "dialogue_turn"
+        context["master_seed"] = int(getattr(world, "_decision_master_seed", 42))
         result = agent.decision_cycle_from_dict(observation, context=context)
         diagnostics = result.get("diagnostics")
         if diagnostics is not None:
@@ -72,12 +78,15 @@ def implant_personality(
                 free_energy_before=float(result.get("free_energy_before", 0.0)),
                 free_energy_after=float(result.get("free_energy_after", 0.0)),
             )
-        verify_dialogue_predictions(
+        v_outcomes = verify_dialogue_predictions(
             verification_loop=agent.verification_loop,
             ledger=agent.prediction_ledger,
             new_observation=result.get("observed", observation),
             tick=agent.cycle,
         )
+        tick_c, tick_f = dialogue_verification_tick_counts(v_outcomes)
+        verify_confirmed += tick_c
+        verify_falsified += tick_f
         register_dialogue_predictions(
             ledger=agent.prediction_ledger,
             current_observation=result.get("observed", observation),
@@ -99,7 +108,14 @@ def implant_personality(
         sessions_since_sleep = 0
         if sleep_count % max(1, int(config.snapshot_every_n_sleeps)) != 0:
             continue
-        snapshot = capture_personality_snapshot(agent, sleep_count)
+        pv_summary = dialogue_verification_period_summary(verify_confirmed, verify_falsified)
+        verify_confirmed = 0
+        verify_falsified = 0
+        snapshot = capture_personality_snapshot(
+            agent,
+            sleep_count,
+            prediction_verification=pv_summary,
+        )
         if snapshots:
             snapshot.maturity_distance = personality_distance(snapshots[-1], snapshot)
         snapshots.append(snapshot)

@@ -1,0 +1,43 @@
+{
+  "milestone": "M5.3",
+  "schema_version": 1,
+  "dialogue_action_subspace": true,
+  "policy_tiebreak": {
+    "domain": "policy_tiebreak",
+    "source": "segmentum.dialogue.seed_utils.derive_subseed",
+    "wired_via": "SegmentAgent.decision_cycle + dialogue observation / event_type"
+  },
+  "determinism": {
+    "action_sequence": "same_master_seed_in_dialogue_context",
+    "rule_based_surface": "RuleBasedGenerator + pick_index(master_seed, surface, ...)"
+  },
+  "prediction_ledger": {
+    "dialogue_hypothesis_maintenance": true,
+    "maintenance_context_value": "dialogue_hypothesis"
+  },
+  "patch_c_patterns": [
+    "conflict_rupture_pattern",
+    "conflict_repair_pattern",
+    "opinion_rejection_pattern",
+    "question_reward_pattern",
+    "withdrawal_pattern",
+    "trusting_environment_pattern",
+    "suspicious_environment_pattern"
+  ],
+  "outcome_types_synthetic_coverage": [
+    "social_threat",
+    "identity_threat",
+    "social_reward",
+    "identity_affirm",
+    "epistemic_gain",
+    "epistemic_loss",
+    "neutral"
+  ],
+  "tests": {
+    "module": "tests/test_m53_dialogue_action.py",
+    "notes": "Includes 20-turn smoke, outcome classification matrix, inject_outcome_semantics, cognitive_style_bridge heuristics."
+  },
+  "references": {
+    "spec": "prompts/M5.3_Work_Prompt.md"
+  }
+}
