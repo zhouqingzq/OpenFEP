@@ -1,0 +1,28 @@
+[
+  {
+    "defense_distribution": {},
+    "maturity_distance": 0.0,
+    "memory_stats": {
+      "episodic": 2,
+      "procedural": 2,
+      "semantic": 0
+    },
+    "narrative_priors": {
+      "contamination_sensitivity": 0.0,
+      "controllability_prior": 0.0,
+      "meaning_stability": 0.0,
+      "trauma_bias": 0.0,
+      "trust_prior": 0.0
+    },
+    "precision_debt": {},
+    "sleep_cycle": 1,
+    "slow_traits": {
+      "caution_bias": 0.5,
+      "exploration_posture": 0.5,
+      "social_approach": 0.5,
+      "threat_sensitivity": 0.5,
+      "trust_stance": 0.5
+    },
+    "tick": 2
+  }
+]

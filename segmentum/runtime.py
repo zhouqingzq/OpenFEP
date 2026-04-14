@@ -284,11 +284,17 @@ class SegmentRuntime:
                 current_cycle=runtime.agent.cycle,
                 duration=max(RESTART_MEMORY_CONTINUITY_WINDOW, runtime.continuity_rebind_total_ticks),
             )
+        saved_m218 = payload.get("m218") if isinstance(payload.get("m218"), dict) else None
         runtime.agent.self_model.record_restart_consistency(
-            payload.get("m218") if isinstance(payload.get("m218"), dict) else None,
+            saved_m218,
             current_tick=runtime.agent.cycle,
         )
-        runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
+        # Preserve serialized m218 verbatim so export_snapshot matches the saved file (audit.to_dict()
+        # can diverge slightly from the persisted continuity report after restart bookkeeping).
+        if saved_m218 is not None:
+            runtime.last_continuity_report = dict(saved_m218)
+        else:
+            runtime.last_continuity_report = runtime.agent.self_model.continuity_audit.to_dict()
         runtime.subject_state = SubjectState.from_dict(
             payload.get("subject_state") if isinstance(payload.get("subject_state"), dict) else None
         )

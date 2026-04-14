@@ -7,6 +7,7 @@ from segmentum.chat_pipeline.parser import parse_line
 from segmentum.chat_pipeline.session_builder import build_sessions
 from segmentum.agent import SegmentAgent
 from segmentum.dialogue.lifecycle import ImplantationConfig, implant_personality
+from segmentum.dialogue.memory_bridge import dialogue_observation_to_memory_fields
 from segmentum.dialogue.maturity import PersonalitySnapshot, is_mature
 from segmentum.dialogue.observer import DialogueObserver
 from segmentum.dialogue.world import DialogueWorld
@@ -123,6 +124,31 @@ def test_m52_implantation_basic_flow_and_social_memory() -> None:
     others = set(result.final_agent_state["social_memory"]["others"])
     assert {"21", "22"}.issubset(others)
     assert len(others) >= 2
+    assert result.snapshots
+    pv0 = result.snapshots[0].prediction_verification
+    assert set(pv0.keys()) >= {"confirmed", "falsified", "total", "falsification_rate"}
+    assert int(pv0["total"]) == int(pv0["confirmed"]) + int(pv0["falsified"])
+
+
+def test_m52_prior_self_body_on_replay() -> None:
+    world = DialogueWorld(_dataset(), DialogueObserver(), seed=42)
+    assert world.current_turn.get("prior_self_body") == ""
+    world.advance()
+    assert world.current_turn.get("prior_self_body") == "收到"
+
+
+def test_m52_memory_bridge_prior_self_question_bumps_relevance_self() -> None:
+    obs = {
+        "semantic_content": 0.5,
+        "topic_novelty": 0.5,
+        "emotional_tone": 0.5,
+        "conflict_tension": 0.0,
+        "relationship_depth": 0.5,
+        "hidden_intent": 0.5,
+    }
+    base = dialogue_observation_to_memory_fields(obs, None)
+    bumped = dialogue_observation_to_memory_fields(obs, {"prior_self_body": "你在吗？"})
+    assert bumped["relevance_self"] > base["relevance_self"]
 
 
 def test_m52_sleep_trigger_and_determinism() -> None:

@@ -5,6 +5,7 @@ from math import log
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .constants import ACTION_IMAGINED_EFFECTS
+from .dialogue.actions import DIALOGUE_IMAGINED_EFFECTS, is_dialogue_action
 from .environment import clamp
 from .predictive_coding import LayerBeliefUpdate, SensorimotorLayer, default_beliefs
 
@@ -232,10 +233,14 @@ class GenerativeWorldModel:
 
     def imagine_action(self, action: object, prediction: dict[str, float]) -> dict[str, float]:
         action_key = action_name(action)
+        if is_dialogue_action(action_key):
+            deltas = DIALOGUE_IMAGINED_EFFECTS.get(action_key, {})
+        else:
+            deltas = ACTION_IMAGINED_EFFECTS.get(action_key, {})
         imagined = {}
         for key, value in prediction.items():
-            delta = ACTION_IMAGINED_EFFECTS.get(action_key, {}).get(key, 0.0)
-            imagined[key] = clamp(value + delta)
+            delta = float(deltas.get(key, 0.0))
+            imagined[key] = clamp(float(value) + delta)
         return imagined
 
     def state_action_key(self, cluster_id: int, action: object) -> str:

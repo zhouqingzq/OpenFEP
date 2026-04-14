@@ -2,18 +2,18 @@
   "milestone_id": "M1",
   "title": "Core Survival Agent Foundations",
   "status": "PASS",
-  "generated_at": "2026-04-13T01:21:35+00:00",
+  "generated_at": "2026-04-14T00:55:26+00:00",
   "seed_set": [
     7,
     23,
     29
   ],
   "artifacts": {
-    "runtime_trace": "/Users/admin/git/OpenFEP/artifacts/m1_runtime_trace.json",
-    "memory_gate": "/Users/admin/git/OpenFEP/artifacts/m1_memory_gate.json",
-    "sleep_trace": "/Users/admin/git/OpenFEP/artifacts/m1_sleep_consolidation.json",
-    "narrative_trace": "/Users/admin/git/OpenFEP/artifacts/m1_narrative_trace.json",
-    "summary": "/Users/admin/git/OpenFEP/reports/m1_acceptance_summary.md"
+    "runtime_trace": "E:\\workspace\\segments\\artifacts\\m1_runtime_trace.json",
+    "memory_gate": "E:\\workspace\\segments\\artifacts\\m1_memory_gate.json",
+    "sleep_trace": "E:\\workspace\\segments\\artifacts\\m1_sleep_consolidation.json",
+    "narrative_trace": "E:\\workspace\\segments\\artifacts\\m1_narrative_trace.json",
+    "summary": "E:\\workspace\\segments\\reports\\m1_acceptance_summary.md"
   },
   "tests": {
     "acceptance": [
@@ -70,7 +70,7 @@
   ],
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-04-13T01:21:35+00:00"
+    "round_started_at": "2026-04-14T00:55:26+00:00"
   },
   "recommendation": "ACCEPT_RECONSTRUCTED_SCOPE",
   "canonical_files": [

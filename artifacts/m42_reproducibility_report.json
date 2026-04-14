@@ -1,9 +1,9 @@
 {
-  "benchmark_root": "/Users/admin/git/OpenFEP/external_benchmark_registry",
+  "benchmark_root": "E:\\workspace\\segments\\external_benchmark_registry",
   "replay_basis": {
     "benchmark_id": "iowa_gambling_task",
-    "manifest_path": "/Users/admin/git/OpenFEP/external_benchmark_registry/iowa_gambling_task/manifest.json",
-    "data_path": "/Users/admin/git/OpenFEP/external_benchmark_registry/iowa_gambling_task/iowa_gambling_task_external.jsonl",
+    "manifest_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\manifest.json",
+    "data_path": "E:\\workspace\\segments\\external_benchmark_registry\\iowa_gambling_task\\iowa_gambling_task_external.jsonl",
     "source_type": "external_bundle",
     "smoke_test_only": false,
     "is_synthetic": false,

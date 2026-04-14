@@ -2,7 +2,7 @@
   "milestone_id": "M2.23",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-13T01:29:09+00:00",
+  "generated_at": "2026-04-14T01:01:11+00:00",
   "seed_set": [
     223,
     242,
@@ -12,13 +12,13 @@
     436
   ],
   "artifacts": {
-    "trace": "/Users/admin/git/OpenFEP/artifacts/m223_self_consistency_trace.json",
-    "alignment": "/Users/admin/git/OpenFEP/artifacts/m223_commitment_alignment.json",
-    "repair": "/Users/admin/git/OpenFEP/artifacts/m223_repair_outcomes.json",
-    "identity_update": "/Users/admin/git/OpenFEP/artifacts/m223_identity_update_bounds.json",
-    "stress": "/Users/admin/git/OpenFEP/artifacts/m223_stress_alignment.json",
-    "protocol_audit": "/Users/admin/git/OpenFEP/artifacts/m223_protocol_audit.json",
-    "report": "/Users/admin/git/OpenFEP/reports/m223_acceptance_report.json"
+    "trace": "E:\\workspace\\segments\\artifacts\\m223_self_consistency_trace.json",
+    "alignment": "E:\\workspace\\segments\\artifacts\\m223_commitment_alignment.json",
+    "repair": "E:\\workspace\\segments\\artifacts\\m223_repair_outcomes.json",
+    "identity_update": "E:\\workspace\\segments\\artifacts\\m223_identity_update_bounds.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m223_stress_alignment.json",
+    "protocol_audit": "E:\\workspace\\segments\\artifacts\\m223_protocol_audit.json",
+    "report": "E:\\workspace\\segments\\reports\\m223_acceptance_report.json"
   },
   "tests": {
     "milestone_suite": [
@@ -2597,6 +2597,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m223_v1",
-    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248"
+    "codebase_version": "4a1b22e5490a4bc5e1798cf3b161ee2f175841cd"
   }
 }

@@ -1,8 +1,8 @@
 {
-  "matured": false,
-  "maturity_tick": null,
+  "matured": true,
+  "maturity_tick": 119,
   "milestone": "M5.2",
-  "sleep_cycles": 1,
-  "ticks": 4,
-  "uid": 31
+  "sleep_cycles": 3,
+  "ticks": 119,
+  "uid": 100001
 }

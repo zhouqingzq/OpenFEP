@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 import math
 from statistics import mean
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping
 
 if TYPE_CHECKING:
     from ..agent import SegmentAgent
@@ -20,6 +20,8 @@ class PersonalitySnapshot:
     defense_distribution: dict[str, int]
     memory_stats: dict[str, int]
     maturity_distance: float = 0.0
+    #: Dialogue-bridge prediction ledger outcomes since previous personality snapshot (monitoring).
+    prediction_verification: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -52,7 +54,12 @@ def personality_distance(a: PersonalitySnapshot, b: PersonalitySnapshot) -> floa
     return round(max(0.0, 1.0 - cosine), 6)
 
 
-def capture_personality_snapshot(agent: "SegmentAgent", sleep_cycle: int) -> PersonalitySnapshot:
+def capture_personality_snapshot(
+    agent: "SegmentAgent",
+    sleep_cycle: int,
+    *,
+    prediction_verification: Mapping[str, object] | None = None,
+) -> PersonalitySnapshot:
     precision_report = agent.precision_manipulator.to_dict()
     debts = precision_report.get("channel_debts", {})
     defense_history = precision_report.get("strategy_history", [])
@@ -67,6 +74,7 @@ def capture_personality_snapshot(agent: "SegmentAgent", sleep_cycle: int) -> Per
         "semantic": len(agent.long_term_memory.semantic_schemas),
         "procedural": len(agent.action_history),
     }
+    pv = dict(prediction_verification) if prediction_verification else {}
     return PersonalitySnapshot(
         sleep_cycle=int(sleep_cycle),
         tick=int(agent.cycle),
@@ -76,6 +84,7 @@ def capture_personality_snapshot(agent: "SegmentAgent", sleep_cycle: int) -> Per
         defense_distribution=defense_distribution,
         memory_stats=memory_stats,
         maturity_distance=0.0,
+        prediction_verification=pv,
     )
 
 

@@ -1,0 +1,27 @@
+{
+  "distance_trace": [
+    0.0
+  ],
+  "final_narrative_priors": {
+    "contamination_sensitivity": 0.0,
+    "controllability_prior": 0.0,
+    "meaning_stability": 0.0,
+    "trauma_bias": 0.0,
+    "trust_prior": 0.0
+  },
+  "final_slow_traits": {
+    "caution_bias": 0.5,
+    "exploration_posture": 0.5,
+    "social_approach": 0.5,
+    "threat_sensitivity": 0.5,
+    "trust_stance": 0.5
+  },
+  "matured": false,
+  "maturity_snapshot_index": null,
+  "max_distance": 0.0,
+  "mean_distance": 0.0,
+  "min_distance": 0.0,
+  "snapshots": 1,
+  "threshold": 0.02,
+  "window": 3
+}

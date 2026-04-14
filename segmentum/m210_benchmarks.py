@@ -248,6 +248,7 @@ def build_profiled_agent(*, profile_name: str, seed: int) -> SegmentAgent:
         agent.identity_traits,
         agent.self_model,
         agent.goal_stack,
+        agent.slow_variable_learner,
     )
     return agent
 

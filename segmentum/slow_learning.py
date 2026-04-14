@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from statistics import mean
 from typing import Mapping
 
+from .dialogue.actions import DIALOGUE_ACTION_STRATEGY_MAP, is_dialogue_action
+
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
     return max(low, min(high, float(value)))
@@ -723,6 +725,29 @@ class SlowVariableLearner:
         if action in {"scan", "seek_contact"}:
             bias -= (style.compute_conservatism - 0.5) * 0.10
             bias += (0.5 - style.process_attraction_decay) * 0.12
+        if is_dialogue_action(action):
+            strat = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "explore")
+            if strat == "explore":
+                bias += (traits.exploration_posture - 0.5) * 0.28
+                bias += (values.exploration_weight - 0.5) * 0.18
+                bias += (traits.trust_stance - 0.5) * 0.10
+                bias -= (traits.caution_bias - 0.5) * 0.10
+            elif strat == "exploit":
+                bias += (traits.social_approach - 0.5) * 0.22
+                bias += (values.social_weight - 0.5) * 0.16
+                bias += (identity.commitment_stability - 0.5) * 0.08
+                bias -= (traits.threat_sensitivity - 0.5) * 0.08
+            else:
+                bias += (traits.caution_bias - 0.5) * 0.24
+                bias += (traits.threat_sensitivity - 0.5) * 0.18
+                bias += (values.maintenance_weight - 0.5) * 0.12
+                bias -= (traits.exploration_posture - 0.5) * 0.10
+            if action in {"share_opinion", "disagree", "joke"}:
+                bias += (style.compute_conservatism - 0.5) * 0.06 * (
+                    1.0 if action == "disagree" else -0.5
+                )
+            if action in {"minimal_response", "disengage", "deflect"}:
+                bias += (style.compression_preference - 0.5) * 0.08
         return max(-0.32, min(0.32, round(bias, 6)))
 
     def cognitive_style_bias(
@@ -988,6 +1013,9 @@ class SlowVariableLearner:
             1
             for payload in new_episodes
             if str(payload.get("predicted_outcome", "neutral")) in {"survival_threat", "integrity_loss"}
+            or str(payload.get("predicted_outcome", "neutral")) == "dialogue_threat"
+            or str(payload.get("dialogue_outcome_semantic", ""))
+            in {"social_threat", "identity_threat", "epistemic_loss"}
             or float(payload.get("observation", {}).get("danger", payload.get("danger", 0.0))) >= 0.72
         )
         safe_repairs = sum(
@@ -995,12 +1023,24 @@ class SlowVariableLearner:
             for payload in new_episodes
             if str(payload.get("predicted_outcome", "neutral")) in {"neutral", "resource_gain"}
             and str(payload.get("action_taken", payload.get("action", ""))) in {"hide", "rest", "exploit_shelter", "thermoregulate"}
+        ) + sum(
+            1
+            for payload in new_episodes
+            if str(payload.get("predicted_outcome", "neutral")) == "dialogue_reward"
+            and str(payload.get("action_taken", payload.get("action", "")))
+            in {"agree", "empathize", "elaborate", "joke"}
         ) + len(repair_history)
         exploratory_successes = sum(
             1
             for payload in new_episodes
             if str(payload.get("action_taken", payload.get("action", ""))) in {"scan", "seek_contact"}
             and str(payload.get("predicted_outcome", "neutral")) in {"neutral", "resource_gain"}
+        ) + sum(
+            1
+            for payload in new_episodes
+            if str(payload.get("predicted_outcome", "")) == "dialogue_epistemic_gain"
+            and str(payload.get("action_taken", payload.get("action", "")))
+            in {"ask_question", "introduce_topic", "share_opinion"}
         )
         exploratory_failures = sum(
             1

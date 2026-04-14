@@ -18,7 +18,8 @@ api = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.30,<1"]
 packages = ["segmentum"]
 
 [tool.pytest.ini_options]
-addopts = "-m 'not stress'"
+addopts = "-m 'not stress and not m411'"
 markers = [
     "stress: long-running soak, benchmark, and endurance tests excluded from default pytest runs",
+    "m411: slow M411 phenomenology rollouts; run explicitly with pytest -m m411 tests/test_m411_phenomenology.py",
 ]

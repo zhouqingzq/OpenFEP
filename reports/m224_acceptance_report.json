@@ -3,8 +3,8 @@
   "schema_version": "m224_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-13T01:29:10+00:00",
-  "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
+  "generated_at": "2026-04-14T01:01:13+00:00",
+  "codebase_version": "4a1b22e5490a4bc5e1798cf3b161ee2f175841cd",
   "seed_set": [
     224,
     243,
@@ -6068,11 +6068,11 @@
     "open_world_runtime_passed": true
   },
   "artifacts": {
-    "workspace_causality": "/Users/admin/git/OpenFEP/artifacts/m224_workspace_causality.json",
-    "report_leakage": "/Users/admin/git/OpenFEP/artifacts/m224_report_leakage.json",
-    "capacity_pressure": "/Users/admin/git/OpenFEP/artifacts/m224_capacity_pressure.json",
-    "persistence_trace": "/Users/admin/git/OpenFEP/artifacts/m224_persistence_trace.json",
-    "downstream_alignment": "/Users/admin/git/OpenFEP/artifacts/m224_downstream_alignment.json"
+    "workspace_causality": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
+    "report_leakage": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
+    "capacity_pressure": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
+    "persistence_trace": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
+    "downstream_alignment": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json"
   },
   "residual_risks": [
     "Open-world runtime evidence is now multi-cycle and seeded, but it still covers a bounded horizon rather than long-run deployment.",
@@ -6082,8 +6082,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m224_v2",
-    "generated_at": "2026-04-13T01:29:10+00:00",
-    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
+    "generated_at": "2026-04-14T01:01:13+00:00",
+    "codebase_version": "4a1b22e5490a4bc5e1798cf3b161ee2f175841cd",
     "seed_set": [
       224,
       243,
@@ -6094,33 +6094,33 @@
     ],
     "artifacts": {
       "workspace_causality": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m224_workspace_causality.json",
-        "modified_at": "2026-04-13T01:29:11+00:00",
+        "path": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
+        "modified_at": "2026-04-14T01:01:14+00:00",
         "matches_round_metadata": true
       },
       "report_leakage": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m224_report_leakage.json",
-        "modified_at": "2026-04-13T01:29:11+00:00",
+        "path": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
+        "modified_at": "2026-04-14T01:01:14+00:00",
         "matches_round_metadata": true
       },
       "capacity_pressure": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m224_capacity_pressure.json",
-        "modified_at": "2026-04-13T01:29:11+00:00",
+        "path": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
+        "modified_at": "2026-04-14T01:01:14+00:00",
         "matches_round_metadata": true
       },
       "persistence_trace": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m224_persistence_trace.json",
-        "modified_at": "2026-04-13T01:29:11+00:00",
+        "path": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
+        "modified_at": "2026-04-14T01:01:14+00:00",
         "matches_round_metadata": true
       },
       "downstream_alignment": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m224_downstream_alignment.json",
-        "modified_at": "2026-04-13T01:29:11+00:00",
+        "path": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json",
+        "modified_at": "2026-04-14T01:01:14+00:00",
         "matches_round_metadata": true
       },
       "report": {
-        "path": "/Users/admin/git/OpenFEP/reports/m224_acceptance_report.json",
-        "modified_at": "2026-04-13T01:29:11+00:00",
+        "path": "E:\\workspace\\segments\\reports\\m224_acceptance_report.json",
+        "modified_at": "2026-04-14T01:01:14+00:00",
         "matches_round_metadata": true
       }
     }
@@ -7073,11 +7073,11 @@
         }
       },
       "artifacts": {
-        "workspace_causality": "/Users/admin/git/OpenFEP/artifacts/m224_workspace_causality.json",
-        "report_leakage": "/Users/admin/git/OpenFEP/artifacts/m224_report_leakage.json",
-        "capacity_pressure": "/Users/admin/git/OpenFEP/artifacts/m224_capacity_pressure.json",
-        "persistence_trace": "/Users/admin/git/OpenFEP/artifacts/m224_persistence_trace.json",
-        "downstream_alignment": "/Users/admin/git/OpenFEP/artifacts/m224_downstream_alignment.json"
+        "workspace_causality": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
+        "report_leakage": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
+        "capacity_pressure": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
+        "persistence_trace": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
+        "downstream_alignment": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json"
       }
     },
     "second": {
@@ -8018,11 +8018,11 @@
         }
       },
       "artifacts": {
-        "workspace_causality": "/Users/admin/git/OpenFEP/artifacts/m224_workspace_causality.json",
-        "report_leakage": "/Users/admin/git/OpenFEP/artifacts/m224_report_leakage.json",
-        "capacity_pressure": "/Users/admin/git/OpenFEP/artifacts/m224_capacity_pressure.json",
-        "persistence_trace": "/Users/admin/git/OpenFEP/artifacts/m224_persistence_trace.json",
-        "downstream_alignment": "/Users/admin/git/OpenFEP/artifacts/m224_downstream_alignment.json"
+        "workspace_causality": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
+        "report_leakage": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
+        "capacity_pressure": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
+        "persistence_trace": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
+        "downstream_alignment": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json"
       }
     }
   },

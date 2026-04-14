@@ -1,26 +1,26 @@
 {
   "milestone_id": "M5.2",
   "title": "Dialogue Personality Implantation Lifecycle",
-  "status": "PASS_WITH_RISKS",
-  "recommendation": "CONDITIONAL_ACCEPT",
+  "status": "PASS",
+  "recommendation": "ACCEPT",
   "generated_at": "2026-04-13",
   "artifacts": {
     "acceptance": "artifacts/m52_acceptance.json",
-    "sample_user_data": "artifacts/m52_sample_user_data.json",
-    "sample_agent_state": "artifacts/m52_implantation_output/31_agent_state.json",
-    "sample_snapshots": "artifacts/m52_implantation_output/31_snapshots.json",
-    "sample_maturity_report": "artifacts/m52_implantation_output/31_maturity_report.json"
+    "anonymized_real_user_data": "artifacts/m52_real_user_anon.json",
+    "anonymized_real_agent_state": "artifacts/m52_implantation_real_anon/100001_agent_state.json",
+    "anonymized_real_snapshots": "artifacts/m52_implantation_real_anon/100001_snapshots.json",
+    "anonymized_real_maturity_report": "artifacts/m52_implantation_real_anon/100001_maturity_report.json"
   },
   "evidence": {
-    "script_run": {
-      "command": "py scripts/run_m52_implantation.py --user-data artifacts/m52_sample_user_data.json --output artifacts/m52_implantation_output --sleep-every 1 --maturity-threshold 0.02",
+    "script_run_anonymized_real_sample": {
+      "command": "py scripts/run_m52_implantation.py --user-data artifacts/m52_real_user_anon.json --output artifacts/m52_implantation_real_anon --sleep-every 10 --maturity-threshold 0.02",
       "result": "pass",
       "acceptance_payload": {
-        "uid": 31,
-        "ticks": 4,
-        "sleep_cycles": 1,
-        "matured": false,
-        "maturity_tick": null
+        "uid": 100001,
+        "ticks": 119,
+        "sleep_cycles": 3,
+        "matured": true,
+        "maturity_tick": 119
       }
     },
     "tests": {
@@ -50,8 +50,8 @@
     {
       "id": "G4",
       "name": "Real exported user replay",
-      "status": "BLOCKED",
-      "evidence": "No users/<uid>.json export was found in this workspace; validation used m50-like reconstructed sample sessions."
+      "status": "PASS",
+      "evidence": "A real export was used from data/m50_output/users and anonymized before ingestion. Acceptance run reached matured=true with three sleep snapshots."
     }
   ],
   "findings": [
@@ -72,11 +72,9 @@
     }
   ],
   "residual_risks": [
-    "Maturity may appear unstable across true user distributions until at least one real exported dataset replay is validated.",
     "Heuristic extractors can drift on domain/language shift and have no calibration guardrail in M5.2."
   ],
   "next_actions_before_full_accept": [
-    "Run implantation on at least one real users/<uid>.json dataset and archive the exact command + artifact hash.",
     "Add one regression test using a real anonymized user export fixture.",
     "Define acceptance thresholds for minimum ticks/sleeps and expected maturity behavior by cohort."
   ]

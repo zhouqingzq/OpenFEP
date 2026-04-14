@@ -6,6 +6,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
+import pytest
+
 from segmentum.m4_acceptance import final_conclusion, memory_milestone_layer_status
 from segmentum.m411_phenomenology import (
     M411RolloutConfig,
@@ -24,6 +26,8 @@ SMOKE_CONFIG = M411RolloutConfig(
     sleep_interval=50,
     min_acceptance_ticks=1000,
 )
+
+pytestmark = pytest.mark.m411
 
 
 class TestM411Phenomenology(unittest.TestCase):

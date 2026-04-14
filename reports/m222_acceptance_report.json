@@ -2,17 +2,17 @@
   "milestone_id": "M2.22",
   "status": "FAIL",
   "recommendation": "REJECT",
-  "generated_at": "2026-04-13T01:23:00+00:00",
+  "generated_at": "2026-04-14T00:53:57+00:00",
   "seed_set": [
     222
   ],
   "artifacts": {
-    "summary": "/Users/admin/git/OpenFEP/artifacts/m222_long_horizon_summary.json",
-    "mixed_trace": "/Users/admin/git/OpenFEP/artifacts/m222_mixed_stress_trace.json",
-    "restart": "/Users/admin/git/OpenFEP/artifacts/m222_restart_continuity.json",
-    "ablation": "/Users/admin/git/OpenFEP/artifacts/m222_ablation_comparison.json",
-    "resource_guard": "/Users/admin/git/OpenFEP/artifacts/m222_resource_guard.json",
-    "report": "/Users/admin/git/OpenFEP/reports/m222_acceptance_report.json"
+    "summary": "E:\\workspace\\segments\\artifacts\\m222_long_horizon_summary.json",
+    "mixed_trace": "E:\\workspace\\segments\\artifacts\\m222_mixed_stress_trace.json",
+    "restart": "E:\\workspace\\segments\\artifacts\\m222_restart_continuity.json",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m222_ablation_comparison.json",
+    "resource_guard": "E:\\workspace\\segments\\artifacts\\m222_resource_guard.json",
+    "report": "E:\\workspace\\segments\\reports\\m222_acceptance_report.json"
   },
   "tests": {
     "milestone_suite": [
@@ -2384,6 +2384,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m222_v1",
-    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248"
+    "codebase_version": "4a1b22e5490a4bc5e1798cf3b161ee2f175841cd"
   }
 }

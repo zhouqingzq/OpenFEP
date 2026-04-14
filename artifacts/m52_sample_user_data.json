@@ -1,0 +1,88 @@
+{
+  "uid": 31,
+  "profile": {
+    "source": "m50_like_logs"
+  },
+  "sessions": [
+    {
+      "session_id": "31_77_20240201100000_0000",
+      "uid_a": 31,
+      "uid_b": 77,
+      "start_time": "2024-02-01T10:00:00",
+      "end_time": "2024-02-01T10:02:20",
+      "metadata": {
+        "turn_count": 4
+      },
+      "turns": [
+        {
+          "timestamp": "2024-02-01T10:00:00",
+          "msg_type": 0,
+          "sender_uid": 31,
+          "receiver_uid": 77,
+          "body": "早上好"
+        },
+        {
+          "timestamp": "2024-02-01T10:00:40",
+          "msg_type": 0,
+          "sender_uid": 77,
+          "receiver_uid": 31,
+          "body": "今天会议你会来吗？"
+        },
+        {
+          "timestamp": "2024-02-01T10:01:10",
+          "msg_type": 0,
+          "sender_uid": 31,
+          "receiver_uid": 77,
+          "body": "会来"
+        },
+        {
+          "timestamp": "2024-02-01T10:02:20",
+          "msg_type": 0,
+          "sender_uid": 77,
+          "receiver_uid": 31,
+          "body": "太好了"
+        }
+      ]
+    },
+    {
+      "session_id": "31_88_20240201121000_0000",
+      "uid_a": 31,
+      "uid_b": 88,
+      "start_time": "2024-02-01T12:10:00",
+      "end_time": "2024-02-01T12:11:30",
+      "metadata": {
+        "turn_count": 4
+      },
+      "turns": [
+        {
+          "timestamp": "2024-02-01T12:10:00",
+          "msg_type": 0,
+          "sender_uid": 31,
+          "receiver_uid": 88,
+          "body": "你在吗"
+        },
+        {
+          "timestamp": "2024-02-01T12:10:20",
+          "msg_type": 0,
+          "sender_uid": 88,
+          "receiver_uid": 31,
+          "body": "在，怎么了"
+        },
+        {
+          "timestamp": "2024-02-01T12:10:45",
+          "msg_type": 0,
+          "sender_uid": 31,
+          "receiver_uid": 88,
+          "body": "帮我看下文档"
+        },
+        {
+          "timestamp": "2024-02-01T12:11:30",
+          "msg_type": 0,
+          "sender_uid": 88,
+          "receiver_uid": 31,
+          "body": "好的"
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # M5.2 Acceptance Summary
 
-- Status: `PASS_WITH_RISKS`
-- Recommendation: `CONDITIONAL_ACCEPT`
+- Status: `PASS`
+- Recommendation: `ACCEPT`
 - Date: 2026-04-13
 
 ## What Was Verified
@@ -13,21 +13,22 @@
   - script output path is portable (`artifacts/m52_acceptance.json`).
 - M5.2 test suite passes: `py -m pytest tests/test_m52_implantation.py -q` -> `6 passed`.
 
-## Acceptance Evidence
+## Acceptance Evidence (Anonymized Real Sample)
 
 - Script run:
-  - `py scripts/run_m52_implantation.py --user-data artifacts/m52_sample_user_data.json --output artifacts/m52_implantation_output --sleep-every 1 --maturity-threshold 0.02`
-  - Output: `ticks=4`, `sleep_cycles=1`, `matured=false`.
+  - `py scripts/run_m52_implantation.py --user-data artifacts/m52_real_user_anon.json --output artifacts/m52_implantation_real_anon --sleep-every 10 --maturity-threshold 0.02`
+  - Output: `ticks=119`, `sleep_cycles=3`, `matured=true`.
 - Report files:
   - `artifacts/m52_acceptance.json`
-  - `artifacts/m52_implantation_output/31_agent_state.json`
-  - `artifacts/m52_implantation_output/31_snapshots.json`
-  - `artifacts/m52_implantation_output/31_maturity_report.json`
+  - `artifacts/m52_real_user_anon.json`
+  - `artifacts/m52_implantation_real_anon/100001_agent_state.json`
+  - `artifacts/m52_implantation_real_anon/100001_snapshots.json`
+  - `artifacts/m52_implantation_real_anon/100001_maturity_report.json`
 
-## Blocking Gap To Full PASS
+## Privacy Handling
 
-- Workspace currently has no real exported `users/<uid>.json`.
-- This round used an M5.0-like reconstructed sample dataset, not a true user export replay.
+- Raw UID input was converted into an anonymized dataset before implantation.
+- Acceptance artifacts only contain mapped anonymous IDs (e.g. `100001`), no raw user UID.
 
 ## Remaining Concept/Prototype Areas
 
@@ -37,5 +38,5 @@
 
 ## Final Call
 
-- Entering next milestone is acceptable **with risk tracking enabled**.
-- Before declaring full M5.2 `PASS`, run one real-user replay and store the exact command + artifact evidence.
+- M5.2 is acceptable to close and enter the next milestone.
+- Keep risk tracking for heuristic extractor calibration and dynamic prediction modeling.

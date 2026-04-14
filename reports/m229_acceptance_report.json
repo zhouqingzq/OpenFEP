@@ -1,17 +1,17 @@
 {
   "milestone_id": "M2.29",
   "status": "PASS",
-  "generated_at": "2026-04-13T02:26:56+00:00",
+  "generated_at": "2026-04-13T16:52:29+00:00",
   "seed_set": [
     229,
     431
   ],
   "artifacts": {
-    "specification": "/Users/admin/git/OpenFEP/reports/m229_milestone_spec.md",
-    "canonical_trace": "/Users/admin/git/OpenFEP/artifacts/m229_verification_trace.jsonl",
-    "ablation": "/Users/admin/git/OpenFEP/artifacts/m229_verification_ablation.json",
-    "stress": "/Users/admin/git/OpenFEP/artifacts/m229_verification_stress.json",
-    "summary": "/Users/admin/git/OpenFEP/reports/m229_acceptance_summary.md"
+    "specification": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
+    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
+    "ablation": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
+    "stress": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
+    "summary": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md"
   },
   "tests": {
     "milestone": [
@@ -203,38 +203,38 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-04-13T02:26:56+00:00",
-    "codebase_version": "6428b0888c0b6f88894014ee0e1e73aca741c248",
+    "generated_at": "2026-04-13T16:52:29+00:00",
+    "codebase_version": "4a1b22e5490a4bc5e1798cf3b161ee2f175841cd",
     "artifact_records": {
       "specification": {
-        "path": "/Users/admin/git/OpenFEP/reports/m229_milestone_spec.md",
+        "path": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
         "exists": true,
         "size_bytes": 2414,
-        "modified_at": "2026-04-12T06:59:44+00:00"
+        "modified_at": "2026-03-22T06:44:24+00:00"
       },
       "canonical_trace": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m229_verification_trace.jsonl",
+        "path": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
         "exists": true,
-        "size_bytes": 21729,
-        "modified_at": "2026-04-13T02:26:56+00:00"
+        "size_bytes": 21733,
+        "modified_at": "2026-04-13T16:52:29+00:00"
       },
       "ablation": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m229_verification_ablation.json",
+        "path": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
         "exists": true,
-        "size_bytes": 1265,
-        "modified_at": "2026-04-13T02:26:56+00:00"
+        "size_bytes": 1304,
+        "modified_at": "2026-04-13T16:52:29+00:00"
       },
       "stress": {
-        "path": "/Users/admin/git/OpenFEP/artifacts/m229_verification_stress.json",
+        "path": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
         "exists": true,
-        "size_bytes": 6057,
-        "modified_at": "2026-04-13T02:26:56+00:00"
+        "size_bytes": 6270,
+        "modified_at": "2026-04-13T16:52:29+00:00"
       },
       "summary": {
-        "path": "/Users/admin/git/OpenFEP/reports/m229_acceptance_summary.md",
+        "path": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md",
         "exists": true,
-        "size_bytes": 229,
-        "modified_at": "2026-04-13T02:26:56+00:00"
+        "size_bytes": 236,
+        "modified_at": "2026-04-13T16:52:29+00:00"
       }
     }
   },

@@ -7,6 +7,7 @@ from types import MappingProxyType
 from typing import Callable, Mapping
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .dialogue.actions import DIALOGUE_ACTION_STRATEGY_MAP, is_dialogue_action
 from .slow_learning import SlowLearningState
 
 
@@ -1123,6 +1124,37 @@ class PersonalityProfile:
             bias += (-c) * 0.10 * max(0.0, danger - 0.3)
         elif action == "thermoregulate":
             bias += n * 0.05
+        elif is_dialogue_action(action):
+            strat = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "explore")
+            danger_excess = max(0.0, danger - 0.35)
+            if action == "ask_question":
+                bias += o * 0.16 + e * 0.08 + (0.45 - danger) * 0.10
+            elif action == "introduce_topic":
+                bias += o * 0.18 + e * 0.06 - c * 0.04
+            elif action == "share_opinion":
+                bias += a * 0.10 + o * 0.12 - n * 0.06 * danger_excess
+            elif action == "elaborate":
+                bias += c * 0.10 + a * 0.08 + (-o) * 0.03
+            elif action == "agree":
+                bias += a * 0.18 + (-n) * 0.05 + (0.5 - danger) * 0.06
+            elif action == "empathize":
+                bias += a * 0.14 + e * 0.10 + n * 0.04 * (1.0 - danger)
+            elif action == "joke":
+                bias += o * 0.14 + e * 0.10 - n * 0.05 * danger_excess
+            elif action == "disagree":
+                bias += (-a) * 0.08 + c * 0.10 + n * 0.12 * danger_excess
+            elif action == "deflect":
+                bias += n * 0.10 + (-e) * 0.04 + c * 0.06
+            elif action == "minimal_response":
+                bias += (-e) * 0.08 + c * 0.08 + n * 0.05 * danger_excess
+            elif action == "disengage":
+                bias += n * 0.12 + c * 0.08 + (-a) * 0.05
+            if strat == "explore":
+                bias += o * 0.04 + (0.5 - danger) * 0.03
+            elif strat == "exploit":
+                bias += a * 0.03 + (-danger_excess) * 0.04
+            else:
+                bias += n * 0.05 + danger_excess * 0.05
 
         return max(-0.30, min(0.30, bias))
 

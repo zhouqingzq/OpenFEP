@@ -150,3 +150,24 @@ def test_predictive_coding_dynamic_modalities_and_bounds() -> None:
         top_down_prediction={"hidden_intent": 0.1},
     )
     assert update.error_precision["hidden_intent"] <= 0.20
+
+
+def test_dialogue_observer_transcript_utterance_history() -> None:
+    from segmentum.dialogue.observer import DialogueObserver
+    from segmentum.dialogue.types import TranscriptUtterance
+
+    obs = DialogueObserver()
+    hist = [
+        TranscriptUtterance(role="interlocutor", text="早"),
+        TranscriptUtterance(role="agent", text="早。"),
+    ]
+    out = obs.observe(
+        current_turn="今天怎么样？",
+        conversation_history=hist,
+        partner_uid=0,
+        session_context={},
+        session_id="s0",
+        turn_index=1,
+        speaker_uid=0,
+    )
+    assert 0.0 <= out.channels["semantic_content"] <= 1.0
