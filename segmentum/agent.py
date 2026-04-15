@@ -2574,6 +2574,124 @@ class SegmentAgent(MemoryAwareAgentMixin):
             return True
         return is_dialogue_channel_observation(observed)
 
+    @staticmethod
+    def _dialogue_channel_value(observed: Mapping[str, float], key: str, default: float) -> float:
+        try:
+            value = float(observed.get(key, default))
+        except (TypeError, ValueError):
+            value = default
+        return max(0.0, min(1.0, value))
+
+    def _dialogue_action_affordance_bias(self, action: str, observed: Mapping[str, float]) -> float:
+        """Observation-conditioned bias that expands dialogue action coverage."""
+        if not is_dialogue_action(action):
+            return 0.0
+        semantic = self._dialogue_channel_value(observed, "semantic_content", 0.5)
+        novelty = self._dialogue_channel_value(observed, "topic_novelty", 0.5)
+        emotional = self._dialogue_channel_value(observed, "emotional_tone", 0.5)
+        conflict = self._dialogue_channel_value(observed, "conflict_tension", 0.0)
+        relationship = self._dialogue_channel_value(observed, "relationship_depth", 0.2)
+        hidden_intent = self._dialogue_channel_value(observed, "hidden_intent", 0.1)
+
+        neutral_mid_conflict = max(0.0, 0.36 - abs(conflict - 0.30))
+        raw = 0.0
+        if action == "ask_question":
+            epistemic_uncertainty = max(0.0, max(1.0 - semantic, novelty, hidden_intent))
+            raw = (
+                (epistemic_uncertainty * 0.26)
+                + (conflict * 0.06)
+                + ((1.0 - relationship) * 0.05)
+                - 0.01
+                - (max(0.0, relationship - 0.50) * 0.08)
+                - (max(0.0, semantic - 0.55) * 0.08)
+            )
+        elif action == "introduce_topic":
+            raw = ((1.0 - novelty) * 0.30) + ((1.0 - relationship) * 0.12) + ((0.6 - conflict) * 0.12)
+        elif action == "share_opinion":
+            raw = (semantic * 0.20) + (novelty * 0.14) + ((emotional - 0.45) * 0.12) - (conflict * 0.06)
+        elif action == "elaborate":
+            raw = (semantic * 0.24) + ((1.0 - novelty) * 0.16) + (relationship * 0.12) - (conflict * 0.03)
+        elif action == "agree":
+            raw = (
+                (emotional * 0.22)
+                + ((1.0 - conflict) * 0.20)
+                + (relationship * 0.16)
+                - (hidden_intent * 0.10)
+                - (max(0.0, conflict - 0.42) * 0.24)
+                - (max(0.0, 0.42 - emotional) * 0.12)
+                - (max(0.0, 0.50 - emotional) * 0.25)
+            )
+            if emotional <= 0.52 and conflict <= 0.55 and relationship >= 0.18:
+                raw -= 0.10
+        elif action == "empathize":
+            raw = (
+                (max(0.0, 0.58 - emotional) * 0.55)
+                + (relationship * 0.22)
+                + (conflict * 0.10)
+                + (hidden_intent * 0.06)
+                + (max(0.0, 0.35 - conflict) * 0.06)
+            )
+            if emotional <= 0.45 and conflict <= 0.55:
+                raw += 0.10
+            if emotional <= 0.52 and relationship >= 0.18 and conflict <= 0.55:
+                raw += 0.14
+        elif action == "joke":
+            raw = (
+                (max(0.0, 0.56 - emotional) * 0.36)
+                + (neutral_mid_conflict * 0.36)
+                + ((1.0 - hidden_intent) * 0.08)
+                + (novelty * 0.10)
+            )
+            if neutral_mid_conflict >= 0.24 and novelty >= 0.40:
+                raw += 0.08
+        elif action == "disagree":
+            raw = (
+                (conflict * 0.44)
+                + (hidden_intent * 0.20)
+                + (semantic * 0.10)
+                + (max(0.0, 0.50 - emotional) * 0.22)
+            )
+            if conflict >= 0.28 and hidden_intent >= 0.12:
+                raw += 0.10
+        elif action == "deflect":
+            raw = (conflict * 0.24) + (hidden_intent * 0.24) + ((1.0 - relationship) * 0.12)
+        elif action == "minimal_response":
+            raw = (conflict * 0.14) + ((1.0 - relationship) * 0.20) + ((1.0 - semantic) * 0.08)
+        elif action == "disengage":
+            raw = (conflict * 0.32) + (hidden_intent * 0.26) + ((1.0 - relationship) * 0.20) - (emotional * 0.06)
+        # Center around zero so mismatch can become negative.
+        return max(-0.26, min(0.26, raw - 0.20))
+
+    def _dialogue_repetition_penalty(self, action: str, observed: Mapping[str, float]) -> float:
+        """Discourage short-horizon action loops in dialogue-only mode."""
+        if not is_dialogue_action(action):
+            return 0.0
+        recent = [
+            str(item.get("action", ""))
+            for item in self.decision_history[-8:]
+            if str(item.get("action", "")) in DIALOGUE_ACTION_STRATEGY_MAP
+        ]
+        streak = 0
+        for picked in reversed(recent):
+            if picked != action:
+                break
+            streak += 1
+        if streak <= 1:
+            return 0.0
+        conflict = self._dialogue_channel_value(observed, "conflict_tension", 0.0)
+        # Allow repeated low-bandwidth responses under high conflict,
+        # but still discourage degenerate one-action loops.
+        if action in {"minimal_response", "deflect"} and conflict >= 0.60:
+            scale = 0.03
+        else:
+            scale = 0.08
+        if action == "ask_question":
+            scale += 0.03
+        if action == "agree":
+            scale += 0.03
+        penalty = scale * float(streak - 1)
+        return -max(0.0, min(0.24, penalty))
+
     def evaluate_action_options(
         self,
         observed: dict[str, float],
@@ -2739,6 +2857,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         social_assessments: dict[str, dict[str, object]] = {}
         memory_aggregate = dict(self.last_memory_context.get("aggregate", {}) or {})
         chronic_threat_bias = clamp(float(memory_aggregate.get("chronic_threat_bias", 0.0)))
+        dialogue_subspace_active = self._use_dialogue_action_subspace(observed)
         for action, option in action_options.items():
             predicted_state = dict(option["predicted_state"])
             predicted_effects = dict(option["predicted_effects"])
@@ -2800,6 +2919,9 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 known_task=self._is_known_task(action),
                 process_tension=float(self.drive_system.process_valence.unresolved_tension),
             )
+            if dialogue_subspace_active:
+                subject_bias += self._dialogue_action_affordance_bias(action, observed)
+                subject_bias += self._dialogue_repetition_penalty(action, observed)
             goal_alignment = self.goal_stack.goal_alignment_score(
                 goal=active_goal,
                 action=action,
