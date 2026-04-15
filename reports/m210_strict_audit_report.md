@@ -9,7 +9,7 @@ Final status: `REJECT_M210`
 - artifact_freshness: True
 
 ## Statistical Evidence
-- significant_metrics: ['caution_rate', 'exploration_rate', 'seek_contact_rate', 'action_entropy', 'survival_score', 'mean_conditioned_prediction_error', 'narrative_consistency_proxy']
+- significant_metrics: ['caution_rate', 'exploration_rate', 'seek_contact_rate', 'mean_conditioned_prediction_error']
 - effect_metrics: ['caution_rate', 'exploration_rate', 'seek_contact_rate', 'action_entropy', 'survival_score', 'mean_conditioned_prediction_error', 'narrative_consistency_proxy']
 
 ## Stability Evidence

@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-04-13T16:52:14+00:00",
+  "generated_at": "2026-04-15T04:20:56+00:00",
   "seed_set": [
     227,
     342
@@ -470,16 +470,16 @@
           "continuity_score": 0.649815,
           "continuity_anchors": [
             "ep-000071-rest",
-            "ff747a2b-5d6d-4e27-af0f-497c27828ee8",
-            "7dcdee13-78ad-49ab-83d2-d47fbc6c82d6",
-            "16ff0346-7fc3-4b7f-be6b-9df116da612a",
+            "9da07cd4-5fa2-424a-90fe-3af0e6c71b98",
+            "9c76a473-8965-46a2-8dca-fa48d9825564",
+            "493aace7-7bde-4791-ac6d-4fc3ce526127",
             "ep-000069-scan",
             "ep-000050-rest-merged",
             "ep-000057-exploit_shelter-merged",
-            "309c4cce-b017-459c-b79d-34b47044ed58",
-            "2b304721-5fad-42c2-b3ac-c01f9316bf9d",
-            "6f582689-a39e-4925-b134-b6fdc425c5d4",
-            "5318bb41-8d4a-4477-9b07-3c9977931afd",
+            "cfbf3b4f-bfa7-4c97-90a3-ec12f6f72d2d",
+            "86cd7e6a-1d0a-44bd-bea0-1867d8c06fa4",
+            "b634e116-a0b6-4fe8-bbc9-e76def85e845",
+            "1f286bde-df7f-4f0f-a065-64603bb5ba81",
             "ep-000049-hide"
           ],
           "status_flags": {
@@ -517,8 +517,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-04-13T16:52:14+00:00",
-    "codebase_version": "4a1b22e5490a4bc5e1798cf3b161ee2f175841cd",
+    "generated_at": "2026-04-15T04:20:56+00:00",
+    "codebase_version": "a55fd4402b4b152ae43863baf8d17b4e73d48e7e",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -530,31 +530,31 @@
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
         "size_bytes": 86113,
-        "modified_at": "2026-04-13T16:52:00+00:00"
+        "modified_at": "2026-04-15T04:20:46+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1674,
-        "modified_at": "2026-04-13T16:52:00+00:00"
+        "modified_at": "2026-04-15T04:20:46+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
         "size_bytes": 15049,
-        "modified_at": "2026-04-13T16:52:00+00:00"
+        "modified_at": "2026-04-15T04:20:46+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
         "size_bytes": 19013,
-        "modified_at": "2026-04-13T16:52:14+00:00"
+        "modified_at": "2026-04-15T04:20:56+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-04-13T16:40:07+00:00"
+        "modified_at": "2026-04-13T16:52:14+00:00"
       }
     }
   },

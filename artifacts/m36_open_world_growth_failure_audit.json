@@ -1,7 +1,7 @@
 {
   "milestone_id": "M3.6",
   "artifact_family": "failure_audit",
-  "generated_at": "2026-04-10T07:36:35+00:00",
+  "generated_at": "2026-04-15T06:53:59+00:00",
   "status": "CLEAR",
   "blocking_findings": [],
   "evaluated_gates": {

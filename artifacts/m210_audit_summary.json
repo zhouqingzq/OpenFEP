@@ -7,10 +7,7 @@
       "caution_rate",
       "exploration_rate",
       "seek_contact_rate",
-      "action_entropy",
-      "survival_score",
-      "mean_conditioned_prediction_error",
-      "narrative_consistency_proxy"
+      "mean_conditioned_prediction_error"
     ],
     "effect_metrics": [
       "caution_rate",

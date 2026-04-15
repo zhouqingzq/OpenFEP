@@ -30,6 +30,34 @@ class SourceType(str, Enum):
     HEARSAY = "hearsay"
     RECONSTRUCTION = "reconstruction"
 
+    @classmethod
+    def _missing_(cls, value: object) -> "SourceType" | None:
+        """Backward-compatible coercion for legacy dataset/source labels."""
+        text = str(value or "").strip().lower()
+        if not text:
+            return cls.EXPERIENCE
+        alias_map = {
+            # Legacy narrative/text-source labels used by older milestones.
+            "user_story": cls.EXPERIENCE,
+            "user_diary": cls.EXPERIENCE,
+            "open_text": cls.EXPERIENCE,
+            "narrative": cls.EXPERIENCE,
+            "test": cls.EXPERIENCE,
+            # World/scenario ids sometimes flowed into source_type fields.
+            "foraging_valley": cls.EXPERIENCE,
+            "predator_river": cls.EXPERIENCE,
+            # Common near-synonyms.
+            "observed": cls.EXPERIENCE,
+            "witnessed": cls.EXPERIENCE,
+            "heard": cls.HEARSAY,
+            "inferred": cls.INFERENCE,
+            "reconstructed": cls.RECONSTRUCTION,
+        }
+        if text in alias_map:
+            return alias_map[text]
+        # Default unknown legacy values to experiential source for robustness.
+        return cls.EXPERIENCE
+
 
 class AnchorStrength(str, Enum):
     LOCKED = "locked"

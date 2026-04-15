@@ -1,0 +1,479 @@
+{
+  "milestone": "M5.3",
+  "artifact": "m53_action_coverage_benchmark",
+  "seed_range": {
+    "start_inclusive": 2001,
+    "end_exclusive": 2007,
+    "count": 6
+  },
+  "personas": [
+    "balanced",
+    "high_trust_prosocial",
+    "guarded_trauma",
+    "assertive_low_agreeableness",
+    "curious_explorer",
+    "defensive_withdrawn",
+    "combative_confident",
+    "playful_open",
+    "inquisitive_skeptic",
+    "argumentative_rationalist"
+  ],
+  "scripts": {
+    "supportive_repair": [
+      "谢谢你愿意听我说。",
+      "我今天有点开心。",
+      "我们一起想办法好吗？",
+      "我希望你给我建议。",
+      "你怎么看？",
+      "我感觉好多了。"
+    ],
+    "escalating_conflict": [
+      "你到底在回避什么？？为什么不回答！！",
+      "这说法离谱，凭什么这样解释？？",
+      "你不是在胡说吗？？别再绕圈子了！！",
+      "不要再推脱了，马上正面回答我？！",
+      "你在敷衍我吗？？",
+      "这完全说不通！"
+    ],
+    "novel_topics": [
+      "我最近在研究量子电路和语言模型对齐。",
+      "另外我在想城市雨洪系统设计。",
+      "还有古典诗词和博弈论的关系。",
+      "你对这些跨学科话题怎么看？",
+      "我们要不要再换个主题？",
+      "再聊一个新角度吧。"
+    ],
+    "mixed_tension_repair": [
+      "我有点烦，但也想好好沟通。",
+      "你愿意先听听我的担心吗？",
+      "我不完全同意你刚才那句。",
+      "不过我也想理解你的理由。",
+      "我们能不能先确认事实？",
+      "最后给我一个建议。"
+    ],
+    "probing_ambiguity": [
+      "你能具体说说你为什么这么判断吗？",
+      "我还不太理解关键依据。",
+      "请你分步骤讲一下。",
+      "你提到的风险点是什么？",
+      "如果换个条件会怎样？",
+      "你最担心哪一部分？"
+    ],
+    "humor_deescalation": [
+      "我快被这事整懵了，哈哈。",
+      "要不先深呼吸一下？",
+      "我知道你认真，但我们别太紧绷。",
+      "轻松点，我们还在同一队。",
+      "先开个玩笑：今天bug比我还倔。",
+      "好啦，回到正题。"
+    ],
+    "playful_small_tension": [
+      "我有点烦，但也想轻松点聊，哈哈。",
+      "我们先别太绷着，要不要换个轻松角度？",
+      "我不是在攻击你，只是这事让我头大。",
+      "先开个玩笑：这问题比闹钟还顽固。",
+      "行，我们认真说，但别太紧张。",
+      "你愿意一起找个不吵架的解法吗？"
+    ],
+    "distress_emotion": [
+      "我真的很难过，也有点生气。",
+      "这件事让我很烦，我快撑不住了。",
+      "我现在情绪很糟，你能先听我说吗？",
+      "我不是要攻击你，我只是很难受。",
+      "你愿意先理解我的感受吗？",
+      "我需要一点被理解，不是被评判。"
+    ],
+    "direct_debate": [
+      "你是不是在胡说？？这完全错了！",
+      "你为什么一直回避问题？",
+      "这前后矛盾，请你解释。",
+      "不要绕圈子，直接回答。",
+      "我不同意你的推断。",
+      "给我证据。"
+    ],
+    "clarification_needed": [
+      "你刚才那句我没听懂，能具体说说吗？",
+      "这个结论是怎么得出来的？",
+      "你说的“那个条件”具体指什么？",
+      "能不能按步骤再解释一次？",
+      "我理解可能有偏差，你先澄清一下？",
+      "如果换个场景，这个判断还成立吗？"
+    ],
+    "uncertain_signals": [
+      "你这句话让我有点拿不准，你具体是指哪件事？",
+      "我不确定自己理解得对不对，你能澄清吗？",
+      "这里有两个可能解释，你更接近哪一个？",
+      "你说“风险不大”是基于什么证据？",
+      "如果把时间线拉长，这个结论会变吗？",
+      "我有疑问：你真正担心的变量是什么？"
+    ],
+    "hard_contradiction": [
+      "你的前提和结论明显冲突，这点我不能同意。",
+      "你回避了关键证据，所以这个判断站不住脚。",
+      "如果没有数据支撑，这个说法就是错误的。",
+      "你这段推理有逻辑断层，我要明确反对。",
+      "请先修正这个矛盾，再谈下一步。",
+      "我接受讨论，但不接受这个结论。"
+    ],
+    "emotional_support_request": [
+      "我最近真的很烦，心里一直发紧。",
+      "今天也很烦，我有点扛不住。",
+      "我不是想争论，只是想被理解一下。",
+      "这件事让我很烦，也有点无力。",
+      "你能先听我说完吗？我现在很烦。",
+      "谢谢你愿意听我说，我需要一点支持。"
+    ]
+  },
+  "global_counts": {
+    "ask_question": 636,
+    "introduce_topic": 164,
+    "share_opinion": 148,
+    "elaborate": 560,
+    "agree": 1260,
+    "empathize": 128,
+    "joke": 368,
+    "disagree": 168,
+    "deflect": 288,
+    "minimal_response": 864,
+    "disengage": 96
+  },
+  "by_persona_counts": {
+    "balanced": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 12,
+      "elaborate": 132,
+      "agree": 264,
+      "empathize": 12,
+      "joke": 48,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "high_trust_prosocial": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 120,
+      "agree": 276,
+      "empathize": 24,
+      "joke": 48,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "guarded_trauma": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 0,
+      "agree": 0,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 48,
+      "deflect": 132,
+      "minimal_response": 276,
+      "disengage": 12
+    },
+    "assertive_low_agreeableness": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 12,
+      "agree": 0,
+      "empathize": 12,
+      "joke": 0,
+      "disagree": 48,
+      "deflect": 24,
+      "minimal_response": 288,
+      "disengage": 84
+    },
+    "curious_explorer": {
+      "ask_question": 24,
+      "introduce_topic": 44,
+      "share_opinion": 24,
+      "elaborate": 16,
+      "agree": 276,
+      "empathize": 12,
+      "joke": 72,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "defensive_withdrawn": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 0,
+      "agree": 0,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 48,
+      "deflect": 132,
+      "minimal_response": 288,
+      "disengage": 0
+    },
+    "combative_confident": {
+      "ask_question": 240,
+      "introduce_topic": 18,
+      "share_opinion": 12,
+      "elaborate": 110,
+      "agree": 24,
+      "empathize": 12,
+      "joke": 52,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "playful_open": {
+      "ask_question": 12,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 92,
+      "agree": 276,
+      "empathize": 40,
+      "joke": 48,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "inquisitive_skeptic": {
+      "ask_question": 120,
+      "introduce_topic": 48,
+      "share_opinion": 52,
+      "elaborate": 20,
+      "agree": 144,
+      "empathize": 12,
+      "joke": 72,
+      "disagree": 0,
+      "deflect": 0,
+      "minimal_response": 0,
+      "disengage": 0
+    },
+    "argumentative_rationalist": {
+      "ask_question": 240,
+      "introduce_topic": 54,
+      "share_opinion": 48,
+      "elaborate": 58,
+      "agree": 0,
+      "empathize": 4,
+      "joke": 28,
+      "disagree": 24,
+      "deflect": 0,
+      "minimal_response": 12,
+      "disengage": 0
+    }
+  },
+  "by_script_counts": {
+    "supportive_repair": {
+      "ask_question": 48,
+      "introduce_topic": 18,
+      "share_opinion": 0,
+      "elaborate": 54,
+      "agree": 120,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 84,
+      "disengage": 12
+    },
+    "escalating_conflict": {
+      "ask_question": 0,
+      "introduce_topic": 36,
+      "share_opinion": 0,
+      "elaborate": 48,
+      "agree": 0,
+      "empathize": 0,
+      "joke": 168,
+      "disagree": 72,
+      "deflect": 0,
+      "minimal_response": 24,
+      "disengage": 12
+    },
+    "novel_topics": {
+      "ask_question": 48,
+      "introduce_topic": 0,
+      "share_opinion": 0,
+      "elaborate": 40,
+      "agree": 120,
+      "empathize": 12,
+      "joke": 32,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 12
+    },
+    "mixed_tension_repair": {
+      "ask_question": 0,
+      "introduce_topic": 0,
+      "share_opinion": 24,
+      "elaborate": 60,
+      "agree": 144,
+      "empathize": 0,
+      "joke": 24,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 12
+    },
+    "probing_ambiguity": {
+      "ask_question": 96,
+      "introduce_topic": 0,
+      "share_opinion": 48,
+      "elaborate": 0,
+      "agree": 96,
+      "empathize": 12,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 12
+    },
+    "humor_deescalation": {
+      "ask_question": 48,
+      "introduce_topic": 0,
+      "share_opinion": 24,
+      "elaborate": 60,
+      "agree": 120,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 36,
+      "minimal_response": 72,
+      "disengage": 0
+    },
+    "playful_small_tension": {
+      "ask_question": 72,
+      "introduce_topic": 44,
+      "share_opinion": 0,
+      "elaborate": 52,
+      "agree": 96,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 0
+    },
+    "distress_emotion": {
+      "ask_question": 48,
+      "introduce_topic": 46,
+      "share_opinion": 0,
+      "elaborate": 38,
+      "agree": 120,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 12
+    },
+    "direct_debate": {
+      "ask_question": 0,
+      "introduce_topic": 10,
+      "share_opinion": 4,
+      "elaborate": 34,
+      "agree": 36,
+      "empathize": 0,
+      "joke": 144,
+      "disagree": 96,
+      "deflect": 0,
+      "minimal_response": 36,
+      "disengage": 0
+    },
+    "clarification_needed": {
+      "ask_question": 72,
+      "introduce_topic": 2,
+      "share_opinion": 0,
+      "elaborate": 78,
+      "agree": 96,
+      "empathize": 4,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 12
+    },
+    "uncertain_signals": {
+      "ask_question": 84,
+      "introduce_topic": 0,
+      "share_opinion": 24,
+      "elaborate": 36,
+      "agree": 96,
+      "empathize": 12,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 12
+    },
+    "hard_contradiction": {
+      "ask_question": 48,
+      "introduce_topic": 0,
+      "share_opinion": 24,
+      "elaborate": 60,
+      "agree": 120,
+      "empathize": 0,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 36,
+      "minimal_response": 72,
+      "disengage": 0
+    },
+    "emotional_support_request": {
+      "ask_question": 72,
+      "introduce_topic": 8,
+      "share_opinion": 0,
+      "elaborate": 0,
+      "agree": 96,
+      "empathize": 88,
+      "joke": 0,
+      "disagree": 0,
+      "deflect": 24,
+      "minimal_response": 72,
+      "disengage": 0
+    }
+  },
+  "unique_actions_observed": [
+    "agree",
+    "ask_question",
+    "deflect",
+    "disagree",
+    "disengage",
+    "elaborate",
+    "empathize",
+    "introduce_topic",
+    "joke",
+    "minimal_response",
+    "share_opinion"
+  ],
+  "guardrail_summary": {
+    "baseline_loop_actions": [
+      "agree",
+      "minimal_response",
+      "deflect",
+      "elaborate"
+    ],
+    "baseline_loop_only": false,
+    "unique_action_count": 11,
+    "top_action": "agree",
+    "top_action_share": 0.269231,
+    "global_entropy_bits": 3.009829,
+    "min_unique_actions_per_persona_script_cell": 2,
+    "prosocial_nonzero_actions": 3
+  },
+  "pass_criteria": {
+    "min_unique_actions_global": 6,
+    "max_top_action_share": 0.4,
+    "min_unique_actions_per_cell": 2,
+    "min_prosocial_nonzero_actions": 2
+  },
+  "passes": true,
+  "notes": "Benchmark is deterministic given fixed seed range, script bank, and persona set."
+}
