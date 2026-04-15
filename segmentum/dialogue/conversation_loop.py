@@ -66,6 +66,8 @@ def run_conversation(
             "partner_uid": partner_uid,
             "session_id": session_id,
             "turn_index": turn_index,
+            "current_turn": partner_text,
+            "observation": channels,
         }
         outcome_label: str | None = None
         # Outcome tags the *prior* agent turn: integrate_outcome (end of last loop) should have
