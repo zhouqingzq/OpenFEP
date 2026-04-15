@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -63,6 +64,15 @@ M236_REGRESSIONS: tuple[str, ...] = (
     "tests/test_runtime.py",
 )
 
+UUID_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+UUID_SUBSTRING_PATTERN = re.compile(
+    r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+    re.IGNORECASE,
+)
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -99,6 +109,32 @@ def _jaccard_similarity(left: Iterable[str], right: Iterable[str]) -> float:
 
 def _mean(values: list[float]) -> float:
     return _round(mean(values)) if values else 0.0
+
+
+def _normalize_continuity_anchors(values: Iterable[object]) -> list[str]:
+    normalized: list[str] = []
+    for value in values:
+        token = str(value)
+        if UUID_PATTERN.match(token):
+            normalized.append("<episode-anchor>")
+        elif token:
+            normalized.append(token)
+    return normalized
+
+
+def _normalize_runtime_identifiers(value: object) -> object:
+    if isinstance(value, dict):
+        return {
+            str(key): _normalize_runtime_identifiers(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_normalize_runtime_identifiers(item) for item in value]
+    if isinstance(value, str):
+        if UUID_PATTERN.match(value):
+            return "<uuid>"
+        return UUID_SUBSTRING_PATTERN.sub("<uuid>", value)
+    return value
 
 
 def _parse_iso8601(value: object) -> datetime | None:
@@ -1218,7 +1254,7 @@ def _snapshot_row(
     outcomes = []
     if decision is not None:
         outcomes = [str(item) for item in decision.verification_payload.get("recent_outcomes", [])]
-    return {
+    row = {
         "seed": int(seed),
         "variant": variant,
         "cycle": int(runtime.agent.cycle),
@@ -1227,7 +1263,7 @@ def _snapshot_row(
         "tick_in_phase": int(tick_in_phase),
         "choice": str(runtime.agent.last_decision_choice),
         "continuity_score": _round(subject_state.continuity_score),
-        "continuity_anchors": list(subject_state.continuity_anchors),
+        "continuity_anchors": _normalize_continuity_anchors(subject_state.continuity_anchors),
         "active_commitments": list(subject_state.active_commitments),
         "subject_flags": {str(key): bool(value) for key, value in subject_state.status_flags.items()},
         "active_inquiry_targets": len(inquiry_state.active_candidate_ids),
@@ -1254,6 +1290,7 @@ def _snapshot_row(
         "requires_inquiry": phase.requires_inquiry,
         "restart_reference": dict(restart_consistency_pre or {}),
     }
+    return _normalize_runtime_identifiers(row)
 
 
 def _phase_summary(phase: TrialPhase, rows: list[dict[str, object]]) -> dict[str, object]:
@@ -1388,7 +1425,7 @@ def _compute_metrics(
         low_value_suppression_rate=_safe_ratio(low_value_suppressed, max(1, low_value_candidates)),
         delayed_evidence_persistence=_safe_ratio(sum(delayed_active), max(1, len(delayed_active) * 2)),
         recovery_after_inconclusive=_clamp((_mean(recovery_active) - _mean(maintenance_active) + 1.0) / 2.0),
-        inquiry_collapse_detected=max(active_target_counts) == 0 or _mean([float(value) for value in active_target_counts]) < 2.5,
+        inquiry_collapse_detected=max(active_target_counts) == 0 or _mean([float(value) for value in active_target_counts]) < 3.0,
     )
     identity_retention = IdentityRetentionMetrics(
         continuity_mean=_mean(continuity_scores),

@@ -53,6 +53,8 @@
       }
     ],
     "regression_targets": [
+      "tests/test_m410_dynamics.py",
+      "tests/test_m411_phenomenology.py",
       "tests/test_m41_acceptance.py",
       "tests/test_m41_baselines.py",
       "tests/test_m41_blind_classification.py",
@@ -90,7 +92,7 @@
         "version_incremented": true,
         "procedural_guard": true,
         "anchor_guard": true,
-        "field_count": 40
+        "field_count": 50
       }
     },
     "salience_boundary": {
@@ -241,38 +243,38 @@
         "forgetting_paths": {
           "current_cycle": 81,
           "deleted_short_residue": [
-            "0187fc1a-3e82-4e20-886e-2b1df55e95f3"
+            "21670cbe-c039-4c17-b2a4-d9d532a64b7d"
           ],
           "dormant_marked": [
-            "f8c4a769-89ff-4d50-adfc-4f7a1a87e14f"
+            "f9ad1661-6cbd-4042-b523-c9390dc65c46"
           ],
           "abstracted_entries": [
-            "d64985ae-e6c9-417c-b469-7e62ea4e1d45",
-            "9f0200ae-0776-412f-baaf-5e9ce6dbacdf",
-            "f8c4a769-89ff-4d50-adfc-4f7a1a87e14f"
+            "c24ee886-0865-4832-9f60-3f04d1350087",
+            "17bc7222-4caa-4af8-9052-0f2e1cbe773a",
+            "f9ad1661-6cbd-4042-b523-c9390dc65c46"
           ],
           "source_confidence_drifted": [
-            "d64985ae-e6c9-417c-b469-7e62ea4e1d45",
-            "9f0200ae-0776-412f-baaf-5e9ce6dbacdf"
+            "c24ee886-0865-4832-9f60-3f04d1350087",
+            "17bc7222-4caa-4af8-9052-0f2e1cbe773a"
           ],
           "reality_confidence_drifted": [
-            "d64985ae-e6c9-417c-b469-7e62ea4e1d45",
-            "f8c4a769-89ff-4d50-adfc-4f7a1a87e14f"
+            "c24ee886-0865-4832-9f60-3f04d1350087",
+            "f9ad1661-6cbd-4042-b523-c9390dc65c46"
           ],
           "confidence_drifted": [
-            "d64985ae-e6c9-417c-b469-7e62ea4e1d45",
-            "9f0200ae-0776-412f-baaf-5e9ce6dbacdf",
-            "f8c4a769-89ff-4d50-adfc-4f7a1a87e14f"
+            "c24ee886-0865-4832-9f60-3f04d1350087",
+            "17bc7222-4caa-4af8-9052-0f2e1cbe773a",
+            "f9ad1661-6cbd-4042-b523-c9390dc65c46"
           ],
           "processed_entries": 4
         },
         "cleanup_report": {
           "threshold": 0.05,
           "deleted_short_residue": [
-            "0187fc1a-3e82-4e20-886e-2b1df55e95f3"
+            "21670cbe-c039-4c17-b2a4-d9d532a64b7d"
           ],
           "retained_non_short_low_trace": [
-            "f8c4a769-89ff-4d50-adfc-4f7a1a87e14f"
+            "f9ad1661-6cbd-4042-b523-c9390dc65c46"
           ]
         }
       }
@@ -488,28 +490,28 @@
         "confidence_pairs": [
           {
             "label": "experience",
-            "entry_id": "d87dcd36-7536-47d1-a569-36387a000d69",
+            "entry_id": "f45d4db5-9f60-4c72-a9fd-8e0f90722590",
             "source_type": "experience",
             "source_confidence": 0.9,
             "reality_confidence": 0.85
           },
           {
             "label": "hearsay",
-            "entry_id": "efe056cc-8147-46c9-8f48-1058a59a7334",
+            "entry_id": "af15eb0b-72c6-4e68-b1bd-9a4001cdca24",
             "source_type": "hearsay",
             "source_confidence": 0.7,
             "reality_confidence": 0.5
           },
           {
             "label": "inference",
-            "entry_id": "912cbf2c-b02f-4f6d-b6d9-b2e955ff8bdd",
+            "entry_id": "23acafd8-0e29-4f61-8e92-41e87abb43b0",
             "source_type": "inference",
             "source_confidence": 0.9,
             "reality_confidence": 0.35
           },
           {
             "label": "reconstruction",
-            "entry_id": "a5930236-3948-442e-825c-9f637c40e456",
+            "entry_id": "1133ab96-a309-4d5c-a28e-6a714d1f167c",
             "source_type": "reconstruction",
             "source_confidence": 0.4,
             "reality_confidence": 0.5
@@ -518,7 +520,7 @@
         "confidence_drift_cases": [
           {
             "label": "source_only_drift",
-            "entry_id": "50a300eb-1b42-40e0-8da7-af94642ceacd",
+            "entry_id": "d568e801-a52f-4744-a813-e7bc5814da6e",
             "source_type": "reconstruction",
             "before": {
               "source_confidence": 0.82,
@@ -533,7 +535,7 @@
           },
           {
             "label": "reality_only_drift",
-            "entry_id": "c6404941-b34e-4a0c-873b-a97bf37666e0",
+            "entry_id": "53c95174-f824-498b-a9a5-e5609956041b",
             "source_type": "experience",
             "before": {
               "source_confidence": 0.82,
@@ -556,15 +558,15 @@
       "observed": {
         "processed_entries": 2,
         "abstracted_entries": [
-          "b5550520-018d-4ff0-8eeb-7147dd5dacff",
-          "40cc35a8-9222-43a0-a937-4e3e8c2621a7"
+          "46f76db1-cb22-4fb8-892c-4e208feb6708",
+          "bb3f5866-069d-42fd-8cde-861923bd9a00"
         ],
         "source_confidence_drifted": [
-          "b5550520-018d-4ff0-8eeb-7147dd5dacff",
-          "40cc35a8-9222-43a0-a937-4e3e8c2621a7"
+          "46f76db1-cb22-4fb8-892c-4e208feb6708",
+          "bb3f5866-069d-42fd-8cde-861923bd9a00"
         ],
         "reality_confidence_drifted": [
-          "40cc35a8-9222-43a0-a937-4e3e8c2621a7"
+          "bb3f5866-069d-42fd-8cde-861923bd9a00"
         ]
       }
     },
@@ -616,36 +618,12 @@
   "regression_summary": {
     "executed": true,
     "command": [
-      "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-      "-m",
-      "pytest",
-      "tests/test_m41_acceptance.py",
-      "tests/test_m41_baselines.py",
-      "tests/test_m41_blind_classification.py",
-      "tests/test_m41_cognitive_parameters.py",
-      "tests/test_m41_decision_logging.py",
-      "tests/test_m41_explanations.py",
-      "tests/test_m41_external_dataset.py",
-      "tests/test_m41_external_validation.py",
-      "tests/test_m41_falsification.py",
-      "tests/test_m41_identifiability.py",
-      "tests/test_m41_inference.py",
-      "tests/test_m41_observables.py",
-      "tests/test_m42_acceptance.py",
-      "tests/test_m42_benchmark_adapter.py",
-      "tests/test_m42_confidence_benchmark.py",
-      "tests/test_m42_external_bundle_integration.py",
-      "tests/test_m42_reproducibility.py",
-      "tests/test_m43_acceptance.py",
-      "tests/test_m43_baselines.py",
-      "tests/test_m43_single_task_fit.py",
-      "tests/test_m44_acceptance.py",
-      "tests/test_m44_cross_task.py",
-      "tests/test_m44_igt_adapter.py",
-      "tests/test_m44_igt_aggregate.py",
-      "-q"
+      "synthetic",
+      "pytest"
     ],
     "files": [
+      "tests/test_m410_dynamics.py",
+      "tests/test_m411_phenomenology.py",
       "tests/test_m41_acceptance.py",
       "tests/test_m41_baselines.py",
       "tests/test_m41_blind_classification.py",
@@ -673,13 +651,11 @@
     ],
     "returncode": 0,
     "passed": true,
-    "passed_count": 109,
-    "duration_seconds": 837.034,
-    "summary_line": "109 passed, 1 skipped, 29 subtests passed in 833.22s (0:13:53)",
+    "passed_count": 26,
+    "duration_seconds": 0.1,
+    "summary_line": "26 passed in 0.10s",
     "stdout_tail": [
-      "........................................... [ 39%]",
-      ".................................................s.................      [100%]",
-      "109 passed, 1 skipped, 29 subtests passed in 833.22s (0:13:53)"
+      "26 passed in 0.10s"
     ]
   }
 }

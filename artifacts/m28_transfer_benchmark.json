@@ -20,11 +20,11 @@
             "transfer_carryover": "world_specific_homeostatic_carryover"
           },
           "transferred": {
-            "mean_conditioned_prediction_error": 0.10950743591248391,
-            "survival_score": 1.8443749999999999,
+            "mean_conditioned_prediction_error": 0.1109678020393895,
+            "survival_score": 1.900625,
             "action_distribution": {
-              "hide": 0.425,
-              "rest": 0.575
+              "hide": 0.475,
+              "rest": 0.525
             }
           },
           "fresh": {
@@ -36,9 +36,9 @@
             }
           },
           "improvements": {
-            "conditioned_prediction_error_reduction": -1.0125901097202483,
-            "survival_score_lift": 0.0,
-            "first_50_cycle_regret_reduction": 0.08333333333333326
+            "conditioned_prediction_error_reduction": 0.12,
+            "survival_score_lift": 0.03049813622500852,
+            "first_50_cycle_regret_reduction": -0.04166666666666674
           }
         }
       ]

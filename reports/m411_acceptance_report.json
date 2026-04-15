@@ -40,40 +40,48 @@
         "official_min_acceptance_ticks_required": 5000
       },
       "encoding_source_histogram": {
-        "dynamics": 21
+        "dynamics": 23
       },
-      "semantic_dynamic_count": 0,
-      "live_m410_patterns_observed": false,
+      "semantic_dynamic_count": 4,
+      "live_m410_patterns_observed": true,
       "replay_sources": [
         "live_sleep_consolidation"
       ],
-      "budget_competition_observed": false,
+      "budget_competition_observed": true,
       "budget_evidence_source": "encoded_event_metadata",
-      "actual_budget_competition_event_count": 0,
+      "actual_budget_competition_event_count": 23,
+      "budget_competition_rate": 0.766667,
+      "budget_granted_requested_histogram": {
+        "0.00-0.24": 23,
+        "0.25-0.49": 0,
+        "0.50-0.74": 0,
+        "0.75-0.99": 0,
+        "1.00": 0
+      },
       "curated_corpus_paths_read": []
     },
     "serial_position_effect": {
-      "status": "FAIL",
-      "passed": false,
+      "status": "PASS",
+      "passed": true,
       "default": {
         "status": "PASS",
         "passed": true,
         "list_count": 2,
-        "primacy_score": 0.028394,
-        "recency_score": 0.032648,
-        "first_mean": 0.347688,
-        "middle_mean": 0.319293,
+        "primacy_score": 0.05979,
+        "recency_score": 0.064044,
+        "first_mean": 0.347687,
+        "middle_mean": 0.287897,
         "last_mean": 0.351942
       },
       "negative_control": {
-        "status": "PASS",
-        "passed": true,
+        "status": "FAIL",
+        "passed": false,
         "list_count": 2,
-        "primacy_score": 0.053,
-        "recency_score": 0.0405,
-        "first_mean": 0.225,
-        "middle_mean": 0.172,
-        "last_mean": 0.2125
+        "primacy_score": 0.015955,
+        "recency_score": -0.00967,
+        "first_mean": 0.210187,
+        "middle_mean": 0.194232,
+        "last_mean": 0.184563
       }
     },
     "retention_curve_fit": {
@@ -86,11 +94,11 @@
         "buckets": [
           {
             "lag": 2.0,
-            "retention": 0.515829
+            "retention": 0.515828
           },
           {
             "lag": 7.5,
-            "retention": 0.44603
+            "retention": 0.446029
           },
           {
             "lag": 12.0,
@@ -98,69 +106,56 @@
           },
           {
             "lag": 16.5,
-            "retention": 0.390311
+            "retention": 0.350311
           },
           {
             "lag": 23.666667,
-            "retention": 0.542646
+            "retention": 0.515979
           }
         ],
-        "linear_sse": 0.015824,
-        "log_sse": 0.015319,
-        "log_advantage": 0.000505,
+        "linear_sse": 0.018732,
+        "log_sse": 0.016628,
+        "log_advantage": 0.002104,
         "degenerate": false
       },
       "negative_control": {
-        "status": "FAIL",
-        "passed": false,
+        "status": "PASS",
+        "passed": true,
         "bucket_count": 5,
         "buckets": [
           {
-            "lag": 1.0,
-            "retention": 0.23
+            "lag": 2.0,
+            "retention": 0.209625
           },
           {
-            "lag": 4.0,
-            "retention": 0.23
+            "lag": 6.5,
+            "retention": 0.23525
           },
           {
-            "lag": 9.0,
-            "retention": 0.27
+            "lag": 11.5,
+            "retention": 0.27425
           },
           {
             "lag": 16.5,
-            "retention": 0.23
+            "retention": 0.233875
           },
           {
             "lag": 24.0,
-            "retention": 0.283333
+            "retention": 0.236
           }
         ],
-        "linear_sse": 0.001601,
-        "log_sse": 0.001691,
-        "log_advantage": -8.9e-05,
+        "linear_sse": 0.001955,
+        "log_sse": 0.001591,
+        "log_advantage": 0.000364,
         "degenerate": false
       }
     },
     "schema_intrusion": {
       "status": "FAIL",
       "passed": false,
-      "default_intrusion_present": false,
+      "default_intrusion_present": true,
       "control_intrusion_collapsed": false,
       "default": {
-        "status": "FAIL",
-        "passed": false,
-        "intrusion_present": false,
-        "degenerate_cluster_formation": true,
-        "intrusion_rate": 0.0,
-        "intrusion_count": 0,
-        "cluster_count": 0,
-        "nondegenerate_cluster_count": 0,
-        "keyword_only_cluster_count": 0,
-        "identification_criterion": "representational_centroid_not_keyword",
-        "clusters_preview": []
-      },
-      "negative_control": {
         "status": "PASS",
         "passed": true,
         "intrusion_present": true,
@@ -173,55 +168,180 @@
         "identification_criterion": "representational_centroid_not_keyword",
         "clusters_preview": [
           {
-            "entry_id": "910bc794-e96c-4306-ac53-99da85d749a3",
+            "entry_id": "bbc19d30-9f61-437a-83f9-3d411c9d33cb",
             "support_ids": [
-              "ep-000006-scan-merged",
-              "ep-000010-rest-merged"
+              "ep-000001-hide",
+              "ep-000006-scan",
+              "ep-000012-rest",
+              "ep-000013-unstable_workspace_note",
+              "ep-000014-hide",
+              "ep-000015-exploit_shelter",
+              "ep-000016-scan",
+              "ep-000017-rest",
+              "ep-000019-rest",
+              "ep-000021-rest"
             ],
-            "nearest_support_distance": 0.222831,
-            "mean_support_distance": 0.222832,
-            "residual_norm_mean": 0.267678,
+            "nearest_support_distance": 0.272271,
+            "mean_support_distance": 0.377362,
+            "residual_norm_mean": 0.436145,
             "recalled": true,
             "intrusion_identification": "representational_centroid_not_keyword"
           },
           {
-            "entry_id": "dff7ec38-9752-45b8-9b4f-c472c271e487",
+            "entry_id": "fc2a6cf5-1d67-48d3-af0e-1978fb676686",
             "support_ids": [
-              "ep-000006-scan-merged",
-              "ep-000010-rest-merged"
+              "ep-000001-hide",
+              "ep-000006-scan",
+              "ep-000012-rest",
+              "ep-000013-unstable_workspace_note",
+              "ep-000014-hide",
+              "ep-000015-exploit_shelter",
+              "ep-000016-scan",
+              "ep-000017-rest",
+              "ep-000019-rest",
+              "ep-000021-rest"
             ],
-            "nearest_support_distance": 0.222831,
-            "mean_support_distance": 0.222832,
-            "residual_norm_mean": 0.267678,
+            "nearest_support_distance": 0.272271,
+            "mean_support_distance": 0.377362,
+            "residual_norm_mean": 0.436145,
             "recalled": false,
             "intrusion_identification": "representational_centroid_not_keyword"
           },
           {
-            "entry_id": "46c31fe8-a3b9-4c32-96f5-83f7910f22a6",
+            "entry_id": "d8f6b6ba-1c00-4095-962b-6a9789648e59",
             "support_ids": [
-              "ep-000006-scan-merged",
-              "ep-000010-rest-merged",
-              "ep-000016-rest-merged",
-              "ep-000023-rest"
+              "ep-000001-hide",
+              "ep-000006-scan",
+              "ep-000012-rest",
+              "ep-000013-unstable_workspace_note",
+              "ep-000014-hide",
+              "ep-000015-exploit_shelter",
+              "ep-000016-scan",
+              "ep-000017-rest-merged",
+              "ep-000022-rest",
+              "ep-000024-exploit_shelter"
             ],
-            "nearest_support_distance": 0.359698,
-            "mean_support_distance": 0.434759,
-            "residual_norm_mean": 0.443319,
+            "nearest_support_distance": 0.30446,
+            "mean_support_distance": 0.377337,
+            "residual_norm_mean": 0.43279,
             "recalled": true,
             "intrusion_identification": "representational_centroid_not_keyword"
           },
           {
-            "entry_id": "5613bca6-e7d6-4497-ab4d-d74caa821813",
+            "entry_id": "941147b9-34c7-41d8-b0df-ea87f5faf3ad",
             "support_ids": [
-              "ep-000006-scan-merged",
-              "910bc794-e96c-4306-ac53-99da85d749a3",
-              "ep-000010-rest-merged",
-              "ep-000016-rest-merged",
-              "ep-000023-rest"
+              "ep-000001-hide",
+              "bbc19d30-9f61-437a-83f9-3d411c9d33cb",
+              "fc2a6cf5-1d67-48d3-af0e-1978fb676686",
+              "ep-000006-scan",
+              "ep-000012-rest",
+              "ep-000013-unstable_workspace_note",
+              "ep-000014-hide",
+              "ep-000015-exploit_shelter",
+              "ep-000016-scan",
+              "ep-000017-rest-merged",
+              "ep-000022-rest",
+              "ep-000024-exploit_shelter"
             ],
-            "nearest_support_distance": 0.300396,
-            "mean_support_distance": 0.370801,
-            "residual_norm_mean": 0.421291,
+            "nearest_support_distance": 0.29887,
+            "mean_support_distance": 0.376865,
+            "residual_norm_mean": 0.371531,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          }
+        ]
+      },
+      "negative_control": {
+        "status": "PASS",
+        "passed": true,
+        "intrusion_present": true,
+        "degenerate_cluster_formation": false,
+        "intrusion_rate": 1.0,
+        "intrusion_count": 4,
+        "cluster_count": 4,
+        "nondegenerate_cluster_count": 4,
+        "keyword_only_cluster_count": 0,
+        "identification_criterion": "representational_centroid_not_keyword",
+        "clusters_preview": [
+          {
+            "entry_id": "284c3ad8-81ac-4e0b-9c79-2748f62a2008",
+            "support_ids": [
+              "ep-000001-hide",
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged",
+              "ep-000013-seek_contact",
+              "ep-000014-exploit_shelter",
+              "ep-000015-exploit_shelter",
+              "ep-000016-rest",
+              "ep-000018-rest",
+              "ep-000020-rest",
+              "ep-000022-scan"
+            ],
+            "nearest_support_distance": 0.350157,
+            "mean_support_distance": 0.426873,
+            "residual_norm_mean": 0.436621,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          },
+          {
+            "entry_id": "546a74b1-6001-43ba-afe0-6aa136f2c6d6",
+            "support_ids": [
+              "ep-000001-hide",
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged",
+              "ep-000013-seek_contact",
+              "ep-000014-exploit_shelter",
+              "ep-000015-exploit_shelter",
+              "ep-000016-rest",
+              "ep-000018-rest",
+              "ep-000020-rest",
+              "ep-000022-scan"
+            ],
+            "nearest_support_distance": 0.350157,
+            "mean_support_distance": 0.426873,
+            "residual_norm_mean": 0.436621,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          },
+          {
+            "entry_id": "e21de372-5e45-4c67-acb4-3546773a7a98",
+            "support_ids": [
+              "ep-000001-hide",
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged",
+              "ep-000013-seek_contact",
+              "ep-000014-exploit_shelter",
+              "ep-000015-exploit_shelter",
+              "ep-000016-rest-merged",
+              "ep-000022-scan",
+              "ep-000023-rest",
+              "ep-000024-rest"
+            ],
+            "nearest_support_distance": 0.342206,
+            "mean_support_distance": 0.431903,
+            "residual_norm_mean": 0.435046,
+            "recalled": true,
+            "intrusion_identification": "representational_centroid_not_keyword"
+          },
+          {
+            "entry_id": "16d5dde5-6400-4309-a447-e66d858bcf4e",
+            "support_ids": [
+              "ep-000001-hide",
+              "284c3ad8-81ac-4e0b-9c79-2748f62a2008",
+              "546a74b1-6001-43ba-afe0-6aa136f2c6d6",
+              "ep-000006-scan-merged",
+              "ep-000010-rest-merged",
+              "ep-000013-seek_contact",
+              "ep-000014-exploit_shelter",
+              "ep-000015-exploit_shelter",
+              "ep-000016-rest-merged",
+              "ep-000022-scan",
+              "ep-000023-rest",
+              "ep-000024-rest"
+            ],
+            "nearest_support_distance": 0.342698,
+            "mean_support_distance": 0.430474,
+            "residual_norm_mean": 0.372903,
             "recalled": true,
             "intrusion_identification": "representational_centroid_not_keyword"
           }
@@ -234,27 +354,39 @@
       "default": {
         "status": "FAIL",
         "passed": false,
-        "self_related_count": 4,
-        "baseline_count": 0,
-        "matched_baseline_sufficient": false,
-        "self_related_source": "relevance_self_structured_field",
-        "self_retention": 0.554257,
-        "baseline_retention": 0.0,
-        "retention_gap": 0.554257,
-        "significance_statistic": 0.554257,
-        "perturbation_tick": 15
-      },
-      "negative_control": {
-        "status": "FAIL",
-        "passed": false,
         "self_related_count": 5,
         "baseline_count": 0,
         "matched_baseline_sufficient": false,
         "self_related_source": "relevance_self_structured_field",
-        "self_retention": 0.262,
+        "baseline_match_fields": [
+          "arousal",
+          "novelty",
+          "created_at",
+          "encoding_strength_tiebreak"
+        ],
+        "self_retention": 0.50391,
         "baseline_retention": 0.0,
-        "retention_gap": 0.262,
-        "significance_statistic": 0.262,
+        "retention_gap": 0.50391,
+        "significance_statistic": 0.50391,
+        "perturbation_tick": 15
+      },
+      "negative_control": {
+        "status": "PASS",
+        "passed": true,
+        "self_related_count": 7,
+        "baseline_count": 7,
+        "matched_baseline_sufficient": true,
+        "self_related_source": "relevance_self_structured_field",
+        "baseline_match_fields": [
+          "arousal",
+          "novelty",
+          "created_at",
+          "encoding_strength_tiebreak"
+        ],
+        "self_retention": 0.246321,
+        "baseline_retention": 0.186286,
+        "retention_gap": 0.060036,
+        "significance_statistic": 0.060036,
         "perturbation_tick": 15
       }
     },
@@ -262,7 +394,7 @@
       "status": "FAIL",
       "passed": false,
       "comparisons": {
-        "serial_position_collapse": false,
+        "serial_position_collapse": true,
         "retention_curve_collapse": true,
         "schema_intrusion_collapse": false,
         "identity_continuity_collapse": true
@@ -292,7 +424,6 @@
   },
   "failed_gates": [
     "long_horizon_free_rollout",
-    "serial_position_effect",
     "schema_intrusion",
     "identity_continuity",
     "negative_controls"

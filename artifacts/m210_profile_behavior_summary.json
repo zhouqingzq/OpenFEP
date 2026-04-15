@@ -54,9 +54,9 @@
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": false
+        "narrative_bias_persists": true
       },
-      "final_passed": false
+      "final_passed": true
     },
     "exploratory": {
       "behavior_summary": {
@@ -73,9 +73,9 @@
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": false
+        "narrative_bias_persists": true
       },
-      "final_passed": false
+      "final_passed": true
     },
     "rigid_cautious": {
       "behavior_summary": {

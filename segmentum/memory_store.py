@@ -205,9 +205,14 @@ def _sanitize_legacy_compression_metadata(metadata: object) -> dict[str, object]
 
 def _payload_without_recursive_legacy(payload: dict[str, object]) -> dict[str, object]:
     sanitized = deepcopy(payload)
-    sanitized["compression_metadata"] = _sanitize_legacy_compression_metadata(
+    had_compression_metadata = "compression_metadata" in sanitized
+    sanitized_metadata = _sanitize_legacy_compression_metadata(
         sanitized.get("compression_metadata")
     )
+    if had_compression_metadata or sanitized_metadata:
+        sanitized["compression_metadata"] = sanitized_metadata
+    else:
+        sanitized.pop("compression_metadata", None)
     return sanitized
 
 

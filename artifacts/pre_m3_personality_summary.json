@@ -131,16 +131,30 @@
       "rigid_cautious"
     ]
   },
-  "generated_at": "2026-04-15T09:01:57+00:00",
-  "codebase_version": "b7c2b00bbf3388ab4f4e290a763bbacb849870dc",
+  "generated_at": "2026-04-15T09:40:46+00:00",
+  "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
   "codebase_provenance": {
-    "git_commit": "b7c2b00bbf3388ab4f4e290a763bbacb849870dc",
-    "dirty_worktree": false,
-    "binding_scope": "frozen_commit",
-    "workspace_fingerprint": "8aaa248e0b33c2f90c1eed770618dd7c45dfd62267432aa6b70514a8e253c93d",
-    "status_entries": [],
-    "changed_path_count": 0,
-    "changed_paths": [],
-    "reproducibility_scope": "frozen_commit"
+    "git_commit": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
+    "dirty_worktree": true,
+    "binding_scope": "workspace_snapshot",
+    "workspace_fingerprint": "fd035d09ad15413be484608ddec422c70aef0364a2b4373a47615f78dd6d4970",
+    "status_entries": [
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
+      " M reports/m1_acceptance_report.json",
+      " M reports/m210_strict_audit_report.md"
+    ],
+    "changed_path_count": 6,
+    "changed_paths": [
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "reports/m1_acceptance_report.json",
+      "reports/m210_strict_audit_report.md"
+    ],
+    "reproducibility_scope": "strict_workspace_fingerprint"
   }
 }

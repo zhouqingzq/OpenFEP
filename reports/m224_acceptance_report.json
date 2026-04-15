@@ -3,8 +3,8 @@
   "schema_version": "m224_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-15T03:47:56+00:00",
-  "codebase_version": "a55fd4402b4b152ae43863baf8d17b4e73d48e7e",
+  "generated_at": "2026-04-15T09:55:29+00:00",
+  "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
   "seed_set": [
     224,
     243,
@@ -6082,8 +6082,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m224_v2",
-    "generated_at": "2026-04-15T03:47:56+00:00",
-    "codebase_version": "a55fd4402b4b152ae43863baf8d17b4e73d48e7e",
+    "generated_at": "2026-04-15T09:55:29+00:00",
+    "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
     "seed_set": [
       224,
       243,
@@ -6095,32 +6095,32 @@
     "artifacts": {
       "workspace_causality": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_workspace_causality.json",
-        "modified_at": "2026-04-15T03:47:56+00:00",
+        "modified_at": "2026-04-15T09:55:30+00:00",
         "matches_round_metadata": true
       },
       "report_leakage": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_report_leakage.json",
-        "modified_at": "2026-04-15T03:47:56+00:00",
+        "modified_at": "2026-04-15T09:55:30+00:00",
         "matches_round_metadata": true
       },
       "capacity_pressure": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_capacity_pressure.json",
-        "modified_at": "2026-04-15T03:47:56+00:00",
+        "modified_at": "2026-04-15T09:55:30+00:00",
         "matches_round_metadata": true
       },
       "persistence_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_persistence_trace.json",
-        "modified_at": "2026-04-15T03:47:56+00:00",
+        "modified_at": "2026-04-15T09:55:30+00:00",
         "matches_round_metadata": true
       },
       "downstream_alignment": {
         "path": "E:\\workspace\\segments\\artifacts\\m224_downstream_alignment.json",
-        "modified_at": "2026-04-15T03:47:56+00:00",
+        "modified_at": "2026-04-15T09:55:30+00:00",
         "matches_round_metadata": true
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m224_acceptance_report.json",
-        "modified_at": "2026-04-15T03:47:56+00:00",
+        "modified_at": "2026-04-15T09:55:30+00:00",
         "matches_round_metadata": true
       }
     }

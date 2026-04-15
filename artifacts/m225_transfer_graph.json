@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.25",
   "schema_version": "m225_v2",
-  "generated_at": "2026-04-15T04:02:34+00:00",
-  "codebase_version": "a55fd4402b4b152ae43863baf8d17b4e73d48e7e",
+  "generated_at": "2026-04-15T10:10:13+00:00",
+  "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
   "seed_set": [
     225,
     244,

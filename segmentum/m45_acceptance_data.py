@@ -38,7 +38,7 @@ TESTS_DIR = ROOT / "tests"
 def _discover_regression_targets() -> list[str]:
     targets: list[str] = []
     for prefix in ("m41", "m42", "m43", "m44"):
-        pattern = f"test_{prefix}_*.py"
+        pattern = f"test_{prefix}*.py"
         for path in sorted(TESTS_DIR.glob(pattern)):
             if path.suffix != ".py" or path.parent.name == "__pycache__":
                 continue

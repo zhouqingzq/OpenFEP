@@ -3,8 +3,8 @@
   "mode": "official_runtime_acceptance",
   "artifact_lineage": "official_runtime_evidence",
   "primary_evidence_chain": true,
-  "generated_at": "2026-04-11T14:48:31+00:00",
-  "git_head": "fd886f0346aad9fbbb428658a4265c882488aba2",
+  "generated_at": "2026-04-15T13:33:53+00:00",
+  "git_head": "3422c05045d5ef05e801ceba0b49e787f40ebbfc",
   "status": "INCOMPLETE",
   "acceptance_state": "acceptance_not_issued",
   "recommendation": "DEFER",
@@ -2445,8 +2445,8 @@
         },
         "after": {
           "id": "semantic",
-          "content": "Semantic trust pattern. | reconstructed from base, low-conf",
-          "content_hash": "1fb8ed0c791ca48cdaec45799e46ff319b1df7e2e23a02bca6f06f38b4e27cfa",
+          "content": "Semantic trust pattern. | reconstructed from donor, base",
+          "content_hash": "ee66d001ede231b74bab2a35c48b7726d208878eb4bf0cd60ed2e67d9d994057",
           "memory_class": "semantic",
           "store_level": "short",
           "source_type": "reconstruction",
@@ -2476,8 +2476,8 @@
             "community"
           ],
           "anchor_slots": {
-            "time": null,
-            "place": null,
+            "time": "cycle-12",
+            "place": "community_lab",
             "agents": "lin",
             "action": "mentor_checkin",
             "outcome": "commitment_kept"
@@ -2503,10 +2503,12 @@
               "trigger_reason": "semantic_abstractness",
               "primary_id": "semantic",
               "borrowed_source_ids": [
-                "base",
-                "low-conf"
+                "donor",
+                "base"
               ],
               "reconstructed_fields": [
+                "time",
+                "place",
                 "content"
               ],
               "protected_fields": []
@@ -2531,10 +2533,12 @@
           "triggered": true,
           "trigger_reason": "semantic_abstractness",
           "borrowed_source_ids": [
-            "base",
-            "low-conf"
+            "donor",
+            "base"
           ],
           "reconstructed_fields": [
+            "time",
+            "place",
             "content"
           ],
           "protected_fields": [],
@@ -2543,10 +2547,12 @@
             "trigger_reason": "semantic_abstractness",
             "primary_id": "semantic",
             "borrowed_source_ids": [
-              "base",
-              "low-conf"
+              "donor",
+              "base"
             ],
             "reconstructed_fields": [
+              "time",
+              "place",
               "content"
             ],
             "protected_fields": []
@@ -4653,7 +4659,7 @@
           }
         ],
         "skeleton": {
-          "id": "ce4b8a31-91b3-4548-ade0-7bff9a8f46cf",
+          "id": "d164c914-b602-4d21-aa02-a8c174430025",
           "content": "semantic centroid display",
           "content_hash": "d1878ef4165b359772309b152a7f2f918d4ea0380516bebc010b09dab2abc8ba",
           "memory_class": "semantic",
@@ -4848,16 +4854,16 @@
             }
           },
           "extracted_patterns": [
-            "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-            "7b8bd501-ef70-4128-8b32-c131e3fd5af7"
+            "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+            "b73e12a9-7c37-472a-b521-d71e1c586b59"
           ],
           "replay_reencoded_ids": [
-            "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+            "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
             "ep-2",
             "ep-1"
           ],
           "validated_inference_ids": [
-            "7b8bd501-ef70-4128-8b32-c131e3fd5af7"
+            "b73e12a9-7c37-472a-b521-d71e1c586b59"
           ],
           "cleanup": {
             "deleted_ids": [
@@ -4871,7 +4877,8 @@
               "ep-2",
               "ep-3",
               "ep-4",
-              "ep-5"
+              "ep-5",
+              "dormant-long"
             ],
             "confidence_drift_ids": []
           }
@@ -4896,9 +4903,9 @@
             "relevance_social": 0.2,
             "relevance_reward": 0.2,
             "relevance": 0.6,
-            "salience": 0.49200000000000005,
-            "trace_strength": 0.40500747109023927,
-            "accessibility": 0.1078669691337557,
+            "salience": 0.49520755905457153,
+            "trace_strength": 0.406611250617525,
+            "accessibility": 0.10890942582649142,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -4985,25 +4992,25 @@
                   "redundancy_penalty": 0.0
                 }
               },
-              "semantic_reconstruction_error": 0.42061027388783556,
-              "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+              "semantic_reconstruction_error": 0.42359070646692654,
+              "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
               "m410_replay": {
                 "encoding_source": "dynamics",
-                "encoding_strength": 0.492,
-                "fep_prediction_error": 0.4,
+                "encoding_strength": 0.495208,
+                "fep_prediction_error": 0.407128,
                 "surprise": 0.72,
                 "arousal": 0.3,
-                "raw_drive": 0.0864,
-                "attention_budget_raw_drive_total": 0.0864,
-                "raw_strength": 0.492,
+                "raw_drive": 0.08794,
+                "attention_budget_raw_drive_total": 0.08794,
+                "raw_strength": 0.495208,
                 "attention_budget_total": 0.4,
                 "attention_budget_requested": 0.4,
                 "attention_budget_granted": 0.4,
                 "attention_budget_denied": 0.0,
                 "fallback_evidence": {},
-                "replay_second_pass_error": 0.4,
-                "salience_delta": -0.22799999999999992,
-                "retention_adjustment": -0.22799999999999992
+                "replay_second_pass_error": 0.40712790901015894,
+                "salience_delta": -0.22479244094542844,
+                "retention_adjustment": -0.22479244094542844
               }
             },
             "derived_from": [],
@@ -5015,10 +5022,10 @@
             "residual_norm_var": null,
             "support_ids": null,
             "consolidation_source": null,
-            "semantic_reconstruction_error": 0.42061027388783556,
-            "replay_second_pass_error": 0.4,
-            "salience_delta": -0.22799999999999992,
-            "retention_adjustment": -0.22799999999999992
+            "semantic_reconstruction_error": 0.42359070646692654,
+            "replay_second_pass_error": 0.40712790901015894,
+            "salience_delta": -0.22479244094542844,
+            "retention_adjustment": -0.22479244094542844
           },
           {
             "id": "ep-2",
@@ -5039,9 +5046,9 @@
             "relevance_social": 0.2,
             "relevance_reward": 0.2,
             "relevance": 0.6,
-            "salience": 0.45825,
-            "trace_strength": 0.38917152473971806,
-            "accessibility": 0.10057419575086485,
+            "salience": 0.4616490187384685,
+            "trace_strength": 0.3908710341089523,
+            "accessibility": 0.1016788768408671,
             "abstractness": 0.35,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
@@ -5128,25 +5135,25 @@
                   "redundancy_penalty": 0.0
                 }
               },
-              "semantic_reconstruction_error": 0.19191258426689997,
-              "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+              "semantic_reconstruction_error": 0.13324663207283527,
+              "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
               "m410_replay": {
                 "encoding_source": "dynamics",
-                "encoding_strength": 0.45825,
-                "fep_prediction_error": 0.325,
+                "encoding_strength": 0.461649,
+                "fep_prediction_error": 0.332553,
                 "surprise": 0.72,
                 "arousal": 0.3,
-                "raw_drive": 0.0702,
-                "attention_budget_raw_drive_total": 0.0702,
-                "raw_strength": 0.45825,
+                "raw_drive": 0.071832,
+                "attention_budget_raw_drive_total": 0.071832,
+                "raw_strength": 0.461649,
                 "attention_budget_total": 0.4,
                 "attention_budget_requested": 0.4,
                 "attention_budget_granted": 0.4,
                 "attention_budget_denied": 0.0,
                 "fallback_evidence": {},
-                "replay_second_pass_error": 0.32499999999999996,
-                "salience_delta": -0.26175,
-                "retention_adjustment": -0.26175
+                "replay_second_pass_error": 0.3325533749743743,
+                "salience_delta": -0.2583509812615315,
+                "retention_adjustment": -0.2583509812615315
               }
             },
             "derived_from": [],
@@ -5158,10 +5165,10 @@
             "residual_norm_var": null,
             "support_ids": null,
             "consolidation_source": null,
-            "semantic_reconstruction_error": 0.19191258426689997,
-            "replay_second_pass_error": 0.32499999999999996,
-            "salience_delta": -0.26175,
-            "retention_adjustment": -0.26175
+            "semantic_reconstruction_error": 0.13324663207283527,
+            "replay_second_pass_error": 0.3325533749743743,
+            "salience_delta": -0.2583509812615315,
+            "retention_adjustment": -0.2583509812615315
           },
           {
             "id": "ep-3",
@@ -5271,8 +5278,8 @@
                   "redundancy_penalty": 0.0
                 }
               },
-              "semantic_reconstruction_error": 0.13997929311151697,
-              "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+              "semantic_reconstruction_error": 0.19338337897648714,
+              "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
             },
             "derived_from": [],
             "version": 1,
@@ -5283,7 +5290,7 @@
             "residual_norm_var": null,
             "support_ids": null,
             "consolidation_source": null,
-            "semantic_reconstruction_error": 0.13997929311151697,
+            "semantic_reconstruction_error": 0.19338337897648714,
             "replay_second_pass_error": null,
             "salience_delta": null,
             "retention_adjustment": null
@@ -5396,8 +5403,8 @@
                   "redundancy_penalty": 0.0
                 }
               },
-              "semantic_reconstruction_error": 0.13997929311151697,
-              "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+              "semantic_reconstruction_error": 0.19338337897648714,
+              "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
             },
             "derived_from": [],
             "version": 1,
@@ -5408,7 +5415,7 @@
             "residual_norm_var": null,
             "support_ids": null,
             "consolidation_source": null,
-            "semantic_reconstruction_error": 0.13997929311151697,
+            "semantic_reconstruction_error": 0.19338337897648714,
             "replay_second_pass_error": null,
             "salience_delta": null,
             "retention_adjustment": null
@@ -5521,8 +5528,8 @@
                   "redundancy_penalty": 0.0
                 }
               },
-              "semantic_reconstruction_error": 0.13997929311151697,
-              "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+              "semantic_reconstruction_error": 0.19338337897648714,
+              "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
             },
             "derived_from": [],
             "version": 1,
@@ -5533,7 +5540,7 @@
             "residual_norm_var": null,
             "support_ids": null,
             "consolidation_source": null,
-            "semantic_reconstruction_error": 0.13997929311151697,
+            "semantic_reconstruction_error": 0.19338337897648714,
             "replay_second_pass_error": null,
             "salience_delta": null,
             "retention_adjustment": null
@@ -5559,8 +5566,8 @@
             "relevance": 0.3,
             "salience": 0.2,
             "trace_strength": 0.02,
-            "accessibility": 0.02,
-            "abstractness": 0.2,
+            "accessibility": 0.013000000000000001,
+            "abstractness": 0.30000000000000004,
             "source_confidence": 0.9,
             "reality_confidence": 0.85,
             "semantic_tags": [
@@ -5592,7 +5599,10 @@
             "support_count": 1,
             "counterevidence_count": 0,
             "competing_interpretations": null,
-            "compression_metadata": null,
+            "compression_metadata": {
+              "semantic_reconstruction_error": 0.4403622804939404,
+              "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
+            },
             "derived_from": [],
             "version": 1,
             "is_dormant": true,
@@ -5602,13 +5612,13 @@
             "residual_norm_var": null,
             "support_ids": null,
             "consolidation_source": null,
-            "semantic_reconstruction_error": null,
+            "semantic_reconstruction_error": 0.4403622804939404,
             "replay_second_pass_error": null,
             "salience_delta": null,
             "retention_adjustment": null
           },
           {
-            "id": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+            "id": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
             "content": "semantic centroid display",
             "content_hash": "d1878ef4165b359772309b152a7f2f918d4ea0380516bebc010b09dab2abc8ba",
             "memory_class": "semantic",
@@ -5633,14 +5643,9 @@
             "source_confidence": 0.88,
             "reality_confidence": 0.8,
             "semantic_tags": [
-              "care",
-              "mentor",
-              "promise"
+              "mentor"
             ],
-            "context_tags": [
-              "lab",
-              "weekly"
-            ],
+            "context_tags": [],
             "anchor_slots": {
               "time": null,
               "place": null,
@@ -5660,11 +5665,12 @@
             "execution_contexts": [],
             "mood_context": "",
             "retrieval_count": 10,
-            "support_count": 5,
+            "support_count": 6,
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
               "support_entry_ids": [
+                "dormant-long",
                 "ep-1",
                 "ep-2",
                 "ep-3",
@@ -5678,14 +5684,9 @@
               ],
               "stable_structure": {
                 "semantic_tags": [
-                  "care",
-                  "mentor",
-                  "promise"
+                  "mentor"
                 ],
-                "context_tags": [
-                  "lab",
-                  "weekly"
-                ],
+                "context_tags": [],
                 "actions": [
                   "mentor_checkin"
                 ],
@@ -5710,24 +5711,25 @@
               "centroid": [
                 0.0,
                 0.3,
-                0.4,
+                0.39999999999999997,
                 0.3,
                 0.3,
-                0.2,
-                0.29999999999999993,
-                0.2,
-                0.2,
-                0.6,
-                0.62205
+                0.19999999999999998,
+                0.28333333333333327,
+                0.19999999999999998,
+                0.19999999999999998,
+                0.5499999999999999,
+                0.5528094296321733
               ],
-              "residual_norm_mean": 0.20649214749785724,
-              "residual_norm_var": 0.011866203021723145,
+              "residual_norm_mean": 0.2628916259938606,
+              "residual_norm_var": 0.014770340222107154,
               "support_ids": [
                 "ep-1",
                 "ep-2",
                 "ep-3",
                 "ep-4",
-                "ep-5"
+                "ep-5",
+                "dormant-long"
               ],
               "consolidation_source": "dynamics",
               "m45_internal": {
@@ -5875,36 +5877,37 @@
                 "centroid_before": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.72
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.55,
+                  0.6333333333333333
                 ],
                 "centroid_after": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.62205
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.5499999999999999,
+                  0.5528094296321733
                 ],
-                "residual_norm_mean_before": 0.15999999999999992,
-                "residual_norm_mean_after": 0.20649214749785724,
-                "residual_norm_var_before": 0.014400000000000013,
-                "residual_norm_var_after": 0.011866203021723145
+                "residual_norm_mean_before": 0.24275607290900936,
+                "residual_norm_mean_after": 0.2628916259938606,
+                "residual_norm_var_before": 0.025847266843573472,
+                "residual_norm_var_after": 0.014770340222107154
               }
             },
             "derived_from": [
+              "dormant-long",
               "ep-1",
               "ep-2",
               "ep-3",
@@ -5917,24 +5920,25 @@
             "centroid": [
               0.0,
               0.3,
-              0.4,
+              0.39999999999999997,
               0.3,
               0.3,
-              0.2,
-              0.29999999999999993,
-              0.2,
-              0.2,
-              0.6,
-              0.62205
+              0.19999999999999998,
+              0.28333333333333327,
+              0.19999999999999998,
+              0.19999999999999998,
+              0.5499999999999999,
+              0.5528094296321733
             ],
-            "residual_norm_mean": 0.20649214749785724,
-            "residual_norm_var": 0.011866203021723145,
+            "residual_norm_mean": 0.2628916259938606,
+            "residual_norm_var": 0.014770340222107154,
             "support_ids": [
               "ep-1",
               "ep-2",
               "ep-3",
               "ep-4",
-              "ep-5"
+              "ep-5",
+              "dormant-long"
             ],
             "consolidation_source": "dynamics",
             "semantic_reconstruction_error": null,
@@ -5943,7 +5947,7 @@
             "retention_adjustment": -0.27299999999999996
           },
           {
-            "id": "7b8bd501-ef70-4128-8b32-c131e3fd5af7",
+            "id": "b73e12a9-7c37-472a-b521-d71e1c586b59",
             "content": "inferred centroid display",
             "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
             "memory_class": "inferred",
@@ -5966,13 +5970,15 @@
             "accessibility": 0.5,
             "abstractness": 0.87,
             "source_confidence": 0.9,
-            "reality_confidence": 0.7142857142857143,
+            "reality_confidence": 0.75,
             "semantic_tags": [
               "care",
+              "history",
               "mentor",
               "promise"
             ],
             "context_tags": [
+              "archive",
               "lab",
               "weekly"
             ],
@@ -5995,14 +6001,15 @@
             "execution_contexts": [],
             "mood_context": "",
             "retrieval_count": 0,
-            "support_count": 5,
+            "support_count": 6,
             "counterevidence_count": 0,
             "competing_interpretations": [
-              "hypothesis:ep-1",
-              "hypothesis:ep-2"
+              "hypothesis:dormant-long",
+              "hypothesis:ep-1"
             ],
             "compression_metadata": {
               "support_entry_ids": [
+                "dormant-long",
                 "ep-1",
                 "ep-2",
                 "ep-3",
@@ -6012,6 +6019,7 @@
               "stable_structure": {
                 "semantic_tags": [
                   "care",
+                  "history",
                   "mentor",
                   "promise"
                 ]
@@ -6038,24 +6046,25 @@
               "centroid": [
                 0.0,
                 0.3,
-                0.4,
+                0.39999999999999997,
                 0.3,
                 0.3,
-                0.2,
-                0.29999999999999993,
-                0.2,
-                0.2,
-                0.6,
-                0.62205
+                0.19999999999999998,
+                0.28333333333333327,
+                0.19999999999999998,
+                0.19999999999999998,
+                0.5499999999999999,
+                0.5528094296321733
               ],
-              "residual_norm_mean": 0.20649214749785724,
-              "residual_norm_var": 0.011866203021723145,
+              "residual_norm_mean": 0.2628916259938606,
+              "residual_norm_var": 0.014770340222107154,
               "support_ids": [
                 "ep-1",
                 "ep-2",
                 "ep-3",
                 "ep-4",
-                "ep-5"
+                "ep-5",
+                "dormant-long"
               ],
               "consolidation_source": "dynamics",
               "m45_internal": {
@@ -6101,37 +6110,38 @@
                 "centroid_before": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.72
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.55,
+                  0.6333333333333333
                 ],
                 "centroid_after": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.62205
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.5499999999999999,
+                  0.5528094296321733
                 ],
-                "residual_norm_mean_before": 0.15999999999999992,
-                "residual_norm_mean_after": 0.20649214749785724,
-                "residual_norm_var_before": 0.014400000000000013,
-                "residual_norm_var_after": 0.011866203021723145
+                "residual_norm_mean_before": 0.24275607290900936,
+                "residual_norm_mean_after": 0.2628916259938606,
+                "residual_norm_var_before": 0.025847266843573472,
+                "residual_norm_var_after": 0.014770340222107154
               },
-              "inference_write_score": 0.6083333333333334
+              "inference_write_score": 0.675
             },
             "derived_from": [
+              "dormant-long",
               "ep-1",
               "ep-2",
               "ep-3",
@@ -6144,24 +6154,25 @@
             "centroid": [
               0.0,
               0.3,
-              0.4,
+              0.39999999999999997,
               0.3,
               0.3,
-              0.2,
-              0.29999999999999993,
-              0.2,
-              0.2,
-              0.6,
-              0.62205
+              0.19999999999999998,
+              0.28333333333333327,
+              0.19999999999999998,
+              0.19999999999999998,
+              0.5499999999999999,
+              0.5528094296321733
             ],
-            "residual_norm_mean": 0.20649214749785724,
-            "residual_norm_var": 0.011866203021723145,
+            "residual_norm_mean": 0.2628916259938606,
+            "residual_norm_var": 0.014770340222107154,
             "support_ids": [
               "ep-1",
               "ep-2",
               "ep-3",
               "ep-4",
-              "ep-5"
+              "ep-5",
+              "dormant-long"
             ],
             "consolidation_source": "dynamics",
             "semantic_reconstruction_error": null,
@@ -6172,7 +6183,7 @@
         ],
         "extracted_entries": [
           {
-            "id": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+            "id": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
             "content": "semantic centroid display",
             "content_hash": "d1878ef4165b359772309b152a7f2f918d4ea0380516bebc010b09dab2abc8ba",
             "memory_class": "semantic",
@@ -6197,14 +6208,9 @@
             "source_confidence": 0.88,
             "reality_confidence": 0.8,
             "semantic_tags": [
-              "care",
-              "mentor",
-              "promise"
+              "mentor"
             ],
-            "context_tags": [
-              "lab",
-              "weekly"
-            ],
+            "context_tags": [],
             "anchor_slots": {
               "time": null,
               "place": null,
@@ -6224,11 +6230,12 @@
             "execution_contexts": [],
             "mood_context": "",
             "retrieval_count": 10,
-            "support_count": 5,
+            "support_count": 6,
             "counterevidence_count": 0,
             "competing_interpretations": null,
             "compression_metadata": {
               "support_entry_ids": [
+                "dormant-long",
                 "ep-1",
                 "ep-2",
                 "ep-3",
@@ -6242,14 +6249,9 @@
               ],
               "stable_structure": {
                 "semantic_tags": [
-                  "care",
-                  "mentor",
-                  "promise"
+                  "mentor"
                 ],
-                "context_tags": [
-                  "lab",
-                  "weekly"
-                ],
+                "context_tags": [],
                 "actions": [
                   "mentor_checkin"
                 ],
@@ -6274,24 +6276,25 @@
               "centroid": [
                 0.0,
                 0.3,
-                0.4,
+                0.39999999999999997,
                 0.3,
                 0.3,
-                0.2,
-                0.29999999999999993,
-                0.2,
-                0.2,
-                0.6,
-                0.62205
+                0.19999999999999998,
+                0.28333333333333327,
+                0.19999999999999998,
+                0.19999999999999998,
+                0.5499999999999999,
+                0.5528094296321733
               ],
-              "residual_norm_mean": 0.20649214749785724,
-              "residual_norm_var": 0.011866203021723145,
+              "residual_norm_mean": 0.2628916259938606,
+              "residual_norm_var": 0.014770340222107154,
               "support_ids": [
                 "ep-1",
                 "ep-2",
                 "ep-3",
                 "ep-4",
-                "ep-5"
+                "ep-5",
+                "dormant-long"
               ],
               "consolidation_source": "dynamics",
               "m45_internal": {
@@ -6439,36 +6442,37 @@
                 "centroid_before": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.72
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.55,
+                  0.6333333333333333
                 ],
                 "centroid_after": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.62205
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.5499999999999999,
+                  0.5528094296321733
                 ],
-                "residual_norm_mean_before": 0.15999999999999992,
-                "residual_norm_mean_after": 0.20649214749785724,
-                "residual_norm_var_before": 0.014400000000000013,
-                "residual_norm_var_after": 0.011866203021723145
+                "residual_norm_mean_before": 0.24275607290900936,
+                "residual_norm_mean_after": 0.2628916259938606,
+                "residual_norm_var_before": 0.025847266843573472,
+                "residual_norm_var_after": 0.014770340222107154
               }
             },
             "derived_from": [
+              "dormant-long",
               "ep-1",
               "ep-2",
               "ep-3",
@@ -6481,24 +6485,25 @@
             "centroid": [
               0.0,
               0.3,
-              0.4,
+              0.39999999999999997,
               0.3,
               0.3,
-              0.2,
-              0.29999999999999993,
-              0.2,
-              0.2,
-              0.6,
-              0.62205
+              0.19999999999999998,
+              0.28333333333333327,
+              0.19999999999999998,
+              0.19999999999999998,
+              0.5499999999999999,
+              0.5528094296321733
             ],
-            "residual_norm_mean": 0.20649214749785724,
-            "residual_norm_var": 0.011866203021723145,
+            "residual_norm_mean": 0.2628916259938606,
+            "residual_norm_var": 0.014770340222107154,
             "support_ids": [
               "ep-1",
               "ep-2",
               "ep-3",
               "ep-4",
-              "ep-5"
+              "ep-5",
+              "dormant-long"
             ],
             "consolidation_source": "dynamics",
             "semantic_reconstruction_error": null,
@@ -6507,7 +6512,7 @@
             "retention_adjustment": -0.27299999999999996
           },
           {
-            "id": "7b8bd501-ef70-4128-8b32-c131e3fd5af7",
+            "id": "b73e12a9-7c37-472a-b521-d71e1c586b59",
             "content": "inferred centroid display",
             "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
             "memory_class": "inferred",
@@ -6530,13 +6535,15 @@
             "accessibility": 0.5,
             "abstractness": 0.87,
             "source_confidence": 0.9,
-            "reality_confidence": 0.7142857142857143,
+            "reality_confidence": 0.75,
             "semantic_tags": [
               "care",
+              "history",
               "mentor",
               "promise"
             ],
             "context_tags": [
+              "archive",
               "lab",
               "weekly"
             ],
@@ -6559,14 +6566,15 @@
             "execution_contexts": [],
             "mood_context": "",
             "retrieval_count": 0,
-            "support_count": 5,
+            "support_count": 6,
             "counterevidence_count": 0,
             "competing_interpretations": [
-              "hypothesis:ep-1",
-              "hypothesis:ep-2"
+              "hypothesis:dormant-long",
+              "hypothesis:ep-1"
             ],
             "compression_metadata": {
               "support_entry_ids": [
+                "dormant-long",
                 "ep-1",
                 "ep-2",
                 "ep-3",
@@ -6576,6 +6584,7 @@
               "stable_structure": {
                 "semantic_tags": [
                   "care",
+                  "history",
                   "mentor",
                   "promise"
                 ]
@@ -6602,24 +6611,25 @@
               "centroid": [
                 0.0,
                 0.3,
-                0.4,
+                0.39999999999999997,
                 0.3,
                 0.3,
-                0.2,
-                0.29999999999999993,
-                0.2,
-                0.2,
-                0.6,
-                0.62205
+                0.19999999999999998,
+                0.28333333333333327,
+                0.19999999999999998,
+                0.19999999999999998,
+                0.5499999999999999,
+                0.5528094296321733
               ],
-              "residual_norm_mean": 0.20649214749785724,
-              "residual_norm_var": 0.011866203021723145,
+              "residual_norm_mean": 0.2628916259938606,
+              "residual_norm_var": 0.014770340222107154,
               "support_ids": [
                 "ep-1",
                 "ep-2",
                 "ep-3",
                 "ep-4",
-                "ep-5"
+                "ep-5",
+                "dormant-long"
               ],
               "consolidation_source": "dynamics",
               "m45_internal": {
@@ -6665,37 +6675,38 @@
                 "centroid_before": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.72
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.55,
+                  0.6333333333333333
                 ],
                 "centroid_after": [
                   0.0,
                   0.3,
-                  0.4,
+                  0.39999999999999997,
                   0.3,
                   0.3,
-                  0.2,
-                  0.29999999999999993,
-                  0.2,
-                  0.2,
-                  0.6,
-                  0.62205
+                  0.19999999999999998,
+                  0.28333333333333327,
+                  0.19999999999999998,
+                  0.19999999999999998,
+                  0.5499999999999999,
+                  0.5528094296321733
                 ],
-                "residual_norm_mean_before": 0.15999999999999992,
-                "residual_norm_mean_after": 0.20649214749785724,
-                "residual_norm_var_before": 0.014400000000000013,
-                "residual_norm_var_after": 0.011866203021723145
+                "residual_norm_mean_before": 0.24275607290900936,
+                "residual_norm_mean_after": 0.2628916259938606,
+                "residual_norm_var_before": 0.025847266843573472,
+                "residual_norm_var_after": 0.014770340222107154
               },
-              "inference_write_score": 0.6083333333333334
+              "inference_write_score": 0.675
             },
             "derived_from": [
+              "dormant-long",
               "ep-1",
               "ep-2",
               "ep-3",
@@ -6708,24 +6719,25 @@
             "centroid": [
               0.0,
               0.3,
-              0.4,
+              0.39999999999999997,
               0.3,
               0.3,
-              0.2,
-              0.29999999999999993,
-              0.2,
-              0.2,
-              0.6,
-              0.62205
+              0.19999999999999998,
+              0.28333333333333327,
+              0.19999999999999998,
+              0.19999999999999998,
+              0.5499999999999999,
+              0.5528094296321733
             ],
-            "residual_norm_mean": 0.20649214749785724,
-            "residual_norm_var": 0.011866203021723145,
+            "residual_norm_mean": 0.2628916259938606,
+            "residual_norm_var": 0.014770340222107154,
             "support_ids": [
               "ep-1",
               "ep-2",
               "ep-3",
               "ep-4",
-              "ep-5"
+              "ep-5",
+              "dormant-long"
             ],
             "consolidation_source": "dynamics",
             "semantic_reconstruction_error": null,
@@ -6742,11 +6754,11 @@
           "ep-5"
         ],
         "source_absorbed": {
-          "ep-1": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-          "ep-2": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-          "ep-3": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-          "ep-4": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-          "ep-5": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+          "ep-1": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+          "ep-2": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+          "ep-3": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+          "ep-4": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+          "ep-5": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
         }
       },
       "criteria_checks": {
@@ -6793,16 +6805,16 @@
             }
           },
           "extracted_patterns": [
-            "e1525766-bbeb-4d29-85fa-ef85113e5d20",
-            "0616b723-0cca-49ce-85d8-ad380eba7f4e"
+            "7990c696-0bb8-4678-9f44-27c738d2a40b",
+            "a1f41bee-4030-4b34-a7cc-2996762d3e1f"
           ],
           "replay_reencoded_ids": [
-            "e1525766-bbeb-4d29-85fa-ef85113e5d20",
+            "7990c696-0bb8-4678-9f44-27c738d2a40b",
             "validation-source-1",
             "validation-source-0"
           ],
           "validated_inference_ids": [
-            "0616b723-0cca-49ce-85d8-ad380eba7f4e"
+            "a1f41bee-4030-4b34-a7cc-2996762d3e1f"
           ],
           "cleanup": {
             "deleted_ids": [],
@@ -6817,7 +6829,7 @@
         },
         "validated_entries": [
           {
-            "id": "0616b723-0cca-49ce-85d8-ad380eba7f4e",
+            "id": "a1f41bee-4030-4b34-a7cc-2996762d3e1f",
             "content": "inferred centroid display",
             "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
             "memory_class": "inferred",
@@ -7727,16 +7739,16 @@
             }
           },
           "extracted_patterns": [
-            "de423930-3268-431f-ba8b-2cabe1d1922f",
-            "22954fa9-f09b-44bb-ac85-90be91976400"
+            "6bba4b4f-9490-4cea-ad8d-4e5abc245035",
+            "60c0e850-e910-4ee8-9b42-79610dabe9d9"
           ],
           "replay_reencoded_ids": [
-            "de423930-3268-431f-ba8b-2cabe1d1922f",
+            "6bba4b4f-9490-4cea-ad8d-4e5abc245035",
             "inference-source-1",
             "inference-source-0"
           ],
           "validated_inference_ids": [
-            "22954fa9-f09b-44bb-ac85-90be91976400"
+            "60c0e850-e910-4ee8-9b42-79610dabe9d9"
           ],
           "cleanup": {
             "deleted_ids": [],
@@ -7752,7 +7764,7 @@
         "validated_entries": [
           {
             "entry": {
-              "id": "22954fa9-f09b-44bb-ac85-90be91976400",
+              "id": "60c0e850-e910-4ee8-9b42-79610dabe9d9",
               "content": "inferred centroid display",
               "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
               "memory_class": "inferred",
@@ -8052,8 +8064,8 @@
             }
           },
           "extracted_patterns": [
-            "3959e8b4-3548-4e5f-8a48-80eafcaea379",
-            "b0550b06-6402-4222-834a-6758defa771b"
+            "77b34c31-e745-463f-8710-2c6018513b3c",
+            "f68005a6-3549-4fc1-bb94-be98eebd0a3f"
           ],
           "replay_reencoded_ids": [
             "ep-1",
@@ -10726,8 +10738,8 @@
               },
               "after": {
                 "id": "semantic",
-                "content": "Semantic trust pattern. | reconstructed from base, low-conf",
-                "content_hash": "1fb8ed0c791ca48cdaec45799e46ff319b1df7e2e23a02bca6f06f38b4e27cfa",
+                "content": "Semantic trust pattern. | reconstructed from donor, base",
+                "content_hash": "ee66d001ede231b74bab2a35c48b7726d208878eb4bf0cd60ed2e67d9d994057",
                 "memory_class": "semantic",
                 "store_level": "short",
                 "source_type": "reconstruction",
@@ -10757,8 +10769,8 @@
                   "community"
                 ],
                 "anchor_slots": {
-                  "time": null,
-                  "place": null,
+                  "time": "cycle-12",
+                  "place": "community_lab",
                   "agents": "lin",
                   "action": "mentor_checkin",
                   "outcome": "commitment_kept"
@@ -10784,10 +10796,12 @@
                     "trigger_reason": "semantic_abstractness",
                     "primary_id": "semantic",
                     "borrowed_source_ids": [
-                      "base",
-                      "low-conf"
+                      "donor",
+                      "base"
                     ],
                     "reconstructed_fields": [
+                      "time",
+                      "place",
                       "content"
                     ],
                     "protected_fields": []
@@ -10812,10 +10826,12 @@
                 "triggered": true,
                 "trigger_reason": "semantic_abstractness",
                 "borrowed_source_ids": [
-                  "base",
-                  "low-conf"
+                  "donor",
+                  "base"
                 ],
                 "reconstructed_fields": [
+                  "time",
+                  "place",
                   "content"
                 ],
                 "protected_fields": [],
@@ -10824,10 +10840,12 @@
                   "trigger_reason": "semantic_abstractness",
                   "primary_id": "semantic",
                   "borrowed_source_ids": [
-                    "base",
-                    "low-conf"
+                    "donor",
+                    "base"
                   ],
                   "reconstructed_fields": [
+                    "time",
+                    "place",
                     "content"
                   ],
                   "protected_fields": []
@@ -12993,7 +13011,7 @@
                 }
               ],
               "skeleton": {
-                "id": "ce4b8a31-91b3-4548-ade0-7bff9a8f46cf",
+                "id": "d164c914-b602-4d21-aa02-a8c174430025",
                 "content": "semantic centroid display",
                 "content_hash": "d1878ef4165b359772309b152a7f2f918d4ea0380516bebc010b09dab2abc8ba",
                 "memory_class": "semantic",
@@ -13188,16 +13206,16 @@
                   }
                 },
                 "extracted_patterns": [
-                  "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-                  "7b8bd501-ef70-4128-8b32-c131e3fd5af7"
+                  "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+                  "b73e12a9-7c37-472a-b521-d71e1c586b59"
                 ],
                 "replay_reencoded_ids": [
-                  "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+                  "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
                   "ep-2",
                   "ep-1"
                 ],
                 "validated_inference_ids": [
-                  "7b8bd501-ef70-4128-8b32-c131e3fd5af7"
+                  "b73e12a9-7c37-472a-b521-d71e1c586b59"
                 ],
                 "cleanup": {
                   "deleted_ids": [
@@ -13211,7 +13229,8 @@
                     "ep-2",
                     "ep-3",
                     "ep-4",
-                    "ep-5"
+                    "ep-5",
+                    "dormant-long"
                   ],
                   "confidence_drift_ids": []
                 }
@@ -13236,9 +13255,9 @@
                   "relevance_social": 0.2,
                   "relevance_reward": 0.2,
                   "relevance": 0.6,
-                  "salience": 0.49200000000000005,
-                  "trace_strength": 0.40500747109023927,
-                  "accessibility": 0.1078669691337557,
+                  "salience": 0.49520755905457153,
+                  "trace_strength": 0.406611250617525,
+                  "accessibility": 0.10890942582649142,
                   "abstractness": 0.35,
                   "source_confidence": 0.9,
                   "reality_confidence": 0.85,
@@ -13325,25 +13344,25 @@
                         "redundancy_penalty": 0.0
                       }
                     },
-                    "semantic_reconstruction_error": 0.42061027388783556,
-                    "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+                    "semantic_reconstruction_error": 0.42359070646692654,
+                    "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
                     "m410_replay": {
                       "encoding_source": "dynamics",
-                      "encoding_strength": 0.492,
-                      "fep_prediction_error": 0.4,
+                      "encoding_strength": 0.495208,
+                      "fep_prediction_error": 0.407128,
                       "surprise": 0.72,
                       "arousal": 0.3,
-                      "raw_drive": 0.0864,
-                      "attention_budget_raw_drive_total": 0.0864,
-                      "raw_strength": 0.492,
+                      "raw_drive": 0.08794,
+                      "attention_budget_raw_drive_total": 0.08794,
+                      "raw_strength": 0.495208,
                       "attention_budget_total": 0.4,
                       "attention_budget_requested": 0.4,
                       "attention_budget_granted": 0.4,
                       "attention_budget_denied": 0.0,
                       "fallback_evidence": {},
-                      "replay_second_pass_error": 0.4,
-                      "salience_delta": -0.22799999999999992,
-                      "retention_adjustment": -0.22799999999999992
+                      "replay_second_pass_error": 0.40712790901015894,
+                      "salience_delta": -0.22479244094542844,
+                      "retention_adjustment": -0.22479244094542844
                     }
                   },
                   "derived_from": [],
@@ -13355,10 +13374,10 @@
                   "residual_norm_var": null,
                   "support_ids": null,
                   "consolidation_source": null,
-                  "semantic_reconstruction_error": 0.42061027388783556,
-                  "replay_second_pass_error": 0.4,
-                  "salience_delta": -0.22799999999999992,
-                  "retention_adjustment": -0.22799999999999992
+                  "semantic_reconstruction_error": 0.42359070646692654,
+                  "replay_second_pass_error": 0.40712790901015894,
+                  "salience_delta": -0.22479244094542844,
+                  "retention_adjustment": -0.22479244094542844
                 },
                 {
                   "id": "ep-2",
@@ -13379,9 +13398,9 @@
                   "relevance_social": 0.2,
                   "relevance_reward": 0.2,
                   "relevance": 0.6,
-                  "salience": 0.45825,
-                  "trace_strength": 0.38917152473971806,
-                  "accessibility": 0.10057419575086485,
+                  "salience": 0.4616490187384685,
+                  "trace_strength": 0.3908710341089523,
+                  "accessibility": 0.1016788768408671,
                   "abstractness": 0.35,
                   "source_confidence": 0.9,
                   "reality_confidence": 0.85,
@@ -13468,25 +13487,25 @@
                         "redundancy_penalty": 0.0
                       }
                     },
-                    "semantic_reconstruction_error": 0.19191258426689997,
-                    "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+                    "semantic_reconstruction_error": 0.13324663207283527,
+                    "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
                     "m410_replay": {
                       "encoding_source": "dynamics",
-                      "encoding_strength": 0.45825,
-                      "fep_prediction_error": 0.325,
+                      "encoding_strength": 0.461649,
+                      "fep_prediction_error": 0.332553,
                       "surprise": 0.72,
                       "arousal": 0.3,
-                      "raw_drive": 0.0702,
-                      "attention_budget_raw_drive_total": 0.0702,
-                      "raw_strength": 0.45825,
+                      "raw_drive": 0.071832,
+                      "attention_budget_raw_drive_total": 0.071832,
+                      "raw_strength": 0.461649,
                       "attention_budget_total": 0.4,
                       "attention_budget_requested": 0.4,
                       "attention_budget_granted": 0.4,
                       "attention_budget_denied": 0.0,
                       "fallback_evidence": {},
-                      "replay_second_pass_error": 0.32499999999999996,
-                      "salience_delta": -0.26175,
-                      "retention_adjustment": -0.26175
+                      "replay_second_pass_error": 0.3325533749743743,
+                      "salience_delta": -0.2583509812615315,
+                      "retention_adjustment": -0.2583509812615315
                     }
                   },
                   "derived_from": [],
@@ -13498,10 +13517,10 @@
                   "residual_norm_var": null,
                   "support_ids": null,
                   "consolidation_source": null,
-                  "semantic_reconstruction_error": 0.19191258426689997,
-                  "replay_second_pass_error": 0.32499999999999996,
-                  "salience_delta": -0.26175,
-                  "retention_adjustment": -0.26175
+                  "semantic_reconstruction_error": 0.13324663207283527,
+                  "replay_second_pass_error": 0.3325533749743743,
+                  "salience_delta": -0.2583509812615315,
+                  "retention_adjustment": -0.2583509812615315
                 },
                 {
                   "id": "ep-3",
@@ -13611,8 +13630,8 @@
                         "redundancy_penalty": 0.0
                       }
                     },
-                    "semantic_reconstruction_error": 0.13997929311151697,
-                    "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+                    "semantic_reconstruction_error": 0.19338337897648714,
+                    "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
                   },
                   "derived_from": [],
                   "version": 1,
@@ -13623,7 +13642,7 @@
                   "residual_norm_var": null,
                   "support_ids": null,
                   "consolidation_source": null,
-                  "semantic_reconstruction_error": 0.13997929311151697,
+                  "semantic_reconstruction_error": 0.19338337897648714,
                   "replay_second_pass_error": null,
                   "salience_delta": null,
                   "retention_adjustment": null
@@ -13736,8 +13755,8 @@
                         "redundancy_penalty": 0.0
                       }
                     },
-                    "semantic_reconstruction_error": 0.13997929311151697,
-                    "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+                    "semantic_reconstruction_error": 0.19338337897648714,
+                    "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
                   },
                   "derived_from": [],
                   "version": 1,
@@ -13748,7 +13767,7 @@
                   "residual_norm_var": null,
                   "support_ids": null,
                   "consolidation_source": null,
-                  "semantic_reconstruction_error": 0.13997929311151697,
+                  "semantic_reconstruction_error": 0.19338337897648714,
                   "replay_second_pass_error": null,
                   "salience_delta": null,
                   "retention_adjustment": null
@@ -13861,8 +13880,8 @@
                         "redundancy_penalty": 0.0
                       }
                     },
-                    "semantic_reconstruction_error": 0.13997929311151697,
-                    "absorbed_by": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+                    "semantic_reconstruction_error": 0.19338337897648714,
+                    "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
                   },
                   "derived_from": [],
                   "version": 1,
@@ -13873,7 +13892,7 @@
                   "residual_norm_var": null,
                   "support_ids": null,
                   "consolidation_source": null,
-                  "semantic_reconstruction_error": 0.13997929311151697,
+                  "semantic_reconstruction_error": 0.19338337897648714,
                   "replay_second_pass_error": null,
                   "salience_delta": null,
                   "retention_adjustment": null
@@ -13899,8 +13918,8 @@
                   "relevance": 0.3,
                   "salience": 0.2,
                   "trace_strength": 0.02,
-                  "accessibility": 0.02,
-                  "abstractness": 0.2,
+                  "accessibility": 0.013000000000000001,
+                  "abstractness": 0.30000000000000004,
                   "source_confidence": 0.9,
                   "reality_confidence": 0.85,
                   "semantic_tags": [
@@ -13932,7 +13951,10 @@
                   "support_count": 1,
                   "counterevidence_count": 0,
                   "competing_interpretations": null,
-                  "compression_metadata": null,
+                  "compression_metadata": {
+                    "semantic_reconstruction_error": 0.4403622804939404,
+                    "absorbed_by": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
+                  },
                   "derived_from": [],
                   "version": 1,
                   "is_dormant": true,
@@ -13942,13 +13964,13 @@
                   "residual_norm_var": null,
                   "support_ids": null,
                   "consolidation_source": null,
-                  "semantic_reconstruction_error": null,
+                  "semantic_reconstruction_error": 0.4403622804939404,
                   "replay_second_pass_error": null,
                   "salience_delta": null,
                   "retention_adjustment": null
                 },
                 {
-                  "id": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+                  "id": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
                   "content": "semantic centroid display",
                   "content_hash": "d1878ef4165b359772309b152a7f2f918d4ea0380516bebc010b09dab2abc8ba",
                   "memory_class": "semantic",
@@ -13973,14 +13995,9 @@
                   "source_confidence": 0.88,
                   "reality_confidence": 0.8,
                   "semantic_tags": [
-                    "care",
-                    "mentor",
-                    "promise"
+                    "mentor"
                   ],
-                  "context_tags": [
-                    "lab",
-                    "weekly"
-                  ],
+                  "context_tags": [],
                   "anchor_slots": {
                     "time": null,
                     "place": null,
@@ -14000,11 +14017,12 @@
                   "execution_contexts": [],
                   "mood_context": "",
                   "retrieval_count": 10,
-                  "support_count": 5,
+                  "support_count": 6,
                   "counterevidence_count": 0,
                   "competing_interpretations": null,
                   "compression_metadata": {
                     "support_entry_ids": [
+                      "dormant-long",
                       "ep-1",
                       "ep-2",
                       "ep-3",
@@ -14018,14 +14036,9 @@
                     ],
                     "stable_structure": {
                       "semantic_tags": [
-                        "care",
-                        "mentor",
-                        "promise"
+                        "mentor"
                       ],
-                      "context_tags": [
-                        "lab",
-                        "weekly"
-                      ],
+                      "context_tags": [],
                       "actions": [
                         "mentor_checkin"
                       ],
@@ -14050,24 +14063,25 @@
                     "centroid": [
                       0.0,
                       0.3,
-                      0.4,
+                      0.39999999999999997,
                       0.3,
                       0.3,
-                      0.2,
-                      0.29999999999999993,
-                      0.2,
-                      0.2,
-                      0.6,
-                      0.62205
+                      0.19999999999999998,
+                      0.28333333333333327,
+                      0.19999999999999998,
+                      0.19999999999999998,
+                      0.5499999999999999,
+                      0.5528094296321733
                     ],
-                    "residual_norm_mean": 0.20649214749785724,
-                    "residual_norm_var": 0.011866203021723145,
+                    "residual_norm_mean": 0.2628916259938606,
+                    "residual_norm_var": 0.014770340222107154,
                     "support_ids": [
                       "ep-1",
                       "ep-2",
                       "ep-3",
                       "ep-4",
-                      "ep-5"
+                      "ep-5",
+                      "dormant-long"
                     ],
                     "consolidation_source": "dynamics",
                     "m45_internal": {
@@ -14215,36 +14229,37 @@
                       "centroid_before": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.72
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.55,
+                        0.6333333333333333
                       ],
                       "centroid_after": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.62205
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.5499999999999999,
+                        0.5528094296321733
                       ],
-                      "residual_norm_mean_before": 0.15999999999999992,
-                      "residual_norm_mean_after": 0.20649214749785724,
-                      "residual_norm_var_before": 0.014400000000000013,
-                      "residual_norm_var_after": 0.011866203021723145
+                      "residual_norm_mean_before": 0.24275607290900936,
+                      "residual_norm_mean_after": 0.2628916259938606,
+                      "residual_norm_var_before": 0.025847266843573472,
+                      "residual_norm_var_after": 0.014770340222107154
                     }
                   },
                   "derived_from": [
+                    "dormant-long",
                     "ep-1",
                     "ep-2",
                     "ep-3",
@@ -14257,24 +14272,25 @@
                   "centroid": [
                     0.0,
                     0.3,
-                    0.4,
+                    0.39999999999999997,
                     0.3,
                     0.3,
-                    0.2,
-                    0.29999999999999993,
-                    0.2,
-                    0.2,
-                    0.6,
-                    0.62205
+                    0.19999999999999998,
+                    0.28333333333333327,
+                    0.19999999999999998,
+                    0.19999999999999998,
+                    0.5499999999999999,
+                    0.5528094296321733
                   ],
-                  "residual_norm_mean": 0.20649214749785724,
-                  "residual_norm_var": 0.011866203021723145,
+                  "residual_norm_mean": 0.2628916259938606,
+                  "residual_norm_var": 0.014770340222107154,
                   "support_ids": [
                     "ep-1",
                     "ep-2",
                     "ep-3",
                     "ep-4",
-                    "ep-5"
+                    "ep-5",
+                    "dormant-long"
                   ],
                   "consolidation_source": "dynamics",
                   "semantic_reconstruction_error": null,
@@ -14283,7 +14299,7 @@
                   "retention_adjustment": -0.27299999999999996
                 },
                 {
-                  "id": "7b8bd501-ef70-4128-8b32-c131e3fd5af7",
+                  "id": "b73e12a9-7c37-472a-b521-d71e1c586b59",
                   "content": "inferred centroid display",
                   "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
                   "memory_class": "inferred",
@@ -14306,13 +14322,15 @@
                   "accessibility": 0.5,
                   "abstractness": 0.87,
                   "source_confidence": 0.9,
-                  "reality_confidence": 0.7142857142857143,
+                  "reality_confidence": 0.75,
                   "semantic_tags": [
                     "care",
+                    "history",
                     "mentor",
                     "promise"
                   ],
                   "context_tags": [
+                    "archive",
                     "lab",
                     "weekly"
                   ],
@@ -14335,14 +14353,15 @@
                   "execution_contexts": [],
                   "mood_context": "",
                   "retrieval_count": 0,
-                  "support_count": 5,
+                  "support_count": 6,
                   "counterevidence_count": 0,
                   "competing_interpretations": [
-                    "hypothesis:ep-1",
-                    "hypothesis:ep-2"
+                    "hypothesis:dormant-long",
+                    "hypothesis:ep-1"
                   ],
                   "compression_metadata": {
                     "support_entry_ids": [
+                      "dormant-long",
                       "ep-1",
                       "ep-2",
                       "ep-3",
@@ -14352,6 +14371,7 @@
                     "stable_structure": {
                       "semantic_tags": [
                         "care",
+                        "history",
                         "mentor",
                         "promise"
                       ]
@@ -14378,24 +14398,25 @@
                     "centroid": [
                       0.0,
                       0.3,
-                      0.4,
+                      0.39999999999999997,
                       0.3,
                       0.3,
-                      0.2,
-                      0.29999999999999993,
-                      0.2,
-                      0.2,
-                      0.6,
-                      0.62205
+                      0.19999999999999998,
+                      0.28333333333333327,
+                      0.19999999999999998,
+                      0.19999999999999998,
+                      0.5499999999999999,
+                      0.5528094296321733
                     ],
-                    "residual_norm_mean": 0.20649214749785724,
-                    "residual_norm_var": 0.011866203021723145,
+                    "residual_norm_mean": 0.2628916259938606,
+                    "residual_norm_var": 0.014770340222107154,
                     "support_ids": [
                       "ep-1",
                       "ep-2",
                       "ep-3",
                       "ep-4",
-                      "ep-5"
+                      "ep-5",
+                      "dormant-long"
                     ],
                     "consolidation_source": "dynamics",
                     "m45_internal": {
@@ -14441,37 +14462,38 @@
                       "centroid_before": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.72
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.55,
+                        0.6333333333333333
                       ],
                       "centroid_after": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.62205
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.5499999999999999,
+                        0.5528094296321733
                       ],
-                      "residual_norm_mean_before": 0.15999999999999992,
-                      "residual_norm_mean_after": 0.20649214749785724,
-                      "residual_norm_var_before": 0.014400000000000013,
-                      "residual_norm_var_after": 0.011866203021723145
+                      "residual_norm_mean_before": 0.24275607290900936,
+                      "residual_norm_mean_after": 0.2628916259938606,
+                      "residual_norm_var_before": 0.025847266843573472,
+                      "residual_norm_var_after": 0.014770340222107154
                     },
-                    "inference_write_score": 0.6083333333333334
+                    "inference_write_score": 0.675
                   },
                   "derived_from": [
+                    "dormant-long",
                     "ep-1",
                     "ep-2",
                     "ep-3",
@@ -14484,24 +14506,25 @@
                   "centroid": [
                     0.0,
                     0.3,
-                    0.4,
+                    0.39999999999999997,
                     0.3,
                     0.3,
-                    0.2,
-                    0.29999999999999993,
-                    0.2,
-                    0.2,
-                    0.6,
-                    0.62205
+                    0.19999999999999998,
+                    0.28333333333333327,
+                    0.19999999999999998,
+                    0.19999999999999998,
+                    0.5499999999999999,
+                    0.5528094296321733
                   ],
-                  "residual_norm_mean": 0.20649214749785724,
-                  "residual_norm_var": 0.011866203021723145,
+                  "residual_norm_mean": 0.2628916259938606,
+                  "residual_norm_var": 0.014770340222107154,
                   "support_ids": [
                     "ep-1",
                     "ep-2",
                     "ep-3",
                     "ep-4",
-                    "ep-5"
+                    "ep-5",
+                    "dormant-long"
                   ],
                   "consolidation_source": "dynamics",
                   "semantic_reconstruction_error": null,
@@ -14512,7 +14535,7 @@
               ],
               "extracted_entries": [
                 {
-                  "id": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
+                  "id": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
                   "content": "semantic centroid display",
                   "content_hash": "d1878ef4165b359772309b152a7f2f918d4ea0380516bebc010b09dab2abc8ba",
                   "memory_class": "semantic",
@@ -14537,14 +14560,9 @@
                   "source_confidence": 0.88,
                   "reality_confidence": 0.8,
                   "semantic_tags": [
-                    "care",
-                    "mentor",
-                    "promise"
+                    "mentor"
                   ],
-                  "context_tags": [
-                    "lab",
-                    "weekly"
-                  ],
+                  "context_tags": [],
                   "anchor_slots": {
                     "time": null,
                     "place": null,
@@ -14564,11 +14582,12 @@
                   "execution_contexts": [],
                   "mood_context": "",
                   "retrieval_count": 10,
-                  "support_count": 5,
+                  "support_count": 6,
                   "counterevidence_count": 0,
                   "competing_interpretations": null,
                   "compression_metadata": {
                     "support_entry_ids": [
+                      "dormant-long",
                       "ep-1",
                       "ep-2",
                       "ep-3",
@@ -14582,14 +14601,9 @@
                     ],
                     "stable_structure": {
                       "semantic_tags": [
-                        "care",
-                        "mentor",
-                        "promise"
+                        "mentor"
                       ],
-                      "context_tags": [
-                        "lab",
-                        "weekly"
-                      ],
+                      "context_tags": [],
                       "actions": [
                         "mentor_checkin"
                       ],
@@ -14614,24 +14628,25 @@
                     "centroid": [
                       0.0,
                       0.3,
-                      0.4,
+                      0.39999999999999997,
                       0.3,
                       0.3,
-                      0.2,
-                      0.29999999999999993,
-                      0.2,
-                      0.2,
-                      0.6,
-                      0.62205
+                      0.19999999999999998,
+                      0.28333333333333327,
+                      0.19999999999999998,
+                      0.19999999999999998,
+                      0.5499999999999999,
+                      0.5528094296321733
                     ],
-                    "residual_norm_mean": 0.20649214749785724,
-                    "residual_norm_var": 0.011866203021723145,
+                    "residual_norm_mean": 0.2628916259938606,
+                    "residual_norm_var": 0.014770340222107154,
                     "support_ids": [
                       "ep-1",
                       "ep-2",
                       "ep-3",
                       "ep-4",
-                      "ep-5"
+                      "ep-5",
+                      "dormant-long"
                     ],
                     "consolidation_source": "dynamics",
                     "m45_internal": {
@@ -14779,36 +14794,37 @@
                       "centroid_before": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.72
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.55,
+                        0.6333333333333333
                       ],
                       "centroid_after": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.62205
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.5499999999999999,
+                        0.5528094296321733
                       ],
-                      "residual_norm_mean_before": 0.15999999999999992,
-                      "residual_norm_mean_after": 0.20649214749785724,
-                      "residual_norm_var_before": 0.014400000000000013,
-                      "residual_norm_var_after": 0.011866203021723145
+                      "residual_norm_mean_before": 0.24275607290900936,
+                      "residual_norm_mean_after": 0.2628916259938606,
+                      "residual_norm_var_before": 0.025847266843573472,
+                      "residual_norm_var_after": 0.014770340222107154
                     }
                   },
                   "derived_from": [
+                    "dormant-long",
                     "ep-1",
                     "ep-2",
                     "ep-3",
@@ -14821,24 +14837,25 @@
                   "centroid": [
                     0.0,
                     0.3,
-                    0.4,
+                    0.39999999999999997,
                     0.3,
                     0.3,
-                    0.2,
-                    0.29999999999999993,
-                    0.2,
-                    0.2,
-                    0.6,
-                    0.62205
+                    0.19999999999999998,
+                    0.28333333333333327,
+                    0.19999999999999998,
+                    0.19999999999999998,
+                    0.5499999999999999,
+                    0.5528094296321733
                   ],
-                  "residual_norm_mean": 0.20649214749785724,
-                  "residual_norm_var": 0.011866203021723145,
+                  "residual_norm_mean": 0.2628916259938606,
+                  "residual_norm_var": 0.014770340222107154,
                   "support_ids": [
                     "ep-1",
                     "ep-2",
                     "ep-3",
                     "ep-4",
-                    "ep-5"
+                    "ep-5",
+                    "dormant-long"
                   ],
                   "consolidation_source": "dynamics",
                   "semantic_reconstruction_error": null,
@@ -14847,7 +14864,7 @@
                   "retention_adjustment": -0.27299999999999996
                 },
                 {
-                  "id": "7b8bd501-ef70-4128-8b32-c131e3fd5af7",
+                  "id": "b73e12a9-7c37-472a-b521-d71e1c586b59",
                   "content": "inferred centroid display",
                   "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
                   "memory_class": "inferred",
@@ -14870,13 +14887,15 @@
                   "accessibility": 0.5,
                   "abstractness": 0.87,
                   "source_confidence": 0.9,
-                  "reality_confidence": 0.7142857142857143,
+                  "reality_confidence": 0.75,
                   "semantic_tags": [
                     "care",
+                    "history",
                     "mentor",
                     "promise"
                   ],
                   "context_tags": [
+                    "archive",
                     "lab",
                     "weekly"
                   ],
@@ -14899,14 +14918,15 @@
                   "execution_contexts": [],
                   "mood_context": "",
                   "retrieval_count": 0,
-                  "support_count": 5,
+                  "support_count": 6,
                   "counterevidence_count": 0,
                   "competing_interpretations": [
-                    "hypothesis:ep-1",
-                    "hypothesis:ep-2"
+                    "hypothesis:dormant-long",
+                    "hypothesis:ep-1"
                   ],
                   "compression_metadata": {
                     "support_entry_ids": [
+                      "dormant-long",
                       "ep-1",
                       "ep-2",
                       "ep-3",
@@ -14916,6 +14936,7 @@
                     "stable_structure": {
                       "semantic_tags": [
                         "care",
+                        "history",
                         "mentor",
                         "promise"
                       ]
@@ -14942,24 +14963,25 @@
                     "centroid": [
                       0.0,
                       0.3,
-                      0.4,
+                      0.39999999999999997,
                       0.3,
                       0.3,
-                      0.2,
-                      0.29999999999999993,
-                      0.2,
-                      0.2,
-                      0.6,
-                      0.62205
+                      0.19999999999999998,
+                      0.28333333333333327,
+                      0.19999999999999998,
+                      0.19999999999999998,
+                      0.5499999999999999,
+                      0.5528094296321733
                     ],
-                    "residual_norm_mean": 0.20649214749785724,
-                    "residual_norm_var": 0.011866203021723145,
+                    "residual_norm_mean": 0.2628916259938606,
+                    "residual_norm_var": 0.014770340222107154,
                     "support_ids": [
                       "ep-1",
                       "ep-2",
                       "ep-3",
                       "ep-4",
-                      "ep-5"
+                      "ep-5",
+                      "dormant-long"
                     ],
                     "consolidation_source": "dynamics",
                     "m45_internal": {
@@ -15005,37 +15027,38 @@
                       "centroid_before": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.72
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.55,
+                        0.6333333333333333
                       ],
                       "centroid_after": [
                         0.0,
                         0.3,
-                        0.4,
+                        0.39999999999999997,
                         0.3,
                         0.3,
-                        0.2,
-                        0.29999999999999993,
-                        0.2,
-                        0.2,
-                        0.6,
-                        0.62205
+                        0.19999999999999998,
+                        0.28333333333333327,
+                        0.19999999999999998,
+                        0.19999999999999998,
+                        0.5499999999999999,
+                        0.5528094296321733
                       ],
-                      "residual_norm_mean_before": 0.15999999999999992,
-                      "residual_norm_mean_after": 0.20649214749785724,
-                      "residual_norm_var_before": 0.014400000000000013,
-                      "residual_norm_var_after": 0.011866203021723145
+                      "residual_norm_mean_before": 0.24275607290900936,
+                      "residual_norm_mean_after": 0.2628916259938606,
+                      "residual_norm_var_before": 0.025847266843573472,
+                      "residual_norm_var_after": 0.014770340222107154
                     },
-                    "inference_write_score": 0.6083333333333334
+                    "inference_write_score": 0.675
                   },
                   "derived_from": [
+                    "dormant-long",
                     "ep-1",
                     "ep-2",
                     "ep-3",
@@ -15048,24 +15071,25 @@
                   "centroid": [
                     0.0,
                     0.3,
-                    0.4,
+                    0.39999999999999997,
                     0.3,
                     0.3,
-                    0.2,
-                    0.29999999999999993,
-                    0.2,
-                    0.2,
-                    0.6,
-                    0.62205
+                    0.19999999999999998,
+                    0.28333333333333327,
+                    0.19999999999999998,
+                    0.19999999999999998,
+                    0.5499999999999999,
+                    0.5528094296321733
                   ],
-                  "residual_norm_mean": 0.20649214749785724,
-                  "residual_norm_var": 0.011866203021723145,
+                  "residual_norm_mean": 0.2628916259938606,
+                  "residual_norm_var": 0.014770340222107154,
                   "support_ids": [
                     "ep-1",
                     "ep-2",
                     "ep-3",
                     "ep-4",
-                    "ep-5"
+                    "ep-5",
+                    "dormant-long"
                   ],
                   "consolidation_source": "dynamics",
                   "semantic_reconstruction_error": null,
@@ -15082,11 +15106,11 @@
                 "ep-5"
               ],
               "source_absorbed": {
-                "ep-1": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-                "ep-2": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-                "ep-3": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-                "ep-4": "5d63e854-06fb-44a8-9efd-9d5e4441d367",
-                "ep-5": "5d63e854-06fb-44a8-9efd-9d5e4441d367"
+                "ep-1": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+                "ep-2": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+                "ep-3": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+                "ep-4": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc",
+                "ep-5": "be7cf8d4-20c4-426c-91a2-c76c1b3252fc"
               }
             },
             "criteria_checks": {
@@ -15133,16 +15157,16 @@
                   }
                 },
                 "extracted_patterns": [
-                  "e1525766-bbeb-4d29-85fa-ef85113e5d20",
-                  "0616b723-0cca-49ce-85d8-ad380eba7f4e"
+                  "7990c696-0bb8-4678-9f44-27c738d2a40b",
+                  "a1f41bee-4030-4b34-a7cc-2996762d3e1f"
                 ],
                 "replay_reencoded_ids": [
-                  "e1525766-bbeb-4d29-85fa-ef85113e5d20",
+                  "7990c696-0bb8-4678-9f44-27c738d2a40b",
                   "validation-source-1",
                   "validation-source-0"
                 ],
                 "validated_inference_ids": [
-                  "0616b723-0cca-49ce-85d8-ad380eba7f4e"
+                  "a1f41bee-4030-4b34-a7cc-2996762d3e1f"
                 ],
                 "cleanup": {
                   "deleted_ids": [],
@@ -15157,7 +15181,7 @@
               },
               "validated_entries": [
                 {
-                  "id": "0616b723-0cca-49ce-85d8-ad380eba7f4e",
+                  "id": "a1f41bee-4030-4b34-a7cc-2996762d3e1f",
                   "content": "inferred centroid display",
                   "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
                   "memory_class": "inferred",
@@ -16095,16 +16119,16 @@
                   }
                 },
                 "extracted_patterns": [
-                  "de423930-3268-431f-ba8b-2cabe1d1922f",
-                  "22954fa9-f09b-44bb-ac85-90be91976400"
+                  "6bba4b4f-9490-4cea-ad8d-4e5abc245035",
+                  "60c0e850-e910-4ee8-9b42-79610dabe9d9"
                 ],
                 "replay_reencoded_ids": [
-                  "de423930-3268-431f-ba8b-2cabe1d1922f",
+                  "6bba4b4f-9490-4cea-ad8d-4e5abc245035",
                   "inference-source-1",
                   "inference-source-0"
                 ],
                 "validated_inference_ids": [
-                  "22954fa9-f09b-44bb-ac85-90be91976400"
+                  "60c0e850-e910-4ee8-9b42-79610dabe9d9"
                 ],
                 "cleanup": {
                   "deleted_ids": [],
@@ -16120,7 +16144,7 @@
               "validated_entries": [
                 {
                   "entry": {
-                    "id": "22954fa9-f09b-44bb-ac85-90be91976400",
+                    "id": "60c0e850-e910-4ee8-9b42-79610dabe9d9",
                     "content": "inferred centroid display",
                     "content_hash": "9a6b399aa2544166836178bba8077119d2e76b216f7210ea1c0bb419edf2a5fa",
                     "memory_class": "inferred",
@@ -16447,8 +16471,8 @@
                   }
                 },
                 "extracted_patterns": [
-                  "3959e8b4-3548-4e5f-8a48-80eafcaea379",
-                  "b0550b06-6402-4222-834a-6758defa771b"
+                  "77b34c31-e745-463f-8710-2c6018513b3c",
+                  "f68005a6-3549-4fc1-bb94-be98eebd0a3f"
                 ],
                 "replay_reencoded_ids": [
                   "ep-1",
@@ -16957,10 +16981,10 @@
   ],
   "round_started_at": "2026-04-09T00:00:00+00:00",
   "artifacts": {
-    "canonical_trace": "E:\\workspace\\segments\\artifacts\\m46_canonical_trace.json",
-    "ablation": "E:\\workspace\\segments\\artifacts\\m46_ablation.json",
-    "failure_injection": "E:\\workspace\\segments\\artifacts\\m46_failure_injection.json",
-    "summary": "E:\\workspace\\segments\\reports\\m46_acceptance_summary.md"
+    "canonical_trace": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp1w35zu7p\\artifacts\\m46_canonical_trace.json",
+    "ablation": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp1w35zu7p\\artifacts\\m46_ablation.json",
+    "failure_injection": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp1w35zu7p\\artifacts\\m46_failure_injection.json",
+    "summary": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp1w35zu7p\\reports\\m46_acceptance_summary.md"
   },
   "tests": {
     "milestone": [

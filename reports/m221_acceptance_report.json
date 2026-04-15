@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-10T06:30:04+00:00",
+  "generated_at": "2026-04-15T09:43:30+00:00",
   "seed_set": [
     221,
     240,
@@ -44,7 +44,7 @@
     "exploratory_adaptive": 3
   },
   "effect_metric_count": {
-    "threat_hardened": 4,
+    "threat_hardened": 3,
     "social_trusting": 3,
     "exploratory_adaptive": 3
   },
@@ -114,8 +114,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9577381666666667,
-            "std": 0.027600367427606607
+            "mean": 0.9754266666666667,
+            "std": 0.013766679406773789
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -155,12 +155,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.7576423333333333,
-            "std": 0.02096505295061812
+            "mean": 0.7625603333333333,
+            "std": 0.0164071033566427
           },
           "action_metric_retention": {
-            "mean": 0.4319443333333333,
-            "std": 0.05943500054868533
+            "mean": 0.3746526666666667,
+            "std": 0.04434811479144921
           },
           "conflict_uncertainty_score": {
             "mean": 0.296986,
@@ -196,8 +196,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9775498333333333,
-            "std": 0.003800980725052707
+            "mean": 0.987003,
+            "std": 0.005691712074001393
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -237,12 +237,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.873107,
-            "std": 0.016092935489421034
+            "mean": 0.8616366666666667,
+            "std": 0.02442163601990842
           },
           "action_metric_retention": {
-            "mean": 0.6149306666666667,
-            "std": 0.11410514647561794
+            "mean": 0.4881945,
+            "std": 0.043694984810425705
           },
           "conflict_uncertainty_score": {
             "mean": 0.5215,
@@ -321,8 +321,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.998417,
-            "std": 6.517156844309249e-05
+            "mean": 0.9984581666666666,
+            "std": 6.233355614932009e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -362,8 +362,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9257841666666666,
-            "std": 0.03799311341728773
+            "mean": 0.9269908333333333,
+            "std": 0.049686342138850294
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -403,8 +403,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.955458,
-            "std": 0.05393975627803053
+            "mean": 0.9611903333333334,
+            "std": 0.0525480043917517
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -444,8 +444,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9979111666666667,
-            "std": 0.0012202324118334635
+            "mean": 0.9949198333333333,
+            "std": 0.00520864900643366
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -485,8 +485,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9659565,
-            "std": 0.05249116997092622
+            "mean": 0.9685406666666667,
+            "std": 0.056576429941176815
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -526,8 +526,8 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.998417,
-            "std": 6.517156844309249e-05
+            "mean": 0.9984581666666666,
+            "std": 6.233355614932009e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -569,12 +569,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.969437,
-            "std": 0.0196037590612957
+            "mean": 0.9676495,
+            "std": 0.0283746573650385
           },
           "action_metric_retention": {
-            "mean": 1.118895,
-            "std": 0.07927187505246315
+            "mean": 1.0918608333333333,
+            "std": 0.0584458537092714
           },
           "conflict_uncertainty_score": {
             "mean": 0.193115,
@@ -610,12 +610,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.982782,
-            "std": 0.007036289173515624
+            "mean": 0.977122,
+            "std": 0.019018076120715627
           },
           "action_metric_retention": {
-            "mean": 1.1069903333333333,
-            "std": 0.08013810810857852
+            "mean": 1.0512626666666667,
+            "std": 0.09077597810666774
           },
           "conflict_uncertainty_score": {
             "mean": 0.201489,
@@ -651,12 +651,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.8009595,
-            "std": 0.04698458751104805
+            "mean": 0.7978096666666666,
+            "std": 0.038601761875449246
           },
           "action_metric_retention": {
-            "mean": 0.13538183333333334,
-            "std": 0.057699280944152345
+            "mean": 0.25313566666666665,
+            "std": 0.07738525656451334
           },
           "conflict_uncertainty_score": {
             "mean": 0.254513,
@@ -692,12 +692,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.676157,
-            "std": 0.1106154644779231
+            "mean": 0.8542388333333334,
+            "std": 0.05677257881646933
           },
           "action_metric_retention": {
-            "mean": 0.9781296666666667,
-            "std": 0.09829797643842365
+            "mean": 0.9820706666666666,
+            "std": 0.06228973859758571
           },
           "conflict_uncertainty_score": {
             "mean": 0.207,
@@ -733,12 +733,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9043276666666666,
-            "std": 0.06157705195299803
+            "mean": 0.8541208333333333,
+            "std": 0.06871165915965226
           },
           "action_metric_retention": {
-            "mean": 1.0832256666666666,
-            "std": 0.08796407280374313
+            "mean": 1.0175823333333334,
+            "std": 0.0565161028635989
           },
           "conflict_uncertainty_score": {
             "mean": 0.399,
@@ -774,12 +774,12 @@
             "std": 0.0
           },
           "attention_target_consistency": {
-            "mean": 0.9690575,
-            "std": 0.00884611952119875
+            "mean": 0.958588,
+            "std": 0.015834185022707455
           },
           "action_metric_retention": {
-            "mean": 1.0090498333333333,
-            "std": 0.09525078922055655
+            "mean": 1.0883616666666667,
+            "std": 0.07877217177545774
           },
           "conflict_uncertainty_score": {
             "mean": 0.23807,
@@ -819,12 +819,12 @@
         "std": 0.014601056491455221
       },
       "attention_target_consistency": {
-        "mean": 0.9554347777777777,
-        "std": 0.035995838729490734
+        "mean": 0.9598465,
+        "std": 0.039330313169714005
       },
       "action_metric_retention": {
-        "mean": 1.0356634444444444,
-        "std": 0.06844317348251777
+        "mean": 1.0170875555555556,
+        "std": 0.05771246407957125
       }
     },
     "canonical_vs_adversarial_surface": {
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "f9e4057c89fb88ec72250e708f5e858056c766d9"
+    "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5"
   }
 }

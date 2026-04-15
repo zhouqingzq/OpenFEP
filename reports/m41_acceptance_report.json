@@ -1,7 +1,7 @@
 {
   "milestone_id": "M4.1",
   "status": "PASS",
-  "generated_at": "2026-04-15T04:39:19+00:00",
+  "generated_at": "2026-04-15T13:45:33+00:00",
   "scope": {
     "milestone_goal": "Translate 'prior preference structure under finite energy constraints' into a unified parameter interface, observable interface, and logging interface that provides a common language for downstream benchmark tasks and open-world validation.",
     "gates_in_scope": [
@@ -206,7 +206,7 @@
   "recommendation": "ACCEPT",
   "freshness": {
     "generated_this_round": true,
-    "round_started_at": "2026-04-15T04:39:16+00:00"
+    "round_started_at": "2026-04-15T13:45:29+00:00"
   },
   "report_validation": {
     "valid": true,

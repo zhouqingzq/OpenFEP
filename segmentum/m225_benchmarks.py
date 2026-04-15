@@ -1463,6 +1463,8 @@ def _run_episode(seed: int, variant_id: str, protocol: TransferProtocol) -> dict
                 and adapter_health_after >= adapter_health_before - 0.08
                 and coherence >= coherence_before - 0.08
             )
+            if variant.variant_id == "adapter_degraded":
+                recovered = recovered and variant.adapter_resilience >= 0.70
             if recovered:
                 adapter_recoveries += 1
                 response = "adapter_recovered_in_runtime"

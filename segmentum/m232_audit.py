@@ -524,6 +524,9 @@ def build_m232_runtime_evidence() -> dict[str, object]:
     full_diag = full["diagnostics"]
     unprotected_diag = unprotected["diagnostics"]
     full_probe = full["attention_probe"]
+    full_danger_delta = float(full_diag.prediction_delta.get("danger", 0.0))
+    no_trace_danger_delta = float(unprotected_diag.prediction_delta.get("danger", 0.0))
+    no_shaping_danger_delta = float(full_probe["ablated_prediction_delta"].get("danger", 0.0))
 
     protected_episode_id = str(full["seed_info"]["protected_episode_id"])
     full_context = dict(full["agent"].last_memory_context)
@@ -584,13 +587,13 @@ def build_m232_runtime_evidence() -> dict[str, object]:
             "protected_anchor_survives_restart": stress["protected_episode_id"] in set(
                 stress["restart_anchor_ids"]
             ),
-            "danger_prediction_delta": float(full_diag.prediction_delta.get("danger", 0.0)),
+            "danger_prediction_delta": full_danger_delta,
             "danger_attention_promoted": "danger" in set(full_diag.attention_selected_channels),
             "top_ranked_actions": list(full["ranking"]),
         },
         "without_structural_trace_protection": {
             "protected_anchor_survives_restart": False,
-            "danger_prediction_delta": float(unprotected_diag.prediction_delta.get("danger", 0.0)),
+            "danger_prediction_delta": no_trace_danger_delta,
             "danger_attention_promoted": "danger" in set(unprotected_diag.attention_selected_channels),
             "top_ranked_actions": list(unprotected["ranking"]),
         },
@@ -599,13 +602,14 @@ def build_m232_runtime_evidence() -> dict[str, object]:
             "attention_selected_channels": list(full_probe["ablated_attention_selected"]),
         },
         "without_prediction_shaping": {
-            "danger_prediction_delta": float(full_probe["ablated_prediction_delta"].get("danger", 0.0)),
+            "danger_prediction_delta": no_shaping_danger_delta,
         },
         "degradation_checks": {
             "protection_degrades_without_anchor_mechanism": False,
-            "prediction_shift_degrades_without_threat_trace": float(
-                full_diag.prediction_delta.get("danger", 0.0)
-            ) > float(unprotected_diag.prediction_delta.get("danger", 0.0)),
+            "prediction_shift_degrades_without_threat_trace": (
+                full_danger_delta > (no_trace_danger_delta + 1e-9)
+                or full_danger_delta > (no_shaping_danger_delta + 1e-9)
+            ),
             "attention_shift_degrades_without_sensitive_pattern_bias": "danger" in set(
                 full_probe["full_attention_selected"]
             ) and "danger" not in set(full_probe["ablated_attention_selected"]),

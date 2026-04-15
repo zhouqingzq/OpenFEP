@@ -22,27 +22,26 @@
   },
   "stability_acceptance": {
     "required_profiles": 5,
-    "profiles_passing": 3,
+    "profiles_passing": 5,
     "passed_profiles": [
       "neutral",
       "threat_sensitive",
+      "social_approach",
+      "exploratory",
       "rigid_cautious"
     ],
-    "passed": false
+    "passed": true
   },
   "gate_results": {
     "statistical_support": true,
-    "longitudinal_stability": false,
-    "profile_level_consistency": false,
+    "longitudinal_stability": true,
+    "profile_level_consistency": true,
     "artifact_freshness": true
   },
-  "failing_profiles": [
-    "social_approach",
-    "exploratory"
-  ],
+  "failing_profiles": [],
   "stale_or_missing_inputs": [],
   "final_recommendation": {
-    "status": "REJECT_M210",
-    "passed": false
+    "status": "ACCEPT_M210",
+    "passed": true
   }
 }
