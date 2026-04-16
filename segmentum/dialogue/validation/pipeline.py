@@ -261,7 +261,7 @@ def run_validation(
     conclusion = "skipped_all_strategies" if not valid else "completed"
     aggregate = {
         "pipeline_status": conclusion,
-        "metric_version": "m54_v2",
+        "metric_version": "m54_v3",
         "behavioral_labeling": "dialogue_act_classifier_both",
         "strategy_count": int(len(valid)),
         "semantic_personality_mean": float(mean(strategy_personality_means.values())) if strategy_personality_means else 0.0,

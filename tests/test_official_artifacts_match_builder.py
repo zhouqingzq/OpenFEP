@@ -44,6 +44,26 @@ UUID_SUBSTRING_PATTERN = re.compile(
 )
 HASH_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$", re.IGNORECASE)
 HASH_SUBSTRING_PATTERN = re.compile(r"\b(?:[0-9a-f]{40}|[0-9a-f]{64})\b", re.IGNORECASE)
+
+
+def _normalize_cross_platform_path_string(raw: str) -> str:
+    """Make acceptance JSON comparable across OS and checkout roots (Linux CI vs Windows dev)."""
+    if not raw:
+        return raw
+    normalized = raw.replace("\\", "/")
+    lower = normalized.lower()
+    for marker in ("segmentum/", "tests/", "reports/", "artifacts/", "prompts/"):
+        idx = lower.find(marker)
+        if idx != -1:
+            return normalized[idx:].replace("\\", "/")
+    tail = normalized.rsplit("/", 1)[-1] if "/" in normalized else normalized
+    if tail.lower().startswith("python"):
+        return "<python>"
+    if any(sep in raw for sep in ("/", "\\", ":")) and lower.endswith(".py"):
+        return Path(normalized).name
+    return raw
+
+
 M45_SYNTHETIC_REGRESSION_SUMMARY = {
     "executed": True,
     "command": ["synthetic", "pytest"],
@@ -100,6 +120,7 @@ def _normalize_json(value, *, key: str | None = None):  # noqa: ANN001
         suffix = Path(normalized).suffix.lower()
         if suffix in {".json", ".jsonl", ".md"} and ("/" in normalized or "\\" in value):
             return Path(normalized).name
+        return _normalize_cross_platform_path_string(value)
     return value
 
 

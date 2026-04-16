@@ -19,6 +19,10 @@ def _bundle(
     base_sem: float,
     base_beh: float,
     base_ast: float,
+    base_sem_c: float | None = None,
+    base_beh_c: float | None = None,
+    base_ast_c: float | None = None,
+    classifier_pass: bool = True,
 ) -> dict[str, dict]:
     keys = (
         "semantic_similarity",
@@ -28,6 +32,9 @@ def _bundle(
         "personality_similarity",
         "agent_state_similarity",
     )
+    c_sem = float(base_sem_c) if base_sem_c is not None else base_sem
+    c_beh = float(base_beh_c) if base_beh_c is not None else base_beh
+    c_ast = float(base_ast_c) if base_ast_c is not None else base_ast
     p = {
         "semantic_similarity": sem,
         "behavioral_similarity_strategy": beh,
@@ -45,7 +52,14 @@ def _bundle(
         "agent_state_similarity": base_ast,
     }
     b = dict(a)
-    c = dict(a)
+    c = {
+        "semantic_similarity": c_sem,
+        "behavioral_similarity_strategy": c_beh,
+        "behavioral_similarity_action11": 0.4,
+        "stylistic_similarity": 0.35,
+        "personality_similarity": 0.65,
+        "agent_state_similarity": c_ast,
+    }
     assert set(p.keys()) == set(keys)
     return {
         "skipped": False,
@@ -53,6 +67,10 @@ def _bundle(
         "baseline_a_metrics": a,
         "baseline_b_metrics": b,
         "baseline_c_metrics": c,
+        "classifier_validation": {
+            "passed_3class_gate": classifier_pass,
+            "macro_f1_3class": 0.85,
+        },
     }
 
 
@@ -69,6 +87,8 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         base_sem=0.50,
                         base_beh=0.40,
                         base_ast=0.50,
+                        base_beh_c=0.35,
+                        classifier_pass=True,
                     )
                 },
                 aggregate={},
@@ -80,11 +100,14 @@ class TestM54ReportAcceptance(unittest.TestCase):
             p = Path(tmp)
             generate_report(reports, p)
             payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
-        self.assertEqual(payload["metric_version"], "m54_v2")
+        self.assertEqual(payload["metric_version"], "m54_v3")
         self.assertIn("hard_pass_breakdown", payload)
-        # With n=2 and large effect, expect pass
+        self.assertTrue(payload["hard_pass_breakdown"]["classifier_3class_gate_passed"])
         self.assertTrue(payload["hard_pass"])
         self.assertEqual(payload["overall_conclusion"], "pass")
+        self.assertEqual(payload["users_tested"], 8)
+        self.assertEqual(payload["users_skipped_no_strategy"], 0)
+        self.assertFalse(payload["behavioral_hard_metric_degraded"])
 
     def test_hard_fail_when_agent_state_low(self) -> None:
         reports = [
@@ -98,6 +121,7 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         base_sem=0.2,
                         base_beh=0.2,
                         base_ast=0.4,
+                        classifier_pass=False,
                     )
                 },
                 aggregate={},
@@ -113,6 +137,7 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         base_sem=0.21,
                         base_beh=0.21,
                         base_ast=0.41,
+                        classifier_pass=False,
                     )
                 },
                 aggregate={},
@@ -125,6 +150,39 @@ class TestM54ReportAcceptance(unittest.TestCase):
             payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
         self.assertFalse(payload["hard_pass"])
         self.assertEqual(payload["overall_conclusion"], "partial")
+        self.assertTrue(payload["behavioral_hard_metric_degraded"])
+
+    def test_hard_fail_when_classifier_gate_passed_but_behavioral_not_vs_c(self) -> None:
+        """
+        When gate passes, behavioral must beat baseline C. Here personality behavioral
+        equals baseline C (zero paired diff), so vs_c is not significant.
+        """
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy={
+                    "random": _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_ast=0.50,
+                        base_beh_c=0.70,
+                        classifier_pass=True,
+                    )
+                },
+                aggregate={},
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertFalse(payload["hard_pass"])
+        self.assertFalse(payload["hard_pass_breakdown"]["behavioral_similarity_strategy_vs_baseline_c_significant_better"])
 
 
 if __name__ == "__main__":

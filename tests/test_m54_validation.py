@@ -208,7 +208,7 @@ class TestM54Validation(unittest.TestCase):
             self.assertTrue((output_dir / "per_user").exists())
             self.assertTrue(all(r.conclusion == "completed" for r in reports))
             agg = json.loads((output_dir / "aggregate_report.json").read_text(encoding="utf-8"))
-            self.assertEqual(agg.get("metric_version"), "m54_v2")
+            self.assertEqual(agg.get("metric_version"), "m54_v3")
             self.assertIn("hard_pass", agg)
             self.assertIn("acceptance_rules", agg)
 
