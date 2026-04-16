@@ -65,10 +65,15 @@ def _normalize_cross_platform_path_string(raw: str) -> str:
         return raw
     normalized = raw.replace("\\", "/")
     lower = normalized.lower()
-    for marker in ("segmentum/", "tests/", "reports/", "artifacts/", "prompts/"):
-        idx = lower.find(marker)
-        if idx != -1:
-            return normalized[idx:].replace("\\", "/")
+    parts = normalized.split("/")
+    lower_parts = [part.lower() for part in parts]
+    for marker in ("tests", "reports", "artifacts", "prompts"):
+        if marker in lower_parts:
+            idx = lower_parts.index(marker)
+            return "/".join(parts[idx:])
+    if "segmentum" in lower_parts:
+        idx = len(lower_parts) - 1 - lower_parts[::-1].index("segmentum")
+        return "/".join(parts[idx:])
     tail = normalized.rsplit("/", 1)[-1] if "/" in normalized else normalized
     if _looks_like_python_executable_basename(tail):
         return "<python>"
@@ -179,6 +184,24 @@ class TestOfficialArtifactsMatchBuilder(unittest.TestCase):
         self.assertTrue(EXEMPTIONS["m45"])
         self.assertIn("m411", EXEMPTIONS)
         self.assertTrue(EXEMPTIONS["m411"])
+
+    def test_cross_platform_path_normalization_prefers_repo_subdirs(self) -> None:
+        self.assertEqual(
+            _normalize_json("/Users/admin/git/OpenFEP/segmentum/tests/test_m48_acceptance.py"),
+            "tests/test_m48_acceptance.py",
+        )
+        self.assertEqual(
+            _normalize_json("E:\\workspace\\segments\\tests\\test_m48_acceptance.py"),
+            "tests/test_m48_acceptance.py",
+        )
+        self.assertEqual(
+            _normalize_json("/Users/admin/git/OpenFEP/segmentum/segmentum/memory_encoding.py"),
+            "segmentum/memory_encoding.py",
+        )
+        self.assertEqual(
+            _normalize_json("E:\\workspace\\segments\\segmentum\\memory_encoding.py"),
+            "segmentum/memory_encoding.py",
+        )
 
     def test_m41_report_matches_writer(self) -> None:
         generated = _capture_in_place_report("m41_", M41_REPORT_PATH, write_m41_acceptance_artifacts)
