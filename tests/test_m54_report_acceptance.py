@@ -1,0 +1,131 @@
+"""Aggregate report hard_pass rules (M5.4)."""
+
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+import tempfile
+
+from segmentum.dialogue.validation.pipeline import ValidationReport
+from segmentum.dialogue.validation.report import generate_report
+
+
+def _bundle(
+    *,
+    sem: float,
+    beh: float,
+    ast: float,
+    base_sem: float,
+    base_beh: float,
+    base_ast: float,
+) -> dict[str, dict]:
+    keys = (
+        "semantic_similarity",
+        "behavioral_similarity_strategy",
+        "behavioral_similarity_action11",
+        "stylistic_similarity",
+        "personality_similarity",
+        "agent_state_similarity",
+    )
+    p = {
+        "semantic_similarity": sem,
+        "behavioral_similarity_strategy": beh,
+        "behavioral_similarity_action11": 0.5,
+        "stylistic_similarity": 0.4,
+        "personality_similarity": 0.7,
+        "agent_state_similarity": ast,
+    }
+    a = {
+        "semantic_similarity": base_sem,
+        "behavioral_similarity_strategy": base_beh,
+        "behavioral_similarity_action11": 0.4,
+        "stylistic_similarity": 0.35,
+        "personality_similarity": 0.65,
+        "agent_state_similarity": base_ast,
+    }
+    b = dict(a)
+    c = dict(a)
+    assert set(p.keys()) == set(keys)
+    return {
+        "skipped": False,
+        "personality_metrics": p,
+        "baseline_a_metrics": a,
+        "baseline_b_metrics": b,
+        "baseline_c_metrics": c,
+    }
+
+
+class TestM54ReportAcceptance(unittest.TestCase):
+    def test_hard_pass_when_sem_beh_sig_and_agent_state(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy={
+                    "random": _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70 + 0.001 * uid,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_ast=0.50,
+                    )
+                },
+                aggregate={},
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertEqual(payload["metric_version"], "m54_v2")
+        self.assertIn("hard_pass_breakdown", payload)
+        # With n=2 and large effect, expect pass
+        self.assertTrue(payload["hard_pass"])
+        self.assertEqual(payload["overall_conclusion"], "pass")
+
+    def test_hard_fail_when_agent_state_low(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=1,
+                per_strategy={
+                    "random": _bundle(
+                        sem=0.9,
+                        beh=0.85,
+                        ast=0.5,
+                        base_sem=0.2,
+                        base_beh=0.2,
+                        base_ast=0.4,
+                    )
+                },
+                aggregate={},
+                conclusion="completed",
+            ),
+            ValidationReport(
+                user_uid=2,
+                per_strategy={
+                    "random": _bundle(
+                        sem=0.91,
+                        beh=0.86,
+                        ast=0.55,
+                        base_sem=0.21,
+                        base_beh=0.21,
+                        base_ast=0.41,
+                    )
+                },
+                aggregate={},
+                conclusion="completed",
+            ),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertFalse(payload["hard_pass"])
+        self.assertEqual(payload["overall_conclusion"], "partial")
+
+
+if __name__ == "__main__":
+    unittest.main()

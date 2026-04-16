@@ -454,7 +454,8 @@ For each user with sufficient data:
    fully automated per user.
 3. **Metric suite**: all six similarity levels + three baselines.
 4. **Report generator**: per-user and aggregate results with statistical
-   significance, visualizations, and narrative summary.
+   significance and Markdown tables (optional extra plots are non-blocking;
+   narrative summary may be brief procedural text in aggregate Markdown).
 
 ---
 
