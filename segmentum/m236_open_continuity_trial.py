@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 import re
 import subprocess
 import sys
@@ -1513,45 +1514,52 @@ class OpenContinuityTrial:
         self.detector = CollapseDetector()
 
     def run_seed(self, *, seed: int, variant: str = "full") -> TrialAuditRecord:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            state_path = tmp_root / f"m236_state_{seed}_{variant}.json"
-            trace_path = tmp_root / f"m236_trace_{seed}_{variant}.jsonl"
-            runtime = SegmentRuntime.load_or_create(state_path=state_path, trace_path=trace_path, seed=seed, reset=True)
-            runtime._m236_variant = variant
-            runtime.agent.self_model.identity_narrative = _identity_narrative()
-            protected_episode_id = _seed_structural_trace(runtime)
-            chapter_id = 1
-            restart_reference: dict[str, object] = {}
-            phase_rows: list[dict[str, object]] = []
-            phase_summaries: list[dict[str, object]] = []
-            restart_completed = False
-            for phase in self.phases:
-                _ensure_chapter(runtime, phase, chapter_id=chapter_id)
-                if phase.restart_shock and not restart_completed:
-                    restart_reference = {"commitments": list(runtime.subject_state.active_commitments), "anchors": list(runtime.subject_state.continuity_anchors), "protected_episode_id": protected_episode_id}
-                    runtime.save_snapshot()
-                    runtime = SegmentRuntime.load_or_create(state_path=state_path, trace_path=trace_path, seed=seed, reset=False, enable_restart_rebind=True)
-                    runtime._m236_variant = variant
-                    restart_completed = True
-                _maybe_apply_variant(runtime, variant=variant, phase=phase)
-                current_phase_rows: list[dict[str, object]] = []
-                for tick_in_phase in range(phase.duration):
-                    _update_world(runtime, phase, tick_in_phase=tick_in_phase)
-                    _blend_body(runtime, phase.body_targets)
-                    _phase_runtime_context(runtime, phase, variant=variant, chapter_id=chapter_id)
-                    runtime.step(verbose=False)
-                    row = _snapshot_row(runtime, seed=seed, variant=variant, phase=phase, tick_in_phase=tick_in_phase, restart_consistency_pre=restart_reference)
-                    current_phase_rows.append(row)
-                    phase_rows.append(row)
-                phase_summaries.append(_phase_summary(phase, current_phase_rows))
-                chapter_id += 1
-            transitions = [_phase_transition(phase_summaries[index - 1], phase_summaries[index]) for index in range(1, len(phase_summaries))]
-            metrics = _compute_metrics(rows=phase_rows, phase_summaries=phase_summaries, transitions=transitions, restart_reference=restart_reference)
-            findings = self.detector.detect(snapshots=phase_rows, metrics=metrics, phase_summaries=phase_summaries)
-            acceptance = _acceptance(metrics, findings)
-            trace_excerpt = phase_rows[:4] + phase_rows[-4:]
-            return TrialAuditRecord(seed=seed, variant=variant, phase_summaries=phase_summaries, transitions=transitions, metrics=metrics, collapse_findings=findings, acceptance=acceptance, trace_excerpt=trace_excerpt)
+        # Isolate trial RNG from the rest of the pytest session and restore the global
+        # `random` module when the trial completes so unrelated tests keep stable order.
+        _rng_state = random.getstate()
+        try:
+            random.seed(seed)
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_root = Path(tmp_dir)
+                state_path = tmp_root / f"m236_state_{seed}_{variant}.json"
+                trace_path = tmp_root / f"m236_trace_{seed}_{variant}.jsonl"
+                runtime = SegmentRuntime.load_or_create(state_path=state_path, trace_path=trace_path, seed=seed, reset=True)
+                runtime._m236_variant = variant
+                runtime.agent.self_model.identity_narrative = _identity_narrative()
+                protected_episode_id = _seed_structural_trace(runtime)
+                chapter_id = 1
+                restart_reference: dict[str, object] = {}
+                phase_rows: list[dict[str, object]] = []
+                phase_summaries: list[dict[str, object]] = []
+                restart_completed = False
+                for phase in self.phases:
+                    _ensure_chapter(runtime, phase, chapter_id=chapter_id)
+                    if phase.restart_shock and not restart_completed:
+                        restart_reference = {"commitments": list(runtime.subject_state.active_commitments), "anchors": list(runtime.subject_state.continuity_anchors), "protected_episode_id": protected_episode_id}
+                        runtime.save_snapshot()
+                        runtime = SegmentRuntime.load_or_create(state_path=state_path, trace_path=trace_path, seed=seed, reset=False, enable_restart_rebind=True)
+                        runtime._m236_variant = variant
+                        restart_completed = True
+                    _maybe_apply_variant(runtime, variant=variant, phase=phase)
+                    current_phase_rows: list[dict[str, object]] = []
+                    for tick_in_phase in range(phase.duration):
+                        _update_world(runtime, phase, tick_in_phase=tick_in_phase)
+                        _blend_body(runtime, phase.body_targets)
+                        _phase_runtime_context(runtime, phase, variant=variant, chapter_id=chapter_id)
+                        runtime.step(verbose=False)
+                        row = _snapshot_row(runtime, seed=seed, variant=variant, phase=phase, tick_in_phase=tick_in_phase, restart_consistency_pre=restart_reference)
+                        current_phase_rows.append(row)
+                        phase_rows.append(row)
+                    phase_summaries.append(_phase_summary(phase, current_phase_rows))
+                    chapter_id += 1
+                transitions = [_phase_transition(phase_summaries[index - 1], phase_summaries[index]) for index in range(1, len(phase_summaries))]
+                metrics = _compute_metrics(rows=phase_rows, phase_summaries=phase_summaries, transitions=transitions, restart_reference=restart_reference)
+                findings = self.detector.detect(snapshots=phase_rows, metrics=metrics, phase_summaries=phase_summaries)
+                acceptance = _acceptance(metrics, findings)
+                trace_excerpt = phase_rows[:4] + phase_rows[-4:]
+                return TrialAuditRecord(seed=seed, variant=variant, phase_summaries=phase_summaries, transitions=transitions, metrics=metrics, collapse_findings=findings, acceptance=acceptance, trace_excerpt=trace_excerpt)
+        finally:
+            random.setstate(_rng_state)
 
     def run_suite(self, *, seed_set: Iterable[int] = SEED_SET, variant: str = "full") -> OpenContinuityReport:
         records = tuple(self.run_seed(seed=int(seed), variant=variant) for seed in seed_set)
