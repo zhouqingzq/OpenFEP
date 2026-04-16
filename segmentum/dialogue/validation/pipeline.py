@@ -10,7 +10,7 @@ from ..lifecycle import ImplantationConfig, implant_personality
 from ..observer import DialogueObserver
 from ..world import DialogueWorld
 from .act_classifier import DialogueActClassifier, validate_act_classifier
-from .act_classifier_eval_sets import DEFAULT_CLASSIFIER_EVAL_SAMPLES
+from .act_classifier_eval_sets import CLASSIFIER_GATE_EVAL_SAMPLES
 from .baselines import (
     build_population_average_agent,
     clone_agent_template,
@@ -167,6 +167,10 @@ def _result_values(results: dict[str, SimilarityResult]) -> dict[str, float]:
     return {name: float(item.value) for name, item in results.items()}
 
 
+def _result_details(results: dict[str, SimilarityResult]) -> dict[str, dict[str, object]]:
+    return {name: dict(item.details) for name, item in results.items()}
+
+
 def run_validation(
     user_dataset: dict,
     config: ValidationConfig,
@@ -188,7 +192,7 @@ def run_validation(
     strategy_behavioral_p_means: dict[str, float] = {}
     strategy_behavioral_c_means: dict[str, float] = {}
 
-    classifier_eval = validate_act_classifier(DEFAULT_CLASSIFIER_EVAL_SAMPLES)
+    classifier_eval = validate_act_classifier(CLASSIFIER_GATE_EVAL_SAMPLES)
     behavioral_hard_enabled = bool(classifier_eval.get("passed_3class_gate", False))
 
     for strategy in config.strategies:
@@ -199,10 +203,19 @@ def run_validation(
             seed=int(config.seed),
         )
         strategy_key = strategy.value
+        if strategy == SplitStrategy.TOPIC and bool(split.split_metadata.get("topic_split_not_applicable")):
+            per_strategy[strategy_key] = {
+                "skipped": True,
+                "reason": "topic_split_not_applicable",
+                "eligible_for_hard_gate": False,
+                "split_metadata": split.split_metadata,
+            }
+            continue
         if len(split.holdout_sessions) < int(config.min_holdout_sessions):
             per_strategy[strategy_key] = {
                 "skipped": True,
                 "reason": "insufficient_holdout_sessions",
+                "eligible_for_hard_gate": False,
                 "split_metadata": split.split_metadata,
             }
             continue
@@ -210,14 +223,20 @@ def run_validation(
         train_agent = SegmentAgent()
         train_world = DialogueWorld(train_dataset, DialogueObserver(), seed=int(config.seed))
         implant_personality(train_agent, train_world, config.implantation_config)
-        generated, real, g11, r11, g3, r3 = _generate_from_sessions(
+        agent_state_result = agent_state_similarity(train_agent, full_agent)
+        agent_state_result.details["agent_state_measured_before_holdout_generation"] = True
+        train_agent_for_generation = clone_agent_template(
             train_agent,
+            seed=int(config.seed) + 17 + config.strategies.index(strategy),
+        )
+        generated, real, g11, r11, g3, r3 = _generate_from_sessions(
+            train_agent_for_generation,
             split.holdout_sessions,
             user_uid=user_uid,
             seed=int(config.seed),
         )
         personality_metrics = _metrics_bundle(generated, real, g11, r11, g3, r3)
-        personality_metrics["agent_state_similarity"] = agent_state_similarity(train_agent, full_agent)
+        personality_metrics["agent_state_similarity"] = agent_state_result
 
         baseline_a_agent = create_default_agent(seed=int(config.seed) + 101)
         a_gen, a_real, ag11, ar11, ag3, ar3 = _generate_from_sessions(
@@ -268,15 +287,21 @@ def run_validation(
         baseline_a_values = _result_values(baseline_a_metrics)
         baseline_c_values = _result_values(baseline_c_metrics)
         per_strategy[strategy_key] = {
+            "skipped": False,
+            "reason": None,
+            "eligible_for_hard_gate": True,
             "split_metadata": split.split_metadata,
             "metrics_without_baselines": ["agent_state_similarity"],
             "behavioral_hard_metric_enabled": behavioral_hard_enabled,
             "behavioral_labeling": "dialogue_act_classifier_11class_and_3strategy",
             "classifier_validation": classifier_eval,
             "personality_metrics": personality_values,
+            "personality_metric_details": _result_details(personality_metrics),
             "baseline_a_metrics": baseline_a_values,
+            "baseline_a_metric_details": _result_details(baseline_a_metrics),
             "baseline_b_metrics": baseline_b_values,
             "baseline_c_metrics": baseline_c_values,
+            "baseline_c_metric_details": _result_details(baseline_c_metrics),
             "baseline_b_selected_wrong_uids": [int(item.get("_wrong_user_uid", -1)) for item in chosen_wrong],
         }
         strategy_personality_means[strategy_key] = float(personality_values.get("semantic_similarity", 0.0))
@@ -308,6 +333,8 @@ def run_validation(
         if strategy_behavioral_c_means
         else 0.0,
         "behavioral_hard_metric_enabled": behavioral_hard_enabled,
+        "skip_population_average_implant": bool(config.skip_population_average_implant),
+        "requested_strategies": [item.value for item in config.strategies],
     }
     return ValidationReport(
         user_uid=user_uid,
@@ -333,6 +360,7 @@ def run_pilot_validation(
             "suggested_min_users": int(config.min_users),
             "escalated": False,
             "pilot_metrics_used": [],
+            "required_users": int(config.min_users),
         }
     pilot_count = min(len(user_datasets), max(3, int(config.pilot_user_count)))
     pilot_users = user_datasets[:pilot_count]
@@ -384,6 +412,7 @@ def run_pilot_validation(
         "behavioral_diff_sd": round(float(beh_sd), 6),
         "sd_threshold": float(config.pilot_sd_threshold),
         "suggested_min_users": int(suggested),
+        "required_users": int(suggested),
         "escalated": escalated,
         "semantic_escalated": bool(sem_escalate),
         "behavioral_escalated": bool(beh_escalate),
@@ -418,6 +447,9 @@ def run_batch_validation(
             population_average_template=pop_template,
         )
         report.aggregate["pilot"] = pilot
+        report.aggregate["required_users"] = required_users
+        report.aggregate["skip_population_average_implant"] = bool(config.skip_population_average_implant)
+        report.aggregate["requested_strategies"] = [strategy.value for strategy in config.strategies]
         reports.append(report)
     return reports
 

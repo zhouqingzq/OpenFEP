@@ -208,9 +208,11 @@ def _kmeans_fitted_on_train(
     return labels, centroids
 
 
-def _cluster_sizes(labels: list[int]) -> dict[int, int]:
+def _cluster_sizes(labels: list[int], indices: set[int] | None = None) -> dict[int, int]:
     out: dict[int, int] = defaultdict(int)
-    for cid in labels:
+    for idx, cid in enumerate(labels):
+        if indices is not None and idx not in indices:
+            continue
         out[int(cid)] += 1
     return dict(out)
 
@@ -226,7 +228,7 @@ def _merge_small_clusters(
     merge_steps: list[dict[str, object]] = []
     merged = list(labels)
     while True:
-        sizes = _cluster_sizes(merged)
+        sizes = _cluster_sizes(merged, indices=fit_indices)
         small = [cid for cid, size in sizes.items() if size < min_size]
         if not small:
             break
@@ -281,14 +283,23 @@ def _recompute_centroids(
     return centroids
 
 
-def _silhouette_score(labels: list[int], vectors: list[dict[str, float]]) -> float:
+def _silhouette_score(
+    labels: list[int],
+    vectors: list[dict[str, float]],
+    *,
+    indices: set[int] | None = None,
+) -> float:
     clusters: dict[int, list[int]] = defaultdict(list)
     for idx, cid in enumerate(labels):
+        if indices is not None and idx not in indices:
+            continue
         clusters[cid].append(idx)
     if len(clusters) <= 1:
         return -1.0
     values: list[float] = []
-    for idx, cid in enumerate(labels):
+    scored_indices = sorted(indices) if indices is not None else list(range(len(labels)))
+    for idx in scored_indices:
+        cid = labels[idx]
         same = clusters[cid]
         if len(same) <= 1:
             values.append(0.0)
@@ -306,6 +317,24 @@ def _silhouette_score(labels: list[int], vectors: list[dict[str, float]]) -> flo
     if not values:
         return -1.0
     return sum(values) / float(len(values))
+
+
+def _topic_not_applicable(
+    sessions: list[dict],
+    metadata: dict[str, object],
+    reason: str,
+) -> tuple[list[dict], list[dict], dict[str, object]]:
+    out = dict(metadata)
+    out.update(
+        {
+            "topic_split_not_applicable": True,
+            "reason": reason,
+            "train_count": int(len(sessions)),
+            "holdout_count": 0,
+            "strict_topic_no_random_fallback": True,
+        }
+    )
+    return sessions[:], [], out
 
 
 def _distribution_jsd(left: Mapping[int, int], right: Mapping[int, int]) -> float:
@@ -487,22 +516,17 @@ def _split_topic(
         "min_cluster_size": int(min_cluster_size),
         "max_k": int(max_k),
         "max_train_fit_iterations": int(max_train_fit_iterations),
+        "jsd_threshold": float(jsd_threshold),
+        "strict_topic_no_random_fallback": True,
     }
     if n_sessions <= 1:
-        metadata["topic_split_not_applicable"] = True
-        metadata["reason"] = "insufficient_sessions"
-        return sessions[:], [], metadata
+        return _topic_not_applicable(sessions, metadata, "insufficient_sessions")
 
     docs = [_session_document(item) for item in sessions]
     effective_k_max = min(int(max_k), n_sessions // max(1, int(min_cluster_size)))
+    metadata["k_search_max_by_all_sessions"] = int(effective_k_max)
     if effective_k_max < 2:
-        metadata["topic_split_not_applicable"] = True
-        metadata["reason"] = "k_range_empty"
-        fallback_train, fallback_holdout, base_meta = _split_random(
-            sessions, train_ratio=train_ratio, seed=seed
-        )
-        metadata.update(base_meta)
-        return fallback_train, fallback_holdout, metadata
+        return _topic_not_applicable(sessions, metadata, "k_range_empty")
 
     fit_indices: set[int] | None = None
     seen_masks: set[frozenset[int]] = set()
@@ -516,9 +540,13 @@ def _split_topic(
             fit_indices = {idx for idx, item in enumerate(sessions) if id(item) in init_ids}
 
         vectors, _ = _build_tfidf(docs, fit_indices)
+        fit_k_max = min(int(max_k), len(fit_indices) // max(1, int(min_cluster_size)))
+        metadata["k_search_max_by_train_sessions"] = int(fit_k_max)
+        if fit_k_max < 2:
+            return _topic_not_applicable(sessions, metadata, "train_k_range_empty")
 
         best: dict[str, object] | None = None
-        for k in range(2, effective_k_max + 1):
+        for k in range(2, fit_k_max + 1):
             labels, centroids = _kmeans_fitted_on_train(
                 vectors,
                 k,
@@ -533,17 +561,21 @@ def _split_topic(
                 fit_indices=fit_indices,
             )
             centroids = _recompute_centroids(labels, vectors, fit_indices=fit_indices)
-            sizes = _cluster_sizes(labels)
+            sizes = _cluster_sizes(labels, indices=fit_indices)
             if any(size < min_cluster_size for size in sizes.values()):
                 continue
-            score = _silhouette_score(labels, vectors)
+            score = _silhouette_score(labels, vectors, indices=fit_indices)
             candidate = {
                 "k": int(k),
                 "labels": labels,
                 "centroids": centroids,
                 "sizes": {str(cid): int(size) for cid, size in sorted(sizes.items())},
+                "all_assigned_cluster_sizes": {
+                    str(cid): int(size) for cid, size in sorted(_cluster_sizes(labels).items())
+                },
                 "merge_steps": merge_steps,
                 "silhouette": float(score),
+                "silhouette_scope": "train_fit_sessions_only",
             }
             if best is None:
                 best = candidate
@@ -553,13 +585,7 @@ def _split_topic(
                     best = candidate
 
         if best is None:
-            metadata["topic_split_not_applicable"] = True
-            metadata["reason"] = "no_valid_cluster_layout"
-            fallback_train, fallback_holdout, base_meta = _split_random(
-                sessions, train_ratio=train_ratio, seed=seed
-            )
-            metadata.update(base_meta)
-            return fallback_train, fallback_holdout, metadata
+            return _topic_not_applicable(sessions, metadata, "no_valid_cluster_layout")
 
         labels = list(best["labels"])
         strat = _topic_try_stratified_jsd(
@@ -571,13 +597,7 @@ def _split_topic(
             max_retries=max_retries,
         )
         if strat is None:
-            metadata["topic_split_not_applicable"] = True
-            metadata["reason"] = "jsd_quality_gate_failed"
-            fallback_train, fallback_holdout, base_meta = _split_random(
-                sessions, train_ratio=train_ratio, seed=seed
-            )
-            metadata.update(base_meta)
-            return fallback_train, fallback_holdout, metadata
+            return _topic_not_applicable(sessions, metadata, "jsd_quality_gate_failed")
 
         train_idx, holdout_idx, jsd, attempt = strat
         train_list = [sessions[idx] for idx in sorted(train_idx)]
@@ -586,8 +606,11 @@ def _split_topic(
         meta_round: dict[str, object] = {
             "k_selected": int(best["k"]),
             "cluster_sizes": dict(best["sizes"]),
+            "cluster_sizes_scope": "train_fit_sessions_only",
+            "all_assigned_cluster_sizes": dict(best["all_assigned_cluster_sizes"]),
             "merge_steps": list(best["merge_steps"]),
             "silhouette": round(float(best["silhouette"]), 6),
+            "silhouette_scope": str(best["silhouette_scope"]),
             "topic_jsd_train_holdout": round(float(jsd), 6),
             "jsd_threshold": float(jsd_threshold),
             "topic_split_retry_count": int(attempt),
@@ -597,6 +620,7 @@ def _split_topic(
             "train_count": int(len(train_list)),
             "holdout_count": int(len(holdout_list)),
             "topic_split_not_applicable": False,
+            "topic_holdout_transform_only": True,
         }
         merged = {**metadata, **meta_round}
 
@@ -605,23 +629,11 @@ def _split_topic(
 
         mask = frozenset(train_idx)
         if mask in seen_masks:
-            metadata["topic_split_not_applicable"] = True
-            metadata["reason"] = "topic_strict_fit_cycle_detected"
-            fallback_train, fallback_holdout, base_meta = _split_random(
-                sessions, train_ratio=train_ratio, seed=seed
-            )
-            metadata.update(base_meta)
-            return fallback_train, fallback_holdout, metadata
+            return _topic_not_applicable(sessions, metadata, "topic_strict_fit_cycle_detected")
         seen_masks.add(mask)
         fit_indices = set(train_idx)
 
-    metadata["topic_split_not_applicable"] = True
-    metadata["reason"] = "topic_strict_fit_not_converged"
-    fallback_train, fallback_holdout, base_meta = _split_random(
-        sessions, train_ratio=train_ratio, seed=seed
-    )
-    metadata.update(base_meta)
-    return fallback_train, fallback_holdout, metadata
+    return _topic_not_applicable(sessions, metadata, "topic_strict_fit_not_converged")
 
 
 def split_user_data(

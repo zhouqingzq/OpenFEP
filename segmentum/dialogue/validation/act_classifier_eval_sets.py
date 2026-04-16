@@ -1,27 +1,37 @@
-"""Fixed labeled samples for `validate_act_classifier` (gate on 3-class macro-F1).
+"""Fixed labeled samples for M5.4 dialogue-act classifier gates.
 
-Held-out style: mix of clear examples and a few harder lines so the gate is not trivially
-passed by a handful of hand-picked strings alone.
+The smoke set is kept for small unit checks.  The gate set is intentionally
+larger and phrased independently from the classifier's hand-written examples;
+the hard behavioral metric is enabled only when this gate passes.
 """
 
 from __future__ import annotations
 
-# Default eval set used by run_validation pipeline (>= 11 rows; includes edge-ish lines).
-DEFAULT_CLASSIFIER_EVAL_SAMPLES: list[dict[str, str]] = [
-    {"text": "你能具体说说吗？", "label_11": "ask_question", "label_3": "explore"},
-    {"text": "这是不是意味着要延期？", "label_11": "ask_question", "label_3": "explore"},
-    {"text": "我同意你的看法。", "label_11": "agree", "label_3": "exploit"},
-    {"text": "嗯，有道理。", "label_11": "agree", "label_3": "exploit"},
-    {"text": "我能理解你的感受。", "label_11": "empathize", "label_3": "exploit"},
-    {"text": "哈哈这个太好笑了", "label_11": "joke", "label_3": "exploit"},
-    {"text": "这一点我不同意。", "label_11": "disagree", "label_3": "escape"},
-    {"text": "我不太认可这个结论。", "label_11": "disagree", "label_3": "escape"},
-    {"text": "我们先不聊这个。", "label_11": "deflect", "label_3": "escape"},
-    {"text": "嗯。", "label_11": "minimal_response", "label_3": "escape"},
-    {"text": "我先到这里，改天聊。", "label_11": "disengage", "label_3": "escape"},
-    {"text": "我补充一下细节。", "label_11": "elaborate", "label_3": "exploit"},
-    {"text": "我想提一个新话题。", "label_11": "introduce_topic", "label_3": "explore"},
-    {"text": "在我看来这个方案更稳。", "label_11": "share_opinion", "label_3": "explore"},
-    {"text": "换个角度，预算和风险怎么平衡？", "label_11": "ask_question", "label_3": "explore"},
-    {"text": "收到，我这边先记下来。", "label_11": "minimal_response", "label_3": "escape"},
+
+SMOKE_CLASSIFIER_EVAL_SAMPLES: list[dict[str, str]] = [
+    {"text": "Can you explain this?", "label_11": "ask_question", "label_3": "explore"},
+    {"text": "I will add concrete details now.", "label_11": "elaborate", "label_3": "exploit"},
+    {"text": "ok", "label_11": "minimal_response", "label_3": "escape"},
 ]
+
+
+CLASSIFIER_GATE_EVAL_SAMPLES: list[dict[str, str]] = [
+    {"text": "Can you compare the two options?", "label_11": "ask_question", "label_3": "explore"},
+    {"text": "What makes this riskier?", "label_11": "ask_question", "label_3": "explore"},
+    {"text": "By the way, let us talk about a new topic.", "label_11": "introduce_topic", "label_3": "explore"},
+    {"text": "I think this option is safer.", "label_11": "share_opinion", "label_3": "explore"},
+    {"text": "In my view the budget risk matters most.", "label_11": "share_opinion", "label_3": "explore"},
+    {"text": "Let me expand with more detail.", "label_11": "elaborate", "label_3": "exploit"},
+    {"text": "Here is the supporting context in more detail.", "label_11": "elaborate", "label_3": "exploit"},
+    {"text": "I agree, that makes sense.", "label_11": "agree", "label_3": "exploit"},
+    {"text": "I understand; that sounds hard.", "label_11": "empathize", "label_3": "exploit"},
+    {"text": "hh that is funnier than expected", "label_11": "joke", "label_3": "exploit"},
+    {"text": "I disagree with that conclusion.", "label_11": "disagree", "label_3": "escape"},
+    {"text": "Not now, let us move on.", "label_11": "deflect", "label_3": "escape"},
+    {"text": "ok", "label_11": "minimal_response", "label_3": "escape"},
+    {"text": "Talk later, I have to go.", "label_11": "disengage", "label_3": "escape"},
+    {"text": "Skip this for now; another time.", "label_11": "deflect", "label_3": "escape"},
+]
+
+
+DEFAULT_CLASSIFIER_EVAL_SAMPLES = SMOKE_CLASSIFIER_EVAL_SAMPLES

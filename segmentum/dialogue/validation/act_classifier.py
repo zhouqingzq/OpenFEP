@@ -31,6 +31,23 @@ _ACTION_KEYWORDS: dict[str, tuple[str, ...]] = {
     "disengage": ("先到这", "先这样", "我要走了", "不聊了", "改天聊", "先停"),
 }
 
+_ASCII_ACTION_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "ask_question": ("why", "what", "how", "can you", "could you", "would you", "explain", "compare"),
+    "introduce_topic": ("new topic", "another topic", "switch topic", "talk about", "by the way"),
+    "share_opinion": ("i think", "i believe", "my view", "in my view", "i would say", "i prefer"),
+    "elaborate": ("add detail", "expand", "more detail", "supporting context", "unpack", "clarify"),
+    "agree": ("agree", "exactly", "makes sense", "you are right", "yes"),
+    "empathize": ("understand", "that sounds hard", "sorry", "that hurts", "i hear you"),
+    "joke": ("haha", "lol", "funny", "joke", "hh", "233"),
+    "disagree": ("disagree", "i object", "not right", "i do not buy", "no way"),
+    "deflect": ("not now", "skip this", "let us move on", "another time", "park this"),
+    "minimal_response": ("ok", "fine", "noted", "sure", "got it"),
+    "disengage": ("bye", "goodbye", "talk later", "i have to go", "stop here"),
+}
+
+for _action_name, _extra_keywords in _ASCII_ACTION_KEYWORDS.items():
+    _ACTION_KEYWORDS[_action_name] = _ACTION_KEYWORDS.get(_action_name, ()) + _extra_keywords
+
 
 def _tokenize(text: str) -> list[str]:
     return _TOKEN_RE.findall(text.lower())

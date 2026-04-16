@@ -10,6 +10,7 @@ from .statistics import ComparisonResult, paired_comparison
 
 ACCEPTANCE_RULES_VERSION = "m54_v3"
 AGENT_STATE_MIN_MEAN = 0.80
+REQUIRED_STRATEGIES = ("random", "temporal", "partner", "topic")
 
 
 def _write_json(path: Path, payload: object) -> None:
@@ -36,6 +37,12 @@ def _strategy_has_metric(
     )
 
 
+def _strategy_eligible(strategy_result: dict[str, object]) -> bool:
+    return not strategy_result.get("skipped", False) and bool(
+        strategy_result.get("eligible_for_hard_gate", True)
+    )
+
+
 def collect_per_user_personality_only_metric(
     reports: list[ValidationReport], metric_name: str
 ) -> tuple[list[float], int, int]:
@@ -49,7 +56,7 @@ def collect_per_user_personality_only_metric(
     for report in reports:
         p_vals: list[float] = []
         for strategy_result in report.per_strategy.values():
-            if strategy_result.get("skipped", False):
+            if not _strategy_eligible(strategy_result):
                 continue
             p = strategy_result.get("personality_metrics", {})
             if metric_name not in p:
@@ -80,7 +87,7 @@ def collect_per_user_metric_vectors(
         b_vals: list[float] = []
         c_vals: list[float] = []
         for strategy_result in report.per_strategy.values():
-            if strategy_result.get("skipped", False):
+            if not _strategy_eligible(strategy_result):
                 continue
             if not _strategy_has_metric(strategy_result, metric_name):
                 continue
@@ -115,7 +122,7 @@ def _classifier_3class_gate_passed(reports: list[ValidationReport]) -> bool:
 
 
 def _comparison_for_metric(reports: list[ValidationReport], metric_name: str) -> ComparisonResult:
-    p, a, b, c, _, _ = collect_per_user_metric_vectors(reports, metric_name)
+    p, a, b, c, users_used, users_skipped = collect_per_user_metric_vectors(reports, metric_name)
     p_vs_a = paired_comparison(p, a, test="wilcoxon", alpha=0.05)
     p_vs_b = paired_comparison(p, b, test="wilcoxon", alpha=0.05)
     p_vs_c = paired_comparison(p, c, test="wilcoxon", alpha=0.05)
@@ -137,6 +144,8 @@ def _comparison_for_metric(reports: list[ValidationReport], metric_name: str) ->
         vs_a_significant=bool(p_vs_a[1]),
         vs_b_significant=bool(p_vs_b[1]),
         vs_c_significant=bool(p_vs_c[1]),
+        users_included=users_used,
+        users_skipped_no_metric=users_skipped,
     )
 
 
@@ -190,7 +199,7 @@ def collect_per_user_metric_vectors_for_strategy(
     users_skipped = 0
     for report in reports:
         strategy_result = report.per_strategy.get(strategy_key)
-        if strategy_result is None or strategy_result.get("skipped", False):
+        if strategy_result is None or not _strategy_eligible(strategy_result):
             users_skipped += 1
             continue
         if not _strategy_has_metric(strategy_result, metric_name):
@@ -218,7 +227,7 @@ def collect_per_user_personality_only_metric_for_strategy(
     users_skipped = 0
     for report in reports:
         strategy_result = report.per_strategy.get(strategy_key)
-        if strategy_result is None or strategy_result.get("skipped", False):
+        if strategy_result is None or not _strategy_eligible(strategy_result):
             users_skipped += 1
             continue
         p = strategy_result.get("personality_metrics", {})
@@ -232,7 +241,7 @@ def collect_per_user_personality_only_metric_for_strategy(
 def _comparison_for_metric_for_strategy(
     reports: list[ValidationReport], metric_name: str, strategy_key: str
 ) -> ComparisonResult:
-    p, a, b, c, _, _ = collect_per_user_metric_vectors_for_strategy(
+    p, a, b, c, users_used, users_skipped = collect_per_user_metric_vectors_for_strategy(
         reports, metric_name, strategy_key
     )
     p_vs_a = paired_comparison(p, a, test="wilcoxon", alpha=0.05)
@@ -256,6 +265,8 @@ def _comparison_for_metric_for_strategy(
         vs_a_significant=bool(p_vs_a[1]),
         vs_b_significant=bool(p_vs_b[1]),
         vs_c_significant=bool(p_vs_c[1]),
+        users_included=users_used,
+        users_skipped_no_metric=users_skipped,
     )
 
 
@@ -294,6 +305,7 @@ def _topic_split_summary(reports: list[ValidationReport]) -> dict[str, object]:
     """Counts topic split applicability from per-user topic strategy metadata."""
     total = 0
     not_applicable = 0
+    valid = 0
     for report in reports:
         tr = report.per_strategy.get("topic")
         if tr is None:
@@ -302,10 +314,104 @@ def _topic_split_summary(reports: list[ValidationReport]) -> dict[str, object]:
         meta = tr.get("split_metadata", {})
         if isinstance(meta, dict) and bool(meta.get("topic_split_not_applicable")):
             not_applicable += 1
+        elif _strategy_eligible(tr):
+            valid += 1
     return {
         "users_with_topic_strategy_row": int(total),
         "users_topic_split_not_applicable": int(not_applicable),
         "users_topic_split_applicable": int(total - not_applicable),
+        "users_topic_split_valid_for_hard_gate": int(valid),
+    }
+
+
+def _required_users(reports: list[ValidationReport]) -> int:
+    values: list[int] = []
+    for report in reports:
+        raw = report.aggregate.get("required_users")
+        if raw is None:
+            pilot = report.aggregate.get("pilot")
+            if isinstance(pilot, dict):
+                raw = pilot.get("required_users", pilot.get("suggested_min_users"))
+        try:
+            if raw is not None:
+                values.append(int(raw))
+        except (TypeError, ValueError):
+            continue
+    return max(values) if values else 10
+
+
+def _pilot_gate(reports: list[ValidationReport], required_users: int) -> dict[str, object]:
+    pilot_present = any(isinstance(report.aggregate.get("pilot"), dict) for report in reports)
+    user_count_ok = len(reports) >= int(required_users)
+    return {
+        "passed": bool(pilot_present and user_count_ok),
+        "pilot_present": bool(pilot_present),
+        "user_count_ok": bool(user_count_ok),
+        "user_count": int(len(reports)),
+        "required_users": int(required_users),
+    }
+
+
+def _formal_baseline_c_gate(reports: list[ValidationReport]) -> dict[str, object]:
+    skip_used = any(bool(report.aggregate.get("skip_population_average_implant")) for report in reports)
+    return {
+        "passed": not skip_used,
+        "skip_population_average_implant_used": bool(skip_used),
+    }
+
+
+def _split_gate(
+    per_strategy_comparisons: dict[str, dict[str, dict[str, object]]],
+    required_users: int,
+) -> dict[str, object]:
+    per_strategy: dict[str, dict[str, object]] = {}
+    for key in REQUIRED_STRATEGIES:
+        row = per_strategy_comparisons.get(key, {}).get("semantic_similarity", {})
+        users = int(row.get("users_included") or 0)
+        per_strategy[key] = {
+            "present": key in per_strategy_comparisons,
+            "users_included": users,
+            "required_users": int(required_users),
+            "passed": bool(key in per_strategy_comparisons and users >= int(required_users)),
+        }
+    return {
+        "passed": all(bool(item["passed"]) for item in per_strategy.values()),
+        "required_strategies": list(REQUIRED_STRATEGIES),
+        "per_strategy": per_strategy,
+    }
+
+
+def _topic_gate(
+    per_strategy_hard_pass: dict[str, dict[str, bool]],
+    topic_split_summary: dict[str, object],
+    required_users: int,
+) -> dict[str, object]:
+    valid_users = int(topic_split_summary.get("users_topic_split_valid_for_hard_gate", 0))
+    enough_users = valid_users >= int(required_users)
+    topic_hard_pass = bool(per_strategy_hard_pass.get("topic", {}).get("hard_pass"))
+    return {
+        "passed": bool(enough_users and topic_hard_pass),
+        "policy": "exclude_not_applicable_but_require_min_users",
+        "valid_topic_users": int(valid_users),
+        "required_users": int(required_users),
+        "topic_hard_pass": bool(topic_hard_pass),
+    }
+
+
+def _partner_gate(
+    per_strategy_hard_pass: dict[str, dict[str, bool]],
+    per_strategy_comparisons: dict[str, dict[str, dict[str, object]]],
+    required_users: int,
+) -> dict[str, object]:
+    row = per_strategy_comparisons.get("partner", {}).get("semantic_similarity", {})
+    users = int(row.get("users_included") or 0)
+    enough_users = users >= int(required_users)
+    partner_hard_pass = bool(per_strategy_hard_pass.get("partner", {}).get("hard_pass"))
+    return {
+        "passed": bool(enough_users and partner_hard_pass),
+        "users_included": int(users),
+        "required_users": int(required_users),
+        "partner_hard_pass": bool(partner_hard_pass),
     }
 
 
@@ -435,7 +541,7 @@ def generate_report(
             "personality_similarity",
         ]
 
-    hard_pass, hard_pass_breakdown = _compute_hard_pass(
+    metric_hard_pass, metric_hard_breakdown = _compute_hard_pass(
         comparisons,
         classifier_3class_gate_passed=classifier_gate,
     )
@@ -446,6 +552,41 @@ def generate_report(
     partner_hard_pass = per_strategy_hard_pass.get("partner", {}).get("hard_pass")
     topic_hard_pass = per_strategy_hard_pass.get("topic", {}).get("hard_pass")
     topic_split_summary = _topic_split_summary(reports)
+    required_users = _required_users(reports)
+    pilot_gate = _pilot_gate(reports, required_users)
+    split_gate = _split_gate(per_strategy_comparisons, required_users)
+    partner_gate = _partner_gate(per_strategy_hard_pass, per_strategy_comparisons, required_users)
+    topic_gate = _topic_gate(per_strategy_hard_pass, topic_split_summary, required_users)
+    baseline_c_gate = _formal_baseline_c_gate(reports)
+    reproducibility_gate = {
+        "passed": bool(baseline_c_gate["passed"]),
+        "baseline_c_full_population_implant": bool(baseline_c_gate["passed"]),
+    }
+    hard_pass_breakdown = {
+        **metric_hard_breakdown,
+        "metric_hard_pass": bool(metric_hard_pass),
+        "pilot_gate": bool(pilot_gate["passed"]),
+        "split_gate_all_required_strategies": bool(split_gate["passed"]),
+        "partner_gate": bool(partner_gate["passed"]),
+        "topic_gate": bool(topic_gate["passed"]),
+        "reproducibility_gate": bool(reproducibility_gate["passed"]),
+        "baseline_c_full_population_implant": bool(baseline_c_gate["passed"]),
+    }
+    hard_pass = bool(
+        metric_hard_pass
+        and pilot_gate["passed"]
+        and split_gate["passed"]
+        and partner_gate["passed"]
+        and topic_gate["passed"]
+        and reproducibility_gate["passed"]
+        and baseline_c_gate["passed"]
+    )
+    if hard_pass:
+        overall_conclusion = "pass"
+    elif bool(metric_hard_pass):
+        overall_conclusion = "partial"
+    else:
+        overall_conclusion = "fail"
 
     acceptance_rules = {
         "version": ACCEPTANCE_RULES_VERSION,
@@ -459,6 +600,8 @@ def generate_report(
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
         "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
         "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
+        "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
+        "formal_baseline_c": "skip_population_average_implant is test-only and blocks formal acceptance when present",
     }
 
     metric_interpretations = {
@@ -469,6 +612,7 @@ def generate_report(
         "user_count": int(len(reports)),
         "users_tested": int(users_used),
         "users_skipped_no_strategy": int(users_skipped_no_strategy),
+        "required_users": int(required_users),
         "agent_state_users_tested": int(ast_users_used),
         "agent_state_users_skipped_no_metric": int(ast_users_skipped),
         "metric_version": "m54_v3",
@@ -480,13 +624,19 @@ def generate_report(
         "partner_hard_pass": partner_hard_pass,
         "topic_hard_pass": topic_hard_pass,
         "topic_split_summary": topic_split_summary,
+        "pilot_gate": pilot_gate,
+        "split_gate": split_gate,
+        "partner_gate": partner_gate,
+        "topic_gate": topic_gate,
+        "reproducibility_gate": reproducibility_gate,
+        "baseline_c_gate": baseline_c_gate,
         "metric_interpretations": metric_interpretations,
         "hard_metrics": list(hard_metrics_list),
         "soft_metrics": list(soft_metrics_list),
         "acceptance_rules": acceptance_rules,
         "hard_pass": bool(hard_pass),
         "hard_pass_breakdown": hard_pass_breakdown,
-        "overall_conclusion": "pass" if hard_pass else "partial",
+        "overall_conclusion": overall_conclusion,
         "reports": [asdict(item) for item in reports],
     }
     _write_json(output_dir / "aggregate_report.json", aggregate_payload)
@@ -495,6 +645,7 @@ def generate_report(
         "# M5.4 Validation Aggregate Report",
         "",
         f"- Users: {len(reports)} (tested: {users_used}, skipped no strategy: {users_skipped_no_strategy})",
+        f"- Required users: {required_users}",
         f"- Agent state: users with metric {ast_users_used}, skipped {ast_users_skipped}",
         f"- Topic split: {topic_split_summary}",
         f"- Metric version: {aggregate_payload['metric_version']} ({aggregate_payload['behavioral_labeling']})",
@@ -502,8 +653,11 @@ def generate_report(
         f"- Behavioral hard metric degraded (soft-only): {behavioral_degraded}",
         f"- Overall conclusion: {aggregate_payload['overall_conclusion']}",
         f"- Hard pass: {hard_pass}",
+        f"- Pilot gate: {pilot_gate['passed']}",
+        f"- Split gate: {split_gate['passed']}",
         f"- Partner strategy hard pass: {partner_hard_pass}",
         f"- Topic strategy hard pass: {topic_hard_pass}",
+        f"- Formal Baseline C gate: {baseline_c_gate['passed']}",
         "",
         "## Acceptance (hard metrics)",
         "",

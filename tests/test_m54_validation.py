@@ -6,10 +6,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from segmentum.dialogue.validation.act_classifier import DialogueActClassifier, validate_act_classifier
 from segmentum.dialogue.validation.baselines import select_wrong_users
-from segmentum.dialogue.validation.pipeline import ValidationConfig, run_batch_validation, run_pilot_validation
+from segmentum.dialogue.validation.metrics import SimilarityResult
+from segmentum.dialogue.validation.pipeline import ValidationConfig, run_batch_validation, run_pilot_validation, run_validation
 from segmentum.dialogue.validation.report import generate_report
 from segmentum.dialogue.validation.splitter import SplitStrategy, split_user_data
 from segmentum.dialogue.validation.statistics import paired_comparison
@@ -123,6 +125,62 @@ class TestM54Validation(unittest.TestCase):
             self.assertIn("merge_steps", meta)
             self.assertIn("topic_jsd_train_holdout", meta)
             self.assertTrue(meta.get("topic_kmeans_fitted_on_train_sessions_only"))
+
+    def test_topic_not_applicable_does_not_random_fallback(self) -> None:
+        user = _build_user(15, sessions=8)
+        split = split_user_data(user, SplitStrategy.TOPIC, train_ratio=0.70, seed=42)
+        self.assertTrue(split.split_metadata["topic_split_not_applicable"])
+        self.assertTrue(split.split_metadata["strict_topic_no_random_fallback"])
+        self.assertEqual(split.holdout_sessions, [])
+        self.assertEqual(len(split.train_sessions), len(user["sessions"]))
+
+    def test_agent_state_similarity_is_measured_before_holdout_generation(self) -> None:
+        user = _build_user(16, sessions=6)
+        other = _build_user(17, sessions=6)
+        captured_cycles: list[int] = []
+
+        def fake_implant(agent, world, config):
+            del world, config
+            agent.cycle = 7
+            return None
+
+        def fake_generate(agent, holdout_sessions, *, user_uid: int, seed: int):
+            del holdout_sessions, user_uid, seed
+            agent.cycle = 999
+            return ["generated detail"], ["real detail"], ["elaborate"], ["elaborate"], ["exploit"], ["exploit"]
+
+        def fake_state_similarity(agent_train, agent_full):
+            del agent_full
+            captured_cycles.append(int(agent_train.cycle))
+            return SimilarityResult(
+                "agent_state_similarity",
+                0.91,
+                {"vector_length": 1},
+            )
+
+        cfg = ValidationConfig(
+            strategies=[SplitStrategy.RANDOM],
+            min_holdout_sessions=1,
+            seed=3,
+            skip_population_average_implant=True,
+        )
+        prev_sem = os.environ.get("SEGMENTUM_USE_TFIDF_SEMANTIC")
+        os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = "1"
+        try:
+            with patch("segmentum.dialogue.validation.pipeline.implant_personality", side_effect=fake_implant), patch(
+                "segmentum.dialogue.validation.pipeline._generate_from_sessions", side_effect=fake_generate
+            ), patch(
+                "segmentum.dialogue.validation.pipeline.agent_state_similarity", side_effect=fake_state_similarity
+            ):
+                report = run_validation(user, cfg, all_user_profiles=[user, other])
+        finally:
+            if prev_sem is None:
+                os.environ.pop("SEGMENTUM_USE_TFIDF_SEMANTIC", None)
+            else:
+                os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = prev_sem
+        self.assertEqual(captured_cycles, [7])
+        details = report.per_strategy["random"]["personality_metric_details"]["agent_state_similarity"]
+        self.assertTrue(details["agent_state_measured_before_holdout_generation"])
 
     def test_act_classifier_and_gate(self) -> None:
         clf = DialogueActClassifier()
