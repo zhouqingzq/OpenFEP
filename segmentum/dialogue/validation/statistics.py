@@ -6,23 +6,28 @@ import math
 from statistics import mean
 @dataclass(slots=True)
 class ComparisonResult:
+    """Aggregate comparison row. Baseline fields are None for personality-only metrics (e.g. agent_state)."""
+
     metric_name: str
     personality_mean: float
-    baseline_a_mean: float
-    baseline_b_mean: float
-    baseline_c_mean: float
-    vs_a_pvalue: float
-    vs_b_pvalue: float
-    vs_c_pvalue: float
-    vs_a_mean_diff: float
-    vs_b_mean_diff: float
-    vs_c_mean_diff: float
-    vs_a_better: bool
-    vs_b_better: bool
-    vs_c_better: bool
-    vs_a_significant: bool
-    vs_b_significant: bool
-    vs_c_significant: bool
+    baseline_a_mean: float | None = None
+    baseline_b_mean: float | None = None
+    baseline_c_mean: float | None = None
+    vs_a_pvalue: float | None = None
+    vs_b_pvalue: float | None = None
+    vs_c_pvalue: float | None = None
+    vs_a_mean_diff: float | None = None
+    vs_b_mean_diff: float | None = None
+    vs_c_mean_diff: float | None = None
+    vs_a_better: bool | None = None
+    vs_b_better: bool | None = None
+    vs_c_better: bool | None = None
+    vs_a_significant: bool | None = None
+    vs_b_significant: bool | None = None
+    vs_c_significant: bool | None = None
+    users_included: int | None = None
+    users_skipped_no_metric: int | None = None
+    interpretation_notes: str | None = None
 
 
 def _normal_cdf(value: float) -> float:

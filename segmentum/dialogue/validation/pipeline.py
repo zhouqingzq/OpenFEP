@@ -166,6 +166,8 @@ def run_validation(
     strategy_baseline_a_means: dict[str, float] = {}
     strategy_baseline_b_means: dict[str, float] = {}
     strategy_baseline_c_means: dict[str, float] = {}
+    strategy_behavioral_p_means: dict[str, float] = {}
+    strategy_behavioral_c_means: dict[str, float] = {}
 
     classifier_eval = validate_act_classifier(DEFAULT_CLASSIFIER_EVAL_SAMPLES)
     behavioral_hard_enabled = bool(classifier_eval.get("passed_3class_gate", False))
@@ -243,6 +245,7 @@ def run_validation(
         baseline_c_values = _result_values(baseline_c_metrics)
         per_strategy[strategy_key] = {
             "split_metadata": split.split_metadata,
+            "metrics_without_baselines": ["agent_state_similarity"],
             "behavioral_hard_metric_enabled": behavioral_hard_enabled,
             "behavioral_labeling": "dialogue_act_classifier_both",
             "classifier_validation": classifier_eval,
@@ -256,6 +259,12 @@ def run_validation(
         strategy_baseline_a_means[strategy_key] = float(baseline_a_values.get("semantic_similarity", 0.0))
         strategy_baseline_b_means[strategy_key] = float(baseline_b_values.get("semantic_similarity", 0.0))
         strategy_baseline_c_means[strategy_key] = float(baseline_c_values.get("semantic_similarity", 0.0))
+        strategy_behavioral_p_means[strategy_key] = float(
+            personality_values.get("behavioral_similarity_strategy", 0.0)
+        )
+        strategy_behavioral_c_means[strategy_key] = float(
+            baseline_c_values.get("behavioral_similarity_strategy", 0.0)
+        )
 
     valid = [value for value in per_strategy.values() if not value.get("skipped", False)]
     conclusion = "skipped_all_strategies" if not valid else "completed"
@@ -268,6 +277,12 @@ def run_validation(
         "semantic_baseline_a_mean": float(mean(strategy_baseline_a_means.values())) if strategy_baseline_a_means else 0.0,
         "semantic_baseline_b_mean": float(mean(strategy_baseline_b_means.values())) if strategy_baseline_b_means else 0.0,
         "semantic_baseline_c_mean": float(mean(strategy_baseline_c_means.values())) if strategy_baseline_c_means else 0.0,
+        "behavioral_personality_mean": float(mean(strategy_behavioral_p_means.values()))
+        if strategy_behavioral_p_means
+        else 0.0,
+        "behavioral_baseline_c_mean": float(mean(strategy_behavioral_c_means.values()))
+        if strategy_behavioral_c_means
+        else 0.0,
         "behavioral_hard_metric_enabled": behavioral_hard_enabled,
     }
     return ValidationReport(
@@ -287,27 +302,53 @@ def run_pilot_validation(
             "pilot_user_count": 0,
             "semantic_diff_mean": 0.0,
             "semantic_diff_sd": 0.0,
+            "behavioral_diff_sd": 0.0,
             "sd_threshold": float(config.pilot_sd_threshold),
             "suggested_min_users": int(config.min_users),
             "escalated": False,
+            "pilot_metrics_used": [],
         }
     pilot_count = min(len(user_datasets), max(3, int(config.pilot_user_count)))
     pilot_users = user_datasets[:pilot_count]
-    diffs: list[float] = []
+    semantic_diffs: list[float] = []
+    behavioral_diffs: list[float] = []
+    classifier_gate_any = False
     for item in pilot_users:
         report = run_validation(item, config, all_user_profiles=user_datasets)
         personality = float(report.aggregate.get("semantic_personality_mean", 0.0))
         baseline_a = float(report.aggregate.get("semantic_baseline_a_mean", 0.0))
-        diffs.append(personality - baseline_a)
-    sd = pstdev(diffs) if len(diffs) > 1 else 0.0
-    suggested = int(config.min_users_if_high_sd) if sd > float(config.pilot_sd_threshold) else int(config.min_users)
+        semantic_diffs.append(personality - baseline_a)
+        beh_p = float(report.aggregate.get("behavioral_personality_mean", 0.0))
+        beh_c = float(report.aggregate.get("behavioral_baseline_c_mean", 0.0))
+        behavioral_diffs.append(beh_p - beh_c)
+        if report.aggregate.get("behavioral_hard_metric_enabled"):
+            classifier_gate_any = True
+    sem_sd = pstdev(semantic_diffs) if len(semantic_diffs) > 1 else 0.0
+    beh_sd = pstdev(behavioral_diffs) if len(behavioral_diffs) > 1 else 0.0
+    sem_escalate = sem_sd > float(config.pilot_sd_threshold)
+    beh_escalate = classifier_gate_any and (beh_sd > float(config.pilot_sd_threshold))
+    suggested_sem = (
+        int(config.min_users_if_high_sd) if sem_escalate else int(config.min_users)
+    )
+    suggested_beh = (
+        int(config.min_users_if_high_sd) if beh_escalate else int(config.min_users)
+    )
+    suggested = max(suggested_sem, suggested_beh)
+    escalated = bool(sem_escalate or beh_escalate)
+    pilot_metrics_used = ["semantic_vs_baseline_a_mean_diff"]
+    if classifier_gate_any:
+        pilot_metrics_used.append("behavioral_vs_baseline_c_mean_diff_when_classifier_hard_enabled")
     return {
         "pilot_user_count": int(pilot_count),
-        "semantic_diff_mean": round(float(mean(diffs)) if diffs else 0.0, 6),
-        "semantic_diff_sd": round(float(sd), 6),
+        "semantic_diff_mean": round(float(mean(semantic_diffs)) if semantic_diffs else 0.0, 6),
+        "semantic_diff_sd": round(float(sem_sd), 6),
+        "behavioral_diff_sd": round(float(beh_sd), 6),
         "sd_threshold": float(config.pilot_sd_threshold),
         "suggested_min_users": int(suggested),
-        "escalated": bool(sd > float(config.pilot_sd_threshold)),
+        "escalated": escalated,
+        "semantic_escalated": bool(sem_escalate),
+        "behavioral_escalated": bool(beh_escalate),
+        "pilot_metrics_used": pilot_metrics_used,
     }
 
 

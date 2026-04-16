@@ -18,12 +18,11 @@ def _bundle(
     ast: float,
     base_sem: float,
     base_beh: float,
-    base_ast: float,
     base_sem_c: float | None = None,
     base_beh_c: float | None = None,
-    base_ast_c: float | None = None,
     classifier_pass: bool = True,
 ) -> dict[str, dict]:
+    """Baseline dicts omit agent_state_like the real pipeline (train-only vs full agent only)."""
     keys = (
         "semantic_similarity",
         "behavioral_similarity_strategy",
@@ -34,7 +33,6 @@ def _bundle(
     )
     c_sem = float(base_sem_c) if base_sem_c is not None else base_sem
     c_beh = float(base_beh_c) if base_beh_c is not None else base_beh
-    c_ast = float(base_ast_c) if base_ast_c is not None else base_ast
     p = {
         "semantic_similarity": sem,
         "behavioral_similarity_strategy": beh,
@@ -49,7 +47,6 @@ def _bundle(
         "behavioral_similarity_action11": 0.4,
         "stylistic_similarity": 0.35,
         "personality_similarity": 0.65,
-        "agent_state_similarity": base_ast,
     }
     b = dict(a)
     c = {
@@ -58,7 +55,6 @@ def _bundle(
         "behavioral_similarity_action11": 0.4,
         "stylistic_similarity": 0.35,
         "personality_similarity": 0.65,
-        "agent_state_similarity": c_ast,
     }
     assert set(p.keys()) == set(keys)
     return {
@@ -86,7 +82,6 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         ast=0.90,
                         base_sem=0.50,
                         base_beh=0.40,
-                        base_ast=0.50,
                         base_beh_c=0.35,
                         classifier_pass=True,
                     )
@@ -107,6 +102,11 @@ class TestM54ReportAcceptance(unittest.TestCase):
         self.assertEqual(payload["overall_conclusion"], "pass")
         self.assertEqual(payload["users_tested"], 8)
         self.assertEqual(payload["users_skipped_no_strategy"], 0)
+        self.assertEqual(payload["agent_state_users_tested"], 8)
+        self.assertEqual(payload["agent_state_users_skipped_no_metric"], 0)
+        ast = payload["comparisons"]["agent_state_similarity"]
+        self.assertIsNone(ast["baseline_a_mean"])
+        self.assertIn("interpretation_notes", ast)
         self.assertFalse(payload["behavioral_hard_metric_degraded"])
 
     def test_hard_fail_when_agent_state_low(self) -> None:
@@ -120,7 +120,6 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         ast=0.5,
                         base_sem=0.2,
                         base_beh=0.2,
-                        base_ast=0.4,
                         classifier_pass=False,
                     )
                 },
@@ -136,7 +135,6 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         ast=0.55,
                         base_sem=0.21,
                         base_beh=0.21,
-                        base_ast=0.41,
                         classifier_pass=False,
                     )
                 },
@@ -167,7 +165,6 @@ class TestM54ReportAcceptance(unittest.TestCase):
                         ast=0.90,
                         base_sem=0.50,
                         base_beh=0.40,
-                        base_ast=0.50,
                         base_beh_c=0.70,
                         classifier_pass=True,
                     )

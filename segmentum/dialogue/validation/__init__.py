@@ -16,7 +16,11 @@ from .metrics import (
     surface_similarity,
 )
 from .pipeline import ValidationConfig, ValidationReport, run_batch_validation, run_pilot_validation, run_validation
-from .report import collect_per_user_metric_vectors, generate_report
+from .report import (
+    collect_per_user_metric_vectors,
+    collect_per_user_personality_only_metric,
+    generate_report,
+)
 from .splitter import DataSplit, SplitStrategy, split_user_data
 from .statistics import ComparisonResult, paired_comparison
 
@@ -31,6 +35,7 @@ __all__ = [
     "ValidationConfig",
     "ValidationReport",
     "collect_per_user_metric_vectors",
+    "collect_per_user_personality_only_metric",
     "generate_report",
     "agent_state_similarity",
     "behavioral_similarity",

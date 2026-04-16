@@ -5,7 +5,10 @@ from __future__ import annotations
 import unittest
 
 from segmentum.dialogue.validation.pipeline import ValidationReport
-from segmentum.dialogue.validation.report import collect_per_user_metric_vectors
+from segmentum.dialogue.validation.report import (
+    collect_per_user_metric_vectors,
+    collect_per_user_personality_only_metric,
+)
 
 
 def _mini_strategy(sem_p: float, sem_a: float, sem_c: float) -> dict[str, object]:
@@ -67,6 +70,29 @@ class TestM54ReportAggregation(unittest.TestCase):
         )
         self.assertEqual(users_used, 1)
         self.assertEqual(skipped, 1)
+
+    def test_personality_only_metric_without_baseline_keys(self) -> None:
+        """agent_state lives only on personality_metrics in the real pipeline."""
+        r = ValidationReport(
+            user_uid=1,
+            per_strategy={
+                "random": {
+                    "skipped": False,
+                    "personality_metrics": {"agent_state_similarity": 0.88},
+                    "baseline_a_metrics": {"semantic_similarity": 0.5},
+                    "baseline_b_metrics": {"semantic_similarity": 0.5},
+                    "baseline_c_metrics": {"semantic_similarity": 0.5},
+                }
+            },
+            aggregate={},
+            conclusion="completed",
+        )
+        vals, used, skipped = collect_per_user_personality_only_metric(
+            [r], "agent_state_similarity"
+        )
+        self.assertEqual(vals, [0.88])
+        self.assertEqual(used, 1)
+        self.assertEqual(skipped, 0)
 
 
 if __name__ == "__main__":
