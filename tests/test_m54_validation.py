@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 import tempfile
@@ -189,28 +190,39 @@ class TestM54Validation(unittest.TestCase):
 
     def test_pipeline_and_report_generation(self) -> None:
         # min_holdout_sessions default 3 → need enough sessions so holdout >= 3
-        users = [_build_user(uid, sessions=12) for uid in range(30, 40)]
-        cfg = ValidationConfig(
-            strategies=[SplitStrategy.RANDOM],
-            seed=7,
-            min_users=10,
-            pilot_user_count=3,
-        )
-        pilot = run_pilot_validation(users, cfg)
-        self.assertIn("semantic_diff_sd", pilot)
-        reports = run_batch_validation(users, cfg)
-        self.assertEqual(len(reports), 10)
-        with tempfile.TemporaryDirectory() as tmp:
-            output_dir = Path(tmp) / "m54_validation"
-            md_path = generate_report(reports, output_dir)
-            self.assertTrue(md_path.exists())
-            self.assertTrue((output_dir / "aggregate_report.json").exists())
-            self.assertTrue((output_dir / "per_user").exists())
-            self.assertTrue(all(r.conclusion == "completed" for r in reports))
-            agg = json.loads((output_dir / "aggregate_report.json").read_text(encoding="utf-8"))
-            self.assertEqual(agg.get("metric_version"), "m54_v3")
-            self.assertIn("hard_pass", agg)
-            self.assertIn("acceptance_rules", agg)
+        # TF-IDF semantic path avoids loading sentence-transformers (slow / CI-unfriendly).
+        # skip_population_average_implant avoids N× full-data implants for Baseline C (tests only).
+        prev_sem = os.environ.get("SEGMENTUM_USE_TFIDF_SEMANTIC")
+        os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = "1"
+        try:
+            users = [_build_user(uid, sessions=12) for uid in range(30, 40)]
+            cfg = ValidationConfig(
+                strategies=[SplitStrategy.RANDOM],
+                seed=7,
+                min_users=10,
+                pilot_user_count=3,
+                skip_population_average_implant=True,
+            )
+            pilot = run_pilot_validation(users, cfg)
+            self.assertIn("semantic_diff_sd", pilot)
+            reports = run_batch_validation(users, cfg)
+            self.assertEqual(len(reports), 10)
+            with tempfile.TemporaryDirectory() as tmp:
+                output_dir = Path(tmp) / "m54_validation"
+                md_path = generate_report(reports, output_dir)
+                self.assertTrue(md_path.exists())
+                self.assertTrue((output_dir / "aggregate_report.json").exists())
+                self.assertTrue((output_dir / "per_user").exists())
+                self.assertTrue(all(r.conclusion == "completed" for r in reports))
+                agg = json.loads((output_dir / "aggregate_report.json").read_text(encoding="utf-8"))
+                self.assertEqual(agg.get("metric_version"), "m54_v3")
+                self.assertIn("hard_pass", agg)
+                self.assertIn("acceptance_rules", agg)
+        finally:
+            if prev_sem is None:
+                os.environ.pop("SEGMENTUM_USE_TFIDF_SEMANTIC", None)
+            else:
+                os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = prev_sem
 
 
 if __name__ == "__main__":

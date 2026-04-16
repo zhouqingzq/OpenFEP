@@ -11,7 +11,14 @@ from ..observer import DialogueObserver
 from ..world import DialogueWorld
 from .act_classifier import DialogueActClassifier, validate_act_classifier
 from .act_classifier_eval_sets import DEFAULT_CLASSIFIER_EVAL_SAMPLES
-from .baselines import create_average_agent, create_default_agent, create_wrong_agent, select_wrong_users
+from .baselines import (
+    build_population_average_agent,
+    clone_agent_template,
+    create_average_agent,
+    create_default_agent,
+    create_wrong_agent,
+    select_wrong_users,
+)
 from .metrics import (
     SimilarityResult,
     agent_state_similarity,
@@ -26,6 +33,13 @@ from .splitter import SplitStrategy, split_user_data
 
 @dataclass(slots=True)
 class ValidationConfig:
+    """M5.4 validation options.
+
+    ``skip_population_average_implant``: when True, Baseline C uses profile-only
+    :func:`create_average_agent` instead of one full implant per user to build a population
+    average agent (much faster; for unit tests). Production runs should use False.
+    """
+
     strategies: list[SplitStrategy]
     train_ratio: float = 0.70
     seed: int = 42
@@ -36,6 +50,7 @@ class ValidationConfig:
     min_users_if_high_sd: int = 15
     implantation_config: ImplantationConfig = field(default_factory=ImplantationConfig)
     wrong_user_uids: list[int] | None = None
+    skip_population_average_implant: bool = False
 
 
 @dataclass(slots=True)
@@ -101,7 +116,7 @@ def _generate_from_sessions(
     *,
     user_uid: int,
     seed: int,
-) -> tuple[list[str], list[str], list[str], list[str]]:
+) -> tuple[list[str], list[str], list[str], list[str], list[str], list[str]]:
     observer = DialogueObserver()
     generated_texts: list[str] = []
     real_texts: list[str] = []
@@ -121,28 +136,30 @@ def _generate_from_sessions(
             generated_texts.append(str(turn.text))
             real_texts.append(str(real))
     classifier = DialogueActClassifier()
-    gen_actions = [item.label_11 for item in classifier.predict_batch(generated_texts)]
-    real_actions = [item.label_11 for item in classifier.predict_batch(real_texts)]
-    return generated_texts, real_texts, gen_actions, real_actions
+    preds_g = classifier.predict_batch(generated_texts)
+    preds_r = classifier.predict_batch(real_texts)
+    gen_11 = [item.label_11 for item in preds_g]
+    real_11 = [item.label_11 for item in preds_r]
+    gen_3 = [item.label_3 for item in preds_g]
+    real_3 = [item.label_3 for item in preds_r]
+    return generated_texts, real_texts, gen_11, real_11, gen_3, real_3
 
 
 def _metrics_bundle(
     generated_texts: list[str],
     real_texts: list[str],
-    generated_actions: list[str],
-    real_actions: list[str],
+    gen_11: list[str],
+    real_11: list[str],
+    gen_3: list[str],
+    real_3: list[str],
 ) -> dict[str, SimilarityResult]:
     return {
         "surface_similarity": surface_similarity(generated_texts, real_texts),
         "semantic_similarity": semantic_similarity(generated_texts, real_texts),
         "stylistic_similarity": stylistic_similarity(generated_texts, real_texts),
         "personality_similarity": personality_similarity(generated_texts, real_texts),
-        "behavioral_similarity_strategy": behavioral_similarity(
-            generated_actions, real_actions, granularity="strategy"
-        ),
-        "behavioral_similarity_action11": behavioral_similarity(
-            generated_actions, real_actions, granularity="action11"
-        ),
+        "behavioral_similarity_strategy": behavioral_similarity(gen_3, real_3, granularity="strategy"),
+        "behavioral_similarity_action11": behavioral_similarity(gen_11, real_11, granularity="action11"),
     }
 
 
@@ -154,6 +171,8 @@ def run_validation(
     user_dataset: dict,
     config: ValidationConfig,
     all_user_profiles: list[dict] | None = None,
+    *,
+    population_average_template: SegmentAgent | None = None,
 ) -> ValidationReport:
     user_uid = int(user_dataset.get("uid", 0))
     all_profiles = list(all_user_profiles or [])
@@ -191,23 +210,23 @@ def run_validation(
         train_agent = SegmentAgent()
         train_world = DialogueWorld(train_dataset, DialogueObserver(), seed=int(config.seed))
         implant_personality(train_agent, train_world, config.implantation_config)
-        generated, real, gen_actions, real_actions = _generate_from_sessions(
+        generated, real, g11, r11, g3, r3 = _generate_from_sessions(
             train_agent,
             split.holdout_sessions,
             user_uid=user_uid,
             seed=int(config.seed),
         )
-        personality_metrics = _metrics_bundle(generated, real, gen_actions, real_actions)
+        personality_metrics = _metrics_bundle(generated, real, g11, r11, g3, r3)
         personality_metrics["agent_state_similarity"] = agent_state_similarity(train_agent, full_agent)
 
         baseline_a_agent = create_default_agent(seed=int(config.seed) + 101)
-        a_gen, a_real, a_actions, a_real_actions = _generate_from_sessions(
+        a_gen, a_real, ag11, ar11, ag3, ar3 = _generate_from_sessions(
             baseline_a_agent,
             split.holdout_sessions,
             user_uid=user_uid,
             seed=int(config.seed) + 101,
         )
-        baseline_a_metrics = _metrics_bundle(a_gen, a_real, a_actions, a_real_actions)
+        baseline_a_metrics = _metrics_bundle(a_gen, a_real, ag11, ar11, ag3, ar3)
 
         chosen_wrong = select_wrong_users(
             user_dataset,
@@ -218,27 +237,32 @@ def run_validation(
         b_runs: list[dict[str, float]] = []
         for wrong in chosen_wrong:
             wrong_agent = create_wrong_agent(wrong, config.implantation_config, seed=int(config.seed) + int(wrong.get("_wrong_user_uid", 0)))
-            b_gen, b_real, b_actions, b_real_actions = _generate_from_sessions(
+            b_gen, b_real, bg11, br11, bg3, br3 = _generate_from_sessions(
                 wrong_agent,
                 split.holdout_sessions,
                 user_uid=user_uid,
                 seed=int(config.seed) + 303,
             )
-            b_runs.append(_result_values(_metrics_bundle(b_gen, b_real, b_actions, b_real_actions)))
+            b_runs.append(_result_values(_metrics_bundle(b_gen, b_real, bg11, br11, bg3, br3)))
         baseline_b_values: dict[str, float] = {}
         if b_runs:
             metric_names = sorted(set().union(*[set(item.keys()) for item in b_runs]))
             for name in metric_names:
                 baseline_b_values[name] = float(mean([run.get(name, 0.0) for run in b_runs]))
 
-        baseline_c_agent = create_average_agent(all_profiles, seed=int(config.seed) + 404)
-        c_gen, c_real, c_actions, c_real_actions = _generate_from_sessions(
+        strat_idx = config.strategies.index(strategy)
+        strat_seed = int(config.seed) + 404 + strat_idx * 31
+        if population_average_template is not None:
+            baseline_c_agent = clone_agent_template(population_average_template, seed=strat_seed)
+        else:
+            baseline_c_agent = create_average_agent(all_profiles, seed=strat_seed)
+        c_gen, c_real, cg11, cr11, cg3, cr3 = _generate_from_sessions(
             baseline_c_agent,
             split.holdout_sessions,
             user_uid=user_uid,
             seed=int(config.seed) + 404,
         )
-        baseline_c_metrics = _metrics_bundle(c_gen, c_real, c_actions, c_real_actions)
+        baseline_c_metrics = _metrics_bundle(c_gen, c_real, cg11, cr11, cg3, cr3)
 
         personality_values = _result_values(personality_metrics)
         baseline_a_values = _result_values(baseline_a_metrics)
@@ -247,7 +271,7 @@ def run_validation(
             "split_metadata": split.split_metadata,
             "metrics_without_baselines": ["agent_state_similarity"],
             "behavioral_hard_metric_enabled": behavioral_hard_enabled,
-            "behavioral_labeling": "dialogue_act_classifier_both",
+            "behavioral_labeling": "dialogue_act_classifier_11class_and_3strategy",
             "classifier_validation": classifier_eval,
             "personality_metrics": personality_values,
             "baseline_a_metrics": baseline_a_values,
@@ -271,7 +295,7 @@ def run_validation(
     aggregate = {
         "pipeline_status": conclusion,
         "metric_version": "m54_v3",
-        "behavioral_labeling": "dialogue_act_classifier_both",
+        "behavioral_labeling": "dialogue_act_classifier_11class_and_3strategy",
         "strategy_count": int(len(valid)),
         "semantic_personality_mean": float(mean(strategy_personality_means.values())) if strategy_personality_means else 0.0,
         "semantic_baseline_a_mean": float(mean(strategy_baseline_a_means.values())) if strategy_baseline_a_means else 0.0,
@@ -296,6 +320,8 @@ def run_validation(
 def run_pilot_validation(
     user_datasets: list[dict],
     config: ValidationConfig,
+    *,
+    population_average_template: SegmentAgent | None = None,
 ) -> dict[str, object]:
     if not user_datasets:
         return {
@@ -310,11 +336,24 @@ def run_pilot_validation(
         }
     pilot_count = min(len(user_datasets), max(3, int(config.pilot_user_count)))
     pilot_users = user_datasets[:pilot_count]
+    if population_average_template is not None:
+        pop_template = population_average_template
+    elif config.skip_population_average_implant:
+        pop_template = None
+    else:
+        pop_template = build_population_average_agent(
+            user_datasets, config.implantation_config, seed=int(config.seed)
+        )
     semantic_diffs: list[float] = []
     behavioral_diffs: list[float] = []
     classifier_gate_any = False
     for item in pilot_users:
-        report = run_validation(item, config, all_user_profiles=user_datasets)
+        report = run_validation(
+            item,
+            config,
+            all_user_profiles=user_datasets,
+            population_average_template=pop_template,
+        )
         personality = float(report.aggregate.get("semantic_personality_mean", 0.0))
         baseline_a = float(report.aggregate.get("semantic_baseline_a_mean", 0.0))
         semantic_diffs.append(personality - baseline_a)
@@ -356,7 +395,15 @@ def run_batch_validation(
     user_datasets: list[dict],
     config: ValidationConfig,
 ) -> list[ValidationReport]:
-    pilot = run_pilot_validation(user_datasets, config)
+    if config.skip_population_average_implant:
+        pop_template = None
+    else:
+        pop_template = build_population_average_agent(
+            user_datasets, config.implantation_config, seed=int(config.seed)
+        )
+    pilot = run_pilot_validation(
+        user_datasets, config, population_average_template=pop_template
+    )
     required_users = int(pilot.get("suggested_min_users", config.min_users))
     if len(user_datasets) < required_users:
         raise ValueError(
@@ -364,7 +411,12 @@ def run_batch_validation(
         )
     reports: list[ValidationReport] = []
     for item in user_datasets:
-        report = run_validation(item, config, all_user_profiles=user_datasets)
+        report = run_validation(
+            item,
+            config,
+            all_user_profiles=user_datasets,
+            population_average_template=pop_template,
+        )
         report.aggregate["pilot"] = pilot
         reports.append(report)
     return reports

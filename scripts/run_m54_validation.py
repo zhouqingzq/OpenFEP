@@ -64,8 +64,9 @@ def main() -> None:
         "aggregate_report_json": str(aggregate_path.as_posix()),
         "aggregate_report_md": str(md_path.as_posix()),
     }
-    _write_json(Path("artifacts/m54_acceptance.json"), acceptance)
-    print(f"wrote {args.output}")
+    acceptance_path = args.output / "m54_acceptance.json"
+    _write_json(acceptance_path, acceptance)
+    print(f"wrote {args.output} (including {acceptance_path})")
 
 
 if __name__ == "__main__":

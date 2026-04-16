@@ -472,7 +472,7 @@ def generate_report(
         "agent_state_users_tested": int(ast_users_used),
         "agent_state_users_skipped_no_metric": int(ast_users_skipped),
         "metric_version": "m54_v3",
-        "behavioral_labeling": "dialogue_act_classifier_both",
+        "behavioral_labeling": "dialogue_act_classifier_11class_and_3strategy",
         "behavioral_hard_metric_degraded": bool(behavioral_degraded),
         "comparisons": comparisons,
         "per_strategy_comparisons": per_strategy_comparisons,

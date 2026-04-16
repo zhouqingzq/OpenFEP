@@ -1,6 +1,8 @@
 from .act_classifier import ActionPrediction, DialogueActClassifier, validate_act_classifier
 from .act_classifier_eval_sets import DEFAULT_CLASSIFIER_EVAL_SAMPLES
 from .baselines import (
+    build_population_average_agent,
+    clone_agent_template,
     create_average_agent,
     create_default_agent,
     create_wrong_agent,
@@ -39,6 +41,8 @@ __all__ = [
     "generate_report",
     "agent_state_similarity",
     "behavioral_similarity",
+    "build_population_average_agent",
+    "clone_agent_template",
     "create_average_agent",
     "create_default_agent",
     "create_wrong_agent",

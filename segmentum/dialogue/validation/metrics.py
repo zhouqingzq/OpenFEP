@@ -13,6 +13,8 @@ _ST_MODEL_NAME: str | None = None
 from ...personality_analyzer import PersonalityAnalyzer
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
 
+_STRATEGY_LABELS = frozenset({"explore", "exploit", "escape"})
+
 
 @dataclass(slots=True)
 class SimilarityResult:
@@ -320,8 +322,17 @@ def behavioral_similarity(
     if granularity not in {"strategy", "action11"}:
         raise ValueError("granularity must be 'strategy' or 'action11'")
     if granularity == "strategy":
-        gen_labels = [DIALOGUE_ACTION_STRATEGY_MAP.get(item, "explore") for item in generated_actions]
-        real_labels = [DIALOGUE_ACTION_STRATEGY_MAP.get(item, "explore") for item in real_actions]
+        if (
+            generated_actions
+            and real_actions
+            and all(item in _STRATEGY_LABELS for item in generated_actions)
+            and all(item in _STRATEGY_LABELS for item in real_actions)
+        ):
+            gen_labels = list(generated_actions)
+            real_labels = list(real_actions)
+        else:
+            gen_labels = [DIALOGUE_ACTION_STRATEGY_MAP.get(item, "explore") for item in generated_actions]
+            real_labels = [DIALOGUE_ACTION_STRATEGY_MAP.get(item, "explore") for item in real_actions]
     else:
         gen_labels = list(generated_actions)
         real_labels = list(real_actions)

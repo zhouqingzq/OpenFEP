@@ -5,6 +5,8 @@ import random
 from typing import Mapping
 
 from ...agent import SegmentAgent
+from ...self_model import NarrativePriors
+from ...slow_learning import SlowTraitState
 from ..lifecycle import ImplantationConfig, implant_personality
 from ..observer import DialogueObserver
 from ..world import DialogueWorld
@@ -120,6 +122,7 @@ def create_average_agent(
     all_user_profiles: list[dict],
     seed: int = 42,
 ) -> SegmentAgent:
+    """Baseline C fallback: mean Big Five / profile scalars only (no full implant)."""
     agent = SegmentAgent(rng=random.Random(int(seed)))
     if not all_user_profiles:
         return agent
@@ -131,6 +134,49 @@ def create_average_agent(
     if traits_obj is not None:
         _assign_if_present(traits_obj, mean_vector)
     return agent
+
+
+def build_population_average_agent(
+    user_datasets: list[dict],
+    config: ImplantationConfig,
+    *,
+    seed: int = 42,
+) -> SegmentAgent:
+    """Baseline C: full-data implant per user, then mean SlowTraitState + NarrativePriors (+ profile)."""
+    agent = SegmentAgent(rng=random.Random(int(seed)))
+    if not user_datasets:
+        return agent
+    trait_dicts: list[dict[str, float]] = []
+    prior_dicts: list[dict[str, float]] = []
+    profile_vectors: list[dict[str, float]] = []
+    for idx, ds in enumerate(user_datasets):
+        if not isinstance(ds, Mapping):
+            continue
+        sub = SegmentAgent(rng=random.Random(int(seed) + idx + 1))
+        world = DialogueWorld(ds, DialogueObserver(), seed=int(seed) + idx + 1)
+        implant_personality(sub, world, config)
+        traits = getattr(getattr(sub.slow_variable_learner, "state", None), "traits", None)
+        if traits is not None and hasattr(traits, "to_dict"):
+            trait_dicts.append(dict(traits.to_dict()))
+        priors = getattr(sub.self_model, "narrative_priors", None)
+        if priors is not None and hasattr(priors, "to_dict"):
+            prior_dicts.append(dict(priors.to_dict()))
+        profile_vectors.append(_profile_vector(ds))
+    mean_traits = _mean_map(trait_dicts) if trait_dicts else {}
+    mean_priors = _mean_map(prior_dicts) if prior_dicts else {}
+    mean_profile = _mean_map(profile_vectors) if profile_vectors else {}
+    _inject_average_personality_profile(agent, mean_profile)
+    if mean_traits:
+        agent.slow_variable_learner.state.traits = SlowTraitState.from_dict(mean_traits)
+    if mean_priors:
+        agent.self_model.narrative_priors = NarrativePriors.from_dict(mean_priors)
+    return agent
+
+
+def clone_agent_template(template: SegmentAgent, *, seed: int) -> SegmentAgent:
+    """Fresh agent for evaluation (dialogue mutates state)."""
+    payload = template.to_dict()
+    return SegmentAgent.from_dict(payload, rng=random.Random(int(seed)))
 
 
 def select_wrong_users(
