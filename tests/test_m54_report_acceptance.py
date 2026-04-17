@@ -6,6 +6,7 @@ import json
 import unittest
 from pathlib import Path
 import tempfile
+from unittest.mock import patch
 
 from segmentum.dialogue.validation.pipeline import ValidationReport
 from segmentum.dialogue.validation.report import generate_report
@@ -67,8 +68,14 @@ def _bundle(
         "baseline_a_metrics": a,
         "baseline_b_metrics": b,
         "baseline_c_metrics": c,
+        "personality_metric_details": {
+            "semantic_similarity": {"method": "sentence_embedding_cosine"},
+        },
         "classifier_validation": {
             "passed_3class_gate": classifier_pass,
+            "formal_gate_eligible": classifier_pass,
+            "formal_engine": classifier_pass,
+            "engine": "sentence_embedding_nearest_centroid" if classifier_pass else "keyword_debug",
             "macro_f1_3class": 0.85,
         },
     }
@@ -98,6 +105,28 @@ def _aggregate(required_users: int = 8, *, skip_population_average_implant: bool
 
 
 class TestM54ReportAcceptance(unittest.TestCase):
+    def setUp(self) -> None:
+        def fake_paired(personality, baseline, *, test: str = "wilcoxon", alpha: float = 0.05):
+            n = min(len(personality), len(baseline))
+            if n == 0:
+                return 1.0, False, 0.0, False
+            diffs = [float(personality[idx]) - float(baseline[idx]) for idx in range(n)]
+            mean_diff = sum(diffs) / float(n)
+            better = mean_diff > 1e-12
+            p = 0.01 if better else 1.0
+            return p, bool(better and p < alpha), mean_diff, better
+
+        self._patches = [
+            patch("segmentum.dialogue.validation.report.scipy_wilcoxon_available", return_value=True),
+            patch("segmentum.dialogue.validation.report.paired_comparison", side_effect=fake_paired),
+        ]
+        for patcher in self._patches:
+            patcher.start()
+
+    def tearDown(self) -> None:
+        for patcher in reversed(self._patches):
+            patcher.stop()
+
     def test_hard_pass_when_sem_beh_sig_and_agent_state(self) -> None:
         reports = [
             ValidationReport(
@@ -337,7 +366,9 @@ class TestM54ReportAcceptance(unittest.TestCase):
             p = Path(tmp)
             generate_report(reports, p)
             payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
-        self.assertTrue(payload["hard_pass"])
+        self.assertFalse(payload["hard_pass"])
+        self.assertFalse(payload["formal_acceptance_eligible"])
+        self.assertEqual(payload["overall_conclusion"], "partial")
         self.assertTrue(payload["behavioral_hard_metric_degraded"])
         self.assertFalse(payload["hard_pass_breakdown"]["behavioral_hard_metric_required"])
 

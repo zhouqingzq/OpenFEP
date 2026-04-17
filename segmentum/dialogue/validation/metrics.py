@@ -208,12 +208,31 @@ def _semantic_similarity_tfidf_pairs(
 
 
 def _semantic_similarity_sentence_embedding(pairs: list[tuple[str, str]]) -> SimilarityResult:
-    import numpy as np
-
     model_name = os.environ.get(
         "SEGMENTUM_SEMANTIC_MODEL",
         "paraphrase-multilingual-MiniLM-L12-v2",
     )
+    pair_scores, embedding_dim = _sentence_embedding_pair_scores(pairs, model_name=model_name)
+    value = sum(pair_scores) / float(len(pair_scores))
+    return SimilarityResult(
+        metric_name="semantic_similarity",
+        value=round(float(max(0.0, min(1.0, value))), 6),
+        details={
+            "pair_count": int(len(pair_scores)),
+            "method": "sentence_embedding_cosine",
+            "model": model_name,
+            "embedding_dim": embedding_dim,
+        },
+    )
+
+
+def _sentence_embedding_pair_scores(
+    pairs: list[tuple[str, str]],
+    *,
+    model_name: str,
+) -> tuple[list[float], int]:
+    import numpy as np
+
     model = _load_sentence_transformer(model_name)
     texts = [text for pair in pairs for text in pair]
     emb = model.encode(
@@ -225,19 +244,9 @@ def _semantic_similarity_sentence_embedding(pairs: list[tuple[str, str]]) -> Sim
     arr = np.asarray(emb, dtype=np.float64)
     pair_scores: list[float] = []
     for i in range(0, len(arr), 2):
-        pair_scores.append(float(np.dot(arr[i], arr[i + 1])))
-    value = sum(pair_scores) / float(len(pair_scores))
+        pair_scores.append(float(max(0.0, min(1.0, np.dot(arr[i], arr[i + 1])))))
     embedding_dim = int(arr.shape[1]) if arr.size else 0
-    return SimilarityResult(
-        metric_name="semantic_similarity",
-        value=round(float(max(0.0, min(1.0, value))), 6),
-        details={
-            "pair_count": int(len(pair_scores)),
-            "method": "sentence_embedding_cosine",
-            "model": model_name,
-            "embedding_dim": embedding_dim,
-        },
-    )
+    return pair_scores, embedding_dim
 
 
 def semantic_similarity(generated: list[str], real: list[str]) -> SimilarityResult:
@@ -264,6 +273,41 @@ def semantic_similarity(generated: list[str], real: list[str]) -> SimilarityResu
         )
     except Exception as exc:  # noqa: BLE001 — keep validation run alive; see details
         return _semantic_similarity_tfidf_pairs(pairs, fallback_reason=repr(exc))
+
+
+def semantic_pair_scores(generated: list[str], real: list[str]) -> list[float]:
+    """Return one semantic score per generated/real pair using the configured engine."""
+    pairs = list(zip(generated, real))
+    if not pairs:
+        return []
+    force_tfidf = os.environ.get("SEGMENTUM_USE_TFIDF_SEMANTIC", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+    if force_tfidf:
+        vectors = _tfidf_vectors([item for pair in pairs for item in pair])
+        return [
+            round(float(max(0.0, min(1.0, _cosine_similarity(vectors[idx], vectors[idx + 1])))), 6)
+            for idx in range(0, len(vectors), 2)
+        ]
+    try:
+        model_name = os.environ.get(
+            "SEGMENTUM_SEMANTIC_MODEL",
+            "paraphrase-multilingual-MiniLM-L12-v2",
+        )
+        scores, _ = _sentence_embedding_pair_scores(pairs, model_name=model_name)
+        return [round(float(score), 6) for score in scores]
+    except ImportError:
+        pass
+    except Exception:  # noqa: BLE001 - diagnostics should not abort validation
+        pass
+    vectors = _tfidf_vectors([item for pair in pairs for item in pair])
+    return [
+        round(float(max(0.0, min(1.0, _cosine_similarity(vectors[idx], vectors[idx + 1])))), 6)
+        for idx in range(0, len(vectors), 2)
+    ]
 
 
 def stylistic_similarity(generated: list[str], real: list[str]) -> SimilarityResult:

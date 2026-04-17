@@ -104,6 +104,9 @@ def run_conversation(
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
         }
+        surface_profile = getattr(agent, "dialogue_surface_profile", None)
+        if isinstance(surface_profile, dict):
+            personality_state["surface_profile"] = dict(surface_profile)
         reply = gen.generate(
             action,
             dialogue_context,

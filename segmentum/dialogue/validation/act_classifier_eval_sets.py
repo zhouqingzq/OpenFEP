@@ -35,3 +35,9 @@ CLASSIFIER_GATE_EVAL_SAMPLES: list[dict[str, str]] = [
 
 
 DEFAULT_CLASSIFIER_EVAL_SAMPLES = SMOKE_CLASSIFIER_EVAL_SAMPLES
+
+# Formal M5.4 runs must provide independent human-labeled Chinese train/gate
+# files via scripts/run_m54_validation.py.  Keeping these defaults empty makes
+# missing labels fail formal acceptance instead of silently reusing toy samples.
+DEFAULT_CLASSIFIER_TRAIN_SAMPLES: list[dict[str, str]] = []
+DEFAULT_CLASSIFIER_GATE_SAMPLES: list[dict[str, str]] = []

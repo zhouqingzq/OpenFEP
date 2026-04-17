@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 import random
 from typing import Mapping
 
@@ -18,6 +19,11 @@ _BIG_FIVE_KEYS = (
     "agreeableness",
     "neuroticism",
 )
+
+
+def _progress(message: str) -> None:
+    if os.environ.get("SEGMENTUM_M54_PROGRESS"):
+        print(message, flush=True)
 
 
 def _flatten_numeric(prefix: str, value: object, out: dict[str, float]) -> None:
@@ -146,12 +152,17 @@ def build_population_average_agent(
     agent = SegmentAgent(rng=random.Random(int(seed)))
     if not user_datasets:
         return agent
+    _progress(f"building Baseline C population average from {len(user_datasets)} users...")
     trait_dicts: list[dict[str, float]] = []
     prior_dicts: list[dict[str, float]] = []
     profile_vectors: list[dict[str, float]] = []
+    total = len(user_datasets)
     for idx, ds in enumerate(user_datasets):
         if not isinstance(ds, Mapping):
             continue
+        if idx == 0 or (idx + 1) % 5 == 0 or idx + 1 == total:
+            uid = int(ds.get("uid", -1))
+            _progress(f"  Baseline C implant {idx + 1}/{total} (uid={uid})")
         sub = SegmentAgent(rng=random.Random(int(seed) + idx + 1))
         world = DialogueWorld(ds, DialogueObserver(), seed=int(seed) + idx + 1)
         implant_personality(sub, world, config)

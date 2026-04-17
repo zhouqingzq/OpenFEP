@@ -493,6 +493,25 @@ def _topic_try_stratified_jsd(
     return None
 
 
+def _topic_existing_split_if_balanced(
+    labels: list[int],
+    *,
+    fit_indices: set[int],
+    jsd_threshold: float,
+) -> tuple[set[int], set[int], float] | None:
+    n_sessions = len(labels)
+    if not fit_indices or len(fit_indices) >= n_sessions:
+        return None
+    train_idx = set(fit_indices)
+    holdout_idx = set(range(n_sessions)) - train_idx
+    train_dist = Counter(labels[idx] for idx in train_idx)
+    holdout_dist = Counter(labels[idx] for idx in holdout_idx)
+    jsd = _distribution_jsd(train_dist, holdout_dist)
+    if jsd <= jsd_threshold:
+        return train_idx, holdout_idx, float(jsd)
+    return None
+
+
 def _split_topic(
     sessions: list[dict],
     *,
@@ -588,6 +607,37 @@ def _split_topic(
             return _topic_not_applicable(sessions, metadata, "no_valid_cluster_layout")
 
         labels = list(best["labels"])
+        existing = _topic_existing_split_if_balanced(
+            labels,
+            fit_indices=fit_indices,
+            jsd_threshold=jsd_threshold,
+        )
+        if existing is not None:
+            train_idx, holdout_idx, jsd = existing
+            train_list = [sessions[idx] for idx in sorted(train_idx)]
+            holdout_list = [sessions[idx] for idx in sorted(holdout_idx)]
+            meta_round: dict[str, object] = {
+                "k_selected": int(best["k"]),
+                "cluster_sizes": dict(best["sizes"]),
+                "cluster_sizes_scope": "train_fit_sessions_only",
+                "all_assigned_cluster_sizes": dict(best["all_assigned_cluster_sizes"]),
+                "merge_steps": list(best["merge_steps"]),
+                "silhouette": round(float(best["silhouette"]), 6),
+                "silhouette_scope": str(best["silhouette_scope"]),
+                "topic_jsd_train_holdout": round(float(jsd), 6),
+                "jsd_threshold": float(jsd_threshold),
+                "topic_split_retry_count": 0,
+                "topic_train_fit_iteration": int(fit_iter),
+                "topic_train_fit_iterations": int(fit_iter + 1),
+                "topic_strict_fit_converged": True,
+                "topic_reused_balanced_initial_fit_split": True,
+                "train_count": int(len(train_list)),
+                "holdout_count": int(len(holdout_list)),
+                "topic_split_not_applicable": False,
+                "topic_holdout_transform_only": True,
+            }
+            return train_list, holdout_list, {**metadata, **meta_round}
+
         strat = _topic_try_stratified_jsd(
             sessions,
             labels=labels,

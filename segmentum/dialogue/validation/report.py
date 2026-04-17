@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import asdict
 import json
 from pathlib import Path
-from statistics import mean
+from statistics import mean, median
 
 from .pipeline import ValidationReport
-from .statistics import ComparisonResult, paired_comparison
+from .statistics import ComparisonResult, paired_comparison, scipy_wilcoxon_available
 
 ACCEPTANCE_RULES_VERSION = "m54_v3"
 AGENT_STATE_MIN_MEAN = 0.80
@@ -117,8 +117,50 @@ def _classifier_3class_gate_passed(reports: list[ValidationReport]) -> bool:
                 continue
             cv = strategy_result.get("classifier_validation")
             if isinstance(cv, dict) and "passed_3class_gate" in cv:
-                return bool(cv["passed_3class_gate"])
+                return bool(cv["passed_3class_gate"]) and bool(cv.get("formal_gate_eligible", False))
     return False
+
+
+def _classifier_gate_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            if strategy_result.get("skipped", False):
+                continue
+            cv = strategy_result.get("classifier_validation")
+            if isinstance(cv, dict):
+                return dict(cv)
+    return {
+        "passed_3class_gate": False,
+        "formal_gate_eligible": False,
+        "engine": "missing",
+    }
+
+
+def _semantic_engine_gate(reports: list[ValidationReport]) -> dict[str, object]:
+    methods: list[str] = []
+    fallback_reasons: list[str] = []
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            if not _strategy_eligible(strategy_result):
+                continue
+            details = strategy_result.get("personality_metric_details", {})
+            if not isinstance(details, dict):
+                continue
+            sem = details.get("semantic_similarity", {})
+            if not isinstance(sem, dict):
+                continue
+            method = str(sem.get("method", "unknown"))
+            methods.append(method)
+            if sem.get("fallback_reason") is not None:
+                fallback_reasons.append(str(sem.get("fallback_reason")))
+    unique_methods = sorted(set(methods))
+    passed = bool(methods) and all(method == "sentence_embedding_cosine" for method in methods)
+    return {
+        "passed": bool(passed),
+        "methods": unique_methods,
+        "fallback_reasons": sorted(set(fallback_reasons)),
+        "policy": "formal acceptance requires sentence_embedding_cosine for personality semantic metrics",
+    }
 
 
 def _comparison_for_metric(reports: list[ValidationReport], metric_name: str) -> ComparisonResult:
@@ -126,6 +168,7 @@ def _comparison_for_metric(reports: list[ValidationReport], metric_name: str) ->
     p_vs_a = paired_comparison(p, a, test="wilcoxon", alpha=0.05)
     p_vs_b = paired_comparison(p, b, test="wilcoxon", alpha=0.05)
     p_vs_c = paired_comparison(p, c, test="wilcoxon", alpha=0.05)
+    stat_valid = scipy_wilcoxon_available()
     return ComparisonResult(
         metric_name=metric_name,
         personality_mean=round(float(mean(p)) if p else 0.0, 6),
@@ -144,6 +187,8 @@ def _comparison_for_metric(reports: list[ValidationReport], metric_name: str) ->
         vs_a_significant=bool(p_vs_a[1]),
         vs_b_significant=bool(p_vs_b[1]),
         vs_c_significant=bool(p_vs_c[1]),
+        statistical_valid=bool(stat_valid),
+        statistical_error=None if stat_valid else "scipy.stats.wilcoxon unavailable",
         users_included=users_used,
         users_skipped_no_metric=users_skipped,
     )
@@ -173,6 +218,8 @@ def _comparison_for_agent_state(reports: list[ValidationReport]) -> ComparisonRe
         vs_a_significant=None,
         vs_b_significant=None,
         vs_c_significant=None,
+        statistical_valid=True,
+        statistical_error=None,
         users_included=users_used,
         users_skipped_no_metric=users_skipped,
         interpretation_notes="cosine(train_only_implanted_agent, full_data_implanted_agent); no baseline comparison",
@@ -247,6 +294,7 @@ def _comparison_for_metric_for_strategy(
     p_vs_a = paired_comparison(p, a, test="wilcoxon", alpha=0.05)
     p_vs_b = paired_comparison(p, b, test="wilcoxon", alpha=0.05)
     p_vs_c = paired_comparison(p, c, test="wilcoxon", alpha=0.05)
+    stat_valid = scipy_wilcoxon_available()
     return ComparisonResult(
         metric_name=metric_name,
         personality_mean=round(float(mean(p)) if p else 0.0, 6),
@@ -265,6 +313,8 @@ def _comparison_for_metric_for_strategy(
         vs_a_significant=bool(p_vs_a[1]),
         vs_b_significant=bool(p_vs_b[1]),
         vs_c_significant=bool(p_vs_c[1]),
+        statistical_valid=bool(stat_valid),
+        statistical_error=None if stat_valid else "scipy.stats.wilcoxon unavailable",
         users_included=users_used,
         users_skipped_no_metric=users_skipped,
     )
@@ -295,6 +345,8 @@ def _comparison_for_agent_state_for_strategy(
         vs_a_significant=None,
         vs_b_significant=None,
         vs_c_significant=None,
+        statistical_valid=True,
+        statistical_error=None,
         users_included=users_used,
         users_skipped_no_metric=users_skipped,
         interpretation_notes=f"strategy={strategy_key}; cosine(train_only, full_data); no baseline",
@@ -423,11 +475,13 @@ def _per_strategy_hard_pass(
     """Same hard rules as _compute_hard_pass but per split strategy."""
     out: dict[str, dict[str, bool]] = {}
     for sk, comp in comparisons_by_strategy.items():
-        sem_ok = bool(comp["semantic_similarity"]["vs_a_significant"])
+        sem_stat_ok = bool(comp["semantic_similarity"].get("statistical_valid", True))
+        sem_ok = bool(comp["semantic_similarity"]["vs_a_significant"]) and sem_stat_ok
         beh_row = comp["behavioral_similarity_strategy"]
         beh_vs_c_sig = bool(beh_row["vs_c_significant"])
+        beh_stat_ok = bool(beh_row.get("statistical_valid", True))
         if classifier_3class_gate_passed:
-            beh_ok = beh_vs_c_sig
+            beh_ok = beh_vs_c_sig and beh_stat_ok
         else:
             beh_ok = True
         as_row = comp["agent_state_similarity"]
@@ -436,6 +490,8 @@ def _per_strategy_hard_pass(
             "hard_pass": bool(sem_ok and beh_ok and agent_state_ok),
             "semantic_similarity_vs_baseline_a_significant_better": sem_ok,
             "behavioral_similarity_strategy_vs_baseline_c_significant_better": beh_vs_c_sig,
+            "semantic_wilcoxon_valid": sem_stat_ok,
+            "behavioral_wilcoxon_valid": beh_stat_ok,
             f"agent_state_similarity_mean_ge_{AGENT_STATE_MIN_MEAN:.2f}": agent_state_ok,
         }
     return out
@@ -457,11 +513,13 @@ def _compute_hard_pass(
     classifier_3class_gate_passed: bool,
 ) -> tuple[bool, dict[str, bool]]:
     """Semantic vs A; behavioral(strategy) vs C when classifier gate passes; agent state threshold."""
-    sem_ok = bool(comparisons["semantic_similarity"]["vs_a_significant"])
+    sem_stat_ok = bool(comparisons["semantic_similarity"].get("statistical_valid", True))
+    sem_ok = bool(comparisons["semantic_similarity"]["vs_a_significant"]) and sem_stat_ok
     beh_row = comparisons["behavioral_similarity_strategy"]
     beh_vs_c_sig = bool(beh_row["vs_c_significant"])
+    beh_stat_ok = bool(beh_row.get("statistical_valid", True))
     if classifier_3class_gate_passed:
-        beh_ok = beh_vs_c_sig
+        beh_ok = beh_vs_c_sig and beh_stat_ok
     else:
         beh_ok = True
     as_row = comparisons["agent_state_similarity"]
@@ -472,9 +530,152 @@ def _compute_hard_pass(
         "behavioral_hard_metric_required": bool(classifier_3class_gate_passed),
         "semantic_similarity_vs_baseline_a_significant_better": sem_ok,
         "behavioral_similarity_strategy_vs_baseline_c_significant_better": beh_vs_c_sig,
+        "semantic_wilcoxon_valid": sem_stat_ok,
+        "behavioral_wilcoxon_valid": beh_stat_ok,
         f"agent_state_similarity_mean_ge_{AGENT_STATE_MIN_MEAN:.2f}": agent_state_ok,
     }
     return hard_pass, breakdown
+
+
+def _quartiles(values: list[float]) -> dict[str, float]:
+    if not values:
+        return {"q1": 0.0, "median": 0.0, "q3": 0.0, "iqr": 0.0}
+    ordered = sorted(float(v) for v in values)
+    n = len(ordered)
+    q1 = ordered[max(0, int((n - 1) * 0.25))]
+    q2 = float(median(ordered))
+    q3 = ordered[min(n - 1, int((n - 1) * 0.75))]
+    return {
+        "q1": round(float(q1), 6),
+        "median": round(float(q2), 6),
+        "q3": round(float(q3), 6),
+        "iqr": round(float(q3 - q1), 6),
+    }
+
+
+def _semantic_delta_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    user_rows: list[dict[str, object]] = []
+    per_strategy: dict[str, list[float]] = {}
+    pair_counts: dict[int, int] = {}
+    length_buckets: dict[str, list[float]] = {}
+    diagnostic_strategy: dict[str, list[float]] = {}
+    diagnostic_rows_total = 0
+
+    for report in reports:
+        user_diffs: list[float] = []
+        for strategy_key, strategy_result in report.per_strategy.items():
+            if not _strategy_eligible(strategy_result):
+                continue
+            p = strategy_result.get("personality_metrics", {})
+            a = strategy_result.get("baseline_a_metrics", {})
+            if not isinstance(p, dict) or not isinstance(a, dict):
+                continue
+            if "semantic_similarity" not in p or "semantic_similarity" not in a:
+                continue
+            diff = float(p["semantic_similarity"]) - float(a["semantic_similarity"])
+            user_diffs.append(diff)
+            per_strategy.setdefault(strategy_key, []).append(diff)
+            details = strategy_result.get("personality_metric_details", {})
+            if isinstance(details, dict):
+                sem = details.get("semantic_similarity", {})
+                if isinstance(sem, dict):
+                    try:
+                        pc = int(sem.get("pair_count", 0))
+                        pair_counts[pc] = pair_counts.get(pc, 0) + 1
+                    except (TypeError, ValueError):
+                        pass
+            trace = strategy_result.get("diagnostic_trace", [])
+            if isinstance(trace, list):
+                diagnostic_rows_total += len(trace)
+                for row in trace:
+                    if not isinstance(row, dict):
+                        continue
+                    try:
+                        pair_delta = float(row.get("personality_vs_a_pair_delta", 0.0))
+                    except (TypeError, ValueError):
+                        continue
+                    bucket = str(row.get("reply_length_bucket", "unknown"))
+                    length_buckets.setdefault(bucket, []).append(pair_delta)
+                    diagnostic_strategy.setdefault(strategy_key, []).append(pair_delta)
+        if user_diffs:
+            user_rows.append(
+                {
+                    "user_uid": int(report.user_uid),
+                    "mean_delta": round(float(mean(user_diffs)), 6),
+                    "positive_strategies": int(sum(1 for item in user_diffs if item > 0.0)),
+                    "negative_strategies": int(sum(1 for item in user_diffs if item < 0.0)),
+                }
+            )
+
+    user_deltas = [float(row["mean_delta"]) for row in user_rows]
+    user_rows_sorted = sorted(user_rows, key=lambda row: float(row["mean_delta"]))
+    return {
+        "users": {
+            "count": int(len(user_rows)),
+            "positive": int(sum(1 for item in user_deltas if item > 0.0)),
+            "negative": int(sum(1 for item in user_deltas if item < 0.0)),
+            "zero": int(sum(1 for item in user_deltas if abs(item) <= 1e-12)),
+            **_quartiles(user_deltas),
+            "worst": user_rows_sorted[:5],
+            "best": list(reversed(user_rows_sorted[-5:])),
+        },
+        "per_strategy": {
+            key: {
+                "count": int(len(values)),
+                "mean_delta": round(float(mean(values)) if values else 0.0, 6),
+                "positive": int(sum(1 for item in values if item > 0.0)),
+                "negative": int(sum(1 for item in values if item < 0.0)),
+                **_quartiles(values),
+            }
+            for key, values in sorted(per_strategy.items())
+        },
+        "pair_count_distribution": {str(k): int(v) for k, v in sorted(pair_counts.items())},
+        "diagnostic_pairs": {
+            "rows": int(diagnostic_rows_total),
+            "by_strategy": {
+                key: {
+                    "count": int(len(values)),
+                    "mean_pair_delta": round(float(mean(values)) if values else 0.0, 6),
+                    "positive": int(sum(1 for item in values if item > 0.0)),
+                    "negative": int(sum(1 for item in values if item < 0.0)),
+                }
+                for key, values in sorted(diagnostic_strategy.items())
+            },
+            "by_reply_length_bucket": {
+                key: {
+                    "count": int(len(values)),
+                    "mean_pair_delta": round(float(mean(values)) if values else 0.0, 6),
+                    "positive": int(sum(1 for item in values if item > 0.0)),
+                    "negative": int(sum(1 for item in values if item < 0.0)),
+                }
+                for key, values in sorted(length_buckets.items())
+            },
+        },
+    }
+
+
+def _write_diagnostic_trace(reports: list[ValidationReport], output_dir: Path) -> int:
+    rows: list[dict[str, object]] = []
+    for report in reports:
+        for strategy_key, strategy_result in report.per_strategy.items():
+            trace = strategy_result.get("diagnostic_trace", [])
+            if not isinstance(trace, list):
+                continue
+            for row in trace:
+                if not isinstance(row, dict):
+                    continue
+                payload = dict(row)
+                payload["user_uid"] = int(report.user_uid)
+                payload.setdefault("strategy", strategy_key)
+                rows.append(payload)
+    if not rows:
+        return 0
+    path = output_dir / "diagnostic_trace.jsonl"
+    path.write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    return len(rows)
 
 
 def generate_report(
@@ -558,13 +759,29 @@ def generate_report(
     partner_gate = _partner_gate(per_strategy_hard_pass, per_strategy_comparisons, required_users)
     topic_gate = _topic_gate(per_strategy_hard_pass, topic_split_summary, required_users)
     baseline_c_gate = _formal_baseline_c_gate(reports)
+    classifier_gate_summary = _classifier_gate_summary(reports)
+    semantic_engine_gate = _semantic_engine_gate(reports)
+    statistical_gate = {
+        "passed": bool(scipy_wilcoxon_available()),
+        "engine": "scipy.stats.wilcoxon",
+        "policy": "formal acceptance requires scipy.stats.wilcoxon(alternative='greater')",
+    }
     reproducibility_gate = {
         "passed": bool(baseline_c_gate["passed"]),
         "baseline_c_full_population_implant": bool(baseline_c_gate["passed"]),
     }
+    formal_acceptance_eligible = bool(
+        classifier_gate
+        and semantic_engine_gate["passed"]
+        and statistical_gate["passed"]
+        and baseline_c_gate["passed"]
+    )
     hard_pass_breakdown = {
         **metric_hard_breakdown,
         "metric_hard_pass": bool(metric_hard_pass),
+        "formal_acceptance_eligible": bool(formal_acceptance_eligible),
+        "semantic_embedding_gate": bool(semantic_engine_gate["passed"]),
+        "statistical_gate": bool(statistical_gate["passed"]),
         "pilot_gate": bool(pilot_gate["passed"]),
         "split_gate_all_required_strategies": bool(split_gate["passed"]),
         "partner_gate": bool(partner_gate["passed"]),
@@ -574,6 +791,7 @@ def generate_report(
     }
     hard_pass = bool(
         metric_hard_pass
+        and formal_acceptance_eligible
         and pilot_gate["passed"]
         and split_gate["passed"]
         and partner_gate["passed"]
@@ -587,6 +805,8 @@ def generate_report(
         overall_conclusion = "partial"
     else:
         overall_conclusion = "fail"
+    semantic_delta_summary = _semantic_delta_summary(reports)
+    diagnostic_trace_rows = _write_diagnostic_trace(reports, output_dir)
 
     acceptance_rules = {
         "version": ACCEPTANCE_RULES_VERSION,
@@ -595,7 +815,9 @@ def generate_report(
         "semantic_similarity": "paired Wilcoxon one-sided greater vs baseline A (p < 0.05) and mean paired diff > 0; one paired sample per user (mean across split strategies)",
         "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
-        "statistical_engine": "scipy.stats.wilcoxon when available; else conservative fallback (see statistics.py)",
+        "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
+        "classifier_gate": "formal acceptance requires independent train/gate labels, class minima, separation, non-TFIDF embedding engine, and 3-class macro-F1 gate pass",
+        "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
         "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
@@ -616,7 +838,11 @@ def generate_report(
         "agent_state_users_tested": int(ast_users_used),
         "agent_state_users_skipped_no_metric": int(ast_users_skipped),
         "metric_version": "m54_v3",
-        "behavioral_labeling": "dialogue_act_classifier_11class_and_3strategy",
+        "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+        "classifier_gate": classifier_gate_summary,
+        "semantic_engine_gate": semantic_engine_gate,
+        "statistical_gate": statistical_gate,
+        "formal_acceptance_eligible": bool(formal_acceptance_eligible),
         "behavioral_hard_metric_degraded": bool(behavioral_degraded),
         "comparisons": comparisons,
         "per_strategy_comparisons": per_strategy_comparisons,
@@ -631,6 +857,13 @@ def generate_report(
         "reproducibility_gate": reproducibility_gate,
         "baseline_c_gate": baseline_c_gate,
         "metric_interpretations": metric_interpretations,
+        "semantic_delta_summary": semantic_delta_summary,
+        "diagnostic_trace_jsonl": (
+            str((output_dir / "diagnostic_trace.jsonl").as_posix())
+            if diagnostic_trace_rows
+            else None
+        ),
+        "diagnostic_trace_rows": int(diagnostic_trace_rows),
         "hard_metrics": list(hard_metrics_list),
         "soft_metrics": list(soft_metrics_list),
         "acceptance_rules": acceptance_rules,
@@ -650,6 +883,9 @@ def generate_report(
         f"- Topic split: {topic_split_summary}",
         f"- Metric version: {aggregate_payload['metric_version']} ({aggregate_payload['behavioral_labeling']})",
         f"- Classifier 3-class gate: {classifier_gate}",
+        f"- Semantic embedding gate: {semantic_engine_gate['passed']}",
+        f"- Statistical gate: {statistical_gate['passed']}",
+        f"- Formal acceptance eligible: {formal_acceptance_eligible}",
         f"- Behavioral hard metric degraded (soft-only): {behavioral_degraded}",
         f"- Overall conclusion: {aggregate_payload['overall_conclusion']}",
         f"- Hard pass: {hard_pass}",
@@ -658,6 +894,7 @@ def generate_report(
         f"- Partner strategy hard pass: {partner_hard_pass}",
         f"- Topic strategy hard pass: {topic_hard_pass}",
         f"- Formal Baseline C gate: {baseline_c_gate['passed']}",
+        f"- Diagnostic trace rows: {diagnostic_trace_rows}",
         "",
         "## Acceptance (hard metrics)",
         "",
@@ -666,6 +903,25 @@ def generate_report(
     ]
     for check_name, ok in hard_pass_breakdown.items():
         lines.append(f"| {check_name} | {ok} |")
+    user_delta = semantic_delta_summary["users"]
+    lines.extend(
+        [
+            "",
+            "## Semantic Delta Diagnostics",
+            "",
+            f"- Users positive/negative/zero: {user_delta['positive']} / {user_delta['negative']} / {user_delta['zero']}",
+            f"- User delta median: {_fmt_cell_num(user_delta['median'])}; IQR: {_fmt_cell_num(user_delta['iqr'])}",
+            f"- Pair-count distribution: {semantic_delta_summary['pair_count_distribution']}",
+            "",
+            "| Strategy | mean P-A delta | positive | negative | median | IQR |",
+            "| --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for sk, row in semantic_delta_summary["per_strategy"].items():
+        lines.append(
+            f"| `{sk}` | {_fmt_cell_num(row['mean_delta'])} | {row['positive']} | {row['negative']} | "
+            f"{_fmt_cell_num(row['median'])} | {_fmt_cell_num(row['iqr'])} |"
+        )
     lines.extend(
         [
             "",
