@@ -6,11 +6,12 @@ import random
 from typing import Mapping
 
 from ...agent import SegmentAgent
-from ...self_model import NarrativePriors
+from ...self_model import NarrativePriors, PreferredPolicies
 from ...slow_learning import SlowTraitState
 from ..lifecycle import ImplantationConfig, implant_personality
 from ..observer import DialogueObserver
 from ..world import DialogueWorld
+from .state_calibration import apply_train_state_calibration
 
 _BIG_FIVE_KEYS = (
     "openness",
@@ -69,11 +70,13 @@ def create_wrong_agent(
     wrong_user_data: dict,
     config: ImplantationConfig,
     seed: int = 42,
+    classifier: object | None = None,
 ) -> SegmentAgent:
     agent = SegmentAgent(rng=random.Random(int(seed)))
     observer = DialogueObserver()
     world = DialogueWorld(wrong_user_data, observer, seed=int(seed))
     implant_personality(agent, world, config)
+    apply_train_state_calibration(agent, wrong_user_data, classifier=classifier, source="wrong_user_full")
     return agent
 
 
@@ -86,6 +89,32 @@ def _mean_map(values: list[dict[str, float]]) -> dict[str, float]:
             acc[key] = acc.get(key, 0.0) + float(value)
     inv = 1.0 / float(len(values))
     return {key: value * inv for key, value in acc.items()}
+
+
+def _mean_preferred_policies(values: list[PreferredPolicies]) -> PreferredPolicies | None:
+    if not values:
+        return None
+    action_maps = [dict(item.action_distribution) for item in values]
+    mean_actions = _mean_map(action_maps)
+    strategy_counts: dict[str, int] = {}
+    for item in values:
+        if item.dominant_strategy:
+            strategy_counts[item.dominant_strategy] = strategy_counts.get(item.dominant_strategy, 0) + 1
+    dominant_strategy = (
+        max(strategy_counts.items(), key=lambda item: (int(item[1]), str(item[0])))[0]
+        if strategy_counts
+        else "expected_free_energy"
+    )
+    ranked = sorted(mean_actions.items(), key=lambda item: (-float(item[1]), str(item[0])))
+    learned_preferences = [action for action, freq in ranked if float(freq) >= 0.12][:4]
+    return PreferredPolicies(
+        dominant_strategy=dominant_strategy,
+        action_distribution={key: round(float(value), 6) for key, value in mean_actions.items()},
+        risk_profile="risk_neutral",
+        learned_avoidances=[],
+        learned_preferences=learned_preferences,
+        last_updated_tick=0,
+    )
 
 
 def _assign_if_present(obj: object, payload: Mapping[str, float]) -> None:
@@ -127,6 +156,7 @@ def _inject_average_personality_profile(agent: SegmentAgent, mean_vector: dict[s
 def create_average_agent(
     all_user_profiles: list[dict],
     seed: int = 42,
+    classifier: object | None = None,
 ) -> SegmentAgent:
     """Baseline C fallback: mean Big Five / profile scalars only (no full implant)."""
     agent = SegmentAgent(rng=random.Random(int(seed)))
@@ -139,6 +169,29 @@ def create_average_agent(
     traits_obj = getattr(traits_obj, "traits", None)
     if traits_obj is not None:
         _assign_if_present(traits_obj, mean_vector)
+    calibration_dicts: list[dict[str, float]] = []
+    prior_dicts: list[dict[str, float]] = []
+    policy_values: list[PreferredPolicies] = []
+    for idx, item in enumerate(all_user_profiles):
+        if not isinstance(item, Mapping):
+            continue
+        sub = SegmentAgent(rng=random.Random(int(seed) + idx + 1))
+        apply_train_state_calibration(sub, item, classifier=classifier, source="population_profile")
+        traits = sub.slow_variable_learner.state.traits.to_dict()
+        priors = sub.self_model.narrative_priors.to_dict()
+        calibration_dicts.append(dict(traits))
+        prior_dicts.append(dict(priors))
+        if sub.self_model.preferred_policies is not None:
+            policy_values.append(sub.self_model.preferred_policies)
+    if calibration_dicts:
+        agent.slow_variable_learner.state.traits = SlowTraitState.from_dict(
+            _mean_map(calibration_dicts)
+        )
+    if prior_dicts:
+        agent.self_model.narrative_priors = NarrativePriors.from_dict(_mean_map(prior_dicts))
+    mean_policies = _mean_preferred_policies(policy_values)
+    if mean_policies is not None:
+        agent.self_model.preferred_policies = mean_policies
     return agent
 
 
@@ -147,6 +200,7 @@ def build_population_average_agent(
     config: ImplantationConfig,
     *,
     seed: int = 42,
+    classifier: object | None = None,
 ) -> SegmentAgent:
     """Baseline C: full-data implant per user, then mean SlowTraitState + NarrativePriors (+ profile)."""
     agent = SegmentAgent(rng=random.Random(int(seed)))
@@ -155,6 +209,7 @@ def build_population_average_agent(
     _progress(f"building Baseline C population average from {len(user_datasets)} users...")
     trait_dicts: list[dict[str, float]] = []
     prior_dicts: list[dict[str, float]] = []
+    policy_values: list[PreferredPolicies] = []
     profile_vectors: list[dict[str, float]] = []
     total = len(user_datasets)
     for idx, ds in enumerate(user_datasets):
@@ -166,12 +221,16 @@ def build_population_average_agent(
         sub = SegmentAgent(rng=random.Random(int(seed) + idx + 1))
         world = DialogueWorld(ds, DialogueObserver(), seed=int(seed) + idx + 1)
         implant_personality(sub, world, config)
+        apply_train_state_calibration(sub, ds, classifier=classifier, source="population_full")
         traits = getattr(getattr(sub.slow_variable_learner, "state", None), "traits", None)
         if traits is not None and hasattr(traits, "to_dict"):
             trait_dicts.append(dict(traits.to_dict()))
         priors = getattr(sub.self_model, "narrative_priors", None)
         if priors is not None and hasattr(priors, "to_dict"):
             prior_dicts.append(dict(priors.to_dict()))
+        policies = getattr(sub.self_model, "preferred_policies", None)
+        if isinstance(policies, PreferredPolicies):
+            policy_values.append(policies)
         profile_vectors.append(_profile_vector(ds))
     mean_traits = _mean_map(trait_dicts) if trait_dicts else {}
     mean_priors = _mean_map(prior_dicts) if prior_dicts else {}
@@ -181,6 +240,9 @@ def build_population_average_agent(
         agent.slow_variable_learner.state.traits = SlowTraitState.from_dict(mean_traits)
     if mean_priors:
         agent.self_model.narrative_priors = NarrativePriors.from_dict(mean_priors)
+    mean_policies = _mean_preferred_policies(policy_values)
+    if mean_policies is not None:
+        agent.self_model.preferred_policies = mean_policies
     return agent
 
 

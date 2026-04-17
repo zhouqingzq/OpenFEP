@@ -217,6 +217,7 @@ def average_surface_profiles(
     *,
     source: str = "population_average",
     max_items: int = 12,
+    include_surface_anchors: bool = True,
 ) -> DialogueSurfaceProfile:
     normalized = [
         p if isinstance(p, DialogueSurfaceProfile) else DialogueSurfaceProfile.from_dict(p)
@@ -256,10 +257,14 @@ def average_surface_profiles(
             6,
         ),
         punctuation_counts={k: int(v) for k, v in punct_counts.items()},
-        opening_phrases=_top(prefix_counts, max_items),
-        connector_phrases=_top(connector_counts, max_items),
-        top_tokens=_top(token_counts, max_items),
-        action_phrases={k: _top(v, 5) for k, v in action_phrases.items()},
+        opening_phrases=_top(prefix_counts, max_items) if include_surface_anchors else [],
+        connector_phrases=_top(connector_counts, max_items) if include_surface_anchors else [],
+        top_tokens=_top(token_counts, max_items) if include_surface_anchors else [],
+        action_phrases=(
+            {k: _top(v, 5) for k, v in action_phrases.items()}
+            if include_surface_anchors
+            else {}
+        ),
         strategy_counts={k: int(v) for k, v in strategy_counts.items()},
         partner_tokens={},
     )

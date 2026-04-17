@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
+import math
 import os
 from statistics import mean, pstdev
 from typing import Mapping
 
 from ...agent import SegmentAgent
+from ...slow_learning import SlowTraitState
 from ..conversation_loop import run_conversation
 from ..lifecycle import ImplantationConfig, implant_personality
 from ..observer import DialogueObserver
@@ -35,6 +38,7 @@ from .metrics import (
     surface_similarity,
 )
 from .splitter import SplitStrategy, split_user_data
+from .state_calibration import apply_train_state_calibration
 from .surface_profile import (
     DialogueSurfaceProfile,
     attach_surface_profile,
@@ -181,6 +185,7 @@ def _generate_from_sessions(
                         "real_chars": int(len(str(real))),
                         "action": action,
                         "strategy": strategy,
+                        "generation_diagnostics": dict(turn.generation_diagnostics or {}),
                         "dominant_component": str(getattr(chosen, "dominant_component", "")),
                         "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
                         "narrative_priors": priors.to_dict() if hasattr(priors, "to_dict") else {},
@@ -276,6 +281,113 @@ def _surface_profile_summary(profile: DialogueSurfaceProfile) -> dict[str, objec
     }
 
 
+def _agreement_rate(left: list[str], right: list[str]) -> float:
+    total = min(len(left), len(right))
+    if total <= 0:
+        return 0.0
+    return round(sum(1 for idx in range(total) if left[idx] == right[idx]) / float(total), 6)
+
+
+def _mean_semantic_pair_score(left: list[str], right: list[str]) -> float:
+    scores = semantic_pair_scores(left, right)
+    return round(float(mean(scores)) if scores else 0.0, 6)
+
+
+def _state_vector(agent: SegmentAgent) -> dict[str, float]:
+    out: dict[str, float] = {}
+    traits = getattr(getattr(agent.slow_variable_learner, "state", None), "traits", None)
+    if traits is not None and hasattr(traits, "to_dict"):
+        for key, value in traits.to_dict().items():
+            out[f"trait:{key}"] = float(value)
+    priors = getattr(agent.self_model, "narrative_priors", None)
+    if priors is not None and hasattr(priors, "to_dict"):
+        for key, value in priors.to_dict().items():
+            out[f"prior:{key}"] = float(value)
+    return out
+
+
+def _vector_distance(left: Mapping[str, float], right: Mapping[str, float]) -> dict[str, object]:
+    keys = sorted(set(left.keys()) | set(right.keys()))
+    if not keys:
+        return {"cosine": 0.0, "l2": 0.0, "per_dimension_abs_delta": {}}
+    l_vals = [float(left.get(key, 0.0)) for key in keys]
+    r_vals = [float(right.get(key, 0.0)) for key in keys]
+    dot = sum(l * r for l, r in zip(l_vals, r_vals))
+    l_norm = math.sqrt(sum(l * l for l in l_vals))
+    r_norm = math.sqrt(sum(r * r for r in r_vals))
+    cosine = 0.0 if l_norm <= 1e-12 or r_norm <= 1e-12 else max(-1.0, min(1.0, dot / (l_norm * r_norm)))
+    l2 = math.sqrt(sum((l - r) ** 2 for l, r in zip(l_vals, r_vals)))
+    return {
+        "cosine": round(float(cosine), 6),
+        "l2": round(float(l2), 6),
+        "per_dimension_abs_delta": {
+            key: round(abs(float(left.get(key, 0.0)) - float(right.get(key, 0.0))), 6)
+            for key in keys
+        },
+    }
+
+
+def _state_distance_diagnostics(
+    train_agent: SegmentAgent,
+    full_agent: SegmentAgent,
+    default_agent: SegmentAgent,
+    wrong_agent: SegmentAgent | None,
+) -> dict[str, object]:
+    train_vec = _state_vector(train_agent)
+    vectors = {
+        "train_full": _vector_distance(train_vec, _state_vector(full_agent)),
+        "train_default": _vector_distance(train_vec, _state_vector(default_agent)),
+    }
+    if wrong_agent is not None:
+        vectors["train_wrong_user"] = _vector_distance(train_vec, _state_vector(wrong_agent))
+    variance_vectors = [
+        _state_vector(train_agent),
+        _state_vector(full_agent),
+        _state_vector(default_agent),
+    ]
+    if wrong_agent is not None:
+        variance_vectors.append(_state_vector(wrong_agent))
+    keys = sorted(set().union(*[set(vec.keys()) for vec in variance_vectors]))
+    per_dim_values: dict[str, list[float]] = {key: [] for key in keys}
+    for vec in variance_vectors:
+        for key in keys:
+            per_dim_values[key].append(float(vec.get(key, 0.0)))
+    return {
+        **vectors,
+        "per_dimension_variance": {
+            key: round(float(pstdev(values)) ** 2 if len(values) > 1 else 0.0, 6)
+            for key, values in per_dim_values.items()
+        },
+    }
+
+
+def _ablation_summary(
+    *,
+    name: str,
+    generated: list[str],
+    real: list[str],
+    gen_11: list[str],
+    gen_3: list[str],
+    personality_generated: list[str],
+    personality_11: list[str],
+    personality_3: list[str],
+    baseline_a_semantic: float,
+    real_11: list[str],
+    real_3: list[str],
+) -> dict[str, object]:
+    metrics = _metrics_bundle(generated, real, gen_11, real_11, gen_3, real_3)
+    semantic_mean = float(metrics["semantic_similarity"].value)
+    return {
+        "name": name,
+        "semantic_mean": round(float(semantic_mean), 6),
+        "semantic_vs_baseline_a_diff": round(float(semantic_mean) - float(baseline_a_semantic), 6),
+        "action_agreement_vs_personality": _agreement_rate(gen_11, personality_11),
+        "strategy_agreement_vs_personality": _agreement_rate(gen_3, personality_3),
+        "text_similarity_vs_personality": _mean_semantic_pair_score(generated, personality_generated),
+        "pair_count": int(min(len(generated), len(real))),
+    }
+
+
 def _semantic_trace_rows(
     *,
     strategy_key: str,
@@ -285,8 +397,22 @@ def _semantic_trace_rows(
     personality_scores: list[float],
     baseline_a_scores: list[float],
     baseline_c_scores: list[float],
+    personality_vs_a_text_scores: list[float] | None = None,
+    personality_vs_c_text_scores: list[float] | None = None,
+    personality_vs_b_best_text_scores: list[float] | None = None,
+    baseline_b_best_trace: list[dict[str, object]] | None = None,
+    baseline_b_worst_trace: list[dict[str, object]] | None = None,
+    baseline_b_best_scores: list[float] | None = None,
+    baseline_b_worst_scores: list[float] | None = None,
 ) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
+    personality_vs_a_text_scores = personality_vs_a_text_scores or []
+    personality_vs_c_text_scores = personality_vs_c_text_scores or []
+    personality_vs_b_best_text_scores = personality_vs_b_best_text_scores or []
+    baseline_b_best_trace = baseline_b_best_trace or []
+    baseline_b_worst_trace = baseline_b_worst_trace or []
+    baseline_b_best_scores = baseline_b_best_scores or []
+    baseline_b_worst_scores = baseline_b_worst_scores or []
     total = min(
         len(personality_trace),
         len(baseline_a_trace),
@@ -299,6 +425,11 @@ def _semantic_trace_rows(
         p = dict(personality_trace[idx])
         a = dict(baseline_a_trace[idx])
         c = dict(baseline_c_trace[idx])
+        b_best = dict(baseline_b_best_trace[idx]) if idx < len(baseline_b_best_trace) else {}
+        b_worst = dict(baseline_b_worst_trace[idx]) if idx < len(baseline_b_worst_trace) else {}
+        p_gen_diag = dict(p.get("generation_diagnostics", {})) if isinstance(p.get("generation_diagnostics"), Mapping) else {}
+        a_gen_diag = dict(a.get("generation_diagnostics", {})) if isinstance(a.get("generation_diagnostics"), Mapping) else {}
+        c_gen_diag = dict(c.get("generation_diagnostics", {})) if isinstance(c.get("generation_diagnostics"), Mapping) else {}
         rows.append(
             {
                 "strategy": strategy_key,
@@ -310,9 +441,41 @@ def _semantic_trace_rows(
                 "personality_text": p.get("generated_text"),
                 "baseline_a_text": a.get("generated_text"),
                 "baseline_c_text": c.get("generated_text"),
+                "baseline_b_best_text": b_best.get("generated_text"),
+                "baseline_b_worst_text": b_worst.get("generated_text"),
+                "personality_generated_chars": int(p.get("generated_chars", 0) or 0),
+                "baseline_a_generated_chars": int(a.get("generated_chars", 0) or 0),
+                "baseline_c_generated_chars": int(c.get("generated_chars", 0) or 0),
+                "baseline_b_best_generated_chars": int(b_best.get("generated_chars", 0) or 0),
+                "baseline_b_worst_generated_chars": int(b_worst.get("generated_chars", 0) or 0),
                 "personality_semantic_pair_score": round(float(personality_scores[idx]), 6),
                 "baseline_a_semantic_pair_score": round(float(baseline_a_scores[idx]), 6),
                 "baseline_c_semantic_pair_score": round(float(baseline_c_scores[idx]), 6),
+                "baseline_b_best_semantic_pair_score": (
+                    round(float(baseline_b_best_scores[idx]), 6)
+                    if idx < len(baseline_b_best_scores)
+                    else None
+                ),
+                "baseline_b_worst_semantic_pair_score": (
+                    round(float(baseline_b_worst_scores[idx]), 6)
+                    if idx < len(baseline_b_worst_scores)
+                    else None
+                ),
+                "personality_vs_a_text_similarity": (
+                    round(float(personality_vs_a_text_scores[idx]), 6)
+                    if idx < len(personality_vs_a_text_scores)
+                    else None
+                ),
+                "personality_vs_c_text_similarity": (
+                    round(float(personality_vs_c_text_scores[idx]), 6)
+                    if idx < len(personality_vs_c_text_scores)
+                    else None
+                ),
+                "personality_vs_b_best_text_similarity": (
+                    round(float(personality_vs_b_best_text_scores[idx]), 6)
+                    if idx < len(personality_vs_b_best_text_scores)
+                    else None
+                ),
                 "personality_vs_a_pair_delta": round(
                     float(personality_scores[idx]) - float(baseline_a_scores[idx]),
                     6,
@@ -327,6 +490,39 @@ def _semantic_trace_rows(
                 "baseline_a_strategy": a.get("strategy"),
                 "baseline_c_action": c.get("action"),
                 "baseline_c_strategy": c.get("strategy"),
+                "baseline_b_best_action": b_best.get("action"),
+                "baseline_b_best_strategy": b_best.get("strategy"),
+                "baseline_b_worst_action": b_worst.get("action"),
+                "baseline_b_worst_strategy": b_worst.get("strategy"),
+                "personality_baseline_a_action_agree": p.get("action") == a.get("action"),
+                "personality_baseline_a_strategy_agree": p.get("strategy") == a.get("strategy"),
+                "personality_baseline_c_action_agree": p.get("action") == c.get("action"),
+                "personality_baseline_c_strategy_agree": p.get("strategy") == c.get("strategy"),
+                "personality_baseline_b_best_action_agree": (
+                    p.get("action") == b_best.get("action") if b_best else None
+                ),
+                "personality_baseline_b_best_strategy_agree": (
+                    p.get("strategy") == b_best.get("strategy") if b_best else None
+                ),
+                "personality_template_id": p_gen_diag.get("template_id"),
+                "baseline_a_template_id": a_gen_diag.get("template_id"),
+                "baseline_c_template_id": c_gen_diag.get("template_id"),
+                "personality_surface_source": p_gen_diag.get("surface_source"),
+                "baseline_a_surface_source": a_gen_diag.get("surface_source"),
+                "baseline_c_surface_source": c_gen_diag.get("surface_source"),
+                "personality_profile_phrase_used": p_gen_diag.get("profile_phrase_used"),
+                "personality_profile_opening_used": p_gen_diag.get("profile_opening_used"),
+                "personality_topic_anchor_used": p_gen_diag.get("topic_anchor_used"),
+                "personality_partner_anchor_used": p_gen_diag.get("partner_anchor_used"),
+                "personality_rhetorical_move": p_gen_diag.get("rhetorical_move"),
+                "personality_profile_confidence": p_gen_diag.get("profile_confidence"),
+                "personality_profile_degraded_reason": p_gen_diag.get("profile_degraded_reason"),
+                "personality_profile_anchor_match": p_gen_diag.get("profile_anchor_match"),
+                "personality_profile_length_bucket": p_gen_diag.get("profile_length_bucket"),
+                "baseline_a_rhetorical_move": a_gen_diag.get("rhetorical_move"),
+                "baseline_c_rhetorical_move": c_gen_diag.get("rhetorical_move"),
+                "baseline_c_profile_confidence": c_gen_diag.get("profile_confidence"),
+                "baseline_c_profile_degraded_reason": c_gen_diag.get("profile_degraded_reason"),
                 "dominant_component": p.get("dominant_component"),
                 "reply_length_bucket": _reply_length_bucket(int(p.get("generated_chars", 0) or 0)),
                 "slow_traits": p.get("slow_traits", {}),
@@ -385,6 +581,7 @@ def run_validation(
             if isinstance(item, Mapping)
         ),
         source="population_average",
+        include_surface_anchors=False,
     )
 
     for strategy in config.strategies:
@@ -420,6 +617,12 @@ def run_validation(
         train_agent = SegmentAgent()
         train_world = DialogueWorld(train_dataset, DialogueObserver(), seed=int(config.seed))
         implant_personality(train_agent, train_world, config.implantation_config)
+        state_calibration_summary = apply_train_state_calibration(
+            train_agent,
+            train_dataset,
+            classifier=classifier,
+            source=f"{strategy_key}:train",
+        )
         agent_state_result = agent_state_similarity(train_agent, full_agent)
         agent_state_result.details["agent_state_measured_before_holdout_generation"] = True
         train_agent_for_generation = clone_agent_template(
@@ -456,6 +659,8 @@ def run_validation(
             seed=int(config.seed) + 202,
         )
         b_runs: list[dict[str, float]] = []
+        b_trace_runs: list[dict[str, object]] = []
+        wrong_agent_for_state: SegmentAgent | None = None
         for wrong in chosen_wrong:
             wrong_uid = int(wrong.get("_wrong_user_uid", wrong.get("uid", 0)))
             cache_key = int(wrong_uid)
@@ -465,6 +670,7 @@ def run_validation(
                     wrong,
                     config.implantation_config,
                     seed=int(config.seed) + wrong_uid,
+                    classifier=classifier,
                 )
                 wrong_profile = build_surface_profile(wrong, classifier=classifier, source="wrong_user")
                 if wrong_agent_cache is not None:
@@ -475,16 +681,33 @@ def run_validation(
                 wrong_template,
                 seed=int(config.seed) + 303 + wrong_uid + config.strategies.index(strategy),
             )
+            if wrong_agent_for_state is None:
+                wrong_agent_for_state = wrong_agent
             attach_surface_profile(wrong_agent, wrong_profile)
-            b_gen, b_real, bg11, br11, bg3, br3, _b_trace = _call_generate_from_sessions(
+            b_gen, b_real, bg11, br11, bg3, br3, b_trace = _call_generate_from_sessions(
                 wrong_agent,
                 split.holdout_sessions,
                 user_uid=user_uid,
                 seed=int(config.seed) + 303,
                 classifier=classifier,
-                diagnostic_trace=False,
+                diagnostic_trace=bool(config.diagnostic_trace),
             )
-            b_runs.append(_result_values(_metrics_bundle(b_gen, b_real, bg11, br11, bg3, br3)))
+            b_metrics = _metrics_bundle(b_gen, b_real, bg11, br11, bg3, br3)
+            b_values = _result_values(b_metrics)
+            b_runs.append(b_values)
+            if config.diagnostic_trace:
+                b_trace_runs.append(
+                    {
+                        "wrong_uid": wrong_uid,
+                        "generated": b_gen,
+                        "real": b_real,
+                        "gen_11": bg11,
+                        "gen_3": bg3,
+                        "trace": b_trace,
+                        "semantic_scores": semantic_pair_scores(b_gen, b_real),
+                        "semantic_mean": float(b_values.get("semantic_similarity", 0.0)),
+                    }
+                )
         baseline_b_values: dict[str, float] = {}
         if b_runs:
             metric_names = sorted(set().union(*[set(item.keys()) for item in b_runs]))
@@ -496,7 +719,7 @@ def run_validation(
         if population_average_template is not None:
             baseline_c_agent = clone_agent_template(population_average_template, seed=strat_seed)
         else:
-            baseline_c_agent = create_average_agent(all_profiles, seed=strat_seed)
+            baseline_c_agent = create_average_agent(all_profiles, seed=strat_seed, classifier=classifier)
         attach_surface_profile(baseline_c_agent, population_surface_profile)
         c_gen, c_real, cg11, cr11, cg3, cr3, c_trace = _call_generate_from_sessions(
             baseline_c_agent,
@@ -507,12 +730,21 @@ def run_validation(
             diagnostic_trace=bool(config.diagnostic_trace),
         )
         baseline_c_metrics = _metrics_bundle(c_gen, c_real, cg11, cr11, cg3, cr3)
+        state_distance_diag = _state_distance_diagnostics(
+            train_agent,
+            full_agent,
+            baseline_a_agent,
+            wrong_agent_for_state,
+        )
 
         personality_values = _result_values(personality_metrics)
         baseline_a_values = _result_values(baseline_a_metrics)
         baseline_c_values = _result_values(baseline_c_metrics)
         diagnostic_rows: list[dict[str, object]] = []
+        ablation_rows: list[dict[str, object]] = []
         if config.diagnostic_trace:
+            b_best = max(b_trace_runs, key=lambda row: float(row.get("semantic_mean", 0.0)), default={})
+            b_worst = min(b_trace_runs, key=lambda row: float(row.get("semantic_mean", 0.0)), default={})
             diagnostic_rows = _semantic_trace_rows(
                 strategy_key=strategy_key,
                 personality_trace=p_trace,
@@ -521,6 +753,98 @@ def run_validation(
                 personality_scores=semantic_pair_scores(generated, real),
                 baseline_a_scores=semantic_pair_scores(a_gen, a_real),
                 baseline_c_scores=semantic_pair_scores(c_gen, c_real),
+                personality_vs_a_text_scores=semantic_pair_scores(generated, a_gen),
+                personality_vs_c_text_scores=semantic_pair_scores(generated, c_gen),
+                personality_vs_b_best_text_scores=(
+                    semantic_pair_scores(generated, list(b_best.get("generated", [])))
+                    if isinstance(b_best, dict)
+                    else []
+                ),
+                baseline_b_best_trace=list(b_best.get("trace", [])) if isinstance(b_best, dict) else [],
+                baseline_b_worst_trace=list(b_worst.get("trace", [])) if isinstance(b_worst, dict) else [],
+                baseline_b_best_scores=list(b_best.get("semantic_scores", [])) if isinstance(b_best, dict) else [],
+                baseline_b_worst_scores=list(b_worst.get("semantic_scores", [])) if isinstance(b_worst, dict) else [],
+            )
+            no_surface_agent = clone_agent_template(
+                train_agent,
+                seed=int(config.seed) + 17 + config.strategies.index(strategy),
+            )
+            ns_gen, ns_real, ns_g11, ns_r11, ns_g3, ns_r3, _ = _call_generate_from_sessions(
+                no_surface_agent,
+                split.holdout_sessions,
+                user_uid=user_uid,
+                seed=int(config.seed),
+                classifier=classifier,
+                diagnostic_trace=False,
+            )
+            ablation_rows.append(
+                _ablation_summary(
+                    name="no_surface_profile",
+                    generated=ns_gen,
+                    real=ns_real,
+                    gen_11=ns_g11,
+                    gen_3=ns_g3,
+                    personality_generated=generated,
+                    personality_11=g11,
+                    personality_3=g3,
+                    baseline_a_semantic=float(baseline_a_values.get("semantic_similarity", 0.0)),
+                    real_11=ns_r11,
+                    real_3=ns_r3,
+                )
+            )
+            no_policy_agent = clone_agent_template(
+                train_agent,
+                seed=int(config.seed) + 808 + config.strategies.index(strategy),
+            )
+            no_policy_agent.slow_variable_learner.state.traits = SlowTraitState()
+            attach_surface_profile(no_policy_agent, train_surface_profile)
+            np_gen, np_real, np_g11, np_r11, np_g3, np_r3, _ = _call_generate_from_sessions(
+                no_policy_agent,
+                split.holdout_sessions,
+                user_uid=user_uid,
+                seed=int(config.seed) + 808,
+                classifier=classifier,
+                diagnostic_trace=False,
+            )
+            ablation_rows.append(
+                _ablation_summary(
+                    name="no_policy_trait_bias",
+                    generated=np_gen,
+                    real=np_real,
+                    gen_11=np_g11,
+                    gen_3=np_g3,
+                    personality_generated=generated,
+                    personality_11=g11,
+                    personality_3=g3,
+                    baseline_a_semantic=float(baseline_a_values.get("semantic_similarity", 0.0)),
+                    real_11=np_r11,
+                    real_3=np_r3,
+                )
+            )
+            surface_only_agent = create_default_agent(seed=int(config.seed) + 909)
+            attach_surface_profile(surface_only_agent, train_surface_profile)
+            so_gen, so_real, so_g11, so_r11, so_g3, so_r3, _ = _call_generate_from_sessions(
+                surface_only_agent,
+                split.holdout_sessions,
+                user_uid=user_uid,
+                seed=int(config.seed) + 909,
+                classifier=classifier,
+                diagnostic_trace=False,
+            )
+            ablation_rows.append(
+                _ablation_summary(
+                    name="surface_only_default_agent",
+                    generated=so_gen,
+                    real=so_real,
+                    gen_11=so_g11,
+                    gen_3=so_g3,
+                    personality_generated=generated,
+                    personality_11=g11,
+                    personality_3=g3,
+                    baseline_a_semantic=float(baseline_a_values.get("semantic_similarity", 0.0)),
+                    real_11=so_r11,
+                    real_3=so_r3,
+                )
             )
         per_strategy[strategy_key] = {
             "skipped": False,
@@ -539,10 +863,13 @@ def run_validation(
             "baseline_c_metrics": baseline_c_values,
             "baseline_c_metric_details": _result_details(baseline_c_metrics),
             "baseline_b_selected_wrong_uids": [int(item.get("_wrong_user_uid", -1)) for item in chosen_wrong],
+            "state_calibration_summary": state_calibration_summary,
             "surface_profile": _surface_profile_summary(train_surface_profile),
             "baseline_a_surface_profile": {"source": "empty", "reply_count": 0},
             "baseline_c_surface_profile": _surface_profile_summary(population_surface_profile),
             "diagnostic_trace": diagnostic_rows,
+            "ablation_summary": ablation_rows,
+            "state_distance_diagnostics": state_distance_diag,
         }
         strategy_personality_means[strategy_key] = float(personality_values.get("semantic_similarity", 0.0))
         strategy_baseline_a_means[strategy_key] = float(baseline_a_values.get("semantic_similarity", 0.0))
@@ -614,8 +941,13 @@ def run_pilot_validation(
     elif config.skip_population_average_implant:
         pop_template = None
     else:
+        classifier_train = list(config.classifier_train_samples or DEFAULT_CLASSIFIER_TRAIN_SAMPLES)
+        population_classifier = DialogueActClassifier(classifier_train or None)
         pop_template = build_population_average_agent(
-            user_datasets, config.implantation_config, seed=int(config.seed)
+            user_datasets,
+            config.implantation_config,
+            seed=int(config.seed),
+            classifier=population_classifier,
         )
     semantic_diffs: list[float] = []
     behavioral_diffs: list[float] = []
@@ -675,8 +1007,13 @@ def run_batch_validation(
     if config.skip_population_average_implant:
         pop_template = None
     else:
+        classifier_train = list(config.classifier_train_samples or DEFAULT_CLASSIFIER_TRAIN_SAMPLES)
+        population_classifier = DialogueActClassifier(classifier_train or None)
         pop_template = build_population_average_agent(
-            user_datasets, config.implantation_config, seed=int(config.seed)
+            user_datasets,
+            config.implantation_config,
+            seed=int(config.seed),
+            classifier=population_classifier,
         )
     pilot = run_pilot_validation(
         user_datasets,

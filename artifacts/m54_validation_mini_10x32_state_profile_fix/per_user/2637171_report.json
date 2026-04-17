@@ -1,0 +1,3198 @@
+{
+  "aggregate": {
+    "behavioral_baseline_c_mean": 0.525,
+    "behavioral_hard_metric_enabled": false,
+    "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+    "behavioral_personality_mean": 0.5892857499999999,
+    "classifier_validation": {
+      "behavioral_hard_metric_enabled": false,
+      "class_distribution": {
+        "gate": {
+          "escape": 50,
+          "exploit": 50,
+          "explore": 50
+        },
+        "train": {
+          "escape": 100,
+          "exploit": 100,
+          "explore": 100
+        }
+      },
+      "confusion_matrix_3class": {
+        "escape": {
+          "escape": 41,
+          "exploit": 5,
+          "explore": 4
+        },
+        "exploit": {
+          "escape": 3,
+          "exploit": 40,
+          "explore": 7
+        },
+        "explore": {
+          "escape": 0,
+          "exploit": 6,
+          "explore": 44
+        }
+      },
+      "cue_override_rate": 0.646667,
+      "dataset_origin": "data\\m54_classifier_gate.jsonl",
+      "dataset_separation_ok": true,
+      "degradation_required": true,
+      "engine": "tfidf_nearest_centroid",
+      "formal_dataset_minima": {
+        "gate_per_class": 50,
+        "gate_samples": 150,
+        "train_per_class": 100,
+        "train_samples": 300
+      },
+      "formal_dataset_ok": true,
+      "formal_engine": false,
+      "formal_gate_eligible": false,
+      "gate_count": 150,
+      "macro_f1_11class": 0.571724,
+      "macro_f1_3class": 0.834172,
+      "min_macro_f1_3class": 0.7,
+      "passed_3class_gate": false,
+      "per_class_metrics_3class": {
+        "escape": {
+          "f1": 0.87234,
+          "precision": 0.931818,
+          "recall": 0.82,
+          "support": 50
+        },
+        "exploit": {
+          "f1": 0.792079,
+          "precision": 0.784314,
+          "recall": 0.8,
+          "support": 50
+        },
+        "explore": {
+          "f1": 0.838095,
+          "precision": 0.8,
+          "recall": 0.88,
+          "support": 50
+        }
+      },
+      "prediction_source_counts": {
+        "cue": 97,
+        "tfidf_centroid": 53
+      },
+      "sample_count": 150,
+      "train_count": 300
+    },
+    "diagnostic_trace_enabled": true,
+    "formal_requested": false,
+    "metric_version": "m54_v3",
+    "pilot": {
+      "behavioral_diff_sd": 0.071986,
+      "behavioral_escalated": false,
+      "escalated": false,
+      "pilot_metrics_used": [
+        "semantic_vs_baseline_a_mean_diff"
+      ],
+      "pilot_user_count": 5,
+      "required_users": 10,
+      "sd_threshold": 0.04,
+      "semantic_diff_mean": -0.008449,
+      "semantic_diff_sd": 0.019288,
+      "semantic_escalated": false,
+      "suggested_min_users": 10
+    },
+    "pipeline_status": "completed",
+    "requested_strategies": [
+      "random",
+      "temporal",
+      "partner",
+      "topic"
+    ],
+    "required_users": 10,
+    "semantic_baseline_a_mean": 0.03271325,
+    "semantic_baseline_b_mean": 0.04328275,
+    "semantic_baseline_c_mean": 0.046399499999999996,
+    "semantic_personality_mean": 0.0342325,
+    "skip_population_average_implant": false,
+    "strategy_count": 4
+  },
+  "conclusion": "completed",
+  "per_strategy": {
+    "partner": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 5,
+          "semantic_mean": 0.0,
+          "semantic_vs_baseline_a_diff": -0.019683,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 1.0
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_policy_trait_bias",
+          "pair_count": 5,
+          "semantic_mean": 0.0,
+          "semantic_vs_baseline_a_diff": -0.019683,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.799265
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "surface_only_default_agent",
+          "pair_count": 5,
+          "semantic_mean": 0.018026,
+          "semantic_vs_baseline_a_diff": -0.001657,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.656274
+        }
+      ],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "empathize",
+            "share_opinion"
+          ],
+          "chi_square_distance": 0.7
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.166667
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 5
+        },
+        "stylistic_similarity": {
+          "jsd": 0.051999
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.040693
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.588235,
+        "behavioral_similarity_strategy": 0.857143,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.019683,
+        "stylistic_similarity": 0.924982,
+        "surface_similarity": 0.020346
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.462745,
+        "behavioral_similarity_strategy": 0.6857143333333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.014751,
+        "stylistic_similarity": 0.9072566666666667,
+        "surface_similarity": 0.007779333333333333
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637379,
+        2637215,
+        2637318
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "elaborate",
+            "empathize",
+            "share_opinion"
+          ],
+          "chi_square_distance": 40000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.666667
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 5
+        },
+        "stylistic_similarity": {
+          "jsd": 0.069622
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.022121
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.6,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.014236,
+        "stylistic_similarity": 0.899557,
+        "surface_similarity": 0.011061
+      },
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.358648,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 1804,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 1804
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.294346
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 41,
+            "exploit": 5,
+            "explore": 4
+          },
+          "exploit": {
+            "escape": 3,
+            "exploit": 40,
+            "explore": 7
+          },
+          "explore": {
+            "escape": 0,
+            "exploit": 6,
+            "explore": 44
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "tfidf_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.571724,
+        "macro_f1_3class": 0.834172,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.87234,
+            "precision": 0.931818,
+            "recall": 0.82,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.792079,
+            "precision": 0.784314,
+            "recall": 0.8,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.838095,
+            "precision": 0.8,
+            "recall": 0.88,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "tfidf_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“安安 剛剛關注”，是的，我也这么想。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 21,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“安安 剛剛關注”，是的，我也这么想。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 29,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“安安 剛剛關注”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 29,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:1",
+          "baseline_c_text": "你说“安安 剛剛關注”，我在认真听你说，是的，我也这么想。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.150519,
+            "meaning_stability": 0.059667,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.065333
+          },
+          "pair_index": 0,
+          "partner_uid": 2652542,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 21,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "你说“安安 剛剛關注”，是的，我也这么想。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 1.0,
+          "personality_vs_b_best_text_similarity": 1.0,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.913445,
+          "real_text": "不客氣😊 好久不見了[口水][色][口水]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_2652542_20250523153909_0002",
+          "slow_traits": {
+            "caution_bias": 0.395556,
+            "exploration_posture": 0.583704,
+            "social_approach": 0.451111,
+            "threat_sensitivity": 0.495867,
+            "trust_stance": 0.554444
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 32,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.024095,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，是的，我也这么想。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 27,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我同意。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 44,
+          "baseline_b_worst_semantic_pair_score": 0.015473,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我在认真听你说，有道理，我跟你的看法一致。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 40,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.03369,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:1",
+          "baseline_c_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我在认真听你说，是的，我也这么想。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.150519,
+            "meaning_stability": 0.059667,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.065333
+          },
+          "pair_index": 1,
+          "partner_uid": 2652542,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 27,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:0",
+          "personality_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我同意。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.024095,
+          "personality_vs_a_text_similarity": 0.886433,
+          "personality_vs_b_best_text_similarity": 1.0,
+          "personality_vs_c_pair_delta": -0.03369,
+          "personality_vs_c_text_similarity": 0.8355,
+          "real_text": "哈哈哈🤣前面的沒聽過😆",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_2652542_20250524131331_0005",
+          "slow_traits": {
+            "caution_bias": 0.395556,
+            "exploration_posture": 0.583704,
+            "social_approach": 0.451111,
+            "threat_sensitivity": 0.495867,
+            "trust_stance": 0.554444
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 20,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“你很可愛欸😂”，是的，我也这么想。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 15,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“你很可愛欸😂”，我同意。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 28,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“你很可愛欸😂”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 23,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:0",
+          "baseline_c_text": "你说“你很可愛欸😂”，我在认真听你说，我同意。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.150519,
+            "meaning_stability": 0.059667,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.065333
+          },
+          "pair_index": 2,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 20,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "你说“你很可愛欸😂”，是的，我也这么想。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 1.0,
+          "personality_vs_b_best_text_similarity": 0.670778,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.610696,
+          "real_text": "[捂嘴笑]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250604155717_0004",
+          "slow_traits": {
+            "caution_bias": 0.395556,
+            "exploration_posture": 0.583704,
+            "social_approach": 0.451111,
+            "threat_sensitivity": 0.495867,
+            "trust_stance": 0.554444
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 15,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“😂😂😂早安啊”，我同意。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 24,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“😂😂😂早安啊”，有道理，我跟你的看法一致。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 28,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“😂😂😂早安啊”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 23,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:0",
+          "baseline_c_text": "你说“😂😂😂早安啊”，我在认真听你说，我同意。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.150519,
+            "meaning_stability": 0.059667,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.065333
+          },
+          "pair_index": 3,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 24,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "你说“😂😂😂早安啊”，有道理，我跟你的看法一致。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 0.39073,
+          "personality_vs_b_best_text_similarity": 1.0,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.370631,
+          "real_text": "哈哈哈🤣",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250606080233_0006",
+          "slow_traits": {
+            "caution_bias": 0.395556,
+            "exploration_posture": 0.583704,
+            "social_approach": 0.451111,
+            "threat_sensitivity": 0.495867,
+            "trust_stance": 0.554444
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "share_opinion",
+          "baseline_a_generated_chars": 8,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.074319,
+          "baseline_a_strategy": "explore",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "share_opinion:0",
+          "baseline_a_text": "我的想法是这样。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 29,
+          "baseline_b_best_semantic_pair_score": 0.153598,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“今天也要愉快順心過一天[可愛]”，是的，我也这么想。",
+          "baseline_b_worst_action": "share_opinion",
+          "baseline_b_worst_generated_chars": 16,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "explore",
+          "baseline_b_worst_text": "从我的角度，这件事可以这么处理。",
+          "baseline_c_action": "elaborate",
+          "baseline_c_generated_chars": 33,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.037491,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，换句话说。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.150519,
+            "meaning_stability": 0.059667,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.065333
+          },
+          "pair_index": 4,
+          "partner_uid": 5531374,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 12,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "explore",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "share_opinion:1",
+          "personality_text": "坦白说，我倾向于这样看。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.074319,
+          "personality_vs_a_text_similarity": 0.255786,
+          "personality_vs_b_best_text_similarity": 0.057005,
+          "personality_vs_c_pair_delta": -0.037491,
+          "personality_vs_c_text_similarity": 0.045542,
+          "real_text": "好 妳也是嘿[哈哈]",
+          "reply_length_bucket": "short",
+          "session_id": "2637171_5531374_20250606090146_0007",
+          "slow_traits": {
+            "caution_bias": 0.395556,
+            "exploration_posture": 0.583704,
+            "social_approach": 0.451111,
+            "threat_sensitivity": 0.495867,
+            "trust_stance": 0.554444
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "empathize",
+            "share_opinion"
+          ],
+          "chi_square_distance": 0.7
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.166667
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 5
+        },
+        "stylistic_similarity": {
+          "jsd": 0.057448
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.978875,
+        "behavioral_similarity_action11": 0.588235,
+        "behavioral_similarity_strategy": 0.857143,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.917121,
+        "surface_similarity": 0.0
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 13,
+        "holdout_partners": [
+          2651435,
+          2652542,
+          2701585,
+          3098066,
+          5531374
+        ],
+        "partner_count": 10,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "partner",
+        "train_count": 19,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "ask_question": 1,
+          "elaborate": 1,
+          "empathize": 1,
+          "joke": 1,
+          "minimal_response": 1,
+          "share_opinion": 4
+        },
+        "applied": true,
+        "avg_reply_chars": 5.333333,
+        "partner_question_ratio": 0.0,
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": 0.150519,
+          "meaning_stability": 0.059667,
+          "trauma_bias": 0.0,
+          "trust_prior": 0.065333
+        },
+        "reply_count": 9,
+        "source": "partner:train",
+        "strategy_counts": {
+          "escape": 1,
+          "exploit": 3,
+          "explore": 5
+        },
+        "token_variety": 0.481481,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": -0.104444,
+          "exploration_posture": 0.083704,
+          "social_approach": -0.048889,
+          "threat_sensitivity": -0.004133,
+          "trust_stance": 0.054444
+        },
+        "ultra_short_ratio": 0.222222
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.004245,
+          "prior:meaning_stability": 0.002105,
+          "prior:trauma_bias": 0.0,
+          "prior:trust_prior": 0.007942,
+          "trait:caution_bias": 0.002885,
+          "trait:exploration_posture": 0.004738,
+          "trait:social_approach": 0.004369,
+          "trait:threat_sensitivity": 7.9e-05,
+          "trait:trust_stance": 0.005515
+        },
+        "train_default": {
+          "cosine": 0.978875,
+          "l2": 0.231885,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.150519,
+            "prior:meaning_stability": 0.059667,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.065333,
+            "trait:caution_bias": 0.104444,
+            "trait:exploration_posture": 0.083704,
+            "trait:social_approach": 0.048889,
+            "trait:threat_sensitivity": 0.004133,
+            "trait:trust_stance": 0.054444
+          }
+        },
+        "train_full": {
+          "cosine": 0.978875,
+          "l2": 0.231885,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.150519,
+            "prior:meaning_stability": 0.059667,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.065333,
+            "trait:caution_bias": 0.104444,
+            "trait:exploration_posture": 0.083704,
+            "trait:social_approach": 0.048889,
+            "trait:threat_sensitivity": 0.004133,
+            "trait:trust_stance": 0.054444
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.952756,
+          "l2": 0.366478,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.150382,
+            "prior:meaning_stability": 0.050025,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.152821,
+            "trait:caution_bias": 0.005812,
+            "trait:exploration_posture": 0.193789,
+            "trait:social_approach": 0.17812,
+            "trait:threat_sensitivity": 0.017375,
+            "trait:trust_stance": 0.127351
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 6.7,
+        "median_reply_chars": 5,
+        "opening_phrases": [
+          "新年快樂🎆",
+          "[口水]",
+          "很久沒見了",
+          "你還是一樣 沒變呢🤣",
+          "哈哈早安"
+        ],
+        "reply_count": 30,
+        "source": "partner:train",
+        "strategy_counts": {
+          "escape": 5,
+          "exploit": 10,
+          "explore": 15
+        },
+        "top_tokens": [
+          "哈",
+          "早",
+          "下",
+          "點",
+          "安",
+          "好",
+          "班",
+          "沒"
+        ],
+        "ultra_short_ratio": 0.233333
+      }
+    },
+    "random": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 2,
+          "semantic_mean": 0.019794,
+          "semantic_vs_baseline_a_diff": -0.001788,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 1.0
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_policy_trait_bias",
+          "pair_count": 2,
+          "semantic_mean": 0.0689,
+          "semantic_vs_baseline_a_diff": 0.047318,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.826461
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "surface_only_default_agent",
+          "pair_count": 2,
+          "semantic_mean": 0.070104,
+          "semantic_vs_baseline_a_diff": 0.048522,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.616983
+        }
+      ],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.075496
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.030303
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.021582,
+        "stylistic_similarity": 0.891082,
+        "surface_similarity": 0.015152
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.044131000000000004,
+        "stylistic_similarity": 0.8829123333333333,
+        "surface_similarity": 0.030013
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637379,
+        2637215,
+        2637318
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.07508
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.055556
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.059,
+        "stylistic_similarity": 0.891682,
+        "surface_similarity": 0.027778
+      },
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.358648,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 1804,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 1804
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.294346
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 41,
+            "exploit": 5,
+            "explore": 4
+          },
+          "exploit": {
+            "escape": 3,
+            "exploit": 40,
+            "explore": 7
+          },
+          "explore": {
+            "escape": 0,
+            "exploit": 6,
+            "explore": 44
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "tfidf_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.571724,
+        "macro_f1_3class": 0.834172,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.87234,
+            "precision": 0.931818,
+            "recall": 0.82,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.792079,
+            "precision": 0.784314,
+            "recall": 0.8,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.838095,
+            "precision": 0.8,
+            "recall": 0.88,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "tfidf_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“你很可愛欸😂”，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 20,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“你很可愛欸😂”，是的，我也这么想。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 28,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“你很可愛欸😂”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 23,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:0",
+          "baseline_c_text": "你说“你很可愛欸😂”，我在认真听你说，我同意。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.168,
+            "meaning_stability": 0.105,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.104
+          },
+          "pair_index": 0,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 15,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "random:train",
+          "personality_template_id": "agree:0",
+          "personality_text": "你说“你很可愛欸😂”，我同意。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 0.585997,
+          "personality_vs_b_best_text_similarity": 0.566758,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.836369,
+          "real_text": "[捂嘴笑]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250604155717_0004",
+          "slow_traits": {
+            "caution_bias": 0.365,
+            "exploration_posture": 0.575,
+            "social_approach": 0.491667,
+            "threat_sensitivity": 0.481,
+            "trust_stance": 0.586667
+          },
+          "strategy": "random",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 33,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.043164,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“今天也要愉快順心過一天[可愛]”，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 29,
+          "baseline_b_best_semantic_pair_score": 0.098678,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“今天也要愉快順心過一天[可愛]”，是的，我也这么想。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 37,
+          "baseline_b_worst_semantic_pair_score": 0.083054,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 37,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.118,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:1",
+          "baseline_c_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，是的，我也这么想。",
+          "dominant_component": "expected_free_energy",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.168,
+            "meaning_stability": 0.105,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.104
+          },
+          "pair_index": 1,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 33,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.039589,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "random:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "你说“今天也要愉快順心過一天[可愛]”，有道理，我跟你的看法一致。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.003575,
+          "personality_vs_a_text_similarity": 1.0,
+          "personality_vs_b_best_text_similarity": 0.681199,
+          "personality_vs_c_pair_delta": -0.078411,
+          "personality_vs_c_text_similarity": 0.624133,
+          "real_text": "好 妳也是嘿[哈哈]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250606090146_0007",
+          "slow_traits": {
+            "caution_bias": 0.365,
+            "exploration_posture": 0.575,
+            "social_approach": 0.491667,
+            "threat_sensitivity": 0.481,
+            "trust_stance": 0.586667
+          },
+          "strategy": "random",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.068061
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.030303
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.968767,
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.019794,
+        "stylistic_similarity": 0.901808,
+        "surface_similarity": 0.015152
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "random",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "agree": 1,
+          "ask_question": 1,
+          "elaborate": 1,
+          "empathize": 2,
+          "joke": 1,
+          "minimal_response": 1,
+          "share_opinion": 5
+        },
+        "applied": true,
+        "avg_reply_chars": 7.0,
+        "partner_question_ratio": 0.0,
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": 0.168,
+          "meaning_stability": 0.105,
+          "trauma_bias": 0.0,
+          "trust_prior": 0.104
+        },
+        "reply_count": 12,
+        "source": "random:train",
+        "strategy_counts": {
+          "escape": 1,
+          "exploit": 5,
+          "explore": 6
+        },
+        "token_variety": 0.541667,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": -0.135,
+          "exploration_posture": 0.075,
+          "social_approach": -0.008333,
+          "threat_sensitivity": -0.019,
+          "trust_stance": 0.086667
+        },
+        "ultra_short_ratio": 0.166667
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.005289,
+          "prior:meaning_stability": 0.002884,
+          "prior:trauma_bias": 0.0,
+          "prior:trust_prior": 0.008115,
+          "trait:caution_bias": 0.003836,
+          "trait:exploration_posture": 0.004359,
+          "trait:social_approach": 0.003279,
+          "trait:threat_sensitivity": 0.000103,
+          "trait:trust_stance": 0.005636
+        },
+        "train_default": {
+          "cosine": 0.968767,
+          "l2": 0.286106,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.168,
+            "prior:meaning_stability": 0.105,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.104,
+            "trait:caution_bias": 0.135,
+            "trait:exploration_posture": 0.075,
+            "trait:social_approach": 0.008333,
+            "trait:threat_sensitivity": 0.019,
+            "trait:trust_stance": 0.086667
+          }
+        },
+        "train_full": {
+          "cosine": 0.968767,
+          "l2": 0.286106,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.168,
+            "prior:meaning_stability": 0.105,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.104,
+            "trait:caution_bias": 0.135,
+            "trait:exploration_posture": 0.075,
+            "trait:social_approach": 0.008333,
+            "trait:threat_sensitivity": 0.019,
+            "trait:trust_stance": 0.086667
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.963548,
+          "l2": 0.322613,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.167863,
+            "prior:meaning_stability": 0.004692,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.114154,
+            "trait:caution_bias": 0.024744,
+            "trait:exploration_posture": 0.185085,
+            "trait:social_approach": 0.137564,
+            "trait:threat_sensitivity": 0.002508,
+            "trait:trust_stance": 0.095128
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 7.121212,
+        "median_reply_chars": 5,
+        "opening_phrases": [
+          "嘻嘻🤭",
+          "新年快樂🎆",
+          "[口水]",
+          "很久沒見了",
+          "你還是一樣 沒變呢🤣"
+        ],
+        "reply_count": 33,
+        "source": "random:train",
+        "strategy_counts": {
+          "escape": 5,
+          "exploit": 12,
+          "explore": 16
+        },
+        "top_tokens": [
+          "哈",
+          "早",
+          "下",
+          "安",
+          "點",
+          "沒",
+          "好",
+          "嘻"
+        ],
+        "ultra_short_ratio": 0.242424
+      }
+    },
+    "temporal": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 8,
+          "semantic_mean": 0.097342,
+          "semantic_vs_baseline_a_diff": 0.029336,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 1.0
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_policy_trait_bias",
+          "pair_count": 8,
+          "semantic_mean": 0.068724,
+          "semantic_vs_baseline_a_diff": 0.000718,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.760372
+        },
+        {
+          "action_agreement_vs_personality": 0.625,
+          "name": "surface_only_default_agent",
+          "pair_count": 8,
+          "semantic_mean": 0.065772,
+          "semantic_vs_baseline_a_diff": -0.002234,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.693229
+        }
+      ],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "elaborate",
+            "empathize",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 3.25
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 8
+        },
+        "stylistic_similarity": {
+          "jsd": 0.061968
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.05375
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.235294,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.068006,
+        "stylistic_similarity": 0.910599,
+        "surface_similarity": 0.026875
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.16107733333333335,
+        "behavioral_similarity_strategy": 0.590508,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.070118,
+        "stylistic_similarity": 0.9014733333333333,
+        "surface_similarity": 0.025202333333333334
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637379,
+        2637215,
+        2637318
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "elaborate",
+            "empathize",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 3.25
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 8
+        },
+        "stylistic_similarity": {
+          "jsd": 0.075354
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.035638
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.235294,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.053362,
+        "stylistic_similarity": 0.891287,
+        "surface_similarity": 0.017819
+      },
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.358648,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 1804,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 1804
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.294346
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 41,
+            "exploit": 5,
+            "explore": 4
+          },
+          "exploit": {
+            "escape": 3,
+            "exploit": 40,
+            "explore": 7
+          },
+          "explore": {
+            "escape": 0,
+            "exploit": 6,
+            "explore": 44
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "tfidf_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.571724,
+        "macro_f1_3class": 0.834172,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.87234,
+            "precision": 0.931818,
+            "recall": 0.82,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.792079,
+            "precision": 0.784314,
+            "recall": 0.8,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.838095,
+            "precision": 0.8,
+            "recall": 0.88,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "tfidf_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.043271,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“今天也要愉快順心過一天[可愛]”，我同意。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 37,
+          "baseline_b_best_semantic_pair_score": 0.145183,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 24,
+          "baseline_b_worst_semantic_pair_score": 0.051101,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“今天也要愉快順心過一天[可愛]”，我同意。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 41,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.046629,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:2",
+          "baseline_c_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，有道理，我跟你的看法一致。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 0,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 29,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.151789,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "你说“今天也要愉快順心過一天[可愛]”，是的，我也这么想。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.108518,
+          "personality_vs_a_text_similarity": 0.860768,
+          "personality_vs_b_best_text_similarity": 0.945046,
+          "personality_vs_c_pair_delta": 0.10516,
+          "personality_vs_c_text_similarity": 0.767183,
+          "real_text": "好 妳也是嘿[哈哈]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250606090146_0007",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 20,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.424531,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“早安[哈哈]”，是的，我也这么想。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 23,
+          "baseline_b_best_semantic_pair_score": 0.403979,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“早安[哈哈]”，我在认真听你说，我同意。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 24,
+          "baseline_b_worst_semantic_pair_score": 0.368162,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“早安[哈哈]”，有道理，我跟你的看法一致。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 32,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.314151,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:2",
+          "baseline_c_text": "你说“早安[哈哈]”，我在认真听你说，有道理，我跟你的看法一致。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 1,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 15,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.507798,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:0",
+          "personality_text": "你说“早安[哈哈]”，我同意。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.083267,
+          "personality_vs_a_text_similarity": 0.639472,
+          "personality_vs_b_best_text_similarity": 0.86789,
+          "personality_vs_c_pair_delta": 0.193647,
+          "personality_vs_c_text_similarity": 0.571556,
+          "real_text": "哈哈哈",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613065732_0017",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 19,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.076247,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“你很早餒～”，是的，我也这么想。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 31,
+          "baseline_b_best_semantic_pair_score": 0.058985,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“你很早餒～”，我在认真听你说，有道理，我跟你的看法一致。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 23,
+          "baseline_b_worst_semantic_pair_score": 0.064972,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“你很早餒～”，有道理，我跟你的看法一致。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 22,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.066119,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:0",
+          "baseline_c_text": "你说“你很早餒～”，我在认真听你说，我同意。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 2,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 14,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.089752,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:0",
+          "personality_text": "你说“你很早餒～”，我同意。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.013505,
+          "personality_vs_a_text_similarity": 0.580388,
+          "personality_vs_b_best_text_similarity": 0.570533,
+          "personality_vs_c_pair_delta": 0.023633,
+          "personality_vs_c_text_similarity": 0.873068,
+          "real_text": "嘿啊 平日都早起",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613065732_0017",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 1
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 36,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“很好👍所以都早睡齁[哈哈]我只有要上”，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "share_opinion",
+          "baseline_b_best_generated_chars": 16,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "explore",
+          "baseline_b_best_text": "从我的角度，这件事可以这么处理。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 32,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“很好👍所以都早睡齁[哈哈]我只有要上”，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 44,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:2",
+          "baseline_c_text": "你说“很好👍所以都早睡齁[哈哈]我只有要上”，我在认真听你说，有道理，我跟你的看法一致。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 3,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 36,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "你说“很好👍所以都早睡齁[哈哈]我只有要上”，有道理，我跟你的看法一致。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 1.0,
+          "personality_vs_b_best_text_similarity": 0.122697,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.952882,
+          "real_text": "了解😉😆",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613065732_0017",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 2
+        },
+        {
+          "baseline_a_action": "elaborate",
+          "baseline_a_generated_chars": 28,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "elaborate:0",
+          "baseline_a_text": "你说“上班順心唷～等等我也要睡回籠覺了🤣”，我补充几句。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 39,
+          "baseline_b_best_semantic_pair_score": 0.029747,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“上班順心唷～等等我也要睡回籠覺了🤣”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_worst_action": "elaborate",
+          "baseline_b_worst_generated_chars": 28,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“上班順心唷～等等我也要睡回籠覺了🤣”，我补充几句。",
+          "baseline_c_action": "elaborate",
+          "baseline_c_generated_chars": 36,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "elaborate:0",
+          "baseline_c_text": "你说“上班順心唷～等等我也要睡回籠覺了🤣”，我在认真听你说，我补充几句。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 4,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 35,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.029394,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "你说“上班順心唷～等等我也要睡回籠覺了🤣”，有道理，我跟你的看法一致。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.029394,
+          "personality_vs_a_text_similarity": 0.764041,
+          "personality_vs_b_best_text_similarity": 0.788824,
+          "personality_vs_c_pair_delta": 0.029394,
+          "personality_vs_c_text_similarity": 0.742614,
+          "real_text": "哈哈哈 好的 晚安😴",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613065732_0017",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 3
+        },
+        {
+          "baseline_a_action": "elaborate",
+          "baseline_a_generated_chars": 15,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "elaborate:0",
+          "baseline_a_text": "你说“[哈哈]”，我补充几句。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 21,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“[哈哈]”，我在认真听你说，我同意。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 13,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“[哈哈]”，我同意。",
+          "baseline_c_action": "elaborate",
+          "baseline_c_generated_chars": 22,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_text": "你说“[哈哈]”，我在认真听你说，展开来说。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 5,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 18,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "你说“[哈哈]”，是的，我也这么想。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 0.410703,
+          "personality_vs_b_best_text_similarity": 0.518672,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.383998,
+          "real_text": "起床了🤣",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613100157_0019",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "elaborate",
+          "baseline_a_generated_chars": 18,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "elaborate:1",
+          "baseline_a_text": "你说“你也是唷[微笑]”，展开来说。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 34,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“你也是唷[微笑]”，我在认真听你说，有道理，我跟你的看法一致。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 26,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“你也是唷[微笑]”，有道理，我跟你的看法一致。",
+          "baseline_c_action": "elaborate",
+          "baseline_c_generated_chars": 26,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_text": "你说“你也是唷[微笑]”，我在认真听你说，展开来说。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 6,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 22,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "你说“你也是唷[微笑]”，是的，我也这么想。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 0.591118,
+          "personality_vs_b_best_text_similarity": 0.596593,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.581352,
+          "real_text": "[哈哈]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613153805_0023",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 22,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“北部還好”，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 21,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“北部還好”，我在认真听你说，我同意。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 13,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“北部還好”，我同意。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 30,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:2",
+          "baseline_c_text": "你说“北部還好”，我在认真听你说，有道理，我跟你的看法一致。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.240889,
+            "meaning_stability": 0.159656,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.092
+          },
+          "pair_index": 7,
+          "partner_uid": 5674771,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 22,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "exploratory_questioning",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "你说“北部還好”，有道理，我跟你的看法一致。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 1.0,
+          "personality_vs_b_best_text_similarity": 0.57008,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.913685,
+          "real_text": "嗯，台中下超大",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5674771_20250613153805_0023",
+          "slow_traits": {
+            "caution_bias": 0.336667,
+            "exploration_posture": 0.637778,
+            "social_approach": 0.460347,
+            "threat_sensitivity": 0.472,
+            "trust_stance": 0.576667
+          },
+          "strategy": "temporal",
+          "turn_index": 1
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "elaborate",
+            "empathize",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 7.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 8
+        },
+        "stylistic_similarity": {
+          "jsd": 0.062366
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.081676
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.945664,
+        "behavioral_similarity_action11": 0.125,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.097342,
+        "stylistic_similarity": 0.910025,
+        "surface_similarity": 0.040838
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "ordered_by": "session_start_time",
+        "session_count": 32,
+        "strategy": "temporal",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "agree": 1,
+          "empathize": 1,
+          "share_opinion": 4
+        },
+        "applied": true,
+        "avg_reply_chars": 8.166667,
+        "partner_question_ratio": 0.0,
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": 0.240889,
+          "meaning_stability": 0.159656,
+          "trauma_bias": 0.0,
+          "trust_prior": 0.092
+        },
+        "reply_count": 6,
+        "source": "temporal:train",
+        "strategy_counts": {
+          "exploit": 2,
+          "explore": 4
+        },
+        "token_variety": 0.694444,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": -0.163333,
+          "exploration_posture": 0.137778,
+          "social_approach": -0.039653,
+          "threat_sensitivity": -0.028,
+          "trust_stance": 0.076667
+        },
+        "ultra_short_ratio": 0.166667
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.010876,
+          "prior:meaning_stability": 0.004846,
+          "prior:trauma_bias": 0.0,
+          "prior:trust_prior": 0.008002,
+          "trait:caution_bias": 0.00503,
+          "trait:exploration_posture": 0.007727,
+          "trait:social_approach": 0.004067,
+          "trait:threat_sensitivity": 0.000158,
+          "trait:trust_stance": 0.005557
+        },
+        "train_default": {
+          "cosine": 0.945664,
+          "l2": 0.381937,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.240889,
+            "prior:meaning_stability": 0.159656,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.092,
+            "trait:caution_bias": 0.163333,
+            "trait:exploration_posture": 0.137778,
+            "trait:social_approach": 0.039653,
+            "trait:threat_sensitivity": 0.028,
+            "trait:trust_stance": 0.076667
+          }
+        },
+        "train_full": {
+          "cosine": 0.945664,
+          "l2": 0.381937,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.240889,
+            "prior:meaning_stability": 0.159656,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.092,
+            "trait:caution_bias": 0.163333,
+            "trait:exploration_posture": 0.137778,
+            "trait:social_approach": 0.039653,
+            "trait:threat_sensitivity": 0.028,
+            "trait:trust_stance": 0.076667
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.936689,
+          "l2": 0.424549,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.240752,
+            "prior:meaning_stability": 0.049964,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.126154,
+            "trait:caution_bias": 0.053077,
+            "trait:exploration_posture": 0.247863,
+            "trait:social_approach": 0.168884,
+            "trait:threat_sensitivity": 0.006492,
+            "trait:trust_stance": 0.105128
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 6.37037,
+        "median_reply_chars": 5,
+        "opening_phrases": [
+          "嘻嘻🤭",
+          "新年快樂🎆",
+          "[口水]",
+          "很久沒見了",
+          "你還是一樣 沒變呢🤣"
+        ],
+        "reply_count": 27,
+        "source": "temporal:train",
+        "strategy_counts": {
+          "escape": 4,
+          "exploit": 8,
+          "explore": 15
+        },
+        "top_tokens": [
+          "哈",
+          "不",
+          "沒",
+          "嘻",
+          "口",
+          "水",
+          "久",
+          "見"
+        ],
+        "ultra_short_ratio": 0.259259
+      }
+    },
+    "topic": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 2,
+          "semantic_mean": 0.019794,
+          "semantic_vs_baseline_a_diff": -0.001788,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 1.0
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_policy_trait_bias",
+          "pair_count": 2,
+          "semantic_mean": 0.0689,
+          "semantic_vs_baseline_a_diff": 0.047318,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.826461
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "surface_only_default_agent",
+          "pair_count": 2,
+          "semantic_mean": 0.070104,
+          "semantic_vs_baseline_a_diff": 0.048522,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.616983
+        }
+      ],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.075496
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.030303
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.021582,
+        "stylistic_similarity": 0.891082,
+        "surface_similarity": 0.015152
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.044131000000000004,
+        "stylistic_similarity": 0.8829123333333333,
+        "surface_similarity": 0.030013
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637379,
+        2637215,
+        2637318
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.07508
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.055556
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.059,
+        "stylistic_similarity": 0.891682,
+        "surface_similarity": 0.027778
+      },
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.358648,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 1804,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 1804
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.294346
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 41,
+            "exploit": 5,
+            "explore": 4
+          },
+          "exploit": {
+            "escape": 3,
+            "exploit": 40,
+            "explore": 7
+          },
+          "explore": {
+            "escape": 0,
+            "exploit": 6,
+            "explore": 44
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "tfidf_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.571724,
+        "macro_f1_3class": 0.834172,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.87234,
+            "precision": 0.931818,
+            "recall": 0.82,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.792079,
+            "precision": 0.784314,
+            "recall": 0.8,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.838095,
+            "precision": 0.8,
+            "recall": 0.88,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "tfidf_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“你很可愛欸😂”，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 20,
+          "baseline_b_best_semantic_pair_score": 0.0,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“你很可愛欸😂”，是的，我也这么想。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 28,
+          "baseline_b_worst_semantic_pair_score": 0.0,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“你很可愛欸😂”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 23,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:0",
+          "baseline_c_text": "你说“你很可愛欸😂”，我在认真听你说，我同意。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.168,
+            "meaning_stability": 0.105,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.104
+          },
+          "pair_index": 0,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 15,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.0,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "topic:train",
+          "personality_template_id": "agree:0",
+          "personality_text": "你说“你很可愛欸😂”，我同意。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.0,
+          "personality_vs_a_text_similarity": 0.585997,
+          "personality_vs_b_best_text_similarity": 0.566758,
+          "personality_vs_c_pair_delta": 0.0,
+          "personality_vs_c_text_similarity": 0.836369,
+          "real_text": "[捂嘴笑]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250604155717_0004",
+          "slow_traits": {
+            "caution_bias": 0.365,
+            "exploration_posture": 0.575,
+            "social_approach": 0.491667,
+            "threat_sensitivity": 0.481,
+            "trust_stance": 0.586667
+          },
+          "strategy": "topic",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 33,
+          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_semantic_pair_score": 0.043164,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“今天也要愉快順心過一天[可愛]”，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 29,
+          "baseline_b_best_semantic_pair_score": 0.098678,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "你说“今天也要愉快順心過一天[可愛]”，是的，我也这么想。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 37,
+          "baseline_b_worst_semantic_pair_score": 0.083054,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_action": "agree",
+          "baseline_c_generated_chars": 37,
+          "baseline_c_profile_confidence": 0.35,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_semantic_pair_score": 0.118,
+          "baseline_c_strategy": "exploit",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "agree:1",
+          "baseline_c_text": "你说“今天也要愉快順心過一天[可愛]”，我在认真听你说，是的，我也这么想。",
+          "dominant_component": "expected_free_energy",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.168,
+            "meaning_stability": 0.105,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.104
+          },
+          "pair_index": 1,
+          "partner_uid": 5531374,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 33,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.35,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_length_bucket": "short",
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.039589,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "topic:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "你说“今天也要愉快順心過一天[可愛]”，有道理，我跟你的看法一致。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.003575,
+          "personality_vs_a_text_similarity": 1.0,
+          "personality_vs_b_best_text_similarity": 0.681199,
+          "personality_vs_c_pair_delta": -0.078411,
+          "personality_vs_c_text_similarity": 0.624133,
+          "real_text": "好 妳也是嘿[哈哈]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637171_5531374_20250606090146_0007",
+          "slow_traits": {
+            "caution_bias": 0.365,
+            "exploration_posture": 0.575,
+            "social_approach": 0.491667,
+            "threat_sensitivity": 0.481,
+            "trust_stance": 0.586667
+          },
+          "strategy": "topic",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "method": "tfidf_cosine",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.068061
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.030303
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.968767,
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.019794,
+        "stylistic_similarity": 0.901808,
+        "surface_similarity": 0.015152
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "all_assigned_cluster_sizes": {
+          "1": 10,
+          "3": 22
+        },
+        "cluster_sizes": {
+          "1": 8,
+          "3": 14
+        },
+        "cluster_sizes_scope": "train_fit_sessions_only",
+        "holdout_count": 10,
+        "jsd_threshold": 0.1,
+        "k_search_max_by_all_sessions": 6,
+        "k_search_max_by_train_sessions": 4,
+        "k_selected": 4,
+        "max_k": 8,
+        "max_train_fit_iterations": 24,
+        "merge_steps": [
+          {
+            "source_cluster": 0,
+            "source_size": 3,
+            "target_cluster": 3,
+            "target_size": 8
+          },
+          {
+            "source_cluster": 2,
+            "source_size": 3,
+            "target_cluster": 3,
+            "target_size": 11
+          }
+        ],
+        "min_cluster_size": 5,
+        "seed": 42,
+        "session_count": 32,
+        "silhouette": 0.06373,
+        "silhouette_scope": "train_fit_sessions_only",
+        "strategy": "topic",
+        "strict_topic_no_random_fallback": true,
+        "strict_train_only_fit": true,
+        "topic_holdout_transform_only": true,
+        "topic_jsd_train_holdout": 0.01672,
+        "topic_kmeans_fitted_on_train_sessions_only": true,
+        "topic_reused_balanced_initial_fit_split": true,
+        "topic_split_not_applicable": false,
+        "topic_split_retry_count": 0,
+        "topic_strict_fit_converged": true,
+        "topic_train_fit_iteration": 0,
+        "topic_train_fit_iterations": 1,
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "agree": 1,
+          "ask_question": 1,
+          "elaborate": 1,
+          "empathize": 2,
+          "joke": 1,
+          "minimal_response": 1,
+          "share_opinion": 5
+        },
+        "applied": true,
+        "avg_reply_chars": 7.0,
+        "partner_question_ratio": 0.0,
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": 0.168,
+          "meaning_stability": 0.105,
+          "trauma_bias": 0.0,
+          "trust_prior": 0.104
+        },
+        "reply_count": 12,
+        "source": "topic:train",
+        "strategy_counts": {
+          "escape": 1,
+          "exploit": 5,
+          "explore": 6
+        },
+        "token_variety": 0.541667,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": -0.135,
+          "exploration_posture": 0.075,
+          "social_approach": -0.008333,
+          "threat_sensitivity": -0.019,
+          "trust_stance": 0.086667
+        },
+        "ultra_short_ratio": 0.166667
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.005289,
+          "prior:meaning_stability": 0.002884,
+          "prior:trauma_bias": 0.0,
+          "prior:trust_prior": 0.008115,
+          "trait:caution_bias": 0.003836,
+          "trait:exploration_posture": 0.004359,
+          "trait:social_approach": 0.003279,
+          "trait:threat_sensitivity": 0.000103,
+          "trait:trust_stance": 0.005636
+        },
+        "train_default": {
+          "cosine": 0.968767,
+          "l2": 0.286106,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.168,
+            "prior:meaning_stability": 0.105,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.104,
+            "trait:caution_bias": 0.135,
+            "trait:exploration_posture": 0.075,
+            "trait:social_approach": 0.008333,
+            "trait:threat_sensitivity": 0.019,
+            "trait:trust_stance": 0.086667
+          }
+        },
+        "train_full": {
+          "cosine": 0.968767,
+          "l2": 0.286106,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.168,
+            "prior:meaning_stability": 0.105,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.104,
+            "trait:caution_bias": 0.135,
+            "trait:exploration_posture": 0.075,
+            "trait:social_approach": 0.008333,
+            "trait:threat_sensitivity": 0.019,
+            "trait:trust_stance": 0.086667
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.963548,
+          "l2": 0.322613,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.167863,
+            "prior:meaning_stability": 0.004692,
+            "prior:trauma_bias": 0.0,
+            "prior:trust_prior": 0.114154,
+            "trait:caution_bias": 0.024744,
+            "trait:exploration_posture": 0.185085,
+            "trait:social_approach": 0.137564,
+            "trait:threat_sensitivity": 0.002508,
+            "trait:trust_stance": 0.095128
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 7.121212,
+        "median_reply_chars": 5,
+        "opening_phrases": [
+          "嘻嘻🤭",
+          "新年快樂🎆",
+          "[口水]",
+          "很久沒見了",
+          "你還是一樣 沒變呢🤣"
+        ],
+        "reply_count": 33,
+        "source": "topic:train",
+        "strategy_counts": {
+          "escape": 5,
+          "exploit": 12,
+          "explore": 16
+        },
+        "top_tokens": [
+          "哈",
+          "早",
+          "下",
+          "安",
+          "點",
+          "沒",
+          "好",
+          "嘻"
+        ],
+        "ultra_short_ratio": 0.242424
+      }
+    }
+  },
+  "user_uid": 2637171
+}

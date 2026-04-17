@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import asdict
 import json
+import math
 from pathlib import Path
 from statistics import mean, median
 
@@ -654,6 +656,359 @@ def _semantic_delta_summary(reports: list[ValidationReport]) -> dict[str, object
     }
 
 
+def _counter_jsd(left: Counter[str], right: Counter[str]) -> float:
+    keys = sorted(set(left.keys()) | set(right.keys()))
+    if not keys:
+        return 0.0
+    l_total = float(sum(left.values()))
+    r_total = float(sum(right.values()))
+    if l_total <= 0.0 or r_total <= 0.0:
+        return 0.0
+    p = [float(left.get(key, 0)) / l_total for key in keys]
+    q = [float(right.get(key, 0)) / r_total for key in keys]
+    m = [(a + b) / 2.0 for a, b in zip(p, q)]
+
+    def _kl(a: list[float], b: list[float]) -> float:
+        out = 0.0
+        for x, y in zip(a, b):
+            if x > 0.0:
+                out += x * math.log(x / max(y, 1e-12))
+        return out
+
+    return round(float(0.5 * _kl(p, m) + 0.5 * _kl(q, m)), 6)
+
+
+def _safe_float(value: object, default: float = 0.0) -> float:
+    try:
+        if value is None:
+            return float(default)
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _mean_or_zero(values: object) -> float:
+    if not isinstance(values, list) or not values:
+        return 0.0
+    return float(mean([_safe_float(item) for item in values]))
+
+
+def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    baselines = {
+        "baseline_a": {
+            "action_key": "baseline_a_action",
+            "strategy_key": "baseline_a_strategy",
+            "text_key": "baseline_a_text",
+            "chars_key": "baseline_a_generated_chars",
+            "text_similarity_key": "personality_vs_a_text_similarity",
+            "semantic_score_key": "baseline_a_semantic_pair_score",
+            "template_key": "baseline_a_template_id",
+        },
+        "baseline_c": {
+            "action_key": "baseline_c_action",
+            "strategy_key": "baseline_c_strategy",
+            "text_key": "baseline_c_text",
+            "chars_key": "baseline_c_generated_chars",
+            "text_similarity_key": "personality_vs_c_text_similarity",
+            "semantic_score_key": "baseline_c_semantic_pair_score",
+            "template_key": "baseline_c_template_id",
+        },
+        "baseline_b_best": {
+            "action_key": "baseline_b_best_action",
+            "strategy_key": "baseline_b_best_strategy",
+            "text_key": "baseline_b_best_text",
+            "chars_key": "baseline_b_best_generated_chars",
+            "text_similarity_key": "personality_vs_b_best_text_similarity",
+            "semantic_score_key": "baseline_b_best_semantic_pair_score",
+            "template_key": "",
+        },
+    }
+    overall: dict[str, dict[str, object]] = {}
+    per_user: dict[int, dict[str, list[float] | int]] = {}
+    for report in reports:
+        per_user.setdefault(
+            int(report.user_uid),
+            {
+                "semantic_deltas": [],
+                "a_action_agreements": [],
+                "a_text_similarities": [],
+                "c_action_agreements": [],
+                "c_text_similarities": [],
+            },
+        )
+        for strategy_result in report.per_strategy.values():
+            trace = strategy_result.get("diagnostic_trace", [])
+            if not isinstance(trace, list):
+                continue
+            for row in trace:
+                if not isinstance(row, dict):
+                    continue
+                p_action = str(row.get("personality_action", ""))
+                p_strategy = str(row.get("personality_strategy", ""))
+                p_text = str(row.get("personality_text", ""))
+                p_chars = int(row.get("personality_generated_chars", 0) or 0)
+                p_sem = _safe_float(row.get("personality_semantic_pair_score"))
+                per_user[int(report.user_uid)]["semantic_deltas"].append(  # type: ignore[index, union-attr]
+                    _safe_float(row.get("personality_vs_a_pair_delta"))
+                )
+                for baseline, spec in baselines.items():
+                    bucket = overall.setdefault(
+                        baseline,
+                        {
+                            "rows": 0,
+                            "action_agree": 0,
+                            "strategy_agree": 0,
+                            "exact_duplicate": 0,
+                            "template_agree": 0,
+                            "template_rows": 0,
+                            "text_similarity_values": [],
+                            "length_deltas": [],
+                            "semantic_deltas": [],
+                            "personality_actions": Counter(),
+                            "baseline_actions": Counter(),
+                            "personality_strategies": Counter(),
+                            "baseline_strategies": Counter(),
+                        },
+                    )
+                    b_action = str(row.get(str(spec["action_key"]), ""))
+                    b_strategy = str(row.get(str(spec["strategy_key"]), ""))
+                    raw_b_text = row.get(str(spec["text_key"]), "")
+                    b_text = "" if raw_b_text is None else str(raw_b_text)
+                    if not b_text:
+                        continue
+                    bucket["rows"] = int(bucket["rows"]) + 1
+                    bucket["action_agree"] = int(bucket["action_agree"]) + int(p_action == b_action)
+                    bucket["strategy_agree"] = int(bucket["strategy_agree"]) + int(p_strategy == b_strategy)
+                    bucket["exact_duplicate"] = int(bucket["exact_duplicate"]) + int(p_text == b_text)
+                    p_template = str(row.get("personality_template_id", ""))
+                    template_key = str(spec.get("template_key", ""))
+                    b_template = str(row.get(template_key, "")) if template_key else ""
+                    if p_template and b_template:
+                        bucket["template_rows"] = int(bucket["template_rows"]) + 1
+                        bucket["template_agree"] = int(bucket["template_agree"]) + int(p_template == b_template)
+                    bucket["text_similarity_values"].append(_safe_float(row.get(str(spec["text_similarity_key"]))))  # type: ignore[union-attr]
+                    bucket["length_deltas"].append(p_chars - int(row.get(str(spec["chars_key"]), 0) or 0))  # type: ignore[union-attr]
+                    b_sem = _safe_float(row.get(str(spec["semantic_score_key"])), default=p_sem)
+                    bucket["semantic_deltas"].append(p_sem - b_sem)  # type: ignore[union-attr]
+                    bucket["personality_actions"].update([p_action])  # type: ignore[union-attr]
+                    bucket["baseline_actions"].update([b_action])  # type: ignore[union-attr]
+                    bucket["personality_strategies"].update([p_strategy])  # type: ignore[union-attr]
+                    bucket["baseline_strategies"].update([b_strategy])  # type: ignore[union-attr]
+                    if baseline == "baseline_a":
+                        per_user[int(report.user_uid)]["a_action_agreements"].append(float(p_action == b_action))  # type: ignore[index, union-attr]
+                        per_user[int(report.user_uid)]["a_text_similarities"].append(_safe_float(row.get(str(spec["text_similarity_key"]))))  # type: ignore[index, union-attr]
+                    elif baseline == "baseline_c":
+                        per_user[int(report.user_uid)]["c_action_agreements"].append(float(p_action == b_action))  # type: ignore[index, union-attr]
+                        per_user[int(report.user_uid)]["c_text_similarities"].append(_safe_float(row.get(str(spec["text_similarity_key"]))))  # type: ignore[index, union-attr]
+    summarized: dict[str, dict[str, object]] = {}
+    for baseline, bucket in overall.items():
+        rows = int(bucket["rows"])
+        text_vals = list(bucket["text_similarity_values"])  # type: ignore[arg-type]
+        length_vals = list(bucket["length_deltas"])  # type: ignore[arg-type]
+        sem_vals = list(bucket["semantic_deltas"])  # type: ignore[arg-type]
+        p_actions = bucket["personality_actions"]  # type: ignore[assignment]
+        b_actions = bucket["baseline_actions"]  # type: ignore[assignment]
+        p_strats = bucket["personality_strategies"]  # type: ignore[assignment]
+        b_strats = bucket["baseline_strategies"]  # type: ignore[assignment]
+        summarized[baseline] = {
+            "rows": rows,
+            "action_agreement_rate": round(float(bucket["action_agree"]) / float(rows), 6) if rows else 0.0,
+            "strategy_agreement_rate": round(float(bucket["strategy_agree"]) / float(rows), 6) if rows else 0.0,
+            "exact_duplicate_rate": round(float(bucket["exact_duplicate"]) / float(rows), 6) if rows else 0.0,
+            "template_agreement_rate": (
+                round(float(bucket["template_agree"]) / float(bucket["template_rows"]), 6)
+                if int(bucket["template_rows"])
+                else 0.0
+            ),
+            "mean_text_similarity": round(float(mean(text_vals)) if text_vals else 0.0, 6),
+            "mean_length_delta": round(float(mean(length_vals)) if length_vals else 0.0, 6),
+            "mean_semantic_delta": round(float(mean(sem_vals)) if sem_vals else 0.0, 6),
+            "action_distribution_delta": _counter_jsd(p_actions, b_actions),  # type: ignore[arg-type]
+            "strategy_jsd": _counter_jsd(p_strats, b_strats),  # type: ignore[arg-type]
+            "personality_action_distribution": dict(p_actions),  # type: ignore[arg-type]
+            "baseline_action_distribution": dict(b_actions),  # type: ignore[arg-type]
+        }
+    user_rows: list[dict[str, object]] = []
+    for uid, bucket in per_user.items():
+        deltas = list(bucket.get("semantic_deltas", []))  # type: ignore[arg-type]
+        if not deltas:
+            continue
+        user_rows.append(
+            {
+                "user_uid": int(uid),
+                "mean_semantic_delta": round(float(mean(deltas)), 6),
+                "baseline_a_action_agreement_rate": round(_mean_or_zero(bucket.get("a_action_agreements")), 6),
+                "baseline_a_text_similarity_mean": round(_mean_or_zero(bucket.get("a_text_similarities")), 6),
+                "baseline_c_action_agreement_rate": round(_mean_or_zero(bucket.get("c_action_agreements")), 6),
+                "baseline_c_text_similarity_mean": round(_mean_or_zero(bucket.get("c_text_similarities")), 6),
+            }
+        )
+    user_rows.sort(key=lambda row: float(row["mean_semantic_delta"]))
+    b_summary = summarized.get("baseline_b_best", {})
+    warning = bool(
+        b_summary
+        and int(b_summary.get("rows", 0) or 0) > 0
+        and (
+            _safe_float(b_summary.get("mean_text_similarity")) >= 0.85
+            or abs(_safe_float(b_summary.get("mean_semantic_delta"))) <= 0.005
+        )
+    )
+    c_summary = summarized.get("baseline_c", {})
+    c_reasons: list[str] = []
+    if c_summary:
+        if _safe_float(c_summary.get("action_agreement_rate")) >= 0.90:
+            c_reasons.append("action_agreement_high")
+        if _safe_float(c_summary.get("mean_text_similarity")) >= 0.85:
+            c_reasons.append("text_similarity_high")
+        if _safe_float(c_summary.get("template_agreement_rate")) >= 0.75:
+            c_reasons.append("template_overlap_high")
+        if abs(_safe_float(c_summary.get("mean_semantic_delta"))) <= 0.005:
+            c_reasons.append("semantic_delta_near_zero")
+    baseline_c_too_close = bool(c_reasons)
+    return {
+        "baselines": summarized,
+        "per_user_rankings": {
+            "worst": user_rows[:5],
+            "best": list(reversed(user_rows[-5:])),
+        },
+        "wrong_user_masked_by_generic_template_warning": warning,
+        "baseline_c_too_close_warning": baseline_c_too_close,
+        "baseline_c_too_close_reason": ",".join(c_reasons),
+        "baseline_c_too_close_fields": {
+            "action_agreement_rate": _safe_float(c_summary.get("action_agreement_rate")),
+            "mean_text_similarity": _safe_float(c_summary.get("mean_text_similarity")),
+            "template_agreement_rate": _safe_float(c_summary.get("template_agreement_rate")),
+            "mean_semantic_delta": _safe_float(c_summary.get("mean_semantic_delta")),
+        },
+    }
+
+
+def _ablation_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    by_name: dict[str, list[dict[str, object]]] = {}
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            rows = strategy_result.get("ablation_summary", [])
+            if not isinstance(rows, list):
+                continue
+            for row in rows:
+                if isinstance(row, dict):
+                    by_name.setdefault(str(row.get("name", "unknown")), []).append(row)
+    return {
+        name: {
+            "count": len(rows),
+            "semantic_mean": round(float(mean([_safe_float(row.get("semantic_mean")) for row in rows])), 6),
+            "semantic_vs_baseline_a_diff_mean": round(
+                float(mean([_safe_float(row.get("semantic_vs_baseline_a_diff")) for row in rows])),
+                6,
+            ),
+            "action_agreement_vs_personality_mean": round(
+                float(mean([_safe_float(row.get("action_agreement_vs_personality")) for row in rows])),
+                6,
+            ),
+            "text_similarity_vs_personality_mean": round(
+                float(mean([_safe_float(row.get("text_similarity_vs_personality")) for row in rows])),
+                6,
+            ),
+        }
+        for name, rows in sorted(by_name.items())
+        if rows
+    }
+
+
+def _state_saturation_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    personality_values: list[float] = []
+    distances: dict[str, list[float]] = {}
+    variances: dict[str, list[float]] = {}
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            if not _strategy_eligible(strategy_result):
+                continue
+            p = strategy_result.get("personality_metrics", {})
+            if isinstance(p, dict) and "personality_similarity" in p:
+                personality_values.append(_safe_float(p.get("personality_similarity")))
+            state = strategy_result.get("state_distance_diagnostics", {})
+            if isinstance(state, dict):
+                for key in ("train_full", "train_default", "train_wrong_user"):
+                    row = state.get(key)
+                    if isinstance(row, dict):
+                        distances.setdefault(f"{key}_cosine", []).append(_safe_float(row.get("cosine")))
+                        distances.setdefault(f"{key}_l2", []).append(_safe_float(row.get("l2")))
+                var_row = state.get("per_dimension_variance")
+                if isinstance(var_row, dict):
+                    for key, value in var_row.items():
+                        variances.setdefault(str(key), []).append(_safe_float(value))
+    value_sd = 0.0
+    if len(personality_values) > 1:
+        value_sd = math.sqrt(sum((x - mean(personality_values)) ** 2 for x in personality_values) / len(personality_values))
+    saturated = bool(personality_values and (value_sd <= 1e-6 or min(personality_values) >= 0.999))
+    return {
+        "personality_similarity": {
+            "count": len(personality_values),
+            "mean": round(float(mean(personality_values)) if personality_values else 0.0, 6),
+            "std": round(float(value_sd), 6),
+            "saturation_warning": saturated,
+            "diagnostic_only": True,
+        },
+        "state_distances": {
+            key: round(float(mean(values)) if values else 0.0, 6)
+            for key, values in sorted(distances.items())
+        },
+        "per_dimension_variance_mean": {
+            key: round(float(mean(values)) if values else 0.0, 6)
+            for key, values in sorted(variances.items())
+        },
+    }
+
+
+def _debug_readiness_gate(
+    *,
+    baseline_audit_summary: dict[str, object],
+    ablation_summary: dict[str, object],
+    state_saturation_summary: dict[str, object],
+    comparisons: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    distances = state_saturation_summary.get("state_distances", {})
+    distances = distances if isinstance(distances, dict) else {}
+    train_default_l2 = _safe_float(distances.get("train_default_l2"))
+    train_wrong_user_l2 = _safe_float(distances.get("train_wrong_user_l2"))
+    wrong_user_warning = bool(
+        baseline_audit_summary.get("wrong_user_masked_by_generic_template_warning", False)
+    )
+    baseline_c_warning = bool(baseline_audit_summary.get("baseline_c_too_close_warning", False))
+    no_surface = ablation_summary.get("no_surface_profile", {})
+    no_surface_diff = (
+        _safe_float(no_surface.get("semantic_vs_baseline_a_diff_mean"))
+        if isinstance(no_surface, dict)
+        else 0.0
+    )
+    full_diff = _safe_float(
+        comparisons.get("semantic_similarity", {}).get("vs_a_mean_diff")
+        if isinstance(comparisons.get("semantic_similarity"), dict)
+        else None
+    )
+    no_surface_present = isinstance(no_surface, dict) and bool(no_surface)
+    checks = {
+        "train_default_l2_positive": train_default_l2 > 0.0,
+        "train_wrong_user_l2_positive": train_wrong_user_l2 > 0.0,
+        "wrong_user_masked_warning_false": not wrong_user_warning,
+        "no_surface_not_better_than_full": bool(no_surface_present and no_surface_diff <= full_diff),
+    }
+    return {
+        "passed": all(bool(value) for value in checks.values()),
+        "checks": checks,
+        "train_default_l2_mean": round(float(train_default_l2), 6),
+        "train_wrong_user_l2_mean": round(float(train_wrong_user_l2), 6),
+        "full_personality_semantic_vs_baseline_a_diff_mean": round(float(full_diff), 6),
+        "no_surface_profile_semantic_vs_baseline_a_diff_mean": round(float(no_surface_diff), 6),
+        "wrong_user_masked_by_generic_template_warning": wrong_user_warning,
+        "baseline_c_too_close_warning": baseline_c_warning,
+        "baseline_c_too_close_reason": str(
+            baseline_audit_summary.get("baseline_c_too_close_reason", "")
+        ),
+        "policy": "debug-only gate for state/profile differentiation before mini-formal",
+    }
+
+
 def _write_diagnostic_trace(reports: list[ValidationReport], output_dir: Path) -> int:
     rows: list[dict[str, object]] = []
     for report in reports:
@@ -806,6 +1161,15 @@ def generate_report(
     else:
         overall_conclusion = "fail"
     semantic_delta_summary = _semantic_delta_summary(reports)
+    baseline_audit_summary = _baseline_audit_summary(reports)
+    ablation_summary = _ablation_summary(reports)
+    state_saturation_summary = _state_saturation_summary(reports)
+    debug_readiness_gate = _debug_readiness_gate(
+        baseline_audit_summary=baseline_audit_summary,
+        ablation_summary=ablation_summary,
+        state_saturation_summary=state_saturation_summary,
+        comparisons=comparisons,
+    )
     diagnostic_trace_rows = _write_diagnostic_trace(reports, output_dir)
 
     acceptance_rules = {
@@ -858,6 +1222,13 @@ def generate_report(
         "baseline_c_gate": baseline_c_gate,
         "metric_interpretations": metric_interpretations,
         "semantic_delta_summary": semantic_delta_summary,
+        "baseline_audit_summary": baseline_audit_summary,
+        "ablation_summary": ablation_summary,
+        "state_saturation_summary": state_saturation_summary,
+        "debug_readiness_gate": debug_readiness_gate,
+        "baseline_audit_summary_json": str((output_dir / "baseline_audit_summary.json").as_posix()),
+        "ablation_summary_json": str((output_dir / "ablation_summary.json").as_posix()),
+        "state_saturation_summary_json": str((output_dir / "state_saturation_summary.json").as_posix()),
         "diagnostic_trace_jsonl": (
             str((output_dir / "diagnostic_trace.jsonl").as_posix())
             if diagnostic_trace_rows
@@ -872,6 +1243,9 @@ def generate_report(
         "overall_conclusion": overall_conclusion,
         "reports": [asdict(item) for item in reports],
     }
+    _write_json(output_dir / "baseline_audit_summary.json", baseline_audit_summary)
+    _write_json(output_dir / "ablation_summary.json", ablation_summary)
+    _write_json(output_dir / "state_saturation_summary.json", state_saturation_summary)
     _write_json(output_dir / "aggregate_report.json", aggregate_payload)
 
     lines = [
@@ -922,6 +1296,59 @@ def generate_report(
             f"| `{sk}` | {_fmt_cell_num(row['mean_delta'])} | {row['positive']} | {row['negative']} | "
             f"{_fmt_cell_num(row['median'])} | {_fmt_cell_num(row['iqr'])} |"
         )
+    lines.extend(
+        [
+            "",
+            "## Baseline Audit Diagnostics",
+            "",
+            f"- Wrong-user masked warning: {baseline_audit_summary['wrong_user_masked_by_generic_template_warning']}",
+            f"- Baseline C too-close warning: {baseline_audit_summary['baseline_c_too_close_warning']} "
+            f"({baseline_audit_summary['baseline_c_too_close_reason']})",
+            "",
+            "| Baseline | rows | action agree | strategy agree | template agree | text sim | duplicate | semantic delta | action JSD | strategy JSD |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for baseline, row in baseline_audit_summary["baselines"].items():
+        lines.append(
+            f"| `{baseline}` | {row['rows']} | {_fmt_cell_num(row['action_agreement_rate'])} | "
+            f"{_fmt_cell_num(row['strategy_agreement_rate'])} | {_fmt_cell_num(row['template_agreement_rate'])} | "
+            f"{_fmt_cell_num(row['mean_text_similarity'])} | "
+            f"{_fmt_cell_num(row['exact_duplicate_rate'])} | {_fmt_cell_num(row['mean_semantic_delta'])} | "
+            f"{_fmt_cell_num(row['action_distribution_delta'])} | {_fmt_cell_num(row['strategy_jsd'])} |"
+        )
+    if ablation_summary:
+        lines.extend(
+            [
+                "",
+                "## Ablation Diagnostics",
+                "",
+                "| Ablation | count | semantic | semantic vs A | action agree vs P | text sim vs P |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        for name, row in ablation_summary.items():
+            lines.append(
+                f"| `{name}` | {row['count']} | {_fmt_cell_num(row['semantic_mean'])} | "
+                f"{_fmt_cell_num(row['semantic_vs_baseline_a_diff_mean'])} | "
+                f"{_fmt_cell_num(row['action_agreement_vs_personality_mean'])} | "
+                f"{_fmt_cell_num(row['text_similarity_vs_personality_mean'])} |"
+            )
+    lines.extend(
+        [
+            "",
+            "## State Saturation Diagnostics",
+            "",
+            f"- Personality similarity diagnostic-only saturation warning: "
+            f"{state_saturation_summary['personality_similarity']['saturation_warning']}",
+            f"- State distance means: {state_saturation_summary['state_distances']}",
+            "",
+            "## Debug Readiness Gate",
+            "",
+            f"- Passed: {debug_readiness_gate['passed']}",
+            f"- Checks: {debug_readiness_gate['checks']}",
+        ]
+    )
     lines.extend(
         [
             "",

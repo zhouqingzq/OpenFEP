@@ -749,13 +749,18 @@ class SlowVariableLearner:
             if action in {"minimal_response", "disengage", "deflect"}:
                 bias += (style.compression_preference - 0.5) * 0.08
             if action in {"empathize", "agree", "elaborate"}:
-                bias += (traits.social_approach - 0.5) * 0.18
-                bias += (traits.trust_stance - 0.5) * 0.16
+                bias += (traits.social_approach - 0.5) * 0.24
+                bias += (traits.trust_stance - 0.5) * 0.22
+                bias += max(0.0, traits.social_approach - 0.62) * 0.12
+                bias += max(0.0, traits.trust_stance - 0.62) * 0.10
             if action in {"deflect", "minimal_response", "ask_question"}:
-                bias += (traits.caution_bias - 0.5) * (0.16 if action != "ask_question" else 0.08)
-                bias -= (traits.trust_stance - 0.5) * 0.12
-            if action == "ask_question":
-                bias += (traits.exploration_posture - 0.5) * 0.12
+                bias += (traits.caution_bias - 0.5) * (0.22 if action != "ask_question" else 0.10)
+                bias -= (traits.trust_stance - 0.5) * 0.16
+                bias += max(0.0, traits.caution_bias - 0.62) * (0.12 if action != "ask_question" else 0.06)
+                bias += max(0.0, 0.38 - traits.trust_stance) * (0.12 if action != "ask_question" else 0.08)
+            if action in {"ask_question", "introduce_topic"}:
+                bias += (traits.exploration_posture - 0.5) * 0.18
+                bias += max(0.0, traits.exploration_posture - 0.62) * 0.12
         return max(-0.32, min(0.32, round(bias, 6)))
 
     def cognitive_style_bias(

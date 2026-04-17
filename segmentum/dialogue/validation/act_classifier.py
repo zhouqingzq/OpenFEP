@@ -27,6 +27,7 @@ class ActionPrediction:
     label_11: str
     label_3: str
     confidence: float
+    source: str = "model"
 
 
 def _safe_strategy(label_11: str) -> str:
@@ -259,6 +260,7 @@ def _cue_prediction(text: str) -> ActionPrediction | None:
         label_11=_cue_action(best_label, text),
         label_3=best_label,
         confidence=round(confidence, 6),
+        source="cue",
     )
 
 
@@ -312,6 +314,7 @@ class KeywordDialogueActClassifier:
             label_11=best_action,
             label_3=_safe_strategy(best_action),
             confidence=round(float(confidence), 6),
+            source="keyword",
         )
 
     def predict_batch(self, texts: list[str]) -> list[ActionPrediction]:
@@ -344,6 +347,7 @@ class DialogueActClassifier:
         self._sample_labels_11: list[str] = []
         self._sample_labels_3: list[str] = []
         self._embedding_rows: list[object] = []
+        self._embedding_centroids_3: dict[str, object] = {}
         self._char_vectors: list[dict[str, float]] = []
         self._model: object | None = None
         self.model_name = model_name or os.environ.get(
@@ -410,6 +414,7 @@ class DialogueActClassifier:
         }
 
     def _fit_sentence_embeddings(self) -> None:
+        import numpy as np
         from sentence_transformers import SentenceTransformer
 
         if self.model_name not in _ST_CLASSIFIER_MODELS:
@@ -426,6 +431,17 @@ class DialogueActClassifier:
         self._char_vectors = [_char_vector(item["text"]) for item in self.train_samples]
         self._sample_labels_11 = [item["label_11"] for item in self.train_samples]
         self._sample_labels_3 = [item["label_3"] for item in self.train_samples]
+        by_3: dict[str, list[object]] = defaultdict(list)
+        for row, label_3 in zip(self._embedding_rows, self._sample_labels_3):
+            by_3[label_3].append(row)
+        self._embedding_centroids_3 = {}
+        for label_3, label_rows in by_3.items():
+            arr = np.asarray(label_rows, dtype=float)
+            centroid = arr.mean(axis=0)
+            norm = float(np.linalg.norm(centroid))
+            if norm > 1e-12:
+                centroid = centroid / norm
+            self._embedding_centroids_3[label_3] = centroid
 
     def _fit_centroids(self, vectors: list[dict[str, float]]) -> None:
         by_3: dict[str, list[dict[str, float]]] = defaultdict(list)
@@ -449,7 +465,7 @@ class DialogueActClassifier:
         if label_11 not in DIALOGUE_ACTION_STRATEGY_MAP:
             label_11 = _representative_action(label_3)
         confidence = max(0.34, min(0.99, 0.50 + score_3 * 0.30 + margin_3 * 0.20))
-        return ActionPrediction(label_11=label_11, label_3=label_3, confidence=round(confidence, 6))
+        return ActionPrediction(label_11=label_11, label_3=label_3, confidence=round(confidence, 6), source="tfidf_centroid")
 
     def _predict_embedding(self, text: str) -> ActionPrediction:
         if self._model is None or not self._embedding_rows:
@@ -461,10 +477,23 @@ class DialogueActClassifier:
             convert_to_numpy=True,
         )[0]
         char_vec = _char_vector(text)
+        label_3 = "explore"
+        score_3 = float("-inf")
+        second_3 = float("-inf")
+        for candidate_label, centroid in self._embedding_centroids_3.items():
+            embedding_score = float(row @ centroid)
+            if embedding_score > score_3:
+                second_3 = score_3
+                score_3 = embedding_score
+                label_3 = candidate_label
+            elif embedding_score > second_3:
+                second_3 = embedding_score
         best_idx = 0
         best_score = float("-inf")
         second = float("-inf")
         for idx, train_row in enumerate(self._embedding_rows):
+            if idx < len(self._sample_labels_3) and self._sample_labels_3[idx] != label_3:
+                continue
             embedding_score = float(row @ train_row)
             char_score = (
                 _cosine_similarity(char_vec, self._char_vectors[idx])
@@ -478,11 +507,19 @@ class DialogueActClassifier:
                 best_idx = idx
             elif score > second:
                 second = score
-        label_3 = self._sample_labels_3[best_idx]
+        if best_score == float("-inf"):
+            best_idx = 0
+            best_score = score_3
+            second = second_3
         label_11 = self._sample_labels_11[best_idx]
-        margin = max(0.0, best_score - second)
-        confidence = max(0.34, min(0.99, 0.50 + best_score * 0.25 + margin * 0.25))
-        return ActionPrediction(label_11=label_11, label_3=label_3, confidence=round(confidence, 6))
+        margin = max(0.0, score_3 - second_3)
+        confidence = max(0.34, min(0.99, 0.50 + score_3 * 0.25 + margin * 0.25))
+        return ActionPrediction(
+            label_11=label_11,
+            label_3=label_3,
+            confidence=round(confidence, 6),
+            source="embedding_centroid",
+        )
 
     def _nearest_centroid(
         self,
@@ -533,6 +570,34 @@ def _macro_f1(true_labels: list[str], pred_labels: list[str], labels: list[str])
     return sum(f1_values) / float(len(f1_values)) if f1_values else 0.0
 
 
+def _confusion_matrix(true_labels: list[str], pred_labels: list[str], labels: list[str]) -> dict[str, dict[str, int]]:
+    return {
+        label: {
+            pred_label: int(sum(1 for t, p in zip(true_labels, pred_labels) if t == label and p == pred_label))
+            for pred_label in labels
+        }
+        for label in labels
+    }
+
+
+def _per_class_metrics(true_labels: list[str], pred_labels: list[str], labels: list[str]) -> dict[str, dict[str, float]]:
+    rows: dict[str, dict[str, float]] = {}
+    for label in labels:
+        tp = sum(1 for t, p in zip(true_labels, pred_labels) if t == label and p == label)
+        fp = sum(1 for t, p in zip(true_labels, pred_labels) if t != label and p == label)
+        fn = sum(1 for t, p in zip(true_labels, pred_labels) if t == label and p != label)
+        precision = float(tp) / float(tp + fp) if (tp + fp) > 0 else 0.0
+        recall = float(tp) / float(tp + fn) if (tp + fn) > 0 else 0.0
+        f1 = 0.0 if precision + recall <= 0.0 else 2.0 * precision * recall / (precision + recall)
+        rows[label] = {
+            "precision": round(float(precision), 6),
+            "recall": round(float(recall), 6),
+            "f1": round(float(f1), 6),
+            "support": int(sum(1 for item in true_labels if item == label)),
+        }
+    return rows
+
+
 def _class_distribution(samples: list[dict[str, str]], key: str = "label_3") -> dict[str, int]:
     counts = Counter(item[key] for item in samples)
     return {label: int(counts.get(label, 0)) for label in FORMAL_STRATEGY_LABELS}
@@ -578,6 +643,9 @@ def validate_act_classifier(
             "class_distribution": {"train": _class_distribution(train), "gate": _class_distribution(gate)},
             "macro_f1_3class": 0.0,
             "macro_f1_11class": 0.0,
+            "confusion_matrix_3class": _confusion_matrix([], [], list(FORMAL_STRATEGY_LABELS)),
+            "per_class_metrics_3class": _per_class_metrics([], [], list(FORMAL_STRATEGY_LABELS)),
+            "cue_override_rate": 0.0,
             "min_macro_f1_3class": float(min_macro_f1_3class),
             "passed_3class_gate": False,
             "formal_gate_eligible": False,
@@ -590,17 +658,20 @@ def validate_act_classifier(
     true_3: list[str] = []
     pred_11: list[str] = []
     pred_3: list[str] = []
+    pred_sources: list[str] = []
     for sample in gate:
         pred = clf.predict(sample["text"])
         true_11.append(sample["label_11"])
         true_3.append(sample["label_3"])
         pred_11.append(pred.label_11)
         pred_3.append(pred.label_3)
+        pred_sources.append(str(getattr(pred, "source", "model")))
 
     labels_11 = sorted(set(true_11) | set(pred_11))
     labels_3 = list(FORMAL_STRATEGY_LABELS)
     macro_f1_3 = _macro_f1(true_3, pred_3, labels_3)
     macro_f1_11 = _macro_f1(true_11, pred_11, labels_11)
+    cue_count = sum(1 for source in pred_sources if source == "cue")
     dataset_ok = _formal_dataset_ok(train, gate)
     formal_engine = bool(getattr(clf, "formal_engine", False))
     formal_gate_eligible = bool(dataset_ok and formal_engine)
@@ -624,6 +695,10 @@ def validate_act_classifier(
         },
         "macro_f1_3class": round(float(macro_f1_3), 6),
         "macro_f1_11class": round(float(macro_f1_11), 6),
+        "confusion_matrix_3class": _confusion_matrix(true_3, pred_3, labels_3),
+        "per_class_metrics_3class": _per_class_metrics(true_3, pred_3, labels_3),
+        "cue_override_rate": round(float(cue_count) / float(max(1, len(pred_sources))), 6),
+        "prediction_source_counts": {k: int(v) for k, v in Counter(pred_sources).items()},
         "min_macro_f1_3class": float(min_macro_f1_3class),
         "formal_gate_eligible": bool(formal_gate_eligible),
         "formal_engine": bool(formal_engine),

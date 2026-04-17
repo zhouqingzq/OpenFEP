@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+from segmentum.agent import SegmentAgent
 from segmentum.dialogue.validation.act_classifier import (
     DialogueActClassifier,
     KeywordDialogueActClassifier,
@@ -24,8 +25,13 @@ from segmentum.dialogue.validation.pipeline import (
 )
 from segmentum.dialogue.validation.report import generate_report
 from segmentum.dialogue.validation.splitter import SplitStrategy, split_user_data
+from segmentum.dialogue.validation.state_calibration import apply_train_state_calibration
 from segmentum.dialogue.validation.statistics import paired_comparison
-from segmentum.dialogue.validation.surface_profile import build_surface_profile
+from segmentum.dialogue.validation.surface_profile import (
+    DialogueSurfaceProfile,
+    average_surface_profiles,
+    build_surface_profile,
+)
 from segmentum.dialogue.generator import RuleBasedGenerator
 from segmentum.slow_learning import SlowVariableLearner
 
@@ -231,6 +237,65 @@ class TestM54Validation(unittest.TestCase):
         self.assertNotIn(holdout_text, payload)
         self.assertNotIn(str(user["sessions"][3]["session_id"]), payload)
 
+    def test_state_calibration_uses_train_sessions_only(self) -> None:
+        user = _build_user(181, sessions=4)
+        train_dataset = dict(user)
+        train_dataset["sessions"] = user["sessions"][:2]
+        holdout_text = "HOLDOUT_STATE_TOKEN_DO_NOT_LEAK"
+        holdout_session_id = str(user["sessions"][3]["session_id"])
+        user["sessions"][3]["turns"][1]["body"] = holdout_text
+        agent = SegmentAgent()
+
+        summary = apply_train_state_calibration(agent, train_dataset, source="unit_train")
+        payload = json.dumps(summary, ensure_ascii=False)
+
+        self.assertTrue(summary["applied"])
+        self.assertEqual(summary["source"], "unit_train")
+        self.assertNotIn(holdout_text, payload)
+        self.assertNotIn(holdout_session_id, payload)
+        self.assertNotEqual(agent.slow_variable_learner.state.traits.to_dict(), SlowVariableLearner().state.traits.to_dict())
+
+    def test_population_surface_profile_drops_target_like_anchors(self) -> None:
+        profile_a = DialogueSurfaceProfile(
+            source="a",
+            reply_count=4,
+            avg_reply_chars=20.0,
+            median_reply_chars=18,
+            punctuation_counts={"?": 2},
+            opening_phrases=["target opener"],
+            connector_phrases=["target connector"],
+            top_tokens=["target_topic"],
+            action_phrases={"elaborate": ["target phrase"]},
+            strategy_counts={"exploit": 4},
+            partner_tokens={"100": ["partner_secret"]},
+        )
+        profile_b = DialogueSurfaceProfile(
+            source="b",
+            reply_count=6,
+            avg_reply_chars=10.0,
+            median_reply_chars=9,
+            punctuation_counts={"!": 1},
+            opening_phrases=["other opener"],
+            connector_phrases=["other connector"],
+            top_tokens=["other_topic"],
+            action_phrases={"ask_question": ["other phrase"]},
+            strategy_counts={"explore": 6},
+            partner_tokens={"200": ["other_secret"]},
+        )
+
+        population = average_surface_profiles(
+            [profile_a, profile_b],
+            include_surface_anchors=False,
+        )
+
+        self.assertEqual(population.top_tokens, [])
+        self.assertEqual(population.opening_phrases, [])
+        self.assertEqual(population.connector_phrases, [])
+        self.assertEqual(population.action_phrases, {})
+        self.assertEqual(population.partner_tokens, {})
+        self.assertEqual(population.strategy_counts["exploit"], 4)
+        self.assertEqual(population.strategy_counts["explore"], 6)
+
     def test_rule_generator_uses_surface_profile_deterministically(self) -> None:
         generator = RuleBasedGenerator()
         context = {
@@ -241,7 +306,7 @@ class TestM54Validation(unittest.TestCase):
         base_state = {"slow_traits": {"social_approach": 0.8, "caution_bias": 0.2}}
         profile_a = {
             "source": "a",
-            "reply_count": 5,
+            "reply_count": 8,
             "connector_phrases": ["我会认真回应"],
             "top_tokens": ["alpha"],
             "action_phrases": {"elaborate": ["我补充 alpha 的关键细节"]},
@@ -249,7 +314,7 @@ class TestM54Validation(unittest.TestCase):
         }
         profile_b = {
             "source": "b",
-            "reply_count": 5,
+            "reply_count": 8,
             "connector_phrases": ["先看 beta"],
             "top_tokens": ["beta"],
             "action_phrases": {"elaborate": ["我补充 beta 的关键细节"]},
@@ -264,6 +329,7 @@ class TestM54Validation(unittest.TestCase):
             master_seed=9,
             turn_index=0,
         )
+        first_diag = dict(generator.last_diagnostics)
         second = generator.generate(
             "elaborate",
             context,
@@ -284,6 +350,14 @@ class TestM54Validation(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertNotEqual(first, different)
         self.assertIn("alpha", first)
+        self.assertTrue(first_diag["topic_anchor_used"])
+        self.assertEqual(first_diag["profile_degraded_reason"], "")
+        self.assertEqual(generator.last_diagnostics["surface_source"], "b")
+        self.assertFalse(generator.last_diagnostics["profile_phrase_used"])
+        self.assertFalse(generator.last_diagnostics["topic_anchor_used"])
+        self.assertIn("anchor_mismatch", generator.last_diagnostics["profile_degraded_reason"])
+        self.assertLess(generator.last_diagnostics["profile_confidence"], first_diag["profile_confidence"])
+        self.assertIn("template_id", generator.last_diagnostics)
 
     def test_dialogue_action_bias_changes_with_slow_traits(self) -> None:
         warm = SlowVariableLearner()
@@ -320,6 +394,10 @@ class TestM54Validation(unittest.TestCase):
         self.assertTrue(report["dataset_separation_ok"])
         self.assertEqual(report["class_distribution"]["train"]["explore"], 100)
         self.assertGreaterEqual(report["macro_f1_3class"], 0.70)
+        self.assertIn("confusion_matrix_3class", report)
+        self.assertIn("per_class_metrics_3class", report)
+        self.assertIn("cue_override_rate", report)
+        self.assertGreater(report["per_class_metrics_3class"]["explore"]["recall"], 0.0)
         self.assertFalse(report["formal_gate_eligible"])
         self.assertFalse(report["behavioral_hard_metric_enabled"])
 
@@ -406,9 +484,47 @@ class TestM54Validation(unittest.TestCase):
                     "strategy": "random",
                     "pair_index": 0,
                     "personality_vs_a_pair_delta": 0.3,
+                    "personality_action": "elaborate",
+                    "baseline_a_action": "ask_question",
+                    "baseline_c_action": "elaborate",
+                    "personality_strategy": "exploit",
+                    "baseline_a_strategy": "explore",
+                    "baseline_c_strategy": "exploit",
+                    "personality_text": "persona alpha",
+                    "baseline_a_text": "default beta",
+                    "baseline_c_text": "average gamma",
+                    "personality_generated_chars": 13,
+                    "baseline_a_generated_chars": 12,
+                    "baseline_c_generated_chars": 13,
+                    "personality_semantic_pair_score": 0.7,
+                    "baseline_a_semantic_pair_score": 0.4,
+                    "baseline_c_semantic_pair_score": 0.5,
+                    "personality_vs_a_text_similarity": 0.2,
+                    "personality_vs_c_text_similarity": 0.3,
+                    "personality_template_id": "elaborate:0",
+                    "baseline_a_template_id": "ask_question:1",
+                    "personality_surface_source": "random:train",
+                    "baseline_a_surface_source": "generic",
+                    "personality_profile_phrase_used": True,
+                    "personality_topic_anchor_used": True,
                     "reply_length_bucket": "medium",
                 }
             ],
+            "ablation_summary": [
+                {
+                    "name": "no_surface_profile",
+                    "semantic_mean": 0.6,
+                    "semantic_vs_baseline_a_diff": 0.2,
+                    "action_agreement_vs_personality": 0.0,
+                    "text_similarity_vs_personality": 0.3,
+                }
+            ],
+            "state_distance_diagnostics": {
+                "train_full": {"cosine": 0.9, "l2": 0.1},
+                "train_default": {"cosine": 0.5, "l2": 0.5},
+                "train_wrong_user": {"cosine": 0.4, "l2": 0.4},
+                "per_dimension_variance": {"trait:social_approach": 0.01},
+            },
         }
         report = ValidationReport(
             user_uid=101,
@@ -428,6 +544,21 @@ class TestM54Validation(unittest.TestCase):
             self.assertTrue((output_dir / "diagnostic_trace.jsonl").exists())
             self.assertIn("semantic_delta_summary", aggregate)
             self.assertEqual(aggregate["semantic_delta_summary"]["users"]["positive"], 1)
+            self.assertIn("baseline_audit_summary", aggregate)
+            self.assertIn("ablation_summary", aggregate)
+            self.assertIn("state_saturation_summary", aggregate)
+            self.assertIn("debug_readiness_gate", aggregate)
+            self.assertTrue(aggregate["debug_readiness_gate"]["passed"])
+            self.assertTrue(aggregate["baseline_audit_summary"]["baseline_c_too_close_warning"])
+            self.assertIn(
+                "action_agreement_high",
+                aggregate["baseline_audit_summary"]["baseline_c_too_close_reason"],
+            )
+            self.assertGreater(
+                aggregate["baseline_audit_summary"]["baselines"]["baseline_a"]["rows"],
+                0,
+            )
+            self.assertIn("no_surface_profile", aggregate["ablation_summary"])
 
     def test_pipeline_and_report_generation_cover_all_strategies(self) -> None:
         prev_sem = os.environ.get("SEGMENTUM_USE_TFIDF_SEMANTIC")

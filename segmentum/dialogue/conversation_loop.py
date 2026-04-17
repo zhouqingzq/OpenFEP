@@ -28,6 +28,7 @@ class ConversationTurn:
     observation: dict[str, float] | None
     strategy: str | None
     diagnostics: Any | None = None
+    generation_diagnostics: dict[str, object] | None = None
     outcome: str | None = None
 
 
@@ -115,6 +116,11 @@ def run_conversation(
             master_seed=master_seed,
             turn_index=turn_index,
         )
+        generation_diagnostics = getattr(gen, "last_diagnostics", None)
+        if isinstance(generation_diagnostics, dict):
+            generation_diagnostics = dict(generation_diagnostics)
+        else:
+            generation_diagnostics = {}
         transcript.append(TranscriptUtterance(role="interlocutor", text=partner_text))
         transcript.append(TranscriptUtterance(role="agent", text=reply))
 
@@ -134,6 +140,7 @@ def run_conversation(
                 observation=channels,
                 strategy=strat,
                 diagnostics=diagnostics,
+                generation_diagnostics=generation_diagnostics,
                 outcome=None,
             )
         )

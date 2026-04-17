@@ -1,0 +1,1052 @@
+{
+  "aggregate": {
+    "behavioral_baseline_c_mean": 0.6355715,
+    "behavioral_hard_metric_enabled": false,
+    "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+    "behavioral_personality_mean": 0.47404850000000004,
+    "classifier_validation": {
+      "behavioral_hard_metric_enabled": false,
+      "class_distribution": {
+        "gate": {
+          "escape": 50,
+          "exploit": 50,
+          "explore": 50
+        },
+        "train": {
+          "escape": 100,
+          "exploit": 100,
+          "explore": 100
+        }
+      },
+      "dataset_origin": "data\\m54_classifier_gate.jsonl",
+      "dataset_separation_ok": true,
+      "degradation_required": true,
+      "engine": "sentence_embedding_unavailable",
+      "formal_dataset_minima": {
+        "gate_per_class": 50,
+        "gate_samples": 150,
+        "train_per_class": 100,
+        "train_samples": 300
+      },
+      "formal_dataset_ok": true,
+      "formal_engine": false,
+      "formal_gate_eligible": false,
+      "gate_count": 150,
+      "macro_f1_11class": 0.395695,
+      "macro_f1_3class": 0.644956,
+      "min_macro_f1_3class": 0.7,
+      "passed_3class_gate": false,
+      "sample_count": 150,
+      "train_count": 300
+    },
+    "formal_requested": true,
+    "metric_version": "m54_v3",
+    "pilot": {
+      "behavioral_diff_sd": 0.101673,
+      "behavioral_escalated": false,
+      "escalated": false,
+      "pilot_metrics_used": [
+        "semantic_vs_baseline_a_mean_diff"
+      ],
+      "pilot_user_count": 5,
+      "required_users": 10,
+      "sd_threshold": 0.04,
+      "semantic_diff_mean": 0.003395,
+      "semantic_diff_sd": 0.017791,
+      "semantic_escalated": false,
+      "suggested_min_users": 10
+    },
+    "pipeline_status": "completed",
+    "requested_strategies": [
+      "random",
+      "temporal",
+      "partner",
+      "topic"
+    ],
+    "required_users": 10,
+    "semantic_baseline_a_mean": 0.03904075,
+    "semantic_baseline_b_mean": 0.04207233333333334,
+    "semantic_baseline_c_mean": 0.036063,
+    "semantic_personality_mean": 0.0430445,
+    "skip_population_average_implant": false,
+    "strategy_count": 4
+  },
+  "conclusion": "completed",
+  "per_strategy": {
+    "partner": {
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disagree",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 4.844848
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.588235
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 61
+        },
+        "stylistic_similarity": {
+          "jsd": 0.087182
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.049672
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.171091,
+        "behavioral_similarity_strategy": 0.278689,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.046891,
+        "stylistic_similarity": 0.874223,
+        "surface_similarity": 0.024836
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.16028566666666666,
+        "behavioral_similarity_strategy": 0.3798206666666667,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.03750066666666667,
+        "stylistic_similarity": 0.874613,
+        "surface_similarity": 0.018487999999999997
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637266,
+        2637594
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disagree",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 4.844848
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.588235
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 61
+        },
+        "stylistic_similarity": {
+          "jsd": 0.085798
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.043504
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.171091,
+        "behavioral_similarity_strategy": 0.278689,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.042563,
+        "stylistic_similarity": 0.876219,
+        "surface_similarity": 0.021752
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_unavailable",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.395695,
+        "macro_f1_3class": 0.644956,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disagree",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 4.791569
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.415592
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 61
+        },
+        "stylistic_similarity": {
+          "jsd": 0.082038
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.041068
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 1.0,
+        "behavioral_similarity_action11": 0.172665,
+        "behavioral_similarity_strategy": 0.413977,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.033785,
+        "stylistic_similarity": 0.881644,
+        "surface_similarity": 0.020534
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 11,
+        "holdout_partners": [
+          3123725,
+          3180176,
+          3510939,
+          4681952,
+          5351067,
+          5401029,
+          5678031
+        ],
+        "partner_count": 20,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "partner",
+        "train_count": 21,
+        "train_ratio": 0.7
+      }
+    },
+    "random": {
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.396232
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.148092
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 67
+        },
+        "stylistic_similarity": {
+          "jsd": 0.088012
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.055373
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.417322,
+        "behavioral_similarity_strategy": 0.871011,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.040573,
+        "stylistic_similarity": 0.873026,
+        "surface_similarity": 0.027687
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.26683466666666666,
+        "behavioral_similarity_strategy": 0.5980916666666667,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.04685,
+        "stylistic_similarity": 0.886141,
+        "surface_similarity": 0.027233666666666666
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637266,
+        2637594
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.396232
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.148092
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 67
+        },
+        "stylistic_similarity": {
+          "jsd": 0.083589
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.049649
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.417322,
+        "behavioral_similarity_strategy": 0.871011,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.03744,
+        "stylistic_similarity": 0.879407,
+        "surface_similarity": 0.024824
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_unavailable",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.395695,
+        "macro_f1_3class": 0.644956,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 2.593476
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.737498
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 67
+        },
+        "stylistic_similarity": {
+          "jsd": 0.08197
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.055596
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 1.0,
+        "behavioral_similarity_action11": 0.278282,
+        "behavioral_similarity_strategy": 0.57554,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.049891,
+        "stylistic_similarity": 0.881742,
+        "surface_similarity": 0.027798
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "random",
+        "train_count": 22,
+        "train_ratio": 0.7
+      }
+    },
+    "temporal": {
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 6.143519
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 1.040912
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 36
+        },
+        "stylistic_similarity": {
+          "jsd": 0.092175
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.037814
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.139987,
+        "behavioral_similarity_strategy": 0.489977,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.028126,
+        "stylistic_similarity": 0.86702,
+        "surface_similarity": 0.018907
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.22852333333333333,
+        "behavioral_similarity_strategy": 0.30479533333333336,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.037088666666666666,
+        "stylistic_similarity": 0.8648826666666667,
+        "surface_similarity": 0.023490666666666667
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637266,
+        2637594
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 6.685185
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.917271
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 36
+        },
+        "stylistic_similarity": {
+          "jsd": 0.08549
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.031603
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.13012,
+        "behavioral_similarity_strategy": 0.521575,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.026809,
+        "stylistic_similarity": 0.876664,
+        "surface_similarity": 0.015801
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_unavailable",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.395695,
+        "macro_f1_3class": 0.644956,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 771607.964552
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.019897
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 36
+        },
+        "stylistic_similarity": {
+          "jsd": 0.085167
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.042932
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 1.0,
+        "behavioral_similarity_action11": 1e-06,
+        "behavioral_similarity_strategy": 0.331137,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.038611,
+        "stylistic_similarity": 0.877129,
+        "surface_similarity": 0.021466
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "ordered_by": "session_start_time",
+        "session_count": 32,
+        "strategy": "temporal",
+        "train_count": 22,
+        "train_ratio": 0.7
+      }
+    },
+    "topic": {
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.396232
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.148092
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 67
+        },
+        "stylistic_similarity": {
+          "jsd": 0.088012
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.055373
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.417322,
+        "behavioral_similarity_strategy": 0.871011,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.040573,
+        "stylistic_similarity": 0.873026,
+        "surface_similarity": 0.027687
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.26683466666666666,
+        "behavioral_similarity_strategy": 0.5980916666666667,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.04685,
+        "stylistic_similarity": 0.886141,
+        "surface_similarity": 0.027233666666666666
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637266,
+        2637594
+      ],
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 1.396232
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.148092
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 67
+        },
+        "stylistic_similarity": {
+          "jsd": 0.083589
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.049649
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 0.417322,
+        "behavioral_similarity_strategy": 0.871011,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.03744,
+        "stylistic_similarity": 0.879407,
+        "surface_similarity": 0.024824
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_unavailable",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": false,
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.395695,
+        "macro_f1_3class": 0.644956,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "ask_question",
+            "deflect",
+            "disengage",
+            "elaborate",
+            "empathize",
+            "introduce_topic",
+            "joke",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 2.593476
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 0.737498
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "fallback_reason": "sentence_transformers_not_installed; pip install segmentum[validation]",
+          "method": "tfidf_cosine_fallback",
+          "pair_count": 67
+        },
+        "stylistic_similarity": {
+          "jsd": 0.08197
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.055596
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 1.0,
+        "behavioral_similarity_action11": 0.278282,
+        "behavioral_similarity_strategy": 0.57554,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.049891,
+        "stylistic_similarity": 0.881742,
+        "surface_similarity": 0.027798
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "all_assigned_cluster_sizes": {
+          "0": 27,
+          "1": 5
+        },
+        "cluster_sizes": {
+          "0": 17,
+          "1": 5
+        },
+        "cluster_sizes_scope": "train_fit_sessions_only",
+        "holdout_count": 10,
+        "jsd_threshold": 0.1,
+        "k_search_max_by_all_sessions": 6,
+        "k_search_max_by_train_sessions": 4,
+        "k_selected": 3,
+        "max_k": 8,
+        "max_train_fit_iterations": 24,
+        "merge_steps": [
+          {
+            "source_cluster": 2,
+            "source_size": 2,
+            "target_cluster": 0,
+            "target_size": 15
+          }
+        ],
+        "min_cluster_size": 5,
+        "seed": 42,
+        "session_count": 32,
+        "silhouette": 0.087649,
+        "silhouette_scope": "train_fit_sessions_only",
+        "strategy": "topic",
+        "strict_topic_no_random_fallback": true,
+        "strict_train_only_fit": true,
+        "topic_holdout_transform_only": true,
+        "topic_jsd_train_holdout": 0.086071,
+        "topic_kmeans_fitted_on_train_sessions_only": true,
+        "topic_reused_balanced_initial_fit_split": true,
+        "topic_split_not_applicable": false,
+        "topic_split_retry_count": 0,
+        "topic_strict_fit_converged": true,
+        "topic_train_fit_iteration": 0,
+        "topic_train_fit_iterations": 1,
+        "train_count": 22,
+        "train_ratio": 0.7
+      }
+    }
+  },
+  "user_uid": 2637372
+}
