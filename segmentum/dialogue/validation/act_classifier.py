@@ -31,6 +31,12 @@ _MISSING_PROVENANCE_MARKERS = (
     "unspecified",
     "missing",
 )
+_LLM_PROVISIONAL_PROVENANCE_MARKERS = (
+    "codex_authored",
+    "llm_generated",
+    "model_generated",
+    "ai_generated",
+)
 _REQUIRED_PROVENANCE_FIELDS = (
     "source",
     "annotator",
@@ -729,6 +735,19 @@ def _positive_classifier_provenance(
     return True, ""
 
 
+def _provenance_text(
+    train_samples: list[dict[str, str]],
+    gate_samples: list[dict[str, str]],
+    dataset_origin: str,
+) -> str:
+    values = [str(dataset_origin)]
+    for sample in [*train_samples, *gate_samples]:
+        for key in _REQUIRED_PROVENANCE_FIELDS:
+            if sample.get(key):
+                values.append(str(sample[key]))
+    return " ".join(values).lower()
+
+
 def _classifier_evidence_tier(
     train_samples: list[dict[str, str]],
     gate_samples: list[dict[str, str]],
@@ -736,12 +755,14 @@ def _classifier_evidence_tier(
     *,
     provenance_ok: bool,
 ) -> str:
-    if not provenance_ok:
-        return "repo_fixture_smoke"
     positive_ok, _reason = _positive_classifier_provenance(train_samples, gate_samples, dataset_origin)
-    if not positive_ok:
-        return "repo_fixture_smoke"
-    return "external_human_labeled"
+    if provenance_ok and positive_ok:
+        return "external_human_labeled"
+    if train_samples and gate_samples:
+        lowered = _provenance_text(train_samples, gate_samples, dataset_origin)
+        if any(marker in lowered for marker in _LLM_PROVISIONAL_PROVENANCE_MARKERS):
+            return "llm_generated_provisional"
+    return "repo_fixture_smoke"
 
 
 def validate_act_classifier(

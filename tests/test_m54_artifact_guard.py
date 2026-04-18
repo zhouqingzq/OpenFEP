@@ -139,7 +139,7 @@ class TestM54ArtifactGuard(unittest.TestCase):
                         self.assertEqual(builder, HISTORICAL_MISSING)
                         self.assertEqual(input_scope, HISTORICAL_MISSING)
 
-    def test_repo_fixture_classifier_artifacts_fail_closed(self) -> None:
+    def test_provisional_classifier_artifacts_fail_closed(self) -> None:
         for path in _tracked_m54_summary_artifacts():
             with self.subTest(path=str(path.relative_to(_repo_root()))):
                 payload = _load(path)
@@ -152,11 +152,11 @@ class TestM54ArtifactGuard(unittest.TestCase):
                         classifier_gate.get("classifier_evidence_tier", "repo_fixture_smoke"),
                     )
                 )
-                fixture_like = tier == "repo_fixture_smoke" or any(
+                non_formal = tier in {"repo_fixture_smoke", "llm_generated_provisional"} or any(
                     marker in origin.lower()
                     for marker in ("codex_authored", "fixture", "synthetic", "smoke", "toy")
                 )
-                if fixture_like:
+                if non_formal:
                     self.assertFalse(classifier_gate.get("passed_3class_gate", False))
                     self.assertFalse(payload.get("formal_acceptance_eligible", False))
                     self.assertFalse(payload.get("hard_pass", False))

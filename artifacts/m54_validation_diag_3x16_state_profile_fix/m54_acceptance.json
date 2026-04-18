@@ -10,7 +10,7 @@
     "passed": false,
     "skip_population_average_implant_used": false
   },
-  "classifier_evidence_tier": "repo_fixture_smoke",
+  "classifier_evidence_tier": "llm_generated_provisional",
   "classifier_gate": {
     "behavioral_hard_metric_enabled": false,
     "class_distribution": {
@@ -25,8 +25,8 @@
         "explore": 0
       }
     },
-    "classifier_evidence_tier": "repo_fixture_smoke",
-    "classifier_provenance_failure_reason": "repo_fixture_or_historical_artifact",
+    "classifier_evidence_tier": "llm_generated_provisional",
+    "classifier_provenance_failure_reason": "llm_generated_provisional_labels",
     "classifier_provenance_ok": false,
     "confusion_matrix_3class": {
       "escape": {
@@ -89,7 +89,7 @@
   "formal_acceptance_eligible": false,
   "formal_blockers": [
     "baseline_c_gate_failed",
-    "classifier_fixture_only",
+    "classifier_provisional_llm_labels",
     "surface_ablation_missing"
   ],
   "formal_requested": false,

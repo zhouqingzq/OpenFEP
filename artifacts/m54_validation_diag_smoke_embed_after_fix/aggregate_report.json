@@ -4,7 +4,7 @@
     "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
     "aggregation": "per_user_mean_across_strategies",
     "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
-    "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels; repo fixtures are smoke-only",
+    "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels; LLM-generated provisional labels are engineering-only",
     "formal_baseline_c": "Baseline C formal evidence requires population_average_full_implant and leave-one-out population averaging",
     "hard_metrics": [
       "semantic_similarity",
@@ -38,7 +38,7 @@
   },
   "behavioral_hard_metric_degraded": false,
   "behavioral_labeling": "generated_action_direct_real_reply_classifier",
-  "classifier_evidence_tier": "repo_fixture_smoke",
+  "classifier_evidence_tier": "llm_generated_provisional",
   "classifier_gate": {
     "behavioral_hard_metric_enabled": false,
     "class_distribution": {
@@ -53,8 +53,8 @@
         "explore": 100
       }
     },
-    "classifier_evidence_tier": "repo_fixture_smoke",
-    "classifier_provenance_failure_reason": "repo_fixture_or_historical_artifact",
+    "classifier_evidence_tier": "llm_generated_provisional",
+    "classifier_provenance_failure_reason": "llm_generated_provisional_labels",
     "classifier_provenance_ok": false,
     "dataset_origin": "data\\m54_classifier_gate.jsonl",
     "dataset_separation_ok": true,
@@ -228,7 +228,7 @@
   "formal_acceptance_eligible": false,
   "formal_blockers": [
     "baseline_c_gate_failed",
-    "classifier_fixture_only",
+    "classifier_provisional_llm_labels",
     "surface_ablation_missing"
   ],
   "hard_metrics": [

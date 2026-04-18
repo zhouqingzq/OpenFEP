@@ -1,6 +1,6 @@
 # M5.4 Stop-Bleed Notice
 
-This historical artifact is fail-closed under m54_v4_stop_bleed. Repo-tracked classifier fixtures are smoke-only and do not support formal acceptance. See aggregate_report.json / m54_acceptance.json for machine-readable blockers.
+This historical artifact is fail-closed under m54_v4_stop_bleed. Current classifier labels are LLM-generated provisional data: usable for engineering/direction checks, but not for formal human-labeled acceptance. See aggregate_report.json / m54_acceptance.json for machine-readable blockers.
 
 # M5.4 Validation Aggregate Report
 

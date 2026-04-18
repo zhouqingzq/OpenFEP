@@ -1486,7 +1486,10 @@ def _formal_blockers(
     metric_hard_pass: bool,
 ) -> list[str]:
     blockers: list[str] = []
-    if classifier_gate_summary.get("classifier_evidence_tier") != "external_human_labeled":
+    classifier_tier = str(classifier_gate_summary.get("classifier_evidence_tier", "repo_fixture_smoke"))
+    if classifier_tier == "llm_generated_provisional":
+        blockers.append("classifier_provisional_llm_labels")
+    elif classifier_tier != "external_human_labeled":
         blockers.append("classifier_fixture_only")
     elif not classifier_gate:
         blockers.append("classifier_gate_failed")
@@ -1726,7 +1729,7 @@ def generate_report(
         "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
-        "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; repo fixtures are smoke-only",
+        "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
         "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",

@@ -586,7 +586,7 @@ class TestM54Validation(unittest.TestCase):
         self.assertFalse(report["formal_gate_eligible"])
         self.assertFalse(report["behavioral_hard_metric_enabled"])
 
-    def test_classifier_provenance_blocks_codex_authored_fixture(self) -> None:
+    def test_classifier_provenance_marks_codex_authored_labels_provisional(self) -> None:
         train = _classifier_samples(100, offset=0)
         gate = _classifier_samples(50, offset=1000)
         for sample in train + gate:
@@ -601,7 +601,7 @@ class TestM54Validation(unittest.TestCase):
             dataset_origin="independent_holdout_labels",
         )
         self.assertFalse(report["classifier_provenance_ok"])
-        self.assertEqual(report["classifier_evidence_tier"], "repo_fixture_smoke")
+        self.assertEqual(report["classifier_evidence_tier"], "llm_generated_provisional")
         self.assertIn("codex_authored", report["classifier_provenance_failure_reason"])
         self.assertFalse(report["formal_gate_eligible"])
 
