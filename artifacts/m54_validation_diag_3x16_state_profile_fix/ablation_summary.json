@@ -1,23 +1,23 @@
 {
   "no_policy_trait_bias": {
-    "action_agreement_vs_personality_mean": 0.833333,
+    "action_agreement_vs_personality_mean": 0.8125,
     "count": 12,
-    "semantic_mean": 0.060671,
-    "semantic_vs_baseline_a_diff_mean": 0.017226,
-    "text_similarity_vs_personality_mean": 0.548812
+    "semantic_mean": 0.054662,
+    "semantic_vs_baseline_a_diff_mean": 0.016058,
+    "text_similarity_vs_personality_mean": 0.558611
   },
   "no_surface_profile": {
     "action_agreement_vs_personality_mean": 0.833333,
     "count": 12,
-    "semantic_mean": 0.039262,
-    "semantic_vs_baseline_a_diff_mean": -0.004182,
-    "text_similarity_vs_personality_mean": 0.329338
+    "semantic_mean": 0.039804,
+    "semantic_vs_baseline_a_diff_mean": 0.0012,
+    "text_similarity_vs_personality_mean": 0.308634
   },
   "surface_only_default_agent": {
     "action_agreement_vs_personality_mean": 0.276109,
     "count": 12,
-    "semantic_mean": 0.083742,
-    "semantic_vs_baseline_a_diff_mean": 0.040297,
-    "text_similarity_vs_personality_mean": 0.525933
+    "semantic_mean": 0.082973,
+    "semantic_vs_baseline_a_diff_mean": 0.04437,
+    "text_similarity_vs_personality_mean": 0.524549
   }
 }

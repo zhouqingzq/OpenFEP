@@ -31,6 +31,7 @@ from .metrics import (
     SimilarityResult,
     agent_state_similarity,
     behavioral_similarity,
+    balanced_behavioral_similarity,
     personality_similarity,
     semantic_pair_scores,
     semantic_similarity,
@@ -77,6 +78,8 @@ class ValidationConfig:
     classifier_dataset_origin: str = "missing_formal_labels"
     formal: bool = False
     diagnostic_trace: bool = False
+    max_cue_override_rate: float = 0.35
+    require_classifier_provenance: bool = True
 
 
 @dataclass(slots=True)
@@ -256,6 +259,67 @@ def _metrics_bundle(
         "personality_similarity": personality_similarity(generated_texts, real_texts),
         "behavioral_similarity_strategy": behavioral_similarity(gen_3, real_3, granularity="strategy"),
         "behavioral_similarity_action11": behavioral_similarity(gen_11, real_11, granularity="action11"),
+        "balanced_behavioral_similarity_strategy": balanced_behavioral_similarity(
+            gen_3,
+            real_3,
+            granularity="strategy",
+        ),
+        "balanced_behavioral_similarity_action11": balanced_behavioral_similarity(
+            gen_11,
+            real_11,
+            granularity="action11",
+        ),
+    }
+
+
+def _majority_label(counts: Mapping[str, object], default: str) -> str:
+    if not isinstance(counts, Mapping) or not counts:
+        return default
+    scored: list[tuple[int, str]] = []
+    for key, value in counts.items():
+        try:
+            scored.append((int(value), str(key)))
+        except (TypeError, ValueError):
+            continue
+    if not scored:
+        return default
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return scored[0][1]
+
+
+def _majority_behavioral_metrics(
+    real_11: list[str],
+    real_3: list[str],
+    state_calibration_summary: Mapping[str, object],
+) -> dict[str, object]:
+    action_counts = state_calibration_summary.get("action_counts", {})
+    strategy_counts = state_calibration_summary.get("strategy_counts", {})
+    majority_action = _majority_label(action_counts if isinstance(action_counts, Mapping) else {}, "elaborate")
+    inferred_strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(majority_action, "exploit")
+    majority_strategy = _majority_label(
+        strategy_counts if isinstance(strategy_counts, Mapping) else {},
+        inferred_strategy,
+    )
+    gen_11 = [majority_action] * len(real_11)
+    gen_3 = [majority_strategy] * len(real_3)
+    strategy_result = behavioral_similarity(gen_3, real_3, granularity="strategy")
+    action_result = behavioral_similarity(gen_11, real_11, granularity="action11")
+    balanced_strategy_result = balanced_behavioral_similarity(gen_3, real_3, granularity="strategy")
+    balanced_action_result = balanced_behavioral_similarity(gen_11, real_11, granularity="action11")
+    return {
+        "majority_action": majority_action,
+        "majority_strategy": majority_strategy,
+        "behavioral_similarity_strategy": float(strategy_result.value),
+        "behavioral_similarity_action11": float(action_result.value),
+        "balanced_behavioral_similarity_strategy": float(balanced_strategy_result.value),
+        "balanced_behavioral_similarity_action11": float(balanced_action_result.value),
+        "strategy_details": dict(strategy_result.details),
+        "action11_details": dict(action_result.details),
+        "balanced_strategy_details": dict(balanced_strategy_result.details),
+        "balanced_action11_details": dict(balanced_action_result.details),
+        "real_strategy_distribution": dict(Counter(real_3)),
+        "real_action_distribution": dict(Counter(real_11)),
+        "pair_count": int(min(len(real_11), len(real_3))),
     }
 
 
@@ -512,6 +576,8 @@ def _semantic_trace_rows(
                 "baseline_c_surface_source": c_gen_diag.get("surface_source"),
                 "personality_profile_phrase_used": p_gen_diag.get("profile_phrase_used"),
                 "personality_profile_opening_used": p_gen_diag.get("profile_opening_used"),
+                "personality_profile_expression_sources": p_gen_diag.get("profile_expression_sources", []),
+                "personality_profile_expression_source": p_gen_diag.get("profile_expression_source"),
                 "personality_topic_anchor_used": p_gen_diag.get("topic_anchor_used"),
                 "personality_partner_anchor_used": p_gen_diag.get("partner_anchor_used"),
                 "personality_rhetorical_move": p_gen_diag.get("rhetorical_move"),
@@ -523,6 +589,8 @@ def _semantic_trace_rows(
                 "baseline_c_rhetorical_move": c_gen_diag.get("rhetorical_move"),
                 "baseline_c_profile_confidence": c_gen_diag.get("profile_confidence"),
                 "baseline_c_profile_degraded_reason": c_gen_diag.get("profile_degraded_reason"),
+                "baseline_c_profile_expression_sources": c_gen_diag.get("profile_expression_sources", []),
+                "baseline_c_profile_expression_source": c_gen_diag.get("profile_expression_source"),
                 "dominant_component": p.get("dominant_component"),
                 "reply_length_bucket": _reply_length_bucket(int(p.get("generated_chars", 0) or 0)),
                 "slow_traits": p.get("slow_traits", {}),
@@ -552,9 +620,32 @@ def run_validation(
 ) -> ValidationReport:
     user_uid = int(user_dataset.get("uid", 0))
     all_profiles = list(all_user_profiles or [])
+    population_profiles = [
+        item
+        for item in all_profiles
+        if isinstance(item, Mapping) and int(item.get("uid", -1)) != user_uid
+    ]
+    classifier_train = list(config.classifier_train_samples or DEFAULT_CLASSIFIER_TRAIN_SAMPLES)
+    classifier_gate = list(config.classifier_gate_samples or DEFAULT_CLASSIFIER_GATE_SAMPLES)
+    classifier = DialogueActClassifier(classifier_train or None)
+    classifier_eval = validate_act_classifier(
+        train_samples=classifier_train,
+        gate_samples=classifier_gate,
+        classifier=classifier,
+        dataset_origin=str(config.classifier_dataset_origin),
+        max_cue_override_rate=float(config.max_cue_override_rate),
+        require_classifier_provenance=bool(config.require_classifier_provenance),
+    )
+    behavioral_hard_enabled = bool(classifier_eval.get("passed_3class_gate", False))
     full_agent = SegmentAgent()
     full_world = DialogueWorld(user_dataset, DialogueObserver(), seed=int(config.seed))
     implant_personality(full_agent, full_world, config.implantation_config)
+    full_state_calibration_summary = apply_train_state_calibration(
+        full_agent,
+        user_dataset,
+        classifier=classifier,
+        source="full:data",
+    )
 
     per_strategy: dict[str, dict] = {}
     strategy_personality_means: dict[str, float] = {}
@@ -564,21 +655,10 @@ def run_validation(
     strategy_behavioral_p_means: dict[str, float] = {}
     strategy_behavioral_c_means: dict[str, float] = {}
 
-    classifier_train = list(config.classifier_train_samples or DEFAULT_CLASSIFIER_TRAIN_SAMPLES)
-    classifier_gate = list(config.classifier_gate_samples or DEFAULT_CLASSIFIER_GATE_SAMPLES)
-    classifier = DialogueActClassifier(classifier_train or None)
-    classifier_eval = validate_act_classifier(
-        train_samples=classifier_train,
-        gate_samples=classifier_gate,
-        classifier=classifier,
-        dataset_origin=str(config.classifier_dataset_origin),
-    )
-    behavioral_hard_enabled = bool(classifier_eval.get("passed_3class_gate", False))
     population_surface_profile = average_surface_profiles(
         (
             build_surface_profile(item, classifier=None, source=f"population:{int(item.get('uid', -1))}")
-            for item in all_profiles
-            if isinstance(item, Mapping)
+            for item in population_profiles
         ),
         source="population_average",
         include_surface_anchors=False,
@@ -640,6 +720,11 @@ def run_validation(
         )
         personality_metrics = _metrics_bundle(generated, real, g11, r11, g3, r3)
         personality_metrics["agent_state_similarity"] = agent_state_result
+        majority_baseline_metrics = _majority_behavioral_metrics(
+            r11,
+            r3,
+            state_calibration_summary,
+        )
 
         baseline_a_agent = create_default_agent(seed=int(config.seed) + 101)
         a_gen, a_real, ag11, ar11, ag3, ar3, a_trace = _call_generate_from_sessions(
@@ -716,10 +801,7 @@ def run_validation(
 
         strat_idx = config.strategies.index(strategy)
         strat_seed = int(config.seed) + 404 + strat_idx * 31
-        if population_average_template is not None:
-            baseline_c_agent = clone_agent_template(population_average_template, seed=strat_seed)
-        else:
-            baseline_c_agent = create_average_agent(all_profiles, seed=strat_seed, classifier=classifier)
+        baseline_c_agent = create_average_agent(population_profiles, seed=strat_seed, classifier=classifier)
         attach_surface_profile(baseline_c_agent, population_surface_profile)
         c_gen, c_real, cg11, cr11, cg3, cr3, c_trace = _call_generate_from_sessions(
             baseline_c_agent,
@@ -867,6 +949,11 @@ def run_validation(
             "surface_profile": _surface_profile_summary(train_surface_profile),
             "baseline_a_surface_profile": {"source": "empty", "reply_count": 0},
             "baseline_c_surface_profile": _surface_profile_summary(population_surface_profile),
+            "baseline_c_leave_one_out": True,
+            "baseline_c_population_excluded_uid": int(user_uid),
+            "baseline_c_population_user_count": int(len(population_profiles)),
+            "full_state_calibration_summary": full_state_calibration_summary,
+            "majority_baseline_metrics": majority_baseline_metrics,
             "diagnostic_trace": diagnostic_rows,
             "ablation_summary": ablation_rows,
             "state_distance_diagnostics": state_distance_diag,
@@ -936,19 +1023,7 @@ def run_pilot_validation(
     pilot_count = min(len(user_datasets), max(3, int(config.pilot_user_count)))
     _progress(f"running pilot validation on {pilot_count} users...")
     pilot_users = user_datasets[:pilot_count]
-    if population_average_template is not None:
-        pop_template = population_average_template
-    elif config.skip_population_average_implant:
-        pop_template = None
-    else:
-        classifier_train = list(config.classifier_train_samples or DEFAULT_CLASSIFIER_TRAIN_SAMPLES)
-        population_classifier = DialogueActClassifier(classifier_train or None)
-        pop_template = build_population_average_agent(
-            user_datasets,
-            config.implantation_config,
-            seed=int(config.seed),
-            classifier=population_classifier,
-        )
+    pop_template = None
     semantic_diffs: list[float] = []
     behavioral_diffs: list[float] = []
     classifier_gate_any = False
@@ -1004,17 +1079,7 @@ def run_batch_validation(
     config: ValidationConfig,
 ) -> list[ValidationReport]:
     wrong_agent_cache: dict[int, tuple[SegmentAgent, DialogueSurfaceProfile]] = {}
-    if config.skip_population_average_implant:
-        pop_template = None
-    else:
-        classifier_train = list(config.classifier_train_samples or DEFAULT_CLASSIFIER_TRAIN_SAMPLES)
-        population_classifier = DialogueActClassifier(classifier_train or None)
-        pop_template = build_population_average_agent(
-            user_datasets,
-            config.implantation_config,
-            seed=int(config.seed),
-            classifier=population_classifier,
-        )
+    pop_template = None
     pilot = run_pilot_validation(
         user_datasets,
         config,

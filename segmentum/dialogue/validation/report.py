@@ -138,6 +138,10 @@ def _classifier_gate_summary(reports: list[ValidationReport]) -> dict[str, objec
     }
 
 
+def _formal_requested(reports: list[ValidationReport]) -> bool:
+    return any(bool(report.aggregate.get("formal_requested", False)) for report in reports)
+
+
 def _semantic_engine_gate(reports: list[ValidationReport]) -> dict[str, object]:
     methods: list[str] = []
     fallback_reasons: list[str] = []
@@ -406,11 +410,59 @@ def _pilot_gate(reports: list[ValidationReport], required_users: int) -> dict[st
     }
 
 
-def _formal_baseline_c_gate(reports: list[ValidationReport]) -> dict[str, object]:
+def _formal_baseline_c_gate(
+    reports: list[ValidationReport],
+    *,
+    required_users: int,
+    formal_requested: bool,
+) -> dict[str, object]:
     skip_used = any(bool(report.aggregate.get("skip_population_average_implant")) for report in reports)
+    leave_one_out_values: list[bool] = []
+    population_counts: list[int] = []
+    metrics_present_values: list[bool] = []
+    excluded_uid_values: list[bool] = []
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            if not _strategy_eligible(strategy_result):
+                continue
+            leave_one_out_values.append(bool(strategy_result.get("baseline_c_leave_one_out", False)))
+            try:
+                population_counts.append(int(strategy_result.get("baseline_c_population_user_count", 0) or 0))
+            except (TypeError, ValueError):
+                population_counts.append(0)
+            c_metrics = strategy_result.get("baseline_c_metrics", {})
+            metrics_present_values.append(isinstance(c_metrics, dict) and bool(c_metrics))
+            try:
+                excluded_raw = strategy_result.get("baseline_c_population_excluded_uid", -999999)
+                excluded_uid = int(excluded_raw if excluded_raw is not None else -999999)
+            except (TypeError, ValueError):
+                excluded_uid = -999999
+            excluded_uid_values.append(excluded_uid == int(report.user_uid))
+    leave_one_out_ok = bool(leave_one_out_values and all(leave_one_out_values))
+    metrics_present_ok = bool(metrics_present_values and all(metrics_present_values))
+    target_excluded_ok = bool(excluded_uid_values and all(excluded_uid_values))
+    min_population = int(min(population_counts)) if population_counts else 0
+    population_count_ok = bool(min_population >= max(0, int(required_users) - 1))
+    if formal_requested:
+        passed = bool(
+            (not skip_used)
+            and leave_one_out_ok
+            and metrics_present_ok
+            and target_excluded_ok
+            and population_count_ok
+        )
+    else:
+        passed = bool(not skip_used)
     return {
-        "passed": not skip_used,
+        "passed": bool(passed),
         "skip_population_average_implant_used": bool(skip_used),
+        "leave_one_out_population_average": bool(leave_one_out_ok),
+        "target_user_excluded": bool(target_excluded_ok),
+        "baseline_c_metrics_present": bool(metrics_present_ok),
+        "population_count_ok": bool(population_count_ok),
+        "min_population_user_count": int(min_population),
+        "required_population_user_count": max(0, int(required_users) - 1),
+        "formal_requested": bool(formal_requested),
     }
 
 
@@ -764,6 +816,7 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
                             "text_similarity_values": [],
                             "length_deltas": [],
                             "semantic_deltas": [],
+                            "baseline_semantic_values": [],
                             "personality_actions": Counter(),
                             "baseline_actions": Counter(),
                             "personality_strategies": Counter(),
@@ -790,6 +843,7 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
                     bucket["length_deltas"].append(p_chars - int(row.get(str(spec["chars_key"]), 0) or 0))  # type: ignore[union-attr]
                     b_sem = _safe_float(row.get(str(spec["semantic_score_key"])), default=p_sem)
                     bucket["semantic_deltas"].append(p_sem - b_sem)  # type: ignore[union-attr]
+                    bucket["baseline_semantic_values"].append(b_sem)  # type: ignore[union-attr]
                     bucket["personality_actions"].update([p_action])  # type: ignore[union-attr]
                     bucket["baseline_actions"].update([b_action])  # type: ignore[union-attr]
                     bucket["personality_strategies"].update([p_strategy])  # type: ignore[union-attr]
@@ -806,6 +860,7 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
         text_vals = list(bucket["text_similarity_values"])  # type: ignore[arg-type]
         length_vals = list(bucket["length_deltas"])  # type: ignore[arg-type]
         sem_vals = list(bucket["semantic_deltas"])  # type: ignore[arg-type]
+        baseline_sem_vals = list(bucket["baseline_semantic_values"])  # type: ignore[arg-type]
         p_actions = bucket["personality_actions"]  # type: ignore[assignment]
         b_actions = bucket["baseline_actions"]  # type: ignore[assignment]
         p_strats = bucket["personality_strategies"]  # type: ignore[assignment]
@@ -823,6 +878,7 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
             "mean_text_similarity": round(float(mean(text_vals)) if text_vals else 0.0, 6),
             "mean_length_delta": round(float(mean(length_vals)) if length_vals else 0.0, 6),
             "mean_semantic_delta": round(float(mean(sem_vals)) if sem_vals else 0.0, 6),
+            "mean_baseline_semantic": round(float(mean(baseline_sem_vals)) if baseline_sem_vals else 0.0, 6),
             "action_distribution_delta": _counter_jsd(p_actions, b_actions),  # type: ignore[arg-type]
             "strategy_jsd": _counter_jsd(p_strats, b_strats),  # type: ignore[arg-type]
             "personality_action_distribution": dict(p_actions),  # type: ignore[arg-type]
@@ -855,6 +911,7 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
     )
     c_summary = summarized.get("baseline_c", {})
     c_reasons: list[str] = []
+    c_weak_reasons: list[str] = []
     if c_summary:
         if _safe_float(c_summary.get("action_agreement_rate")) >= 0.90:
             c_reasons.append("action_agreement_high")
@@ -864,7 +921,12 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
             c_reasons.append("template_overlap_high")
         if abs(_safe_float(c_summary.get("mean_semantic_delta"))) <= 0.005:
             c_reasons.append("semantic_delta_near_zero")
+        if _safe_float(c_summary.get("mean_text_similarity")) <= 0.05:
+            c_weak_reasons.append("text_similarity_low")
+        if _safe_float(c_summary.get("mean_baseline_semantic")) <= 0.01:
+            c_weak_reasons.append("semantic_mean_low")
     baseline_c_too_close = bool(c_reasons)
+    baseline_c_too_weak = bool(c_weak_reasons)
     return {
         "baselines": summarized,
         "per_user_rankings": {
@@ -874,11 +936,14 @@ def _baseline_audit_summary(reports: list[ValidationReport]) -> dict[str, object
         "wrong_user_masked_by_generic_template_warning": warning,
         "baseline_c_too_close_warning": baseline_c_too_close,
         "baseline_c_too_close_reason": ",".join(c_reasons),
+        "baseline_c_too_weak_warning": baseline_c_too_weak,
+        "baseline_c_too_weak_reason": ",".join(c_weak_reasons),
         "baseline_c_too_close_fields": {
             "action_agreement_rate": _safe_float(c_summary.get("action_agreement_rate")),
             "mean_text_similarity": _safe_float(c_summary.get("mean_text_similarity")),
             "template_agreement_rate": _safe_float(c_summary.get("template_agreement_rate")),
             "mean_semantic_delta": _safe_float(c_summary.get("mean_semantic_delta")),
+            "mean_baseline_semantic": _safe_float(c_summary.get("mean_baseline_semantic")),
         },
     }
 
@@ -913,6 +978,57 @@ def _ablation_summary(reports: list[ValidationReport]) -> dict[str, object]:
         for name, rows in sorted(by_name.items())
         if rows
     }
+
+
+def _profile_expression_source_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    buckets = {
+        "personality": {
+            "source_key": "personality_profile_expression_sources",
+            "move_key": "personality_rhetorical_move",
+        },
+        "baseline_c": {
+            "source_key": "baseline_c_profile_expression_sources",
+            "move_key": "baseline_c_rhetorical_move",
+        },
+    }
+    summary: dict[str, object] = {}
+    for name, spec in buckets.items():
+        source_counts: Counter[str] = Counter()
+        move_counts: Counter[str] = Counter()
+        rows = 0
+        for report in reports:
+            for strategy_result in report.per_strategy.values():
+                trace = strategy_result.get("diagnostic_trace", [])
+                if not isinstance(trace, list):
+                    continue
+                for row in trace:
+                    if not isinstance(row, dict):
+                        continue
+                    rows += 1
+                    raw_sources = row.get(str(spec["source_key"]), [])
+                    if isinstance(raw_sources, list):
+                        sources = [str(item) for item in raw_sources if str(item)]
+                    else:
+                        sources = [part for part in str(raw_sources).split(",") if part]
+                    if not sources:
+                        sources = ["generic"]
+                    source_counts.update(sources)
+                    move = str(row.get(str(spec["move_key"]), "") or "unknown")
+                    move_counts.update([move])
+        summary[name] = {
+            "rows": int(rows),
+            "source_counts": dict(sorted(source_counts.items())),
+            "source_rates": {
+                key: round(float(value) / float(max(1, rows)), 6)
+                for key, value in sorted(source_counts.items())
+            },
+            "rhetorical_move_counts": dict(sorted(move_counts.items())),
+            "rhetorical_move_rates": {
+                key: round(float(value) / float(max(1, rows)), 6)
+                for key, value in sorted(move_counts.items())
+            },
+        }
+    return summary
 
 
 def _state_saturation_summary(reports: list[ValidationReport]) -> dict[str, object]:
@@ -991,11 +1107,12 @@ def _debug_readiness_gate(
         "train_default_l2_positive": train_default_l2 > 0.0,
         "train_wrong_user_l2_positive": train_wrong_user_l2 > 0.0,
         "wrong_user_masked_warning_false": not wrong_user_warning,
-        "no_surface_not_better_than_full": bool(no_surface_present and no_surface_diff <= full_diff),
+        "no_surface_not_better_than_full": bool((not no_surface_present) or no_surface_diff <= full_diff),
     }
     return {
         "passed": all(bool(value) for value in checks.values()),
         "checks": checks,
+        "ablation_evaluated": bool(no_surface_present),
         "train_default_l2_mean": round(float(train_default_l2), 6),
         "train_wrong_user_l2_mean": round(float(train_wrong_user_l2), 6),
         "full_personality_semantic_vs_baseline_a_diff_mean": round(float(full_diff), 6),
@@ -1006,6 +1123,186 @@ def _debug_readiness_gate(
             baseline_audit_summary.get("baseline_c_too_close_reason", "")
         ),
         "policy": "debug-only gate for state/profile differentiation before mini-formal",
+    }
+
+
+def _diagnostic_trace_gate(
+    *,
+    formal_requested: bool,
+    diagnostic_trace_rows: int,
+) -> dict[str, object]:
+    passed = (not formal_requested) or int(diagnostic_trace_rows) > 0
+    return {
+        "passed": bool(passed),
+        "formal_requested": bool(formal_requested),
+        "diagnostic_trace_rows": int(diagnostic_trace_rows),
+        "policy": "formal acceptance requires non-empty diagnostic_trace.jsonl",
+    }
+
+
+def _agent_state_differentiation_gate(
+    reports: list[ValidationReport],
+    *,
+    formal_requested: bool,
+) -> dict[str, object]:
+    full_l2: list[float] = []
+    default_l2: list[float] = []
+    wrong_l2: list[float] = []
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            if not _strategy_eligible(strategy_result):
+                continue
+            diag = strategy_result.get("state_distance_diagnostics", {})
+            if not isinstance(diag, dict):
+                continue
+            train_full = diag.get("train_full", {})
+            train_default = diag.get("train_default", {})
+            train_wrong = diag.get("train_wrong_user", {})
+            if not isinstance(train_full, dict) or not isinstance(train_default, dict):
+                continue
+            full_l2.append(_safe_float(train_full.get("l2")))
+            default_l2.append(_safe_float(train_default.get("l2")))
+            if isinstance(train_wrong, dict):
+                wrong_l2.append(_safe_float(train_wrong.get("l2")))
+    full_mean = float(mean(full_l2)) if full_l2 else 0.0
+    default_mean = float(mean(default_l2)) if default_l2 else 0.0
+    wrong_mean = float(mean(wrong_l2)) if wrong_l2 else 0.0
+    default_ok = bool(full_l2 and default_l2 and full_mean < default_mean)
+    wrong_ok = bool(full_l2 and wrong_l2 and full_mean < wrong_mean)
+    diagnostic_passed = bool(default_ok and wrong_ok)
+    passed = (not formal_requested) or diagnostic_passed
+    return {
+        "passed": bool(passed),
+        "formal_requested": bool(formal_requested),
+        "diagnostic_passed": bool(diagnostic_passed),
+        "comparisons_evaluated": int(len(full_l2)),
+        "train_full_l2_mean": round(float(full_mean), 6),
+        "train_default_l2_mean": round(float(default_mean), 6),
+        "train_wrong_user_l2_mean": round(float(wrong_mean), 6),
+        "train_full_closer_than_default": bool(default_ok),
+        "train_full_closer_than_wrong_user": bool(wrong_ok),
+        "policy": "train-only state must be closer to full-data state than default or wrong-user state",
+    }
+
+
+def _behavioral_majority_baseline_gate(
+    reports: list[ValidationReport],
+    *,
+    formal_requested: bool,
+) -> dict[str, object]:
+    personality_values: list[float] = []
+    majority_values: list[float] = []
+    for report in reports:
+        for strategy_result in report.per_strategy.values():
+            if not _strategy_eligible(strategy_result):
+                continue
+            p = strategy_result.get("personality_metrics", {})
+            majority = strategy_result.get("majority_baseline_metrics", {})
+            if not isinstance(p, dict) or not isinstance(majority, dict):
+                continue
+            if "behavioral_similarity_strategy" not in p or "behavioral_similarity_strategy" not in majority:
+                continue
+            personality_values.append(_safe_float(p.get("behavioral_similarity_strategy")))
+            majority_values.append(_safe_float(majority.get("behavioral_similarity_strategy")))
+    personality_mean = float(mean(personality_values)) if personality_values else 0.0
+    majority_mean = float(mean(majority_values)) if majority_values else 0.0
+    warning = bool(majority_values and majority_mean >= personality_mean - 1e-12)
+    passed = (not formal_requested) or bool(majority_values and not warning)
+    return {
+        "passed": bool(passed),
+        "formal_requested": bool(formal_requested),
+        "behavioral_metric_majority_warning": bool(warning),
+        "personality_behavioral_strategy_mean": round(float(personality_mean), 6),
+        "majority_behavioral_strategy_mean": round(float(majority_mean), 6),
+        "comparisons_evaluated": int(len(majority_values)),
+        "policy": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
+    }
+
+
+def _baseline_c_behavioral_failure_audit(reports: list[ValidationReport]) -> dict[str, object]:
+    rows: list[dict[str, object]] = []
+    for report in reports:
+        for strategy_key, strategy_result in report.per_strategy.items():
+            if not _strategy_eligible(strategy_result):
+                continue
+            trace = strategy_result.get("diagnostic_trace", [])
+            if not isinstance(trace, list):
+                trace = []
+            real_strategy: Counter[str] = Counter()
+            personality_strategy: Counter[str] = Counter()
+            baseline_c_strategy: Counter[str] = Counter()
+            real_action: Counter[str] = Counter()
+            personality_action: Counter[str] = Counter()
+            baseline_c_action: Counter[str] = Counter()
+            for item in trace:
+                if not isinstance(item, dict):
+                    continue
+                if item.get("real_text") is not None:
+                    # Real action labels are not persisted in diagnostic rows; the real
+                    # distribution is available from metric details only for majority rows.
+                    pass
+                personality_strategy.update([str(item.get("personality_strategy", "unknown"))])
+                baseline_c_strategy.update([str(item.get("baseline_c_strategy", "unknown"))])
+                personality_action.update([str(item.get("personality_action", "unknown"))])
+                baseline_c_action.update([str(item.get("baseline_c_action", "unknown"))])
+            majority = strategy_result.get("majority_baseline_metrics", {})
+            if isinstance(majority, dict):
+                real_strategy_raw = majority.get("real_strategy_distribution", {})
+                real_action_raw = majority.get("real_action_distribution", {})
+                real_strategy_map = real_strategy_raw if isinstance(real_strategy_raw, dict) else {}
+                real_action_map = real_action_raw if isinstance(real_action_raw, dict) else {}
+                real_strategy.update(
+                    {
+                        str(k): int(v)
+                        for k, v in real_strategy_map.items()
+                    }
+                )
+                real_action.update(
+                    {
+                        str(k): int(v)
+                        for k, v in real_action_map.items()
+                    }
+                )
+            p = strategy_result.get("personality_metrics", {})
+            c = strategy_result.get("baseline_c_metrics", {})
+            rows.append(
+                {
+                    "user_uid": int(report.user_uid),
+                    "strategy": str(strategy_key),
+                    "pair_count": int(len(trace)),
+                    "real_strategy_distribution": dict(real_strategy),
+                    "personality_strategy_distribution": dict(personality_strategy),
+                    "baseline_c_strategy_distribution": dict(baseline_c_strategy),
+                    "majority_strategy": majority.get("majority_strategy") if isinstance(majority, dict) else None,
+                    "real_action_distribution": dict(real_action),
+                    "personality_action_distribution": dict(personality_action),
+                    "baseline_c_action_distribution": dict(baseline_c_action),
+                    "majority_action": majority.get("majority_action") if isinstance(majority, dict) else None,
+                    "personality_behavioral_strategy": (
+                        _safe_float(p.get("behavioral_similarity_strategy")) if isinstance(p, dict) else 0.0
+                    ),
+                    "baseline_c_behavioral_strategy": (
+                        _safe_float(c.get("behavioral_similarity_strategy")) if isinstance(c, dict) else 0.0
+                    ),
+                    "majority_behavioral_strategy": (
+                        _safe_float(majority.get("behavioral_similarity_strategy"))
+                        if isinstance(majority, dict)
+                        else 0.0
+                    ),
+                    "personality_balanced_behavioral_strategy": (
+                        _safe_float(p.get("balanced_behavioral_similarity_strategy")) if isinstance(p, dict) else 0.0
+                    ),
+                    "majority_balanced_behavioral_strategy": (
+                        _safe_float(majority.get("balanced_behavioral_similarity_strategy"))
+                        if isinstance(majority, dict)
+                        else 0.0
+                    ),
+                }
+            )
+    return {
+        "rows": rows,
+        "row_count": int(len(rows)),
+        "policy": "diagnostic distribution audit for Baseline C and train-majority behavioral baselines",
     }
 
 
@@ -1109,13 +1406,31 @@ def generate_report(
     topic_hard_pass = per_strategy_hard_pass.get("topic", {}).get("hard_pass")
     topic_split_summary = _topic_split_summary(reports)
     required_users = _required_users(reports)
+    formal_requested = _formal_requested(reports)
+    diagnostic_trace_rows = _write_diagnostic_trace(reports, output_dir)
     pilot_gate = _pilot_gate(reports, required_users)
     split_gate = _split_gate(per_strategy_comparisons, required_users)
     partner_gate = _partner_gate(per_strategy_hard_pass, per_strategy_comparisons, required_users)
     topic_gate = _topic_gate(per_strategy_hard_pass, topic_split_summary, required_users)
-    baseline_c_gate = _formal_baseline_c_gate(reports)
+    baseline_c_gate = _formal_baseline_c_gate(
+        reports,
+        required_users=required_users,
+        formal_requested=formal_requested,
+    )
     classifier_gate_summary = _classifier_gate_summary(reports)
     semantic_engine_gate = _semantic_engine_gate(reports)
+    diagnostic_trace_gate = _diagnostic_trace_gate(
+        formal_requested=formal_requested,
+        diagnostic_trace_rows=diagnostic_trace_rows,
+    )
+    agent_state_differentiation_gate = _agent_state_differentiation_gate(
+        reports,
+        formal_requested=formal_requested,
+    )
+    behavioral_majority_baseline_gate = _behavioral_majority_baseline_gate(
+        reports,
+        formal_requested=formal_requested,
+    )
     statistical_gate = {
         "passed": bool(scipy_wilcoxon_available()),
         "engine": "scipy.stats.wilcoxon",
@@ -1123,13 +1438,16 @@ def generate_report(
     }
     reproducibility_gate = {
         "passed": bool(baseline_c_gate["passed"]),
-        "baseline_c_full_population_implant": bool(baseline_c_gate["passed"]),
+        "baseline_c_leave_one_out_population_average": bool(baseline_c_gate["passed"]),
     }
     formal_acceptance_eligible = bool(
         classifier_gate
         and semantic_engine_gate["passed"]
         and statistical_gate["passed"]
         and baseline_c_gate["passed"]
+        and diagnostic_trace_gate["passed"]
+        and agent_state_differentiation_gate["passed"]
+        and behavioral_majority_baseline_gate["passed"]
     )
     hard_pass_breakdown = {
         **metric_hard_breakdown,
@@ -1142,7 +1460,10 @@ def generate_report(
         "partner_gate": bool(partner_gate["passed"]),
         "topic_gate": bool(topic_gate["passed"]),
         "reproducibility_gate": bool(reproducibility_gate["passed"]),
-        "baseline_c_full_population_implant": bool(baseline_c_gate["passed"]),
+        "baseline_c_leave_one_out_population_average": bool(baseline_c_gate["passed"]),
+        "diagnostic_trace_gate": bool(diagnostic_trace_gate["passed"]),
+        "agent_state_differentiation_gate": bool(agent_state_differentiation_gate["passed"]),
+        "behavioral_majority_baseline_gate": bool(behavioral_majority_baseline_gate["passed"]),
     }
     hard_pass = bool(
         metric_hard_pass
@@ -1153,6 +1474,9 @@ def generate_report(
         and topic_gate["passed"]
         and reproducibility_gate["passed"]
         and baseline_c_gate["passed"]
+        and diagnostic_trace_gate["passed"]
+        and agent_state_differentiation_gate["passed"]
+        and behavioral_majority_baseline_gate["passed"]
     )
     if hard_pass:
         overall_conclusion = "pass"
@@ -1163,6 +1487,7 @@ def generate_report(
     semantic_delta_summary = _semantic_delta_summary(reports)
     baseline_audit_summary = _baseline_audit_summary(reports)
     ablation_summary = _ablation_summary(reports)
+    profile_expression_summary = _profile_expression_source_summary(reports)
     state_saturation_summary = _state_saturation_summary(reports)
     debug_readiness_gate = _debug_readiness_gate(
         baseline_audit_summary=baseline_audit_summary,
@@ -1170,7 +1495,7 @@ def generate_report(
         state_saturation_summary=state_saturation_summary,
         comparisons=comparisons,
     )
-    diagnostic_trace_rows = _write_diagnostic_trace(reports, output_dir)
+    baseline_c_behavioral_failure_audit = _baseline_c_behavioral_failure_audit(reports)
 
     acceptance_rules = {
         "version": ACCEPTANCE_RULES_VERSION,
@@ -1180,14 +1505,17 @@ def generate_report(
         "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
-        "classifier_gate": "formal acceptance requires independent train/gate labels, class minima, separation, non-TFIDF embedding engine, and 3-class macro-F1 gate pass",
+        "classifier_gate": "formal acceptance requires independent non-fixture train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass",
         "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
         "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
         "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
         "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
-        "formal_baseline_c": "skip_population_average_implant is test-only and blocks formal acceptance when present",
+        "formal_baseline_c": "Baseline C must use leave-one-out population averaging and skip_population_average_implant is test-only",
+        "diagnostic_trace_gate": "formal acceptance requires non-empty diagnostic trace and audit summaries",
+        "behavioral_majority_baseline_gate": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
+        "agent_state_differentiation_gate": "train-only state must be closer to full-data state than default or wrong-user state",
     }
 
     metric_interpretations = {
@@ -1208,6 +1536,7 @@ def generate_report(
         "statistical_gate": statistical_gate,
         "formal_acceptance_eligible": bool(formal_acceptance_eligible),
         "behavioral_hard_metric_degraded": bool(behavioral_degraded),
+        "formal_requested": bool(formal_requested),
         "comparisons": comparisons,
         "per_strategy_comparisons": per_strategy_comparisons,
         "per_strategy_hard_pass": per_strategy_hard_pass,
@@ -1220,14 +1549,25 @@ def generate_report(
         "topic_gate": topic_gate,
         "reproducibility_gate": reproducibility_gate,
         "baseline_c_gate": baseline_c_gate,
+        "diagnostic_trace_gate": diagnostic_trace_gate,
+        "agent_state_differentiation_gate": agent_state_differentiation_gate,
+        "behavioral_majority_baseline_gate": behavioral_majority_baseline_gate,
         "metric_interpretations": metric_interpretations,
         "semantic_delta_summary": semantic_delta_summary,
         "baseline_audit_summary": baseline_audit_summary,
         "ablation_summary": ablation_summary,
+        "profile_expression_source_summary": profile_expression_summary,
         "state_saturation_summary": state_saturation_summary,
         "debug_readiness_gate": debug_readiness_gate,
+        "baseline_c_behavioral_failure_audit": baseline_c_behavioral_failure_audit,
+        "baseline_c_behavioral_failure_audit_json": str(
+            (output_dir / "baseline_c_behavioral_failure_audit.json").as_posix()
+        ),
         "baseline_audit_summary_json": str((output_dir / "baseline_audit_summary.json").as_posix()),
         "ablation_summary_json": str((output_dir / "ablation_summary.json").as_posix()),
+        "profile_expression_source_summary_json": str(
+            (output_dir / "profile_expression_source_summary.json").as_posix()
+        ),
         "state_saturation_summary_json": str((output_dir / "state_saturation_summary.json").as_posix()),
         "diagnostic_trace_jsonl": (
             str((output_dir / "diagnostic_trace.jsonl").as_posix())
@@ -1245,7 +1585,9 @@ def generate_report(
     }
     _write_json(output_dir / "baseline_audit_summary.json", baseline_audit_summary)
     _write_json(output_dir / "ablation_summary.json", ablation_summary)
+    _write_json(output_dir / "profile_expression_source_summary.json", profile_expression_summary)
     _write_json(output_dir / "state_saturation_summary.json", state_saturation_summary)
+    _write_json(output_dir / "baseline_c_behavioral_failure_audit.json", baseline_c_behavioral_failure_audit)
     _write_json(output_dir / "aggregate_report.json", aggregate_payload)
 
     lines = [
@@ -1268,6 +1610,9 @@ def generate_report(
         f"- Partner strategy hard pass: {partner_hard_pass}",
         f"- Topic strategy hard pass: {topic_hard_pass}",
         f"- Formal Baseline C gate: {baseline_c_gate['passed']}",
+        f"- Diagnostic trace gate: {diagnostic_trace_gate['passed']}",
+        f"- Agent-state differentiation gate: {agent_state_differentiation_gate['passed']}",
+        f"- Behavioral majority baseline gate: {behavioral_majority_baseline_gate['passed']}",
         f"- Diagnostic trace rows: {diagnostic_trace_rows}",
         "",
         "## Acceptance (hard metrics)",
@@ -1304,6 +1649,9 @@ def generate_report(
             f"- Wrong-user masked warning: {baseline_audit_summary['wrong_user_masked_by_generic_template_warning']}",
             f"- Baseline C too-close warning: {baseline_audit_summary['baseline_c_too_close_warning']} "
             f"({baseline_audit_summary['baseline_c_too_close_reason']})",
+            f"- Baseline C too-weak warning (diagnostic-only): "
+            f"{baseline_audit_summary['baseline_c_too_weak_warning']} "
+            f"({baseline_audit_summary['baseline_c_too_weak_reason']})",
             "",
             "| Baseline | rows | action agree | strategy agree | template agree | text sim | duplicate | semantic delta | action JSD | strategy JSD |",
             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -1316,7 +1664,22 @@ def generate_report(
             f"{_fmt_cell_num(row['mean_text_similarity'])} | "
             f"{_fmt_cell_num(row['exact_duplicate_rate'])} | {_fmt_cell_num(row['mean_semantic_delta'])} | "
             f"{_fmt_cell_num(row['action_distribution_delta'])} | {_fmt_cell_num(row['strategy_jsd'])} |"
+            )
+    if profile_expression_summary:
+        lines.extend(
+            [
+                "",
+                "## Profile Expression Diagnostics",
+                "",
+                "| Surface | rows | expression source rates | rhetorical move rates |",
+                "| --- | --- | --- | --- |",
+            ]
         )
+        for name, row in profile_expression_summary.items():
+            lines.append(
+                f"| `{name}` | {row['rows']} | {row['source_rates']} | "
+                f"{row['rhetorical_move_rates']} |"
+            )
     if ablation_summary:
         lines.extend(
             [

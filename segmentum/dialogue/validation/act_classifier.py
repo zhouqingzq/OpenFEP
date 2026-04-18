@@ -17,9 +17,18 @@ MIN_FORMAL_TRAIN_PER_CLASS = 100
 MIN_FORMAL_GATE_SAMPLES = 150
 MIN_FORMAL_GATE_PER_CLASS = 50
 FORMAL_STRATEGY_LABELS = ("explore", "exploit", "escape")
+DEFAULT_MAX_CUE_OVERRIDE_RATE = 0.35
+_NON_FORMAL_PROVENANCE_MARKERS = (
+    "codex_authored",
+    "fixture",
+    "synthetic",
+    "smoke",
+    "toy",
+)
 
 _TOKEN_RE = re.compile(r"[A-Za-z0-9_]+|[\u4e00-\u9fff]")
 _ST_CLASSIFIER_MODELS: dict[str, object] = {}
+_ST_CLASSIFIER_EMBEDDINGS: dict[tuple[str, str], object] = {}
 
 
 @dataclass(slots=True)
@@ -92,7 +101,12 @@ def _normalize_sample(sample: Mapping[str, object]) -> dict[str, str] | None:
         return None
     if not label_11:
         label_11 = _representative_action(label_3)
-    return {"text": text, "label_11": label_11, "label_3": label_3}
+    out = {"text": text, "label_11": label_11, "label_3": label_3}
+    for key in ("source", "annotator", "sampling_policy", "created_at", "label_schema_version", "session_id"):
+        raw = sample.get(key)
+        if raw is not None and str(raw).strip():
+            out[key] = str(raw).strip()
+    return out
 
 
 def _normalize_samples(samples: Iterable[Mapping[str, object]] | None) -> list[dict[str, str]]:
@@ -421,12 +435,7 @@ class DialogueActClassifier:
             _ST_CLASSIFIER_MODELS[self.model_name] = SentenceTransformer(self.model_name)
         self._model = _ST_CLASSIFIER_MODELS[self.model_name]
         texts = [item["text"] for item in self.train_samples]
-        rows = self._model.encode(
-            texts,
-            normalize_embeddings=True,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-        )
+        rows = self._embedding_rows_for_texts(texts)
         self._embedding_rows = [row for row in rows]
         self._char_vectors = [_char_vector(item["text"]) for item in self.train_samples]
         self._sample_labels_11 = [item["label_11"] for item in self.train_samples]
@@ -442,6 +451,30 @@ class DialogueActClassifier:
             if norm > 1e-12:
                 centroid = centroid / norm
             self._embedding_centroids_3[label_3] = centroid
+
+    def _embedding_rows_for_texts(self, texts: list[str]) -> list[object]:
+        import numpy as np
+
+        if self._model is None:
+            return []
+        missing: list[str] = []
+        seen_missing: set[str] = set()
+        for text in texts:
+            key = (self.model_name, text)
+            if key in _ST_CLASSIFIER_EMBEDDINGS or text in seen_missing:
+                continue
+            missing.append(text)
+            seen_missing.add(text)
+        if missing:
+            encoded = self._model.encode(
+                missing,
+                normalize_embeddings=True,
+                show_progress_bar=False,
+                convert_to_numpy=True,
+            )
+            for text, row in zip(missing, encoded):
+                _ST_CLASSIFIER_EMBEDDINGS[(self.model_name, text)] = np.asarray(row, dtype=float)
+        return [_ST_CLASSIFIER_EMBEDDINGS[(self.model_name, text)] for text in texts]
 
     def _fit_centroids(self, vectors: list[dict[str, float]]) -> None:
         by_3: dict[str, list[dict[str, float]]] = defaultdict(list)
@@ -470,12 +503,10 @@ class DialogueActClassifier:
     def _predict_embedding(self, text: str) -> ActionPrediction:
         if self._model is None or not self._embedding_rows:
             return self._predict_tfidf(text)
-        row = self._model.encode(
-            [text],
-            normalize_embeddings=True,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-        )[0]
+        row = self._embedding_rows_for_texts([text])[0]
+        return self._predict_embedding_from_row(text, row)
+
+    def _predict_embedding_from_row(self, text: str, row: object) -> ActionPrediction:
         char_vec = _char_vector(text)
         label_3 = "explore"
         score_3 = float("-inf")
@@ -549,7 +580,26 @@ class DialogueActClassifier:
         return self._predict_tfidf(text)
 
     def predict_batch(self, texts: list[str]) -> list[ActionPrediction]:
-        return [self.predict(item) for item in texts]
+        if not self.train_samples or not self.formal_engine:
+            return [self.predict(item) for item in texts]
+        out: list[ActionPrediction | None] = [None] * len(texts)
+        pending_indices: list[int] = []
+        pending_texts: list[str] = []
+        for idx, text in enumerate(texts):
+            cue = _cue_prediction(text)
+            if cue is not None:
+                out[idx] = cue
+            else:
+                pending_indices.append(idx)
+                pending_texts.append(text)
+        if pending_texts and self._model is not None and self._embedding_rows:
+            rows = self._embedding_rows_for_texts(pending_texts)
+            for idx, text, row in zip(pending_indices, pending_texts, rows):
+                out[idx] = self._predict_embedding_from_row(text, row)
+        for idx, item in enumerate(out):
+            if item is None:
+                out[idx] = self._predict_tfidf(texts[idx])
+        return [item for item in out if item is not None]
 
 
 def _macro_f1(true_labels: list[str], pred_labels: list[str], labels: list[str]) -> float:
@@ -621,6 +671,27 @@ def _formal_dataset_ok(train_samples: list[dict[str, str]], gate_samples: list[d
     )
 
 
+def _classifier_provenance(
+    train_samples: list[dict[str, str]],
+    gate_samples: list[dict[str, str]],
+    dataset_origin: str,
+    *,
+    require_classifier_provenance: bool,
+) -> tuple[bool, str]:
+    if not require_classifier_provenance:
+        return True, ""
+    values = [str(dataset_origin)]
+    for sample in [*train_samples, *gate_samples]:
+        for key in ("source", "annotator", "sampling_policy", "label_schema_version"):
+            if sample.get(key):
+                values.append(str(sample[key]))
+    lowered = " ".join(values).lower()
+    hits = [marker for marker in _NON_FORMAL_PROVENANCE_MARKERS if marker in lowered]
+    if hits:
+        return False, "non_formal_provenance_marker:" + ",".join(sorted(set(hits)))
+    return True, ""
+
+
 def validate_act_classifier(
     samples: list[dict[str, str]] | None = None,
     *,
@@ -629,11 +700,19 @@ def validate_act_classifier(
     classifier: DialogueActClassifier | KeywordDialogueActClassifier | None = None,
     min_macro_f1_3class: float = 0.70,
     dataset_origin: str = "unspecified",
+    max_cue_override_rate: float = DEFAULT_MAX_CUE_OVERRIDE_RATE,
+    require_classifier_provenance: bool = True,
 ) -> dict[str, object]:
     train = _normalize_samples(train_samples)
     gate = _normalize_samples(gate_samples if gate_samples is not None else samples)
     clf = classifier or DialogueActClassifier(train if train else None)
     if not gate:
+        provenance_ok, provenance_reason = _classifier_provenance(
+            train,
+            gate,
+            dataset_origin,
+            require_classifier_provenance=require_classifier_provenance,
+        )
         return {
             "engine": getattr(clf, "engine", "unknown"),
             "dataset_origin": dataset_origin,
@@ -646,9 +725,22 @@ def validate_act_classifier(
             "confusion_matrix_3class": _confusion_matrix([], [], list(FORMAL_STRATEGY_LABELS)),
             "per_class_metrics_3class": _per_class_metrics([], [], list(FORMAL_STRATEGY_LABELS)),
             "cue_override_rate": 0.0,
+            "cue_override_gate_passed": True,
+            "max_cue_override_rate": float(max_cue_override_rate),
+            "macro_f1_3class_without_cue": 0.0,
+            "macro_f1_3class_cue_only": 0.0,
+            "without_cue_3class_gate_passed": False,
             "min_macro_f1_3class": float(min_macro_f1_3class),
             "passed_3class_gate": False,
             "formal_gate_eligible": False,
+            "classifier_provenance_ok": bool(provenance_ok),
+            "classifier_provenance_failure_reason": provenance_reason,
+            "formal_engine": bool(getattr(clf, "formal_engine", False)),
+            "formal_engine_failure_reason": (
+                ""
+                if bool(getattr(clf, "formal_engine", False))
+                else str(getattr(clf, "engine", "unknown"))
+            ),
             "behavioral_hard_metric_enabled": False,
             "degradation_required": True,
             "notes": "no gate samples provided",
@@ -672,9 +764,38 @@ def validate_act_classifier(
     macro_f1_3 = _macro_f1(true_3, pred_3, labels_3)
     macro_f1_11 = _macro_f1(true_11, pred_11, labels_11)
     cue_count = sum(1 for source in pred_sources if source == "cue")
+    non_cue_indices = [idx for idx, source in enumerate(pred_sources) if source != "cue"]
+    cue_indices = [idx for idx, source in enumerate(pred_sources) if source == "cue"]
+    macro_f1_3_without_cue = _macro_f1(
+        [true_3[idx] for idx in non_cue_indices],
+        [pred_3[idx] for idx in non_cue_indices],
+        labels_3,
+    )
+    macro_f1_3_cue_only = _macro_f1(
+        [true_3[idx] for idx in cue_indices],
+        [pred_3[idx] for idx in cue_indices],
+        labels_3,
+    )
     dataset_ok = _formal_dataset_ok(train, gate)
     formal_engine = bool(getattr(clf, "formal_engine", False))
-    formal_gate_eligible = bool(dataset_ok and formal_engine)
+    provenance_ok, provenance_reason = _classifier_provenance(
+        train,
+        gate,
+        dataset_origin,
+        require_classifier_provenance=require_classifier_provenance,
+    )
+    cue_override_rate = round(float(cue_count) / float(max(1, len(pred_sources))), 6)
+    cue_override_gate_passed = cue_override_rate <= float(max_cue_override_rate)
+    without_cue_gate_passed = bool(
+        non_cue_indices and macro_f1_3_without_cue >= float(min_macro_f1_3class)
+    )
+    formal_gate_eligible = bool(
+        dataset_ok
+        and formal_engine
+        and provenance_ok
+        and cue_override_gate_passed
+        and without_cue_gate_passed
+    )
     passed = bool(formal_gate_eligible and macro_f1_3 >= float(min_macro_f1_3class))
     return {
         "engine": getattr(clf, "engine", "unknown"),
@@ -697,11 +818,19 @@ def validate_act_classifier(
         "macro_f1_11class": round(float(macro_f1_11), 6),
         "confusion_matrix_3class": _confusion_matrix(true_3, pred_3, labels_3),
         "per_class_metrics_3class": _per_class_metrics(true_3, pred_3, labels_3),
-        "cue_override_rate": round(float(cue_count) / float(max(1, len(pred_sources))), 6),
+        "cue_override_rate": cue_override_rate,
+        "cue_override_gate_passed": bool(cue_override_gate_passed),
+        "max_cue_override_rate": float(max_cue_override_rate),
+        "macro_f1_3class_without_cue": round(float(macro_f1_3_without_cue), 6),
+        "macro_f1_3class_cue_only": round(float(macro_f1_3_cue_only), 6),
+        "without_cue_3class_gate_passed": bool(without_cue_gate_passed),
         "prediction_source_counts": {k: int(v) for k, v in Counter(pred_sources).items()},
         "min_macro_f1_3class": float(min_macro_f1_3class),
         "formal_gate_eligible": bool(formal_gate_eligible),
+        "classifier_provenance_ok": bool(provenance_ok),
+        "classifier_provenance_failure_reason": provenance_reason,
         "formal_engine": bool(formal_engine),
+        "formal_engine_failure_reason": "" if formal_engine else str(getattr(clf, "engine", "unknown")),
         "formal_dataset_ok": bool(dataset_ok),
         "passed_3class_gate": bool(passed),
         "behavioral_hard_metric_enabled": bool(passed),

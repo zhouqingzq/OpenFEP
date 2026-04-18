@@ -1,0 +1,1739 @@
+{
+  "aggregate": {
+    "behavioral_baseline_c_mean": 1.0,
+    "behavioral_hard_metric_enabled": true,
+    "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+    "behavioral_personality_mean": 0.75,
+    "classifier_validation": {
+      "behavioral_hard_metric_enabled": true,
+      "class_distribution": {
+        "gate": {
+          "escape": 50,
+          "exploit": 50,
+          "explore": 50
+        },
+        "train": {
+          "escape": 100,
+          "exploit": 100,
+          "explore": 100
+        }
+      },
+      "confusion_matrix_3class": {
+        "escape": {
+          "escape": 39,
+          "exploit": 8,
+          "explore": 3
+        },
+        "exploit": {
+          "escape": 4,
+          "exploit": 42,
+          "explore": 4
+        },
+        "explore": {
+          "escape": 4,
+          "exploit": 0,
+          "explore": 46
+        }
+      },
+      "cue_override_rate": 0.646667,
+      "dataset_origin": "data\\m54_classifier_gate.jsonl",
+      "dataset_separation_ok": true,
+      "degradation_required": false,
+      "engine": "sentence_embedding_nearest_centroid",
+      "formal_dataset_minima": {
+        "gate_per_class": 50,
+        "gate_samples": 150,
+        "train_per_class": 100,
+        "train_samples": 300
+      },
+      "formal_dataset_ok": true,
+      "formal_engine": true,
+      "formal_engine_failure_reason": "",
+      "formal_gate_eligible": true,
+      "gate_count": 150,
+      "macro_f1_11class": 0.58848,
+      "macro_f1_3class": 0.845776,
+      "min_macro_f1_3class": 0.7,
+      "passed_3class_gate": true,
+      "per_class_metrics_3class": {
+        "escape": {
+          "f1": 0.804124,
+          "precision": 0.829787,
+          "recall": 0.78,
+          "support": 50
+        },
+        "exploit": {
+          "f1": 0.84,
+          "precision": 0.84,
+          "recall": 0.84,
+          "support": 50
+        },
+        "explore": {
+          "f1": 0.893204,
+          "precision": 0.867925,
+          "recall": 0.92,
+          "support": 50
+        }
+      },
+      "prediction_source_counts": {
+        "cue": 97,
+        "embedding_centroid": 53
+      },
+      "sample_count": 150,
+      "train_count": 300
+    },
+    "diagnostic_trace_enabled": false,
+    "formal_requested": true,
+    "metric_version": "m54_v3",
+    "pilot": {
+      "behavioral_diff_sd": 0.337313,
+      "behavioral_escalated": true,
+      "escalated": true,
+      "pilot_metrics_used": [
+        "semantic_vs_baseline_a_mean_diff",
+        "behavioral_vs_baseline_c_mean_diff_when_classifier_hard_enabled"
+      ],
+      "pilot_user_count": 5,
+      "required_users": 15,
+      "sd_threshold": 0.04,
+      "semantic_diff_mean": 0.063223,
+      "semantic_diff_sd": 0.153253,
+      "semantic_escalated": true,
+      "suggested_min_users": 15
+    },
+    "pipeline_status": "completed",
+    "requested_strategies": [
+      "random",
+      "temporal",
+      "partner",
+      "topic"
+    ],
+    "required_users": 15,
+    "semantic_baseline_a_mean": 0.40370174999999997,
+    "semantic_baseline_b_mean": 0.4050398333333333,
+    "semantic_baseline_c_mean": 0.38508975,
+    "semantic_personality_mean": 0.73767025,
+    "skip_population_average_implant": false,
+    "strategy_count": 4
+  },
+  "conclusion": "completed",
+  "per_strategy": {
+    "partner": {
+      "ablation_summary": [],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 4
+        },
+        "stylistic_similarity": {
+          "jsd": 0.133063
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.04381
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.43863,
+        "stylistic_similarity": 0.80803,
+        "surface_similarity": 0.021905
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.42331766666666665,
+        "stylistic_similarity": 0.846905,
+        "surface_similarity": 0.0
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637215,
+        2637470,
+        2637318
+      ],
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 4
+        },
+        "stylistic_similarity": {
+          "jsd": 0.158887
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.416255,
+        "stylistic_similarity": 0.770774,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.186292,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2845,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2845
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325835
+      },
+      "behavioral_hard_metric_enabled": true,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": true,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": false,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": true,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": true,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "embedding_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 4
+        },
+        "stylistic_similarity": {
+          "jsd": 0.094881
+        },
+        "surface_similarity": {
+          "bleu4": 0.088629,
+          "rouge_l": 0.333333
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.836762,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.689256,
+        "stylistic_similarity": 0.863115,
+        "surface_similarity": 0.210981
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "holdout_partners": [
+          3938449,
+          4744012,
+          4744389
+        ],
+        "partner_count": 19,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "partner",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "minimal_response": 3
+        },
+        "applied": true,
+        "avg_reply_chars": 16.0,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "minimal_response": 1.0
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.394667,
+          "meaning_stability": -0.1155,
+          "trauma_bias": 0.15156,
+          "trust_prior": -0.276
+        },
+        "reply_count": 3,
+        "source": "partner:train",
+        "strategy_counts": {
+          "escape": 3
+        },
+        "token_variety": 0.166667,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.28,
+          "exploration_posture": -0.213333,
+          "social_approach": -0.123333,
+          "threat_sensitivity": 0.1684,
+          "trust_stance": -0.23
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.030747,
+          "prior:meaning_stability": 0.002537,
+          "prior:trauma_bias": 0.004899,
+          "prior:trust_prior": 0.014095,
+          "trait:caution_bias": 0.01649,
+          "trait:exploration_posture": 0.008367,
+          "trait:social_approach": 0.004473,
+          "trait:threat_sensitivity": 0.006048,
+          "trait:trust_stance": 0.009789
+        },
+        "train_default": {
+          "cosine": 0.836762,
+          "l2": 0.69902,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.394667,
+            "prior:meaning_stability": 0.1155,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.213333,
+            "trait:social_approach": 0.123333,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_full": {
+          "cosine": 0.836762,
+          "l2": 0.69902,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.394667,
+            "prior:meaning_stability": 0.1155,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.213333,
+            "trait:social_approach": 0.123333,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.988757,
+          "l2": 0.196572,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.103342,
+            "prior:meaning_stability": 0.036132,
+            "prior:trauma_bias": 0.025486,
+            "prior:trust_prior": 0.097607,
+            "trait:caution_bias": 0.051548,
+            "trait:exploration_posture": 0.077629,
+            "trait:social_approach": 0.019429,
+            "trait:threat_sensitivity": 0.028318,
+            "trait:trust_stance": 0.081339
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 13.45,
+        "median_reply_chars": 12,
+        "opening_phrases": [
+          "[強][強][花][花]",
+          "恭禧冠軍呦[勝利][勝利][勝利][",
+          "[送花][送花][送花][送花][送",
+          "[送花][送花][送花]"
+        ],
+        "reply_count": 20,
+        "source": "partner:train",
+        "strategy_counts": {
+          "escape": 20
+        },
+        "top_tokens": [
+          "花",
+          "強",
+          "送",
+          "勝",
+          "利",
+          "恭",
+          "禧",
+          "冠"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    },
+    "random": {
+      "ablation_summary": [],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.097881
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.047619
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.422052,
+        "stylistic_similarity": 0.858788,
+        "surface_similarity": 0.02381
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.3945223333333333,
+        "stylistic_similarity": 0.7706430000000001,
+        "surface_similarity": 0.0
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637215,
+        2637470,
+        2637318
+      ],
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.200366
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.38509,
+        "stylistic_similarity": 0.710933,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.186292,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2845,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2845
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325835
+      },
+      "behavioral_hard_metric_enabled": true,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": true,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": false,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": true,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": true,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "embedding_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.083929
+        },
+        "surface_similarity": {
+          "bleu4": 0.430942,
+          "rouge_l": 0.7
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.830161,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.914577,
+        "stylistic_similarity": 0.878917,
+        "surface_similarity": 0.565471
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "random",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "minimal_response": 5
+        },
+        "applied": true,
+        "avg_reply_chars": 14.4,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "minimal_response": 1.0
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.4032,
+          "meaning_stability": -0.147,
+          "trauma_bias": 0.15156,
+          "trust_prior": -0.276
+        },
+        "reply_count": 5,
+        "source": "random:train",
+        "strategy_counts": {
+          "escape": 5
+        },
+        "token_variety": 0.1,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.28,
+          "exploration_posture": -0.224,
+          "social_approach": -0.126667,
+          "threat_sensitivity": 0.1684,
+          "trust_stance": -0.23
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.031712,
+          "prior:meaning_stability": 0.003774,
+          "prior:trauma_bias": 0.004899,
+          "prior:trust_prior": 0.014095,
+          "trait:caution_bias": 0.01649,
+          "trait:exploration_posture": 0.009061,
+          "trait:social_approach": 0.004569,
+          "trait:threat_sensitivity": 0.006048,
+          "trait:trust_stance": 0.009789
+        },
+        "train_default": {
+          "cosine": 0.830161,
+          "l2": 0.713586,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.4032,
+            "prior:meaning_stability": 0.147,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.224,
+            "trait:social_approach": 0.126667,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_full": {
+          "cosine": 0.830161,
+          "l2": 0.713586,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.4032,
+            "prior:meaning_stability": 0.147,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.224,
+            "trait:social_approach": 0.126667,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.986698,
+          "l2": 0.213066,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.111875,
+            "prior:meaning_stability": 0.067632,
+            "prior:trauma_bias": 0.025486,
+            "prior:trust_prior": 0.097607,
+            "trait:caution_bias": 0.051548,
+            "trait:exploration_posture": 0.088296,
+            "trait:social_approach": 0.016095,
+            "trait:threat_sensitivity": 0.028318,
+            "trait:trust_stance": 0.081339
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 12.6,
+        "median_reply_chars": 12,
+        "opening_phrases": [
+          "[強][強][花][花]",
+          "[送花][送花][送花][送花][送"
+        ],
+        "reply_count": 20,
+        "source": "random:train",
+        "strategy_counts": {
+          "escape": 20
+        },
+        "top_tokens": [
+          "花",
+          "強",
+          "送"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    },
+    "temporal": {
+      "ablation_summary": [],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 1
+        },
+        "stylistic_similarity": {
+          "jsd": 0.089464
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.332073,
+        "stylistic_similarity": 0.870931,
+        "surface_similarity": 0.0
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.40779699999999997,
+        "stylistic_similarity": 0.68531,
+        "surface_similarity": 0.0
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637215,
+        2637470,
+        2637318
+      ],
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 1
+        },
+        "stylistic_similarity": {
+          "jsd": 0.261335
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.353924,
+        "stylistic_similarity": 0.622974,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.186292,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2845,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2845
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325835
+      },
+      "behavioral_hard_metric_enabled": true,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": true,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": false,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": true,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": true,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "embedding_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 1
+        },
+        "stylistic_similarity": {
+          "jsd": 0.082405
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.828421,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.432271,
+        "stylistic_similarity": 0.881115,
+        "surface_similarity": 0.0
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "ordered_by": "session_start_time",
+        "session_count": 32,
+        "strategy": "temporal",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "minimal_response": 6
+        },
+        "applied": true,
+        "avg_reply_chars": 14.0,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "minimal_response": 1.0
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.405333,
+          "meaning_stability": -0.154875,
+          "trauma_bias": 0.15156,
+          "trust_prior": -0.276
+        },
+        "reply_count": 6,
+        "source": "temporal:train",
+        "strategy_counts": {
+          "escape": 6
+        },
+        "token_variety": 0.083333,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.28,
+          "exploration_posture": -0.226667,
+          "social_approach": -0.1275,
+          "threat_sensitivity": 0.1684,
+          "trust_stance": -0.23
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.031958,
+          "prior:meaning_stability": 0.004142,
+          "prior:trauma_bias": 0.004899,
+          "prior:trust_prior": 0.014095,
+          "trait:caution_bias": 0.01649,
+          "trait:exploration_posture": 0.009241,
+          "trait:social_approach": 0.004594,
+          "trait:threat_sensitivity": 0.006048,
+          "trait:trust_stance": 0.009789
+        },
+        "train_default": {
+          "cosine": 0.828421,
+          "l2": 0.71744,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.405333,
+            "prior:meaning_stability": 0.154875,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.226667,
+            "trait:social_approach": 0.1275,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_full": {
+          "cosine": 0.828421,
+          "l2": 0.71744,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.405333,
+            "prior:meaning_stability": 0.154875,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.226667,
+            "trait:social_approach": 0.1275,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.986072,
+          "l2": 0.217849,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.114008,
+            "prior:meaning_stability": 0.075507,
+            "prior:trauma_bias": 0.025486,
+            "prior:trust_prior": 0.097607,
+            "trait:caution_bias": 0.051548,
+            "trait:exploration_posture": 0.090963,
+            "trait:social_approach": 0.015262,
+            "trait:threat_sensitivity": 0.028318,
+            "trait:trust_stance": 0.081339
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 13.526316,
+        "median_reply_chars": 12,
+        "opening_phrases": [
+          "[強][強][花][花]",
+          "恭禧冠軍呦[勝利][勝利][勝利][",
+          "[送花][送花][送花][送花][送"
+        ],
+        "reply_count": 19,
+        "source": "temporal:train",
+        "strategy_counts": {
+          "escape": 19
+        },
+        "top_tokens": [
+          "花",
+          "強",
+          "勝",
+          "利",
+          "送",
+          "恭",
+          "禧",
+          "冠"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    },
+    "topic": {
+      "ablation_summary": [],
+      "baseline_a_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.097881
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.047619
+        }
+      },
+      "baseline_a_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.422052,
+        "stylistic_similarity": 0.858788,
+        "surface_similarity": 0.02381
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.3945223333333333,
+        "stylistic_similarity": 0.7706430000000001,
+        "surface_similarity": 0.0
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637215,
+        2637470,
+        2637318
+      ],
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.200366
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.38509,
+        "stylistic_similarity": 0.710933,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.186292,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2845,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2845
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325835
+      },
+      "behavioral_hard_metric_enabled": true,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": true,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_override_rate": 0.646667,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": false,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": true,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": true,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "cue": 97,
+          "embedding_centroid": 53
+        },
+        "sample_count": 150,
+        "train_count": 300
+      },
+      "diagnostic_trace": [],
+      "eligible_for_hard_gate": true,
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "minimal_response"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.083929
+        },
+        "surface_similarity": {
+          "bleu4": 0.430942,
+          "rouge_l": 0.7
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.830161,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.914577,
+        "stylistic_similarity": 0.878917,
+        "surface_similarity": 0.565471
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "all_assigned_cluster_sizes": {
+          "2": 9,
+          "3": 23
+        },
+        "cluster_sizes": {
+          "2": 5,
+          "3": 17
+        },
+        "cluster_sizes_scope": "train_fit_sessions_only",
+        "holdout_count": 10,
+        "jsd_threshold": 0.1,
+        "k_search_max_by_all_sessions": 6,
+        "k_search_max_by_train_sessions": 4,
+        "k_selected": 4,
+        "max_k": 8,
+        "max_train_fit_iterations": 24,
+        "merge_steps": [
+          {
+            "source_cluster": 1,
+            "source_size": 1,
+            "target_cluster": 2,
+            "target_size": 4
+          },
+          {
+            "source_cluster": 0,
+            "source_size": 3,
+            "target_cluster": 3,
+            "target_size": 14
+          }
+        ],
+        "min_cluster_size": 5,
+        "seed": 42,
+        "session_count": 32,
+        "silhouette": 0.226484,
+        "silhouette_scope": "train_fit_sessions_only",
+        "strategy": "topic",
+        "strict_topic_no_random_fallback": true,
+        "strict_train_only_fit": true,
+        "topic_holdout_transform_only": true,
+        "topic_jsd_train_holdout": 0.017494,
+        "topic_kmeans_fitted_on_train_sessions_only": true,
+        "topic_reused_balanced_initial_fit_split": true,
+        "topic_split_not_applicable": false,
+        "topic_split_retry_count": 0,
+        "topic_strict_fit_converged": true,
+        "topic_train_fit_iteration": 0,
+        "topic_train_fit_iterations": 1,
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "minimal_response": 5
+        },
+        "applied": true,
+        "avg_reply_chars": 14.4,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "minimal_response": 1.0
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.4032,
+          "meaning_stability": -0.147,
+          "trauma_bias": 0.15156,
+          "trust_prior": -0.276
+        },
+        "reply_count": 5,
+        "source": "topic:train",
+        "strategy_counts": {
+          "escape": 5
+        },
+        "token_variety": 0.1,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.28,
+          "exploration_posture": -0.224,
+          "social_approach": -0.126667,
+          "threat_sensitivity": 0.1684,
+          "trust_stance": -0.23
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.031712,
+          "prior:meaning_stability": 0.003774,
+          "prior:trauma_bias": 0.004899,
+          "prior:trust_prior": 0.014095,
+          "trait:caution_bias": 0.01649,
+          "trait:exploration_posture": 0.009061,
+          "trait:social_approach": 0.004569,
+          "trait:threat_sensitivity": 0.006048,
+          "trait:trust_stance": 0.009789
+        },
+        "train_default": {
+          "cosine": 0.830161,
+          "l2": 0.713586,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.4032,
+            "prior:meaning_stability": 0.147,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.224,
+            "trait:social_approach": 0.126667,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_full": {
+          "cosine": 0.830161,
+          "l2": 0.713586,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.4032,
+            "prior:meaning_stability": 0.147,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.224,
+            "trait:social_approach": 0.126667,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.986698,
+          "l2": 0.213066,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.111875,
+            "prior:meaning_stability": 0.067632,
+            "prior:trauma_bias": 0.025486,
+            "prior:trust_prior": 0.097607,
+            "trait:caution_bias": 0.051548,
+            "trait:exploration_posture": 0.088296,
+            "trait:social_approach": 0.016095,
+            "trait:threat_sensitivity": 0.028318,
+            "trait:trust_stance": 0.081339
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 12.6,
+        "median_reply_chars": 12,
+        "opening_phrases": [
+          "[強][強][花][花]",
+          "[送花][送花][送花][送花][送"
+        ],
+        "reply_count": 20,
+        "source": "topic:train",
+        "strategy_counts": {
+          "escape": 20
+        },
+        "top_tokens": [
+          "花",
+          "強",
+          "送"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    }
+  },
+  "user_uid": 2637266
+}

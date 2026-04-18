@@ -45,6 +45,7 @@
     },
     "formal_dataset_ok": true,
     "formal_engine": false,
+    "formal_engine_failure_reason": "tfidf_nearest_centroid",
     "formal_gate_eligible": false,
     "gate_count": 150,
     "macro_f1_11class": 0.571724,
@@ -79,49 +80,57 @@
     "train_count": 300
   },
   "diagnostic_trace_jsonl": "artifacts/m54_validation_mini_10x32_state_profile_fix/diagnostic_trace.jsonl",
-  "diagnostic_trace_rows": 931,
+  "diagnostic_trace_rows": 1884,
+  "direction_auto_escalation": {
+    "applied": true,
+    "pilot_required_users": 15,
+    "policy": "non-formal direction runs honor pilot escalation by rerunning with the required user count",
+    "requested_max_users": 10,
+    "rerun_user_count": 15,
+    "stale_artifact_note": "Earlier 10x32 outputs without this field should be treated as pre-final-patch or pilot-escalation stale artifacts."
+  },
   "formal_acceptance_eligible": false,
   "hard_pass": false,
   "hard_pass_breakdown": {
     "agent_state_similarity_mean_ge_0.80": true,
     "baseline_c_full_population_implant": true,
     "behavioral_hard_metric_required": false,
-    "behavioral_similarity_strategy_vs_baseline_c_significant_better": true,
+    "behavioral_similarity_strategy_vs_baseline_c_significant_better": false,
     "behavioral_wilcoxon_valid": true,
     "classifier_3class_gate_passed": false,
     "formal_acceptance_eligible": false,
-    "metric_hard_pass": false,
+    "metric_hard_pass": true,
     "partner_gate": false,
     "pilot_gate": true,
     "reproducibility_gate": true,
     "semantic_embedding_gate": false,
-    "semantic_similarity_vs_baseline_a_significant_better": false,
+    "semantic_similarity_vs_baseline_a_significant_better": true,
     "semantic_wilcoxon_valid": true,
     "split_gate_all_required_strategies": true,
     "statistical_gate": true,
-    "topic_gate": false
+    "topic_gate": true
   },
   "metric_version": "m54_v3",
   "milestone": "M5.4",
-  "overall_conclusion": "fail",
+  "overall_conclusion": "partial",
   "partner_gate": {
     "partner_hard_pass": false,
     "passed": false,
-    "required_users": 10,
-    "users_included": 10
+    "required_users": 15,
+    "users_included": 15
   },
   "pilot_gate": {
     "passed": true,
     "pilot_present": true,
-    "required_users": 10,
-    "user_count": 10,
+    "required_users": 15,
+    "user_count": 15,
     "user_count_ok": true
   },
   "reproducibility_gate": {
     "baseline_c_full_population_implant": true,
     "passed": true
   },
-  "required_users": 10,
+  "required_users": 15,
   "semantic_engine_gate": {
     "fallback_reasons": [],
     "methods": [
@@ -136,26 +145,26 @@
       "partner": {
         "passed": true,
         "present": true,
-        "required_users": 10,
-        "users_included": 10
+        "required_users": 15,
+        "users_included": 15
       },
       "random": {
         "passed": true,
         "present": true,
-        "required_users": 10,
-        "users_included": 10
+        "required_users": 15,
+        "users_included": 15
       },
       "temporal": {
         "passed": true,
         "present": true,
-        "required_users": 10,
-        "users_included": 10
+        "required_users": 15,
+        "users_included": 15
       },
       "topic": {
         "passed": true,
         "present": true,
-        "required_users": 10,
-        "users_included": 10
+        "required_users": 15,
+        "users_included": 15
       }
     },
     "required_strategies": [
@@ -177,11 +186,11 @@
     "topic"
   ],
   "topic_gate": {
-    "passed": false,
+    "passed": true,
     "policy": "exclude_not_applicable_but_require_min_users",
-    "required_users": 10,
-    "topic_hard_pass": false,
-    "valid_topic_users": 10
+    "required_users": 15,
+    "topic_hard_pass": true,
+    "valid_topic_users": 15
   },
-  "user_count": 10
+  "user_count": 15
 }

@@ -43,35 +43,43 @@
 
 ## Semantic Delta Diagnostics
 
-- Users positive/negative/zero: 1 / 2 / 0
-- User delta median: -0.0053; IQR: 0.0041
+- Users positive/negative/zero: 2 / 1 / 0
+- User delta median: 0.0019; IQR: 0.0055
 - Pair-count distribution: {'0': 2, '1': 2, '2': 1, '6': 1, '7': 1, '8': 1, '11': 2, '14': 2}
 
 | Strategy | mean P-A delta | positive | negative | median | IQR |
 | --- | --- | --- | --- | --- | --- |
-| `partner` | 0.0000 | 0 | 0 | 0.0000 | 0.0000 |
-| `random` | -0.0314 | 0 | 3 | -0.0259 | 0.0194 |
-| `temporal` | 0.0556 | 3 | 0 | 0.0528 | 0.0224 |
-| `topic` | -0.0314 | 0 | 3 | -0.0259 | 0.0194 |
+| `partner` | -0.0086 | 0 | 1 | 0.0000 | 0.0257 |
+| `random` | -0.0204 | 0 | 3 | -0.0209 | 0.0002 |
+| `temporal` | 0.0616 | 3 | 0 | 0.0750 | 0.0472 |
+| `topic` | -0.0204 | 0 | 3 | -0.0209 | 0.0002 |
 
 ## Baseline Audit Diagnostics
 
 - Wrong-user masked warning: False
 - Baseline C too-close warning: False ()
+- Baseline C too-weak warning (diagnostic-only): True (text_similarity_low,semantic_mean_low)
 
 | Baseline | rows | action agree | strategy agree | template agree | text sim | duplicate | semantic delta | action JSD | strategy JSD |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `baseline_a` | 75 | 0.4000 | 0.7600 | 0.1467 | 0.4042 | 0.0000 | -0.0144 | 0.0678 | 0.0541 |
-| `baseline_c` | 75 | 0.3333 | 0.6667 | 0.0800 | 0.0309 | 0.0000 | 0.0522 | 0.1808 | 0.0106 |
+| `baseline_a` | 75 | 0.4000 | 0.7600 | 0.1333 | 0.3324 | 0.0000 | -0.0038 | 0.0678 | 0.0541 |
+| `baseline_c` | 75 | 0.4133 | 0.7867 | 0.0933 | 0.0320 | 0.0000 | 0.0522 | 0.1030 | 0.0197 |
 | `baseline_b_best` | 75 | 0.4400 | 0.7867 | 0.0000 | 0.0296 | 0.0000 | 0.0385 | 0.2163 | 0.0210 |
+
+## Profile Expression Diagnostics
+
+| Surface | rows | expression source rates | rhetorical move rates |
+| --- | --- | --- | --- |
+| `personality` | 75 | {'connector': 0.893333, 'focus': 0.813333, 'generic_focus': 0.106667} | {'guarded_short': 0.133333, 'warm_supportive': 0.866667} |
+| `baseline_c` | 75 | {'connector': 1.0} | {'warm_supportive': 1.0} |
 
 ## Ablation Diagnostics
 
 | Ablation | count | semantic | semantic vs A | action agree vs P | text sim vs P |
 | --- | --- | --- | --- | --- | --- |
-| `no_policy_trait_bias` | 12 | 0.0607 | 0.0172 | 0.8333 | 0.5488 |
-| `no_surface_profile` | 12 | 0.0393 | -0.0042 | 0.8333 | 0.3293 |
-| `surface_only_default_agent` | 12 | 0.0837 | 0.0403 | 0.2761 | 0.5259 |
+| `no_policy_trait_bias` | 12 | 0.0547 | 0.0161 | 0.8125 | 0.5586 |
+| `no_surface_profile` | 12 | 0.0398 | 0.0012 | 0.8333 | 0.3086 |
+| `surface_only_default_agent` | 12 | 0.0830 | 0.0444 | 0.2761 | 0.5245 |
 
 ## State Saturation Diagnostics
 
@@ -87,10 +95,10 @@
 
 | Metric | personality_mean | baseline_a_mean | mean_diff | p (greater) | significant better |
 | --- | --- | --- | --- | --- | --- |
-| `semantic_similarity` | 0.0417 | 0.0434 | -0.0018 | 1.0000 | False |
+| `semantic_similarity` | 0.0417 | 0.0386 | 0.0031 | 0.3750 | False |
 | `behavioral_similarity_strategy` | 0.4552 | 0.4327 | 0.0225 | 0.6250 | False |
 | `behavioral_similarity_action11` | 0.1600 | 0.0000 | 0.1600 | 0.5000 | False |
-| `stylistic_similarity` | 0.9074 | 0.8967 | 0.0107 | 0.1250 | False |
+| `stylistic_similarity` | 0.9074 | 0.8830 | 0.0244 | 0.1250 | False |
 | `personality_similarity` | 1.0000 | 1.0000 | 0.0000 | 1.0000 | False |
 | `agent_state_similarity` | 0.9282 | — | — | — | — |
 
@@ -99,20 +107,20 @@
 | Metric | personality_mean | baseline_c_mean | mean_diff | p (greater) | significant better |
 | --- | --- | --- | --- | --- | --- |
 | `semantic_similarity` | 0.0417 | 0.0046 | 0.0371 | 0.1250 | False |
-| `behavioral_similarity_strategy` | 0.4552 | 0.6309 | -0.1758 | 1.0000 | False |
-| `behavioral_similarity_action11` | 0.1600 | 0.5714 | -0.4114 | 1.0000 | False |
-| `stylistic_similarity` | 0.9074 | 0.8384 | 0.0691 | 0.1250 | False |
+| `behavioral_similarity_strategy` | 0.4552 | 0.5727 | -0.1175 | 1.0000 | False |
+| `behavioral_similarity_action11` | 0.1600 | 0.4100 | -0.2500 | 1.0000 | False |
+| `stylistic_similarity` | 0.9074 | 0.8438 | 0.0636 | 0.1250 | False |
 | `personality_similarity` | 1.0000 | 1.0000 | 0.0000 | 1.0000 | False |
 | `agent_state_similarity` | 0.9282 | — | — | — | — |
 
 ## Hard metric rows (summary)
-- `semantic_similarity`: personality=0.0417, baseline_a=0.0434, p(vs_a)=1.0000, baseline_c=0.0046, p(vs_c)=0.1250
+- `semantic_similarity`: personality=0.0417, baseline_a=0.0386, p(vs_a)=0.3750, baseline_c=0.0046, p(vs_c)=0.1250
 - `agent_state_similarity`: personality=0.9282, baseline_a=—, p(vs_a)=—, baseline_c=—, p(vs_c)=—
 
 ## Soft Metrics
-- `behavioral_similarity_strategy`: personality=0.4552, baseline_a=0.4327, baseline_c=0.6309
-- `behavioral_similarity_action11`: personality=0.1600, baseline_a=0.0000, baseline_c=0.5714
-- `stylistic_similarity`: personality=0.9074, baseline_a=0.8967, baseline_c=0.8384
+- `behavioral_similarity_strategy`: personality=0.4552, baseline_a=0.4327, baseline_c=0.5727
+- `behavioral_similarity_action11`: personality=0.1600, baseline_a=0.0000, baseline_c=0.4100
+- `stylistic_similarity`: personality=0.9074, baseline_a=0.8830, baseline_c=0.8438
 - `personality_similarity`: personality=1.0000, baseline_a=1.0000, baseline_c=1.0000
 
 ## Per-strategy hard pass

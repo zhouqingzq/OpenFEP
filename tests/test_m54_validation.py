@@ -34,6 +34,7 @@ from segmentum.dialogue.validation.surface_profile import (
 )
 from segmentum.dialogue.generator import RuleBasedGenerator
 from segmentum.slow_learning import SlowVariableLearner
+from scripts.run_m54_validation import _parse_required_users_error
 
 
 def _build_user(uid: int, *, sessions: int = 32, partner_start: int = 1000) -> dict:
@@ -222,6 +223,62 @@ class TestM54Validation(unittest.TestCase):
         details = report.per_strategy["random"]["personality_metric_details"]["agent_state_similarity"]
         self.assertTrue(details["agent_state_measured_before_holdout_generation"])
 
+    def test_baseline_c_population_average_excludes_target_user(self) -> None:
+        user = _build_user(171, sessions=8)
+        others = [_build_user(172, sessions=8), _build_user(173, sessions=8)]
+        captured_uid_sets: list[set[int]] = []
+
+        def fake_implant(agent, world, config):
+            del world, config
+            agent.slow_variable_learner.state.traits.social_approach = 0.75
+            return None
+
+        def fake_generate(agent, holdout_sessions, *, user_uid: int, seed: int, classifier):
+            del agent, user_uid, seed, classifier
+            turns = max(1, len(holdout_sessions))
+            return (
+                ["persona alpha"] * turns,
+                ["persona alpha"] * turns,
+                ["elaborate"] * turns,
+                ["elaborate"] * turns,
+                ["exploit"] * turns,
+                ["exploit"] * turns,
+            )
+
+        def fake_average_agent(profiles, *, seed: int, classifier=None):
+            del seed, classifier
+            captured_uid_sets.append({int(item["uid"]) for item in profiles})
+            return SegmentAgent()
+
+        cfg = ValidationConfig(
+            strategies=[SplitStrategy.RANDOM],
+            min_holdout_sessions=1,
+            seed=5,
+            skip_population_average_implant=True,
+        )
+        prev_sem = os.environ.get("SEGMENTUM_USE_TFIDF_SEMANTIC")
+        os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = "1"
+        try:
+            with patch("segmentum.dialogue.validation.pipeline.implant_personality", side_effect=fake_implant), patch(
+                "segmentum.dialogue.validation.pipeline._generate_from_sessions", side_effect=fake_generate
+            ), patch(
+                "segmentum.dialogue.validation.pipeline.create_average_agent", side_effect=fake_average_agent
+            ):
+                report = run_validation(user, cfg, all_user_profiles=[user, *others])
+        finally:
+            if prev_sem is None:
+                os.environ.pop("SEGMENTUM_USE_TFIDF_SEMANTIC", None)
+            else:
+                os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = prev_sem
+
+        self.assertTrue(captured_uid_sets)
+        self.assertNotIn(int(user["uid"]), captured_uid_sets[0])
+        self.assertEqual(captured_uid_sets[0], {172, 173})
+        strategy = report.per_strategy["random"]
+        self.assertTrue(strategy["baseline_c_leave_one_out"])
+        self.assertEqual(strategy["baseline_c_population_excluded_uid"], int(user["uid"]))
+        self.assertEqual(strategy["baseline_c_population_user_count"], 2)
+
     def test_surface_profile_uses_train_sessions_only(self) -> None:
         user = _build_user(18, sessions=4)
         train_dataset = dict(user)
@@ -352,12 +409,53 @@ class TestM54Validation(unittest.TestCase):
         self.assertIn("alpha", first)
         self.assertTrue(first_diag["topic_anchor_used"])
         self.assertEqual(first_diag["profile_degraded_reason"], "")
+        self.assertTrue(first_diag["profile_phrase_used"])
+        self.assertIn("action_phrase", first_diag["profile_expression_sources"])
         self.assertEqual(generator.last_diagnostics["surface_source"], "b")
         self.assertFalse(generator.last_diagnostics["profile_phrase_used"])
         self.assertFalse(generator.last_diagnostics["topic_anchor_used"])
         self.assertIn("anchor_mismatch", generator.last_diagnostics["profile_degraded_reason"])
         self.assertLess(generator.last_diagnostics["profile_confidence"], first_diag["profile_confidence"])
+        self.assertIn("connector", generator.last_diagnostics["profile_expression_sources"])
         self.assertIn("template_id", generator.last_diagnostics)
+
+    def test_rhetorical_move_categories_are_reachable(self) -> None:
+        generator = RuleBasedGenerator()
+        context = {
+            "current_turn": "我们下一步怎么处理？",
+            "partner_uid": 1000,
+            "observation": {"conflict_tension": 0.0, "emotional_tone": 0.5},
+        }
+        cases = [
+            (
+                "agree",
+                {"social_approach": 0.80, "trust_stance": 0.82, "caution_bias": 0.20},
+                "warm_supportive",
+            ),
+            (
+                "deflect",
+                {"social_approach": 0.20, "trust_stance": 0.25, "caution_bias": 0.85},
+                "guarded_short",
+            ),
+            (
+                "ask_question",
+                {"exploration_posture": 0.84, "trust_stance": 0.55, "caution_bias": 0.20},
+                "exploratory_questioning",
+            ),
+            (
+                "share_opinion",
+                {
+                    "social_approach": 0.30,
+                    "trust_stance": 0.50,
+                    "caution_bias": 0.40,
+                    "exploration_posture": 0.40,
+                },
+                "direct_advisory",
+            ),
+        ]
+        for action, traits, expected in cases:
+            generator.generate(action, context, {"slow_traits": traits}, [], master_seed=3, turn_index=0)
+            self.assertEqual(generator.last_diagnostics["rhetorical_move"], expected)
 
     def test_dialogue_action_bias_changes_with_slow_traits(self) -> None:
         warm = SlowVariableLearner()
@@ -397,9 +495,51 @@ class TestM54Validation(unittest.TestCase):
         self.assertIn("confusion_matrix_3class", report)
         self.assertIn("per_class_metrics_3class", report)
         self.assertIn("cue_override_rate", report)
+        self.assertIn("macro_f1_3class_without_cue", report)
+        self.assertFalse(report["classifier_provenance_ok"])
+        self.assertIn("without_cue_3class_gate_passed", report)
         self.assertGreater(report["per_class_metrics_3class"]["explore"]["recall"], 0.0)
         self.assertFalse(report["formal_gate_eligible"])
         self.assertFalse(report["behavioral_hard_metric_enabled"])
+
+    def test_classifier_provenance_blocks_codex_authored_fixture(self) -> None:
+        train = _classifier_samples(100, offset=0)
+        gate = _classifier_samples(50, offset=1000)
+        for sample in train + gate:
+            sample["source"] = "codex_authored_realistic_zh_fixture_v4"
+        report = validate_act_classifier(
+            train_samples=train,
+            gate_samples=gate,
+            classifier=DialogueActClassifier(train, use_tfidf=True),
+            dataset_origin="independent_holdout_labels",
+        )
+        self.assertFalse(report["classifier_provenance_ok"])
+        self.assertIn("codex_authored", report["classifier_provenance_failure_reason"])
+        self.assertFalse(report["formal_gate_eligible"])
+
+    def test_classifier_cue_override_gate_blocks_high_cue_dependence(self) -> None:
+        train = _classifier_samples(100, offset=0)
+        cue_gate: list[dict[str, str]] = []
+        cue_texts = {
+            "explore": ("ask_question", "formal gate cue explore ?"),
+            "exploit": ("elaborate", "formal gate cue exploit \u5c55\u5f00\u4e00\u4e0b"),
+            "escape": ("deflect", "formal gate cue escape \u5148\u653e\u4e00\u653e"),
+        }
+        for label_3, (label_11, text) in cue_texts.items():
+            for idx in range(50):
+                cue_gate.append({"text": f"{text} {idx}", "label_11": label_11, "label_3": label_3})
+        report = validate_act_classifier(
+            train_samples=train,
+            gate_samples=cue_gate,
+            classifier=DialogueActClassifier(train, use_tfidf=True),
+            dataset_origin="independent_holdout_labels",
+            require_classifier_provenance=False,
+            max_cue_override_rate=0.35,
+        )
+        self.assertGreater(report["cue_override_rate"], 0.35)
+        self.assertFalse(report["cue_override_gate_passed"])
+        self.assertFalse(report["without_cue_3class_gate_passed"])
+        self.assertFalse(report["formal_gate_eligible"])
 
     def test_supervised_classifier_handles_non_keyword_chinese(self) -> None:
         train = _classifier_samples(100, offset=0)
@@ -432,6 +572,13 @@ class TestM54Validation(unittest.TestCase):
         dists = sorted(item.get("_wrong_user_distance") for item in selected)
         self.assertLessEqual(dists[0], dists[1])
         self.assertLessEqual(dists[1], dists[2])
+
+    def test_parse_direction_auto_escalation_required_users(self) -> None:
+        self.assertEqual(
+            _parse_required_users_error("insufficient users for validation: have=10, required=15"),
+            15,
+        )
+        self.assertIsNone(_parse_required_users_error("some other validation failure"))
 
     def test_paired_comparison_outputs(self) -> None:
         p, sig, mean_diff, better = paired_comparison(
@@ -506,7 +653,11 @@ class TestM54Validation(unittest.TestCase):
                     "personality_surface_source": "random:train",
                     "baseline_a_surface_source": "generic",
                     "personality_profile_phrase_used": True,
+                    "personality_profile_expression_sources": ["focus", "action_phrase", "anchor"],
+                    "baseline_c_profile_expression_sources": ["generic"],
                     "personality_topic_anchor_used": True,
+                    "personality_rhetorical_move": "warm_supportive",
+                    "baseline_c_rhetorical_move": "direct_advisory",
                     "reply_length_bucket": "medium",
                 }
             ],
@@ -547,6 +698,11 @@ class TestM54Validation(unittest.TestCase):
             self.assertIn("baseline_audit_summary", aggregate)
             self.assertIn("ablation_summary", aggregate)
             self.assertIn("state_saturation_summary", aggregate)
+            self.assertIn("profile_expression_source_summary", aggregate)
+            self.assertTrue((output_dir / "baseline_audit_summary.json").exists())
+            self.assertTrue((output_dir / "ablation_summary.json").exists())
+            self.assertTrue((output_dir / "state_saturation_summary.json").exists())
+            self.assertTrue((output_dir / "profile_expression_source_summary.json").exists())
             self.assertIn("debug_readiness_gate", aggregate)
             self.assertTrue(aggregate["debug_readiness_gate"]["passed"])
             self.assertTrue(aggregate["baseline_audit_summary"]["baseline_c_too_close_warning"])
@@ -557,6 +713,11 @@ class TestM54Validation(unittest.TestCase):
             self.assertGreater(
                 aggregate["baseline_audit_summary"]["baselines"]["baseline_a"]["rows"],
                 0,
+            )
+            self.assertFalse(aggregate["baseline_audit_summary"]["baseline_c_too_weak_warning"])
+            self.assertEqual(
+                aggregate["profile_expression_source_summary"]["personality"]["source_counts"]["action_phrase"],
+                1,
             )
             self.assertIn("no_surface_profile", aggregate["ablation_summary"])
 

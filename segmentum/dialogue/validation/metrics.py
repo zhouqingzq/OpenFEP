@@ -9,6 +9,7 @@ from typing import Mapping
 
 _ST_MODEL: object | None = None
 _ST_MODEL_NAME: str | None = None
+_ST_EMBEDDING_CACHE: dict[tuple[str, str], object] = {}
 
 from ...personality_analyzer import PersonalityAnalyzer
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
@@ -235,13 +236,24 @@ def _sentence_embedding_pair_scores(
 
     model = _load_sentence_transformer(model_name)
     texts = [text for pair in pairs for text in pair]
-    emb = model.encode(
-        texts,
-        normalize_embeddings=True,
-        show_progress_bar=False,
-        convert_to_numpy=True,
-    )
-    arr = np.asarray(emb, dtype=np.float64)
+    missing: list[str] = []
+    seen_missing: set[str] = set()
+    for text in texts:
+        key = (model_name, text)
+        if key in _ST_EMBEDDING_CACHE or text in seen_missing:
+            continue
+        missing.append(text)
+        seen_missing.add(text)
+    if missing:
+        encoded = model.encode(
+            missing,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+            convert_to_numpy=True,
+        )
+        for text, row in zip(missing, encoded):
+            _ST_EMBEDDING_CACHE[(model_name, text)] = np.asarray(row, dtype=np.float64)
+    arr = np.asarray([_ST_EMBEDDING_CACHE[(model_name, text)] for text in texts], dtype=np.float64)
     pair_scores: list[float] = []
     for i in range(0, len(arr), 2):
         pair_scores.append(float(max(0.0, min(1.0, np.dot(arr[i], arr[i + 1])))))
@@ -402,6 +414,55 @@ def behavioral_similarity(
         metric_name=f"behavioral_similarity_{granularity}",
         value=round(float(max(0.0, min(1.0, similarity))), 6),
         details={"chi_square_distance": round(float(chi2), 6), "categories": keys},
+    )
+
+
+def balanced_behavioral_similarity(
+    generated_actions: list[str],
+    real_actions: list[str],
+    *,
+    granularity: str = "strategy",
+) -> SimilarityResult:
+    if granularity not in {"strategy", "action11"}:
+        raise ValueError("granularity must be 'strategy' or 'action11'")
+    if granularity == "strategy":
+        if (
+            generated_actions
+            and real_actions
+            and all(item in _STRATEGY_LABELS for item in generated_actions)
+            and all(item in _STRATEGY_LABELS for item in real_actions)
+        ):
+            gen_labels = list(generated_actions)
+            real_labels = list(real_actions)
+        else:
+            gen_labels = [DIALOGUE_ACTION_STRATEGY_MAP.get(item, "explore") for item in generated_actions]
+            real_labels = [DIALOGUE_ACTION_STRATEGY_MAP.get(item, "explore") for item in real_actions]
+        keys = sorted(_STRATEGY_LABELS)
+    else:
+        gen_labels = list(generated_actions)
+        real_labels = list(real_actions)
+        keys = sorted(set(gen_labels) | set(real_labels))
+    gen_dist = Counter(gen_labels)
+    real_dist = Counter(real_labels)
+    gen_total = float(sum(gen_dist.values()))
+    real_total = float(sum(real_dist.values()))
+    if gen_total <= 0.0 or real_total <= 0.0 or not keys:
+        return SimilarityResult(
+            metric_name=f"balanced_behavioral_similarity_{granularity}",
+            value=0.0,
+            details={"balanced_l1_distance": 0.0, "categories": keys},
+        )
+    distances: list[float] = []
+    for key in keys:
+        p = float(gen_dist.get(key, 0)) / gen_total
+        q = float(real_dist.get(key, 0)) / real_total
+        distances.append(abs(p - q))
+    balanced_distance = sum(distances) / float(len(distances))
+    similarity = 1.0 - balanced_distance
+    return SimilarityResult(
+        metric_name=f"balanced_behavioral_similarity_{granularity}",
+        value=round(float(max(0.0, min(1.0, similarity))), 6),
+        details={"balanced_l1_distance": round(float(balanced_distance), 6), "categories": keys},
     )
 
 

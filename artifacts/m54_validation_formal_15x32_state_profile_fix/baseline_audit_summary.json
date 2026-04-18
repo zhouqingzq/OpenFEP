@@ -1,0 +1,19 @@
+{
+  "baseline_c_too_close_fields": {
+    "action_agreement_rate": 0.0,
+    "mean_baseline_semantic": 0.0,
+    "mean_semantic_delta": 0.0,
+    "mean_text_similarity": 0.0,
+    "template_agreement_rate": 0.0
+  },
+  "baseline_c_too_close_reason": "",
+  "baseline_c_too_close_warning": false,
+  "baseline_c_too_weak_reason": "",
+  "baseline_c_too_weak_warning": false,
+  "baselines": {},
+  "per_user_rankings": {
+    "best": [],
+    "worst": []
+  },
+  "wrong_user_masked_by_generic_template_warning": false
+}

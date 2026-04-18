@@ -13,6 +13,7 @@ from .surface_profile import tokenize_surface
 
 class _Predictor(Protocol):
     def predict(self, text: str) -> object: ...
+    def predict_batch(self, texts: list[str]) -> list[object]: ...
 
 
 _EXPLOIT_ACTIONS = {"agree", "empathize", "elaborate", "joke"}
@@ -86,6 +87,28 @@ def _predict_action(text: str, classifier: _Predictor | None) -> tuple[str, str]
     if not action or not strategy:
         return _fallback_action(text)
     return action, strategy
+
+
+def _predict_actions(texts: list[str], classifier: _Predictor | None) -> list[tuple[str, str]]:
+    if classifier is None:
+        return [_fallback_action(text) for text in texts]
+    try:
+        predictions = list(classifier.predict_batch(texts))
+    except Exception:
+        predictions = []
+    out: list[tuple[str, str]] = []
+    for idx, text in enumerate(texts):
+        if idx >= len(predictions):
+            out.append(_predict_action(text, classifier))
+            continue
+        pred = predictions[idx]
+        action = str(getattr(pred, "label_11", "") or "")
+        strategy = str(getattr(pred, "label_3", "") or "")
+        if not action or not strategy:
+            out.append(_fallback_action(text))
+        else:
+            out.append((action, strategy))
+    return out
 
 
 def _profile_numeric(user_dataset: Mapping[str, object], key: str, default: float = 0.5) -> float:
@@ -251,8 +274,8 @@ def apply_train_state_calibration(
     lengths: list[int] = []
     tokens: Counter[str] = Counter()
     partner_questions = 0
-    for partner_text, reply_text in pairs:
-        action, strategy = _predict_action(reply_text, classifier)
+    predicted_actions = _predict_actions([reply_text for _, reply_text in pairs], classifier)
+    for (partner_text, reply_text), (action, strategy) in zip(pairs, predicted_actions):
         action_counts[action] += 1
         strategy_counts[strategy] += 1
         lengths.append(len(reply_text))

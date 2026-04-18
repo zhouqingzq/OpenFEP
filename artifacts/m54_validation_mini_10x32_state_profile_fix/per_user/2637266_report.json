@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "behavioral_baseline_c_mean": 0.0,
+    "behavioral_baseline_c_mean": 1.0,
     "behavioral_hard_metric_enabled": false,
     "behavioral_labeling": "generated_action_direct_real_reply_classifier",
     "behavioral_personality_mean": 0.0,
@@ -48,6 +48,7 @@
       },
       "formal_dataset_ok": true,
       "formal_engine": false,
+      "formal_engine_failure_reason": "tfidf_nearest_centroid",
       "formal_gate_eligible": false,
       "gate_count": 150,
       "macro_f1_11class": 0.571724,
@@ -85,19 +86,19 @@
     "formal_requested": false,
     "metric_version": "m54_v3",
     "pilot": {
-      "behavioral_diff_sd": 0.071986,
+      "behavioral_diff_sd": 0.364272,
       "behavioral_escalated": false,
-      "escalated": false,
+      "escalated": true,
       "pilot_metrics_used": [
         "semantic_vs_baseline_a_mean_diff"
       ],
       "pilot_user_count": 5,
-      "required_users": 10,
+      "required_users": 15,
       "sd_threshold": 0.04,
-      "semantic_diff_mean": -0.008449,
-      "semantic_diff_sd": 0.019288,
-      "semantic_escalated": false,
-      "suggested_min_users": 10
+      "semantic_diff_mean": 0.076422,
+      "semantic_diff_sd": 0.118842,
+      "semantic_escalated": true,
+      "suggested_min_users": 15
     },
     "pipeline_status": "completed",
     "requested_strategies": [
@@ -106,11 +107,11 @@
       "partner",
       "topic"
     ],
-    "required_users": 10,
-    "semantic_baseline_a_mean": 0.07023399999999999,
-    "semantic_baseline_b_mean": 0.024536083333333333,
-    "semantic_baseline_c_mean": 0.03526,
-    "semantic_personality_mean": 0.049647000000000004,
+    "required_users": 15,
+    "semantic_baseline_a_mean": 0.03160875,
+    "semantic_baseline_b_mean": 0.0,
+    "semantic_baseline_c_mean": 0.0,
+    "semantic_personality_mean": 0.34102175,
     "skip_population_average_implant": false,
     "strategy_count": 4
   },
@@ -122,28 +123,28 @@
           "action_agreement_vs_personality": 1.0,
           "name": "no_surface_profile",
           "pair_count": 4,
-          "semantic_mean": 0.050906,
-          "semantic_vs_baseline_a_diff": -0.046868,
+          "semantic_mean": 0.025459,
+          "semantic_vs_baseline_a_diff": -0.015054,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 1.0
+          "text_similarity_vs_personality": 0.026548
         },
         {
-          "action_agreement_vs_personality": 0.75,
+          "action_agreement_vs_personality": 0.5,
           "name": "no_policy_trait_bias",
           "pair_count": 4,
-          "semantic_mean": 0.067767,
-          "semantic_vs_baseline_a_diff": -0.030007,
-          "strategy_agreement_vs_personality": 0.75,
-          "text_similarity_vs_personality": 0.271425
+          "semantic_mean": 0.369527,
+          "semantic_vs_baseline_a_diff": 0.329014,
+          "strategy_agreement_vs_personality": 0.5,
+          "text_similarity_vs_personality": 0.784386
         },
         {
-          "action_agreement_vs_personality": 0.75,
+          "action_agreement_vs_personality": 0.25,
           "name": "surface_only_default_agent",
           "pair_count": 4,
-          "semantic_mean": 0.102874,
-          "semantic_vs_baseline_a_diff": 0.0051,
-          "strategy_agreement_vs_personality": 0.75,
-          "text_similarity_vs_personality": 0.422793
+          "semantic_mean": 0.493755,
+          "semantic_vs_baseline_a_diff": 0.453242,
+          "strategy_agreement_vs_personality": 0.25,
+          "text_similarity_vs_personality": 0.656227
         }
       ],
       "baseline_a_metric_details": {
@@ -175,20 +176,20 @@
           "pair_count": 4
         },
         "stylistic_similarity": {
-          "jsd": 0.150023
+          "jsd": 0.133063
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.1
+          "rouge_l": 0.04381
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.097774,
-        "stylistic_similarity": 0.783563,
-        "surface_similarity": 0.05
+        "semantic_similarity": 0.040513,
+        "stylistic_similarity": 0.80803,
+        "surface_similarity": 0.021905
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -198,29 +199,28 @@
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.05834366666666666,
-        "stylistic_similarity": 0.799606,
-        "surface_similarity": 0.034127000000000005
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.8526166666666667,
+        "surface_similarity": 0.0
       },
       "baseline_b_selected_wrong_uids": [
-        2637101,
-        2637372,
-        2637134
+        2637215,
+        2637470,
+        2637318
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
-            "agree",
             "share_opinion"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "behavioral_similarity_strategy": {
           "categories": [
-            "exploit",
             "explore"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "personality_similarity": {
           "vector_keys": [
@@ -236,32 +236,34 @@
           "pair_count": 4
         },
         "stylistic_similarity": {
-          "jsd": 0.130902
+          "jsd": 0.058279
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.053221
+          "rouge_l": 0.0
         }
       },
       "baseline_c_metrics": {
-        "behavioral_similarity_action11": 0.0,
-        "behavioral_similarity_strategy": 0.0,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.049528,
-        "stylistic_similarity": 0.811148,
-        "surface_similarity": 0.026611
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.915921,
+        "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.358648,
+        "avg_reply_chars": 6.186292,
         "median_reply_chars": 6,
         "opening_phrases": [],
-        "reply_count": 1804,
+        "reply_count": 2845,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 1804
+          "exploit": 2845
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.294346
+        "ultra_short_ratio": 0.325835
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -309,6 +311,7 @@
         },
         "formal_dataset_ok": true,
         "formal_engine": false,
+        "formal_engine_failure_reason": "tfidf_nearest_centroid",
         "formal_gate_eligible": false,
         "gate_count": 150,
         "macro_f1_11class": 0.571724,
@@ -345,33 +348,37 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 18,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“[愛心]”，是的，我也这么想。",
-          "baseline_b_best_action": "introduce_topic",
-          "baseline_b_best_generated_chars": 11,
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“[愛心]”，我在认真听你说，我同意。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 2,
           "baseline_b_best_semantic_pair_score": 0.0,
-          "baseline_b_best_strategy": "explore",
-          "baseline_b_best_text": "我想提一个新的切入口。",
-          "baseline_b_worst_action": "minimal_response",
-          "baseline_b_worst_generated_chars": 4,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "好。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 2,
           "baseline_b_worst_semantic_pair_score": 0.0,
-          "baseline_b_worst_strategy": "escape",
-          "baseline_b_worst_text": "知道了。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 21,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "好。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
           "baseline_c_semantic_pair_score": 0.0,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:0",
-          "baseline_c_text": "你说“[愛心]”，我在认真听你说，我同意。",
+          "baseline_c_template_id": "share_opinion:0",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -382,32 +389,38 @@
           },
           "pair_index": 0,
           "partner_uid": 4744012,
-          "personality_action": "agree",
-          "personality_baseline_a_action_agree": true,
-          "personality_baseline_a_strategy_agree": true,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": false,
           "personality_baseline_b_best_action_agree": false,
           "personality_baseline_b_best_strategy_agree": false,
           "personality_baseline_c_action_agree": true,
           "personality_baseline_c_strategy_agree": true,
-          "personality_generated_chars": 13,
+          "personality_generated_chars": 22,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.0,
-          "personality_strategy": "exploit",
+          "personality_semantic_pair_score": 0.232209,
+          "personality_strategy": "explore",
           "personality_surface_source": "partner:train",
-          "personality_template_id": "agree:0",
-          "personality_text": "你说“[愛心]”，我同意。",
+          "personality_template_id": "share_opinion:2",
+          "personality_text": "关于“[愛心]”，[送花][送花][送花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.453514,
-          "personality_vs_b_best_text_similarity": 0.028862,
-          "personality_vs_c_pair_delta": 0.0,
-          "personality_vs_c_text_similarity": 0.812708,
+          "personality_vs_a_pair_delta": 0.232209,
+          "personality_vs_a_text_similarity": 0.152644,
+          "personality_vs_b_best_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.232209,
+          "personality_vs_c_text_similarity": 0.04136,
           "real_text": "[強][強][花][花]",
           "reply_length_bucket": "medium",
           "session_id": "2637266_4744012_20250110102213_0002",
@@ -423,33 +436,37 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 12,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.195549,
+          "baseline_a_generated_chars": 25,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.087891,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“[花]”，我同意。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 17,
-          "baseline_b_best_semantic_pair_score": 0.117554,
+          "baseline_b_best_generated_chars": 2,
+          "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“[花]”，是的，我也这么想。",
+          "baseline_b_best_text": "對。",
           "baseline_b_worst_action": "agree",
-          "baseline_b_worst_generated_chars": 21,
-          "baseline_b_worst_semantic_pair_score": 0.100196,
+          "baseline_b_worst_generated_chars": 2,
+          "baseline_b_worst_semantic_pair_score": 0.0,
           "baseline_b_worst_strategy": "exploit",
-          "baseline_b_worst_text": "你说“[花]”，有道理，我跟你的看法一致。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 25,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_text": "對。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
-          "baseline_c_semantic_pair_score": 0.086853,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:1",
-          "baseline_c_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_template_id": "share_opinion:0",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -460,32 +477,38 @@
           },
           "pair_index": 1,
           "partner_uid": 4744012,
-          "personality_action": "agree",
-          "personality_baseline_a_action_agree": true,
-          "personality_baseline_a_strategy_agree": true,
-          "personality_baseline_b_best_action_agree": true,
-          "personality_baseline_b_best_strategy_agree": true,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": false,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
           "personality_baseline_c_action_agree": true,
           "personality_baseline_c_strategy_agree": true,
           "personality_generated_chars": 21,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.101813,
-          "personality_strategy": "exploit",
+          "personality_semantic_pair_score": 0.860213,
+          "personality_strategy": "explore",
           "personality_surface_source": "partner:train",
-          "personality_template_id": "agree:2",
-          "personality_text": "你说“[花]”，有道理，我跟你的看法一致。",
+          "personality_template_id": "share_opinion:0",
+          "personality_text": "关于“[花]”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.093736,
-          "personality_vs_a_text_similarity": 0.32087,
-          "personality_vs_b_best_text_similarity": 0.273636,
-          "personality_vs_c_pair_delta": 0.01496,
-          "personality_vs_c_text_similarity": 0.283353,
+          "personality_vs_a_pair_delta": 0.772322,
+          "personality_vs_a_text_similarity": 0.080162,
+          "personality_vs_b_best_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.860213,
+          "personality_vs_c_text_similarity": 0.047715,
           "real_text": "[強][強][花][花]",
           "reply_length_bucket": "medium",
           "session_id": "2637266_4744012_20250113201851_0003",
@@ -501,33 +524,37 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 16,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“晚上好！🙌🌞⭐”，我同意。",
-          "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 25,
+          "baseline_a_text": "你说“晚上好！🙌🌞⭐”，我在认真听你说，我同意。",
+          "baseline_b_best_action": "elaborate",
+          "baseline_b_best_generated_chars": 3,
           "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“晚上好！🙌🌞⭐”，有道理，我跟你的看法一致。",
-          "baseline_b_worst_action": "agree",
-          "baseline_b_worst_generated_chars": 16,
+          "baseline_b_best_text": "妳是。",
+          "baseline_b_worst_action": "elaborate",
+          "baseline_b_worst_generated_chars": 3,
           "baseline_b_worst_semantic_pair_score": 0.0,
           "baseline_b_worst_strategy": "exploit",
-          "baseline_b_worst_text": "你说“晚上好！🙌🌞⭐”，我同意。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 24,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_text": "妳是。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
           "baseline_c_semantic_pair_score": 0.0,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:0",
-          "baseline_c_text": "你说“晚上好！🙌🌞⭐”，我在认真听你说，我同意。",
+          "baseline_c_template_id": "share_opinion:1",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -543,27 +570,33 @@
           "personality_baseline_a_strategy_agree": false,
           "personality_baseline_b_best_action_agree": false,
           "personality_baseline_b_best_strategy_agree": false,
-          "personality_baseline_c_action_agree": false,
-          "personality_baseline_c_strategy_agree": false,
-          "personality_generated_chars": 16,
+          "personality_baseline_c_action_agree": true,
+          "personality_baseline_c_strategy_agree": true,
+          "personality_generated_chars": 29,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.0,
+          "personality_semantic_pair_score": 0.241342,
           "personality_strategy": "explore",
           "personality_surface_source": "partner:train",
           "personality_template_id": "share_opinion:2",
-          "personality_text": "从我的角度，这件事可以这么处理。",
+          "personality_text": "关于“晚上好！🙌🌞⭐”，[送花][送花][送花][送花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.021515,
-          "personality_vs_b_best_text_similarity": 0.078804,
-          "personality_vs_c_pair_delta": 0.0,
-          "personality_vs_c_text_similarity": 0.032504,
+          "personality_vs_a_pair_delta": 0.241342,
+          "personality_vs_a_text_similarity": 0.170964,
+          "personality_vs_b_best_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.241342,
+          "personality_vs_c_text_similarity": 0.031847,
           "real_text": "[強][強][花][花]",
           "reply_length_bucket": "medium",
           "session_id": "2637266_3938449_20250120190419_0017",
@@ -579,33 +612,37 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 12,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.195549,
+          "baseline_a_generated_chars": 29,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.074161,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“[花]”，我同意。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“[花]”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 12,
-          "baseline_b_best_semantic_pair_score": 0.16085,
+          "baseline_b_best_generated_chars": 2,
+          "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“[花]”，我同意。",
+          "baseline_b_best_text": "對。",
           "baseline_b_worst_action": "agree",
-          "baseline_b_worst_generated_chars": 21,
-          "baseline_b_worst_semantic_pair_score": 0.100196,
+          "baseline_b_worst_generated_chars": 2,
+          "baseline_b_worst_semantic_pair_score": 0.0,
           "baseline_b_worst_strategy": "exploit",
-          "baseline_b_worst_text": "你说“[花]”，有道理，我跟你的看法一致。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 20,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_text": "對。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
-          "baseline_c_semantic_pair_score": 0.11126,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:0",
-          "baseline_c_text": "你说“[花]”，我在认真听你说，我同意。",
+          "baseline_c_template_id": "share_opinion:0",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -621,27 +658,33 @@
           "personality_baseline_a_strategy_agree": true,
           "personality_baseline_b_best_action_agree": true,
           "personality_baseline_b_best_strategy_agree": true,
-          "personality_baseline_c_action_agree": true,
-          "personality_baseline_c_strategy_agree": true,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
           "personality_generated_chars": 21,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.101813,
+          "personality_semantic_pair_score": 0.326137,
           "personality_strategy": "exploit",
           "personality_surface_source": "partner:train",
           "personality_template_id": "agree:2",
-          "personality_text": "你说“[花]”，有道理，我跟你的看法一致。",
+          "personality_text": "关于“[花]”，[送花][送花][送花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.093736,
-          "personality_vs_a_text_similarity": 0.32087,
-          "personality_vs_b_best_text_similarity": 0.340703,
-          "personality_vs_c_pair_delta": -0.009447,
-          "personality_vs_c_text_similarity": 0.313641,
+          "personality_vs_a_pair_delta": 0.251976,
+          "personality_vs_a_text_similarity": 0.077673,
+          "personality_vs_b_best_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.326137,
+          "personality_vs_c_text_similarity": 0.039894,
           "real_text": "[強][強][花][花]",
           "reply_length_bucket": "medium",
           "session_id": "2637266_4744012_20250121141008_0004",
@@ -670,14 +713,14 @@
             "agree",
             "share_opinion"
           ],
-          "chi_square_distance": 562500000.5625
+          "chi_square_distance": 62500000.0625
         },
         "behavioral_similarity_strategy": {
           "categories": [
             "exploit",
             "explore"
           ],
-          "chi_square_distance": 562500000.5625
+          "chi_square_distance": 62500000.0625
         },
         "personality_similarity": {
           "vector_keys": [
@@ -693,11 +736,11 @@
           "pair_count": 4
         },
         "stylistic_similarity": {
-          "jsd": 0.143676
+          "jsd": 0.127395
         },
         "surface_similarity": {
-          "bleu4": 0.0,
-          "rouge_l": 0.055556
+          "bleu4": 0.085128,
+          "rouge_l": 0.388993
         }
       },
       "personality_metrics": {
@@ -705,9 +748,9 @@
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.050906,
-        "stylistic_similarity": 0.79272,
-        "surface_similarity": 0.027778
+        "semantic_similarity": 0.414975,
+        "stylistic_similarity": 0.816209,
+        "surface_similarity": 0.237061
       },
       "reason": null,
       "skipped": false,
@@ -732,6 +775,14 @@
         "applied": true,
         "avg_reply_chars": 16.0,
         "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "share_opinion": 1.0
+        },
+        "policy_dominant_strategy": "explore",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "share_opinion"
+        ],
         "prior_deltas": {
           "contamination_sensitivity": 0.0,
           "controllability_prior": 0.245333,
@@ -758,15 +809,15 @@
       "state_distance_diagnostics": {
         "per_dimension_variance": {
           "prior:contamination_sensitivity": 0.0,
-          "prior:controllability_prior": 0.018353,
-          "prior:meaning_stability": 0.003452,
-          "prior:trauma_bias": 0.000248,
-          "prior:trust_prior": 0.002485,
-          "trait:caution_bias": 0.005517,
-          "trait:exploration_posture": 0.009773,
-          "trait:social_approach": 0.003386,
-          "trait:threat_sensitivity": 0.000413,
-          "trait:trust_stance": 0.001726
+          "prior:controllability_prior": 0.010092,
+          "prior:meaning_stability": 0.002245,
+          "prior:trauma_bias": 7.1e-05,
+          "prior:trust_prior": 0.000511,
+          "trait:caution_bias": 0.004286,
+          "trait:exploration_posture": 0.003614,
+          "trait:social_approach": 0.002763,
+          "trait:threat_sensitivity": 0.000163,
+          "trait:trust_stance": 0.000355
         },
         "train_default": {
           "cosine": 0.943889,
@@ -801,19 +852,19 @@
           }
         },
         "train_wrong_user": {
-          "cosine": 0.870166,
-          "l2": 0.579333,
+          "cosine": 0.969721,
+          "l2": 0.271838,
           "per_dimension_abs_delta": {
             "prior:contamination_sensitivity": 0.0,
-            "prior:controllability_prior": 0.374222,
-            "prior:meaning_stability": 0.157937,
-            "prior:trauma_bias": 0.03636,
-            "prior:trust_prior": 0.134,
-            "trait:caution_bias": 0.188333,
-            "trait:exploration_posture": 0.279445,
-            "trait:social_approach": 0.149583,
-            "trait:threat_sensitivity": 0.0544,
-            "trait:trust_stance": 0.111667
+            "prior:controllability_prior": 0.181578,
+            "prior:meaning_stability": 0.066182,
+            "prior:trauma_bias": 0.01952,
+            "prior:trust_prior": 0.063665,
+            "trait:caution_bias": 0.11682,
+            "trait:exploration_posture": 0.110154,
+            "trait:social_approach": 0.04735,
+            "trait:threat_sensitivity": 0.035689,
+            "trait:trust_stance": 0.053054
           }
         }
       },
@@ -850,28 +901,28 @@
           "action_agreement_vs_personality": 1.0,
           "name": "no_surface_profile",
           "pair_count": 2,
-          "semantic_mean": 0.073841,
-          "semantic_vs_baseline_a_diff": -0.01774,
+          "semantic_mean": 0.0,
+          "semantic_vs_baseline_a_diff": -0.042961,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 1.0
+          "text_similarity_vs_personality": 0.365131
         },
         {
           "action_agreement_vs_personality": 1.0,
           "name": "no_policy_trait_bias",
           "pair_count": 2,
-          "semantic_mean": 0.055983,
-          "semantic_vs_baseline_a_diff": -0.035598,
+          "semantic_mean": 0.738934,
+          "semantic_vs_baseline_a_diff": 0.695973,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 0.201478
+          "text_similarity_vs_personality": 0.845639
         },
         {
           "action_agreement_vs_personality": 0.5,
           "name": "surface_only_default_agent",
           "pair_count": 2,
-          "semantic_mean": 0.091581,
-          "semantic_vs_baseline_a_diff": 0.0,
+          "semantic_mean": 0.474556,
+          "semantic_vs_baseline_a_diff": 0.431595,
           "strategy_agreement_vs_personality": 0.5,
-          "text_similarity_vs_personality": 0.5
+          "text_similarity_vs_personality": 1.0
         }
       ],
       "baseline_a_metric_details": {
@@ -903,20 +954,20 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.084139
+          "jsd": 0.097881
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.1
+          "rouge_l": 0.047619
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.091581,
-        "stylistic_similarity": 0.878613,
-        "surface_similarity": 0.05
+        "semantic_similarity": 0.042961,
+        "stylistic_similarity": 0.858788,
+        "surface_similarity": 0.02381
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -926,29 +977,28 @@
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.019900333333333332,
-        "stylistic_similarity": 0.8520253333333334,
-        "surface_similarity": 0.011904666666666668
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.7706430000000001,
+        "surface_similarity": 0.0
       },
       "baseline_b_selected_wrong_uids": [
-        2637101,
-        2637372,
-        2637134
+        2637215,
+        2637470,
+        2637318
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
-            "agree",
             "share_opinion"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "behavioral_similarity_strategy": {
           "categories": [
-            "exploit",
             "explore"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "personality_similarity": {
           "vector_keys": [
@@ -964,32 +1014,34 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.097521
+          "jsd": 0.078301
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.047619
+          "rouge_l": 0.0
         }
       },
       "baseline_c_metrics": {
-        "behavioral_similarity_action11": 0.0,
-        "behavioral_similarity_strategy": 0.0,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.045756,
-        "stylistic_similarity": 0.859307,
-        "surface_similarity": 0.02381
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.887036,
+        "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.358648,
+        "avg_reply_chars": 6.186292,
         "median_reply_chars": 6,
         "opening_phrases": [],
-        "reply_count": 1804,
+        "reply_count": 2845,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 1804
+          "exploit": 2845
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.294346
+        "ultra_short_ratio": 0.325835
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1037,6 +1089,7 @@
         },
         "formal_dataset_ok": true,
         "formal_engine": false,
+        "formal_engine_failure_reason": "tfidf_nearest_centroid",
         "formal_gate_eligible": false,
         "gate_count": 150,
         "macro_f1_11class": 0.571724,
@@ -1073,33 +1126,37 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 12,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.183162,
+          "baseline_a_generated_chars": 25,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.085923,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“[花]”，我同意。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 17,
-          "baseline_b_best_semantic_pair_score": 0.119402,
+          "baseline_b_best_generated_chars": 2,
+          "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“[花]”，是的，我也这么想。",
-          "baseline_b_worst_action": "minimal_response",
+          "baseline_b_best_text": "對。",
+          "baseline_b_worst_action": "agree",
           "baseline_b_worst_generated_chars": 2,
           "baseline_b_worst_semantic_pair_score": 0.0,
-          "baseline_b_worst_strategy": "escape",
-          "baseline_b_worst_text": "嗯。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 25,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "對。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
-          "baseline_c_semantic_pair_score": 0.091513,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:1",
-          "baseline_c_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_template_id": "share_opinion:0",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -1110,34 +1167,40 @@
           },
           "pair_index": 0,
           "partner_uid": 4744012,
-          "personality_action": "agree",
-          "personality_baseline_a_action_agree": true,
-          "personality_baseline_a_strategy_agree": true,
-          "personality_baseline_b_best_action_agree": true,
-          "personality_baseline_b_best_strategy_agree": true,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": false,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
           "personality_baseline_c_action_agree": true,
           "personality_baseline_c_strategy_agree": true,
-          "personality_generated_chars": 12,
+          "personality_generated_chars": 21,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.147682,
-          "personality_strategy": "exploit",
+          "personality_semantic_pair_score": 0.8578,
+          "personality_strategy": "explore",
           "personality_surface_source": "random:train",
-          "personality_template_id": "agree:0",
-          "personality_text": "你说“[花]”，我同意。",
+          "personality_template_id": "share_opinion:1",
+          "personality_text": "关于“[花]”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.03548,
-          "personality_vs_a_text_similarity": 1.0,
-          "personality_vs_b_best_text_similarity": 0.374702,
-          "personality_vs_c_pair_delta": 0.056169,
-          "personality_vs_c_text_similarity": 0.456683,
+          "personality_vs_a_pair_delta": 0.771877,
+          "personality_vs_a_text_similarity": 0.112443,
+          "personality_vs_b_best_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.8578,
+          "personality_vs_c_text_similarity": 0.062181,
           "real_text": "[強][強][花][花]",
-          "reply_length_bucket": "short",
+          "reply_length_bucket": "medium",
           "session_id": "2637266_4744012_20250113201851_0003",
           "slow_traits": {
             "caution_bias": 0.34,
@@ -1151,33 +1214,37 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 27,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 44,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 27,
+          "baseline_b_best_generated_chars": 2,
           "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
+          "baseline_b_best_text": "對。",
           "baseline_b_worst_action": "agree",
-          "baseline_b_worst_generated_chars": 27,
+          "baseline_b_worst_generated_chars": 2,
           "baseline_b_worst_semantic_pair_score": 0.0,
           "baseline_b_worst_strategy": "exploit",
-          "baseline_b_worst_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 40,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_text": "對。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
           "baseline_c_semantic_pair_score": 0.0,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:1",
-          "baseline_c_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_template_id": "share_opinion:1",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -1188,34 +1255,40 @@
           },
           "pair_index": 1,
           "partner_uid": 5132551,
-          "personality_action": "minimal_response",
-          "personality_baseline_a_action_agree": false,
-          "personality_baseline_a_strategy_agree": false,
-          "personality_baseline_b_best_action_agree": false,
-          "personality_baseline_b_best_strategy_agree": false,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
           "personality_baseline_c_action_agree": false,
           "personality_baseline_c_strategy_agree": false,
-          "personality_generated_chars": 4,
+          "personality_generated_chars": 36,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.0,
-          "personality_strategy": "escape",
+          "personality_semantic_pair_score": 0.091311,
+          "personality_strategy": "exploit",
           "personality_surface_source": "random:train",
-          "personality_template_id": "minimal_response:1",
-          "personality_text": "知道了。",
+          "personality_template_id": "agree:1",
+          "personality_text": "关于“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.0,
+          "personality_vs_a_pair_delta": 0.091311,
+          "personality_vs_a_text_similarity": 0.547659,
           "personality_vs_b_best_text_similarity": 0.0,
-          "personality_vs_c_pair_delta": 0.0,
-          "personality_vs_c_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.091311,
+          "personality_vs_c_text_similarity": 0.034086,
           "real_text": "[送花][送花][送花]",
-          "reply_length_bucket": "short",
+          "reply_length_bucket": "medium",
           "session_id": "2637266_5132551_20250123093050_0000",
           "slow_traits": {
             "caution_bias": 0.34,
@@ -1240,18 +1313,16 @@
         "behavioral_similarity_action11": {
           "categories": [
             "agree",
-            "minimal_response",
             "share_opinion"
           ],
-          "chi_square_distance": 500000001.0
+          "chi_square_distance": 250000000.25
         },
         "behavioral_similarity_strategy": {
           "categories": [
-            "escape",
             "exploit",
             "explore"
           ],
-          "chi_square_distance": 500000001.0
+          "chi_square_distance": 250000000.25
         },
         "personality_similarity": {
           "vector_keys": [
@@ -1267,11 +1338,11 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.068236
+          "jsd": 0.079059
         },
         "surface_similarity": {
-          "bleu4": 0.0,
-          "rouge_l": 0.1
+          "bleu4": 0.094562,
+          "rouge_l": 0.435065
         }
       },
       "personality_metrics": {
@@ -1279,9 +1350,9 @@
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.073841,
-        "stylistic_similarity": 0.901556,
-        "surface_similarity": 0.05
+        "semantic_similarity": 0.474556,
+        "stylistic_similarity": 0.885942,
+        "surface_similarity": 0.264814
       },
       "reason": null,
       "skipped": false,
@@ -1300,6 +1371,14 @@
         "applied": true,
         "avg_reply_chars": 14.4,
         "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "share_opinion": 1.0
+        },
+        "policy_dominant_strategy": "explore",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "share_opinion"
+        ],
         "prior_deltas": {
           "contamination_sensitivity": 0.0,
           "controllability_prior": 0.2368,
@@ -1326,15 +1405,15 @@
       "state_distance_diagnostics": {
         "per_dimension_variance": {
           "prior:contamination_sensitivity": 0.0,
-          "prior:controllability_prior": 0.017444,
-          "prior:meaning_stability": 0.005169,
-          "prior:trauma_bias": 0.000248,
-          "prior:trust_prior": 0.002485,
-          "trait:caution_bias": 0.005517,
-          "trait:exploration_posture": 0.009031,
-          "trait:social_approach": 0.003553,
-          "trait:threat_sensitivity": 0.000413,
-          "trait:trust_stance": 0.001726
+          "prior:controllability_prior": 0.009389,
+          "prior:meaning_stability": 0.003602,
+          "prior:trauma_bias": 7.1e-05,
+          "prior:trust_prior": 0.000511,
+          "trait:caution_bias": 0.004286,
+          "trait:exploration_posture": 0.003097,
+          "trait:social_approach": 0.002888,
+          "trait:threat_sensitivity": 0.000163,
+          "trait:trust_stance": 0.000355
         },
         "train_default": {
           "cosine": 0.942899,
@@ -1369,19 +1448,19 @@
           }
         },
         "train_wrong_user": {
-          "cosine": 0.869882,
-          "l2": 0.579151,
+          "cosine": 0.969533,
+          "l2": 0.272254,
           "per_dimension_abs_delta": {
             "prior:contamination_sensitivity": 0.0,
-            "prior:controllability_prior": 0.365689,
-            "prior:meaning_stability": 0.189437,
-            "prior:trauma_bias": 0.03636,
-            "prior:trust_prior": 0.134,
-            "trait:caution_bias": 0.188333,
-            "trait:exploration_posture": 0.268778,
-            "trait:social_approach": 0.152917,
-            "trait:threat_sensitivity": 0.0544,
-            "trait:trust_stance": 0.111667
+            "prior:controllability_prior": 0.173045,
+            "prior:meaning_stability": 0.097682,
+            "prior:trauma_bias": 0.01952,
+            "prior:trust_prior": 0.063665,
+            "trait:caution_bias": 0.11682,
+            "trait:exploration_posture": 0.099487,
+            "trait:social_approach": 0.050684,
+            "trait:threat_sensitivity": 0.035689,
+            "trait:trust_stance": 0.053054
           }
         }
       },
@@ -1414,25 +1493,25 @@
           "semantic_mean": 0.0,
           "semantic_vs_baseline_a_diff": 0.0,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 1.0
+          "text_similarity_vs_personality": 0.43345
         },
         {
           "action_agreement_vs_personality": 1.0,
           "name": "no_policy_trait_bias",
           "pair_count": 1,
-          "semantic_mean": 0.0,
-          "semantic_vs_baseline_a_diff": 0.0,
+          "semantic_mean": 0.14578,
+          "semantic_vs_baseline_a_diff": 0.14578,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 1.0
+          "text_similarity_vs_personality": 0.475798
         },
         {
           "action_agreement_vs_personality": 1.0,
           "name": "surface_only_default_agent",
           "pair_count": 1,
-          "semantic_mean": 0.0,
-          "semantic_vs_baseline_a_diff": 0.0,
+          "semantic_mean": 0.14578,
+          "semantic_vs_baseline_a_diff": 0.14578,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 1.0
+          "text_similarity_vs_personality": 0.475798
         }
       ],
       "baseline_a_metric_details": {
@@ -1464,7 +1543,7 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.091305
+          "jsd": 0.089464
         },
         "surface_similarity": {
           "bleu4": 0.0,
@@ -1476,7 +1555,7 @@
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.868275,
+        "stylistic_similarity": 0.870931,
         "surface_similarity": 0.0
       },
       "baseline_a_surface_profile": {
@@ -1485,31 +1564,30 @@
       },
       "baseline_b_metrics": {
         "behavioral_similarity_action11": 0.0,
-        "behavioral_similarity_strategy": 0.3333333333333333,
+        "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.8316206666666667,
+        "stylistic_similarity": 0.68531,
         "surface_similarity": 0.0
       },
       "baseline_b_selected_wrong_uids": [
-        2637101,
-        2637372,
-        2637134
+        2637215,
+        2637470,
+        2637318
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
-            "agree",
             "share_opinion"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "behavioral_similarity_strategy": {
           "categories": [
-            "exploit",
             "explore"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "personality_similarity": {
           "vector_keys": [
@@ -1525,7 +1603,7 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.09154
+          "jsd": 0.137545
         },
         "surface_similarity": {
           "bleu4": 0.0,
@@ -1533,24 +1611,26 @@
         }
       },
       "baseline_c_metrics": {
-        "behavioral_similarity_action11": 0.0,
-        "behavioral_similarity_strategy": 0.0,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.867936,
+        "stylistic_similarity": 0.801565,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.358648,
+        "avg_reply_chars": 6.186292,
         "median_reply_chars": 6,
         "opening_phrases": [],
-        "reply_count": 1804,
+        "reply_count": 2845,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 1804
+          "exploit": 2845
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.294346
+        "ultra_short_ratio": 0.325835
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1598,6 +1678,7 @@
         },
         "formal_dataset_ok": true,
         "formal_engine": false,
+        "formal_engine_failure_reason": "tfidf_nearest_centroid",
         "formal_gate_eligible": false,
         "gate_count": 150,
         "macro_f1_11class": 0.571724,
@@ -1634,33 +1715,37 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 36,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 35,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，有道理，我跟你的看法一致。",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 27,
+          "baseline_b_best_generated_chars": 2,
           "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
+          "baseline_b_best_text": "好。",
           "baseline_b_worst_action": "agree",
-          "baseline_b_worst_generated_chars": 27,
+          "baseline_b_worst_generated_chars": 2,
           "baseline_b_worst_semantic_pair_score": 0.0,
           "baseline_b_worst_strategy": "exploit",
-          "baseline_b_worst_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 40,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_text": "好。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
           "baseline_c_semantic_pair_score": 0.0,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:1",
-          "baseline_c_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_template_id": "share_opinion:0",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -1676,27 +1761,33 @@
           "personality_baseline_a_strategy_agree": true,
           "personality_baseline_b_best_action_agree": true,
           "personality_baseline_b_best_strategy_agree": true,
-          "personality_baseline_c_action_agree": true,
-          "personality_baseline_c_strategy_agree": true,
-          "personality_generated_chars": 32,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 40,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
           "personality_semantic_pair_score": 0.0,
           "personality_strategy": "exploit",
           "personality_surface_source": "temporal:train",
           "personality_template_id": "agree:1",
-          "personality_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，是的，我也这么想。",
+          "personality_text": "关于“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，恭禧冠軍呦[勝利][勝利][勝利。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.688774,
-          "personality_vs_b_best_text_similarity": 0.778614,
+          "personality_vs_a_text_similarity": 0.363036,
+          "personality_vs_b_best_text_similarity": 0.10216,
           "personality_vs_c_pair_delta": 0.0,
-          "personality_vs_c_text_similarity": 0.887135,
+          "personality_vs_c_text_similarity": 0.038819,
           "real_text": "[送花][送花][送花]",
           "reply_length_bucket": "medium",
           "session_id": "2637266_5132551_20250123093050_0000",
@@ -1748,7 +1839,7 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.095891
+          "jsd": 0.082405
         },
         "surface_similarity": {
           "bleu4": 0.0,
@@ -1761,7 +1852,7 @@
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.861659,
+        "stylistic_similarity": 0.881115,
         "surface_similarity": 0.0
       },
       "reason": null,
@@ -1781,6 +1872,14 @@
         "applied": true,
         "avg_reply_chars": 14.0,
         "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "share_opinion": 1.0
+        },
+        "policy_dominant_strategy": "explore",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "share_opinion"
+        ],
         "prior_deltas": {
           "contamination_sensitivity": 0.0,
           "controllability_prior": 0.234667,
@@ -1807,15 +1906,15 @@
       "state_distance_diagnostics": {
         "per_dimension_variance": {
           "prior:contamination_sensitivity": 0.0,
-          "prior:controllability_prior": 0.017221,
-          "prior:meaning_stability": 0.005657,
-          "prior:trauma_bias": 0.000248,
-          "prior:trust_prior": 0.002485,
-          "trait:caution_bias": 0.005517,
-          "trait:exploration_posture": 0.008852,
-          "trait:social_approach": 0.003596,
-          "trait:threat_sensitivity": 0.000413,
-          "trait:trust_stance": 0.001726
+          "prior:controllability_prior": 0.009217,
+          "prior:meaning_stability": 0.003999,
+          "prior:trauma_bias": 7.1e-05,
+          "prior:trust_prior": 0.000511,
+          "trait:caution_bias": 0.004286,
+          "trait:exploration_posture": 0.002975,
+          "trait:social_approach": 0.00292,
+          "trait:threat_sensitivity": 0.000163,
+          "trait:trust_stance": 0.000355
         },
         "train_default": {
           "cosine": 0.942506,
@@ -1850,19 +1949,19 @@
           }
         },
         "train_wrong_user": {
-          "cosine": 0.869679,
-          "l2": 0.579427,
+          "cosine": 0.969339,
+          "l2": 0.27304,
           "per_dimension_abs_delta": {
             "prior:contamination_sensitivity": 0.0,
-            "prior:controllability_prior": 0.363556,
-            "prior:meaning_stability": 0.197312,
-            "prior:trauma_bias": 0.03636,
-            "prior:trust_prior": 0.134,
-            "trait:caution_bias": 0.188333,
-            "trait:exploration_posture": 0.266111,
-            "trait:social_approach": 0.15375,
-            "trait:threat_sensitivity": 0.0544,
-            "trait:trust_stance": 0.111667
+            "prior:controllability_prior": 0.170912,
+            "prior:meaning_stability": 0.105557,
+            "prior:trauma_bias": 0.01952,
+            "prior:trust_prior": 0.063665,
+            "trait:caution_bias": 0.11682,
+            "trait:exploration_posture": 0.09682,
+            "trait:social_approach": 0.051517,
+            "trait:threat_sensitivity": 0.035689,
+            "trait:trust_stance": 0.053054
           }
         }
       },
@@ -1898,28 +1997,28 @@
           "action_agreement_vs_personality": 1.0,
           "name": "no_surface_profile",
           "pair_count": 2,
-          "semantic_mean": 0.073841,
-          "semantic_vs_baseline_a_diff": -0.01774,
+          "semantic_mean": 0.0,
+          "semantic_vs_baseline_a_diff": -0.042961,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 1.0
+          "text_similarity_vs_personality": 0.365131
         },
         {
           "action_agreement_vs_personality": 1.0,
           "name": "no_policy_trait_bias",
           "pair_count": 2,
-          "semantic_mean": 0.055983,
-          "semantic_vs_baseline_a_diff": -0.035598,
+          "semantic_mean": 0.738934,
+          "semantic_vs_baseline_a_diff": 0.695973,
           "strategy_agreement_vs_personality": 1.0,
-          "text_similarity_vs_personality": 0.201478
+          "text_similarity_vs_personality": 0.845639
         },
         {
           "action_agreement_vs_personality": 0.5,
           "name": "surface_only_default_agent",
           "pair_count": 2,
-          "semantic_mean": 0.091581,
-          "semantic_vs_baseline_a_diff": 0.0,
+          "semantic_mean": 0.474556,
+          "semantic_vs_baseline_a_diff": 0.431595,
           "strategy_agreement_vs_personality": 0.5,
-          "text_similarity_vs_personality": 0.5
+          "text_similarity_vs_personality": 1.0
         }
       ],
       "baseline_a_metric_details": {
@@ -1951,20 +2050,20 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.084139
+          "jsd": 0.097881
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.1
+          "rouge_l": 0.047619
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.091581,
-        "stylistic_similarity": 0.878613,
-        "surface_similarity": 0.05
+        "semantic_similarity": 0.042961,
+        "stylistic_similarity": 0.858788,
+        "surface_similarity": 0.02381
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -1974,29 +2073,28 @@
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.019900333333333332,
-        "stylistic_similarity": 0.8520253333333334,
-        "surface_similarity": 0.011904666666666668
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.7706430000000001,
+        "surface_similarity": 0.0
       },
       "baseline_b_selected_wrong_uids": [
-        2637101,
-        2637372,
-        2637134
+        2637215,
+        2637470,
+        2637318
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
-            "agree",
             "share_opinion"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "behavioral_similarity_strategy": {
           "categories": [
-            "exploit",
             "explore"
           ],
-          "chi_square_distance": 1000000001.0
+          "chi_square_distance": 0.0
         },
         "personality_similarity": {
           "vector_keys": [
@@ -2012,32 +2110,34 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.097521
+          "jsd": 0.078301
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.047619
+          "rouge_l": 0.0
         }
       },
       "baseline_c_metrics": {
-        "behavioral_similarity_action11": 0.0,
-        "behavioral_similarity_strategy": 0.0,
+        "behavioral_similarity_action11": 1.0,
+        "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.045756,
-        "stylistic_similarity": 0.859307,
-        "surface_similarity": 0.02381
+        "semantic_similarity": 0.0,
+        "stylistic_similarity": 0.887036,
+        "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 14,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.358648,
+        "avg_reply_chars": 6.186292,
         "median_reply_chars": 6,
         "opening_phrases": [],
-        "reply_count": 1804,
+        "reply_count": 2845,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 1804
+          "exploit": 2845
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.294346
+        "ultra_short_ratio": 0.325835
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -2085,6 +2185,7 @@
         },
         "formal_dataset_ok": true,
         "formal_engine": false,
+        "formal_engine_failure_reason": "tfidf_nearest_centroid",
         "formal_gate_eligible": false,
         "gate_count": 150,
         "macro_f1_11class": 0.571724,
@@ -2121,33 +2222,37 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 12,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.183162,
+          "baseline_a_generated_chars": 25,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.085923,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“[花]”，我同意。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 17,
-          "baseline_b_best_semantic_pair_score": 0.119402,
+          "baseline_b_best_generated_chars": 2,
+          "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“[花]”，是的，我也这么想。",
-          "baseline_b_worst_action": "minimal_response",
+          "baseline_b_best_text": "對。",
+          "baseline_b_worst_action": "agree",
           "baseline_b_worst_generated_chars": 2,
           "baseline_b_worst_semantic_pair_score": 0.0,
-          "baseline_b_worst_strategy": "escape",
-          "baseline_b_worst_text": "嗯。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 25,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "對。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
-          "baseline_c_semantic_pair_score": 0.091513,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
+          "baseline_c_semantic_pair_score": 0.0,
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:1",
-          "baseline_c_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_template_id": "share_opinion:0",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -2158,34 +2263,40 @@
           },
           "pair_index": 0,
           "partner_uid": 4744012,
-          "personality_action": "agree",
-          "personality_baseline_a_action_agree": true,
-          "personality_baseline_a_strategy_agree": true,
-          "personality_baseline_b_best_action_agree": true,
-          "personality_baseline_b_best_strategy_agree": true,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": false,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
           "personality_baseline_c_action_agree": true,
           "personality_baseline_c_strategy_agree": true,
-          "personality_generated_chars": 12,
+          "personality_generated_chars": 21,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.147682,
-          "personality_strategy": "exploit",
+          "personality_semantic_pair_score": 0.8578,
+          "personality_strategy": "explore",
           "personality_surface_source": "topic:train",
-          "personality_template_id": "agree:0",
-          "personality_text": "你说“[花]”，我同意。",
+          "personality_template_id": "share_opinion:1",
+          "personality_text": "关于“[花]”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.03548,
-          "personality_vs_a_text_similarity": 1.0,
-          "personality_vs_b_best_text_similarity": 0.374702,
-          "personality_vs_c_pair_delta": 0.056169,
-          "personality_vs_c_text_similarity": 0.456683,
+          "personality_vs_a_pair_delta": 0.771877,
+          "personality_vs_a_text_similarity": 0.112443,
+          "personality_vs_b_best_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.8578,
+          "personality_vs_c_text_similarity": 0.062181,
           "real_text": "[強][強][花][花]",
-          "reply_length_bucket": "short",
+          "reply_length_bucket": "medium",
           "session_id": "2637266_4744012_20250113201851_0003",
           "slow_traits": {
             "caution_bias": 0.34,
@@ -2199,33 +2310,37 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 27,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 44,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
-          "baseline_b_best_generated_chars": 27,
+          "baseline_b_best_generated_chars": 2,
           "baseline_b_best_semantic_pair_score": 0.0,
           "baseline_b_best_strategy": "exploit",
-          "baseline_b_best_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
+          "baseline_b_best_text": "對。",
           "baseline_b_worst_action": "agree",
-          "baseline_b_worst_generated_chars": 27,
+          "baseline_b_worst_generated_chars": 2,
           "baseline_b_worst_semantic_pair_score": 0.0,
           "baseline_b_worst_strategy": "exploit",
-          "baseline_b_worst_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我同意。",
-          "baseline_c_action": "agree",
-          "baseline_c_generated_chars": 40,
-          "baseline_c_profile_confidence": 0.35,
+          "baseline_b_worst_text": "對。",
+          "baseline_c_action": "share_opinion",
+          "baseline_c_generated_chars": 5,
+          "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
-          "baseline_c_rhetorical_move": "warm_supportive",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "direct_advisory",
           "baseline_c_semantic_pair_score": 0.0,
-          "baseline_c_strategy": "exploit",
+          "baseline_c_strategy": "explore",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:1",
-          "baseline_c_text": "你说“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，我在认真听你说，是的，我也这么想。",
+          "baseline_c_template_id": "share_opinion:1",
+          "baseline_c_text": "我倾向于。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
             "contamination_sensitivity": 0.0,
@@ -2236,34 +2351,40 @@
           },
           "pair_index": 1,
           "partner_uid": 5132551,
-          "personality_action": "minimal_response",
-          "personality_baseline_a_action_agree": false,
-          "personality_baseline_a_strategy_agree": false,
-          "personality_baseline_b_best_action_agree": false,
-          "personality_baseline_b_best_strategy_agree": false,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
           "personality_baseline_c_action_agree": false,
           "personality_baseline_c_strategy_agree": false,
-          "personality_generated_chars": 4,
+          "personality_generated_chars": 36,
           "personality_partner_anchor_used": false,
           "personality_profile_anchor_match": false,
-          "personality_profile_confidence": 0.35,
+          "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
+          "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
           "personality_rhetorical_move": "exploratory_questioning",
-          "personality_semantic_pair_score": 0.0,
-          "personality_strategy": "escape",
+          "personality_semantic_pair_score": 0.091311,
+          "personality_strategy": "exploit",
           "personality_surface_source": "topic:train",
-          "personality_template_id": "minimal_response:1",
-          "personality_text": "知道了。",
+          "personality_template_id": "agree:1",
+          "personality_text": "关于“謝謝好友來支持，祝您蛇年快樂，蛇全蛇”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.0,
+          "personality_vs_a_pair_delta": 0.091311,
+          "personality_vs_a_text_similarity": 0.547659,
           "personality_vs_b_best_text_similarity": 0.0,
-          "personality_vs_c_pair_delta": 0.0,
-          "personality_vs_c_text_similarity": 0.0,
+          "personality_vs_c_pair_delta": 0.091311,
+          "personality_vs_c_text_similarity": 0.034086,
           "real_text": "[送花][送花][送花]",
-          "reply_length_bucket": "short",
+          "reply_length_bucket": "medium",
           "session_id": "2637266_5132551_20250123093050_0000",
           "slow_traits": {
             "caution_bias": 0.34,
@@ -2288,18 +2409,16 @@
         "behavioral_similarity_action11": {
           "categories": [
             "agree",
-            "minimal_response",
             "share_opinion"
           ],
-          "chi_square_distance": 500000001.0
+          "chi_square_distance": 250000000.25
         },
         "behavioral_similarity_strategy": {
           "categories": [
-            "escape",
             "exploit",
             "explore"
           ],
-          "chi_square_distance": 500000001.0
+          "chi_square_distance": 250000000.25
         },
         "personality_similarity": {
           "vector_keys": [
@@ -2315,11 +2434,11 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.068236
+          "jsd": 0.079059
         },
         "surface_similarity": {
-          "bleu4": 0.0,
-          "rouge_l": 0.1
+          "bleu4": 0.094562,
+          "rouge_l": 0.435065
         }
       },
       "personality_metrics": {
@@ -2327,9 +2446,9 @@
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.073841,
-        "stylistic_similarity": 0.901556,
-        "surface_similarity": 0.05
+        "semantic_similarity": 0.474556,
+        "stylistic_similarity": 0.885942,
+        "surface_similarity": 0.264814
       },
       "reason": null,
       "skipped": false,
@@ -2391,6 +2510,14 @@
         "applied": true,
         "avg_reply_chars": 14.4,
         "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "share_opinion": 1.0
+        },
+        "policy_dominant_strategy": "explore",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "share_opinion"
+        ],
         "prior_deltas": {
           "contamination_sensitivity": 0.0,
           "controllability_prior": 0.2368,
@@ -2417,15 +2544,15 @@
       "state_distance_diagnostics": {
         "per_dimension_variance": {
           "prior:contamination_sensitivity": 0.0,
-          "prior:controllability_prior": 0.017444,
-          "prior:meaning_stability": 0.005169,
-          "prior:trauma_bias": 0.000248,
-          "prior:trust_prior": 0.002485,
-          "trait:caution_bias": 0.005517,
-          "trait:exploration_posture": 0.009031,
-          "trait:social_approach": 0.003553,
-          "trait:threat_sensitivity": 0.000413,
-          "trait:trust_stance": 0.001726
+          "prior:controllability_prior": 0.009389,
+          "prior:meaning_stability": 0.003602,
+          "prior:trauma_bias": 7.1e-05,
+          "prior:trust_prior": 0.000511,
+          "trait:caution_bias": 0.004286,
+          "trait:exploration_posture": 0.003097,
+          "trait:social_approach": 0.002888,
+          "trait:threat_sensitivity": 0.000163,
+          "trait:trust_stance": 0.000355
         },
         "train_default": {
           "cosine": 0.942899,
@@ -2460,19 +2587,19 @@
           }
         },
         "train_wrong_user": {
-          "cosine": 0.869882,
-          "l2": 0.579151,
+          "cosine": 0.969533,
+          "l2": 0.272254,
           "per_dimension_abs_delta": {
             "prior:contamination_sensitivity": 0.0,
-            "prior:controllability_prior": 0.365689,
-            "prior:meaning_stability": 0.189437,
-            "prior:trauma_bias": 0.03636,
-            "prior:trust_prior": 0.134,
-            "trait:caution_bias": 0.188333,
-            "trait:exploration_posture": 0.268778,
-            "trait:social_approach": 0.152917,
-            "trait:threat_sensitivity": 0.0544,
-            "trait:trust_stance": 0.111667
+            "prior:controllability_prior": 0.173045,
+            "prior:meaning_stability": 0.097682,
+            "prior:trauma_bias": 0.01952,
+            "prior:trust_prior": 0.063665,
+            "trait:caution_bias": 0.11682,
+            "trait:exploration_posture": 0.099487,
+            "trait:social_approach": 0.050684,
+            "trait:threat_sensitivity": 0.035689,
+            "trait:trust_stance": 0.053054
           }
         }
       },

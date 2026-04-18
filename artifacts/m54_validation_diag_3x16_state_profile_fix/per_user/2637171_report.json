@@ -39,6 +39,8 @@
       "dataset_origin": "missing_formal_labels",
       "degradation_required": true,
       "engine": "keyword_debug",
+      "formal_engine": false,
+      "formal_engine_failure_reason": "keyword_debug",
       "formal_gate_eligible": false,
       "gate_count": 0,
       "macro_f1_11class": 0.0,
@@ -73,7 +75,7 @@
     "formal_requested": false,
     "metric_version": "m54_v3",
     "pilot": {
-      "behavioral_diff_sd": 0.229541,
+      "behavioral_diff_sd": 0.277069,
       "behavioral_escalated": false,
       "escalated": false,
       "pilot_metrics_used": [
@@ -82,8 +84,8 @@
       "pilot_user_count": 3,
       "required_users": 3,
       "sd_threshold": 0.04,
-      "semantic_diff_mean": -0.001773,
-      "semantic_diff_sd": 0.008109,
+      "semantic_diff_mean": 0.003068,
+      "semantic_diff_sd": 0.006006,
       "semantic_escalated": false,
       "suggested_min_users": 3
     },
@@ -95,7 +97,7 @@
       "topic"
     ],
     "required_users": 3,
-    "semantic_baseline_a_mean": 0.01431075,
+    "semantic_baseline_a_mean": 0.01280525,
     "semantic_baseline_b_mean": 0.0121285,
     "semantic_baseline_c_mean": 0.0,
     "semantic_personality_mean": 0.02375925,
@@ -188,6 +190,7 @@
         2637101,
         2637134
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [],
@@ -226,17 +229,19 @@
         "stylistic_similarity": 1.0,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637171,
+      "baseline_c_population_user_count": 2,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 5.427419,
+        "avg_reply_chars": 5.088235,
         "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 124,
+        "reply_count": 102,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 124
+          "exploit": 102
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.306452
+        "ultra_short_ratio": 0.333333
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -275,6 +280,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -504,7 +511,7 @@
           "name": "no_surface_profile",
           "pair_count": 1,
           "semantic_mean": 0.05211,
-          "semantic_vs_baseline_a_diff": 0.029147,
+          "semantic_vs_baseline_a_diff": 0.033025,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.0
         },
@@ -513,7 +520,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 1,
           "semantic_mean": 0.0,
-          "semantic_vs_baseline_a_diff": -0.022963,
+          "semantic_vs_baseline_a_diff": -0.019085,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 1.0
         },
@@ -522,7 +529,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 1,
           "semantic_mean": 0.173529,
-          "semantic_vs_baseline_a_diff": 0.150566,
+          "semantic_vs_baseline_a_diff": 0.154444,
           "strategy_agreement_vs_personality": 0.0,
           "text_similarity_vs_personality": 0.837939
         }
@@ -555,20 +562,20 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.042973
+          "jsd": 0.043283
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.054054
+          "rouge_l": 0.045455
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.022963,
-        "stylistic_similarity": 0.938003,
-        "surface_similarity": 0.027027
+        "semantic_similarity": 0.019085,
+        "stylistic_similarity": 0.937556,
+        "surface_similarity": 0.022727
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -586,6 +593,7 @@
         2637101,
         2637134
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -628,17 +636,19 @@
         "stylistic_similarity": 0.832815,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637171,
+      "baseline_c_population_user_count": 2,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 5.427419,
+        "avg_reply_chars": 5.088235,
         "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 124,
+        "reply_count": 102,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 124
+          "exploit": 102
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.306452
+        "ultra_short_ratio": 0.333333
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -677,6 +687,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -710,13 +722,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 36,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.022963,
+          "baseline_a_generated_chars": 44,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.019085,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，有道理，我跟你的看法一致。",
+          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 9,
           "baseline_b_best_semantic_pair_score": 0.048514,
@@ -731,11 +743,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:0",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -759,6 +775,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -769,8 +790,8 @@
           "personality_template_id": "share_opinion:0",
           "personality_text": "关于“午安安 怎麼又破費送禮了😅 謝謝阿偉”，👍👍👍。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.022963,
-          "personality_vs_a_text_similarity": 0.568727,
+          "personality_vs_a_pair_delta": -0.019085,
+          "personality_vs_a_text_similarity": 0.448318,
           "personality_vs_b_best_text_similarity": 0.040804,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -987,7 +1008,7 @@
           "name": "no_surface_profile",
           "pair_count": 2,
           "semantic_mean": 0.0,
-          "semantic_vs_baseline_a_diff": -0.011317,
+          "semantic_vs_baseline_a_diff": -0.013051,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.484185
         },
@@ -996,7 +1017,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 2,
           "semantic_mean": 0.17709,
-          "semantic_vs_baseline_a_diff": 0.165773,
+          "semantic_vs_baseline_a_diff": 0.164039,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.708058
         },
@@ -1005,7 +1026,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 2,
           "semantic_mean": 0.118921,
-          "semantic_vs_baseline_a_diff": 0.107604,
+          "semantic_vs_baseline_a_diff": 0.10587,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.613144
         }
@@ -1038,20 +1059,20 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.053103
+          "jsd": 0.0475
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.030303
+          "rouge_l": 0.022727
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.011317,
-        "stylistic_similarity": 0.923389,
-        "surface_similarity": 0.015152
+        "semantic_similarity": 0.013051,
+        "stylistic_similarity": 0.931472,
+        "surface_similarity": 0.011364
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -1069,6 +1090,7 @@
         2637101,
         2637134
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -1111,17 +1133,19 @@
         "stylistic_similarity": 0.805133,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637171,
+      "baseline_c_population_user_count": 2,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 5.427419,
+        "avg_reply_chars": 5.088235,
         "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 124,
+        "reply_count": 102,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 124
+          "exploit": 102
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.306452
+        "ultra_short_ratio": 0.333333
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1160,6 +1184,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -1193,13 +1219,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 21,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“安安 剛剛關注”，是的，我也这么想。",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“安安 剛剛關注”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1214,11 +1240,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -1242,6 +1272,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1253,7 +1288,7 @@
           "personality_text": "关于“安安 剛剛關注”，[口水]。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.190075,
-          "personality_vs_a_text_similarity": 0.525931,
+          "personality_vs_a_text_similarity": 0.414502,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.190075,
           "personality_vs_c_text_similarity": 0.0,
@@ -1272,13 +1307,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 32,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.022634,
+          "baseline_a_generated_chars": 44,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.026103,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，是的，我也这么想。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 2,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1293,11 +1328,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -1321,6 +1360,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1331,8 +1375,8 @@
           "personality_template_id": "agree:0",
           "personality_text": "关于“午安安 怎麼又破費送禮了😅 謝謝阿偉”，受誰。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.022634,
-          "personality_vs_a_text_similarity": 0.704293,
+          "personality_vs_a_pair_delta": -0.026103,
+          "personality_vs_a_text_similarity": 0.494535,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1549,7 +1593,7 @@
           "name": "no_surface_profile",
           "pair_count": 1,
           "semantic_mean": 0.05211,
-          "semantic_vs_baseline_a_diff": 0.029147,
+          "semantic_vs_baseline_a_diff": 0.033025,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.0
         },
@@ -1558,7 +1602,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 1,
           "semantic_mean": 0.0,
-          "semantic_vs_baseline_a_diff": -0.022963,
+          "semantic_vs_baseline_a_diff": -0.019085,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 1.0
         },
@@ -1567,7 +1611,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 1,
           "semantic_mean": 0.173529,
-          "semantic_vs_baseline_a_diff": 0.150566,
+          "semantic_vs_baseline_a_diff": 0.154444,
           "strategy_agreement_vs_personality": 0.0,
           "text_similarity_vs_personality": 0.837939
         }
@@ -1600,20 +1644,20 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.042973
+          "jsd": 0.043283
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.054054
+          "rouge_l": 0.045455
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.022963,
-        "stylistic_similarity": 0.938003,
-        "surface_similarity": 0.027027
+        "semantic_similarity": 0.019085,
+        "stylistic_similarity": 0.937556,
+        "surface_similarity": 0.022727
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -1631,6 +1675,7 @@
         2637101,
         2637134
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -1673,17 +1718,19 @@
         "stylistic_similarity": 0.832815,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637171,
+      "baseline_c_population_user_count": 2,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 5.427419,
+        "avg_reply_chars": 5.088235,
         "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 124,
+        "reply_count": 102,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 124
+          "exploit": 102
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.306452
+        "ultra_short_ratio": 0.333333
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1722,6 +1769,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -1755,13 +1804,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 36,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.022963,
+          "baseline_a_generated_chars": 44,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.019085,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，有道理，我跟你的看法一致。",
+          "baseline_a_text": "你说“午安安 怎麼又破費送禮了😅 謝謝阿偉”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 9,
           "baseline_b_best_semantic_pair_score": 0.048514,
@@ -1776,11 +1825,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:0",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -1804,6 +1857,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1814,8 +1872,8 @@
           "personality_template_id": "share_opinion:0",
           "personality_text": "关于“午安安 怎麼又破費送禮了😅 謝謝阿偉”，👍👍👍。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.022963,
-          "personality_vs_a_text_similarity": 0.568727,
+          "personality_vs_a_pair_delta": -0.019085,
+          "personality_vs_a_text_similarity": 0.448318,
           "personality_vs_b_best_text_similarity": 0.040804,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,

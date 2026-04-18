@@ -1,0 +1,46 @@
+{
+  "baseline_c": {
+    "rhetorical_move_counts": {
+      "direct_advisory": 1360,
+      "exploratory_questioning": 123,
+      "warm_supportive": 401
+    },
+    "rhetorical_move_rates": {
+      "direct_advisory": 0.721868,
+      "exploratory_questioning": 0.065287,
+      "warm_supportive": 0.212845
+    },
+    "rows": 1884,
+    "source_counts": {
+      "connector": 1884
+    },
+    "source_rates": {
+      "connector": 1.0
+    }
+  },
+  "personality": {
+    "rhetorical_move_counts": {
+      "direct_advisory": 502,
+      "exploratory_questioning": 360,
+      "guarded_short": 20,
+      "warm_supportive": 1002
+    },
+    "rhetorical_move_rates": {
+      "direct_advisory": 0.266454,
+      "exploratory_questioning": 0.191083,
+      "guarded_short": 0.010616,
+      "warm_supportive": 0.531847
+    },
+    "rows": 1884,
+    "source_counts": {
+      "connector": 1842,
+      "focus": 1762,
+      "generic_focus": 42
+    },
+    "source_rates": {
+      "connector": 0.977707,
+      "focus": 0.935244,
+      "generic_focus": 0.022293
+    }
+  }
+}

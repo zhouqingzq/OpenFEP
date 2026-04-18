@@ -67,6 +67,21 @@ def _write_json(path: Path, payload: object) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _parse_required_users_error(message: str) -> int | None:
+    marker = "required="
+    if "insufficient users for validation" not in message or marker not in message:
+        return None
+    tail = message.split(marker, 1)[1].strip()
+    digits = []
+    for ch in tail:
+        if not ch.isdigit():
+            break
+        digits.append(ch)
+    if not digits:
+        return None
+    return int("".join(digits))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run M5.4 consistency validation.")
     parser.add_argument("--user-dir", type=Path, required=True)
@@ -113,6 +128,8 @@ def main() -> None:
             raise ValueError("--formal requires scipy>=1.11")
         if set(item.value for item in strategies) != {"random", "temporal", "partner", "topic"}:
             raise ValueError("--formal requires strategies=random,temporal,partner,topic")
+        if not args.diagnostic_trace:
+            raise ValueError("--formal requires --diagnostic-trace so acceptance artifacts are auditable")
     config = ValidationConfig(
         strategies=strategies,
         min_users=int(args.min_users),
@@ -124,13 +141,66 @@ def main() -> None:
         classifier_dataset_origin=str(args.classifier_gate) if args.classifier_gate else "missing_formal_labels",
         formal=bool(args.formal),
         diagnostic_trace=bool(args.diagnostic_trace),
+        max_cue_override_rate=0.35,
+        require_classifier_provenance=True,
     )
     print("running M5.4 validation...")
-    reports = run_batch_validation(datasets, config)
+    direction_auto_escalation: dict[str, object] = {"applied": False}
+    try:
+        reports = run_batch_validation(datasets, config)
+    except ValueError as exc:
+        required_users = _parse_required_users_error(str(exc))
+        can_direction_escalate = (
+            required_users is not None
+            and not args.formal
+            and args.max_users is not None
+            and int(args.max_users) < int(required_users)
+        )
+        if not can_direction_escalate:
+            raise
+        expanded = _load_user_datasets(
+            args.user_dir,
+            max_users=int(required_users),
+            max_sessions_per_user=args.max_sessions_per_user,
+        )
+        if len(expanded) < int(required_users):
+            raise
+        print(
+            "pilot escalated required users; rerunning direction check "
+            f"with {required_users} users instead of requested max-users={args.max_users}"
+        )
+        direction_auto_escalation = {
+            "applied": True,
+            "policy": "non-formal direction runs honor pilot escalation by rerunning with the required user count",
+            "requested_max_users": int(args.max_users),
+            "pilot_required_users": int(required_users),
+            "rerun_user_count": int(len(expanded)),
+            "stale_artifact_note": (
+                "Earlier 10x32 outputs without this field should be treated as pre-final-patch "
+                "or pilot-escalation stale artifacts."
+            ),
+        }
+        datasets = expanded
+        reports = run_batch_validation(datasets, config)
     print(f"validation completed for {len(reports)} users; writing report...")
     md_path = generate_report(reports, args.output)
     aggregate_path = args.output / "aggregate_report.json"
     agg = json.loads(aggregate_path.read_text(encoding="utf-8")) if aggregate_path.exists() else {}
+    if direction_auto_escalation.get("applied"):
+        agg["direction_auto_escalation"] = direction_auto_escalation
+        _write_json(aggregate_path, agg)
+        if md_path.exists():
+            existing_md = md_path.read_text(encoding="utf-8")
+            md_path.write_text(
+                existing_md
+                + "\n## Direction Auto-Escalation\n\n"
+                + f"- Applied: {direction_auto_escalation['applied']}\n"
+                + f"- Requested max users: {direction_auto_escalation['requested_max_users']}\n"
+                + f"- Pilot required users: {direction_auto_escalation['pilot_required_users']}\n"
+                + f"- Rerun user count: {direction_auto_escalation['rerun_user_count']}\n"
+                + f"- Note: {direction_auto_escalation['stale_artifact_note']}\n",
+                encoding="utf-8",
+            )
     acceptance = {
         "milestone": "M5.4",
         "user_count": len(reports),
@@ -149,8 +219,14 @@ def main() -> None:
         "classifier_gate": agg.get("classifier_gate"),
         "semantic_engine_gate": agg.get("semantic_engine_gate"),
         "statistical_gate": agg.get("statistical_gate"),
+        "baseline_c_gate": agg.get("baseline_c_gate"),
+        "diagnostic_trace_gate": agg.get("diagnostic_trace_gate"),
+        "agent_state_differentiation_gate": agg.get("agent_state_differentiation_gate"),
+        "behavioral_majority_baseline_gate": agg.get("behavioral_majority_baseline_gate"),
+        "direction_auto_escalation": agg.get("direction_auto_escalation", direction_auto_escalation),
         "aggregate_report_json": str(aggregate_path.as_posix()),
         "aggregate_report_md": str(md_path.as_posix()),
+        "baseline_c_behavioral_failure_audit_json": agg.get("baseline_c_behavioral_failure_audit_json"),
         "diagnostic_trace_jsonl": agg.get("diagnostic_trace_jsonl"),
         "diagnostic_trace_rows": agg.get("diagnostic_trace_rows"),
     }

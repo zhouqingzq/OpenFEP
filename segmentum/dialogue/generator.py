@@ -86,9 +86,19 @@ def _rhetorical_move(personality_state: Mapping[str, object], action: str) -> st
         exploration = float(traits.get("exploration_posture", 0.5))
     except (TypeError, ValueError):
         exploration = 0.5
+    if action in {"deflect", "minimal_response", "disengage", "disagree"} and (
+        caution >= 0.50 or trust <= 0.50
+    ):
+        return "guarded_short"
+    if action in {"ask_question", "introduce_topic"} or (
+        action == "share_opinion" and exploration >= 0.56
+    ):
+        return "exploratory_questioning"
+    if action in {"agree", "empathize", "elaborate"} and (social >= 0.42 or trust >= 0.50):
+        return "warm_supportive"
     if caution >= 0.62 or trust <= 0.38:
         return "guarded_short"
-    if exploration >= 0.62 or action in {"ask_question", "introduce_topic"}:
+    if exploration >= 0.62:
         return "exploratory_questioning"
     if social >= 0.62 or trust >= 0.62:
         return "warm_supportive"
@@ -192,6 +202,14 @@ def _generic_focused_reply(action: str, base: str, focus: str) -> str:
     return base
 
 
+def _set_expression_sources(diagnostics: dict[str, object] | None, sources: list[str]) -> None:
+    if diagnostics is None:
+        return
+    cleaned = [source for source in sources if source]
+    diagnostics["profile_expression_sources"] = cleaned
+    diagnostics["profile_expression_source"] = ",".join(cleaned) if cleaned else "generic"
+
+
 def _matched_anchor_candidates(
     profile: Mapping[str, object],
     *,
@@ -231,7 +249,7 @@ def _profile_reply(
     confidence, degraded_reason = _profile_confidence(profile, anchor_match=anchor_match)
     phrase = (
         _profile_action_phrase(profile, action, seed=master_seed, turn_index=turn_index)
-        if confidence >= 0.88
+        if confidence >= 0.80 and (anchor_match or confidence >= 0.90)
         else ""
     )
     opening = _choose(
@@ -292,20 +310,34 @@ def _profile_reply(
     generic_focus = focus if target_context_surface else ""
     expression_available = bool(phrase or connector or opening or anchor)
     if confidence < 0.75:
+        _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
         return _generic_focused_reply(action, base, generic_focus)
     if not expression_available:
+        _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
         return _generic_focused_reply(action, base, generic_focus)
 
     if ultra_short >= 0.45 and action in {"minimal_response", "agree", "deflect"}:
         if diagnostics is not None:
             diagnostics["rhetorical_move"] = rhetorical_move
+        selected_source = (
+            "action_phrase"
+            if phrase
+            else "connector"
+            if connector
+            else "opening"
+            if opening
+            else "generic"
+        )
+        _set_expression_sources(diagnostics, [selected_source])
         return phrase or connector or opening or base
     if ultra_short >= 0.60 and phrase:
         if diagnostics is not None:
             diagnostics["rhetorical_move"] = rhetorical_move
+        _set_expression_sources(diagnostics, ["action_phrase"])
         return phrase
 
     bits: list[str] = []
+    expression_sources: list[str] = []
     if target_context_surface and focus and action in {
         "ask_question",
         "elaborate",
@@ -315,19 +347,26 @@ def _profile_reply(
         "share_opinion",
     }:
         bits.append(f"关于“{focus}”")
-    if phrase and confidence >= 0.85:
+        expression_sources.append("focus")
+    if phrase and confidence >= 0.80:
         bits.append(phrase)
+        expression_sources.append("action_phrase")
     elif connector and confidence >= 0.75:
         bits.append(connector)
+        expression_sources.append("connector")
     elif opening and confidence >= 0.80:
         bits.append(opening)
+        expression_sources.append("opening")
     if anchor and confidence >= 0.90 and anchor not in " ".join(bits):
         bits.append(f"我会把{anchor}也放进判断里")
+        expression_sources.append("anchor")
     if not bits:
         bits.append(base)
+        expression_sources.append("generic")
     reply = "，".join(bits)
     if not reply.endswith(("。", "！", "？", ".", "!", "?")):
         reply += "。"
+    _set_expression_sources(diagnostics, expression_sources)
     return reply
 
 
@@ -404,6 +443,8 @@ class RuleBasedGenerator:
             "profile_degraded_reason": "",
             "profile_anchor_match": False,
             "profile_length_bucket": "none",
+            "profile_expression_sources": [],
+            "profile_expression_source": "generic",
             "rhetorical_move": style,
         }
         if style == "warm_supportive" and action in {"ask_question", "empathize", "agree", "elaborate"}:

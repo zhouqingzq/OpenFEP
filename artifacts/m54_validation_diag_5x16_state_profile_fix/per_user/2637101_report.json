@@ -39,6 +39,8 @@
       "dataset_origin": "missing_formal_labels",
       "degradation_required": true,
       "engine": "keyword_debug",
+      "formal_engine": false,
+      "formal_engine_failure_reason": "keyword_debug",
       "formal_gate_eligible": false,
       "gate_count": 0,
       "macro_f1_11class": 0.0,
@@ -73,7 +75,7 @@
     "formal_requested": false,
     "metric_version": "m54_v3",
     "pilot": {
-      "behavioral_diff_sd": 0.247715,
+      "behavioral_diff_sd": 0.277069,
       "behavioral_escalated": false,
       "escalated": false,
       "pilot_metrics_used": [
@@ -82,8 +84,8 @@
       "pilot_user_count": 3,
       "required_users": 5,
       "sd_threshold": 0.04,
-      "semantic_diff_mean": -0.001773,
-      "semantic_diff_sd": 0.008109,
+      "semantic_diff_mean": 0.003068,
+      "semantic_diff_sd": 0.006006,
       "semantic_escalated": false,
       "suggested_min_users": 5
     },
@@ -95,7 +97,7 @@
       "topic"
     ],
     "required_users": 5,
-    "semantic_baseline_a_mean": 0.037909250000000005,
+    "semantic_baseline_a_mean": 0.036180750000000005,
     "semantic_baseline_b_mean": 0.013506416666666667,
     "semantic_baseline_c_mean": 0.01381325,
     "semantic_personality_mean": 0.032574,
@@ -189,6 +191,7 @@
         2637266,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [],
@@ -227,17 +230,19 @@
         "stylistic_similarity": 1.0,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637101,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
+        "avg_reply_chars": 6.293389,
         "median_reply_chars": 7,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 242,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 242
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.272727
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -276,6 +281,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -514,7 +521,7 @@
           "name": "no_surface_profile",
           "pair_count": 11,
           "semantic_mean": 0.041389,
-          "semantic_vs_baseline_a_diff": -0.026126,
+          "semantic_vs_baseline_a_diff": -0.021365,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.340952
         },
@@ -523,7 +530,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 11,
           "semantic_mean": 0.064957,
-          "semantic_vs_baseline_a_diff": -0.002558,
+          "semantic_vs_baseline_a_diff": 0.002203,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.530322
         },
@@ -532,7 +539,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 11,
           "semantic_mean": 0.089583,
-          "semantic_vs_baseline_a_diff": 0.022068,
+          "semantic_vs_baseline_a_diff": 0.026829,
           "strategy_agreement_vs_personality": 0.818182,
           "text_similarity_vs_personality": 0.622179
         }
@@ -567,20 +574,20 @@
           "pair_count": 11
         },
         "stylistic_similarity": {
-          "jsd": 0.098214
+          "jsd": 0.123075
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.063177
+          "rouge_l": 0.05321
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.727273,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.067515,
-        "stylistic_similarity": 0.858307,
-        "surface_similarity": 0.031588
+        "semantic_similarity": 0.062754,
+        "stylistic_similarity": 0.822441,
+        "surface_similarity": 0.026605
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -599,6 +606,7 @@
         2637266,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -643,17 +651,19 @@
         "stylistic_similarity": 0.752564,
         "surface_similarity": 0.007576
       },
+      "baseline_c_population_excluded_uid": 2637101,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
+        "avg_reply_chars": 6.293389,
         "median_reply_chars": 7,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 242,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 242
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.272727
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -692,6 +702,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -725,13 +737,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 17,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.255838,
+          "baseline_a_generated_chars": 34,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.183181,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“我大約須要4萬幣”，我同意。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“我大約須要4萬幣”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 8,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -746,6 +758,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -774,6 +790,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -784,8 +805,8 @@
           "personality_template_id": "elaborate:2",
           "personality_text": "关于“我大約須要4萬幣”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.028074,
-          "personality_vs_a_text_similarity": 0.634888,
+          "personality_vs_a_pair_delta": 0.044583,
+          "personality_vs_a_text_similarity": 0.484429,
           "personality_vs_b_best_text_similarity": 0.085466,
           "personality_vs_c_pair_delta": 0.227764,
           "personality_vs_c_text_similarity": 0.069038,
@@ -804,13 +825,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 20,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.104546,
+          "baseline_a_generated_chars": 28,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.093651,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“那要怎樣匯款”，是的，我也这么想。",
+          "baseline_a_text": "你说“那要怎樣匯款”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 14,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -825,11 +846,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -853,6 +878,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -863,8 +893,8 @@
           "personality_template_id": "elaborate:0",
           "personality_text": "关于“那要怎樣匯款”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.013337,
-          "personality_vs_a_text_similarity": 0.458793,
+          "personality_vs_a_pair_delta": 0.024232,
+          "personality_vs_a_text_similarity": 0.413078,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.117883,
           "personality_vs_c_text_similarity": 0.0,
@@ -883,13 +913,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 21,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 34,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“那你會多送我嗎？[哈哈]”，我同意。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“那你會多送我嗎？[哈哈]”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -904,11 +934,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -932,6 +966,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -943,7 +982,7 @@
           "personality_text": "关于“那你會多送我嗎？[哈哈]”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.692116,
+          "personality_vs_a_text_similarity": 0.589868,
           "personality_vs_b_best_text_similarity": 0.06129,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.06276,
@@ -962,13 +1001,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 23,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.264318,
+          "baseline_a_generated_chars": 31,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.213999,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“我匯好，再拍照給你”，是的，我也这么想。",
+          "baseline_a_text": "你说“我匯好，再拍照給你”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 10,
           "baseline_b_best_semantic_pair_score": 0.128203,
@@ -983,6 +1022,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -1011,6 +1054,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1021,8 +1069,8 @@
           "personality_template_id": "elaborate:0",
           "personality_text": "关于“我匯好，再拍照給你”，就2個吧。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.151758,
-          "personality_vs_a_text_similarity": 0.557021,
+          "personality_vs_a_pair_delta": -0.101439,
+          "personality_vs_a_text_similarity": 0.522507,
           "personality_vs_b_best_text_similarity": 0.093669,
           "personality_vs_c_pair_delta": 0.11256,
           "personality_vs_c_text_similarity": 0.076565,
@@ -1041,13 +1089,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 15,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 23,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "elaborate:0",
-          "baseline_a_text": "你说“謝謝你🙏”，我补充几句。",
+          "baseline_a_text": "你说“謝謝你🙏”，我在认真听你说，我补充几句。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 3,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1062,11 +1110,15 @@
           "baseline_c_generated_chars": 2,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "escape",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "minimal_response:1",
+          "baseline_c_template_id": "minimal_response:0",
           "baseline_c_text": "嗯。",
           "dominant_component": "identity_bias",
           "narrative_priors": {
@@ -1090,6 +1142,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1101,7 +1158,7 @@
           "personality_text": "关于“謝謝你🙏”，嗯。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.501088,
+          "personality_vs_a_text_similarity": 0.439479,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.365228,
@@ -1120,13 +1177,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 28,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.11796,
+          "baseline_a_generated_chars": 37,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.15778,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "elaborate:1",
-          "baseline_a_text": "你说“我今天會匯款，再麻煩你留意一下，鑽石”，展开来说。",
+          "baseline_a_template_id": "elaborate:0",
+          "baseline_a_text": "你说“我今天會匯款，再麻煩你留意一下，鑽石”，我在认真听你说，我补充几句。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.084284,
@@ -1141,11 +1198,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.103672,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -1169,6 +1230,10 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "connector",
+          "personality_profile_expression_sources": [
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1179,7 +1244,7 @@
           "personality_template_id": "minimal_response:2",
           "personality_text": "45000。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.11796,
+          "personality_vs_a_pair_delta": -0.15778,
           "personality_vs_a_text_similarity": 0.0,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": -0.103672,
@@ -1199,13 +1264,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 14,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.04168,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "elaborate:0",
-          "baseline_a_text": "你说“你有空”，我补充几句。",
+          "baseline_a_template_id": "elaborate:1",
+          "baseline_a_text": "你说“你有空”，我在认真听你说，展开来说。",
           "baseline_b_best_action": "minimal_response",
           "baseline_b_best_generated_chars": 8,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1220,11 +1285,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -1248,6 +1317,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1258,8 +1332,8 @@
           "personality_template_id": "elaborate:2",
           "personality_text": "关于“你有空”，有。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.501074,
+          "personality_vs_a_pair_delta": -0.04168,
+          "personality_vs_a_text_similarity": 0.420595,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1278,13 +1352,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 16,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“可以”，是的，我也这么想。",
+          "baseline_a_text": "你说“可以”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 4,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1299,11 +1373,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -1327,6 +1405,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1338,7 +1421,7 @@
           "personality_text": "关于“可以”，就2個吧。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.293954,
+          "personality_vs_a_text_similarity": 0.254734,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1357,13 +1440,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 13,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "elaborate:2",
-          "baseline_a_text": "你说“感謝你”，换句话说。",
+          "baseline_a_text": "你说“感謝你”，我在认真听你说，换句话说。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 5,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1378,6 +1461,10 @@
           "baseline_c_generated_chars": 2,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "escape",
@@ -1406,6 +1493,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1417,7 +1509,7 @@
           "personality_text": "关于“感謝你”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.278858,
+          "personality_vs_a_text_similarity": 0.245516,
           "personality_vs_b_best_text_similarity": 0.151489,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1436,13 +1528,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 11,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 19,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "elaborate:1",
-          "baseline_a_text": "你说“對”，展开来说。",
+          "baseline_a_text": "你说“對”，我在认真听你说，展开来说。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.133341,
@@ -1457,6 +1549,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -1485,6 +1581,10 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "connector",
+          "personality_profile_expression_sources": [
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1515,13 +1615,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 19,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 27,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“好”，有道理，我跟你的看法一致。",
+          "baseline_a_text": "你说“好”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 11,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1536,6 +1636,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -1564,6 +1668,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1575,7 +1684,7 @@
           "personality_text": "关于“好”，好。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.216078,
+          "personality_vs_a_text_similarity": 0.203205,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1799,7 +1908,7 @@
           "name": "no_surface_profile",
           "pair_count": 7,
           "semantic_mean": 0.023508,
-          "semantic_vs_baseline_a_diff": 0.006901,
+          "semantic_vs_baseline_a_diff": 0.004293,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.322505
         },
@@ -1808,7 +1917,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 7,
           "semantic_mean": 0.026801,
-          "semantic_vs_baseline_a_diff": 0.010194,
+          "semantic_vs_baseline_a_diff": 0.007586,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.495659
         },
@@ -1817,7 +1926,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 7,
           "semantic_mean": 0.02143,
-          "semantic_vs_baseline_a_diff": 0.004823,
+          "semantic_vs_baseline_a_diff": 0.002215,
           "strategy_agreement_vs_personality": 0.571429,
           "text_similarity_vs_personality": 0.505279
         }
@@ -1854,20 +1963,20 @@
           "pair_count": 7
         },
         "stylistic_similarity": {
-          "jsd": 0.091461
+          "jsd": 0.09984
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.047952
+          "rouge_l": 0.037879
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.016607,
-        "stylistic_similarity": 0.868049,
-        "surface_similarity": 0.023976
+        "semantic_similarity": 0.019215,
+        "stylistic_similarity": 0.855961,
+        "surface_similarity": 0.018939
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -1886,6 +1995,7 @@
         2637266,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -1931,17 +2041,19 @@
         "stylistic_similarity": 0.857685,
         "surface_similarity": 0.036281
       },
+      "baseline_c_population_excluded_uid": 2637101,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
+        "avg_reply_chars": 6.293389,
         "median_reply_chars": 7,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 242,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 242
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.272727
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1980,6 +2092,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -2013,13 +2127,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 22,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 30,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“那我晚點再匯一次1250元”，我同意。",
+          "baseline_a_text": "你说“那我晚點再匯一次1250元”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 11,
           "baseline_b_best_semantic_pair_score": 0.227337,
@@ -2034,11 +2148,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2062,6 +2180,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2073,7 +2196,7 @@
           "personality_text": "关于“那我晚點再匯一次1250元”，我這個聽完先下了。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.601763,
+          "personality_vs_a_text_similarity": 0.492175,
           "personality_vs_b_best_text_similarity": 0.037201,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.103063,
@@ -2092,13 +2215,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 23,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 31,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“那請你加我”，有道理，我跟你的看法一致。",
+          "baseline_a_text": "你说“那請你加我”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 5,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -2113,6 +2236,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -2141,6 +2268,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2152,7 +2284,7 @@
           "personality_text": "关于“那請你加我”，要送之前你再打給我。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.420895,
+          "personality_vs_a_text_similarity": 0.437566,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.115923,
@@ -2171,13 +2303,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 22,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 34,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“yann5168”，是的，我也这么想。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“yann5168”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 5,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -2192,11 +2324,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2220,6 +2356,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2231,7 +2372,7 @@
           "personality_text": "关于“yann5168”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.105277,
-          "personality_vs_a_text_similarity": 0.131983,
+          "personality_vs_a_text_similarity": 0.118368,
           "personality_vs_b_best_text_similarity": 0.149453,
           "personality_vs_c_pair_delta": 0.105277,
           "personality_vs_c_text_similarity": 0.0,
@@ -2250,13 +2391,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 11,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.042052,
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.058299,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“哈哈”，我同意。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“哈哈”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.10153,
@@ -2271,11 +2412,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.108546,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2299,6 +2444,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2309,8 +2459,8 @@
           "personality_template_id": "elaborate:1",
           "personality_text": "关于“哈哈”，就2個吧。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.042052,
-          "personality_vs_a_text_similarity": 0.48905,
+          "personality_vs_a_pair_delta": -0.058299,
+          "personality_vs_a_text_similarity": 0.319463,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": -0.108546,
           "personality_vs_c_text_similarity": 0.0,
@@ -2350,11 +2500,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "agree:2",
+          "baseline_c_template_id": "agree:1",
           "baseline_c_text": "我认同。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2378,6 +2532,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2429,11 +2588,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:0",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2457,6 +2620,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2468,7 +2636,7 @@
           "personality_text": "关于“嗯嗯”，要送之前你再打給我。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.100052,
-          "personality_vs_a_text_similarity": 0.019075,
+          "personality_vs_a_text_similarity": 0.019246,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.100052,
           "personality_vs_c_text_similarity": 0.062084,
@@ -2489,7 +2657,7 @@
           "baseline_a_action": "share_opinion",
           "baseline_a_generated_chars": 8,
           "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.074196,
+          "baseline_a_semantic_pair_score": 0.076205,
           "baseline_a_strategy": "explore",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "share_opinion:0",
@@ -2508,11 +2676,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.146276,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2536,6 +2708,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2546,7 +2723,7 @@
           "personality_template_id": "elaborate:1",
           "personality_text": "关于“敲很大力”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.01141,
+          "personality_vs_a_pair_delta": -0.013419,
           "personality_vs_a_text_similarity": 0.0,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": -0.08349,
@@ -2772,7 +2949,7 @@
           "name": "no_surface_profile",
           "pair_count": 11,
           "semantic_mean": 0.041389,
-          "semantic_vs_baseline_a_diff": -0.026126,
+          "semantic_vs_baseline_a_diff": -0.021365,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.340952
         },
@@ -2781,7 +2958,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 11,
           "semantic_mean": 0.064957,
-          "semantic_vs_baseline_a_diff": -0.002558,
+          "semantic_vs_baseline_a_diff": 0.002203,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.530322
         },
@@ -2790,7 +2967,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 11,
           "semantic_mean": 0.089583,
-          "semantic_vs_baseline_a_diff": 0.022068,
+          "semantic_vs_baseline_a_diff": 0.026829,
           "strategy_agreement_vs_personality": 0.818182,
           "text_similarity_vs_personality": 0.622179
         }
@@ -2825,20 +3002,20 @@
           "pair_count": 11
         },
         "stylistic_similarity": {
-          "jsd": 0.098214
+          "jsd": 0.123075
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.063177
+          "rouge_l": 0.05321
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 0.727273,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.067515,
-        "stylistic_similarity": 0.858307,
-        "surface_similarity": 0.031588
+        "semantic_similarity": 0.062754,
+        "stylistic_similarity": 0.822441,
+        "surface_similarity": 0.026605
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -2857,6 +3034,7 @@
         2637266,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -2901,17 +3079,19 @@
         "stylistic_similarity": 0.752564,
         "surface_similarity": 0.007576
       },
+      "baseline_c_population_excluded_uid": 2637101,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
+        "avg_reply_chars": 6.293389,
         "median_reply_chars": 7,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 242,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 242
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.272727
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -2950,6 +3130,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -2983,13 +3165,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 17,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.255838,
+          "baseline_a_generated_chars": 34,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.183181,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“我大約須要4萬幣”，我同意。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“我大約須要4萬幣”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 8,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3004,6 +3186,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -3032,6 +3218,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3042,8 +3233,8 @@
           "personality_template_id": "elaborate:2",
           "personality_text": "关于“我大約須要4萬幣”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.028074,
-          "personality_vs_a_text_similarity": 0.634888,
+          "personality_vs_a_pair_delta": 0.044583,
+          "personality_vs_a_text_similarity": 0.484429,
           "personality_vs_b_best_text_similarity": 0.085466,
           "personality_vs_c_pair_delta": 0.227764,
           "personality_vs_c_text_similarity": 0.069038,
@@ -3062,13 +3253,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 20,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.104546,
+          "baseline_a_generated_chars": 28,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.093651,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“那要怎樣匯款”，是的，我也这么想。",
+          "baseline_a_text": "你说“那要怎樣匯款”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 14,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3083,11 +3274,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -3111,6 +3306,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3121,8 +3321,8 @@
           "personality_template_id": "elaborate:0",
           "personality_text": "关于“那要怎樣匯款”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.013337,
-          "personality_vs_a_text_similarity": 0.458793,
+          "personality_vs_a_pair_delta": 0.024232,
+          "personality_vs_a_text_similarity": 0.413078,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.117883,
           "personality_vs_c_text_similarity": 0.0,
@@ -3141,13 +3341,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 21,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 34,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:0",
-          "baseline_a_text": "你说“那你會多送我嗎？[哈哈]”，我同意。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“那你會多送我嗎？[哈哈]”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3162,11 +3362,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -3190,6 +3394,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3201,7 +3410,7 @@
           "personality_text": "关于“那你會多送我嗎？[哈哈]”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.692116,
+          "personality_vs_a_text_similarity": 0.589868,
           "personality_vs_b_best_text_similarity": 0.06129,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.06276,
@@ -3220,13 +3429,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 23,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.264318,
+          "baseline_a_generated_chars": 31,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.213999,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“我匯好，再拍照給你”，是的，我也这么想。",
+          "baseline_a_text": "你说“我匯好，再拍照給你”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 10,
           "baseline_b_best_semantic_pair_score": 0.128203,
@@ -3241,6 +3450,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -3269,6 +3482,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3279,8 +3497,8 @@
           "personality_template_id": "elaborate:0",
           "personality_text": "关于“我匯好，再拍照給你”，就2個吧。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.151758,
-          "personality_vs_a_text_similarity": 0.557021,
+          "personality_vs_a_pair_delta": -0.101439,
+          "personality_vs_a_text_similarity": 0.522507,
           "personality_vs_b_best_text_similarity": 0.093669,
           "personality_vs_c_pair_delta": 0.11256,
           "personality_vs_c_text_similarity": 0.076565,
@@ -3299,13 +3517,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 15,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 23,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "elaborate:0",
-          "baseline_a_text": "你说“謝謝你🙏”，我补充几句。",
+          "baseline_a_text": "你说“謝謝你🙏”，我在认真听你说，我补充几句。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 3,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3320,11 +3538,15 @@
           "baseline_c_generated_chars": 2,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "escape",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "minimal_response:1",
+          "baseline_c_template_id": "minimal_response:0",
           "baseline_c_text": "嗯。",
           "dominant_component": "identity_bias",
           "narrative_priors": {
@@ -3348,6 +3570,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3359,7 +3586,7 @@
           "personality_text": "关于“謝謝你🙏”，嗯。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.501088,
+          "personality_vs_a_text_similarity": 0.439479,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.365228,
@@ -3378,13 +3605,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 28,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.11796,
+          "baseline_a_generated_chars": 37,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.15778,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "elaborate:1",
-          "baseline_a_text": "你说“我今天會匯款，再麻煩你留意一下，鑽石”，展开来说。",
+          "baseline_a_template_id": "elaborate:0",
+          "baseline_a_text": "你说“我今天會匯款，再麻煩你留意一下，鑽石”，我在认真听你说，我补充几句。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.084284,
@@ -3399,11 +3626,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.103672,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -3427,6 +3658,10 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "connector",
+          "personality_profile_expression_sources": [
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3437,7 +3672,7 @@
           "personality_template_id": "minimal_response:2",
           "personality_text": "45000。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": -0.11796,
+          "personality_vs_a_pair_delta": -0.15778,
           "personality_vs_a_text_similarity": 0.0,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": -0.103672,
@@ -3457,13 +3692,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 14,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.0,
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.04168,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "elaborate:0",
-          "baseline_a_text": "你说“你有空”，我补充几句。",
+          "baseline_a_template_id": "elaborate:1",
+          "baseline_a_text": "你说“你有空”，我在认真听你说，展开来说。",
           "baseline_b_best_action": "minimal_response",
           "baseline_b_best_generated_chars": 8,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3478,11 +3713,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:2",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -3506,6 +3745,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3516,8 +3760,8 @@
           "personality_template_id": "elaborate:2",
           "personality_text": "关于“你有空”，有。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.501074,
+          "personality_vs_a_pair_delta": -0.04168,
+          "personality_vs_a_text_similarity": 0.420595,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -3536,13 +3780,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 16,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 24,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“可以”，是的，我也这么想。",
+          "baseline_a_text": "你说“可以”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 4,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3557,11 +3801,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -3585,6 +3833,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3596,7 +3849,7 @@
           "personality_text": "关于“可以”，就2個吧。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.293954,
+          "personality_vs_a_text_similarity": 0.254734,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -3615,13 +3868,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 13,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "elaborate:2",
-          "baseline_a_text": "你说“感謝你”，换句话说。",
+          "baseline_a_text": "你说“感謝你”，我在认真听你说，换句话说。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 5,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3636,6 +3889,10 @@
           "baseline_c_generated_chars": 2,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "escape",
@@ -3664,6 +3921,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3675,7 +3937,7 @@
           "personality_text": "关于“感謝你”，薪水一開始就講了。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.278858,
+          "personality_vs_a_text_similarity": 0.245516,
           "personality_vs_b_best_text_similarity": 0.151489,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -3694,13 +3956,13 @@
         },
         {
           "baseline_a_action": "elaborate",
-          "baseline_a_generated_chars": 11,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 19,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "elaborate:1",
-          "baseline_a_text": "你说“對”，展开来说。",
+          "baseline_a_text": "你说“對”，我在认真听你说，展开来说。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.133341,
@@ -3715,6 +3977,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -3743,6 +4009,10 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "connector",
+          "personality_profile_expression_sources": [
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3773,13 +4043,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 19,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 27,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
           "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“好”，有道理，我跟你的看法一致。",
+          "baseline_a_text": "你说“好”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 11,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -3794,6 +4064,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -3822,6 +4096,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -3833,7 +4112,7 @@
           "personality_text": "关于“好”，好。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.216078,
+          "personality_vs_a_text_similarity": 0.203205,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,

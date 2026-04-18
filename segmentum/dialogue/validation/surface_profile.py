@@ -36,6 +36,7 @@ _STOP_TOKENS = frozenset(
 
 class _Predictor(Protocol):
     def predict(self, text: str) -> object: ...
+    def predict_batch(self, texts: list[str]) -> list[object]: ...
 
 
 @dataclass(slots=True)
@@ -173,8 +174,15 @@ def build_surface_profile(
     action_phrases: dict[str, Counter[str]] = defaultdict(Counter)
     strategy_counts: Counter[str] = Counter()
     partner_tokens: dict[str, Counter[str]] = defaultdict(Counter)
+    predictions: list[object] = []
+    if classifier is not None:
+        texts = [text for _, text in replies]
+        try:
+            predictions = list(classifier.predict_batch(texts))
+        except Exception:
+            predictions = []
 
-    for partner_uid, text in replies:
+    for idx, (partner_uid, text) in enumerate(replies):
         tokens = [tok for tok in tokenize_surface(text) if tok not in _STOP_TOKENS]
         token_counts.update(tokens)
         partner_tokens[partner_uid].update(tokens)
@@ -184,7 +192,10 @@ def build_surface_profile(
             connector_counts[_phrase(pieces[0], max_chars=16)] += 1
         punct_counts.update(ch for ch in text if ch in _PUNCT_CHARS)
         if classifier is not None:
-            pred = classifier.predict(text)
+            if idx < len(predictions):
+                pred = predictions[idx]
+            else:
+                pred = classifier.predict(text)
             action = str(getattr(pred, "label_11", "elaborate"))
             strategy = str(getattr(pred, "label_3", "exploit"))
         else:

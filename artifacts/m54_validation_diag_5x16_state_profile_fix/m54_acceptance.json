@@ -36,6 +36,8 @@
     "dataset_origin": "missing_formal_labels",
     "degradation_required": true,
     "engine": "keyword_debug",
+    "formal_engine": false,
+    "formal_engine_failure_reason": "keyword_debug",
     "formal_gate_eligible": false,
     "gate_count": 0,
     "macro_f1_11class": 0.0,
@@ -68,6 +70,9 @@
   },
   "diagnostic_trace_jsonl": "artifacts/m54_validation_diag_5x16_state_profile_fix/diagnostic_trace.jsonl",
   "diagnostic_trace_rows": 237,
+  "direction_auto_escalation": {
+    "applied": false
+  },
   "formal_acceptance_eligible": false,
   "hard_pass": false,
   "hard_pass_breakdown": {

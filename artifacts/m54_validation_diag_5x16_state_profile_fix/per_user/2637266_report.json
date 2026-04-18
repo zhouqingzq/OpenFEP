@@ -39,6 +39,8 @@
       "dataset_origin": "missing_formal_labels",
       "degradation_required": true,
       "engine": "keyword_debug",
+      "formal_engine": false,
+      "formal_engine_failure_reason": "keyword_debug",
       "formal_gate_eligible": false,
       "gate_count": 0,
       "macro_f1_11class": 0.0,
@@ -73,7 +75,7 @@
     "formal_requested": false,
     "metric_version": "m54_v3",
     "pilot": {
-      "behavioral_diff_sd": 0.247715,
+      "behavioral_diff_sd": 0.277069,
       "behavioral_escalated": false,
       "escalated": false,
       "pilot_metrics_used": [
@@ -82,8 +84,8 @@
       "pilot_user_count": 3,
       "required_users": 5,
       "sd_threshold": 0.04,
-      "semantic_diff_mean": -0.001773,
-      "semantic_diff_sd": 0.008109,
+      "semantic_diff_mean": 0.003068,
+      "semantic_diff_sd": 0.006006,
       "semantic_escalated": false,
       "suggested_min_users": 5
     },
@@ -95,7 +97,7 @@
       "topic"
     ],
     "required_users": 5,
-    "semantic_baseline_a_mean": 0.0084695,
+    "semantic_baseline_a_mean": 0.0079845,
     "semantic_baseline_b_mean": 0.0,
     "semantic_baseline_c_mean": 0.0,
     "semantic_personality_mean": 0.17115375,
@@ -162,7 +164,7 @@
           "pair_count": 2
         },
         "stylistic_similarity": {
-          "jsd": 0.107034
+          "jsd": 0.092435
         },
         "surface_similarity": {
           "bleu4": 0.0,
@@ -174,7 +176,7 @@
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.845583,
+        "stylistic_similarity": 0.866644,
         "surface_similarity": 0.0
       },
       "baseline_a_surface_profile": {
@@ -194,6 +196,7 @@
         2637215,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -236,17 +239,19 @@
         "stylistic_similarity": 0.843605,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
-        "median_reply_chars": 7,
+        "avg_reply_chars": 5.768421,
+        "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 285,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 285
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.287719
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -285,6 +290,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -318,13 +325,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 25,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 28,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“老爹今天發表新歌比較晚”，是的，我也这么想。",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“老爹今天發表新歌比較晚”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -339,6 +346,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -367,6 +378,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -378,7 +394,7 @@
           "personality_text": "关于“老爹今天發表新歌比較晚”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.507504,
-          "personality_vs_a_text_similarity": 0.44718,
+          "personality_vs_a_text_similarity": 0.389081,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.507504,
           "personality_vs_c_text_similarity": 0.0,
@@ -397,13 +413,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 24,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 23,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“都是老哥友了”，有道理，我跟你的看法一致。",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“都是老哥友了”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 10,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -418,11 +434,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:1",
           "baseline_c_text": "我补充。",
           "dominant_component": "identity_bias",
           "narrative_priors": {
@@ -446,6 +466,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -457,7 +482,7 @@
           "personality_text": "关于“都是老哥友了”，恭禧冠軍呦[勝利][勝利][勝利。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.153521,
+          "personality_vs_a_text_similarity": 0.1685,
           "personality_vs_b_best_text_similarity": 0.03987,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -726,7 +751,7 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.095642
+          "jsd": 0.096801
         },
         "surface_similarity": {
           "bleu4": 0.0,
@@ -738,7 +763,7 @@
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.862017,
+        "stylistic_similarity": 0.860345,
         "surface_similarity": 0.0
       },
       "baseline_a_surface_profile": {
@@ -758,6 +783,7 @@
         2637215,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -800,17 +826,19 @@
         "stylistic_similarity": 0.917894,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
-        "median_reply_chars": 7,
+        "avg_reply_chars": 5.768421,
+        "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 285,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 285
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.287719
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -849,6 +877,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -882,13 +912,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 22,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“[愛心]”，有道理，我跟你的看法一致。",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“[愛心]”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -903,11 +933,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -931,6 +965,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -942,7 +981,7 @@
           "personality_text": "关于“[愛心]”，恭禧冠軍呦[勝利][勝利][勝利。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.04961,
+          "personality_vs_a_text_similarity": 0.045528,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1155,7 +1194,7 @@
           "name": "no_surface_profile",
           "pair_count": 3,
           "semantic_mean": 0.031325,
-          "semantic_vs_baseline_a_diff": -0.002553,
+          "semantic_vs_baseline_a_diff": -0.000613,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.256765
         },
@@ -1164,7 +1203,7 @@
           "name": "no_policy_trait_bias",
           "pair_count": 3,
           "semantic_mean": 0.470686,
-          "semantic_vs_baseline_a_diff": 0.436808,
+          "semantic_vs_baseline_a_diff": 0.438748,
           "strategy_agreement_vs_personality": 0.666667,
           "text_similarity_vs_personality": 0.976249
         },
@@ -1173,7 +1212,7 @@
           "name": "surface_only_default_agent",
           "pair_count": 3,
           "semantic_mean": 0.299593,
-          "semantic_vs_baseline_a_diff": 0.265715,
+          "semantic_vs_baseline_a_diff": 0.267655,
           "strategy_agreement_vs_personality": 1.0,
           "text_similarity_vs_personality": 0.838881
         }
@@ -1206,20 +1245,20 @@
           "pair_count": 3
         },
         "stylistic_similarity": {
-          "jsd": 0.105354
+          "jsd": 0.101944
         },
         "surface_similarity": {
           "bleu4": 0.0,
-          "rouge_l": 0.037037
+          "rouge_l": 0.031746
         }
       },
       "baseline_a_metrics": {
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
-        "semantic_similarity": 0.033878,
-        "stylistic_similarity": 0.848006,
-        "surface_similarity": 0.018519
+        "semantic_similarity": 0.031938,
+        "stylistic_similarity": 0.852926,
+        "surface_similarity": 0.015873
       },
       "baseline_a_surface_profile": {
         "reply_count": 0,
@@ -1238,6 +1277,7 @@
         2637215,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -1280,17 +1320,19 @@
         "stylistic_similarity": 0.861088,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
-        "median_reply_chars": 7,
+        "avg_reply_chars": 5.768421,
+        "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 285,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 285
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.287719
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1329,6 +1371,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -1362,13 +1406,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 21,
-          "baseline_a_rhetorical_move": "direct_advisory",
-          "baseline_a_semantic_pair_score": 0.101633,
+          "baseline_a_generated_chars": 25,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.095813,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“[花]”，有道理，我跟你的看法一致。",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“[花]”，我在认真听你说，是的，我也这么想。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 10,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1383,6 +1427,10 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
@@ -1411,6 +1459,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1421,8 +1474,8 @@
           "personality_template_id": "agree:1",
           "personality_text": "关于“[花]”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
-          "personality_vs_a_pair_delta": 0.773289,
-          "personality_vs_a_text_similarity": 0.14813,
+          "personality_vs_a_pair_delta": 0.779109,
+          "personality_vs_a_text_similarity": 0.140757,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.874922,
           "personality_vs_c_text_similarity": 0.0,
@@ -1441,13 +1494,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 25,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 37,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“老爹今天發表新歌比較晚”，是的，我也这么想。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“老爹今天發表新歌比較晚”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1462,11 +1515,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:2",
+          "baseline_c_template_id": "elaborate:1",
           "baseline_c_text": "我补充。",
           "dominant_component": "identity_bias",
           "narrative_priors": {
@@ -1490,6 +1547,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1501,7 +1563,7 @@
           "personality_text": "关于“老爹今天發表新歌比較晚”，[強][強][花][花]。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.417668,
-          "personality_vs_a_text_similarity": 0.570674,
+          "personality_vs_a_text_similarity": 0.414985,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.417668,
           "personality_vs_c_text_similarity": 0.0,
@@ -1520,13 +1582,13 @@
         },
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 20,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 32,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:1",
-          "baseline_a_text": "你说“都是老哥友了”，是的，我也这么想。",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“都是老哥友了”，我在认真听你说，有道理，我跟你的看法一致。",
           "baseline_b_best_action": "share_opinion",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -1541,11 +1603,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:0",
+          "baseline_c_template_id": "elaborate:1",
           "baseline_c_text": "我补充。",
           "dominant_component": "identity_bias",
           "narrative_priors": {
@@ -1569,6 +1635,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -1580,7 +1651,7 @@
           "personality_text": "关于“都是老哥友了”，恭禧冠軍呦[勝利][勝利][勝利。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.246731,
+          "personality_vs_a_text_similarity": 0.152318,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,
@@ -1843,7 +1914,7 @@
           "pair_count": 1
         },
         "stylistic_similarity": {
-          "jsd": 0.095642
+          "jsd": 0.096801
         },
         "surface_similarity": {
           "bleu4": 0.0,
@@ -1855,7 +1926,7 @@
         "behavioral_similarity_strategy": 1.0,
         "personality_similarity": 1.0,
         "semantic_similarity": 0.0,
-        "stylistic_similarity": 0.862017,
+        "stylistic_similarity": 0.860345,
         "surface_similarity": 0.0
       },
       "baseline_a_surface_profile": {
@@ -1875,6 +1946,7 @@
         2637215,
         2637171
       ],
+      "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -1917,17 +1989,19 @@
         "stylistic_similarity": 0.917894,
         "surface_similarity": 0.0
       },
+      "baseline_c_population_excluded_uid": 2637266,
+      "baseline_c_population_user_count": 4,
       "baseline_c_surface_profile": {
-        "avg_reply_chars": 6.176667,
-        "median_reply_chars": 7,
+        "avg_reply_chars": 5.768421,
+        "median_reply_chars": 5,
         "opening_phrases": [],
-        "reply_count": 300,
+        "reply_count": 285,
         "source": "population_average",
         "strategy_counts": {
-          "exploit": 300
+          "exploit": 285
         },
         "top_tokens": [],
-        "ultra_short_ratio": 0.273333
+        "ultra_short_ratio": 0.287719
       },
       "behavioral_hard_metric_enabled": false,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1966,6 +2040,8 @@
         "dataset_origin": "missing_formal_labels",
         "degradation_required": true,
         "engine": "keyword_debug",
+        "formal_engine": false,
+        "formal_engine_failure_reason": "keyword_debug",
         "formal_gate_eligible": false,
         "gate_count": 0,
         "macro_f1_11class": 0.0,
@@ -1999,13 +2075,13 @@
       "diagnostic_trace": [
         {
           "baseline_a_action": "agree",
-          "baseline_a_generated_chars": 22,
-          "baseline_a_rhetorical_move": "direct_advisory",
+          "baseline_a_generated_chars": 21,
+          "baseline_a_rhetorical_move": "warm_supportive",
           "baseline_a_semantic_pair_score": 0.0,
           "baseline_a_strategy": "exploit",
           "baseline_a_surface_source": "generic",
-          "baseline_a_template_id": "agree:2",
-          "baseline_a_text": "你说“[愛心]”，有道理，我跟你的看法一致。",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“[愛心]”，我在认真听你说，我同意。",
           "baseline_b_best_action": "agree",
           "baseline_b_best_generated_chars": 6,
           "baseline_b_best_semantic_pair_score": 0.0,
@@ -2020,11 +2096,15 @@
           "baseline_c_generated_chars": 4,
           "baseline_c_profile_confidence": 0.8,
           "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
           "baseline_c_rhetorical_move": "warm_supportive",
           "baseline_c_semantic_pair_score": 0.0,
           "baseline_c_strategy": "exploit",
           "baseline_c_surface_source": "population_average",
-          "baseline_c_template_id": "elaborate:1",
+          "baseline_c_template_id": "elaborate:0",
           "baseline_c_text": "我补充。",
           "dominant_component": "goal_alignment",
           "narrative_priors": {
@@ -2048,6 +2128,11 @@
           "personality_profile_anchor_match": false,
           "personality_profile_confidence": 0.8,
           "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
           "personality_profile_length_bucket": "short",
           "personality_profile_opening_used": true,
           "personality_profile_phrase_used": false,
@@ -2059,7 +2144,7 @@
           "personality_text": "关于“[愛心]”，恭禧冠軍呦[勝利][勝利][勝利。",
           "personality_topic_anchor_used": false,
           "personality_vs_a_pair_delta": 0.0,
-          "personality_vs_a_text_similarity": 0.04961,
+          "personality_vs_a_text_similarity": 0.045528,
           "personality_vs_b_best_text_similarity": 0.0,
           "personality_vs_c_pair_delta": 0.0,
           "personality_vs_c_text_similarity": 0.0,

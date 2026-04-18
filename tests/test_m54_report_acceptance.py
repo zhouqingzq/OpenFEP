@@ -74,6 +74,11 @@ def _bundle(
         "classifier_validation": {
             "passed_3class_gate": classifier_pass,
             "formal_gate_eligible": classifier_pass,
+            "classifier_provenance_ok": classifier_pass,
+            "cue_override_gate_passed": classifier_pass,
+            "cue_override_rate": 0.10 if classifier_pass else 1.0,
+            "without_cue_3class_gate_passed": classifier_pass,
+            "macro_f1_3class_without_cue": 0.82 if classifier_pass else 0.0,
             "formal_engine": classifier_pass,
             "engine": "sentence_embedding_nearest_centroid" if classifier_pass else "keyword_debug",
             "macro_f1_3class": 0.85,
@@ -90,10 +95,84 @@ def _all_strategies(bundle: dict[str, dict]) -> dict[str, dict]:
     }
 
 
-def _aggregate(required_users: int = 8, *, skip_population_average_implant: bool = False) -> dict[str, object]:
+def _formal_strategy(
+    bundle: dict[str, dict],
+    *,
+    uid: int,
+    required_users: int = 8,
+    leave_one_out: bool = True,
+    population_user_count: int | None = None,
+    excluded_uid: int | None = None,
+    metrics_present: bool = True,
+    diagnostic_trace_rows: int = 1,
+    train_full_l2: float = 0.10,
+    train_default_l2: float = 0.60,
+    train_wrong_l2: float = 0.70,
+    majority_behavioral: float = 0.30,
+) -> dict[str, dict]:
+    row = dict(bundle)
+    if not metrics_present:
+        row["baseline_c_metrics"] = {}
+    trace = []
+    for idx in range(diagnostic_trace_rows):
+        trace.append(
+            {
+                "pair_index": idx,
+                "real_text": "real response",
+                "personality_action": "elaborate",
+                "personality_strategy": "exploit",
+                "baseline_c_action": "ask_question",
+                "baseline_c_strategy": "explore",
+            }
+        )
+    row.update(
+        {
+            "baseline_c_leave_one_out": bool(leave_one_out),
+            "baseline_c_population_excluded_uid": int(uid if excluded_uid is None else excluded_uid),
+            "baseline_c_population_user_count": int(
+                required_users - 1 if population_user_count is None else population_user_count
+            ),
+            "diagnostic_trace": trace,
+            "state_distance_diagnostics": {
+                "train_full": {"l2": float(train_full_l2)},
+                "train_default": {"l2": float(train_default_l2)},
+                "train_wrong_user": {"l2": float(train_wrong_l2)},
+            },
+            "majority_baseline_metrics": {
+                "majority_action": "elaborate",
+                "majority_strategy": "exploit",
+                "behavioral_similarity_strategy": float(majority_behavioral),
+                "balanced_behavioral_similarity_strategy": 0.50,
+                "real_strategy_distribution": {"exploit": 2, "explore": 1},
+                "real_action_distribution": {"elaborate": 2, "ask_question": 1},
+            },
+        }
+    )
+    return row
+
+
+def _all_formal_strategies(uid: int, bundle: dict[str, dict], **kwargs) -> dict[str, dict]:
+    return {
+        "random": dict(_formal_strategy(bundle, uid=uid, **kwargs), split_metadata={"strategy": "random"}),
+        "temporal": dict(_formal_strategy(bundle, uid=uid, **kwargs), split_metadata={"strategy": "temporal"}),
+        "partner": dict(_formal_strategy(bundle, uid=uid, **kwargs), split_metadata={"strategy": "partner"}),
+        "topic": dict(
+            _formal_strategy(bundle, uid=uid, **kwargs),
+            split_metadata={"strategy": "topic", "topic_split_not_applicable": False},
+        ),
+    }
+
+
+def _aggregate(
+    required_users: int = 8,
+    *,
+    skip_population_average_implant: bool = False,
+    formal_requested: bool = False,
+) -> dict[str, object]:
     return {
         "required_users": int(required_users),
         "skip_population_average_implant": bool(skip_population_average_implant),
+        "formal_requested": bool(formal_requested),
         "pilot": {
             "pilot_user_count": 3,
             "required_users": int(required_users),
@@ -397,6 +476,164 @@ class TestM54ReportAcceptance(unittest.TestCase):
             payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
         self.assertFalse(payload["hard_pass"])
         self.assertFalse(payload["baseline_c_gate"]["passed"])
+
+    def test_formal_report_passes_new_repair_gates_when_evidence_is_present(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70 + 0.001 * uid,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                    ),
+                    required_users=8,
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertTrue(payload["baseline_c_gate"]["passed"])
+        self.assertTrue(payload["diagnostic_trace_gate"]["passed"])
+        self.assertTrue(payload["agent_state_differentiation_gate"]["passed"])
+        self.assertTrue(payload["behavioral_majority_baseline_gate"]["passed"])
+        self.assertGreater(payload["baseline_c_behavioral_failure_audit"]["row_count"], 0)
+        self.assertEqual(payload["overall_conclusion"], "pass")
+
+    def test_formal_baseline_c_gate_rejects_bad_population_metadata(self) -> None:
+        cases = [
+            {"population_user_count": 0},
+            {"population_user_count": 6},
+            {"excluded_uid": 99999},
+            {"metrics_present": False},
+            {"leave_one_out": False},
+        ]
+        for case in cases:
+            with self.subTest(case=case):
+                reports = [
+                    ValidationReport(
+                        user_uid=uid,
+                        per_strategy=_all_formal_strategies(
+                            uid,
+                            _bundle(
+                                sem=0.80 + 0.001 * uid,
+                                beh=0.70 + 0.001 * uid,
+                                ast=0.90,
+                                base_sem=0.50,
+                                base_beh=0.40,
+                                base_beh_c=0.35,
+                            ),
+                            required_users=8,
+                            **case,
+                        ),
+                        aggregate=_aggregate(required_users=8, formal_requested=True),
+                        conclusion="completed",
+                    )
+                    for uid in range(8)
+                ]
+                with tempfile.TemporaryDirectory() as tmp:
+                    p = Path(tmp)
+                    generate_report(reports, p)
+                    payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+                self.assertFalse(payload["baseline_c_gate"]["passed"])
+                self.assertFalse(payload["hard_pass"])
+
+    def test_formal_diagnostic_trace_absence_blocks_hard_pass(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70 + 0.001 * uid,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                    ),
+                    diagnostic_trace_rows=0,
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertFalse(payload["diagnostic_trace_gate"]["passed"])
+        self.assertFalse(payload["hard_pass"])
+
+    def test_formal_agent_state_gate_rejects_wrong_user_closer_than_full(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70 + 0.001 * uid,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                    ),
+                    train_full_l2=0.50,
+                    train_default_l2=0.70,
+                    train_wrong_l2=0.40,
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertFalse(payload["agent_state_differentiation_gate"]["passed"])
+        self.assertFalse(payload["agent_state_differentiation_gate"]["train_full_closer_than_wrong_user"])
+        self.assertFalse(payload["hard_pass"])
+
+    def test_formal_majority_baseline_warning_blocks_hard_pass(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                    ),
+                    majority_behavioral=0.70,
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertTrue(payload["behavioral_majority_baseline_gate"]["behavioral_metric_majority_warning"])
+        self.assertFalse(payload["behavioral_majority_baseline_gate"]["passed"])
+        self.assertFalse(payload["hard_pass"])
 
 
 if __name__ == "__main__":
