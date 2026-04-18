@@ -1,5 +1,6 @@
 {
   "aggregate": {
+    "artifact_rules_version": "m54_v4_stop_bleed",
     "behavioral_baseline_c_mean": 0.0,
     "behavioral_hard_metric_enabled": false,
     "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -40,7 +41,7 @@
       "train_count": 300
     },
     "formal_requested": true,
-    "metric_version": "m54_v3",
+    "metric_version": "m54_v4_stop_bleed",
     "pilot": {
       "behavioral_diff_sd": 0.101673,
       "behavioral_escalated": false,
@@ -132,6 +133,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -346,6 +349,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -554,6 +559,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [
@@ -760,6 +767,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
           "categories": [

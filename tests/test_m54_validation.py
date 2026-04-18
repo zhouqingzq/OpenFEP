@@ -15,6 +15,10 @@ from segmentum.dialogue.validation.act_classifier import (
     validate_act_classifier,
 )
 from segmentum.dialogue.validation.baselines import select_wrong_users
+from segmentum.dialogue.validation.constants import (
+    M54_ACCEPTANCE_RULES_VERSION,
+    M54_CLASSIFIER_LABEL_SCHEMA_VERSION,
+)
 from segmentum.dialogue.validation.metrics import SimilarityResult
 from segmentum.dialogue.validation.pipeline import (
     ValidationConfig,
@@ -116,6 +120,29 @@ def _classifier_samples(per_class: int, *, offset: int = 0) -> list[dict[str, st
                 }
             )
     return rows
+
+
+def _with_classifier_provenance(
+    rows: list[dict[str, str]],
+    *,
+    source: str = "human_labeled_dialogue_corpus",
+    annotator: str = "human_annotation_team",
+    sampling_policy: str = "stratified_holdout_review",
+    label_schema_version: str = M54_CLASSIFIER_LABEL_SCHEMA_VERSION,
+) -> list[dict[str, str]]:
+    enriched: list[dict[str, str]] = []
+    for row in rows:
+        item = dict(row)
+        item.update(
+            {
+                "source": source,
+                "annotator": annotator,
+                "sampling_policy": sampling_policy,
+                "label_schema_version": label_schema_version,
+            }
+        )
+        enriched.append(item)
+    return enriched
 
 
 class TestM54Validation(unittest.TestCase):
@@ -276,8 +303,64 @@ class TestM54Validation(unittest.TestCase):
         self.assertEqual(captured_uid_sets[0], {172, 173})
         strategy = report.per_strategy["random"]
         self.assertTrue(strategy["baseline_c_leave_one_out"])
+        self.assertEqual(strategy["baseline_c_builder"], "profile_only_average_fallback")
+        self.assertEqual(
+            strategy["baseline_c_input_scope"],
+            "leave_one_out_population_train_and_profile_data",
+        )
         self.assertEqual(strategy["baseline_c_population_excluded_uid"], int(user["uid"]))
         self.assertEqual(strategy["baseline_c_population_user_count"], 2)
+
+    def test_baseline_c_formal_path_uses_full_population_implant_builder(self) -> None:
+        user = _build_user(271, sessions=8)
+        others = [_build_user(272, sessions=8), _build_user(273, sessions=8)]
+        captured_uid_sets: list[set[int]] = []
+
+        def fake_generate(agent, holdout_sessions, *, user_uid: int, seed: int, classifier):
+            del agent, user_uid, seed, classifier
+            turns = max(1, len(holdout_sessions))
+            return (
+                ["persona alpha"] * turns,
+                ["persona alpha"] * turns,
+                ["elaborate"] * turns,
+                ["elaborate"] * turns,
+                ["exploit"] * turns,
+                ["exploit"] * turns,
+            )
+
+        def fake_population_builder(profiles, config, *, seed: int, classifier=None):
+            del config, seed, classifier
+            captured_uid_sets.append({int(item["uid"]) for item in profiles})
+            return SegmentAgent()
+
+        cfg = ValidationConfig(
+            strategies=[SplitStrategy.RANDOM],
+            min_holdout_sessions=1,
+            seed=5,
+            skip_population_average_implant=False,
+        )
+        prev_sem = os.environ.get("SEGMENTUM_USE_TFIDF_SEMANTIC")
+        os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = "1"
+        try:
+            with patch(
+                "segmentum.dialogue.validation.pipeline._generate_from_sessions",
+                side_effect=fake_generate,
+            ), patch(
+                "segmentum.dialogue.validation.pipeline.build_population_average_agent",
+                side_effect=fake_population_builder,
+            ):
+                report = run_validation(user, cfg, all_user_profiles=[user, *others])
+        finally:
+            if prev_sem is None:
+                os.environ.pop("SEGMENTUM_USE_TFIDF_SEMANTIC", None)
+            else:
+                os.environ["SEGMENTUM_USE_TFIDF_SEMANTIC"] = prev_sem
+
+        self.assertTrue(captured_uid_sets)
+        self.assertEqual(captured_uid_sets[0], {272, 273})
+        strategy = report.per_strategy["random"]
+        self.assertEqual(strategy["baseline_c_builder"], "population_average_full_implant")
+        self.assertEqual(report.aggregate["baseline_c_builder"], "population_average_full_implant")
 
     def test_surface_profile_uses_train_sessions_only(self) -> None:
         user = _build_user(18, sessions=4)
@@ -497,6 +580,7 @@ class TestM54Validation(unittest.TestCase):
         self.assertIn("cue_override_rate", report)
         self.assertIn("macro_f1_3class_without_cue", report)
         self.assertFalse(report["classifier_provenance_ok"])
+        self.assertEqual(report["classifier_evidence_tier"], "repo_fixture_smoke")
         self.assertIn("without_cue_3class_gate_passed", report)
         self.assertGreater(report["per_class_metrics_3class"]["explore"]["recall"], 0.0)
         self.assertFalse(report["formal_gate_eligible"])
@@ -507,6 +591,9 @@ class TestM54Validation(unittest.TestCase):
         gate = _classifier_samples(50, offset=1000)
         for sample in train + gate:
             sample["source"] = "codex_authored_realistic_zh_fixture_v4"
+            sample["annotator"] = "human_annotation_team"
+            sample["sampling_policy"] = "stratified_holdout_review"
+            sample["label_schema_version"] = M54_CLASSIFIER_LABEL_SCHEMA_VERSION
         report = validate_act_classifier(
             train_samples=train,
             gate_samples=gate,
@@ -514,7 +601,47 @@ class TestM54Validation(unittest.TestCase):
             dataset_origin="independent_holdout_labels",
         )
         self.assertFalse(report["classifier_provenance_ok"])
+        self.assertEqual(report["classifier_evidence_tier"], "repo_fixture_smoke")
         self.assertIn("codex_authored", report["classifier_provenance_failure_reason"])
+        self.assertFalse(report["formal_gate_eligible"])
+
+    def test_classifier_positive_provenance_required_for_external_tier(self) -> None:
+        train = _classifier_samples(100, offset=0)
+        gate = _classifier_samples(50, offset=1000)
+        report = validate_act_classifier(
+            train_samples=train,
+            gate_samples=gate,
+            classifier=DialogueActClassifier(train, use_tfidf=True),
+            dataset_origin="independent_holdout_labels",
+        )
+        self.assertFalse(report["classifier_provenance_ok"])
+        self.assertEqual(report["classifier_evidence_tier"], "repo_fixture_smoke")
+        self.assertIn("missing_provenance_field", report["classifier_provenance_failure_reason"])
+
+        enriched_train = _with_classifier_provenance(train)
+        enriched_gate = _with_classifier_provenance(gate)
+        external_report = validate_act_classifier(
+            train_samples=enriched_train,
+            gate_samples=enriched_gate,
+            classifier=DialogueActClassifier(enriched_train, use_tfidf=True),
+            dataset_origin="independent_holdout_labels",
+        )
+        self.assertTrue(external_report["classifier_provenance_ok"])
+        self.assertEqual(external_report["classifier_evidence_tier"], "external_human_labeled")
+
+    def test_classifier_positive_provenance_blocks_single_synthetic_gate_marker(self) -> None:
+        train = _with_classifier_provenance(_classifier_samples(100, offset=0))
+        gate = _with_classifier_provenance(_classifier_samples(50, offset=1000))
+        gate[0]["source"] = "synthetic_holdout_row"
+        report = validate_act_classifier(
+            train_samples=train,
+            gate_samples=gate,
+            classifier=DialogueActClassifier(train, use_tfidf=True),
+            dataset_origin="independent_holdout_labels",
+        )
+        self.assertFalse(report["classifier_provenance_ok"])
+        self.assertEqual(report["classifier_evidence_tier"], "repo_fixture_smoke")
+        self.assertIn("synthetic", report["classifier_provenance_failure_reason"])
         self.assertFalse(report["formal_gate_eligible"])
 
     def test_classifier_cue_override_gate_blocks_high_cue_dependence(self) -> None:
@@ -779,7 +906,8 @@ class TestM54Validation(unittest.TestCase):
                 self.assertTrue((output_dir / "per_user").exists())
                 self.assertTrue(all(r.conclusion == "completed" for r in reports))
                 agg = json.loads((output_dir / "aggregate_report.json").read_text(encoding="utf-8"))
-                self.assertEqual(agg.get("metric_version"), "m54_v3")
+                self.assertEqual(agg.get("metric_version"), M54_ACCEPTANCE_RULES_VERSION)
+                self.assertEqual(agg.get("artifact_rules_version"), M54_ACCEPTANCE_RULES_VERSION)
                 self.assertEqual(set(agg["split_gate"]["required_strategies"]), {"random", "temporal", "partner", "topic"})
                 self.assertFalse(agg["formal_acceptance_eligible"])
                 self.assertFalse(agg["hard_pass"])

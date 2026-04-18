@@ -27,6 +27,7 @@ from .baselines import (
     create_wrong_agent,
     select_wrong_users,
 )
+from .constants import M54_ACCEPTANCE_RULES_VERSION
 from .metrics import (
     SimilarityResult,
     agent_state_similarity,
@@ -801,7 +802,21 @@ def run_validation(
 
         strat_idx = config.strategies.index(strategy)
         strat_seed = int(config.seed) + 404 + strat_idx * 31
-        baseline_c_agent = create_average_agent(population_profiles, seed=strat_seed, classifier=classifier)
+        if config.skip_population_average_implant:
+            baseline_c_builder = "profile_only_average_fallback"
+            baseline_c_agent = create_average_agent(
+                population_profiles,
+                seed=strat_seed,
+                classifier=classifier,
+            )
+        else:
+            baseline_c_builder = "population_average_full_implant"
+            baseline_c_agent = build_population_average_agent(
+                population_profiles,
+                config.implantation_config,
+                seed=strat_seed,
+                classifier=classifier,
+            )
         attach_surface_profile(baseline_c_agent, population_surface_profile)
         c_gen, c_real, cg11, cr11, cg3, cr3, c_trace = _call_generate_from_sessions(
             baseline_c_agent,
@@ -949,6 +964,8 @@ def run_validation(
             "surface_profile": _surface_profile_summary(train_surface_profile),
             "baseline_a_surface_profile": {"source": "empty", "reply_count": 0},
             "baseline_c_surface_profile": _surface_profile_summary(population_surface_profile),
+            "baseline_c_builder": baseline_c_builder,
+            "baseline_c_input_scope": "leave_one_out_population_train_and_profile_data",
             "baseline_c_leave_one_out": True,
             "baseline_c_population_excluded_uid": int(user_uid),
             "baseline_c_population_user_count": int(len(population_profiles)),
@@ -973,7 +990,8 @@ def run_validation(
     conclusion = "skipped_all_strategies" if not valid else "completed"
     aggregate = {
         "pipeline_status": conclusion,
-        "metric_version": "m54_v3",
+        "metric_version": M54_ACCEPTANCE_RULES_VERSION,
+        "artifact_rules_version": M54_ACCEPTANCE_RULES_VERSION,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
         "strategy_count": int(len(valid)),
         "semantic_personality_mean": float(mean(strategy_personality_means.values())) if strategy_personality_means else 0.0,
@@ -989,6 +1007,11 @@ def run_validation(
         "behavioral_hard_metric_enabled": behavioral_hard_enabled,
         "classifier_validation": classifier_eval,
         "skip_population_average_implant": bool(config.skip_population_average_implant),
+        "baseline_c_builder": (
+            "profile_only_average_fallback"
+            if config.skip_population_average_implant
+            else "population_average_full_implant"
+        ),
         "requested_strategies": [item.value for item in config.strategies],
         "formal_requested": bool(config.formal),
         "diagnostic_trace_enabled": bool(config.diagnostic_trace),

@@ -10,6 +10,7 @@ import re
 from typing import Iterable, Mapping, Sequence
 
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
+from .constants import M54_CLASSIFIER_LABEL_SCHEMA_VERSION
 
 
 MIN_FORMAL_TRAIN_SAMPLES = 300
@@ -24,6 +25,17 @@ _NON_FORMAL_PROVENANCE_MARKERS = (
     "synthetic",
     "smoke",
     "toy",
+)
+_MISSING_PROVENANCE_MARKERS = (
+    "missing_formal_labels",
+    "unspecified",
+    "missing",
+)
+_REQUIRED_PROVENANCE_FIELDS = (
+    "source",
+    "annotator",
+    "sampling_policy",
+    "label_schema_version",
 )
 
 _TOKEN_RE = re.compile(r"[A-Za-z0-9_]+|[\u4e00-\u9fff]")
@@ -680,16 +692,56 @@ def _classifier_provenance(
 ) -> tuple[bool, str]:
     if not require_classifier_provenance:
         return True, ""
+    return _positive_classifier_provenance(train_samples, gate_samples, dataset_origin)
+
+
+def _positive_classifier_provenance(
+    train_samples: list[dict[str, str]],
+    gate_samples: list[dict[str, str]],
+    dataset_origin: str,
+) -> tuple[bool, str]:
+    if not train_samples:
+        return False, "empty_train_samples"
+    if not gate_samples:
+        return False, "empty_gate_samples"
+    lowered_origin = str(dataset_origin).strip().lower()
+    if not lowered_origin or any(marker in lowered_origin for marker in _MISSING_PROVENANCE_MARKERS):
+        return False, "missing_dataset_origin"
+    origin_hits = [marker for marker in _NON_FORMAL_PROVENANCE_MARKERS if marker in lowered_origin]
+    if origin_hits:
+        return False, "non_formal_provenance_marker:dataset_origin:" + ",".join(sorted(set(origin_hits)))
+
     values = [str(dataset_origin)]
-    for sample in [*train_samples, *gate_samples]:
-        for key in ("source", "annotator", "sampling_policy", "label_schema_version"):
-            if sample.get(key):
+    for split_name, samples in (("train", train_samples), ("gate", gate_samples)):
+        for idx, sample in enumerate(samples):
+            missing = [key for key in _REQUIRED_PROVENANCE_FIELDS if not str(sample.get(key, "")).strip()]
+            if missing:
+                return False, f"missing_provenance_field:{split_name}[{idx}]:" + ",".join(missing)
+            schema = str(sample.get("label_schema_version", "")).strip()
+            if schema != M54_CLASSIFIER_LABEL_SCHEMA_VERSION:
+                return False, f"label_schema_mismatch:{split_name}[{idx}]:{schema}"
+            for key in _REQUIRED_PROVENANCE_FIELDS:
                 values.append(str(sample[key]))
     lowered = " ".join(values).lower()
     hits = [marker for marker in _NON_FORMAL_PROVENANCE_MARKERS if marker in lowered]
     if hits:
         return False, "non_formal_provenance_marker:" + ",".join(sorted(set(hits)))
     return True, ""
+
+
+def _classifier_evidence_tier(
+    train_samples: list[dict[str, str]],
+    gate_samples: list[dict[str, str]],
+    dataset_origin: str,
+    *,
+    provenance_ok: bool,
+) -> str:
+    if not provenance_ok:
+        return "repo_fixture_smoke"
+    positive_ok, _reason = _positive_classifier_provenance(train_samples, gate_samples, dataset_origin)
+    if not positive_ok:
+        return "repo_fixture_smoke"
+    return "external_human_labeled"
 
 
 def validate_act_classifier(
@@ -713,9 +765,24 @@ def validate_act_classifier(
             dataset_origin,
             require_classifier_provenance=require_classifier_provenance,
         )
+        evidence_tier = _classifier_evidence_tier(
+            train,
+            gate,
+            dataset_origin,
+            provenance_ok=provenance_ok,
+        )
+        positive_provenance_ok, positive_provenance_reason = _positive_classifier_provenance(
+            train,
+            gate,
+            dataset_origin,
+        )
+        provenance_failure_reason = provenance_reason
+        if not provenance_failure_reason and not positive_provenance_ok:
+            provenance_failure_reason = positive_provenance_reason
         return {
             "engine": getattr(clf, "engine", "unknown"),
             "dataset_origin": dataset_origin,
+            "classifier_evidence_tier": evidence_tier,
             "train_count": int(len(train)),
             "gate_count": 0,
             "sample_count": 0,
@@ -734,7 +801,7 @@ def validate_act_classifier(
             "passed_3class_gate": False,
             "formal_gate_eligible": False,
             "classifier_provenance_ok": bool(provenance_ok),
-            "classifier_provenance_failure_reason": provenance_reason,
+            "classifier_provenance_failure_reason": provenance_failure_reason,
             "formal_engine": bool(getattr(clf, "formal_engine", False)),
             "formal_engine_failure_reason": (
                 ""
@@ -784,6 +851,20 @@ def validate_act_classifier(
         dataset_origin,
         require_classifier_provenance=require_classifier_provenance,
     )
+    evidence_tier = _classifier_evidence_tier(
+        train,
+        gate,
+        dataset_origin,
+        provenance_ok=provenance_ok,
+    )
+    positive_provenance_ok, positive_provenance_reason = _positive_classifier_provenance(
+        train,
+        gate,
+        dataset_origin,
+    )
+    provenance_failure_reason = provenance_reason
+    if not provenance_failure_reason and not positive_provenance_ok:
+        provenance_failure_reason = positive_provenance_reason
     cue_override_rate = round(float(cue_count) / float(max(1, len(pred_sources))), 6)
     cue_override_gate_passed = cue_override_rate <= float(max_cue_override_rate)
     without_cue_gate_passed = bool(
@@ -793,6 +874,7 @@ def validate_act_classifier(
         dataset_ok
         and formal_engine
         and provenance_ok
+        and evidence_tier == "external_human_labeled"
         and cue_override_gate_passed
         and without_cue_gate_passed
     )
@@ -800,6 +882,7 @@ def validate_act_classifier(
     return {
         "engine": getattr(clf, "engine", "unknown"),
         "dataset_origin": dataset_origin,
+        "classifier_evidence_tier": evidence_tier,
         "train_count": int(len(train)),
         "gate_count": int(len(gate)),
         "sample_count": int(len(gate)),
@@ -828,7 +911,7 @@ def validate_act_classifier(
         "min_macro_f1_3class": float(min_macro_f1_3class),
         "formal_gate_eligible": bool(formal_gate_eligible),
         "classifier_provenance_ok": bool(provenance_ok),
-        "classifier_provenance_failure_reason": provenance_reason,
+        "classifier_provenance_failure_reason": provenance_failure_reason,
         "formal_engine": bool(formal_engine),
         "formal_engine_failure_reason": "" if formal_engine else str(getattr(clf, "engine", "unknown")),
         "formal_dataset_ok": bool(dataset_ok),

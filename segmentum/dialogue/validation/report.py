@@ -7,10 +7,11 @@ import math
 from pathlib import Path
 from statistics import mean, median
 
+from .constants import M54_ACCEPTANCE_RULES_VERSION
 from .pipeline import ValidationReport
 from .statistics import ComparisonResult, paired_comparison, scipy_wilcoxon_available
 
-ACCEPTANCE_RULES_VERSION = "m54_v3"
+ACCEPTANCE_RULES_VERSION = M54_ACCEPTANCE_RULES_VERSION
 AGENT_STATE_MIN_MEAN = 0.80
 REQUIRED_STRATEGIES = ("random", "temporal", "partner", "topic")
 
@@ -134,6 +135,7 @@ def _classifier_gate_summary(reports: list[ValidationReport]) -> dict[str, objec
     return {
         "passed_3class_gate": False,
         "formal_gate_eligible": False,
+        "classifier_evidence_tier": "repo_fixture_smoke",
         "engine": "missing",
     }
 
@@ -421,10 +423,14 @@ def _formal_baseline_c_gate(
     population_counts: list[int] = []
     metrics_present_values: list[bool] = []
     excluded_uid_values: list[bool] = []
+    builder_values: list[str] = []
+    input_scope_values: list[str] = []
     for report in reports:
         for strategy_result in report.per_strategy.values():
             if not _strategy_eligible(strategy_result):
                 continue
+            builder_values.append(str(strategy_result.get("baseline_c_builder", "")))
+            input_scope_values.append(str(strategy_result.get("baseline_c_input_scope", "")))
             leave_one_out_values.append(bool(strategy_result.get("baseline_c_leave_one_out", False)))
             try:
                 population_counts.append(int(strategy_result.get("baseline_c_population_user_count", 0) or 0))
@@ -441,11 +447,21 @@ def _formal_baseline_c_gate(
     leave_one_out_ok = bool(leave_one_out_values and all(leave_one_out_values))
     metrics_present_ok = bool(metrics_present_values and all(metrics_present_values))
     target_excluded_ok = bool(excluded_uid_values and all(excluded_uid_values))
+    builder_ok = bool(
+        builder_values
+        and all(item == "population_average_full_implant" for item in builder_values)
+    )
+    input_scope_ok = bool(
+        input_scope_values
+        and all(item == "leave_one_out_population_train_and_profile_data" for item in input_scope_values)
+    )
     min_population = int(min(population_counts)) if population_counts else 0
     population_count_ok = bool(min_population >= max(0, int(required_users) - 1))
     if formal_requested:
         passed = bool(
             (not skip_used)
+            and builder_ok
+            and input_scope_ok
             and leave_one_out_ok
             and metrics_present_ok
             and target_excluded_ok
@@ -455,10 +471,24 @@ def _formal_baseline_c_gate(
         passed = bool(not skip_used)
     return {
         "passed": bool(passed),
+        "baseline_c_builder": (
+            "population_average_full_implant"
+            if builder_ok
+            else "profile_only_average_fallback"
+            if any(item == "profile_only_average_fallback" for item in builder_values)
+            else "missing_or_mixed"
+        ),
+        "baseline_c_input_scope": (
+            "leave_one_out_population_train_and_profile_data"
+            if input_scope_ok
+            else "missing_or_mixed"
+        ),
         "skip_population_average_implant_used": bool(skip_used),
+        "population_average_full_implant_used": bool(builder_ok),
         "leave_one_out_population_average": bool(leave_one_out_ok),
         "target_user_excluded": bool(target_excluded_ok),
         "baseline_c_metrics_present": bool(metrics_present_ok),
+        "baseline_c_input_scope_ok": bool(input_scope_ok),
         "population_count_ok": bool(population_count_ok),
         "min_population_user_count": int(min_population),
         "required_population_user_count": max(0, int(required_users) - 1),
@@ -980,6 +1010,114 @@ def _ablation_summary(reports: list[ValidationReport]) -> dict[str, object]:
     }
 
 
+def _surface_ablation_gate(
+    reports: list[ValidationReport],
+    *,
+    ablation_summary: dict[str, object],
+    formal_requested: bool,
+) -> dict[str, object]:
+    full_diffs: dict[str, list[float]] = {
+        "no_surface_profile": [],
+        "surface_only_default_agent": [],
+    }
+    ablation_diffs: dict[str, list[float]] = {
+        "no_surface_profile": [],
+        "surface_only_default_agent": [],
+    }
+    diagnostic_trace_present = False
+    for report in reports:
+        user_full_diffs: dict[str, list[float]] = {
+            "no_surface_profile": [],
+            "surface_only_default_agent": [],
+        }
+        user_ablation_diffs: dict[str, list[float]] = {
+            "no_surface_profile": [],
+            "surface_only_default_agent": [],
+        }
+        for strategy_result in report.per_strategy.values():
+            if not _strategy_eligible(strategy_result):
+                continue
+            p = strategy_result.get("personality_metrics", {})
+            a = strategy_result.get("baseline_a_metrics", {})
+            if not isinstance(p, dict) or not isinstance(a, dict):
+                continue
+            if "semantic_similarity" not in p or "semantic_similarity" not in a:
+                continue
+            full_diff = _safe_float(p.get("semantic_similarity")) - _safe_float(
+                a.get("semantic_similarity")
+            )
+            rows = strategy_result.get("ablation_summary", [])
+            if not isinstance(rows, list):
+                continue
+            trace = strategy_result.get("diagnostic_trace", [])
+            if isinstance(trace, list) and trace:
+                diagnostic_trace_present = True
+            seen_for_strategy: set[str] = set()
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                name = str(row.get("name", ""))
+                if name not in ablation_diffs or name in seen_for_strategy:
+                    continue
+                seen_for_strategy.add(name)
+                user_full_diffs[name].append(float(full_diff))
+                user_ablation_diffs[name].append(_safe_float(row.get("semantic_vs_baseline_a_diff")))
+        for name in ("no_surface_profile", "surface_only_default_agent"):
+            if user_full_diffs[name] and user_ablation_diffs[name]:
+                full_diffs[name].append(float(mean(user_full_diffs[name])))
+                ablation_diffs[name].append(float(mean(user_ablation_diffs[name])))
+
+    comparisons: dict[str, dict[str, object]] = {}
+    for name in ("no_surface_profile", "surface_only_default_agent"):
+        pvalue, significant, mean_diff, better = paired_comparison(
+            full_diffs[name],
+            ablation_diffs[name],
+            test="wilcoxon",
+            alpha=0.05,
+        )
+        full_mean = float(mean(full_diffs[name])) if full_diffs[name] else 0.0
+        ablation_mean = float(mean(ablation_diffs[name])) if ablation_diffs[name] else 0.0
+        comparisons[name] = {
+            "pairs": int(min(len(full_diffs[name]), len(ablation_diffs[name]))),
+            "full_semantic_vs_baseline_a_diff_mean": round(float(full_mean), 6),
+            "ablation_semantic_vs_baseline_a_diff_mean": round(float(ablation_mean), 6),
+            "full_vs_ablation_mean_diff": round(float(mean_diff), 6),
+            "full_better": bool(better),
+            "full_significant_better": bool(significant),
+            "pvalue": float(pvalue),
+        }
+
+    no_surface = comparisons["no_surface_profile"]
+    surface_only = comparisons["surface_only_default_agent"]
+    no_surface_present = bool(no_surface["pairs"])
+    surface_only_present = bool(surface_only["pairs"])
+    surface_only_below_full = bool(
+        surface_only_present
+        and _safe_float(surface_only["ablation_semantic_vs_baseline_a_diff_mean"])
+        < _safe_float(surface_only["full_semantic_vs_baseline_a_diff_mean"])
+    )
+    checks = {
+        "diagnostic_trace_present": bool(diagnostic_trace_present),
+        "ablation_rows_present": bool(ablation_summary and no_surface_present and surface_only_present),
+        "full_significant_better_than_no_surface": bool(no_surface["full_significant_better"]),
+        "full_significant_better_than_surface_only": bool(surface_only["full_significant_better"]),
+        "surface_only_below_full": bool(surface_only_below_full),
+    }
+    passed = (not formal_requested) or all(checks.values())
+    return {
+        "passed": bool(passed),
+        "formal_requested": bool(formal_requested),
+        "aggregation": "per_user_mean_across_strategies",
+        "checks": checks,
+        "comparisons": comparisons,
+        "policy": (
+            "formal acceptance requires full personality generation to beat no-surface "
+            "and surface-only ablations on semantic-vs-baseline-A paired Wilcoxon, "
+            "with surface-only below full"
+        ),
+    }
+
+
 def _profile_expression_source_summary(reports: list[ValidationReport]) -> dict[str, object]:
     buckets = {
         "personality": {
@@ -1330,6 +1468,62 @@ def _write_diagnostic_trace(reports: list[ValidationReport], output_dir: Path) -
     return len(rows)
 
 
+def _formal_blockers(
+    *,
+    classifier_gate: bool,
+    classifier_gate_summary: dict[str, object],
+    semantic_engine_gate: dict[str, object],
+    statistical_gate: dict[str, object],
+    baseline_c_gate: dict[str, object],
+    diagnostic_trace_gate: dict[str, object],
+    agent_state_differentiation_gate: dict[str, object],
+    behavioral_majority_baseline_gate: dict[str, object],
+    surface_ablation_gate: dict[str, object],
+    pilot_gate: dict[str, object],
+    split_gate: dict[str, object],
+    partner_gate: dict[str, object],
+    topic_gate: dict[str, object],
+    metric_hard_pass: bool,
+) -> list[str]:
+    blockers: list[str] = []
+    if classifier_gate_summary.get("classifier_evidence_tier") != "external_human_labeled":
+        blockers.append("classifier_fixture_only")
+    elif not classifier_gate:
+        blockers.append("classifier_gate_failed")
+    if not semantic_engine_gate.get("passed"):
+        blockers.append("semantic_engine_not_formal")
+    if not statistical_gate.get("passed"):
+        blockers.append("statistical_engine_unavailable")
+    if not baseline_c_gate.get("passed"):
+        if baseline_c_gate.get("baseline_c_builder") == "profile_only_average_fallback":
+            blockers.append("baseline_c_profile_only_fallback")
+        else:
+            blockers.append("baseline_c_gate_failed")
+    if not diagnostic_trace_gate.get("passed"):
+        blockers.append("diagnostic_trace_missing")
+    if not agent_state_differentiation_gate.get("passed"):
+        blockers.append("agent_state_differentiation_failed")
+    if not behavioral_majority_baseline_gate.get("passed"):
+        blockers.append("behavioral_majority_baseline_matches_or_beats_personality")
+    if not surface_ablation_gate.get("passed"):
+        checks = surface_ablation_gate.get("checks", {})
+        if isinstance(checks, dict) and not checks.get("ablation_rows_present", False):
+            blockers.append("surface_ablation_missing")
+        else:
+            blockers.append("surface_ablation_failed")
+    if not pilot_gate.get("passed"):
+        blockers.append("pilot_gate_failed")
+    if not split_gate.get("passed"):
+        blockers.append("split_gate_failed")
+    if not partner_gate.get("passed"):
+        blockers.append("partner_gate_failed")
+    if not topic_gate.get("passed"):
+        blockers.append("topic_gate_failed")
+    if not metric_hard_pass:
+        blockers.append("metric_hard_pass_failed")
+    return sorted(set(blockers))
+
+
 def generate_report(
     reports: list[ValidationReport],
     output_dir: Path,
@@ -1418,6 +1612,9 @@ def generate_report(
         formal_requested=formal_requested,
     )
     classifier_gate_summary = _classifier_gate_summary(reports)
+    classifier_evidence_tier = str(
+        classifier_gate_summary.get("classifier_evidence_tier", "repo_fixture_smoke")
+    )
     semantic_engine_gate = _semantic_engine_gate(reports)
     diagnostic_trace_gate = _diagnostic_trace_gate(
         formal_requested=formal_requested,
@@ -1429,6 +1626,12 @@ def generate_report(
     )
     behavioral_majority_baseline_gate = _behavioral_majority_baseline_gate(
         reports,
+        formal_requested=formal_requested,
+    )
+    ablation_summary = _ablation_summary(reports)
+    surface_ablation_gate = _surface_ablation_gate(
+        reports,
+        ablation_summary=ablation_summary,
         formal_requested=formal_requested,
     )
     statistical_gate = {
@@ -1448,6 +1651,7 @@ def generate_report(
         and diagnostic_trace_gate["passed"]
         and agent_state_differentiation_gate["passed"]
         and behavioral_majority_baseline_gate["passed"]
+        and surface_ablation_gate["passed"]
     )
     hard_pass_breakdown = {
         **metric_hard_breakdown,
@@ -1464,6 +1668,7 @@ def generate_report(
         "diagnostic_trace_gate": bool(diagnostic_trace_gate["passed"]),
         "agent_state_differentiation_gate": bool(agent_state_differentiation_gate["passed"]),
         "behavioral_majority_baseline_gate": bool(behavioral_majority_baseline_gate["passed"]),
+        "surface_ablation_gate": bool(surface_ablation_gate["passed"]),
     }
     hard_pass = bool(
         metric_hard_pass
@@ -1477,6 +1682,23 @@ def generate_report(
         and diagnostic_trace_gate["passed"]
         and agent_state_differentiation_gate["passed"]
         and behavioral_majority_baseline_gate["passed"]
+        and surface_ablation_gate["passed"]
+    )
+    formal_blockers = _formal_blockers(
+        classifier_gate=classifier_gate,
+        classifier_gate_summary=classifier_gate_summary,
+        semantic_engine_gate=semantic_engine_gate,
+        statistical_gate=statistical_gate,
+        baseline_c_gate=baseline_c_gate,
+        diagnostic_trace_gate=diagnostic_trace_gate,
+        agent_state_differentiation_gate=agent_state_differentiation_gate,
+        behavioral_majority_baseline_gate=behavioral_majority_baseline_gate,
+        surface_ablation_gate=surface_ablation_gate,
+        pilot_gate=pilot_gate,
+        split_gate=split_gate,
+        partner_gate=partner_gate,
+        topic_gate=topic_gate,
+        metric_hard_pass=metric_hard_pass,
     )
     if hard_pass:
         overall_conclusion = "pass"
@@ -1486,7 +1708,6 @@ def generate_report(
         overall_conclusion = "fail"
     semantic_delta_summary = _semantic_delta_summary(reports)
     baseline_audit_summary = _baseline_audit_summary(reports)
-    ablation_summary = _ablation_summary(reports)
     profile_expression_summary = _profile_expression_source_summary(reports)
     state_saturation_summary = _state_saturation_summary(reports)
     debug_readiness_gate = _debug_readiness_gate(
@@ -1505,17 +1726,18 @@ def generate_report(
         "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
-        "classifier_gate": "formal acceptance requires independent non-fixture train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass",
+        "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; repo fixtures are smoke-only",
         "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
         "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
         "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
         "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
-        "formal_baseline_c": "Baseline C must use leave-one-out population averaging and skip_population_average_implant is test-only",
+        "formal_baseline_c": "Baseline C must use leave-one-out population averaging via population_average_full_implant; profile_only_average_fallback and skip_population_average_implant are test-only",
         "diagnostic_trace_gate": "formal acceptance requires non-empty diagnostic trace and audit summaries",
         "behavioral_majority_baseline_gate": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
         "agent_state_differentiation_gate": "train-only state must be closer to full-data state than default or wrong-user state",
+        "surface_ablation_gate": "formal acceptance requires full personality generation to significantly beat no-surface and surface-only ablations, and surface-only must remain below full",
     }
 
     metric_interpretations = {
@@ -1529,9 +1751,11 @@ def generate_report(
         "required_users": int(required_users),
         "agent_state_users_tested": int(ast_users_used),
         "agent_state_users_skipped_no_metric": int(ast_users_skipped),
-        "metric_version": "m54_v3",
+        "metric_version": ACCEPTANCE_RULES_VERSION,
+        "artifact_rules_version": ACCEPTANCE_RULES_VERSION,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
         "classifier_gate": classifier_gate_summary,
+        "classifier_evidence_tier": classifier_evidence_tier,
         "semantic_engine_gate": semantic_engine_gate,
         "statistical_gate": statistical_gate,
         "formal_acceptance_eligible": bool(formal_acceptance_eligible),
@@ -1549,9 +1773,12 @@ def generate_report(
         "topic_gate": topic_gate,
         "reproducibility_gate": reproducibility_gate,
         "baseline_c_gate": baseline_c_gate,
+        "baseline_c_builder": baseline_c_gate.get("baseline_c_builder"),
         "diagnostic_trace_gate": diagnostic_trace_gate,
         "agent_state_differentiation_gate": agent_state_differentiation_gate,
         "behavioral_majority_baseline_gate": behavioral_majority_baseline_gate,
+        "surface_ablation_gate": surface_ablation_gate,
+        "formal_blockers": formal_blockers,
         "metric_interpretations": metric_interpretations,
         "semantic_delta_summary": semantic_delta_summary,
         "baseline_audit_summary": baseline_audit_summary,
@@ -1599,12 +1826,14 @@ def generate_report(
         f"- Topic split: {topic_split_summary}",
         f"- Metric version: {aggregate_payload['metric_version']} ({aggregate_payload['behavioral_labeling']})",
         f"- Classifier 3-class gate: {classifier_gate}",
+        f"- Classifier evidence tier: {classifier_evidence_tier}",
         f"- Semantic embedding gate: {semantic_engine_gate['passed']}",
         f"- Statistical gate: {statistical_gate['passed']}",
         f"- Formal acceptance eligible: {formal_acceptance_eligible}",
         f"- Behavioral hard metric degraded (soft-only): {behavioral_degraded}",
         f"- Overall conclusion: {aggregate_payload['overall_conclusion']}",
         f"- Hard pass: {hard_pass}",
+        f"- Formal blockers: {formal_blockers}",
         f"- Pilot gate: {pilot_gate['passed']}",
         f"- Split gate: {split_gate['passed']}",
         f"- Partner strategy hard pass: {partner_hard_pass}",
@@ -1613,6 +1842,7 @@ def generate_report(
         f"- Diagnostic trace gate: {diagnostic_trace_gate['passed']}",
         f"- Agent-state differentiation gate: {agent_state_differentiation_gate['passed']}",
         f"- Behavioral majority baseline gate: {behavioral_majority_baseline_gate['passed']}",
+        f"- Surface ablation gate: {surface_ablation_gate['passed']}",
         f"- Diagnostic trace rows: {diagnostic_trace_rows}",
         "",
         "## Acceptance (hard metrics)",

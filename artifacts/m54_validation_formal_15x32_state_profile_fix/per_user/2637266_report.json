@@ -1,5 +1,6 @@
 {
   "aggregate": {
+    "artifact_rules_version": "m54_v4_stop_bleed",
     "behavioral_baseline_c_mean": 1.0,
     "behavioral_hard_metric_enabled": true,
     "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -84,7 +85,7 @@
     },
     "diagnostic_trace_enabled": false,
     "formal_requested": true,
-    "metric_version": "m54_v3",
+    "metric_version": "m54_v4_stop_bleed",
     "pilot": {
       "behavioral_diff_sd": 0.337313,
       "behavioral_escalated": true,
@@ -183,6 +184,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
@@ -584,6 +587,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
@@ -972,6 +977,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {
@@ -1368,6 +1375,8 @@
         2637470,
         2637318
       ],
+      "baseline_c_builder": "historical_missing",
+      "baseline_c_input_scope": "historical_missing",
       "baseline_c_leave_one_out": true,
       "baseline_c_metric_details": {
         "behavioral_similarity_action11": {

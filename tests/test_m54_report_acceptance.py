@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 from unittest.mock import patch
 
+from segmentum.dialogue.validation.constants import M54_ACCEPTANCE_RULES_VERSION
 from segmentum.dialogue.validation.pipeline import ValidationReport
 from segmentum.dialogue.validation.report import generate_report
 
@@ -74,6 +75,10 @@ def _bundle(
         "classifier_validation": {
             "passed_3class_gate": classifier_pass,
             "formal_gate_eligible": classifier_pass,
+            "classifier_evidence_tier": (
+                "external_human_labeled" if classifier_pass else "repo_fixture_smoke"
+            ),
+            "dataset_origin": "external_human_labeled_unit_tests",
             "classifier_provenance_ok": classifier_pass,
             "cue_override_gate_passed": classifier_pass,
             "cue_override_rate": 0.10 if classifier_pass else 1.0,
@@ -109,6 +114,9 @@ def _formal_strategy(
     train_default_l2: float = 0.60,
     train_wrong_l2: float = 0.70,
     majority_behavioral: float = 0.30,
+    baseline_c_builder: str = "population_average_full_implant",
+    surface_only_diff: float = -0.10,
+    no_surface_diff: float = -0.10,
 ) -> dict[str, dict]:
     row = dict(bundle)
     if not metrics_present:
@@ -128,6 +136,8 @@ def _formal_strategy(
     row.update(
         {
             "baseline_c_leave_one_out": bool(leave_one_out),
+            "baseline_c_builder": baseline_c_builder,
+            "baseline_c_input_scope": "leave_one_out_population_train_and_profile_data",
             "baseline_c_population_excluded_uid": int(uid if excluded_uid is None else excluded_uid),
             "baseline_c_population_user_count": int(
                 required_users - 1 if population_user_count is None else population_user_count
@@ -146,6 +156,26 @@ def _formal_strategy(
                 "real_strategy_distribution": {"exploit": 2, "explore": 1},
                 "real_action_distribution": {"elaborate": 2, "ask_question": 1},
             },
+            "ablation_summary": [
+                {
+                    "name": "no_surface_profile",
+                    "pair_count": 4,
+                    "semantic_mean": 0.10,
+                    "semantic_vs_baseline_a_diff": float(no_surface_diff),
+                    "action_agreement_vs_personality": 0.25,
+                    "strategy_agreement_vs_personality": 0.25,
+                    "text_similarity_vs_personality": 0.20,
+                },
+                {
+                    "name": "surface_only_default_agent",
+                    "pair_count": 4,
+                    "semantic_mean": 0.10,
+                    "semantic_vs_baseline_a_diff": float(surface_only_diff),
+                    "action_agreement_vs_personality": 0.25,
+                    "strategy_agreement_vs_personality": 0.25,
+                    "text_similarity_vs_personality": 0.20,
+                },
+            ],
         }
     )
     return row
@@ -230,7 +260,7 @@ class TestM54ReportAcceptance(unittest.TestCase):
             p = Path(tmp)
             generate_report(reports, p)
             payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
-        self.assertEqual(payload["metric_version"], "m54_v3")
+        self.assertEqual(payload["metric_version"], M54_ACCEPTANCE_RULES_VERSION)
         self.assertIn("hard_pass_breakdown", payload)
         self.assertTrue(payload["hard_pass_breakdown"]["classifier_3class_gate_passed"])
         self.assertTrue(payload["hard_pass"])
@@ -506,6 +536,10 @@ class TestM54ReportAcceptance(unittest.TestCase):
         self.assertTrue(payload["diagnostic_trace_gate"]["passed"])
         self.assertTrue(payload["agent_state_differentiation_gate"]["passed"])
         self.assertTrue(payload["behavioral_majority_baseline_gate"]["passed"])
+        self.assertTrue(payload["surface_ablation_gate"]["passed"])
+        self.assertEqual(payload["surface_ablation_gate"]["aggregation"], "per_user_mean_across_strategies")
+        self.assertEqual(payload["formal_blockers"], [])
+        self.assertEqual(payload["artifact_rules_version"], M54_ACCEPTANCE_RULES_VERSION)
         self.assertGreater(payload["baseline_c_behavioral_failure_audit"]["row_count"], 0)
         self.assertEqual(payload["overall_conclusion"], "pass")
 
@@ -516,6 +550,7 @@ class TestM54ReportAcceptance(unittest.TestCase):
             {"excluded_uid": 99999},
             {"metrics_present": False},
             {"leave_one_out": False},
+            {"baseline_c_builder": "profile_only_average_fallback"},
         ]
         for case in cases:
             with self.subTest(case=case):
@@ -546,6 +581,125 @@ class TestM54ReportAcceptance(unittest.TestCase):
                     payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
                 self.assertFalse(payload["baseline_c_gate"]["passed"])
                 self.assertFalse(payload["hard_pass"])
+
+    def test_formal_surface_ablation_gate_blocks_phrase_only_win(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70 + 0.001 * uid,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                    ),
+                    required_users=8,
+                    surface_only_diff=0.35,
+                    no_surface_diff=0.35,
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertFalse(payload["surface_ablation_gate"]["passed"])
+        self.assertEqual(payload["surface_ablation_gate"]["aggregation"], "per_user_mean_across_strategies")
+        self.assertIn("surface_ablation_failed", payload["formal_blockers"])
+        self.assertFalse(payload["formal_acceptance_eligible"])
+        self.assertFalse(payload["hard_pass"])
+
+    def test_surface_ablation_gate_uses_user_level_pairs(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80,
+                        beh=0.70,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                    ),
+                    required_users=2,
+                    surface_only_diff=-0.10,
+                    no_surface_diff=-0.10,
+                ),
+                aggregate=_aggregate(required_users=2, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(2)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        gate = payload["surface_ablation_gate"]
+        self.assertEqual(gate["aggregation"], "per_user_mean_across_strategies")
+        self.assertEqual(gate["comparisons"]["no_surface_profile"]["pairs"], 2)
+        self.assertEqual(gate["comparisons"]["surface_only_default_agent"]["pairs"], 2)
+
+    def test_surface_ablation_gate_blocks_strategy_weighted_pseudo_replication(self) -> None:
+        user_one = _all_formal_strategies(
+            1,
+            _bundle(
+                sem=0.90,
+                beh=0.70,
+                ast=0.90,
+                base_sem=0.50,
+                base_beh=0.40,
+                base_beh_c=0.35,
+            ),
+            required_users=2,
+            surface_only_diff=0.00,
+            no_surface_diff=0.00,
+        )
+        user_two = {
+            "random": _formal_strategy(
+                _bundle(
+                    sem=0.50,
+                    beh=0.70,
+                    ast=0.90,
+                    base_sem=0.50,
+                    base_beh=0.40,
+                    base_beh_c=0.35,
+                ),
+                uid=2,
+                required_users=2,
+                surface_only_diff=0.50,
+                no_surface_diff=0.50,
+            )
+        }
+        reports = [
+            ValidationReport(
+                user_uid=1,
+                per_strategy=user_one,
+                aggregate=_aggregate(required_users=2, formal_requested=True),
+                conclusion="completed",
+            ),
+            ValidationReport(
+                user_uid=2,
+                per_strategy=user_two,
+                aggregate=_aggregate(required_users=2, formal_requested=True),
+                conclusion="completed",
+            ),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        gate = payload["surface_ablation_gate"]
+        self.assertEqual(gate["comparisons"]["no_surface_profile"]["pairs"], 2)
+        self.assertFalse(gate["passed"])
+        self.assertIn("surface_ablation_failed", payload["formal_blockers"])
 
     def test_formal_diagnostic_trace_absence_blocks_hard_pass(self) -> None:
         reports = [
