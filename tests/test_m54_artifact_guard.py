@@ -10,6 +10,7 @@ from segmentum.dialogue.validation.constants import M54_ACCEPTANCE_RULES_VERSION
 
 REQUIRED_SUMMARY_FIELDS = {
     "artifact_rules_version",
+    "formal_requested",
     "classifier_evidence_tier",
     "baseline_c_builder",
     "surface_ablation_gate",
@@ -17,6 +18,7 @@ REQUIRED_SUMMARY_FIELDS = {
 }
 CONSISTENT_SUMMARY_FIELDS = (
     "artifact_rules_version",
+    "formal_requested",
     "hard_pass",
     "formal_acceptance_eligible",
     "overall_conclusion",

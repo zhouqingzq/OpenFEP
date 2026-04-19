@@ -11,10 +11,10 @@
     "train_full_l2_mean": 0.05642,
     "train_wrong_user_l2_mean": 0.198568
   },
-  "aggregate_report_json": "artifacts/m54_validation_formal_15x32_v4_provisional/aggregate_report.json",
-  "aggregate_report_md": "artifacts/m54_validation_formal_15x32_v4_provisional/aggregate_report.md",
-  "artifact_rules_version": "m54_v4_stop_bleed",
-  "baseline_c_behavioral_failure_audit_json": "artifacts/m54_validation_formal_15x32_v4_provisional/baseline_c_behavioral_failure_audit.json",
+  "aggregate_report_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/aggregate_report.json",
+  "aggregate_report_md": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/aggregate_report.md",
+  "artifact_rules_version": "m54_v5_formal_evidence",
+  "baseline_c_behavioral_failure_audit_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/baseline_c_behavioral_failure_audit.json",
   "baseline_c_builder": "population_average_full_implant",
   "baseline_c_gate": {
     "baseline_c_builder": "population_average_full_implant",
@@ -133,7 +133,7 @@
     "passed": true,
     "policy": "formal acceptance requires non-empty diagnostic_trace.jsonl"
   },
-  "diagnostic_trace_jsonl": "artifacts/m54_validation_formal_15x32_v4_provisional/diagnostic_trace.jsonl",
+  "diagnostic_trace_jsonl": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/diagnostic_trace.jsonl",
   "diagnostic_trace_rows": 1884,
   "direction_auto_escalation": {
     "applied": false
@@ -142,38 +142,46 @@
   "formal_blockers": [
     "behavioral_majority_baseline_matches_or_beats_personality",
     "classifier_provisional_llm_labels",
-    "surface_ablation_failed"
+    "metric_hard_pass_failed",
+    "no_policy_ablation_failed",
+    "partner_gate_failed",
+    "semantic_vs_baseline_c_failed",
+    "surface_ablation_failed",
+    "surface_only_ablation_failed",
+    "topic_gate_failed"
   ],
+  "formal_requested": true,
   "hard_pass": false,
   "hard_pass_breakdown": {
     "agent_state_differentiation_gate": true,
     "agent_state_similarity_mean_ge_0.80": true,
     "baseline_c_leave_one_out_population_average": true,
-    "behavioral_hard_metric_required": false,
+    "behavioral_hard_metric_required": true,
     "behavioral_majority_baseline_gate": false,
     "behavioral_similarity_strategy_vs_baseline_c_significant_better": false,
     "behavioral_wilcoxon_valid": true,
     "classifier_3class_gate_passed": false,
     "diagnostic_trace_gate": true,
     "formal_acceptance_eligible": false,
-    "metric_hard_pass": true,
-    "partner_gate": true,
+    "metric_hard_pass": false,
+    "partner_gate": false,
     "pilot_gate": true,
     "reproducibility_gate": true,
     "semantic_embedding_gate": true,
     "semantic_similarity_vs_baseline_a_significant_better": true,
+    "semantic_similarity_vs_baseline_c_significant_better": false,
     "semantic_wilcoxon_valid": true,
     "split_gate_all_required_strategies": true,
     "statistical_gate": true,
     "surface_ablation_gate": false,
-    "topic_gate": true
+    "topic_gate": false
   },
-  "metric_version": "m54_v4_stop_bleed",
+  "metric_version": "m54_v5_formal_evidence",
   "milestone": "M5.4",
-  "overall_conclusion": "partial",
+  "overall_conclusion": "fail",
   "partner_gate": {
-    "partner_hard_pass": true,
-    "passed": true,
+    "partner_hard_pass": false,
+    "passed": false,
     "required_users": 15,
     "users_included": 15
   },
@@ -248,39 +256,51 @@
     "checks": {
       "ablation_rows_present": true,
       "diagnostic_trace_present": true,
-      "full_significant_better_than_no_surface": true,
+      "full_significant_better_than_no_policy": false,
+      "full_significant_better_than_no_surface": false,
       "full_significant_better_than_surface_only": false,
+      "no_policy_below_full": false,
+      "no_surface_below_full": false,
       "surface_only_below_full": false
     },
     "comparisons": {
-      "no_surface_profile": {
-        "ablation_semantic_vs_baseline_a_diff_mean": 0.007479,
-        "full_better": true,
-        "full_semantic_vs_baseline_a_diff_mean": 0.063429,
-        "full_significant_better": true,
-        "full_vs_ablation_mean_diff": 0.05595,
+      "no_policy_trait_bias": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.083684,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": -0.103207,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": -0.186891,
         "pairs": 15,
-        "pvalue": 0.005127
+        "pvalue": 1.0
+      },
+      "no_surface_profile": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.007479,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": -0.103207,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": -0.110687,
+        "pairs": 15,
+        "pvalue": 1.0
       },
       "surface_only_default_agent": {
-        "ablation_semantic_vs_baseline_a_diff_mean": 0.075035,
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.075035,
         "full_better": false,
-        "full_semantic_vs_baseline_a_diff_mean": 0.063429,
+        "full_semantic_vs_baseline_c_diff_mean": -0.103207,
         "full_significant_better": false,
-        "full_vs_ablation_mean_diff": -0.011606,
+        "full_vs_ablation_mean_diff": -0.178242,
         "pairs": 15,
         "pvalue": 1.0
       }
     },
     "formal_requested": true,
     "passed": false,
-    "policy": "formal acceptance requires full personality generation to beat no-surface and surface-only ablations on semantic-vs-baseline-A paired Wilcoxon, with surface-only below full"
+    "policy": "formal acceptance requires full personality generation to beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C paired Wilcoxon, with every ablation below full"
   },
   "topic_gate": {
-    "passed": true,
+    "passed": false,
     "policy": "exclude_not_applicable_but_require_min_users",
     "required_users": 15,
-    "topic_hard_pass": true,
+    "topic_hard_pass": false,
     "valid_topic_users": 15
   },
   "user_count": 15

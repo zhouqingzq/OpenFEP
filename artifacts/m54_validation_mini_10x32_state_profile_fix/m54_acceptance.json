@@ -1,16 +1,46 @@
 {
-  "aggregate_report_json": "artifacts/m54_validation_mini_10x32_state_profile_fix/aggregate_report.json",
-  "aggregate_report_md": "artifacts/m54_validation_mini_10x32_state_profile_fix/aggregate_report.md",
-  "artifact_rules_version": "m54_v4_stop_bleed",
+  "agent_state_differentiation_gate": {
+    "comparisons_evaluated": 60,
+    "diagnostic_passed": false,
+    "formal_requested": false,
+    "passed": true,
+    "policy": "train-only state must be closer to full-data state than default or wrong-user state",
+    "train_default_l2_mean": 0.213684,
+    "train_full_closer_than_default": false,
+    "train_full_closer_than_wrong_user": false,
+    "train_full_l2_mean": 0.215356,
+    "train_wrong_user_l2_mean": 0.199213
+  },
+  "aggregate_report_json": "E:/workspace/segments/artifacts/m54_validation_mini_10x32_state_profile_fix/aggregate_report.json",
+  "aggregate_report_md": "E:/workspace/segments/artifacts/m54_validation_mini_10x32_state_profile_fix/aggregate_report.md",
+  "artifact_rules_version": "m54_v5_formal_evidence",
+  "baseline_c_behavioral_failure_audit_json": "E:/workspace/segments/artifacts/m54_validation_mini_10x32_state_profile_fix/baseline_c_behavioral_failure_audit.json",
   "baseline_c_builder": "missing_or_mixed",
   "baseline_c_gate": {
     "baseline_c_builder": "missing_or_mixed",
     "baseline_c_input_scope": "missing_or_mixed",
+    "baseline_c_input_scope_ok": false,
+    "baseline_c_metrics_present": true,
     "formal_requested": false,
-    "passed": false,
-    "skip_population_average_implant_used": false
+    "leave_one_out_population_average": true,
+    "min_population_user_count": 14,
+    "passed": true,
+    "population_average_full_implant_used": false,
+    "population_count_ok": true,
+    "required_population_user_count": 14,
+    "skip_population_average_implant_used": false,
+    "target_user_excluded": true
   },
-  "classifier_evidence_tier": "llm_generated_provisional",
+  "behavioral_majority_baseline_gate": {
+    "behavioral_metric_majority_warning": false,
+    "comparisons_evaluated": 0,
+    "formal_requested": false,
+    "majority_behavioral_strategy_mean": 0.0,
+    "passed": true,
+    "personality_behavioral_strategy_mean": 0.0,
+    "policy": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality"
+  },
+  "classifier_evidence_tier": "repo_fixture_smoke",
   "classifier_gate": {
     "behavioral_hard_metric_enabled": false,
     "class_distribution": {
@@ -25,9 +55,6 @@
         "explore": 100
       }
     },
-    "classifier_evidence_tier": "llm_generated_provisional",
-    "classifier_provenance_failure_reason": "llm_generated_provisional_labels",
-    "classifier_provenance_ok": false,
     "confusion_matrix_3class": {
       "escape": {
         "escape": 41,
@@ -92,7 +119,13 @@
     "sample_count": 150,
     "train_count": 300
   },
-  "diagnostic_trace_jsonl": "artifacts/m54_validation_mini_10x32_state_profile_fix/diagnostic_trace.jsonl",
+  "diagnostic_trace_gate": {
+    "diagnostic_trace_rows": 1884,
+    "formal_requested": false,
+    "passed": true,
+    "policy": "formal acceptance requires non-empty diagnostic_trace.jsonl"
+  },
+  "diagnostic_trace_jsonl": "E:/workspace/segments/artifacts/m54_validation_mini_10x32_state_profile_fix/diagnostic_trace.jsonl",
   "diagnostic_trace_rows": 1884,
   "direction_auto_escalation": {
     "applied": true,
@@ -104,20 +137,22 @@
   },
   "formal_acceptance_eligible": false,
   "formal_blockers": [
-    "baseline_c_gate_failed",
-    "classifier_provisional_llm_labels",
-    "surface_ablation_missing"
+    "classifier_fixture_only",
+    "partner_gate_failed",
+    "semantic_engine_not_formal"
   ],
   "formal_requested": false,
   "hard_pass": false,
   "hard_pass_breakdown": {
+    "agent_state_differentiation_gate": true,
     "agent_state_similarity_mean_ge_0.80": true,
-    "baseline_c_full_population_implant": true,
-    "baseline_c_leave_one_out_population_average": false,
+    "baseline_c_leave_one_out_population_average": true,
     "behavioral_hard_metric_required": false,
+    "behavioral_majority_baseline_gate": true,
     "behavioral_similarity_strategy_vs_baseline_c_significant_better": false,
     "behavioral_wilcoxon_valid": true,
     "classifier_3class_gate_passed": false,
+    "diagnostic_trace_gate": true,
     "formal_acceptance_eligible": false,
     "metric_hard_pass": true,
     "partner_gate": false,
@@ -125,13 +160,14 @@
     "reproducibility_gate": true,
     "semantic_embedding_gate": false,
     "semantic_similarity_vs_baseline_a_significant_better": true,
+    "semantic_similarity_vs_baseline_c_significant_better": true,
     "semantic_wilcoxon_valid": true,
     "split_gate_all_required_strategies": true,
     "statistical_gate": true,
-    "surface_ablation_gate": false,
+    "surface_ablation_gate": true,
     "topic_gate": true
   },
-  "metric_version": "m54_v4_stop_bleed",
+  "metric_version": "m54_v5_formal_evidence",
   "milestone": "M5.4",
   "overall_conclusion": "partial",
   "partner_gate": {
@@ -148,7 +184,7 @@
     "user_count_ok": true
   },
   "reproducibility_gate": {
-    "baseline_c_full_population_implant": true,
+    "baseline_c_leave_one_out_population_average": true,
     "passed": true
   },
   "required_users": 15,
@@ -209,15 +245,47 @@
   "surface_ablation_gate": {
     "aggregation": "per_user_mean_across_strategies",
     "checks": {
-      "ablation_rows_present": false,
+      "ablation_rows_present": true,
       "diagnostic_trace_present": true,
-      "full_significant_better_than_no_surface": false,
-      "full_significant_better_than_surface_only": false,
-      "surface_only_below_full": false
+      "full_significant_better_than_no_policy": true,
+      "full_significant_better_than_no_surface": true,
+      "full_significant_better_than_surface_only": true,
+      "no_policy_below_full": true,
+      "no_surface_below_full": true,
+      "surface_only_below_full": true
+    },
+    "comparisons": {
+      "no_policy_trait_bias": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.043663,
+        "full_better": true,
+        "full_semantic_vs_baseline_c_diff_mean": 0.083214,
+        "full_significant_better": true,
+        "full_vs_ablation_mean_diff": 0.039551,
+        "pairs": 15,
+        "pvalue": 0.003357
+      },
+      "no_surface_profile": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.000165,
+        "full_better": true,
+        "full_semantic_vs_baseline_c_diff_mean": 0.083214,
+        "full_significant_better": true,
+        "full_vs_ablation_mean_diff": 0.083049,
+        "pairs": 15,
+        "pvalue": 3.1e-05
+      },
+      "surface_only_default_agent": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.038345,
+        "full_better": true,
+        "full_semantic_vs_baseline_c_diff_mean": 0.083214,
+        "full_significant_better": true,
+        "full_vs_ablation_mean_diff": 0.044869,
+        "pairs": 15,
+        "pvalue": 0.003357
+      }
     },
     "formal_requested": false,
-    "passed": false,
-    "policy": "formal acceptance requires full personality generation to beat no-surface and surface-only ablations; historical artifacts are fail-closed until regenerated under m54_v4_stop_bleed"
+    "passed": true,
+    "policy": "formal acceptance requires full personality generation to beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C paired Wilcoxon, with every ablation below full"
   },
   "topic_gate": {
     "passed": true,

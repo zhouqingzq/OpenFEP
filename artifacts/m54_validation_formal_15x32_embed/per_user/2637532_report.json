@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "artifact_rules_version": "m54_v4_stop_bleed",
+    "artifact_rules_version": "m54_v5_formal_evidence",
     "behavioral_baseline_c_mean": 0.202809,
     "behavioral_hard_metric_enabled": false,
     "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -41,7 +41,7 @@
       "train_count": 300
     },
     "formal_requested": true,
-    "metric_version": "m54_v4_stop_bleed",
+    "metric_version": "m54_v5_formal_evidence",
     "pilot": {
       "behavioral_diff_sd": 0.033172,
       "behavioral_escalated": false,

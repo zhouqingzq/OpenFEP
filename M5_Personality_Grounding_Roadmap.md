@@ -399,6 +399,12 @@ SlowLearning: update traits based on outcome
 
 ## M5.4: Consistency Validation
 
+**Status (2026-04-18): partial / not accepted.** M5.4 must not be used as a
+completed gate for M5.5 until a fresh formal artifact with external-human
+classifier labels passes all hard gates: semantic vs Baseline A and Baseline C,
+behavioral vs Baseline C, no-surface/no-policy/surface-only ablations, and
+artifact guard schema.
+
 ### Title
 
 `M5.4: Consistency Validation — Train/Test Proof of Emergent Personality`

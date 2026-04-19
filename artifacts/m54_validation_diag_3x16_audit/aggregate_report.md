@@ -1,26 +1,28 @@
-# M5.4 Stop-Bleed Notice
-
-This historical artifact is fail-closed under m54_v4_stop_bleed. Current classifier labels are LLM-generated provisional data: usable for engineering/direction checks, but not for formal human-labeled acceptance. See aggregate_report.json / m54_acceptance.json for machine-readable blockers.
-
 # M5.4 Validation Aggregate Report
 
 - Users: 3 (tested: 3, skipped no strategy: 0)
 - Required users: 3
 - Agent state: users with metric 3, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 3, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 3, 'users_topic_split_valid_for_hard_gate': 3}
-- Metric version: m54_v3 (generated_action_direct_real_reply_classifier)
+- Metric version: m54_v5_formal_evidence (generated_action_direct_real_reply_classifier)
 - Classifier 3-class gate: False
+- Classifier evidence tier: repo_fixture_smoke
 - Semantic embedding gate: False
 - Statistical gate: True
 - Formal acceptance eligible: False
 - Behavioral hard metric degraded (soft-only): True
 - Overall conclusion: fail
 - Hard pass: False
+- Formal blockers: ['baseline_c_gate_failed', 'classifier_fixture_only', 'metric_hard_pass_failed', 'partner_gate_failed', 'semantic_engine_not_formal', 'topic_gate_failed']
 - Pilot gate: True
 - Split gate: True
 - Partner strategy hard pass: False
 - Topic strategy hard pass: False
 - Formal Baseline C gate: False
+- Diagnostic trace gate: True
+- Agent-state differentiation gate: True
+- Behavioral majority baseline gate: True
+- Surface ablation gate: True
 - Diagnostic trace rows: 75
 
 ## Acceptance (hard metrics)
@@ -30,6 +32,7 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 | classifier_3class_gate_passed | False |
 | behavioral_hard_metric_required | False |
 | semantic_similarity_vs_baseline_a_significant_better | False |
+| semantic_similarity_vs_baseline_c_significant_better | False |
 | behavioral_similarity_strategy_vs_baseline_c_significant_better | False |
 | semantic_wilcoxon_valid | True |
 | behavioral_wilcoxon_valid | True |
@@ -43,7 +46,11 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 | partner_gate | False |
 | topic_gate | False |
 | reproducibility_gate | False |
-| baseline_c_full_population_implant | False |
+| baseline_c_leave_one_out_population_average | False |
+| diagnostic_trace_gate | True |
+| agent_state_differentiation_gate | True |
+| behavioral_majority_baseline_gate | True |
+| surface_ablation_gate | True |
 
 ## Semantic Delta Diagnostics
 
@@ -61,12 +68,21 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 ## Baseline Audit Diagnostics
 
 - Wrong-user masked warning: False
+- Baseline C too-close warning: False ()
+- Baseline C too-weak warning (diagnostic-only): False ()
 
-| Baseline | rows | action agree | strategy agree | text sim | duplicate | semantic delta | action JSD | strategy JSD |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `baseline_a` | 75 | 0.4667 | 0.7067 | 0.3694 | 0.0000 | -0.0180 | 0.0989 | 0.0247 |
-| `baseline_c` | 75 | 0.4667 | 0.7067 | 0.5479 | 0.0000 | -0.0339 | 0.0989 | 0.0247 |
-| `baseline_b_best` | 75 | 0.6533 | 0.6933 | 0.4736 | 0.0000 | -0.0186 | 0.0487 | 0.0365 |
+| Baseline | rows | action agree | strategy agree | template agree | text sim | duplicate | semantic delta | action JSD | strategy JSD |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `baseline_a` | 75 | 0.4667 | 0.7067 | 0.1867 | 0.3694 | 0.0000 | -0.0180 | 0.0989 | 0.0247 |
+| `baseline_c` | 75 | 0.4667 | 0.7067 | 0.1600 | 0.5479 | 0.0000 | -0.0339 | 0.0989 | 0.0247 |
+| `baseline_b_best` | 75 | 0.6533 | 0.6933 | 0.0000 | 0.4736 | 0.0000 | -0.0186 | 0.0487 | 0.0365 |
+
+## Profile Expression Diagnostics
+
+| Surface | rows | expression source rates | rhetorical move rates |
+| --- | --- | --- | --- |
+| `personality` | 75 | {'generic': 1.0} | {'neutral': 0.906667, 'ultra_short_profile': 0.093333} |
+| `baseline_c` | 75 | {'generic': 1.0} | {'unknown': 1.0} |
 
 ## Ablation Diagnostics
 
@@ -80,6 +96,11 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 
 - Personality similarity diagnostic-only saturation warning: True
 - State distance means: {'train_default_cosine': 1.0, 'train_default_l2': 0.0, 'train_full_cosine': 1.0, 'train_full_l2': 0.0, 'train_wrong_user_cosine': 1.0, 'train_wrong_user_l2': 0.0}
+
+## Debug Readiness Gate
+
+- Passed: False
+- Checks: {'train_default_l2_positive': False, 'train_wrong_user_l2_positive': False, 'wrong_user_masked_warning_false': True, 'no_surface_not_better_than_full': True}
 
 ## Comparisons vs baseline A (directional)
 

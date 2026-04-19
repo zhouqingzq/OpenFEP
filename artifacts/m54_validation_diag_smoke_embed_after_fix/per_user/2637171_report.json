@@ -1,12 +1,12 @@
 {
   "aggregate": {
-    "artifact_rules_version": "m54_v4_stop_bleed",
+    "artifact_rules_version": "m54_v5_formal_evidence",
     "behavioral_baseline_c_mean": 0.0,
     "behavioral_hard_metric_enabled": true,
     "behavioral_labeling": "generated_action_direct_real_reply_classifier",
     "behavioral_personality_mean": 0.0,
     "classifier_validation": {
-      "behavioral_hard_metric_enabled": true,
+      "behavioral_hard_metric_enabled": false,
       "class_distribution": {
         "gate": {
           "escape": 50,
@@ -21,7 +21,7 @@
       },
       "dataset_origin": "data\\m54_classifier_gate.jsonl",
       "dataset_separation_ok": true,
-      "degradation_required": false,
+      "degradation_required": true,
       "engine": "sentence_embedding_nearest_centroid",
       "formal_dataset_minima": {
         "gate_per_class": 50,
@@ -36,13 +36,13 @@
       "macro_f1_11class": 0.562856,
       "macro_f1_3class": 0.803886,
       "min_macro_f1_3class": 0.7,
-      "passed_3class_gate": true,
+      "passed_3class_gate": false,
       "sample_count": 150,
       "train_count": 300
     },
     "diagnostic_trace_enabled": true,
     "formal_requested": false,
-    "metric_version": "m54_v4_stop_bleed",
+    "metric_version": "m54_v5_formal_evidence",
     "pilot": {
       "behavioral_diff_sd": 0.015025,
       "behavioral_escalated": false,
@@ -221,7 +221,7 @@
       "behavioral_hard_metric_enabled": true,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
       "classifier_validation": {
-        "behavioral_hard_metric_enabled": true,
+        "behavioral_hard_metric_enabled": false,
         "class_distribution": {
           "gate": {
             "escape": 50,
@@ -236,7 +236,7 @@
         },
         "dataset_origin": "data\\m54_classifier_gate.jsonl",
         "dataset_separation_ok": true,
-        "degradation_required": false,
+        "degradation_required": true,
         "engine": "sentence_embedding_nearest_centroid",
         "formal_dataset_minima": {
           "gate_per_class": 50,
@@ -251,7 +251,7 @@
         "macro_f1_11class": 0.562856,
         "macro_f1_3class": 0.803886,
         "min_macro_f1_3class": 0.7,
-        "passed_3class_gate": true,
+        "passed_3class_gate": false,
         "sample_count": 150,
         "train_count": 300
       },
@@ -694,7 +694,7 @@
       "behavioral_hard_metric_enabled": true,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
       "classifier_validation": {
-        "behavioral_hard_metric_enabled": true,
+        "behavioral_hard_metric_enabled": false,
         "class_distribution": {
           "gate": {
             "escape": 50,
@@ -709,7 +709,7 @@
         },
         "dataset_origin": "data\\m54_classifier_gate.jsonl",
         "dataset_separation_ok": true,
-        "degradation_required": false,
+        "degradation_required": true,
         "engine": "sentence_embedding_nearest_centroid",
         "formal_dataset_minima": {
           "gate_per_class": 50,
@@ -724,7 +724,7 @@
         "macro_f1_11class": 0.562856,
         "macro_f1_3class": 0.803886,
         "min_macro_f1_3class": 0.7,
-        "passed_3class_gate": true,
+        "passed_3class_gate": false,
         "sample_count": 150,
         "train_count": 300
       },
@@ -1049,7 +1049,7 @@
       "behavioral_hard_metric_enabled": true,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
       "classifier_validation": {
-        "behavioral_hard_metric_enabled": true,
+        "behavioral_hard_metric_enabled": false,
         "class_distribution": {
           "gate": {
             "escape": 50,
@@ -1064,7 +1064,7 @@
         },
         "dataset_origin": "data\\m54_classifier_gate.jsonl",
         "dataset_separation_ok": true,
-        "degradation_required": false,
+        "degradation_required": true,
         "engine": "sentence_embedding_nearest_centroid",
         "formal_dataset_minima": {
           "gate_per_class": 50,
@@ -1079,7 +1079,7 @@
         "macro_f1_11class": 0.562856,
         "macro_f1_3class": 0.803886,
         "min_macro_f1_3class": 0.7,
-        "passed_3class_gate": true,
+        "passed_3class_gate": false,
         "sample_count": 150,
         "train_count": 300
       },
@@ -1628,7 +1628,7 @@
       "behavioral_hard_metric_enabled": true,
       "behavioral_labeling": "generated_action_direct_real_reply_classifier",
       "classifier_validation": {
-        "behavioral_hard_metric_enabled": true,
+        "behavioral_hard_metric_enabled": false,
         "class_distribution": {
           "gate": {
             "escape": 50,
@@ -1643,7 +1643,7 @@
         },
         "dataset_origin": "data\\m54_classifier_gate.jsonl",
         "dataset_separation_ok": true,
-        "degradation_required": false,
+        "degradation_required": true,
         "engine": "sentence_embedding_nearest_centroid",
         "formal_dataset_minima": {
           "gate_per_class": 50,
@@ -1658,7 +1658,7 @@
         "macro_f1_11class": 0.562856,
         "macro_f1_3class": 0.803886,
         "min_macro_f1_3class": 0.7,
-        "passed_3class_gate": true,
+        "passed_3class_gate": false,
         "sample_count": 150,
         "train_count": 300
       },

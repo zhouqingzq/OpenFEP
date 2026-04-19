@@ -437,6 +437,7 @@ def _ablation_summary(
     personality_11: list[str],
     personality_3: list[str],
     baseline_a_semantic: float,
+    baseline_c_semantic: float,
     real_11: list[str],
     real_3: list[str],
 ) -> dict[str, object]:
@@ -446,6 +447,7 @@ def _ablation_summary(
         "name": name,
         "semantic_mean": round(float(semantic_mean), 6),
         "semantic_vs_baseline_a_diff": round(float(semantic_mean) - float(baseline_a_semantic), 6),
+        "semantic_vs_baseline_c_diff": round(float(semantic_mean) - float(baseline_c_semantic), 6),
         "action_agreement_vs_personality": _agreement_rate(gen_11, personality_11),
         "strategy_agreement_vs_personality": _agreement_rate(gen_3, personality_3),
         "text_similarity_vs_personality": _mean_semantic_pair_score(generated, personality_generated),
@@ -885,6 +887,7 @@ def run_validation(
                     personality_11=g11,
                     personality_3=g3,
                     baseline_a_semantic=float(baseline_a_values.get("semantic_similarity", 0.0)),
+                    baseline_c_semantic=float(baseline_c_values.get("semantic_similarity", 0.0)),
                     real_11=ns_r11,
                     real_3=ns_r3,
                 )
@@ -914,6 +917,7 @@ def run_validation(
                     personality_11=g11,
                     personality_3=g3,
                     baseline_a_semantic=float(baseline_a_values.get("semantic_similarity", 0.0)),
+                    baseline_c_semantic=float(baseline_c_values.get("semantic_similarity", 0.0)),
                     real_11=np_r11,
                     real_3=np_r3,
                 )
@@ -939,6 +943,7 @@ def run_validation(
                     personality_11=g11,
                     personality_3=g3,
                     baseline_a_semantic=float(baseline_a_values.get("semantic_similarity", 0.0)),
+                    baseline_c_semantic=float(baseline_c_values.get("semantic_similarity", 0.0)),
                     real_11=so_r11,
                     real_3=so_r3,
                 )

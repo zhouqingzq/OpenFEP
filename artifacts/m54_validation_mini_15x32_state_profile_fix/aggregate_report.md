@@ -1,26 +1,28 @@
-# M5.4 Stop-Bleed Notice
-
-This historical artifact is fail-closed under m54_v4_stop_bleed. Current classifier labels are LLM-generated provisional data: usable for engineering/direction checks, but not for formal human-labeled acceptance. See aggregate_report.json / m54_acceptance.json for machine-readable blockers.
-
 # M5.4 Validation Aggregate Report
 
 - Users: 15 (tested: 15, skipped no strategy: 0)
 - Required users: 15
 - Agent state: users with metric 15, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 15, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 15, 'users_topic_split_valid_for_hard_gate': 15}
-- Metric version: m54_v3 (generated_action_direct_real_reply_classifier)
+- Metric version: m54_v5_formal_evidence (generated_action_direct_real_reply_classifier)
 - Classifier 3-class gate: False
+- Classifier evidence tier: repo_fixture_smoke
 - Semantic embedding gate: False
 - Statistical gate: True
 - Formal acceptance eligible: False
 - Behavioral hard metric degraded (soft-only): True
 - Overall conclusion: partial
 - Hard pass: False
+- Formal blockers: ['classifier_fixture_only', 'partner_gate_failed', 'semantic_engine_not_formal', 'topic_gate_failed']
 - Pilot gate: True
 - Split gate: True
 - Partner strategy hard pass: False
 - Topic strategy hard pass: False
 - Formal Baseline C gate: True
+- Diagnostic trace gate: True
+- Agent-state differentiation gate: True
+- Behavioral majority baseline gate: True
+- Surface ablation gate: True
 - Diagnostic trace rows: 1884
 
 ## Acceptance (hard metrics)
@@ -30,6 +32,7 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 | classifier_3class_gate_passed | False |
 | behavioral_hard_metric_required | False |
 | semantic_similarity_vs_baseline_a_significant_better | True |
+| semantic_similarity_vs_baseline_c_significant_better | True |
 | behavioral_similarity_strategy_vs_baseline_c_significant_better | False |
 | semantic_wilcoxon_valid | True |
 | behavioral_wilcoxon_valid | True |
@@ -43,7 +46,11 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 | partner_gate | False |
 | topic_gate | False |
 | reproducibility_gate | True |
-| baseline_c_full_population_implant | True |
+| baseline_c_leave_one_out_population_average | True |
+| diagnostic_trace_gate | True |
+| agent_state_differentiation_gate | True |
+| behavioral_majority_baseline_gate | True |
+| surface_ablation_gate | True |
 
 ## Semantic Delta Diagnostics
 
@@ -62,12 +69,20 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 
 - Wrong-user masked warning: False
 - Baseline C too-close warning: False ()
+- Baseline C too-weak warning (diagnostic-only): True (text_similarity_low,semantic_mean_low)
 
 | Baseline | rows | action agree | strategy agree | template agree | text sim | duplicate | semantic delta | action JSD | strategy JSD |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `baseline_a` | 1884 | 0.4384 | 0.6035 | 0.1433 | 0.4530 | 0.0032 | 0.0095 | 0.0554 | 0.0149 |
 | `baseline_c` | 1884 | 0.2925 | 0.3689 | 0.0971 | 0.0346 | 0.0000 | 0.0447 | 0.1472 | 0.1277 |
 | `baseline_b_best` | 1884 | 0.4835 | 0.5881 | 0.0000 | 0.0196 | 0.0000 | 0.0236 | 0.0217 | 0.0027 |
+
+## Profile Expression Diagnostics
+
+| Surface | rows | expression source rates | rhetorical move rates |
+| --- | --- | --- | --- |
+| `personality` | 1884 | {'generic': 1.0} | {'direct_advisory': 0.909236, 'exploratory_questioning': 0.089172, 'warm_supportive': 0.001592} |
+| `baseline_c` | 1884 | {'generic': 1.0} | {'direct_advisory': 0.93259, 'exploratory_questioning': 0.06741} |
 
 ## Ablation Diagnostics
 

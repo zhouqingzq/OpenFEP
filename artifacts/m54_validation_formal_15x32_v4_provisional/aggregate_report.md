@@ -4,20 +4,20 @@
 - Required users: 15
 - Agent state: users with metric 15, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 15, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 15, 'users_topic_split_valid_for_hard_gate': 15}
-- Metric version: m54_v4_stop_bleed (generated_action_direct_real_reply_classifier)
+- Metric version: m54_v5_formal_evidence (generated_action_direct_real_reply_classifier)
 - Classifier 3-class gate: False
 - Classifier evidence tier: llm_generated_provisional
 - Semantic embedding gate: True
 - Statistical gate: True
 - Formal acceptance eligible: False
 - Behavioral hard metric degraded (soft-only): True
-- Overall conclusion: partial
+- Overall conclusion: fail
 - Hard pass: False
-- Formal blockers: ['behavioral_majority_baseline_matches_or_beats_personality', 'classifier_provisional_llm_labels', 'surface_ablation_failed']
+- Formal blockers: ['behavioral_majority_baseline_matches_or_beats_personality', 'classifier_provisional_llm_labels', 'metric_hard_pass_failed', 'no_policy_ablation_failed', 'partner_gate_failed', 'semantic_vs_baseline_c_failed', 'surface_ablation_failed', 'surface_only_ablation_failed', 'topic_gate_failed']
 - Pilot gate: True
 - Split gate: True
-- Partner strategy hard pass: True
-- Topic strategy hard pass: True
+- Partner strategy hard pass: False
+- Topic strategy hard pass: False
 - Formal Baseline C gate: True
 - Diagnostic trace gate: True
 - Agent-state differentiation gate: True
@@ -30,20 +30,21 @@
 | Check | Result |
 | --- | --- |
 | classifier_3class_gate_passed | False |
-| behavioral_hard_metric_required | False |
+| behavioral_hard_metric_required | True |
 | semantic_similarity_vs_baseline_a_significant_better | True |
+| semantic_similarity_vs_baseline_c_significant_better | False |
 | behavioral_similarity_strategy_vs_baseline_c_significant_better | False |
 | semantic_wilcoxon_valid | True |
 | behavioral_wilcoxon_valid | True |
 | agent_state_similarity_mean_ge_0.80 | True |
-| metric_hard_pass | True |
+| metric_hard_pass | False |
 | formal_acceptance_eligible | False |
 | semantic_embedding_gate | True |
 | statistical_gate | True |
 | pilot_gate | True |
 | split_gate_all_required_strategies | True |
-| partner_gate | True |
-| topic_gate | True |
+| partner_gate | False |
+| topic_gate | False |
 | reproducibility_gate | True |
 | baseline_c_leave_one_out_population_average | True |
 | diagnostic_trace_gate | True |
@@ -125,10 +126,10 @@
 
 ## Hard metric rows (summary)
 - `semantic_similarity`: personality=0.4452, baseline_a=0.3818, p(vs_a)=0.0042, baseline_c=0.5485, p(vs_c)=1.0000
+- `behavioral_similarity_strategy`: personality=0.2221, baseline_a=0.0632, p(vs_a)=0.0049, baseline_c=0.8879, p(vs_c)=1.0000
 - `agent_state_similarity`: personality=0.9975, baseline_a=—, p(vs_a)=—, baseline_c=—, p(vs_c)=—
 
 ## Soft Metrics
-- `behavioral_similarity_strategy`: personality=0.2221, baseline_a=0.0632, baseline_c=0.8879
 - `behavioral_similarity_action11`: personality=0.1107, baseline_a=0.0068, baseline_c=0.6998
 - `stylistic_similarity`: personality=0.9115, baseline_a=0.8661, baseline_c=0.7113
 - `personality_similarity`: personality=1.0000, baseline_a=1.0000, baseline_c=1.0000
@@ -137,7 +138,7 @@
 
 | Strategy | hard_pass | semantic vs A sig | behavioral vs C sig | agent_state mean ok |
 | --- | --- | --- | --- | --- |
-| `partner` | True | True | False | True |
-| `random` | True | True | False | True |
-| `temporal` | True | True | False | True |
-| `topic` | True | True | False | True |
+| `partner` | False | True | False | True |
+| `random` | False | True | False | True |
+| `temporal` | False | True | False | True |
+| `topic` | False | True | False | True |

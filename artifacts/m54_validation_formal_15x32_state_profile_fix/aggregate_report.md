@@ -1,49 +1,56 @@
-# M5.4 Stop-Bleed Notice
-
-This historical artifact is fail-closed under m54_v4_stop_bleed. Current classifier labels are LLM-generated provisional data: usable for engineering/direction checks, but not for formal human-labeled acceptance. See aggregate_report.json / m54_acceptance.json for machine-readable blockers.
-
 # M5.4 Validation Aggregate Report
 
 - Users: 15 (tested: 15, skipped no strategy: 0)
 - Required users: 15
 - Agent state: users with metric 15, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 15, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 15, 'users_topic_split_valid_for_hard_gate': 15}
-- Metric version: m54_v3 (generated_action_direct_real_reply_classifier)
-- Classifier 3-class gate: True
+- Metric version: m54_v5_formal_evidence (generated_action_direct_real_reply_classifier)
+- Classifier 3-class gate: False
+- Classifier evidence tier: repo_fixture_smoke
 - Semantic embedding gate: True
 - Statistical gate: True
-- Formal acceptance eligible: True
-- Behavioral hard metric degraded (soft-only): False
+- Formal acceptance eligible: False
+- Behavioral hard metric degraded (soft-only): True
 - Overall conclusion: fail
 - Hard pass: False
+- Formal blockers: ['agent_state_differentiation_failed', 'baseline_c_gate_failed', 'behavioral_majority_baseline_matches_or_beats_personality', 'classifier_fixture_only', 'diagnostic_trace_missing', 'metric_hard_pass_failed', 'partner_gate_failed', 'semantic_vs_baseline_c_failed', 'surface_ablation_missing', 'topic_gate_failed']
 - Pilot gate: True
 - Split gate: True
 - Partner strategy hard pass: False
 - Topic strategy hard pass: False
-- Formal Baseline C gate: True
+- Formal Baseline C gate: False
+- Diagnostic trace gate: False
+- Agent-state differentiation gate: False
+- Behavioral majority baseline gate: False
+- Surface ablation gate: False
 - Diagnostic trace rows: 0
 
 ## Acceptance (hard metrics)
 
 | Check | Result |
 | --- | --- |
-| classifier_3class_gate_passed | True |
+| classifier_3class_gate_passed | False |
 | behavioral_hard_metric_required | True |
 | semantic_similarity_vs_baseline_a_significant_better | True |
+| semantic_similarity_vs_baseline_c_significant_better | False |
 | behavioral_similarity_strategy_vs_baseline_c_significant_better | False |
 | semantic_wilcoxon_valid | True |
 | behavioral_wilcoxon_valid | True |
 | agent_state_similarity_mean_ge_0.80 | True |
 | metric_hard_pass | False |
-| formal_acceptance_eligible | True |
+| formal_acceptance_eligible | False |
 | semantic_embedding_gate | True |
 | statistical_gate | True |
 | pilot_gate | True |
 | split_gate_all_required_strategies | True |
 | partner_gate | False |
 | topic_gate | False |
-| reproducibility_gate | True |
-| baseline_c_full_population_implant | True |
+| reproducibility_gate | False |
+| baseline_c_leave_one_out_population_average | False |
+| diagnostic_trace_gate | False |
+| agent_state_differentiation_gate | False |
+| behavioral_majority_baseline_gate | False |
+| surface_ablation_gate | False |
 
 ## Semantic Delta Diagnostics
 
@@ -81,8 +88,8 @@ This historical artifact is fail-closed under m54_v4_stop_bleed. Current classif
 
 ## Debug Readiness Gate
 
-- Passed: False
-- Checks: {'train_default_l2_positive': True, 'train_wrong_user_l2_positive': True, 'wrong_user_masked_warning_false': True, 'no_surface_not_better_than_full': False}
+- Passed: True
+- Checks: {'train_default_l2_positive': True, 'train_wrong_user_l2_positive': True, 'wrong_user_masked_warning_false': True, 'no_surface_not_better_than_full': True}
 
 ## Comparisons vs baseline A (directional)
 

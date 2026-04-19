@@ -131,7 +131,13 @@ def _classifier_gate_summary(reports: list[ValidationReport]) -> dict[str, objec
                 continue
             cv = strategy_result.get("classifier_validation")
             if isinstance(cv, dict):
-                return dict(cv)
+                out = dict(cv)
+                tier = str(out.get("classifier_evidence_tier", "repo_fixture_smoke"))
+                if tier != "external_human_labeled" or not bool(out.get("formal_gate_eligible", False)):
+                    out["passed_3class_gate"] = False
+                    out["behavioral_hard_metric_enabled"] = False
+                    out["degradation_required"] = True
+                return out
     return {
         "passed_3class_gate": False,
         "formal_gate_eligible": False,
@@ -555,24 +561,30 @@ def _per_strategy_hard_pass(
     comparisons_by_strategy: dict[str, dict[str, dict[str, object]]],
     *,
     classifier_3class_gate_passed: bool,
+    formal_requested: bool,
 ) -> dict[str, dict[str, bool]]:
     """Same hard rules as _compute_hard_pass but per split strategy."""
     out: dict[str, dict[str, bool]] = {}
     for sk, comp in comparisons_by_strategy.items():
         sem_stat_ok = bool(comp["semantic_similarity"].get("statistical_valid", True))
-        sem_ok = bool(comp["semantic_similarity"]["vs_a_significant"]) and sem_stat_ok
+        sem_vs_a_sig = bool(comp["semantic_similarity"]["vs_a_significant"])
+        sem_vs_c_sig = bool(comp["semantic_similarity"]["vs_c_significant"])
+        sem_ok = bool(sem_vs_a_sig and sem_stat_ok and ((not formal_requested) or sem_vs_c_sig))
         beh_row = comp["behavioral_similarity_strategy"]
         beh_vs_c_sig = bool(beh_row["vs_c_significant"])
         beh_stat_ok = bool(beh_row.get("statistical_valid", True))
         if classifier_3class_gate_passed:
             beh_ok = beh_vs_c_sig and beh_stat_ok
+        elif formal_requested:
+            beh_ok = False
         else:
             beh_ok = True
         as_row = comp["agent_state_similarity"]
         agent_state_ok = float(as_row["personality_mean"]) >= AGENT_STATE_MIN_MEAN
         out[sk] = {
             "hard_pass": bool(sem_ok and beh_ok and agent_state_ok),
-            "semantic_similarity_vs_baseline_a_significant_better": sem_ok,
+            "semantic_similarity_vs_baseline_a_significant_better": bool(sem_vs_a_sig and sem_stat_ok),
+            "semantic_similarity_vs_baseline_c_significant_better": bool(sem_vs_c_sig and sem_stat_ok),
             "behavioral_similarity_strategy_vs_baseline_c_significant_better": beh_vs_c_sig,
             "semantic_wilcoxon_valid": sem_stat_ok,
             "behavioral_wilcoxon_valid": beh_stat_ok,
@@ -595,15 +607,20 @@ def _compute_hard_pass(
     comparisons: dict[str, dict[str, object]],
     *,
     classifier_3class_gate_passed: bool,
+    formal_requested: bool,
 ) -> tuple[bool, dict[str, bool]]:
-    """Semantic vs A; behavioral(strategy) vs C when classifier gate passes; agent state threshold."""
+    """Formal hard pass proves semantic vs A/C, behavioral vs C, and agent-state stability."""
     sem_stat_ok = bool(comparisons["semantic_similarity"].get("statistical_valid", True))
-    sem_ok = bool(comparisons["semantic_similarity"]["vs_a_significant"]) and sem_stat_ok
+    sem_vs_a_sig = bool(comparisons["semantic_similarity"]["vs_a_significant"])
+    sem_vs_c_sig = bool(comparisons["semantic_similarity"]["vs_c_significant"])
+    sem_ok = bool(sem_vs_a_sig and sem_stat_ok and ((not formal_requested) or sem_vs_c_sig))
     beh_row = comparisons["behavioral_similarity_strategy"]
     beh_vs_c_sig = bool(beh_row["vs_c_significant"])
     beh_stat_ok = bool(beh_row.get("statistical_valid", True))
     if classifier_3class_gate_passed:
         beh_ok = beh_vs_c_sig and beh_stat_ok
+    elif formal_requested:
+        beh_ok = False
     else:
         beh_ok = True
     as_row = comparisons["agent_state_similarity"]
@@ -611,8 +628,9 @@ def _compute_hard_pass(
     hard_pass = bool(sem_ok and beh_ok and agent_state_ok)
     breakdown = {
         "classifier_3class_gate_passed": bool(classifier_3class_gate_passed),
-        "behavioral_hard_metric_required": bool(classifier_3class_gate_passed),
-        "semantic_similarity_vs_baseline_a_significant_better": sem_ok,
+        "behavioral_hard_metric_required": bool(classifier_3class_gate_passed or formal_requested),
+        "semantic_similarity_vs_baseline_a_significant_better": bool(sem_vs_a_sig and sem_stat_ok),
+        "semantic_similarity_vs_baseline_c_significant_better": bool(sem_vs_c_sig and sem_stat_ok),
         "behavioral_similarity_strategy_vs_baseline_c_significant_better": beh_vs_c_sig,
         "semantic_wilcoxon_valid": sem_stat_ok,
         "behavioral_wilcoxon_valid": beh_stat_ok,
@@ -996,6 +1014,22 @@ def _ablation_summary(reports: list[ValidationReport]) -> dict[str, object]:
                 float(mean([_safe_float(row.get("semantic_vs_baseline_a_diff")) for row in rows])),
                 6,
             ),
+            "semantic_vs_baseline_c_diff_mean": round(
+                float(
+                    mean(
+                        [
+                            _safe_float(
+                                row.get(
+                                    "semantic_vs_baseline_c_diff",
+                                    row.get("semantic_vs_baseline_a_diff"),
+                                )
+                            )
+                            for row in rows
+                        ]
+                    )
+                ),
+                6,
+            ),
             "action_agreement_vs_personality_mean": round(
                 float(mean([_safe_float(row.get("action_agreement_vs_personality")) for row in rows])),
                 6,
@@ -1016,36 +1050,23 @@ def _surface_ablation_gate(
     ablation_summary: dict[str, object],
     formal_requested: bool,
 ) -> dict[str, object]:
-    full_diffs: dict[str, list[float]] = {
-        "no_surface_profile": [],
-        "surface_only_default_agent": [],
-    }
-    ablation_diffs: dict[str, list[float]] = {
-        "no_surface_profile": [],
-        "surface_only_default_agent": [],
-    }
+    required_ablations = ("no_surface_profile", "no_policy_trait_bias", "surface_only_default_agent")
+    full_diffs: dict[str, list[float]] = {name: [] for name in required_ablations}
+    ablation_diffs: dict[str, list[float]] = {name: [] for name in required_ablations}
     diagnostic_trace_present = False
     for report in reports:
-        user_full_diffs: dict[str, list[float]] = {
-            "no_surface_profile": [],
-            "surface_only_default_agent": [],
-        }
-        user_ablation_diffs: dict[str, list[float]] = {
-            "no_surface_profile": [],
-            "surface_only_default_agent": [],
-        }
+        user_full_diffs: dict[str, list[float]] = {name: [] for name in required_ablations}
+        user_ablation_diffs: dict[str, list[float]] = {name: [] for name in required_ablations}
         for strategy_result in report.per_strategy.values():
             if not _strategy_eligible(strategy_result):
                 continue
             p = strategy_result.get("personality_metrics", {})
-            a = strategy_result.get("baseline_a_metrics", {})
-            if not isinstance(p, dict) or not isinstance(a, dict):
+            c = strategy_result.get("baseline_c_metrics", {})
+            if not isinstance(p, dict) or not isinstance(c, dict):
                 continue
-            if "semantic_similarity" not in p or "semantic_similarity" not in a:
+            if "semantic_similarity" not in p or "semantic_similarity" not in c:
                 continue
-            full_diff = _safe_float(p.get("semantic_similarity")) - _safe_float(
-                a.get("semantic_similarity")
-            )
+            full_diff = _safe_float(p.get("semantic_similarity")) - _safe_float(c.get("semantic_similarity"))
             rows = strategy_result.get("ablation_summary", [])
             if not isinstance(rows, list):
                 continue
@@ -1061,14 +1082,21 @@ def _surface_ablation_gate(
                     continue
                 seen_for_strategy.add(name)
                 user_full_diffs[name].append(float(full_diff))
-                user_ablation_diffs[name].append(_safe_float(row.get("semantic_vs_baseline_a_diff")))
-        for name in ("no_surface_profile", "surface_only_default_agent"):
+                user_ablation_diffs[name].append(
+                    _safe_float(
+                        row.get(
+                            "semantic_vs_baseline_c_diff",
+                            row.get("semantic_vs_baseline_a_diff"),
+                        )
+                    )
+                )
+        for name in required_ablations:
             if user_full_diffs[name] and user_ablation_diffs[name]:
                 full_diffs[name].append(float(mean(user_full_diffs[name])))
                 ablation_diffs[name].append(float(mean(user_ablation_diffs[name])))
 
     comparisons: dict[str, dict[str, object]] = {}
-    for name in ("no_surface_profile", "surface_only_default_agent"):
+    for name in required_ablations:
         pvalue, significant, mean_diff, better = paired_comparison(
             full_diffs[name],
             ablation_diffs[name],
@@ -1079,8 +1107,8 @@ def _surface_ablation_gate(
         ablation_mean = float(mean(ablation_diffs[name])) if ablation_diffs[name] else 0.0
         comparisons[name] = {
             "pairs": int(min(len(full_diffs[name]), len(ablation_diffs[name]))),
-            "full_semantic_vs_baseline_a_diff_mean": round(float(full_mean), 6),
-            "ablation_semantic_vs_baseline_a_diff_mean": round(float(ablation_mean), 6),
+            "full_semantic_vs_baseline_c_diff_mean": round(float(full_mean), 6),
+            "ablation_semantic_vs_baseline_c_diff_mean": round(float(ablation_mean), 6),
             "full_vs_ablation_mean_diff": round(float(mean_diff), 6),
             "full_better": bool(better),
             "full_significant_better": bool(significant),
@@ -1088,19 +1116,36 @@ def _surface_ablation_gate(
         }
 
     no_surface = comparisons["no_surface_profile"]
+    no_policy = comparisons["no_policy_trait_bias"]
     surface_only = comparisons["surface_only_default_agent"]
     no_surface_present = bool(no_surface["pairs"])
+    no_policy_present = bool(no_policy["pairs"])
     surface_only_present = bool(surface_only["pairs"])
+    no_surface_below_full = bool(
+        no_surface_present
+        and _safe_float(no_surface["ablation_semantic_vs_baseline_c_diff_mean"])
+        < _safe_float(no_surface["full_semantic_vs_baseline_c_diff_mean"])
+    )
+    no_policy_below_full = bool(
+        no_policy_present
+        and _safe_float(no_policy["ablation_semantic_vs_baseline_c_diff_mean"])
+        < _safe_float(no_policy["full_semantic_vs_baseline_c_diff_mean"])
+    )
     surface_only_below_full = bool(
         surface_only_present
-        and _safe_float(surface_only["ablation_semantic_vs_baseline_a_diff_mean"])
-        < _safe_float(surface_only["full_semantic_vs_baseline_a_diff_mean"])
+        and _safe_float(surface_only["ablation_semantic_vs_baseline_c_diff_mean"])
+        < _safe_float(surface_only["full_semantic_vs_baseline_c_diff_mean"])
     )
     checks = {
         "diagnostic_trace_present": bool(diagnostic_trace_present),
-        "ablation_rows_present": bool(ablation_summary and no_surface_present and surface_only_present),
+        "ablation_rows_present": bool(
+            ablation_summary and no_surface_present and no_policy_present and surface_only_present
+        ),
         "full_significant_better_than_no_surface": bool(no_surface["full_significant_better"]),
+        "full_significant_better_than_no_policy": bool(no_policy["full_significant_better"]),
         "full_significant_better_than_surface_only": bool(surface_only["full_significant_better"]),
+        "no_surface_below_full": bool(no_surface_below_full),
+        "no_policy_below_full": bool(no_policy_below_full),
         "surface_only_below_full": bool(surface_only_below_full),
     }
     passed = (not formal_requested) or all(checks.values())
@@ -1111,9 +1156,9 @@ def _surface_ablation_gate(
         "checks": checks,
         "comparisons": comparisons,
         "policy": (
-            "formal acceptance requires full personality generation to beat no-surface "
-            "and surface-only ablations on semantic-vs-baseline-A paired Wilcoxon, "
-            "with surface-only below full"
+            "formal acceptance requires full personality generation to beat no-surface, "
+            "no-policy, and surface-only ablations on semantic-vs-baseline-C paired Wilcoxon, "
+            "with every ablation below full"
         ),
     }
 
@@ -1484,6 +1529,8 @@ def _formal_blockers(
     partner_gate: dict[str, object],
     topic_gate: dict[str, object],
     metric_hard_pass: bool,
+    metric_hard_breakdown: dict[str, bool],
+    formal_requested: bool,
 ) -> list[str]:
     blockers: list[str] = []
     classifier_tier = str(classifier_gate_summary.get("classifier_evidence_tier", "repo_fixture_smoke"))
@@ -1513,7 +1560,21 @@ def _formal_blockers(
         if isinstance(checks, dict) and not checks.get("ablation_rows_present", False):
             blockers.append("surface_ablation_missing")
         else:
-            blockers.append("surface_ablation_failed")
+            if isinstance(checks, dict) and (
+                not checks.get("full_significant_better_than_no_policy", False)
+                or not checks.get("no_policy_below_full", False)
+            ):
+                blockers.append("no_policy_ablation_failed")
+            if isinstance(checks, dict) and (
+                not checks.get("full_significant_better_than_surface_only", False)
+                or not checks.get("surface_only_below_full", False)
+            ):
+                blockers.append("surface_only_ablation_failed")
+            if isinstance(checks, dict) and (
+                not checks.get("full_significant_better_than_no_surface", False)
+                or not checks.get("no_surface_below_full", False)
+            ):
+                blockers.append("surface_ablation_failed")
     if not pilot_gate.get("passed"):
         blockers.append("pilot_gate_failed")
     if not split_gate.get("passed"):
@@ -1523,6 +1584,10 @@ def _formal_blockers(
     if not topic_gate.get("passed"):
         blockers.append("topic_gate_failed")
     if not metric_hard_pass:
+        if formal_requested and not metric_hard_breakdown.get(
+            "semantic_similarity_vs_baseline_c_significant_better", True
+        ):
+            blockers.append("semantic_vs_baseline_c_failed")
         blockers.append("metric_hard_pass_failed")
     return sorted(set(blockers))
 
@@ -1569,9 +1634,10 @@ def generate_report(
         reports, "agent_state_similarity"
     )
     classifier_gate = _classifier_3class_gate_passed(reports)
+    formal_requested = _formal_requested(reports)
     behavioral_degraded = not classifier_gate
 
-    if classifier_gate:
+    if classifier_gate or formal_requested:
         hard_metrics_list = [
             "semantic_similarity",
             "behavioral_similarity_strategy",
@@ -1594,16 +1660,17 @@ def generate_report(
     metric_hard_pass, metric_hard_breakdown = _compute_hard_pass(
         comparisons,
         classifier_3class_gate_passed=classifier_gate,
+        formal_requested=formal_requested,
     )
     per_strategy_hard_pass = _per_strategy_hard_pass(
         per_strategy_comparisons,
         classifier_3class_gate_passed=classifier_gate,
+        formal_requested=formal_requested,
     )
     partner_hard_pass = per_strategy_hard_pass.get("partner", {}).get("hard_pass")
     topic_hard_pass = per_strategy_hard_pass.get("topic", {}).get("hard_pass")
     topic_split_summary = _topic_split_summary(reports)
     required_users = _required_users(reports)
-    formal_requested = _formal_requested(reports)
     diagnostic_trace_rows = _write_diagnostic_trace(reports, output_dir)
     pilot_gate = _pilot_gate(reports, required_users)
     split_gate = _split_gate(per_strategy_comparisons, required_users)
@@ -1702,6 +1769,8 @@ def generate_report(
         partner_gate=partner_gate,
         topic_gate=topic_gate,
         metric_hard_pass=metric_hard_pass,
+        metric_hard_breakdown=metric_hard_breakdown,
+        formal_requested=formal_requested,
     )
     if hard_pass:
         overall_conclusion = "pass"
@@ -1725,8 +1794,8 @@ def generate_report(
         "version": ACCEPTANCE_RULES_VERSION,
         "hard_metrics": list(hard_metrics_list),
         "soft_metrics": list(soft_metrics_list),
-        "semantic_similarity": "paired Wilcoxon one-sided greater vs baseline A (p < 0.05) and mean paired diff > 0; one paired sample per user (mean across split strategies)",
-        "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
+        "semantic_similarity": "formal paired Wilcoxon one-sided greater vs baseline A and baseline C (p < 0.05) with mean paired diff > 0; one paired sample per user (mean across split strategies)",
+        "behavioral_similarity_strategy": "formal paired Wilcoxon one-sided greater vs baseline C; external-human 3-class classifier gate is required before this can count as hard evidence",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
         "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
@@ -1740,7 +1809,7 @@ def generate_report(
         "diagnostic_trace_gate": "formal acceptance requires non-empty diagnostic trace and audit summaries",
         "behavioral_majority_baseline_gate": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
         "agent_state_differentiation_gate": "train-only state must be closer to full-data state than default or wrong-user state",
-        "surface_ablation_gate": "formal acceptance requires full personality generation to significantly beat no-surface and surface-only ablations, and surface-only must remain below full",
+        "surface_ablation_gate": "formal acceptance requires full personality generation to significantly beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C deltas, and every ablation must remain below full",
     }
 
     metric_interpretations = {

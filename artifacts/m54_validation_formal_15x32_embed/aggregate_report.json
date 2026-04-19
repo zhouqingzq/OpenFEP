@@ -1,44 +1,1185 @@
 {
+  "ablation_summary": {},
+  "ablation_summary_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_embed/ablation_summary.json",
   "acceptance_rules": {
+    "agent_state_differentiation_gate": "train-only state must be closer to full-data state than default or wrong-user state",
     "agent_state_similarity": "mean across users >= 0.8 (no baseline significance required)",
     "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
     "aggregation": "per_user_mean_across_strategies",
-    "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
-    "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels; LLM-generated provisional labels are engineering-only",
-    "formal_baseline_c": "Baseline C formal evidence requires population_average_full_implant and leave-one-out population averaging",
+    "behavioral_majority_baseline_gate": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
+    "behavioral_similarity_strategy": "formal paired Wilcoxon one-sided greater vs baseline C; external-human 3-class classifier gate is required before this can count as hard evidence",
+    "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
+    "diagnostic_trace_gate": "formal acceptance requires non-empty diagnostic trace and audit summaries",
+    "formal_baseline_c": "Baseline C must use leave-one-out population averaging via population_average_full_implant; profile_only_average_fallback and skip_population_average_implant are test-only",
     "hard_metrics": [
       "semantic_similarity",
+      "behavioral_similarity_strategy",
       "agent_state_similarity"
     ],
     "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
     "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
     "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
-    "semantic_similarity": "paired Wilcoxon one-sided greater vs baseline A (p < 0.05) and mean paired diff > 0; one paired sample per user (mean across split strategies)",
+    "semantic_similarity": "formal paired Wilcoxon one-sided greater vs baseline A and baseline C (p < 0.05) with mean paired diff > 0; one paired sample per user (mean across split strategies)",
     "soft_metrics": [
-      "behavioral_similarity_strategy",
       "behavioral_similarity_action11",
       "stylistic_similarity",
       "personality_similarity"
     ],
     "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
-    "surface_ablation_gate": "formal acceptance requires full personality generation to beat no-surface and surface-only ablations",
+    "surface_ablation_gate": "formal acceptance requires full personality generation to significantly beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C deltas, and every ablation must remain below full",
     "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
-    "version": "m54_v4_stop_bleed"
+    "version": "m54_v5_formal_evidence"
+  },
+  "agent_state_differentiation_gate": {
+    "comparisons_evaluated": 60,
+    "diagnostic_passed": false,
+    "formal_requested": true,
+    "passed": false,
+    "policy": "train-only state must be closer to full-data state than default or wrong-user state",
+    "train_default_l2_mean": 0.0,
+    "train_full_closer_than_default": false,
+    "train_full_closer_than_wrong_user": false,
+    "train_full_l2_mean": 0.0,
+    "train_wrong_user_l2_mean": 0.0
   },
   "agent_state_users_skipped_no_metric": 0,
   "agent_state_users_tested": 15,
-  "artifact_rules_version": "m54_v4_stop_bleed",
+  "artifact_rules_version": "m54_v5_formal_evidence",
+  "baseline_audit_summary": {
+    "baseline_c_too_close_fields": {
+      "action_agreement_rate": 0.0,
+      "mean_baseline_semantic": 0.0,
+      "mean_semantic_delta": 0.0,
+      "mean_text_similarity": 0.0,
+      "template_agreement_rate": 0.0
+    },
+    "baseline_c_too_close_reason": "",
+    "baseline_c_too_close_warning": false,
+    "baseline_c_too_weak_reason": "",
+    "baseline_c_too_weak_warning": false,
+    "baselines": {},
+    "per_user_rankings": {
+      "best": [],
+      "worst": []
+    },
+    "wrong_user_masked_by_generic_template_warning": false
+  },
+  "baseline_audit_summary_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_embed/baseline_audit_summary.json",
+  "baseline_c_behavioral_failure_audit": {
+    "policy": "diagnostic distribution audit for Baseline C and train-majority behavioral baselines",
+    "row_count": 60,
+    "rows": [
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.1,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.138889,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.273092,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.169576,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.191638,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.227273,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.189189,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.189189,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.29703,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.15,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.276923,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.262411,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.1,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637318
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.138889,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.176269,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637318
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.076923,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637318
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.138889,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.176269,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637318
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.085106,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.125501,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637354
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637354
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637354
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637354
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.081967,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.118022,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637372
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.171176,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.258941,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637372
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637372
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.171176,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.258941,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637372
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.229167,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.307155,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637376
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.3,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.444444,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637376
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.196078,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.185185,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637376
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.3,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.444444,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637376
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637379
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637379
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.117241,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.091892,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637379
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637379
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.108491,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.108491,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637470
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.094118,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.094118,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637470
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.159382,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.12069,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637470
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.094118,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.094118,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637470
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.126195,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.136095,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637485
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.089286,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.132325,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637485
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.127099,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.134095,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637485
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.160218,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.114096,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637485
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.085271,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.082397,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637509
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637509
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637509
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637509
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.222222,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637532
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.405618,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.444097,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637532
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637532
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.405618,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.444097,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637532
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.333333,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.333333,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637594
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.5,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.5,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637594
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.5,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.5,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637594
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.5,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.5,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637594
+      }
+    ]
+  },
+  "baseline_c_behavioral_failure_audit_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_embed/baseline_c_behavioral_failure_audit.json",
   "baseline_c_builder": "missing_or_mixed",
   "baseline_c_gate": {
     "baseline_c_builder": "missing_or_mixed",
     "baseline_c_input_scope": "missing_or_mixed",
+    "baseline_c_input_scope_ok": false,
+    "baseline_c_metrics_present": true,
     "formal_requested": true,
+    "leave_one_out_population_average": false,
+    "min_population_user_count": 0,
     "passed": false,
-    "skip_population_average_implant_used": false
+    "population_average_full_implant_used": false,
+    "population_count_ok": false,
+    "required_population_user_count": 9,
+    "skip_population_average_implant_used": false,
+    "target_user_excluded": false
   },
   "behavioral_hard_metric_degraded": true,
   "behavioral_labeling": "generated_action_direct_real_reply_classifier",
-  "classifier_evidence_tier": "llm_generated_provisional",
+  "behavioral_majority_baseline_gate": {
+    "behavioral_metric_majority_warning": false,
+    "comparisons_evaluated": 0,
+    "formal_requested": true,
+    "majority_behavioral_strategy_mean": 0.0,
+    "passed": false,
+    "personality_behavioral_strategy_mean": 0.0,
+    "policy": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality"
+  },
+  "classifier_evidence_tier": "repo_fixture_smoke",
   "classifier_gate": {
     "behavioral_hard_metric_enabled": false,
     "class_distribution": {
@@ -53,9 +1194,6 @@
         "explore": 100
       }
     },
-    "classifier_evidence_tier": "llm_generated_provisional",
-    "classifier_provenance_failure_reason": "llm_generated_provisional_labels",
-    "classifier_provenance_ok": false,
     "dataset_origin": "data\\m54_classifier_gate.jsonl",
     "dataset_separation_ok": true,
     "degradation_required": true,
@@ -68,7 +1206,7 @@
     },
     "formal_dataset_ok": true,
     "formal_engine": true,
-    "formal_gate_eligible": false,
+    "formal_gate_eligible": true,
     "gate_count": 150,
     "macro_f1_11class": 0.262607,
     "macro_f1_3class": 0.469356,
@@ -223,36 +1361,70 @@
       "vs_c_significant": false
     }
   },
-  "diagnostic_trace_gate": {
-    "formal_requested": true
+  "debug_readiness_gate": {
+    "ablation_evaluated": false,
+    "baseline_c_too_close_reason": "",
+    "baseline_c_too_close_warning": false,
+    "checks": {
+      "no_surface_not_better_than_full": true,
+      "train_default_l2_positive": false,
+      "train_wrong_user_l2_positive": false,
+      "wrong_user_masked_warning_false": true
+    },
+    "full_personality_semantic_vs_baseline_a_diff_mean": -0.001488,
+    "no_surface_profile_semantic_vs_baseline_a_diff_mean": 0.0,
+    "passed": false,
+    "policy": "debug-only gate for state/profile differentiation before mini-formal",
+    "train_default_l2_mean": 0.0,
+    "train_wrong_user_l2_mean": 0.0,
+    "wrong_user_masked_by_generic_template_warning": false
   },
+  "diagnostic_trace_gate": {
+    "diagnostic_trace_rows": 0,
+    "formal_requested": true,
+    "passed": false,
+    "policy": "formal acceptance requires non-empty diagnostic_trace.jsonl"
+  },
+  "diagnostic_trace_jsonl": null,
+  "diagnostic_trace_rows": 0,
   "formal_acceptance_eligible": false,
   "formal_blockers": [
+    "agent_state_differentiation_failed",
     "baseline_c_gate_failed",
-    "classifier_provisional_llm_labels",
-    "surface_ablation_missing"
+    "behavioral_majority_baseline_matches_or_beats_personality",
+    "classifier_fixture_only",
+    "diagnostic_trace_missing",
+    "metric_hard_pass_failed",
+    "partner_gate_failed",
+    "semantic_vs_baseline_c_failed",
+    "surface_ablation_missing",
+    "topic_gate_failed"
   ],
   "formal_requested": true,
   "hard_metrics": [
     "semantic_similarity",
+    "behavioral_similarity_strategy",
     "agent_state_similarity"
   ],
   "hard_pass": false,
   "hard_pass_breakdown": {
+    "agent_state_differentiation_gate": false,
     "agent_state_similarity_mean_ge_0.80": true,
-    "baseline_c_full_population_implant": true,
     "baseline_c_leave_one_out_population_average": false,
-    "behavioral_hard_metric_required": false,
+    "behavioral_hard_metric_required": true,
+    "behavioral_majority_baseline_gate": false,
     "behavioral_similarity_strategy_vs_baseline_c_significant_better": false,
     "behavioral_wilcoxon_valid": true,
     "classifier_3class_gate_passed": false,
+    "diagnostic_trace_gate": false,
     "formal_acceptance_eligible": false,
     "metric_hard_pass": false,
     "partner_gate": false,
     "pilot_gate": true,
-    "reproducibility_gate": true,
+    "reproducibility_gate": false,
     "semantic_embedding_gate": true,
     "semantic_similarity_vs_baseline_a_significant_better": false,
+    "semantic_similarity_vs_baseline_c_significant_better": false,
     "semantic_wilcoxon_valid": true,
     "split_gate_all_required_strategies": true,
     "statistical_gate": true,
@@ -262,7 +1434,7 @@
   "metric_interpretations": {
     "agent_state_similarity": "cosine(train_only_implanted_agent, full_data_implanted_agent); no baseline comparison"
   },
-  "metric_version": "m54_v4_stop_bleed",
+  "metric_version": "m54_v5_formal_evidence",
   "overall_conclusion": "fail",
   "partner_gate": {
     "partner_hard_pass": false,
@@ -864,6 +2036,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     },
     "random": {
@@ -872,6 +2045,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     },
     "temporal": {
@@ -880,6 +2054,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     },
     "topic": {
@@ -888,6 +2063,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     }
   },
@@ -898,9 +2074,27 @@
     "user_count": 15,
     "user_count_ok": true
   },
+  "profile_expression_source_summary": {
+    "baseline_c": {
+      "rhetorical_move_counts": {},
+      "rhetorical_move_rates": {},
+      "rows": 0,
+      "source_counts": {},
+      "source_rates": {}
+    },
+    "personality": {
+      "rhetorical_move_counts": {},
+      "rhetorical_move_rates": {},
+      "rows": 0,
+      "source_counts": {},
+      "source_rates": {}
+    }
+  },
+  "profile_expression_source_summary_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_embed/profile_expression_source_summary.json",
   "reports": [
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.025,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -941,7 +2135,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -1040,6 +2234,8 @@
             2637532,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -1277,6 +2473,8 @@
             2637532,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -1501,6 +2699,8 @@
             2637532,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -1725,6 +2925,8 @@
             2637532,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -1932,6 +3134,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.068273,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1972,7 +3175,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -2071,6 +3274,8 @@
             2637376,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -2308,6 +3513,8 @@
             2637376,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -2532,6 +3739,8 @@
             2637376,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -2756,6 +3965,8 @@
             2637376,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -2957,6 +4168,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.0,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -2997,7 +4209,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -3093,6 +4305,8 @@
             2637215,
             2637485
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -3317,6 +4531,8 @@
             2637215,
             2637485
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -3532,6 +4748,8 @@
             2637215,
             2637485
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -3749,6 +4967,8 @@
             2637215,
             2637485
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -3948,6 +5168,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.238695,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -3988,7 +5209,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -4087,6 +5308,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -4324,6 +5547,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -4557,6 +5782,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -4790,6 +6017,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -4989,6 +6218,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.0,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -5029,7 +6259,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -5122,6 +6352,8 @@
             2637470,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -5337,6 +6569,8 @@
             2637470,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -5546,6 +6780,8 @@
             2637470,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -5755,6 +6991,8 @@
             2637470,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -5952,6 +7190,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.11367525,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -5992,7 +7231,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -6089,6 +7328,8 @@
             2637470,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -6323,6 +7564,8 @@
             2637470,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -6551,6 +7794,8 @@
             2637470,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -6776,6 +8021,8 @@
             2637470,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -6988,6 +8235,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.0212765,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -7028,7 +8276,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -7130,6 +8378,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -7368,6 +8618,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -7589,6 +8841,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -7810,6 +9064,8 @@
             2637532,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -8009,6 +9265,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.10607975,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -8049,7 +9306,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -8150,6 +9407,8 @@
             2637266,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -8395,6 +9654,8 @@
             2637266,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -8632,6 +9893,8 @@
             2637266,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -8867,6 +10130,8 @@
             2637266,
             2637594
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -9078,6 +10343,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.25631125,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -9118,7 +10384,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -9219,6 +10485,8 @@
             2637215,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -9454,6 +10722,8 @@
             2637215,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -9684,6 +10954,8 @@
             2637215,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -9915,6 +11187,8 @@
             2637215,
             2637354
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -10112,6 +11386,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.02931025,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -10152,7 +11427,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -10249,6 +11524,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -10477,6 +11754,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -10702,6 +11981,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -10928,6 +12209,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -11131,6 +12414,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.11402725,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -11171,7 +12455,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -11273,6 +12557,8 @@
             2637215,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -11518,6 +12804,8 @@
             2637215,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -11754,6 +13042,8 @@
             2637215,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -11990,6 +13280,8 @@
             2637215,
             2637318
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -12192,6 +13484,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.1256995,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -12232,7 +13525,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -12333,6 +13626,8 @@
             2637379,
             2637101
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -12572,6 +13867,8 @@
             2637379,
             2637101
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -12806,6 +14103,8 @@
             2637379,
             2637101
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -13040,6 +14339,8 @@
             2637379,
             2637101
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -13242,6 +14543,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.02131775,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -13282,7 +14584,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -13382,6 +14684,8 @@
             2637171,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -13616,6 +14920,8 @@
             2637171,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -13838,6 +15144,8 @@
             2637171,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -14061,6 +15369,8 @@
             2637171,
             2637266
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -14253,6 +15563,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.202809,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -14293,7 +15604,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -14391,6 +15702,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -14627,6 +15940,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -14860,6 +16175,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -15087,6 +16404,8 @@
             2637266,
             2637509
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -15304,6 +16623,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.45833325,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -15344,7 +16664,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -15439,6 +16759,8 @@
             2637372,
             2637134
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -15662,6 +16984,8 @@
             2637372,
             2637134
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -15872,6 +17196,8 @@
             2637372,
             2637134
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -16083,6 +17409,8 @@
             2637372,
             2637134
           ],
+          "baseline_c_builder": "historical_missing",
+          "baseline_c_input_scope": "historical_missing",
           "baseline_c_metric_details": {
             "behavioral_similarity_action11": {
               "categories": [
@@ -16274,10 +17602,169 @@
     }
   ],
   "reproducibility_gate": {
-    "baseline_c_full_population_implant": true,
-    "passed": true
+    "baseline_c_leave_one_out_population_average": false,
+    "passed": false
   },
   "required_users": 10,
+  "semantic_delta_summary": {
+    "diagnostic_pairs": {
+      "by_reply_length_bucket": {},
+      "by_strategy": {},
+      "rows": 0
+    },
+    "pair_count_distribution": {
+      "1": 1,
+      "10": 4,
+      "11": 4,
+      "13": 1,
+      "16": 2,
+      "17": 2,
+      "18": 1,
+      "19": 2,
+      "2": 7,
+      "20": 3,
+      "212": 1,
+      "22": 1,
+      "25": 2,
+      "26": 2,
+      "3": 1,
+      "30": 1,
+      "33": 1,
+      "36": 3,
+      "4": 1,
+      "40": 1,
+      "47": 1,
+      "48": 1,
+      "5": 1,
+      "53": 1,
+      "56": 1,
+      "58": 1,
+      "61": 1,
+      "67": 2,
+      "71": 3,
+      "74": 1,
+      "8": 2,
+      "85": 2,
+      "9": 1,
+      "92": 1
+    },
+    "per_strategy": {
+      "partner": {
+        "count": 15,
+        "iqr": 0.022049,
+        "mean_delta": 0.004293,
+        "median": -0.00828,
+        "negative": 8,
+        "positive": 7,
+        "q1": -0.01553,
+        "q3": 0.006519
+      },
+      "random": {
+        "count": 15,
+        "iqr": 0.024543,
+        "mean_delta": -0.005343,
+        "median": -0.007328,
+        "negative": 9,
+        "positive": 6,
+        "q1": -0.016944,
+        "q3": 0.007599
+      },
+      "temporal": {
+        "count": 15,
+        "iqr": 0.034881,
+        "mean_delta": -0.004211,
+        "median": -0.006944,
+        "negative": 8,
+        "positive": 7,
+        "q1": -0.023282,
+        "q3": 0.011599
+      },
+      "topic": {
+        "count": 15,
+        "iqr": 0.027086,
+        "mean_delta": -0.000692,
+        "median": 0.002415,
+        "negative": 7,
+        "positive": 8,
+        "q1": -0.016944,
+        "q3": 0.010142
+      }
+    },
+    "users": {
+      "best": [
+        {
+          "mean_delta": 0.024302,
+          "negative_strategies": 0,
+          "positive_strategies": 4,
+          "user_uid": 2637266
+        },
+        {
+          "mean_delta": 0.01668,
+          "negative_strategies": 1,
+          "positive_strategies": 3,
+          "user_uid": 2637376
+        },
+        {
+          "mean_delta": 0.015036,
+          "negative_strategies": 2,
+          "positive_strategies": 2,
+          "user_uid": 2637215
+        },
+        {
+          "mean_delta": 0.006164,
+          "negative_strategies": 2,
+          "positive_strategies": 2,
+          "user_uid": 2637372
+        },
+        {
+          "mean_delta": 0.003532,
+          "negative_strategies": 1,
+          "positive_strategies": 3,
+          "user_uid": 2637354
+        }
+      ],
+      "count": 15,
+      "iqr": 0.017629,
+      "median": -0.000552,
+      "negative": 8,
+      "positive": 7,
+      "q1": -0.014097,
+      "q3": 0.003532,
+      "worst": [
+        {
+          "mean_delta": -0.023334,
+          "negative_strategies": 3,
+          "positive_strategies": 1,
+          "user_uid": 2637134
+        },
+        {
+          "mean_delta": -0.021577,
+          "negative_strategies": 4,
+          "positive_strategies": 0,
+          "user_uid": 2637101
+        },
+        {
+          "mean_delta": -0.0146,
+          "negative_strategies": 2,
+          "positive_strategies": 2,
+          "user_uid": 2637318
+        },
+        {
+          "mean_delta": -0.014097,
+          "negative_strategies": 3,
+          "positive_strategies": 1,
+          "user_uid": 2637532
+        },
+        {
+          "mean_delta": -0.006396,
+          "negative_strategies": 3,
+          "positive_strategies": 1,
+          "user_uid": 2637594
+        }
+      ],
+      "zero": 0
+    }
+  },
   "semantic_engine_gate": {
     "fallback_reasons": [],
     "methods": [
@@ -16287,7 +17774,6 @@
     "policy": "formal acceptance requires sentence_embedding_cosine for personality semantic metrics"
   },
   "soft_metrics": [
-    "behavioral_similarity_strategy",
     "behavioral_similarity_action11",
     "stylistic_similarity",
     "personality_similarity"
@@ -16327,6 +17813,18 @@
       "topic"
     ]
   },
+  "state_saturation_summary": {
+    "per_dimension_variance_mean": {},
+    "personality_similarity": {
+      "count": 60,
+      "diagnostic_only": true,
+      "mean": 1.0,
+      "saturation_warning": true,
+      "std": 0.0
+    },
+    "state_distances": {}
+  },
+  "state_saturation_summary_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_embed/state_saturation_summary.json",
   "statistical_gate": {
     "engine": "scipy.stats.wilcoxon",
     "passed": true,
@@ -16337,13 +17835,45 @@
     "checks": {
       "ablation_rows_present": false,
       "diagnostic_trace_present": false,
+      "full_significant_better_than_no_policy": false,
       "full_significant_better_than_no_surface": false,
       "full_significant_better_than_surface_only": false,
+      "no_policy_below_full": false,
+      "no_surface_below_full": false,
       "surface_only_below_full": false
+    },
+    "comparisons": {
+      "no_policy_trait_bias": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.0,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": 0.0,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": 0.0,
+        "pairs": 0,
+        "pvalue": 1.0
+      },
+      "no_surface_profile": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.0,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": 0.0,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": 0.0,
+        "pairs": 0,
+        "pvalue": 1.0
+      },
+      "surface_only_default_agent": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.0,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": 0.0,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": 0.0,
+        "pairs": 0,
+        "pvalue": 1.0
+      }
     },
     "formal_requested": true,
     "passed": false,
-    "policy": "formal acceptance requires full personality generation to beat no-surface and surface-only ablations; historical artifacts are fail-closed until regenerated under m54_v4_stop_bleed"
+    "policy": "formal acceptance requires full personality generation to beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C paired Wilcoxon, with every ablation below full"
   },
   "topic_gate": {
     "passed": false,

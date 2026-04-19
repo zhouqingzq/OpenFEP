@@ -4,6 +4,7 @@
     "count": 60,
     "semantic_mean": 0.465501,
     "semantic_vs_baseline_a_diff_mean": 0.083684,
+    "semantic_vs_baseline_c_diff_mean": 0.083684,
     "text_similarity_vs_personality_mean": 0.738311
   },
   "no_surface_profile": {
@@ -11,6 +12,7 @@
     "count": 60,
     "semantic_mean": 0.389296,
     "semantic_vs_baseline_a_diff_mean": 0.007479,
+    "semantic_vs_baseline_c_diff_mean": 0.007479,
     "text_similarity_vs_personality_mean": 0.616452
   },
   "surface_only_default_agent": {
@@ -18,6 +20,7 @@
     "count": 60,
     "semantic_mean": 0.456852,
     "semantic_vs_baseline_a_diff_mean": 0.075035,
+    "semantic_vs_baseline_c_diff_mean": 0.075035,
     "text_similarity_vs_personality_mean": 0.722678
   }
 }

@@ -5,6 +5,7 @@
       "count": 20,
       "semantic_mean": 0.106195,
       "semantic_vs_baseline_a_diff_mean": 0.073778,
+      "semantic_vs_baseline_c_diff_mean": 0.073778,
       "text_similarity_vs_personality_mean": 0.562851
     },
     "no_surface_profile": {
@@ -12,6 +13,7 @@
       "count": 20,
       "semantic_mean": 0.032437,
       "semantic_vs_baseline_a_diff_mean": 2e-05,
+      "semantic_vs_baseline_c_diff_mean": 2e-05,
       "text_similarity_vs_personality_mean": 0.308046
     },
     "surface_only_default_agent": {
@@ -19,17 +21,21 @@
       "count": 20,
       "semantic_mean": 0.120732,
       "semantic_vs_baseline_a_diff_mean": 0.088315,
+      "semantic_vs_baseline_c_diff_mean": 0.088315,
       "text_similarity_vs_personality_mean": 0.542001
     }
   },
-  "ablation_summary_json": "artifacts/m54_validation_diag_5x16_state_profile_fix/ablation_summary.json",
+  "ablation_summary_json": "E:/workspace/segments/artifacts/m54_validation_diag_5x16_state_profile_fix/ablation_summary.json",
   "acceptance_rules": {
+    "agent_state_differentiation_gate": "train-only state must be closer to full-data state than default or wrong-user state",
     "agent_state_similarity": "mean across users >= 0.8 (no baseline significance required)",
     "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
     "aggregation": "per_user_mean_across_strategies",
-    "behavioral_similarity_strategy": "paired Wilcoxon one-sided greater vs baseline C when 3-class classifier gate passes; otherwise soft-only",
-    "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels; LLM-generated provisional labels are engineering-only",
-    "formal_baseline_c": "Baseline C formal evidence requires population_average_full_implant and leave-one-out population averaging",
+    "behavioral_majority_baseline_gate": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
+    "behavioral_similarity_strategy": "formal paired Wilcoxon one-sided greater vs baseline C; external-human 3-class classifier gate is required before this can count as hard evidence",
+    "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
+    "diagnostic_trace_gate": "formal acceptance requires non-empty diagnostic trace and audit summaries",
+    "formal_baseline_c": "Baseline C must use leave-one-out population averaging via population_average_full_implant; profile_only_average_fallback and skip_population_average_implant are test-only",
     "hard_metrics": [
       "semantic_similarity",
       "agent_state_similarity"
@@ -37,7 +43,7 @@
     "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
     "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
     "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
-    "semantic_similarity": "paired Wilcoxon one-sided greater vs baseline A (p < 0.05) and mean paired diff > 0; one paired sample per user (mean across split strategies)",
+    "semantic_similarity": "formal paired Wilcoxon one-sided greater vs baseline A and baseline C (p < 0.05) with mean paired diff > 0; one paired sample per user (mean across split strategies)",
     "soft_metrics": [
       "behavioral_similarity_strategy",
       "behavioral_similarity_action11",
@@ -45,13 +51,25 @@
       "personality_similarity"
     ],
     "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
-    "surface_ablation_gate": "formal acceptance requires full personality generation to beat no-surface and surface-only ablations",
+    "surface_ablation_gate": "formal acceptance requires full personality generation to significantly beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C deltas, and every ablation must remain below full",
     "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
-    "version": "m54_v4_stop_bleed"
+    "version": "m54_v5_formal_evidence"
+  },
+  "agent_state_differentiation_gate": {
+    "comparisons_evaluated": 20,
+    "diagnostic_passed": false,
+    "formal_requested": false,
+    "passed": true,
+    "policy": "train-only state must be closer to full-data state than default or wrong-user state",
+    "train_default_l2_mean": 0.4365,
+    "train_full_closer_than_default": false,
+    "train_full_closer_than_wrong_user": false,
+    "train_full_l2_mean": 0.438591,
+    "train_wrong_user_l2_mean": 0.428164
   },
   "agent_state_users_skipped_no_metric": 0,
   "agent_state_users_tested": 5,
-  "artifact_rules_version": "m54_v4_stop_bleed",
+  "artifact_rules_version": "m54_v5_formal_evidence",
   "baseline_audit_summary": {
     "baseline_c_too_close_fields": {
       "action_agreement_rate": 0.565401,
@@ -227,18 +245,580 @@
     },
     "wrong_user_masked_by_generic_template_warning": false
   },
-  "baseline_audit_summary_json": "artifacts/m54_validation_diag_5x16_state_profile_fix/baseline_audit_summary.json",
+  "baseline_audit_summary_json": "E:/workspace/segments/artifacts/m54_validation_diag_5x16_state_profile_fix/baseline_audit_summary.json",
+  "baseline_c_behavioral_failure_audit": {
+    "policy": "diagnostic distribution audit for Baseline C and train-majority behavioral baselines",
+    "row_count": 20,
+    "rows": [
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 9,
+          "minimal_response": 2
+        },
+        "baseline_c_behavioral_strategy": 0.96,
+        "baseline_c_strategy_distribution": {
+          "escape": 2,
+          "exploit": 9
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 11,
+        "personality_action_distribution": {
+          "elaborate": 9,
+          "minimal_response": 2
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.96,
+        "personality_strategy_distribution": {
+          "escape": 2,
+          "exploit": 9
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 1,
+          "elaborate": 6
+        },
+        "baseline_c_behavioral_strategy": 0.714286,
+        "baseline_c_strategy_distribution": {
+          "exploit": 7
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 7,
+        "personality_action_distribution": {
+          "agree": 1,
+          "elaborate": 6
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.714286,
+        "personality_strategy_distribution": {
+          "exploit": 7
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 9,
+          "minimal_response": 2
+        },
+        "baseline_c_behavioral_strategy": 0.96,
+        "baseline_c_strategy_distribution": {
+          "escape": 2,
+          "exploit": 9
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 11,
+        "personality_action_distribution": {
+          "elaborate": 9,
+          "minimal_response": 2
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.96,
+        "personality_strategy_distribution": {
+          "escape": 2,
+          "exploit": 9
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637101
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 1,
+          "elaborate": 5
+        },
+        "baseline_c_behavioral_strategy": 0.166667,
+        "baseline_c_strategy_distribution": {
+          "exploit": 6
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 6,
+        "personality_action_distribution": {
+          "agree": 1,
+          "elaborate": 5
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.166667,
+        "personality_strategy_distribution": {
+          "exploit": 6
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 3,
+          "elaborate": 11
+        },
+        "baseline_c_behavioral_strategy": 0.285714,
+        "baseline_c_strategy_distribution": {
+          "exploit": 14
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 14,
+        "personality_action_distribution": {
+          "agree": 13,
+          "minimal_response": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.330579,
+        "personality_strategy_distribution": {
+          "escape": 1,
+          "exploit": 13
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 2,
+          "elaborate": 6
+        },
+        "baseline_c_behavioral_strategy": 0.5,
+        "baseline_c_strategy_distribution": {
+          "exploit": 8
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 8,
+        "personality_action_distribution": {
+          "agree": 4,
+          "minimal_response": 4
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 1.0,
+        "personality_strategy_distribution": {
+          "escape": 4,
+          "exploit": 4
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 3,
+          "elaborate": 11
+        },
+        "baseline_c_behavioral_strategy": 0.285714,
+        "baseline_c_strategy_distribution": {
+          "exploit": 14
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 14,
+        "personality_action_distribution": {
+          "agree": 13,
+          "minimal_response": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.330579,
+        "personality_strategy_distribution": {
+          "escape": 1,
+          "exploit": 13
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637134
+      },
+      {
+        "baseline_c_action_distribution": {},
+        "baseline_c_behavioral_strategy": 0.0,
+        "baseline_c_strategy_distribution": {},
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 0,
+        "personality_action_distribution": {},
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {},
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 1
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 1
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 1,
+        "personality_action_distribution": {
+          "share_opinion": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {
+          "explore": 1
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 2
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 2
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 2,
+        "personality_action_distribution": {
+          "agree": 2
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 1.0,
+        "personality_strategy_distribution": {
+          "exploit": 2
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 1
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 1
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 1,
+        "personality_action_distribution": {
+          "share_opinion": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.0,
+        "personality_strategy_distribution": {
+          "explore": 1
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637171
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 13,
+          "elaborate": 43
+        },
+        "baseline_c_behavioral_strategy": 0.678571,
+        "baseline_c_strategy_distribution": {
+          "exploit": 56
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 56,
+        "personality_action_distribution": {
+          "agree": 20,
+          "elaborate": 36
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.678571,
+        "personality_strategy_distribution": {
+          "exploit": 56
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 4,
+          "elaborate": 12
+        },
+        "baseline_c_behavioral_strategy": 0.625,
+        "baseline_c_strategy_distribution": {
+          "exploit": 16
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 16,
+        "personality_action_distribution": {
+          "agree": 4,
+          "elaborate": 12
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.625,
+        "personality_strategy_distribution": {
+          "exploit": 16
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 51,
+          "minimal_response": 16
+        },
+        "baseline_c_behavioral_strategy": 0.839731,
+        "baseline_c_strategy_distribution": {
+          "escape": 16,
+          "exploit": 51
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 67,
+        "personality_action_distribution": {
+          "agree": 10,
+          "elaborate": 51,
+          "minimal_response": 6
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.825928,
+        "personality_strategy_distribution": {
+          "escape": 6,
+          "exploit": 61
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {
+          "agree": 4,
+          "elaborate": 12
+        },
+        "baseline_c_behavioral_strategy": 0.625,
+        "baseline_c_strategy_distribution": {
+          "exploit": 16
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 16,
+        "personality_action_distribution": {
+          "agree": 4,
+          "elaborate": 12
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 0.625,
+        "personality_strategy_distribution": {
+          "exploit": 16
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637215
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 2
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 2
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 2,
+        "personality_action_distribution": {
+          "agree": 1,
+          "elaborate": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 1.0,
+        "personality_strategy_distribution": {
+          "exploit": 2
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "partner",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 1
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 1
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 1,
+        "personality_action_distribution": {
+          "agree": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 1.0,
+        "personality_strategy_distribution": {
+          "exploit": 1
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "random",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 3
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 3
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 3,
+        "personality_action_distribution": {
+          "agree": 1,
+          "elaborate": 2
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 1.0,
+        "personality_strategy_distribution": {
+          "exploit": 3
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "temporal",
+        "user_uid": 2637266
+      },
+      {
+        "baseline_c_action_distribution": {
+          "elaborate": 1
+        },
+        "baseline_c_behavioral_strategy": 1.0,
+        "baseline_c_strategy_distribution": {
+          "exploit": 1
+        },
+        "majority_action": null,
+        "majority_balanced_behavioral_strategy": 0.0,
+        "majority_behavioral_strategy": 0.0,
+        "majority_strategy": null,
+        "pair_count": 1,
+        "personality_action_distribution": {
+          "agree": 1
+        },
+        "personality_balanced_behavioral_strategy": 0.0,
+        "personality_behavioral_strategy": 1.0,
+        "personality_strategy_distribution": {
+          "exploit": 1
+        },
+        "real_action_distribution": {},
+        "real_strategy_distribution": {},
+        "strategy": "topic",
+        "user_uid": 2637266
+      }
+    ]
+  },
+  "baseline_c_behavioral_failure_audit_json": "E:/workspace/segments/artifacts/m54_validation_diag_5x16_state_profile_fix/baseline_c_behavioral_failure_audit.json",
   "baseline_c_builder": "missing_or_mixed",
   "baseline_c_gate": {
     "baseline_c_builder": "missing_or_mixed",
     "baseline_c_input_scope": "missing_or_mixed",
+    "baseline_c_input_scope_ok": false,
+    "baseline_c_metrics_present": true,
     "formal_requested": false,
-    "passed": false,
-    "skip_population_average_implant_used": false
+    "leave_one_out_population_average": true,
+    "min_population_user_count": 4,
+    "passed": true,
+    "population_average_full_implant_used": false,
+    "population_count_ok": true,
+    "required_population_user_count": 4,
+    "skip_population_average_implant_used": false,
+    "target_user_excluded": true
   },
   "behavioral_hard_metric_degraded": true,
   "behavioral_labeling": "generated_action_direct_real_reply_classifier",
-  "classifier_evidence_tier": "llm_generated_provisional",
+  "behavioral_majority_baseline_gate": {
+    "behavioral_metric_majority_warning": false,
+    "comparisons_evaluated": 0,
+    "formal_requested": false,
+    "majority_behavioral_strategy_mean": 0.0,
+    "passed": true,
+    "personality_behavioral_strategy_mean": 0.0,
+    "policy": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality"
+  },
+  "classifier_evidence_tier": "repo_fixture_smoke",
   "classifier_gate": {
     "behavioral_hard_metric_enabled": false,
     "class_distribution": {
@@ -253,9 +833,6 @@
         "explore": 0
       }
     },
-    "classifier_evidence_tier": "llm_generated_provisional",
-    "classifier_provenance_failure_reason": "llm_generated_provisional_labels",
-    "classifier_provenance_ok": false,
     "confusion_matrix_3class": {
       "escape": {
         "escape": 0,
@@ -456,6 +1033,7 @@
     }
   },
   "debug_readiness_gate": {
+    "ablation_evaluated": true,
     "baseline_c_too_close_reason": "",
     "baseline_c_too_close_warning": false,
     "checks": {
@@ -472,27 +1050,38 @@
     "train_wrong_user_l2_mean": 0.428164,
     "wrong_user_masked_by_generic_template_warning": false
   },
-  "diagnostic_trace_jsonl": "artifacts/m54_validation_diag_5x16_state_profile_fix/diagnostic_trace.jsonl",
+  "diagnostic_trace_gate": {
+    "diagnostic_trace_rows": 237,
+    "formal_requested": false,
+    "passed": true,
+    "policy": "formal acceptance requires non-empty diagnostic_trace.jsonl"
+  },
+  "diagnostic_trace_jsonl": "E:/workspace/segments/artifacts/m54_validation_diag_5x16_state_profile_fix/diagnostic_trace.jsonl",
   "diagnostic_trace_rows": 237,
   "formal_acceptance_eligible": false,
   "formal_blockers": [
-    "baseline_c_gate_failed",
-    "classifier_provisional_llm_labels",
-    "surface_ablation_missing"
+    "classifier_fixture_only",
+    "metric_hard_pass_failed",
+    "partner_gate_failed",
+    "semantic_engine_not_formal",
+    "topic_gate_failed"
   ],
+  "formal_requested": false,
   "hard_metrics": [
     "semantic_similarity",
     "agent_state_similarity"
   ],
   "hard_pass": false,
   "hard_pass_breakdown": {
+    "agent_state_differentiation_gate": true,
     "agent_state_similarity_mean_ge_0.80": true,
-    "baseline_c_full_population_implant": true,
-    "baseline_c_leave_one_out_population_average": false,
+    "baseline_c_leave_one_out_population_average": true,
     "behavioral_hard_metric_required": false,
+    "behavioral_majority_baseline_gate": true,
     "behavioral_similarity_strategy_vs_baseline_c_significant_better": false,
     "behavioral_wilcoxon_valid": true,
     "classifier_3class_gate_passed": false,
+    "diagnostic_trace_gate": true,
     "formal_acceptance_eligible": false,
     "metric_hard_pass": false,
     "partner_gate": false,
@@ -500,16 +1089,17 @@
     "reproducibility_gate": true,
     "semantic_embedding_gate": false,
     "semantic_similarity_vs_baseline_a_significant_better": false,
+    "semantic_similarity_vs_baseline_c_significant_better": true,
     "semantic_wilcoxon_valid": true,
     "split_gate_all_required_strategies": true,
     "statistical_gate": true,
-    "surface_ablation_gate": false,
+    "surface_ablation_gate": true,
     "topic_gate": false
   },
   "metric_interpretations": {
     "agent_state_similarity": "cosine(train_only_implanted_agent, full_data_implanted_agent); no baseline comparison"
   },
-  "metric_version": "m54_v4_stop_bleed",
+  "metric_version": "m54_v5_formal_evidence",
   "overall_conclusion": "fail",
   "partner_gate": {
     "partner_hard_pass": false,
@@ -1111,6 +1701,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     },
     "random": {
@@ -1119,6 +1710,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     },
     "temporal": {
@@ -1127,6 +1719,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": true,
       "semantic_wilcoxon_valid": true
     },
     "topic": {
@@ -1135,6 +1728,7 @@
       "behavioral_wilcoxon_valid": true,
       "hard_pass": false,
       "semantic_similarity_vs_baseline_a_significant_better": false,
+      "semantic_similarity_vs_baseline_c_significant_better": false,
       "semantic_wilcoxon_valid": true
     }
   },
@@ -1185,10 +1779,11 @@
       }
     }
   },
-  "profile_expression_source_summary_json": "artifacts/m54_validation_diag_5x16_state_profile_fix/profile_expression_source_summary.json",
+  "profile_expression_source_summary_json": "E:/workspace/segments/artifacts/m54_validation_diag_5x16_state_profile_fix/profile_expression_source_summary.json",
   "reports": [
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.6585715,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -1262,7 +1857,7 @@
         },
         "diagnostic_trace_enabled": true,
         "formal_requested": false,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.277069,
           "behavioral_escalated": false,
@@ -5553,6 +6148,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.30952375,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -5626,7 +6222,7 @@
         },
         "diagnostic_trace_enabled": true,
         "formal_requested": false,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.277069,
           "behavioral_escalated": false,
@@ -11086,6 +11682,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.75,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -11159,7 +11756,7 @@
         },
         "diagnostic_trace_enabled": true,
         "formal_requested": false,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.277069,
           "behavioral_escalated": false,
@@ -13213,6 +13810,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 0.6920755000000001,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -13286,7 +13884,7 @@
         },
         "diagnostic_trace_enabled": true,
         "formal_requested": false,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.277069,
           "behavioral_escalated": false,
@@ -28732,6 +29330,7 @@
     },
     {
       "aggregate": {
+        "artifact_rules_version": "m54_v5_formal_evidence",
         "behavioral_baseline_c_mean": 1.0,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -28805,7 +29404,7 @@
         },
         "diagnostic_trace_enabled": true,
         "formal_requested": false,
-        "metric_version": "m54_v3",
+        "metric_version": "m54_v5_formal_evidence",
         "pilot": {
           "behavioral_diff_sd": 0.277069,
           "behavioral_escalated": false,
@@ -31122,7 +31721,7 @@
     }
   ],
   "reproducibility_gate": {
-    "baseline_c_full_population_implant": true,
+    "baseline_c_leave_one_out_population_average": true,
     "passed": true
   },
   "required_users": 5,
@@ -31386,7 +31985,7 @@
       "train_wrong_user_l2": 0.428164
     }
   },
-  "state_saturation_summary_json": "artifacts/m54_validation_diag_5x16_state_profile_fix/state_saturation_summary.json",
+  "state_saturation_summary_json": "E:/workspace/segments/artifacts/m54_validation_diag_5x16_state_profile_fix/state_saturation_summary.json",
   "statistical_gate": {
     "engine": "scipy.stats.wilcoxon",
     "passed": true,
@@ -31395,15 +31994,47 @@
   "surface_ablation_gate": {
     "aggregation": "per_user_mean_across_strategies",
     "checks": {
-      "ablation_rows_present": false,
+      "ablation_rows_present": true,
       "diagnostic_trace_present": true,
-      "full_significant_better_than_no_surface": false,
+      "full_significant_better_than_no_policy": false,
+      "full_significant_better_than_no_surface": true,
       "full_significant_better_than_surface_only": false,
+      "no_policy_below_full": false,
+      "no_surface_below_full": true,
       "surface_only_below_full": false
     },
+    "comparisons": {
+      "no_policy_trait_bias": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.073778,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": 0.061976,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": -0.011802,
+        "pairs": 5,
+        "pvalue": 1.0
+      },
+      "no_surface_profile": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 2e-05,
+        "full_better": true,
+        "full_semantic_vs_baseline_c_diff_mean": 0.061976,
+        "full_significant_better": true,
+        "full_vs_ablation_mean_diff": 0.061956,
+        "pairs": 5,
+        "pvalue": 0.03125
+      },
+      "surface_only_default_agent": {
+        "ablation_semantic_vs_baseline_c_diff_mean": 0.088315,
+        "full_better": false,
+        "full_semantic_vs_baseline_c_diff_mean": 0.061976,
+        "full_significant_better": false,
+        "full_vs_ablation_mean_diff": -0.02634,
+        "pairs": 5,
+        "pvalue": 1.0
+      }
+    },
     "formal_requested": false,
-    "passed": false,
-    "policy": "formal acceptance requires full personality generation to beat no-surface and surface-only ablations; historical artifacts are fail-closed until regenerated under m54_v4_stop_bleed"
+    "passed": true,
+    "policy": "formal acceptance requires full personality generation to beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C paired Wilcoxon, with every ablation below full"
   },
   "topic_gate": {
     "passed": false,

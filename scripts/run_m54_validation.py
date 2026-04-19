@@ -208,6 +208,7 @@ def main() -> None:
         "metric_version": agg.get("metric_version"),
         "artifact_rules_version": agg.get("artifact_rules_version"),
         "required_users": agg.get("required_users"),
+        "formal_requested": bool(agg.get("formal_requested", False)),
         "hard_pass": agg.get("hard_pass"),
         "hard_pass_breakdown": agg.get("hard_pass_breakdown"),
         "pilot_gate": agg.get("pilot_gate"),
