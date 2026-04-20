@@ -13,6 +13,8 @@ REQUIRED_SUMMARY_FIELDS = {
     "formal_requested",
     "classifier_evidence_tier",
     "baseline_c_builder",
+    "partial_acceptance_eligible",
+    "partial_acceptance_gate",
     "surface_ablation_gate",
     "formal_blockers",
 }
@@ -21,6 +23,7 @@ CONSISTENT_SUMMARY_FIELDS = (
     "formal_requested",
     "hard_pass",
     "formal_acceptance_eligible",
+    "partial_acceptance_eligible",
     "overall_conclusion",
     "classifier_evidence_tier",
     "baseline_c_builder",

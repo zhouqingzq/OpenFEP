@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "artifact_rules_version": "m54_v5_formal_evidence",
+    "artifact_rules_version": "m54_v6_partial_llm",
     "baseline_c_builder": "population_average_full_implant",
     "behavioral_baseline_c_mean": 0.82967925,
     "behavioral_hard_metric_enabled": false,
@@ -94,7 +94,7 @@
     },
     "diagnostic_trace_enabled": true,
     "formal_requested": true,
-    "metric_version": "m54_v5_formal_evidence",
+    "metric_version": "m54_v6_partial_llm",
     "pilot": {
       "behavioral_diff_sd": 0.337313,
       "behavioral_escalated": false,

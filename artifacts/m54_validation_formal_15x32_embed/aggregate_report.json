@@ -16,6 +16,7 @@
       "behavioral_similarity_strategy",
       "agent_state_similarity"
     ],
+    "partial_acceptance": "LLM-generated provisional labels may support partial acceptance when semantic engine, statistics, split coverage, Baseline C reproducibility, and diagnostic trace gates pass; partial acceptance is not formal acceptance",
     "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
     "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
     "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
@@ -28,7 +29,7 @@
     "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
     "surface_ablation_gate": "formal acceptance requires full personality generation to significantly beat no-surface, no-policy, and surface-only ablations on semantic-vs-baseline-C deltas, and every ablation must remain below full",
     "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
-    "version": "m54_v5_formal_evidence"
+    "version": "m54_v6_partial_llm"
   },
   "agent_state_differentiation_gate": {
     "comparisons_evaluated": 60,
@@ -44,7 +45,7 @@
   },
   "agent_state_users_skipped_no_metric": 0,
   "agent_state_users_tested": 15,
-  "artifact_rules_version": "m54_v5_formal_evidence",
+  "artifact_rules_version": "m54_v6_partial_llm",
   "baseline_audit_summary": {
     "baseline_c_too_close_fields": {
       "action_agreement_rate": 0.0,
@@ -1419,6 +1420,7 @@
     "diagnostic_trace_gate": false,
     "formal_acceptance_eligible": false,
     "metric_hard_pass": false,
+    "partial_acceptance_eligible": false,
     "partner_gate": false,
     "pilot_gate": true,
     "reproducibility_gate": false,
@@ -1434,8 +1436,26 @@
   "metric_interpretations": {
     "agent_state_similarity": "cosine(train_only_implanted_agent, full_data_implanted_agent); no baseline comparison"
   },
-  "metric_version": "m54_v5_formal_evidence",
+  "metric_version": "m54_v6_partial_llm",
   "overall_conclusion": "fail",
+  "partial_acceptance_eligible": false,
+  "partial_acceptance_gate": {
+    "checks": {
+      "baseline_c_leave_one_out_population_average": false,
+      "classifier_evidence_tier_llm_generated_provisional": false,
+      "diagnostic_trace_gate": false,
+      "formal_requested": true,
+      "pilot_gate": true,
+      "reproducibility_gate": false,
+      "semantic_embedding_gate": true,
+      "split_gate_all_required_strategies": true,
+      "statistical_gate": true
+    },
+    "llm_generated_provisional_partial_allowed": false,
+    "metric_hard_pass_partial_allowed": false,
+    "passed": false,
+    "policy": "partial acceptance may use llm_generated_provisional classifier labels when foundational engineering evidence is present; hard/formal acceptance still requires external_human_labeled classifier evidence"
+  },
   "partner_gate": {
     "partner_hard_pass": false,
     "passed": false,
@@ -2094,7 +2114,7 @@
   "reports": [
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.025,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -2135,7 +2155,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -3134,7 +3154,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.068273,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -3175,7 +3195,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -4168,7 +4188,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.0,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -4209,7 +4229,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -5168,7 +5188,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.238695,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -5209,7 +5229,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -6218,7 +6238,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.0,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -6259,7 +6279,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -7190,7 +7210,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.11367525,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -7231,7 +7251,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -8235,7 +8255,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.0212765,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -8276,7 +8296,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -9265,7 +9285,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.10607975,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -9306,7 +9326,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -10343,7 +10363,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.25631125,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -10384,7 +10404,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -11386,7 +11406,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.02931025,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -11427,7 +11447,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -12414,7 +12434,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.11402725,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -12455,7 +12475,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -13484,7 +13504,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.1256995,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -13525,7 +13545,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -14543,7 +14563,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.02131775,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -14584,7 +14604,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -15563,7 +15583,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.202809,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -15604,7 +15624,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,
@@ -16623,7 +16643,7 @@
     },
     {
       "aggregate": {
-        "artifact_rules_version": "m54_v5_formal_evidence",
+        "artifact_rules_version": "m54_v6_partial_llm",
         "behavioral_baseline_c_mean": 0.45833325,
         "behavioral_hard_metric_enabled": false,
         "behavioral_labeling": "generated_action_direct_real_reply_classifier",
@@ -16664,7 +16684,7 @@
           "train_count": 300
         },
         "formal_requested": true,
-        "metric_version": "m54_v5_formal_evidence",
+        "metric_version": "m54_v6_partial_llm",
         "pilot": {
           "behavioral_diff_sd": 0.033172,
           "behavioral_escalated": false,

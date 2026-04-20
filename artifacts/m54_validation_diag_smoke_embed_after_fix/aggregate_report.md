@@ -4,12 +4,13 @@
 - Required users: 3
 - Agent state: users with metric 3, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 3, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 3, 'users_topic_split_valid_for_hard_gate': 3}
-- Metric version: m54_v5_formal_evidence (generated_action_direct_real_reply_classifier)
+- Metric version: m54_v6_partial_llm (generated_action_direct_real_reply_classifier)
 - Classifier 3-class gate: False
 - Classifier evidence tier: repo_fixture_smoke
 - Semantic embedding gate: True
 - Statistical gate: True
 - Formal acceptance eligible: False
+- Partial acceptance eligible: False
 - Behavioral hard metric degraded (soft-only): True
 - Overall conclusion: fail
 - Hard pass: False
@@ -39,6 +40,7 @@
 | agent_state_similarity_mean_ge_0.80 | True |
 | metric_hard_pass | False |
 | formal_acceptance_eligible | False |
+| partial_acceptance_eligible | False |
 | semantic_embedding_gate | True |
 | statistical_gate | True |
 | pilot_gate | True |

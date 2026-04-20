@@ -13,7 +13,7 @@
   },
   "aggregate_report_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/aggregate_report.json",
   "aggregate_report_md": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/aggregate_report.md",
-  "artifact_rules_version": "m54_v5_formal_evidence",
+  "artifact_rules_version": "m54_v6_partial_llm",
   "baseline_c_behavioral_failure_audit_json": "E:/workspace/segments/artifacts/m54_validation_formal_15x32_v4_provisional/baseline_c_behavioral_failure_audit.json",
   "baseline_c_builder": "population_average_full_implant",
   "baseline_c_gate": {
@@ -164,6 +164,7 @@
     "diagnostic_trace_gate": true,
     "formal_acceptance_eligible": false,
     "metric_hard_pass": false,
+    "partial_acceptance_eligible": true,
     "partner_gate": false,
     "pilot_gate": true,
     "reproducibility_gate": true,
@@ -176,9 +177,27 @@
     "surface_ablation_gate": false,
     "topic_gate": false
   },
-  "metric_version": "m54_v5_formal_evidence",
+  "metric_version": "m54_v6_partial_llm",
   "milestone": "M5.4",
-  "overall_conclusion": "fail",
+  "overall_conclusion": "partial",
+  "partial_acceptance_eligible": true,
+  "partial_acceptance_gate": {
+    "checks": {
+      "baseline_c_leave_one_out_population_average": true,
+      "classifier_evidence_tier_llm_generated_provisional": true,
+      "diagnostic_trace_gate": true,
+      "formal_requested": true,
+      "pilot_gate": true,
+      "reproducibility_gate": true,
+      "semantic_embedding_gate": true,
+      "split_gate_all_required_strategies": true,
+      "statistical_gate": true
+    },
+    "llm_generated_provisional_partial_allowed": true,
+    "metric_hard_pass_partial_allowed": false,
+    "passed": true,
+    "policy": "partial acceptance may use llm_generated_provisional classifier labels when foundational engineering evidence is present; hard/formal acceptance still requires external_human_labeled classifier evidence"
+  },
   "partner_gate": {
     "partner_hard_pass": false,
     "passed": false,

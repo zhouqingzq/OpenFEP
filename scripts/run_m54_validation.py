@@ -217,6 +217,8 @@ def main() -> None:
         "topic_gate": agg.get("topic_gate"),
         "reproducibility_gate": agg.get("reproducibility_gate"),
         "overall_conclusion": agg.get("overall_conclusion"),
+        "partial_acceptance_eligible": agg.get("partial_acceptance_eligible"),
+        "partial_acceptance_gate": agg.get("partial_acceptance_gate"),
         "formal_acceptance_eligible": agg.get("formal_acceptance_eligible"),
         "classifier_gate": agg.get("classifier_gate"),
         "classifier_evidence_tier": agg.get("classifier_evidence_tier"),

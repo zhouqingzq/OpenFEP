@@ -215,6 +215,28 @@ def _all_formal_strategies(uid: int, bundle: dict[str, dict], **kwargs) -> dict[
     }
 
 
+def _mark_llm_generated_provisional(strategies: dict[str, dict]) -> dict[str, dict]:
+    out: dict[str, dict] = {}
+    for name, row in strategies.items():
+        item = dict(row)
+        cv = dict(item.get("classifier_validation", {}))
+        cv.update(
+            {
+                "passed_3class_gate": False,
+                "formal_gate_eligible": False,
+                "classifier_evidence_tier": "llm_generated_provisional",
+                "dataset_origin": "codex_authored_realistic_zh_fixture_v4",
+                "classifier_provenance_ok": False,
+                "classifier_provenance_failure_reason": "codex_authored",
+                "behavioral_hard_metric_enabled": False,
+                "degradation_required": True,
+            }
+        )
+        item["classifier_validation"] = cv
+        out[name] = item
+    return out
+
+
 def _aggregate(
     required_users: int = 8,
     *,
@@ -565,6 +587,42 @@ class TestM54ReportAcceptance(unittest.TestCase):
         self.assertFalse(payload["hard_pass_breakdown"]["metric_hard_pass"])
         self.assertIn("classifier_fixture_only", payload["formal_blockers"])
         self.assertFalse(payload["hard_pass"])
+        self.assertFalse(payload["partial_acceptance_eligible"])
+        self.assertEqual(payload["overall_conclusion"], "fail")
+
+    def test_formal_llm_generated_labels_can_receive_partial_acceptance(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_mark_llm_generated_provisional(
+                    _all_formal_strategies(
+                        uid,
+                        _bundle(
+                            sem=0.80 + 0.001 * uid,
+                            beh=0.70 + 0.001 * uid,
+                            ast=0.90,
+                            base_sem=0.50,
+                            base_beh=0.40,
+                            base_beh_c=0.35,
+                            classifier_pass=False,
+                        ),
+                    )
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        self.assertFalse(payload["hard_pass"])
+        self.assertFalse(payload["formal_acceptance_eligible"])
+        self.assertTrue(payload["partial_acceptance_eligible"])
+        self.assertTrue(payload["partial_acceptance_gate"]["llm_generated_provisional_partial_allowed"])
+        self.assertEqual(payload["overall_conclusion"], "partial")
+        self.assertIn("classifier_provisional_llm_labels", payload["formal_blockers"])
 
     def test_test_only_baseline_c_blocks_formal_pass(self) -> None:
         reports = [

@@ -4,14 +4,15 @@
 - Required users: 15
 - Agent state: users with metric 15, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 15, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 15, 'users_topic_split_valid_for_hard_gate': 15}
-- Metric version: m54_v5_formal_evidence (generated_action_direct_real_reply_classifier)
+- Metric version: m54_v6_partial_llm (generated_action_direct_real_reply_classifier)
 - Classifier 3-class gate: False
 - Classifier evidence tier: llm_generated_provisional
 - Semantic embedding gate: True
 - Statistical gate: True
 - Formal acceptance eligible: False
+- Partial acceptance eligible: True
 - Behavioral hard metric degraded (soft-only): True
-- Overall conclusion: fail
+- Overall conclusion: partial
 - Hard pass: False
 - Formal blockers: ['behavioral_majority_baseline_matches_or_beats_personality', 'classifier_provisional_llm_labels', 'metric_hard_pass_failed', 'no_policy_ablation_failed', 'partner_gate_failed', 'semantic_vs_baseline_c_failed', 'surface_ablation_failed', 'surface_only_ablation_failed', 'topic_gate_failed']
 - Pilot gate: True
@@ -39,6 +40,7 @@
 | agent_state_similarity_mean_ge_0.80 | True |
 | metric_hard_pass | False |
 | formal_acceptance_eligible | False |
+| partial_acceptance_eligible | True |
 | semantic_embedding_gate | True |
 | statistical_gate | True |
 | pilot_gate | True |

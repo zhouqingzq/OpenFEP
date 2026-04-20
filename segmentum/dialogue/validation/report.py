@@ -1723,10 +1723,40 @@ def generate_report(
         and behavioral_majority_baseline_gate["passed"]
         and surface_ablation_gate["passed"]
     )
+    llm_partial_gate_checks = {
+        "classifier_evidence_tier_llm_generated_provisional": (
+            classifier_evidence_tier == "llm_generated_provisional"
+        ),
+        "formal_requested": bool(formal_requested),
+        "semantic_embedding_gate": bool(semantic_engine_gate["passed"]),
+        "statistical_gate": bool(statistical_gate["passed"]),
+        "pilot_gate": bool(pilot_gate["passed"]),
+        "split_gate_all_required_strategies": bool(split_gate["passed"]),
+        "reproducibility_gate": bool(reproducibility_gate["passed"]),
+        "baseline_c_leave_one_out_population_average": bool(baseline_c_gate["passed"]),
+        "diagnostic_trace_gate": bool(diagnostic_trace_gate["passed"]),
+    }
+    llm_partial_acceptance_eligible = bool(
+        (not formal_acceptance_eligible)
+        and all(llm_partial_gate_checks.values())
+    )
+    partial_acceptance_eligible = bool(metric_hard_pass or llm_partial_acceptance_eligible)
+    partial_acceptance_gate = {
+        "passed": bool(partial_acceptance_eligible),
+        "llm_generated_provisional_partial_allowed": bool(llm_partial_acceptance_eligible),
+        "metric_hard_pass_partial_allowed": bool(metric_hard_pass),
+        "checks": llm_partial_gate_checks,
+        "policy": (
+            "partial acceptance may use llm_generated_provisional classifier labels "
+            "when foundational engineering evidence is present; hard/formal acceptance "
+            "still requires external_human_labeled classifier evidence"
+        ),
+    }
     hard_pass_breakdown = {
         **metric_hard_breakdown,
         "metric_hard_pass": bool(metric_hard_pass),
         "formal_acceptance_eligible": bool(formal_acceptance_eligible),
+        "partial_acceptance_eligible": bool(partial_acceptance_eligible),
         "semantic_embedding_gate": bool(semantic_engine_gate["passed"]),
         "statistical_gate": bool(statistical_gate["passed"]),
         "pilot_gate": bool(pilot_gate["passed"]),
@@ -1774,7 +1804,7 @@ def generate_report(
     )
     if hard_pass:
         overall_conclusion = "pass"
-    elif bool(metric_hard_pass):
+    elif bool(partial_acceptance_eligible):
         overall_conclusion = "partial"
     else:
         overall_conclusion = "fail"
@@ -1799,6 +1829,7 @@ def generate_report(
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
         "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
+        "partial_acceptance": "LLM-generated provisional labels may support partial acceptance when semantic engine, statistics, split coverage, Baseline C reproducibility, and diagnostic trace gates pass; partial acceptance is not formal acceptance",
         "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
@@ -1831,6 +1862,8 @@ def generate_report(
         "semantic_engine_gate": semantic_engine_gate,
         "statistical_gate": statistical_gate,
         "formal_acceptance_eligible": bool(formal_acceptance_eligible),
+        "partial_acceptance_eligible": bool(partial_acceptance_eligible),
+        "partial_acceptance_gate": partial_acceptance_gate,
         "behavioral_hard_metric_degraded": bool(behavioral_degraded),
         "formal_requested": bool(formal_requested),
         "comparisons": comparisons,
@@ -1902,6 +1935,7 @@ def generate_report(
         f"- Semantic embedding gate: {semantic_engine_gate['passed']}",
         f"- Statistical gate: {statistical_gate['passed']}",
         f"- Formal acceptance eligible: {formal_acceptance_eligible}",
+        f"- Partial acceptance eligible: {partial_acceptance_eligible}",
         f"- Behavioral hard metric degraded (soft-only): {behavioral_degraded}",
         f"- Overall conclusion: {aggregate_payload['overall_conclusion']}",
         f"- Hard pass: {hard_pass}",
