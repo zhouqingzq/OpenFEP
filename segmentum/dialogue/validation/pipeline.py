@@ -198,6 +198,12 @@ def _generate_from_sessions(
     preds_r = classifier.predict_batch(real_texts)
     real_11 = [item.label_11 for item in preds_r]
     real_3 = [item.label_3 for item in preds_r]
+    if diagnostic_trace and trace_rows:
+        for idx, row in enumerate(trace_rows):
+            if idx >= len(real_11) or idx >= len(real_3):
+                break
+            row["real_action"] = str(real_11[idx])
+            row["real_strategy"] = str(real_3[idx])
     return generated_texts, real_texts, gen_11, real_11, gen_3, real_3, trace_rows
 
 
@@ -505,6 +511,8 @@ def _semantic_trace_rows(
                 "partner_uid": p.get("partner_uid"),
                 "turn_index": p.get("turn_index"),
                 "real_text": p.get("real_text"),
+                "real_action": p.get("real_action"),
+                "real_strategy": p.get("real_strategy"),
                 "personality_text": p.get("generated_text"),
                 "baseline_a_text": a.get("generated_text"),
                 "baseline_c_text": c.get("generated_text"),
@@ -613,6 +621,72 @@ def _reply_length_bucket(length: int) -> str:
     return "long"
 
 
+def _trace_generation_diagnostics(row: Mapping[str, object]) -> dict[str, object]:
+    return dict(row.get("generation_diagnostics", {})) if isinstance(row.get("generation_diagnostics"), Mapping) else {}
+
+
+def _ablation_trace_rows(
+    *,
+    strategy_key: str,
+    personality_trace: list[dict[str, object]],
+    personality_scores: list[float],
+    baseline_a_scores: list[float],
+    baseline_c_scores: list[float],
+    ablations: Mapping[str, Mapping[str, object]],
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    total = min(len(personality_trace), len(personality_scores), len(baseline_a_scores), len(baseline_c_scores))
+    for item in ablations.values():
+        trace = item.get("trace", []) if isinstance(item, Mapping) else []
+        if isinstance(trace, list):
+            total = min(total, len(trace))
+    for idx in range(total):
+        p = dict(personality_trace[idx])
+        p_diag = _trace_generation_diagnostics(p)
+        payload: dict[str, object] = {
+            "strategy": strategy_key,
+            "pair_index": idx,
+            "session_id": p.get("session_id"),
+            "partner_uid": p.get("partner_uid"),
+            "turn_index": p.get("turn_index"),
+            "real_text": p.get("real_text"),
+            "real_action": p.get("real_action"),
+            "real_strategy": p.get("real_strategy"),
+            "full_personality_text": p.get("generated_text"),
+            "full_personality_action": p.get("action"),
+            "full_personality_strategy": p.get("strategy"),
+            "full_personality_generated_chars": int(p.get("generated_chars", 0) or 0),
+            "full_personality_template_id": p_diag.get("template_id"),
+            "full_personality_surface_source": p_diag.get("surface_source"),
+            "full_personality_rhetorical_move": p_diag.get("rhetorical_move"),
+            "full_personality_semantic_pair_score": round(float(personality_scores[idx]), 6),
+            "baseline_a_semantic_pair_score": round(float(baseline_a_scores[idx]), 6),
+            "baseline_c_semantic_pair_score": round(float(baseline_c_scores[idx]), 6),
+        }
+        for name, item in ablations.items():
+            trace = item.get("trace", []) if isinstance(item, Mapping) else []
+            scores = item.get("semantic_scores", []) if isinstance(item, Mapping) else []
+            if not isinstance(trace, list) or idx >= len(trace):
+                continue
+            row = dict(trace[idx]) if isinstance(trace[idx], Mapping) else {}
+            diag = _trace_generation_diagnostics(row)
+            prefix = str(name)
+            payload[f"{prefix}_text"] = row.get("generated_text")
+            payload[f"{prefix}_action"] = row.get("action")
+            payload[f"{prefix}_strategy"] = row.get("strategy")
+            payload[f"{prefix}_generated_chars"] = int(row.get("generated_chars", 0) or 0)
+            payload[f"{prefix}_template_id"] = diag.get("template_id")
+            payload[f"{prefix}_surface_source"] = diag.get("surface_source")
+            payload[f"{prefix}_rhetorical_move"] = diag.get("rhetorical_move")
+            payload[f"{prefix}_semantic_pair_score"] = (
+                round(float(scores[idx]), 6)
+                if isinstance(scores, list) and idx < len(scores)
+                else None
+            )
+        rows.append(payload)
+    return rows
+
+
 def run_validation(
     user_dataset: dict,
     config: ValidationConfig,
@@ -620,6 +694,7 @@ def run_validation(
     *,
     population_average_template: SegmentAgent | None = None,
     wrong_agent_cache: dict[int, tuple[SegmentAgent, DialogueSurfaceProfile]] | None = None,
+    baseline_c_agent_cache: dict[tuple[int, bool], SegmentAgent] | None = None,
 ) -> ValidationReport:
     user_uid = int(user_dataset.get("uid", 0))
     all_profiles = list(all_user_profiles or [])
@@ -804,21 +879,37 @@ def run_validation(
 
         strat_idx = config.strategies.index(strategy)
         strat_seed = int(config.seed) + 404 + strat_idx * 31
-        if config.skip_population_average_implant:
-            baseline_c_builder = "profile_only_average_fallback"
-            baseline_c_agent = create_average_agent(
-                population_profiles,
-                seed=strat_seed,
-                classifier=classifier,
-            )
+        baseline_c_cache_key = (int(user_uid), bool(config.skip_population_average_implant))
+        baseline_c_template = (
+            baseline_c_agent_cache.get(baseline_c_cache_key)
+            if baseline_c_agent_cache is not None
+            else None
+        )
+        if baseline_c_template is None:
+            if config.skip_population_average_implant:
+                baseline_c_builder = "profile_only_average_fallback"
+                baseline_c_template = create_average_agent(
+                    population_profiles,
+                    seed=int(config.seed) + 404,
+                    classifier=classifier,
+                )
+            else:
+                baseline_c_builder = "population_average_full_implant"
+                baseline_c_template = build_population_average_agent(
+                    population_profiles,
+                    config.implantation_config,
+                    seed=int(config.seed) + 404,
+                    classifier=classifier,
+                )
+            if baseline_c_agent_cache is not None:
+                baseline_c_agent_cache[baseline_c_cache_key] = baseline_c_template
         else:
-            baseline_c_builder = "population_average_full_implant"
-            baseline_c_agent = build_population_average_agent(
-                population_profiles,
-                config.implantation_config,
-                seed=strat_seed,
-                classifier=classifier,
+            baseline_c_builder = (
+                "profile_only_average_fallback"
+                if config.skip_population_average_implant
+                else "population_average_full_implant"
             )
+        baseline_c_agent = clone_agent_template(baseline_c_template, seed=strat_seed)
         attach_surface_profile(baseline_c_agent, population_surface_profile)
         c_gen, c_real, cg11, cr11, cg3, cr3, c_trace = _call_generate_from_sessions(
             baseline_c_agent,
@@ -841,17 +932,21 @@ def run_validation(
         baseline_c_values = _result_values(baseline_c_metrics)
         diagnostic_rows: list[dict[str, object]] = []
         ablation_rows: list[dict[str, object]] = []
+        ablation_trace_rows: list[dict[str, object]] = []
         if config.diagnostic_trace:
             b_best = max(b_trace_runs, key=lambda row: float(row.get("semantic_mean", 0.0)), default={})
             b_worst = min(b_trace_runs, key=lambda row: float(row.get("semantic_mean", 0.0)), default={})
+            personality_semantic_scores = semantic_pair_scores(generated, real)
+            baseline_a_semantic_scores = semantic_pair_scores(a_gen, a_real)
+            baseline_c_semantic_scores = semantic_pair_scores(c_gen, c_real)
             diagnostic_rows = _semantic_trace_rows(
                 strategy_key=strategy_key,
                 personality_trace=p_trace,
                 baseline_a_trace=a_trace,
                 baseline_c_trace=c_trace,
-                personality_scores=semantic_pair_scores(generated, real),
-                baseline_a_scores=semantic_pair_scores(a_gen, a_real),
-                baseline_c_scores=semantic_pair_scores(c_gen, c_real),
+                personality_scores=personality_semantic_scores,
+                baseline_a_scores=baseline_a_semantic_scores,
+                baseline_c_scores=baseline_c_semantic_scores,
                 personality_vs_a_text_scores=semantic_pair_scores(generated, a_gen),
                 personality_vs_c_text_scores=semantic_pair_scores(generated, c_gen),
                 personality_vs_b_best_text_scores=(
@@ -868,13 +963,13 @@ def run_validation(
                 train_agent,
                 seed=int(config.seed) + 17 + config.strategies.index(strategy),
             )
-            ns_gen, ns_real, ns_g11, ns_r11, ns_g3, ns_r3, _ = _call_generate_from_sessions(
+            ns_gen, ns_real, ns_g11, ns_r11, ns_g3, ns_r3, ns_trace = _call_generate_from_sessions(
                 no_surface_agent,
                 split.holdout_sessions,
                 user_uid=user_uid,
                 seed=int(config.seed),
                 classifier=classifier,
-                diagnostic_trace=False,
+                diagnostic_trace=True,
             )
             ablation_rows.append(
                 _ablation_summary(
@@ -898,13 +993,13 @@ def run_validation(
             )
             no_policy_agent.slow_variable_learner.state.traits = SlowTraitState()
             attach_surface_profile(no_policy_agent, train_surface_profile)
-            np_gen, np_real, np_g11, np_r11, np_g3, np_r3, _ = _call_generate_from_sessions(
+            np_gen, np_real, np_g11, np_r11, np_g3, np_r3, np_trace = _call_generate_from_sessions(
                 no_policy_agent,
                 split.holdout_sessions,
                 user_uid=user_uid,
                 seed=int(config.seed) + 808,
                 classifier=classifier,
-                diagnostic_trace=False,
+                diagnostic_trace=True,
             )
             ablation_rows.append(
                 _ablation_summary(
@@ -924,13 +1019,13 @@ def run_validation(
             )
             surface_only_agent = create_default_agent(seed=int(config.seed) + 909)
             attach_surface_profile(surface_only_agent, train_surface_profile)
-            so_gen, so_real, so_g11, so_r11, so_g3, so_r3, _ = _call_generate_from_sessions(
+            so_gen, so_real, so_g11, so_r11, so_g3, so_r3, so_trace = _call_generate_from_sessions(
                 surface_only_agent,
                 split.holdout_sessions,
                 user_uid=user_uid,
                 seed=int(config.seed) + 909,
                 classifier=classifier,
-                diagnostic_trace=False,
+                diagnostic_trace=True,
             )
             ablation_rows.append(
                 _ablation_summary(
@@ -947,6 +1042,27 @@ def run_validation(
                     real_11=so_r11,
                     real_3=so_r3,
                 )
+            )
+            ablation_trace_rows = _ablation_trace_rows(
+                strategy_key=strategy_key,
+                personality_trace=p_trace,
+                personality_scores=personality_semantic_scores,
+                baseline_a_scores=baseline_a_semantic_scores,
+                baseline_c_scores=baseline_c_semantic_scores,
+                ablations={
+                    "no_surface_profile": {
+                        "trace": ns_trace,
+                        "semantic_scores": semantic_pair_scores(ns_gen, ns_real),
+                    },
+                    "no_policy_trait_bias": {
+                        "trace": np_trace,
+                        "semantic_scores": semantic_pair_scores(np_gen, np_real),
+                    },
+                    "surface_only_default_agent": {
+                        "trace": so_trace,
+                        "semantic_scores": semantic_pair_scores(so_gen, so_real),
+                    },
+                },
             )
         per_strategy[strategy_key] = {
             "skipped": False,
@@ -978,6 +1094,7 @@ def run_validation(
             "majority_baseline_metrics": majority_baseline_metrics,
             "diagnostic_trace": diagnostic_rows,
             "ablation_summary": ablation_rows,
+            "ablation_trace": ablation_trace_rows,
             "state_distance_diagnostics": state_distance_diag,
         }
         strategy_personality_means[strategy_key] = float(personality_values.get("semantic_similarity", 0.0))
@@ -1035,6 +1152,7 @@ def run_pilot_validation(
     *,
     population_average_template: SegmentAgent | None = None,
     wrong_agent_cache: dict[int, tuple[SegmentAgent, DialogueSurfaceProfile]] | None = None,
+    baseline_c_agent_cache: dict[tuple[int, bool], SegmentAgent] | None = None,
 ) -> dict[str, object]:
     if not user_datasets:
         return {
@@ -1063,6 +1181,7 @@ def run_pilot_validation(
             all_user_profiles=user_datasets,
             population_average_template=pop_template,
             wrong_agent_cache=wrong_agent_cache,
+            baseline_c_agent_cache=baseline_c_agent_cache,
         )
         personality = float(report.aggregate.get("semantic_personality_mean", 0.0))
         baseline_a = float(report.aggregate.get("semantic_baseline_a_mean", 0.0))
@@ -1107,12 +1226,14 @@ def run_batch_validation(
     config: ValidationConfig,
 ) -> list[ValidationReport]:
     wrong_agent_cache: dict[int, tuple[SegmentAgent, DialogueSurfaceProfile]] = {}
+    baseline_c_agent_cache: dict[tuple[int, bool], SegmentAgent] = {}
     pop_template = None
     pilot = run_pilot_validation(
         user_datasets,
         config,
         population_average_template=pop_template,
         wrong_agent_cache=wrong_agent_cache,
+        baseline_c_agent_cache=baseline_c_agent_cache,
     )
     required_users = int(pilot.get("suggested_min_users", config.min_users))
     if len(user_datasets) < required_users:
@@ -1130,6 +1251,7 @@ def run_batch_validation(
             all_user_profiles=user_datasets,
             population_average_template=pop_template,
             wrong_agent_cache=wrong_agent_cache,
+            baseline_c_agent_cache=baseline_c_agent_cache,
         )
         report.aggregate["pilot"] = pilot
         report.aggregate["required_users"] = required_users

@@ -1420,32 +1420,34 @@ def _baseline_c_behavioral_failure_audit(reports: list[ValidationReport]) -> dic
             for item in trace:
                 if not isinstance(item, dict):
                     continue
-                if item.get("real_text") is not None:
-                    # Real action labels are not persisted in diagnostic rows; the real
-                    # distribution is available from metric details only for majority rows.
-                    pass
+                if item.get("real_action") is not None:
+                    real_action.update([str(item.get("real_action"))])
+                if item.get("real_strategy") is not None:
+                    real_strategy.update([str(item.get("real_strategy"))])
                 personality_strategy.update([str(item.get("personality_strategy", "unknown"))])
                 baseline_c_strategy.update([str(item.get("baseline_c_strategy", "unknown"))])
                 personality_action.update([str(item.get("personality_action", "unknown"))])
                 baseline_c_action.update([str(item.get("baseline_c_action", "unknown"))])
             majority = strategy_result.get("majority_baseline_metrics", {})
-            if isinstance(majority, dict):
+            if isinstance(majority, dict) and (not real_strategy or not real_action):
                 real_strategy_raw = majority.get("real_strategy_distribution", {})
                 real_action_raw = majority.get("real_action_distribution", {})
                 real_strategy_map = real_strategy_raw if isinstance(real_strategy_raw, dict) else {}
                 real_action_map = real_action_raw if isinstance(real_action_raw, dict) else {}
-                real_strategy.update(
-                    {
-                        str(k): int(v)
-                        for k, v in real_strategy_map.items()
-                    }
-                )
-                real_action.update(
-                    {
-                        str(k): int(v)
-                        for k, v in real_action_map.items()
-                    }
-                )
+                if not real_strategy:
+                    real_strategy.update(
+                        {
+                            str(k): int(v)
+                            for k, v in real_strategy_map.items()
+                        }
+                    )
+                if not real_action:
+                    real_action.update(
+                        {
+                            str(k): int(v)
+                            for k, v in real_action_map.items()
+                        }
+                    )
             p = strategy_result.get("personality_metrics", {})
             c = strategy_result.get("baseline_c_metrics", {})
             rows.append(
@@ -1506,6 +1508,30 @@ def _write_diagnostic_trace(reports: list[ValidationReport], output_dir: Path) -
     if not rows:
         return 0
     path = output_dir / "diagnostic_trace.jsonl"
+    path.write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    return len(rows)
+
+
+def _write_ablation_trace(reports: list[ValidationReport], output_dir: Path) -> int:
+    rows: list[dict[str, object]] = []
+    for report in reports:
+        for strategy_key, strategy_result in report.per_strategy.items():
+            trace = strategy_result.get("ablation_trace", [])
+            if not isinstance(trace, list):
+                continue
+            for row in trace:
+                if not isinstance(row, dict):
+                    continue
+                payload = dict(row)
+                payload["user_uid"] = int(report.user_uid)
+                payload.setdefault("strategy", strategy_key)
+                rows.append(payload)
+    if not rows:
+        return 0
+    path = output_dir / "ablation_trace.jsonl"
     path.write_text(
         "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in rows) + "\n",
         encoding="utf-8",
@@ -1672,6 +1698,7 @@ def generate_report(
     topic_split_summary = _topic_split_summary(reports)
     required_users = _required_users(reports)
     diagnostic_trace_rows = _write_diagnostic_trace(reports, output_dir)
+    ablation_trace_rows = _write_ablation_trace(reports, output_dir)
     pilot_gate = _pilot_gate(reports, required_users)
     split_gate = _split_gate(per_strategy_comparisons, required_users)
     partner_gate = _partner_gate(per_strategy_hard_pass, per_strategy_comparisons, required_users)
@@ -1907,6 +1934,12 @@ def generate_report(
             else None
         ),
         "diagnostic_trace_rows": int(diagnostic_trace_rows),
+        "ablation_trace_jsonl": (
+            str((output_dir / "ablation_trace.jsonl").as_posix())
+            if ablation_trace_rows
+            else None
+        ),
+        "ablation_trace_rows": int(ablation_trace_rows),
         "hard_metrics": list(hard_metrics_list),
         "soft_metrics": list(soft_metrics_list),
         "acceptance_rules": acceptance_rules,
@@ -1950,6 +1983,7 @@ def generate_report(
         f"- Behavioral majority baseline gate: {behavioral_majority_baseline_gate['passed']}",
         f"- Surface ablation gate: {surface_ablation_gate['passed']}",
         f"- Diagnostic trace rows: {diagnostic_trace_rows}",
+        f"- Ablation trace rows: {ablation_trace_rows}",
         "",
         "## Acceptance (hard metrics)",
         "",

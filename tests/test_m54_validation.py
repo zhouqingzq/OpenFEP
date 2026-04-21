@@ -658,7 +658,7 @@ class TestM54Validation(unittest.TestCase):
         report = validate_act_classifier(
             train_samples=train,
             gate_samples=cue_gate,
-            classifier=DialogueActClassifier(train, use_tfidf=True),
+            classifier=KeywordDialogueActClassifier(),
             dataset_origin="independent_holdout_labels",
             require_classifier_provenance=False,
             max_cue_override_rate=0.35,
@@ -667,6 +667,23 @@ class TestM54Validation(unittest.TestCase):
         self.assertFalse(report["cue_override_gate_passed"])
         self.assertFalse(report["without_cue_3class_gate_passed"])
         self.assertFalse(report["formal_gate_eligible"])
+
+    def test_supervised_classifier_uses_cues_as_features_not_overrides(self) -> None:
+        train = _classifier_samples(100, offset=0)
+        gate = _classifier_samples(50, offset=1000)
+        report = validate_act_classifier(
+            train_samples=train,
+            gate_samples=gate,
+            classifier=DialogueActClassifier(train, use_tfidf=True),
+            dataset_origin="independent_holdout_labels",
+            require_classifier_provenance=False,
+            max_cue_override_rate=0.35,
+        )
+        self.assertEqual(report["cue_override_rate"], 0.0)
+        self.assertGreater(report["cue_feature_assist_rate"], 0.0)
+        self.assertTrue(report["cue_override_gate_passed"])
+        self.assertTrue(report["without_cue_3class_gate_passed"])
+        self.assertGreaterEqual(report["macro_f1_3class_without_cue"], 0.70)
 
     def test_supervised_classifier_handles_non_keyword_chinese(self) -> None:
         train = _classifier_samples(100, offset=0)

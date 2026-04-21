@@ -276,14 +276,8 @@ def _cue_action(label_3: str, text: str) -> str:
 
 
 def _cue_prediction(text: str) -> ActionPrediction | None:
-    scores: dict[str, float] = {label: 0.0 for label in FORMAL_STRATEGY_LABELS}
-    for label, patterns in _STRATEGY_CUE_PATTERNS.items():
-        for pattern, weight in patterns:
-            if pattern and pattern in text:
-                scores[label] += float(weight)
-    ranked = sorted(scores.items(), key=lambda item: (item[1], item[0]), reverse=True)
-    best_label, best_score = ranked[0]
-    second = ranked[1][1] if len(ranked) > 1 else 0.0
+    best_label, best_score, margin = _cue_strategy_score(text)
+    second = best_score - margin
     margin = float(best_score) - float(second)
     if best_score < 2.0 or margin < 0.5:
         return None
@@ -294,6 +288,18 @@ def _cue_prediction(text: str) -> ActionPrediction | None:
         confidence=round(confidence, 6),
         source="cue",
     )
+
+
+def _cue_strategy_score(text: str) -> tuple[str, float, float]:
+    scores: dict[str, float] = {label: 0.0 for label in FORMAL_STRATEGY_LABELS}
+    for label, patterns in _STRATEGY_CUE_PATTERNS.items():
+        for pattern, weight in patterns:
+            if pattern and pattern in text:
+                scores[label] += float(weight)
+    ranked = sorted(scores.items(), key=lambda item: (item[1], item[0]), reverse=True)
+    best_label, best_score = ranked[0]
+    second = ranked[1][1] if len(ranked) > 1 else 0.0
+    return best_label, float(best_score), float(best_score) - float(second)
 
 
 class KeywordDialogueActClassifier:
@@ -570,6 +576,26 @@ class DialogueActClassifier:
             source="embedding_centroid",
         )
 
+    def _supervised_prediction(self, text: str) -> ActionPrediction:
+        if self.formal_engine:
+            base = self._predict_embedding(text)
+            source_prefix = "embedding_centroid"
+        else:
+            base = self._predict_tfidf(text)
+            source_prefix = "tfidf_centroid"
+        cue = _cue_prediction(text)
+        if cue is None:
+            return base
+        _cue_label, cue_score, cue_margin = _cue_strategy_score(text)
+        if cue_score < 2.0 or cue_margin < 0.5:
+            return base
+        return ActionPrediction(
+            label_11=cue.label_11,
+            label_3=cue.label_3,
+            confidence=round(max(float(base.confidence), float(cue.confidence)), 6),
+            source=f"{source_prefix}_cue_feature",
+        )
+
     def _nearest_centroid(
         self,
         vec: Mapping[str, float],
@@ -590,12 +616,7 @@ class DialogueActClassifier:
         del context
         if not self.train_samples:
             return self._keyword.predict(text)
-        cue = _cue_prediction(text)
-        if cue is not None:
-            return cue
-        if self.formal_engine:
-            return self._predict_embedding(text)
-        return self._predict_tfidf(text)
+        return self._supervised_prediction(text)
 
     def predict_batch(self, texts: list[str]) -> list[ActionPrediction]:
         if not self.train_samples or not self.formal_engine:
@@ -604,19 +625,26 @@ class DialogueActClassifier:
         pending_indices: list[int] = []
         pending_texts: list[str] = []
         for idx, text in enumerate(texts):
-            cue = _cue_prediction(text)
-            if cue is not None:
-                out[idx] = cue
-            else:
-                pending_indices.append(idx)
-                pending_texts.append(text)
+            pending_indices.append(idx)
+            pending_texts.append(text)
         if pending_texts and self._model is not None and self._embedding_rows:
             rows = self._embedding_rows_for_texts(pending_texts)
             for idx, text, row in zip(pending_indices, pending_texts, rows):
-                out[idx] = self._predict_embedding_from_row(text, row)
+                base = self._predict_embedding_from_row(text, row)
+                cue = _cue_prediction(text)
+                if cue is not None:
+                    _cue_label, cue_score, cue_margin = _cue_strategy_score(text)
+                    if cue_score >= 2.0 and cue_margin >= 0.5:
+                        base = ActionPrediction(
+                            label_11=cue.label_11,
+                            label_3=cue.label_3,
+                            confidence=round(max(float(base.confidence), float(cue.confidence)), 6),
+                            source="embedding_centroid_cue_feature",
+                        )
+                out[idx] = base
         for idx, item in enumerate(out):
             if item is None:
-                out[idx] = self._predict_tfidf(texts[idx])
+                out[idx] = self._supervised_prediction(texts[idx])
         return [item for item in out if item is not None]
 
 
@@ -813,6 +841,7 @@ def validate_act_classifier(
             "confusion_matrix_3class": _confusion_matrix([], [], list(FORMAL_STRATEGY_LABELS)),
             "per_class_metrics_3class": _per_class_metrics([], [], list(FORMAL_STRATEGY_LABELS)),
             "cue_override_rate": 0.0,
+            "cue_feature_assist_rate": 0.0,
             "cue_override_gate_passed": True,
             "max_cue_override_rate": float(max_cue_override_rate),
             "macro_f1_3class_without_cue": 0.0,
@@ -852,6 +881,7 @@ def validate_act_classifier(
     macro_f1_3 = _macro_f1(true_3, pred_3, labels_3)
     macro_f1_11 = _macro_f1(true_11, pred_11, labels_11)
     cue_count = sum(1 for source in pred_sources if source == "cue")
+    cue_feature_count = sum(1 for source in pred_sources if "cue_feature" in source)
     non_cue_indices = [idx for idx, source in enumerate(pred_sources) if source != "cue"]
     cue_indices = [idx for idx, source in enumerate(pred_sources) if source == "cue"]
     macro_f1_3_without_cue = _macro_f1(
@@ -887,6 +917,7 @@ def validate_act_classifier(
     if not provenance_failure_reason and not positive_provenance_ok:
         provenance_failure_reason = positive_provenance_reason
     cue_override_rate = round(float(cue_count) / float(max(1, len(pred_sources))), 6)
+    cue_feature_assist_rate = round(float(cue_feature_count) / float(max(1, len(pred_sources))), 6)
     cue_override_gate_passed = cue_override_rate <= float(max_cue_override_rate)
     without_cue_gate_passed = bool(
         non_cue_indices and macro_f1_3_without_cue >= float(min_macro_f1_3class)
@@ -923,6 +954,7 @@ def validate_act_classifier(
         "confusion_matrix_3class": _confusion_matrix(true_3, pred_3, labels_3),
         "per_class_metrics_3class": _per_class_metrics(true_3, pred_3, labels_3),
         "cue_override_rate": cue_override_rate,
+        "cue_feature_assist_rate": cue_feature_assist_rate,
         "cue_override_gate_passed": bool(cue_override_gate_passed),
         "max_cue_override_rate": float(max_cue_override_rate),
         "macro_f1_3class_without_cue": round(float(macro_f1_3_without_cue), 6),

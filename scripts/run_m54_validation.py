@@ -237,6 +237,8 @@ def main() -> None:
         "baseline_c_behavioral_failure_audit_json": agg.get("baseline_c_behavioral_failure_audit_json"),
         "diagnostic_trace_jsonl": agg.get("diagnostic_trace_jsonl"),
         "diagnostic_trace_rows": agg.get("diagnostic_trace_rows"),
+        "ablation_trace_jsonl": agg.get("ablation_trace_jsonl"),
+        "ablation_trace_rows": agg.get("ablation_trace_rows"),
     }
     acceptance_path = args.output / "m54_acceptance.json"
     _write_json(acceptance_path, acceptance)

@@ -1,0 +1,3810 @@
+{
+  "aggregate": {
+    "artifact_rules_version": "m54_v6_partial_llm",
+    "baseline_c_builder": "population_average_full_implant",
+    "behavioral_baseline_c_mean": 0.70833325,
+    "behavioral_hard_metric_enabled": false,
+    "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+    "behavioral_personality_mean": 0.20833325,
+    "classifier_validation": {
+      "behavioral_hard_metric_enabled": false,
+      "class_distribution": {
+        "gate": {
+          "escape": 50,
+          "exploit": 50,
+          "explore": 50
+        },
+        "train": {
+          "escape": 100,
+          "exploit": 100,
+          "explore": 100
+        }
+      },
+      "classifier_evidence_tier": "llm_generated_provisional",
+      "classifier_provenance_failure_reason": "missing_provenance_field:train[0]:annotator,sampling_policy,label_schema_version",
+      "classifier_provenance_ok": false,
+      "confusion_matrix_3class": {
+        "escape": {
+          "escape": 39,
+          "exploit": 8,
+          "explore": 3
+        },
+        "exploit": {
+          "escape": 4,
+          "exploit": 42,
+          "explore": 4
+        },
+        "explore": {
+          "escape": 4,
+          "exploit": 0,
+          "explore": 46
+        }
+      },
+      "cue_feature_assist_rate": 0.646667,
+      "cue_override_gate_passed": true,
+      "cue_override_rate": 0.0,
+      "dataset_origin": "data\\m54_classifier_gate.jsonl",
+      "dataset_separation_ok": true,
+      "degradation_required": true,
+      "engine": "sentence_embedding_nearest_centroid",
+      "formal_dataset_minima": {
+        "gate_per_class": 50,
+        "gate_samples": 150,
+        "train_per_class": 100,
+        "train_samples": 300
+      },
+      "formal_dataset_ok": true,
+      "formal_engine": true,
+      "formal_engine_failure_reason": "",
+      "formal_gate_eligible": false,
+      "gate_count": 150,
+      "macro_f1_11class": 0.58848,
+      "macro_f1_3class": 0.845776,
+      "macro_f1_3class_cue_only": 0.0,
+      "macro_f1_3class_without_cue": 0.845776,
+      "max_cue_override_rate": 0.35,
+      "min_macro_f1_3class": 0.7,
+      "passed_3class_gate": false,
+      "per_class_metrics_3class": {
+        "escape": {
+          "f1": 0.804124,
+          "precision": 0.829787,
+          "recall": 0.78,
+          "support": 50
+        },
+        "exploit": {
+          "f1": 0.84,
+          "precision": 0.84,
+          "recall": 0.84,
+          "support": 50
+        },
+        "explore": {
+          "f1": 0.893204,
+          "precision": 0.867925,
+          "recall": 0.92,
+          "support": 50
+        }
+      },
+      "prediction_source_counts": {
+        "embedding_centroid": 53,
+        "embedding_centroid_cue_feature": 97
+      },
+      "sample_count": 150,
+      "train_count": 300,
+      "without_cue_3class_gate_passed": true
+    },
+    "diagnostic_trace_enabled": true,
+    "formal_requested": true,
+    "metric_version": "m54_v6_partial_llm",
+    "pilot": {
+      "behavioral_diff_sd": 0.337313,
+      "behavioral_escalated": false,
+      "escalated": true,
+      "pilot_metrics_used": [
+        "semantic_vs_baseline_a_mean_diff"
+      ],
+      "pilot_user_count": 5,
+      "required_users": 15,
+      "sd_threshold": 0.04,
+      "semantic_diff_mean": 0.063223,
+      "semantic_diff_sd": 0.153253,
+      "semantic_escalated": true,
+      "suggested_min_users": 15
+    },
+    "pipeline_status": "completed",
+    "requested_strategies": [
+      "random",
+      "temporal",
+      "partner",
+      "topic"
+    ],
+    "required_users": 15,
+    "semantic_baseline_a_mean": 0.4890495,
+    "semantic_baseline_b_mean": 0.423892,
+    "semantic_baseline_c_mean": 0.55235525,
+    "semantic_personality_mean": 0.48229875,
+    "skip_population_average_implant": false,
+    "strategy_count": 4
+  },
+  "conclusion": "completed",
+  "per_strategy": {
+    "partner": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 3,
+          "semantic_mean": 0.431795,
+          "semantic_vs_baseline_a_diff": 0.005238,
+          "semantic_vs_baseline_c_diff": -0.029288,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.788987
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_policy_trait_bias",
+          "pair_count": 3,
+          "semantic_mean": 0.394247,
+          "semantic_vs_baseline_a_diff": -0.03231,
+          "semantic_vs_baseline_c_diff": -0.066836,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.784545
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "surface_only_default_agent",
+          "pair_count": 3,
+          "semantic_mean": 0.370478,
+          "semantic_vs_baseline_a_diff": -0.056079,
+          "semantic_vs_baseline_c_diff": -0.090605,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.875504
+        }
+      ],
+      "ablation_trace": [
+        {
+          "baseline_a_semantic_pair_score": 0.422083,
+          "baseline_c_semantic_pair_score": 0.337311,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 23,
+          "full_personality_rhetorical_move": "guarded_short",
+          "full_personality_semantic_pair_score": 0.453955,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "partner:train",
+          "full_personality_template_id": "agree:2",
+          "full_personality_text": "关于“我可以去找你嗎[羞]”，你也一樣[樂]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 31,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.373418,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "partner:train",
+          "no_policy_trait_bias_template_id": "agree:1",
+          "no_policy_trait_bias_text": "关于“我可以去找你嗎[羞]”，咩咩 新年快樂[可愛][可愛]。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 28,
+          "no_surface_profile_rhetorical_move": "guarded_short",
+          "no_surface_profile_semantic_pair_score": 0.41588,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:2",
+          "no_surface_profile_text": "你说“我可以去找你嗎[羞]”，有道理，我跟你的看法一致。",
+          "pair_index": 0,
+          "partner_uid": 3641534,
+          "real_action": "introduce_topic",
+          "real_strategy": "explore",
+          "real_text": "得跟小瓜說sorry了，寶可夢有身體狀況 不方便 [微笑]",
+          "session_id": "2637594_3641534_20250102065344_0003",
+          "strategy": "partner",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 31,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.373418,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "partner:train",
+          "surface_only_default_agent_template_id": "agree:1",
+          "surface_only_default_agent_text": "关于“我可以去找你嗎[羞]”，咩咩 新年快樂[可愛][可愛]。",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_semantic_pair_score": 0.24804,
+          "baseline_c_semantic_pair_score": 0.291487,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 21,
+          "full_personality_rhetorical_move": "guarded_short",
+          "full_personality_semantic_pair_score": 0.212197,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "partner:train",
+          "full_personality_template_id": "agree:2",
+          "full_personality_text": "关于“新年快樂🙏”，倫倫 新年快樂[樂]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 24,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.239083,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "partner:train",
+          "no_policy_trait_bias_template_id": "agree:2",
+          "no_policy_trait_bias_text": "关于“新年快樂🙏”，小君君 新年快樂 ♥️🥰🎆。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 23,
+          "no_surface_profile_rhetorical_move": "guarded_short",
+          "no_surface_profile_semantic_pair_score": 0.254371,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:2",
+          "no_surface_profile_text": "你说“新年快樂🙏”，有道理，我跟你的看法一致。",
+          "pair_index": 1,
+          "partner_uid": 4927463,
+          "real_action": "empathize",
+          "real_strategy": "exploit",
+          "real_text": "吾爸你消失這麼久，雖不知道什麼事令你鬱悶，⋯你社會經驗如此豐富，能讓你動搖情緒肯定不簡單，希望你一切都好（真不行，去打一下拳擊🥊（遊樂場很多）發洩發洩[吐舌]",
+          "session_id": "2637594_4927463_20250106213642_0001",
+          "strategy": "partner",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 19,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.160195,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "partner:train",
+          "surface_only_default_agent_template_id": "agree:2",
+          "surface_only_default_agent_text": "关于“新年快樂🙏”，謝謝 Cc 支持。",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_semantic_pair_score": 0.609546,
+          "baseline_c_semantic_pair_score": 0.754453,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 33,
+          "full_personality_rhetorical_move": "guarded_short",
+          "full_personality_semantic_pair_score": 0.57782,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "partner:train",
+          "full_personality_template_id": "agree:1",
+          "full_personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，樹 新年快樂[可愛]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 33,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.570238,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "partner:train",
+          "no_policy_trait_bias_template_id": "agree:0",
+          "no_policy_trait_bias_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，瑜 身體狀況好些了嗎。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 31,
+          "no_surface_profile_rhetorical_move": "guarded_short",
+          "no_surface_profile_semantic_pair_score": 0.625134,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:1",
+          "no_surface_profile_text": "你说“沒關係，過一陣子他也許就沒事了👌🏻”，是的，我也这么想。",
+          "pair_index": 2,
+          "partner_uid": 3885257,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "strategy": "partner",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 33,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.57782,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "partner:train",
+          "surface_only_default_agent_template_id": "agree:1",
+          "surface_only_default_agent_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，樹 新年快樂[可愛]。",
+          "turn_index": 0
+        }
+      ],
+      "baseline_a_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "agree",
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.444444,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 3
+        },
+        "stylistic_similarity": {
+          "jsd": 0.029356
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.070431
+        }
+      },
+      "baseline_a_metrics": {
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 0.555556,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.426557,
+        "stylistic_similarity": 0.957648,
+        "surface_similarity": 0.035216
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "balanced_behavioral_similarity_action11": 0.62963,
+        "balanced_behavioral_similarity_strategy": 0.703704,
+        "behavioral_similarity_action11": 0.111111,
+        "behavioral_similarity_strategy": 0.511111,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.3938896666666667,
+        "stylistic_similarity": 0.8750223333333333,
+        "surface_similarity": 0.005092666666666666
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637372,
+        2637134
+      ],
+      "baseline_c_builder": "population_average_full_implant",
+      "baseline_c_input_scope": "leave_one_out_population_train_and_profile_data",
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.444444,
+          "categories": [
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.444444,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ],
+          "chi_square_distance": 2.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 3
+        },
+        "stylistic_similarity": {
+          "jsd": 0.281494
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "balanced_behavioral_similarity_action11": 0.555556,
+        "balanced_behavioral_similarity_strategy": 0.555556,
+        "behavioral_similarity_action11": 0.333333,
+        "behavioral_similarity_strategy": 0.333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.461083,
+        "stylistic_similarity": 0.593891,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637594,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.1396,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2851,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2851
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325149
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "classifier_evidence_tier": "llm_generated_provisional",
+        "classifier_provenance_failure_reason": "missing_provenance_field:train[0]:annotator,sampling_policy,label_schema_version",
+        "classifier_provenance_ok": false,
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_feature_assist_rate": 0.646667,
+        "cue_override_gate_passed": true,
+        "cue_override_rate": 0.0,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "macro_f1_3class_cue_only": 0.0,
+        "macro_f1_3class_without_cue": 0.845776,
+        "max_cue_override_rate": 0.35,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "embedding_centroid": 53,
+          "embedding_centroid_cue_feature": 97
+        },
+        "sample_count": 150,
+        "train_count": 300,
+        "without_cue_3class_gate_passed": true
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 32,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.422083,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“我可以去找你嗎[羞]”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 4,
+          "baseline_b_best_semantic_pair_score": 0.467381,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "🤣🤣🤣。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 12,
+          "baseline_b_worst_semantic_pair_score": 0.226258,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "我還在咳嗽 好久沒唱了。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.337311,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:0",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.288,
+            "meaning_stability": 0.261375,
+            "trauma_bias": 0.15156,
+            "trust_prior": -0.276
+          },
+          "pair_index": 0,
+          "partner_uid": 3641534,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 23,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "guarded_short",
+          "personality_semantic_pair_score": 0.453955,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "关于“我可以去找你嗎[羞]”，你也一樣[樂]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.031872,
+          "personality_vs_a_text_similarity": 0.848754,
+          "personality_vs_b_best_text_similarity": 0.503756,
+          "personality_vs_c_pair_delta": 0.116644,
+          "personality_vs_c_text_similarity": 0.435726,
+          "real_action": "introduce_topic",
+          "real_strategy": "explore",
+          "real_text": "得跟小瓜說sorry了，寶可夢有身體狀況 不方便 [微笑]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3641534_20250102065344_0003",
+          "slow_traits": {
+            "caution_bias": 0.78,
+            "exploration_posture": 0.42,
+            "social_approach": 0.380833,
+            "threat_sensitivity": 0.6684,
+            "trust_stance": 0.27
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 22,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.24804,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“新年快樂🙏”，我在认真听你说，我同意。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 3,
+          "baseline_b_best_semantic_pair_score": 0.363063,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "噓🤫。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 15,
+          "baseline_b_worst_semantic_pair_score": 0.400356,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "你繼續高產👍我們可以慢慢享受。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.291487,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:2",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.288,
+            "meaning_stability": 0.261375,
+            "trauma_bias": 0.15156,
+            "trust_prior": -0.276
+          },
+          "pair_index": 1,
+          "partner_uid": 4927463,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 21,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "guarded_short",
+          "personality_semantic_pair_score": 0.212197,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "关于“新年快樂🙏”，倫倫 新年快樂[樂]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.035843,
+          "personality_vs_a_text_similarity": 0.838828,
+          "personality_vs_b_best_text_similarity": 0.351424,
+          "personality_vs_c_pair_delta": -0.07929,
+          "personality_vs_c_text_similarity": 0.410104,
+          "real_action": "empathize",
+          "real_strategy": "exploit",
+          "real_text": "吾爸你消失這麼久，雖不知道什麼事令你鬱悶，⋯你社會經驗如此豐富，能讓你動搖情緒肯定不簡單，希望你一切都好（真不行，去打一下拳擊🥊（遊樂場很多）發洩發洩[吐舌]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_4927463_20250106213642_0001",
+          "slow_traits": {
+            "caution_bias": 0.78,
+            "exploration_posture": 0.42,
+            "social_approach": 0.380833,
+            "threat_sensitivity": 0.6684,
+            "trust_stance": 0.27
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 39,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.609546,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“沒關係，過一陣子他也許就沒事了👌🏻”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 3,
+          "baseline_b_best_semantic_pair_score": 0.571921,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "這位。",
+          "baseline_b_worst_action": "introduce_topic",
+          "baseline_b_worst_generated_chars": 9,
+          "baseline_b_worst_semantic_pair_score": 0.376886,
+          "baseline_b_worst_strategy": "explore",
+          "baseline_b_worst_text": "不過第一句真的像。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.754453,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:1",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.288,
+            "meaning_stability": 0.261375,
+            "trauma_bias": 0.15156,
+            "trust_prior": -0.276
+          },
+          "pair_index": 2,
+          "partner_uid": 3885257,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 33,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "guarded_short",
+          "personality_semantic_pair_score": 0.57782,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "partner:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，樹 新年快樂[可愛]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.031726,
+          "personality_vs_a_text_similarity": 0.577832,
+          "personality_vs_b_best_text_similarity": 0.478233,
+          "personality_vs_c_pair_delta": -0.176633,
+          "personality_vs_c_text_similarity": 0.471056,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "slow_traits": {
+            "caution_bias": 0.78,
+            "exploration_posture": 0.42,
+            "social_approach": 0.380833,
+            "threat_sensitivity": 0.6684,
+            "trust_stance": 0.27
+          },
+          "strategy": "partner",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "full_state_calibration_summary": {
+        "action_counts": {
+          "deflect": 1,
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 3
+        },
+        "applied": true,
+        "avg_reply_chars": 27.666667,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "deflect": 0.166667,
+          "empathize": 0.166667,
+          "introduce_topic": 0.166667,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.098667,
+          "meaning_stability": 0.298937,
+          "trauma_bias": 0.08568,
+          "trust_prior": -0.132
+        },
+        "reply_count": 6,
+        "source": "full:data",
+        "strategy_counts": {
+          "escape": 4,
+          "exploit": 1,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.116667,
+          "exploration_posture": -0.006667,
+          "social_approach": -0.035694,
+          "threat_sensitivity": 0.0952,
+          "trust_stance": -0.11
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "majority_baseline_metrics": {
+        "action11_details": {
+          "categories": [
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ],
+          "chi_square_distance": 2.0
+        },
+        "balanced_action11_details": {
+          "balanced_l1_distance": 0.444444,
+          "categories": [
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_action11": 0.555556,
+        "balanced_behavioral_similarity_strategy": 0.555556,
+        "balanced_strategy_details": {
+          "balanced_l1_distance": 0.444444,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": 0.333333,
+        "behavioral_similarity_strategy": 0.333333,
+        "majority_action": "minimal_response",
+        "majority_strategy": "escape",
+        "pair_count": 3,
+        "real_action_distribution": {
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 1
+        },
+        "real_strategy_distribution": {
+          "escape": 1,
+          "exploit": 1,
+          "explore": 1
+        },
+        "strategy_details": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.0
+        }
+      },
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "agree",
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.444444,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "empathize",
+            "introduce_topic",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 2.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 3
+        },
+        "stylistic_similarity": {
+          "jsd": 0.027655
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.076764
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.964338,
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 0.555556,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.414657,
+        "stylistic_similarity": 0.960103,
+        "surface_similarity": 0.038382
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 12,
+        "holdout_partners": [
+          2654580,
+          3027999,
+          3542889,
+          3641534,
+          3885257,
+          3963573,
+          4927463
+        ],
+        "partner_count": 24,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "partner",
+        "train_count": 20,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "deflect": 1,
+          "minimal_response": 2
+        },
+        "applied": true,
+        "avg_reply_chars": 18.0,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "deflect": 0.333333,
+          "minimal_response": 0.666667
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response",
+          "deflect"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.288,
+          "meaning_stability": 0.261375,
+          "trauma_bias": 0.15156,
+          "trust_prior": -0.276
+        },
+        "reply_count": 3,
+        "source": "partner:train",
+        "strategy_counts": {
+          "escape": 3
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.28,
+          "exploration_posture": -0.08,
+          "social_approach": -0.119167,
+          "threat_sensitivity": 0.1684,
+          "trust_stance": -0.23
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.013156,
+          "prior:meaning_stability": 0.015108,
+          "prior:trauma_bias": 0.003054,
+          "prior:trust_prior": 0.009528,
+          "trait:caution_bias": 0.010448,
+          "trait:exploration_posture": 0.002444,
+          "trait:social_approach": 0.002001,
+          "trait:threat_sensitivity": 0.00377,
+          "trait:trust_stance": 0.006617
+        },
+        "train_default": {
+          "cosine": 0.864115,
+          "l2": 0.656252,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.288,
+            "prior:meaning_stability": 0.261375,
+            "prior:trauma_bias": 0.15156,
+            "prior:trust_prior": 0.276,
+            "trait:caution_bias": 0.28,
+            "trait:exploration_posture": 0.08,
+            "trait:social_approach": 0.119167,
+            "trait:threat_sensitivity": 0.1684,
+            "trait:trust_stance": 0.23
+          }
+        },
+        "train_full": {
+          "cosine": 0.964338,
+          "l2": 0.348016,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.189333,
+            "prior:meaning_stability": 0.037562,
+            "prior:trauma_bias": 0.06588,
+            "prior:trust_prior": 0.144,
+            "trait:caution_bias": 0.163333,
+            "trait:exploration_posture": 0.073333,
+            "trait:social_approach": 0.083473,
+            "trait:threat_sensitivity": 0.0732,
+            "trait:trust_stance": 0.12
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.977835,
+          "l2": 0.284429,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.044916,
+            "prior:meaning_stability": 0.173941,
+            "prior:trauma_bias": 0.042732,
+            "prior:trust_prior": 0.139084,
+            "trait:caution_bias": 0.093253,
+            "trait:exploration_posture": 0.037108,
+            "trait:social_approach": 0.041175,
+            "trait:threat_sensitivity": 0.04748,
+            "trait:trust_stance": 0.115904
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 18.538462,
+        "median_reply_chars": 15,
+        "opening_phrases": [
+          "謝謝 Cc 支持 ，千也祝妳新年快樂",
+          "倫倫 新年快樂[樂]",
+          "[期待]曉兒 新年快樂[飛吻]",
+          "我最認真[羞][羞][羞]",
+          "咩咩 新年快樂[可愛][可愛]"
+        ],
+        "reply_count": 13,
+        "source": "partner:train",
+        "strategy_counts": {
+          "escape": 10,
+          "exploit": 1,
+          "explore": 2
+        },
+        "top_tokens": [
+          "樂",
+          "新",
+          "年",
+          "快",
+          "妳",
+          "愛",
+          "不",
+          "也"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    },
+    "random": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 2,
+          "semantic_mean": 0.513983,
+          "semantic_vs_baseline_a_diff": -0.015534,
+          "semantic_vs_baseline_c_diff": -0.098701,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.63003
+        },
+        {
+          "action_agreement_vs_personality": 0.5,
+          "name": "no_policy_trait_bias",
+          "pair_count": 2,
+          "semantic_mean": 0.589653,
+          "semantic_vs_baseline_a_diff": 0.060136,
+          "semantic_vs_baseline_c_diff": -0.023031,
+          "strategy_agreement_vs_personality": 0.5,
+          "text_similarity_vs_personality": 0.954272
+        },
+        {
+          "action_agreement_vs_personality": 0.5,
+          "name": "surface_only_default_agent",
+          "pair_count": 2,
+          "semantic_mean": 0.563452,
+          "semantic_vs_baseline_a_diff": 0.033935,
+          "semantic_vs_baseline_c_diff": -0.049232,
+          "strategy_agreement_vs_personality": 0.5,
+          "text_similarity_vs_personality": 0.983347
+        }
+      ],
+      "ablation_trace": [
+        {
+          "baseline_a_semantic_pair_score": 0.449488,
+          "baseline_c_semantic_pair_score": 0.470915,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 31,
+          "full_personality_rhetorical_move": "warm_supportive",
+          "full_personality_semantic_pair_score": 0.555838,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "random:train",
+          "full_personality_template_id": "agree:1",
+          "full_personality_text": "关于“對不起[期待][期待]”，會的 妳也是 很好聽[愛心]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 24,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.520116,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "random:train",
+          "no_policy_trait_bias_template_id": "agree:1",
+          "no_policy_trait_bias_text": "关于“對不起[期待][期待]”，你也一樣[樂]。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 33,
+          "no_surface_profile_rhetorical_move": "warm_supportive",
+          "no_surface_profile_semantic_pair_score": 0.476336,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:1",
+          "no_surface_profile_text": "你说“對不起[期待][期待]”，我在认真听你说，是的，我也这么想。",
+          "pair_index": 0,
+          "partner_uid": 3396673,
+          "real_action": "deflect",
+          "real_strategy": "escape",
+          "real_text": "不要緊的，不用說sorry[飛吻] 只是一份小小祝福[眨眼]我也有時會missed😆",
+          "session_id": "2637594_3396673_20250102072808_0001",
+          "strategy": "random",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 24,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.520116,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "random:train",
+          "surface_only_default_agent_template_id": "agree:0",
+          "surface_only_default_agent_text": "关于“對不起[期待][期待]”，你也一樣[樂]。",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_semantic_pair_score": 0.609546,
+          "baseline_c_semantic_pair_score": 0.754453,
+          "full_personality_action": "share_opinion",
+          "full_personality_generated_chars": 38,
+          "full_personality_rhetorical_move": "direct_advisory",
+          "full_personality_semantic_pair_score": 0.606787,
+          "full_personality_strategy": "explore",
+          "full_personality_surface_source": "random:train",
+          "full_personality_template_id": "share_opinion:0",
+          "full_personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，咩咩 新年快樂[可愛][可愛]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 36,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.65919,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "random:train",
+          "no_policy_trait_bias_template_id": "agree:0",
+          "no_policy_trait_bias_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，小君君 新年快樂 ♥️🥰🎆。",
+          "no_surface_profile_action": "share_opinion",
+          "no_surface_profile_generated_chars": 8,
+          "no_surface_profile_rhetorical_move": "direct_advisory",
+          "no_surface_profile_semantic_pair_score": 0.551629,
+          "no_surface_profile_strategy": "explore",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "share_opinion:0",
+          "no_surface_profile_text": "我的想法是这样。",
+          "pair_index": 1,
+          "partner_uid": 3885257,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "strategy": "random",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 38,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.606787,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "random:train",
+          "surface_only_default_agent_template_id": "agree:1",
+          "surface_only_default_agent_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，咩咩 新年快樂[可愛][可愛]。",
+          "turn_index": 0
+        }
+      ],
+      "baseline_a_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.030188
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.115427
+        }
+      },
+      "baseline_a_metrics": {
+        "balanced_behavioral_similarity_action11": 0.333333,
+        "balanced_behavioral_similarity_strategy": 0.333333,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.529517,
+        "stylistic_similarity": 0.956447,
+        "surface_similarity": 0.057714
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "balanced_behavioral_similarity_action11": 0.44444433333333333,
+        "balanced_behavioral_similarity_strategy": 0.5555553333333333,
+        "behavioral_similarity_action11": 0.16666666666666666,
+        "behavioral_similarity_strategy": 0.3333333333333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.42045866666666665,
+        "stylistic_similarity": 0.8918843333333334,
+        "surface_similarity": 0.02248666666666667
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637372,
+        2637134
+      ],
+      "baseline_c_builder": "population_average_full_implant",
+      "baseline_c_input_scope": "leave_one_out_population_train_and_profile_data",
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.0,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.241257
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 1.0,
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.612684,
+        "stylistic_similarity": 0.651939,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637594,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.1396,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2851,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2851
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325149
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "classifier_evidence_tier": "llm_generated_provisional",
+        "classifier_provenance_failure_reason": "missing_provenance_field:train[0]:annotator,sampling_policy,label_schema_version",
+        "classifier_provenance_ok": false,
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_feature_assist_rate": 0.646667,
+        "cue_override_gate_passed": true,
+        "cue_override_rate": 0.0,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "macro_f1_3class_cue_only": 0.0,
+        "macro_f1_3class_without_cue": 0.845776,
+        "max_cue_override_rate": 0.35,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "embedding_centroid": 53,
+          "embedding_centroid_cue_feature": 97
+        },
+        "sample_count": 150,
+        "train_count": 300,
+        "without_cue_3class_gate_passed": true
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 37,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.449488,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“對不起[期待][期待]”，我在认真听你说，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 3,
+          "baseline_b_best_semantic_pair_score": 0.375862,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "是喔。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 4,
+          "baseline_b_worst_semantic_pair_score": 0.560574,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "👏👏👏。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.470915,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:0",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.004,
+            "meaning_stability": 0.315375,
+            "trauma_bias": 0.05274,
+            "trust_prior": -0.06
+          },
+          "pair_index": 0,
+          "partner_uid": 3396673,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 31,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "warm_supportive",
+          "personality_semantic_pair_score": 0.555838,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "random:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "关于“對不起[期待][期待]”，會的 妳也是 很好聽[愛心]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.10635,
+          "personality_vs_a_text_similarity": 0.864925,
+          "personality_vs_b_best_text_similarity": 0.352071,
+          "personality_vs_c_pair_delta": 0.084923,
+          "personality_vs_c_text_similarity": 0.395129,
+          "real_action": "deflect",
+          "real_strategy": "escape",
+          "real_text": "不要緊的，不用說sorry[飛吻] 只是一份小小祝福[眨眼]我也有時會missed😆",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3396673_20250102072808_0001",
+          "slow_traits": {
+            "caution_bias": 0.535,
+            "exploration_posture": 0.53,
+            "social_approach": 0.500833,
+            "threat_sensitivity": 0.5586,
+            "trust_stance": 0.45
+          },
+          "strategy": "random",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 39,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.609546,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“沒關係，過一陣子他也許就沒事了👌🏻”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 3,
+          "baseline_b_best_semantic_pair_score": 0.571921,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "這位。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 12,
+          "baseline_b_worst_semantic_pair_score": 0.213442,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "我還在咳嗽 好久沒唱了。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.754453,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:1",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.004,
+            "meaning_stability": 0.315375,
+            "trauma_bias": 0.05274,
+            "trust_prior": -0.06
+          },
+          "pair_index": 1,
+          "partner_uid": 3885257,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": false,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 38,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.606787,
+          "personality_strategy": "explore",
+          "personality_surface_source": "random:train",
+          "personality_template_id": "share_opinion:0",
+          "personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，咩咩 新年快樂[可愛][可愛]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.002759,
+          "personality_vs_a_text_similarity": 0.636609,
+          "personality_vs_b_best_text_similarity": 0.535029,
+          "personality_vs_c_pair_delta": -0.147666,
+          "personality_vs_c_text_similarity": 0.523181,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "slow_traits": {
+            "caution_bias": 0.535,
+            "exploration_posture": 0.53,
+            "social_approach": 0.500833,
+            "threat_sensitivity": 0.5586,
+            "trust_stance": 0.45
+          },
+          "strategy": "random",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "full_state_calibration_summary": {
+        "action_counts": {
+          "deflect": 1,
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 3
+        },
+        "applied": true,
+        "avg_reply_chars": 27.666667,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "deflect": 0.166667,
+          "empathize": 0.166667,
+          "introduce_topic": 0.166667,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.098667,
+          "meaning_stability": 0.298937,
+          "trauma_bias": 0.08568,
+          "trust_prior": -0.132
+        },
+        "reply_count": 6,
+        "source": "full:data",
+        "strategy_counts": {
+          "escape": 4,
+          "exploit": 1,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.116667,
+          "exploration_posture": -0.006667,
+          "social_approach": -0.035694,
+          "threat_sensitivity": 0.0952,
+          "trust_stance": -0.11
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "majority_baseline_metrics": {
+        "action11_details": {
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "balanced_action11_details": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 1.0,
+        "balanced_strategy_details": {
+          "balanced_l1_distance": 0.0,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 1.0,
+        "majority_action": "minimal_response",
+        "majority_strategy": "escape",
+        "pair_count": 2,
+        "real_action_distribution": {
+          "deflect": 1,
+          "minimal_response": 1
+        },
+        "real_strategy_distribution": {
+          "escape": 2
+        },
+        "strategy_details": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        }
+      },
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response",
+            "share_opinion"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 500000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 500000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.021992
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.133333
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.989812,
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 0.333333,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.581313,
+        "stylistic_similarity": 0.968273,
+        "surface_similarity": 0.066667
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "seed": 42,
+        "session_count": 32,
+        "strategy": "random",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 2
+        },
+        "applied": true,
+        "avg_reply_chars": 30.0,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "empathize": 0.25,
+          "introduce_topic": 0.25,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response",
+          "introduce_topic",
+          "empathize"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.004,
+          "meaning_stability": 0.315375,
+          "trauma_bias": 0.05274,
+          "trust_prior": -0.06
+        },
+        "reply_count": 4,
+        "source": "random:train",
+        "strategy_counts": {
+          "escape": 2,
+          "exploit": 1,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.035,
+          "exploration_posture": 0.03,
+          "social_approach": 0.000833,
+          "threat_sensitivity": 0.0586,
+          "trust_stance": -0.05
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.009739,
+          "prior:meaning_stability": 0.018339,
+          "prior:trauma_bias": 0.001671,
+          "prior:trust_prior": 0.003181,
+          "trait:caution_bias": 0.00527,
+          "trait:exploration_posture": 0.003115,
+          "trait:social_approach": 0.001043,
+          "trait:threat_sensitivity": 0.002063,
+          "trait:trust_stance": 0.002209
+        },
+        "train_default": {
+          "cosine": 0.959984,
+          "l2": 0.337518,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.004,
+            "prior:meaning_stability": 0.315375,
+            "prior:trauma_bias": 0.05274,
+            "prior:trust_prior": 0.06,
+            "trait:caution_bias": 0.035,
+            "trait:exploration_posture": 0.03,
+            "trait:social_approach": 0.000833,
+            "trait:threat_sensitivity": 0.0586,
+            "trait:trust_stance": 0.05
+          }
+        },
+        "train_full": {
+          "cosine": 0.989812,
+          "l2": 0.172594,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.094667,
+            "prior:meaning_stability": 0.016438,
+            "prior:trauma_bias": 0.03294,
+            "prior:trust_prior": 0.072,
+            "trait:caution_bias": 0.081667,
+            "trait:exploration_posture": 0.036667,
+            "trait:social_approach": 0.036527,
+            "trait:threat_sensitivity": 0.0366,
+            "trait:trust_stance": 0.06
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.938239,
+          "l2": 0.420777,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.239084,
+            "prior:meaning_stability": 0.227941,
+            "prior:trauma_bias": 0.056088,
+            "prior:trust_prior": 0.076916,
+            "trait:caution_bias": 0.151747,
+            "trait:exploration_posture": 0.147108,
+            "trait:social_approach": 0.078825,
+            "trait:threat_sensitivity": 0.06232,
+            "trait:trust_stance": 0.064096
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 20.75,
+        "median_reply_chars": 16,
+        "opening_phrases": [
+          "謝謝 啾 的 支持， 新年快樂🌹🥰",
+          "謝謝 哥 的照顧支持 ，新年快樂。[",
+          "謝謝 Cc 支持 ，千也祝妳新年快樂",
+          "謝謝貓貓 新年快樂✨🤗",
+          "[期待]曉兒 新年快樂[飛吻]"
+        ],
+        "reply_count": 16,
+        "source": "random:train",
+        "strategy_counts": {
+          "escape": 13,
+          "exploit": 2,
+          "explore": 1
+        },
+        "top_tokens": [
+          "樂",
+          "謝",
+          "新",
+          "年",
+          "快",
+          "不",
+          "也",
+          "愛"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    },
+    "temporal": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 2,
+          "semantic_mean": 0.453263,
+          "semantic_vs_baseline_a_diff": -0.017344,
+          "semantic_vs_baseline_c_diff": -0.069707,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.768197
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_policy_trait_bias",
+          "pair_count": 2,
+          "semantic_mean": 0.409693,
+          "semantic_vs_baseline_a_diff": -0.060914,
+          "semantic_vs_baseline_c_diff": -0.113277,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.77758
+        },
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "surface_only_default_agent",
+          "pair_count": 2,
+          "semantic_mean": 0.462521,
+          "semantic_vs_baseline_a_diff": -0.008086,
+          "semantic_vs_baseline_c_diff": -0.060449,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.707267
+        }
+      ],
+      "ablation_trace": [
+        {
+          "baseline_a_semantic_pair_score": 0.291784,
+          "baseline_c_semantic_pair_score": 0.291487,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 21,
+          "full_personality_rhetorical_move": "guarded_short",
+          "full_personality_semantic_pair_score": 0.268639,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "temporal:train",
+          "full_personality_template_id": "agree:2",
+          "full_personality_text": "关于“新年快樂🙏”，謝謝 哥 的照顧支持。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 19,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.160195,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "temporal:train",
+          "no_policy_trait_bias_template_id": "agree:0",
+          "no_policy_trait_bias_text": "关于“新年快樂🙏”，謝謝 Cc 支持。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 23,
+          "no_surface_profile_rhetorical_move": "guarded_short",
+          "no_surface_profile_semantic_pair_score": 0.254371,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:2",
+          "no_surface_profile_text": "你说“新年快樂🙏”，有道理，我跟你的看法一致。",
+          "pair_index": 0,
+          "partner_uid": 4927463,
+          "real_action": "empathize",
+          "real_strategy": "exploit",
+          "real_text": "吾爸你消失這麼久，雖不知道什麼事令你鬱悶，⋯你社會經驗如此豐富，能讓你動搖情緒肯定不簡單，希望你一切都好（真不行，去打一下拳擊🥊（遊樂場很多）發洩發洩[吐舌]",
+          "session_id": "2637594_4927463_20250106213642_0001",
+          "strategy": "temporal",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 21,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.265852,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "temporal:train",
+          "surface_only_default_agent_template_id": "agree:1",
+          "surface_only_default_agent_text": "关于“新年快樂🙏”，瑜 身體狀況好些了嗎。",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_semantic_pair_score": 0.649429,
+          "baseline_c_semantic_pair_score": 0.754453,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 36,
+          "full_personality_rhetorical_move": "guarded_short",
+          "full_personality_semantic_pair_score": 0.435185,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "temporal:train",
+          "full_personality_template_id": "agree:0",
+          "full_personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，我最認真[羞][羞][羞]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 36,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.65919,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "temporal:train",
+          "no_policy_trait_bias_template_id": "agree:2",
+          "no_policy_trait_bias_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，小君君 新年快樂 ♥️🥰🎆。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 26,
+          "no_surface_profile_rhetorical_move": "guarded_short",
+          "no_surface_profile_semantic_pair_score": 0.652155,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:0",
+          "no_surface_profile_text": "你说“沒關係，過一陣子他也許就沒事了👌🏻”，我同意。",
+          "pair_index": 1,
+          "partner_uid": 3885257,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "strategy": "temporal",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 36,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.65919,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "temporal:train",
+          "surface_only_default_agent_template_id": "agree:1",
+          "surface_only_default_agent_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，小君君 新年快樂 ♥️🥰🎆。",
+          "turn_index": 0
+        }
+      ],
+      "baseline_a_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "agree",
+            "empathize",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.333333,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "empathize",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.024382
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.089655
+        }
+      },
+      "baseline_a_metrics": {
+        "balanced_behavioral_similarity_action11": 0.333333,
+        "balanced_behavioral_similarity_strategy": 0.666667,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.470607,
+        "stylistic_similarity": 0.964824,
+        "surface_similarity": 0.044828
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "balanced_behavioral_similarity_action11": 0.44444433333333333,
+        "balanced_behavioral_similarity_strategy": 0.666667,
+        "behavioral_similarity_action11": 0.16666666666666666,
+        "behavioral_similarity_strategy": 0.3333333333333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.460761,
+        "stylistic_similarity": 0.7626453333333333,
+        "surface_similarity": 0.0
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637372,
+        2637134
+      ],
+      "baseline_c_builder": "population_average_full_implant",
+      "baseline_c_input_scope": "leave_one_out_population_train_and_profile_data",
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "empathize",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.333333,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "empathize",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.252532
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 0.666667,
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.52297,
+        "stylistic_similarity": 0.635673,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637594,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.1396,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2851,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2851
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325149
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "classifier_evidence_tier": "llm_generated_provisional",
+        "classifier_provenance_failure_reason": "missing_provenance_field:train[0]:annotator,sampling_policy,label_schema_version",
+        "classifier_provenance_ok": false,
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_feature_assist_rate": 0.646667,
+        "cue_override_gate_passed": true,
+        "cue_override_rate": 0.0,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "macro_f1_3class_cue_only": 0.0,
+        "macro_f1_3class_without_cue": 0.845776,
+        "max_cue_override_rate": 0.35,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "embedding_centroid": 53,
+          "embedding_centroid_cue_feature": 97
+        },
+        "sample_count": 150,
+        "train_count": 300,
+        "without_cue_3class_gate_passed": true
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 27,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.291784,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“新年快樂🙏”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_best_action": "introduce_topic",
+          "baseline_b_best_generated_chars": 12,
+          "baseline_b_best_semantic_pair_score": 0.286619,
+          "baseline_b_best_strategy": "explore",
+          "baseline_b_best_text": "换个角度，我们聊聊这个。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 4,
+          "baseline_b_worst_semantic_pair_score": 0.355101,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "👏👏👏。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.291487,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:1",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.128,
+            "meaning_stability": 0.263953,
+            "trauma_bias": 0.11052,
+            "trust_prior": -0.216
+          },
+          "pair_index": 0,
+          "partner_uid": 4927463,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 21,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "guarded_short",
+          "personality_semantic_pair_score": 0.268639,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:2",
+          "personality_text": "关于“新年快樂🙏”，謝謝 哥 的照顧支持。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.023145,
+          "personality_vs_a_text_similarity": 0.812219,
+          "personality_vs_b_best_text_similarity": 0.266825,
+          "personality_vs_c_pair_delta": -0.022848,
+          "personality_vs_c_text_similarity": 0.372958,
+          "real_action": "empathize",
+          "real_strategy": "exploit",
+          "real_text": "吾爸你消失這麼久，雖不知道什麼事令你鬱悶，⋯你社會經驗如此豐富，能讓你動搖情緒肯定不簡單，希望你一切都好（真不行，去打一下拳擊🥊（遊樂場很多）發洩發洩[吐舌]",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_4927463_20250106213642_0001",
+          "slow_traits": {
+            "caution_bias": 0.67,
+            "exploration_posture": 0.51,
+            "social_approach": 0.386562,
+            "threat_sensitivity": 0.6228,
+            "trust_stance": 0.32
+          },
+          "strategy": "temporal",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 34,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.649429,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:0",
+          "baseline_a_text": "你说“沒關係，過一陣子他也許就沒事了👌🏻”，我在认真听你说，我同意。",
+          "baseline_b_best_action": "agree",
+          "baseline_b_best_generated_chars": 13,
+          "baseline_b_best_semantic_pair_score": 0.646363,
+          "baseline_b_best_strategy": "exploit",
+          "baseline_b_best_text": "有道理，我跟你的看法一致。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 5,
+          "baseline_b_worst_semantic_pair_score": 0.54486,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "🤣🤣🤣👍。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.754453,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:0",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.128,
+            "meaning_stability": 0.263953,
+            "trauma_bias": 0.11052,
+            "trust_prior": -0.216
+          },
+          "pair_index": 1,
+          "partner_uid": 3885257,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": true,
+          "personality_baseline_b_best_strategy_agree": true,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 36,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "guarded_short",
+          "personality_semantic_pair_score": 0.435185,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "temporal:train",
+          "personality_template_id": "agree:0",
+          "personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，我最認真[羞][羞][羞]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.214244,
+          "personality_vs_a_text_similarity": 0.671756,
+          "personality_vs_b_best_text_similarity": 0.344133,
+          "personality_vs_c_pair_delta": -0.319268,
+          "personality_vs_c_text_similarity": 0.375389,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "slow_traits": {
+            "caution_bias": 0.67,
+            "exploration_posture": 0.51,
+            "social_approach": 0.386562,
+            "threat_sensitivity": 0.6228,
+            "trust_stance": 0.32
+          },
+          "strategy": "temporal",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "full_state_calibration_summary": {
+        "action_counts": {
+          "deflect": 1,
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 3
+        },
+        "applied": true,
+        "avg_reply_chars": 27.666667,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "deflect": 0.166667,
+          "empathize": 0.166667,
+          "introduce_topic": 0.166667,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.098667,
+          "meaning_stability": 0.298937,
+          "trauma_bias": 0.08568,
+          "trust_prior": -0.132
+        },
+        "reply_count": 6,
+        "source": "full:data",
+        "strategy_counts": {
+          "escape": 4,
+          "exploit": 1,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.116667,
+          "exploration_posture": -0.006667,
+          "social_approach": -0.035694,
+          "threat_sensitivity": 0.0952,
+          "trust_stance": -0.11
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "majority_baseline_metrics": {
+        "action11_details": {
+          "categories": [
+            "empathize",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "balanced_action11_details": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "empathize",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 0.666667,
+        "balanced_strategy_details": {
+          "balanced_l1_distance": 0.333333,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 0.5,
+        "majority_action": "minimal_response",
+        "majority_strategy": "escape",
+        "pair_count": 2,
+        "real_action_distribution": {
+          "empathize": 1,
+          "minimal_response": 1
+        },
+        "real_strategy_distribution": {
+          "escape": 1,
+          "exploit": 1
+        },
+        "strategy_details": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1.0
+        }
+      },
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "agree",
+            "empathize",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.333333,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "empathize",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.022236
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.08642
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.991736,
+        "balanced_behavioral_similarity_action11": 0.333333,
+        "balanced_behavioral_similarity_strategy": 0.666667,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.5,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.351912,
+        "stylistic_similarity": 0.96792,
+        "surface_similarity": 0.04321
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "holdout_count": 10,
+        "ordered_by": "session_start_time",
+        "session_count": 32,
+        "strategy": "temporal",
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "deflect": 1,
+          "introduce_topic": 1,
+          "minimal_response": 2
+        },
+        "applied": true,
+        "avg_reply_chars": 20.75,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "deflect": 0.25,
+          "introduce_topic": 0.25,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response",
+          "introduce_topic",
+          "deflect"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.128,
+          "meaning_stability": 0.263953,
+          "trauma_bias": 0.11052,
+          "trust_prior": -0.216
+        },
+        "reply_count": 4,
+        "source": "temporal:train",
+        "strategy_counts": {
+          "escape": 3,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.17,
+          "exploration_posture": 0.01,
+          "social_approach": -0.113438,
+          "threat_sensitivity": 0.1228,
+          "trust_stance": -0.18
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.007511,
+          "prior:meaning_stability": 0.015237,
+          "prior:trauma_bias": 0.002035,
+          "prior:trust_prior": 0.00601,
+          "trait:caution_bias": 0.005339,
+          "trait:exploration_posture": 0.002656,
+          "trait:social_approach": 0.001832,
+          "trait:threat_sensitivity": 0.002512,
+          "trait:trust_stance": 0.004174
+        },
+        "train_default": {
+          "cosine": 0.918239,
+          "l2": 0.484018,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.128,
+            "prior:meaning_stability": 0.263953,
+            "prior:trauma_bias": 0.11052,
+            "prior:trust_prior": 0.216,
+            "trait:caution_bias": 0.17,
+            "trait:exploration_posture": 0.01,
+            "trait:social_approach": 0.113438,
+            "trait:threat_sensitivity": 0.1228,
+            "trait:trust_stance": 0.18
+          }
+        },
+        "train_full": {
+          "cosine": 0.991736,
+          "l2": 0.156797,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.029333,
+            "prior:meaning_stability": 0.034984,
+            "prior:trauma_bias": 0.02484,
+            "prior:trust_prior": 0.084,
+            "trait:caution_bias": 0.053333,
+            "trait:exploration_posture": 0.016667,
+            "trait:social_approach": 0.077744,
+            "trait:threat_sensitivity": 0.0276,
+            "trait:trust_stance": 0.07
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.975363,
+          "l2": 0.269631,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.115084,
+            "prior:meaning_stability": 0.176519,
+            "prior:trauma_bias": 0.001692,
+            "prior:trust_prior": 0.079084,
+            "trait:caution_bias": 0.016747,
+            "trait:exploration_posture": 0.127108,
+            "trait:social_approach": 0.035446,
+            "trait:threat_sensitivity": 0.00188,
+            "trait:trust_stance": 0.065904
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 18.111111,
+        "median_reply_chars": 15,
+        "opening_phrases": [
+          "謝謝 啾 的 支持， 新年快樂🌹🥰",
+          "謝謝 哥 的照顧支持 ，新年快樂。[",
+          "謝謝 Cc 支持 ，千也祝妳新年快樂",
+          "謝謝貓貓 新年快樂✨🤗",
+          "倫倫 新年快樂[樂]"
+        ],
+        "reply_count": 18,
+        "source": "temporal:train",
+        "strategy_counts": {
+          "escape": 14,
+          "exploit": 1,
+          "explore": 3
+        },
+        "top_tokens": [
+          "樂",
+          "新",
+          "年",
+          "快",
+          "謝",
+          "愛",
+          "妳",
+          "小"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    },
+    "topic": {
+      "ablation_summary": [
+        {
+          "action_agreement_vs_personality": 1.0,
+          "name": "no_surface_profile",
+          "pair_count": 2,
+          "semantic_mean": 0.513983,
+          "semantic_vs_baseline_a_diff": -0.015534,
+          "semantic_vs_baseline_c_diff": -0.098701,
+          "strategy_agreement_vs_personality": 1.0,
+          "text_similarity_vs_personality": 0.63003
+        },
+        {
+          "action_agreement_vs_personality": 0.5,
+          "name": "no_policy_trait_bias",
+          "pair_count": 2,
+          "semantic_mean": 0.589653,
+          "semantic_vs_baseline_a_diff": 0.060136,
+          "semantic_vs_baseline_c_diff": -0.023031,
+          "strategy_agreement_vs_personality": 0.5,
+          "text_similarity_vs_personality": 0.954272
+        },
+        {
+          "action_agreement_vs_personality": 0.5,
+          "name": "surface_only_default_agent",
+          "pair_count": 2,
+          "semantic_mean": 0.563452,
+          "semantic_vs_baseline_a_diff": 0.033935,
+          "semantic_vs_baseline_c_diff": -0.049232,
+          "strategy_agreement_vs_personality": 0.5,
+          "text_similarity_vs_personality": 0.983347
+        }
+      ],
+      "ablation_trace": [
+        {
+          "baseline_a_semantic_pair_score": 0.449488,
+          "baseline_c_semantic_pair_score": 0.470915,
+          "full_personality_action": "agree",
+          "full_personality_generated_chars": 31,
+          "full_personality_rhetorical_move": "warm_supportive",
+          "full_personality_semantic_pair_score": 0.555838,
+          "full_personality_strategy": "exploit",
+          "full_personality_surface_source": "topic:train",
+          "full_personality_template_id": "agree:1",
+          "full_personality_text": "关于“對不起[期待][期待]”，會的 妳也是 很好聽[愛心]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 24,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.520116,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "topic:train",
+          "no_policy_trait_bias_template_id": "agree:1",
+          "no_policy_trait_bias_text": "关于“對不起[期待][期待]”，你也一樣[樂]。",
+          "no_surface_profile_action": "agree",
+          "no_surface_profile_generated_chars": 33,
+          "no_surface_profile_rhetorical_move": "warm_supportive",
+          "no_surface_profile_semantic_pair_score": 0.476336,
+          "no_surface_profile_strategy": "exploit",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "agree:1",
+          "no_surface_profile_text": "你说“對不起[期待][期待]”，我在认真听你说，是的，我也这么想。",
+          "pair_index": 0,
+          "partner_uid": 3396673,
+          "real_action": "deflect",
+          "real_strategy": "escape",
+          "real_text": "不要緊的，不用說sorry[飛吻] 只是一份小小祝福[眨眼]我也有時會missed😆",
+          "session_id": "2637594_3396673_20250102072808_0001",
+          "strategy": "topic",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 24,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.520116,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "topic:train",
+          "surface_only_default_agent_template_id": "agree:0",
+          "surface_only_default_agent_text": "关于“對不起[期待][期待]”，你也一樣[樂]。",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_semantic_pair_score": 0.609546,
+          "baseline_c_semantic_pair_score": 0.754453,
+          "full_personality_action": "share_opinion",
+          "full_personality_generated_chars": 38,
+          "full_personality_rhetorical_move": "direct_advisory",
+          "full_personality_semantic_pair_score": 0.606787,
+          "full_personality_strategy": "explore",
+          "full_personality_surface_source": "topic:train",
+          "full_personality_template_id": "share_opinion:0",
+          "full_personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，咩咩 新年快樂[可愛][可愛]。",
+          "no_policy_trait_bias_action": "agree",
+          "no_policy_trait_bias_generated_chars": 36,
+          "no_policy_trait_bias_rhetorical_move": "warm_supportive",
+          "no_policy_trait_bias_semantic_pair_score": 0.65919,
+          "no_policy_trait_bias_strategy": "exploit",
+          "no_policy_trait_bias_surface_source": "topic:train",
+          "no_policy_trait_bias_template_id": "agree:0",
+          "no_policy_trait_bias_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，小君君 新年快樂 ♥️🥰🎆。",
+          "no_surface_profile_action": "share_opinion",
+          "no_surface_profile_generated_chars": 8,
+          "no_surface_profile_rhetorical_move": "direct_advisory",
+          "no_surface_profile_semantic_pair_score": 0.551629,
+          "no_surface_profile_strategy": "explore",
+          "no_surface_profile_surface_source": "generic",
+          "no_surface_profile_template_id": "share_opinion:0",
+          "no_surface_profile_text": "我的想法是这样。",
+          "pair_index": 1,
+          "partner_uid": 3885257,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "strategy": "topic",
+          "surface_only_default_agent_action": "agree",
+          "surface_only_default_agent_generated_chars": 38,
+          "surface_only_default_agent_rhetorical_move": "warm_supportive",
+          "surface_only_default_agent_semantic_pair_score": 0.606787,
+          "surface_only_default_agent_strategy": "exploit",
+          "surface_only_default_agent_surface_source": "topic:train",
+          "surface_only_default_agent_template_id": "agree:1",
+          "surface_only_default_agent_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，咩咩 新年快樂[可愛][可愛]。",
+          "turn_index": 0
+        }
+      ],
+      "baseline_a_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit"
+          ],
+          "chi_square_distance": 1000000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.030188
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.115427
+        }
+      },
+      "baseline_a_metrics": {
+        "balanced_behavioral_similarity_action11": 0.333333,
+        "balanced_behavioral_similarity_strategy": 0.333333,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.529517,
+        "stylistic_similarity": 0.956447,
+        "surface_similarity": 0.057714
+      },
+      "baseline_a_surface_profile": {
+        "reply_count": 0,
+        "source": "empty"
+      },
+      "baseline_b_metrics": {
+        "balanced_behavioral_similarity_action11": 0.44444433333333333,
+        "balanced_behavioral_similarity_strategy": 0.5555553333333333,
+        "behavioral_similarity_action11": 0.16666666666666666,
+        "behavioral_similarity_strategy": 0.3333333333333333,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.42045866666666665,
+        "stylistic_similarity": 0.8918843333333334,
+        "surface_similarity": 0.02248666666666667
+      },
+      "baseline_b_selected_wrong_uids": [
+        2637376,
+        2637372,
+        2637134
+      ],
+      "baseline_c_builder": "population_average_full_implant",
+      "baseline_c_input_scope": "leave_one_out_population_train_and_profile_data",
+      "baseline_c_leave_one_out": true,
+      "baseline_c_metric_details": {
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.0,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.241257
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.0
+        }
+      },
+      "baseline_c_metrics": {
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 1.0,
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 1.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.612684,
+        "stylistic_similarity": 0.651939,
+        "surface_similarity": 0.0
+      },
+      "baseline_c_population_excluded_uid": 2637594,
+      "baseline_c_population_user_count": 14,
+      "baseline_c_surface_profile": {
+        "avg_reply_chars": 6.1396,
+        "median_reply_chars": 6,
+        "opening_phrases": [],
+        "reply_count": 2851,
+        "source": "population_average",
+        "strategy_counts": {
+          "exploit": 2851
+        },
+        "top_tokens": [],
+        "ultra_short_ratio": 0.325149
+      },
+      "behavioral_hard_metric_enabled": false,
+      "behavioral_labeling": "generated_action_direct_real_reply_classifier",
+      "classifier_validation": {
+        "behavioral_hard_metric_enabled": false,
+        "class_distribution": {
+          "gate": {
+            "escape": 50,
+            "exploit": 50,
+            "explore": 50
+          },
+          "train": {
+            "escape": 100,
+            "exploit": 100,
+            "explore": 100
+          }
+        },
+        "classifier_evidence_tier": "llm_generated_provisional",
+        "classifier_provenance_failure_reason": "missing_provenance_field:train[0]:annotator,sampling_policy,label_schema_version",
+        "classifier_provenance_ok": false,
+        "confusion_matrix_3class": {
+          "escape": {
+            "escape": 39,
+            "exploit": 8,
+            "explore": 3
+          },
+          "exploit": {
+            "escape": 4,
+            "exploit": 42,
+            "explore": 4
+          },
+          "explore": {
+            "escape": 4,
+            "exploit": 0,
+            "explore": 46
+          }
+        },
+        "cue_feature_assist_rate": 0.646667,
+        "cue_override_gate_passed": true,
+        "cue_override_rate": 0.0,
+        "dataset_origin": "data\\m54_classifier_gate.jsonl",
+        "dataset_separation_ok": true,
+        "degradation_required": true,
+        "engine": "sentence_embedding_nearest_centroid",
+        "formal_dataset_minima": {
+          "gate_per_class": 50,
+          "gate_samples": 150,
+          "train_per_class": 100,
+          "train_samples": 300
+        },
+        "formal_dataset_ok": true,
+        "formal_engine": true,
+        "formal_engine_failure_reason": "",
+        "formal_gate_eligible": false,
+        "gate_count": 150,
+        "macro_f1_11class": 0.58848,
+        "macro_f1_3class": 0.845776,
+        "macro_f1_3class_cue_only": 0.0,
+        "macro_f1_3class_without_cue": 0.845776,
+        "max_cue_override_rate": 0.35,
+        "min_macro_f1_3class": 0.7,
+        "passed_3class_gate": false,
+        "per_class_metrics_3class": {
+          "escape": {
+            "f1": 0.804124,
+            "precision": 0.829787,
+            "recall": 0.78,
+            "support": 50
+          },
+          "exploit": {
+            "f1": 0.84,
+            "precision": 0.84,
+            "recall": 0.84,
+            "support": 50
+          },
+          "explore": {
+            "f1": 0.893204,
+            "precision": 0.867925,
+            "recall": 0.92,
+            "support": 50
+          }
+        },
+        "prediction_source_counts": {
+          "embedding_centroid": 53,
+          "embedding_centroid_cue_feature": 97
+        },
+        "sample_count": 150,
+        "train_count": 300,
+        "without_cue_3class_gate_passed": true
+      },
+      "diagnostic_trace": [
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 37,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.449488,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:2",
+          "baseline_a_text": "你说“對不起[期待][期待]”，我在认真听你说，有道理，我跟你的看法一致。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 3,
+          "baseline_b_best_semantic_pair_score": 0.375862,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "是喔。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 4,
+          "baseline_b_worst_semantic_pair_score": 0.560574,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "👏👏👏。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.470915,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:0",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.004,
+            "meaning_stability": 0.315375,
+            "trauma_bias": 0.05274,
+            "trust_prior": -0.06
+          },
+          "pair_index": 0,
+          "partner_uid": 3396673,
+          "personality_action": "agree",
+          "personality_baseline_a_action_agree": true,
+          "personality_baseline_a_strategy_agree": true,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 31,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "warm_supportive",
+          "personality_semantic_pair_score": 0.555838,
+          "personality_strategy": "exploit",
+          "personality_surface_source": "topic:train",
+          "personality_template_id": "agree:1",
+          "personality_text": "关于“對不起[期待][期待]”，會的 妳也是 很好聽[愛心]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": 0.10635,
+          "personality_vs_a_text_similarity": 0.864925,
+          "personality_vs_b_best_text_similarity": 0.352071,
+          "personality_vs_c_pair_delta": 0.084923,
+          "personality_vs_c_text_similarity": 0.395129,
+          "real_action": "deflect",
+          "real_strategy": "escape",
+          "real_text": "不要緊的，不用說sorry[飛吻] 只是一份小小祝福[眨眼]我也有時會missed😆",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3396673_20250102072808_0001",
+          "slow_traits": {
+            "caution_bias": 0.535,
+            "exploration_posture": 0.53,
+            "social_approach": 0.500833,
+            "threat_sensitivity": 0.5586,
+            "trust_stance": 0.45
+          },
+          "strategy": "topic",
+          "turn_index": 0
+        },
+        {
+          "baseline_a_action": "agree",
+          "baseline_a_generated_chars": 39,
+          "baseline_a_rhetorical_move": "warm_supportive",
+          "baseline_a_semantic_pair_score": 0.609546,
+          "baseline_a_strategy": "exploit",
+          "baseline_a_surface_source": "generic",
+          "baseline_a_template_id": "agree:1",
+          "baseline_a_text": "你说“沒關係，過一陣子他也許就沒事了👌🏻”，我在认真听你说，是的，我也这么想。",
+          "baseline_b_best_action": "minimal_response",
+          "baseline_b_best_generated_chars": 3,
+          "baseline_b_best_semantic_pair_score": 0.571921,
+          "baseline_b_best_strategy": "escape",
+          "baseline_b_best_text": "這位。",
+          "baseline_b_worst_action": "agree",
+          "baseline_b_worst_generated_chars": 12,
+          "baseline_b_worst_semantic_pair_score": 0.213442,
+          "baseline_b_worst_strategy": "exploit",
+          "baseline_b_worst_text": "我還在咳嗽 好久沒唱了。",
+          "baseline_c_action": "minimal_response",
+          "baseline_c_generated_chars": 2,
+          "baseline_c_profile_confidence": 0.8,
+          "baseline_c_profile_degraded_reason": "anchor_mismatch",
+          "baseline_c_profile_expression_source": "connector",
+          "baseline_c_profile_expression_sources": [
+            "connector"
+          ],
+          "baseline_c_rhetorical_move": "guarded_short",
+          "baseline_c_semantic_pair_score": 0.754453,
+          "baseline_c_strategy": "escape",
+          "baseline_c_surface_source": "population_average",
+          "baseline_c_template_id": "minimal_response:1",
+          "baseline_c_text": "嗯。",
+          "dominant_component": "goal_alignment",
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": -0.004,
+            "meaning_stability": 0.315375,
+            "trauma_bias": 0.05274,
+            "trust_prior": -0.06
+          },
+          "pair_index": 1,
+          "partner_uid": 3885257,
+          "personality_action": "share_opinion",
+          "personality_baseline_a_action_agree": false,
+          "personality_baseline_a_strategy_agree": false,
+          "personality_baseline_b_best_action_agree": false,
+          "personality_baseline_b_best_strategy_agree": false,
+          "personality_baseline_c_action_agree": false,
+          "personality_baseline_c_strategy_agree": false,
+          "personality_generated_chars": 38,
+          "personality_partner_anchor_used": false,
+          "personality_profile_anchor_match": false,
+          "personality_profile_confidence": 0.8,
+          "personality_profile_degraded_reason": "anchor_mismatch",
+          "personality_profile_expression_source": "focus,connector",
+          "personality_profile_expression_sources": [
+            "focus",
+            "connector"
+          ],
+          "personality_profile_length_bucket": "medium",
+          "personality_profile_opening_used": true,
+          "personality_profile_phrase_used": false,
+          "personality_rhetorical_move": "direct_advisory",
+          "personality_semantic_pair_score": 0.606787,
+          "personality_strategy": "explore",
+          "personality_surface_source": "topic:train",
+          "personality_template_id": "share_opinion:0",
+          "personality_text": "关于“沒關係，過一陣子他也許就沒事了👌🏻”，咩咩 新年快樂[可愛][可愛]。",
+          "personality_topic_anchor_used": false,
+          "personality_vs_a_pair_delta": -0.002759,
+          "personality_vs_a_text_similarity": 0.636609,
+          "personality_vs_b_best_text_similarity": 0.535029,
+          "personality_vs_c_pair_delta": -0.147666,
+          "personality_vs_c_text_similarity": 0.523181,
+          "real_action": "minimal_response",
+          "real_strategy": "escape",
+          "real_text": "沒事就好",
+          "reply_length_bucket": "medium",
+          "session_id": "2637594_3885257_20250106214534_0002",
+          "slow_traits": {
+            "caution_bias": 0.535,
+            "exploration_posture": 0.53,
+            "social_approach": 0.500833,
+            "threat_sensitivity": 0.5586,
+            "trust_stance": 0.45
+          },
+          "strategy": "topic",
+          "turn_index": 0
+        }
+      ],
+      "eligible_for_hard_gate": true,
+      "full_state_calibration_summary": {
+        "action_counts": {
+          "deflect": 1,
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 3
+        },
+        "applied": true,
+        "avg_reply_chars": 27.666667,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "deflect": 0.166667,
+          "empathize": 0.166667,
+          "introduce_topic": 0.166667,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.098667,
+          "meaning_stability": 0.298937,
+          "trauma_bias": 0.08568,
+          "trust_prior": -0.132
+        },
+        "reply_count": 6,
+        "source": "full:data",
+        "strategy_counts": {
+          "escape": 4,
+          "exploit": 1,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.116667,
+          "exploration_posture": -0.006667,
+          "social_approach": -0.035694,
+          "threat_sensitivity": 0.0952,
+          "trust_stance": -0.11
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "majority_baseline_metrics": {
+        "action11_details": {
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ],
+          "chi_square_distance": 1.0
+        },
+        "balanced_action11_details": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "deflect",
+            "minimal_response"
+          ]
+        },
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 1.0,
+        "balanced_strategy_details": {
+          "balanced_l1_distance": 0.0,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": 0.5,
+        "behavioral_similarity_strategy": 1.0,
+        "majority_action": "minimal_response",
+        "majority_strategy": "escape",
+        "pair_count": 2,
+        "real_action_distribution": {
+          "deflect": 1,
+          "minimal_response": 1
+        },
+        "real_strategy_distribution": {
+          "escape": 2
+        },
+        "strategy_details": {
+          "categories": [
+            "escape"
+          ],
+          "chi_square_distance": 0.0
+        }
+      },
+      "metrics_without_baselines": [
+        "agent_state_similarity"
+      ],
+      "personality_metric_details": {
+        "agent_state_similarity": {
+          "agent_state_measured_before_holdout_generation": true,
+          "vector_length": 10
+        },
+        "balanced_behavioral_similarity_action11": {
+          "balanced_l1_distance": 0.5,
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response",
+            "share_opinion"
+          ]
+        },
+        "balanced_behavioral_similarity_strategy": {
+          "balanced_l1_distance": 0.666667,
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ]
+        },
+        "behavioral_similarity_action11": {
+          "categories": [
+            "agree",
+            "deflect",
+            "minimal_response",
+            "share_opinion"
+          ],
+          "chi_square_distance": 500000001.0
+        },
+        "behavioral_similarity_strategy": {
+          "categories": [
+            "escape",
+            "exploit",
+            "explore"
+          ],
+          "chi_square_distance": 500000001.0
+        },
+        "personality_similarity": {
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "semantic_similarity": {
+          "embedding_dim": 384,
+          "method": "sentence_embedding_cosine",
+          "model": "paraphrase-multilingual-MiniLM-L12-v2",
+          "pair_count": 2
+        },
+        "stylistic_similarity": {
+          "jsd": 0.021992
+        },
+        "surface_similarity": {
+          "bleu4": 0.0,
+          "rouge_l": 0.133333
+        }
+      },
+      "personality_metrics": {
+        "agent_state_similarity": 0.989812,
+        "balanced_behavioral_similarity_action11": 0.5,
+        "balanced_behavioral_similarity_strategy": 0.333333,
+        "behavioral_similarity_action11": 0.0,
+        "behavioral_similarity_strategy": 0.0,
+        "personality_similarity": 1.0,
+        "semantic_similarity": 0.581313,
+        "stylistic_similarity": 0.968273,
+        "surface_similarity": 0.066667
+      },
+      "reason": null,
+      "skipped": false,
+      "split_metadata": {
+        "all_assigned_cluster_sizes": {
+          "0": 18,
+          "2": 14
+        },
+        "cluster_sizes": {
+          "0": 12,
+          "2": 10
+        },
+        "cluster_sizes_scope": "train_fit_sessions_only",
+        "holdout_count": 10,
+        "jsd_threshold": 0.1,
+        "k_search_max_by_all_sessions": 6,
+        "k_search_max_by_train_sessions": 4,
+        "k_selected": 3,
+        "max_k": 8,
+        "max_train_fit_iterations": 24,
+        "merge_steps": [
+          {
+            "source_cluster": 1,
+            "source_size": 2,
+            "target_cluster": 2,
+            "target_size": 8
+          }
+        ],
+        "min_cluster_size": 5,
+        "seed": 42,
+        "session_count": 32,
+        "silhouette": 0.039004,
+        "silhouette_scope": "train_fit_sessions_only",
+        "strategy": "topic",
+        "strict_topic_no_random_fallback": true,
+        "strict_train_only_fit": true,
+        "topic_holdout_transform_only": true,
+        "topic_jsd_train_holdout": 0.001521,
+        "topic_kmeans_fitted_on_train_sessions_only": true,
+        "topic_reused_balanced_initial_fit_split": true,
+        "topic_split_not_applicable": false,
+        "topic_split_retry_count": 0,
+        "topic_strict_fit_converged": true,
+        "topic_train_fit_iteration": 0,
+        "topic_train_fit_iterations": 1,
+        "train_count": 22,
+        "train_ratio": 0.7
+      },
+      "state_calibration_summary": {
+        "action_counts": {
+          "empathize": 1,
+          "introduce_topic": 1,
+          "minimal_response": 2
+        },
+        "applied": true,
+        "avg_reply_chars": 30.0,
+        "partner_question_ratio": 0.0,
+        "policy_action_distribution": {
+          "empathize": 0.25,
+          "introduce_topic": 0.25,
+          "minimal_response": 0.5
+        },
+        "policy_dominant_strategy": "escape",
+        "policy_learned_avoidances": [],
+        "policy_learned_preferences": [
+          "minimal_response",
+          "introduce_topic",
+          "empathize"
+        ],
+        "prior_deltas": {
+          "contamination_sensitivity": 0.0,
+          "controllability_prior": -0.004,
+          "meaning_stability": 0.315375,
+          "trauma_bias": 0.05274,
+          "trust_prior": -0.06
+        },
+        "reply_count": 4,
+        "source": "topic:train",
+        "strategy_counts": {
+          "escape": 2,
+          "exploit": 1,
+          "explore": 1
+        },
+        "token_variety": 1.0,
+        "train_only": true,
+        "trait_deltas": {
+          "caution_bias": 0.035,
+          "exploration_posture": 0.03,
+          "social_approach": 0.000833,
+          "threat_sensitivity": 0.0586,
+          "trust_stance": -0.05
+        },
+        "ultra_short_ratio": 0.0
+      },
+      "state_distance_diagnostics": {
+        "per_dimension_variance": {
+          "prior:contamination_sensitivity": 0.0,
+          "prior:controllability_prior": 0.009739,
+          "prior:meaning_stability": 0.018339,
+          "prior:trauma_bias": 0.001671,
+          "prior:trust_prior": 0.003181,
+          "trait:caution_bias": 0.00527,
+          "trait:exploration_posture": 0.003115,
+          "trait:social_approach": 0.001043,
+          "trait:threat_sensitivity": 0.002063,
+          "trait:trust_stance": 0.002209
+        },
+        "train_default": {
+          "cosine": 0.959984,
+          "l2": 0.337518,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.004,
+            "prior:meaning_stability": 0.315375,
+            "prior:trauma_bias": 0.05274,
+            "prior:trust_prior": 0.06,
+            "trait:caution_bias": 0.035,
+            "trait:exploration_posture": 0.03,
+            "trait:social_approach": 0.000833,
+            "trait:threat_sensitivity": 0.0586,
+            "trait:trust_stance": 0.05
+          }
+        },
+        "train_full": {
+          "cosine": 0.989812,
+          "l2": 0.172594,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.094667,
+            "prior:meaning_stability": 0.016438,
+            "prior:trauma_bias": 0.03294,
+            "prior:trust_prior": 0.072,
+            "trait:caution_bias": 0.081667,
+            "trait:exploration_posture": 0.036667,
+            "trait:social_approach": 0.036527,
+            "trait:threat_sensitivity": 0.0366,
+            "trait:trust_stance": 0.06
+          }
+        },
+        "train_wrong_user": {
+          "cosine": 0.938239,
+          "l2": 0.420777,
+          "per_dimension_abs_delta": {
+            "prior:contamination_sensitivity": 0.0,
+            "prior:controllability_prior": 0.239084,
+            "prior:meaning_stability": 0.227941,
+            "prior:trauma_bias": 0.056088,
+            "prior:trust_prior": 0.076916,
+            "trait:caution_bias": 0.151747,
+            "trait:exploration_posture": 0.147108,
+            "trait:social_approach": 0.078825,
+            "trait:threat_sensitivity": 0.06232,
+            "trait:trust_stance": 0.064096
+          }
+        }
+      },
+      "surface_profile": {
+        "avg_reply_chars": 20.75,
+        "median_reply_chars": 16,
+        "opening_phrases": [
+          "謝謝 啾 的 支持， 新年快樂🌹🥰",
+          "謝謝 哥 的照顧支持 ，新年快樂。[",
+          "謝謝 Cc 支持 ，千也祝妳新年快樂",
+          "謝謝貓貓 新年快樂✨🤗",
+          "[期待]曉兒 新年快樂[飛吻]"
+        ],
+        "reply_count": 16,
+        "source": "topic:train",
+        "strategy_counts": {
+          "escape": 13,
+          "exploit": 2,
+          "explore": 1
+        },
+        "top_tokens": [
+          "樂",
+          "謝",
+          "新",
+          "年",
+          "快",
+          "不",
+          "也",
+          "愛"
+        ],
+        "ultra_short_ratio": 0.0
+      }
+    }
+  },
+  "user_uid": 2637594
+}
