@@ -181,6 +181,7 @@ def _generate_from_sessions(
                 diagnostics = turn.diagnostics
                 chosen = getattr(diagnostics, "chosen", None) if diagnostics is not None else None
                 priors = getattr(agent.self_model, "narrative_priors", None)
+                gen_diag = dict(turn.generation_diagnostics or {})
                 trace_rows.append(
                     {
                         "session_id": str(session.get("session_id", f"holdout:{idx}")),
@@ -192,7 +193,11 @@ def _generate_from_sessions(
                         "real_chars": int(len(str(real))),
                         "action": action,
                         "strategy": strategy,
-                        "generation_diagnostics": dict(turn.generation_diagnostics or {}),
+                        "generation_diagnostics": gen_diag,
+                        "policy_evidence_weight": float(gen_diag.get("policy_evidence_weight", 0.0) or 0.0),
+                        "policy_lift_applied": bool(gen_diag.get("policy_lift_applied", False)),
+                        "surface_shortcut_suppressed": bool(gen_diag.get("surface_shortcut_suppressed", False)),
+                        "calibration_policy_source": str(gen_diag.get("calibration_policy_source", "")),
                         "dominant_component": str(getattr(chosen, "dominant_component", "")),
                         "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
                         "narrative_priors": priors.to_dict() if hasattr(priors, "to_dict") else {},
@@ -202,11 +207,13 @@ def _generate_from_sessions(
     real_11 = [item.label_11 for item in preds_r]
     real_3 = [item.label_3 for item in preds_r]
     if diagnostic_trace and trace_rows:
+        behavior_weights = semantic_pair_weights(real_texts)
         for idx, row in enumerate(trace_rows):
             if idx >= len(real_11) or idx >= len(real_3):
                 break
             row["real_action"] = str(real_11[idx])
             row["real_strategy"] = str(real_3[idx])
+            row["behavioral_pair_weight"] = round(float(behavior_weights[idx]), 6) if idx < len(behavior_weights) else 1.0
     return generated_texts, real_texts, gen_11, real_11, gen_3, real_3, trace_rows
 
 
@@ -262,13 +269,28 @@ def _metrics_bundle(
     gen_3: list[str],
     real_3: list[str],
 ) -> dict[str, SimilarityResult]:
+    behavior_weights = semantic_pair_weights(real_texts)
+    raw_strategy = behavioral_similarity(gen_3, real_3, granularity="strategy")
+    raw_action11 = behavioral_similarity(gen_11, real_11, granularity="action11")
     return {
         "surface_similarity": surface_similarity(generated_texts, real_texts),
         "semantic_similarity": semantic_similarity(generated_texts, real_texts),
         "stylistic_similarity": stylistic_similarity(generated_texts, real_texts),
         "personality_similarity": personality_similarity(generated_texts, real_texts),
-        "behavioral_similarity_strategy": behavioral_similarity(gen_3, real_3, granularity="strategy"),
-        "behavioral_similarity_action11": behavioral_similarity(gen_11, real_11, granularity="action11"),
+        "behavioral_similarity_strategy": behavioral_similarity(
+            gen_3,
+            real_3,
+            granularity="strategy",
+            weights=behavior_weights,
+        ),
+        "behavioral_similarity_action11": behavioral_similarity(
+            gen_11,
+            real_11,
+            granularity="action11",
+            weights=behavior_weights,
+        ),
+        "behavioral_similarity_strategy_raw": raw_strategy,
+        "behavioral_similarity_action11_raw": raw_action11,
         "balanced_behavioral_similarity_strategy": balanced_behavioral_similarity(
             gen_3,
             real_3,
@@ -298,6 +320,7 @@ def _majority_label(counts: Mapping[str, object], default: str) -> str:
 
 
 def _majority_behavioral_metrics(
+    real_texts: list[str],
     real_11: list[str],
     real_3: list[str],
     state_calibration_summary: Mapping[str, object],
@@ -312,8 +335,11 @@ def _majority_behavioral_metrics(
     )
     gen_11 = [majority_action] * len(real_11)
     gen_3 = [majority_strategy] * len(real_3)
-    strategy_result = behavioral_similarity(gen_3, real_3, granularity="strategy")
-    action_result = behavioral_similarity(gen_11, real_11, granularity="action11")
+    behavior_weights = semantic_pair_weights(real_texts)
+    raw_strategy_result = behavioral_similarity(gen_3, real_3, granularity="strategy")
+    raw_action_result = behavioral_similarity(gen_11, real_11, granularity="action11")
+    strategy_result = behavioral_similarity(gen_3, real_3, granularity="strategy", weights=behavior_weights)
+    action_result = behavioral_similarity(gen_11, real_11, granularity="action11", weights=behavior_weights)
     balanced_strategy_result = balanced_behavioral_similarity(gen_3, real_3, granularity="strategy")
     balanced_action_result = balanced_behavioral_similarity(gen_11, real_11, granularity="action11")
     return {
@@ -321,10 +347,15 @@ def _majority_behavioral_metrics(
         "majority_strategy": majority_strategy,
         "behavioral_similarity_strategy": float(strategy_result.value),
         "behavioral_similarity_action11": float(action_result.value),
+        "behavioral_similarity_strategy_raw": float(raw_strategy_result.value),
+        "behavioral_similarity_action11_raw": float(raw_action_result.value),
         "balanced_behavioral_similarity_strategy": float(balanced_strategy_result.value),
         "balanced_behavioral_similarity_action11": float(balanced_action_result.value),
         "strategy_details": dict(strategy_result.details),
         "action11_details": dict(action_result.details),
+        "strategy_raw_details": dict(raw_strategy_result.details),
+        "action11_raw_details": dict(raw_action_result.details),
+        "behavioral_pair_weight_sum": round(float(sum(behavior_weights)), 6),
         "balanced_strategy_details": dict(balanced_strategy_result.details),
         "balanced_action11_details": dict(balanced_action_result.details),
         "real_strategy_distribution": dict(Counter(real_3)),
@@ -609,13 +640,19 @@ def _semantic_trace_rows(
                 "personality_profile_degraded_reason": p_gen_diag.get("profile_degraded_reason"),
                 "personality_profile_anchor_match": p_gen_diag.get("profile_anchor_match"),
                 "personality_profile_length_bucket": p_gen_diag.get("profile_length_bucket"),
+                "personality_policy_evidence_weight": p_gen_diag.get("policy_evidence_weight"),
+                "personality_policy_lift_applied": p_gen_diag.get("policy_lift_applied"),
+                "personality_surface_shortcut_suppressed": p_gen_diag.get("surface_shortcut_suppressed"),
+                "personality_calibration_policy_source": p_gen_diag.get("calibration_policy_source"),
                 "baseline_a_rhetorical_move": a_gen_diag.get("rhetorical_move"),
                 "baseline_c_rhetorical_move": c_gen_diag.get("rhetorical_move"),
                 "baseline_c_profile_confidence": c_gen_diag.get("profile_confidence"),
                 "baseline_c_profile_degraded_reason": c_gen_diag.get("profile_degraded_reason"),
                 "baseline_c_profile_expression_sources": c_gen_diag.get("profile_expression_sources", []),
                 "baseline_c_profile_expression_source": c_gen_diag.get("profile_expression_source"),
+                "baseline_c_surface_shortcut_suppressed": c_gen_diag.get("surface_shortcut_suppressed"),
                 "dominant_component": p.get("dominant_component"),
+                "behavioral_pair_weight": p.get("behavioral_pair_weight"),
                 "reply_length_bucket": _reply_length_bucket(int(p.get("generated_chars", 0) or 0)),
                 "slow_traits": p.get("slow_traits", {}),
                 "narrative_priors": p.get("narrative_priors", {}),
@@ -675,8 +712,13 @@ def _ablation_trace_rows(
             "full_personality_template_id": p_diag.get("template_id"),
             "full_personality_surface_source": p_diag.get("surface_source"),
             "full_personality_rhetorical_move": p_diag.get("rhetorical_move"),
+            "full_personality_policy_evidence_weight": p_diag.get("policy_evidence_weight"),
+            "full_personality_policy_lift_applied": p_diag.get("policy_lift_applied"),
+            "full_personality_surface_shortcut_suppressed": p_diag.get("surface_shortcut_suppressed"),
+            "full_personality_calibration_policy_source": p_diag.get("calibration_policy_source"),
             "semantic_pair_weight": round(float(semantic_weights[idx]), 6),
             "semantic_info_bucket": semantic_buckets[idx],
+            "behavioral_pair_weight": p.get("behavioral_pair_weight"),
             "full_personality_semantic_pair_score": round(float(personality_scores[idx]), 6),
             "baseline_a_semantic_pair_score": round(float(baseline_a_scores[idx]), 6),
             "baseline_c_semantic_pair_score": round(float(baseline_c_scores[idx]), 6),
@@ -696,6 +738,9 @@ def _ablation_trace_rows(
             payload[f"{prefix}_template_id"] = diag.get("template_id")
             payload[f"{prefix}_surface_source"] = diag.get("surface_source")
             payload[f"{prefix}_rhetorical_move"] = diag.get("rhetorical_move")
+            payload[f"{prefix}_policy_lift_applied"] = diag.get("policy_lift_applied")
+            payload[f"{prefix}_surface_shortcut_suppressed"] = diag.get("surface_shortcut_suppressed")
+            payload[f"{prefix}_calibration_policy_source"] = diag.get("calibration_policy_source")
             payload[f"{prefix}_semantic_pair_score"] = (
                 round(float(scores[idx]), 6)
                 if isinstance(scores, list) and idx < len(scores)
@@ -817,6 +862,7 @@ def run_validation(
         personality_metrics = _metrics_bundle(generated, real, g11, r11, g3, r3)
         personality_metrics["agent_state_similarity"] = agent_state_result
         majority_baseline_metrics = _majority_behavioral_metrics(
+            real,
             r11,
             r3,
             state_calibration_summary,

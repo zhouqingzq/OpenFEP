@@ -161,20 +161,27 @@ class PolicyEvaluator:
         policy_memory_bias = 0.0
         policies = self.self_model.preferred_policies
         if policies is not None:
+            strategy_confidence = max(0.0, min(1.0, float(getattr(policies, "strategy_confidence", 0.0))))
+            policy_evidence_count = int(getattr(policies, "policy_evidence_count", 0) or 0)
+            policy_lift = strategy_confidence if policy_evidence_count >= 3 else 0.0
             if action in policies.learned_preferences:
-                policy_memory_bias += 0.25
+                policy_memory_bias += 0.25 + (0.35 * policy_lift)
             if action in policies.learned_avoidances:
                 policy_memory_bias -= 0.35
             frequency = float(policies.action_distribution.get(action, 0.0))
-            policy_memory_bias += (frequency - 0.20) * 0.30
+            policy_memory_bias += (frequency - 0.20) * (0.30 + 0.45 * policy_lift)
             if is_dialogue_action(action):
                 dominant_strategy = str(policies.dominant_strategy or "")
                 action_strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "")
                 if action in policies.learned_preferences:
-                    policy_memory_bias += 0.15
-                policy_memory_bias += (frequency - 0.10) * 0.45
+                    policy_memory_bias += 0.15 + (0.35 * policy_lift)
+                policy_memory_bias += (frequency - 0.10) * (0.45 + 0.65 * policy_lift)
                 if dominant_strategy not in {"", "expected_free_energy"} and action_strategy == dominant_strategy:
-                    policy_memory_bias += 0.10
+                    policy_memory_bias += 0.10 + (0.30 * policy_lift)
+                if policy_lift >= 0.20 and action_strategy == "escape" and action not in policies.learned_preferences:
+                    policy_memory_bias -= 0.20 + (0.45 * policy_lift)
+                if policy_lift >= 0.20 and action_strategy in {"exploit", "explore"} and frequency >= 0.12:
+                    policy_memory_bias += 0.18 * policy_lift
                 if action in policies.learned_avoidances:
                     policy_memory_bias -= 0.15
 

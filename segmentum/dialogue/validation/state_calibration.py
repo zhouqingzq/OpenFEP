@@ -9,6 +9,8 @@ from ...agent import SegmentAgent
 from ...self_model import NarrativePriors, PreferredPolicies
 from ...slow_learning import SlowTraitState
 from ..actions import DIALOGUE_ACTION_NAMES
+from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
+from .metrics import semantic_pair_info_bucket, semantic_pair_weight_for_text
 from .surface_profile import tokenize_surface
 
 
@@ -92,6 +94,26 @@ def _distribution_entropy(counts: Counter[str]) -> float:
     entropy = 0.0
     for label in labels:
         p = float(counts.get(label, 0)) / float(total)
+        if p > 0.0:
+            entropy -= p * math.log(p)
+    return entropy / math.log(float(len(labels)))
+
+
+def _weighted_coverage(counts: Counter[str]) -> float:
+    total = float(sum(counts.values()))
+    if total <= 0.0:
+        return 0.0
+    return float(max(counts.values())) / total
+
+
+def _weighted_entropy(counts: Counter[str]) -> float:
+    total = float(sum(counts.values()))
+    if total <= 0.0:
+        return 0.0
+    labels = ("explore", "exploit", "escape")
+    entropy = 0.0
+    for label in labels:
+        p = float(counts.get(label, 0.0)) / total
         if p > 0.0:
             entropy -= p * math.log(p)
     return entropy / math.log(float(len(labels)))
@@ -266,26 +288,34 @@ def _target_policies(
     reply_count: int,
     strategy_entropy: float,
     strategy_majority_coverage: float,
+    raw_action_counts: Counter[str] | None = None,
+    raw_strategy_counts: Counter[str] | None = None,
+    surface_majority_coverage: float = 0.0,
 ) -> PreferredPolicies:
-    total = float(max(1, reply_count))
+    evidence_total = float(sum(float(v) for v in action_counts.values()))
+    total = float(max(1.0, evidence_total))
     action_distribution = {
-        action: round(float(action_counts.get(action, 0)) / total, 6)
+        action: round(float(action_counts.get(action, 0.0)) / total, 6)
         for action in DIALOGUE_ACTION_NAMES
-        if action_counts.get(action, 0) > 0
+        if action_counts.get(action, 0.0) > 0
     }
+    policy_evidence_count = int(round(evidence_total))
     majority_is_collapse = bool(strategy_majority_coverage >= 0.75 and strategy_entropy < 0.35)
-    if strategy_counts and not majority_is_collapse:
+    if strategy_counts and not majority_is_collapse and policy_evidence_count >= 3:
         dominant_strategy = max(
             strategy_counts.items(),
-            key=lambda item: (int(item[1]), str(item[0])),
+            key=lambda item: (float(item[1]), str(item[0])),
         )[0]
     else:
         dominant_strategy = "expected_free_energy"
+    strategy_confidence = 0.0
+    if strategy_counts and policy_evidence_count >= 3 and dominant_strategy != "expected_free_energy":
+        strategy_confidence = max(0.0, min(1.0, strategy_majority_coverage * (0.35 + strategy_entropy)))
     ranked_actions = sorted(
         action_distribution.items(),
         key=lambda item: (-float(item[1]), DIALOGUE_ACTION_NAMES.index(item[0])),
     )
-    preference_floor = 0.12 if reply_count >= 12 else 0.20
+    preference_floor = 0.12 if policy_evidence_count >= 12 else 0.20
     learned_preferences = [
         action
         for action, frequency in ranked_actions
@@ -297,8 +327,12 @@ def _target_policies(
     learned_avoidances: list[str] = []
     if reply_count >= 12:
         for action in ("agree", "elaborate", "share_opinion", "minimal_response"):
-            frequency = float(action_distribution.get(action, 0.0))
-            if frequency <= 0.03:
+            evidence_frequency = float(action_distribution.get(action, 0.0))
+            raw_frequency = 0.0
+            if raw_action_counts:
+                raw_total = float(max(1, sum(raw_action_counts.values())))
+                raw_frequency = float(raw_action_counts.get(action, 0)) / raw_total
+            if evidence_frequency <= 0.03 and raw_frequency <= 0.03:
                 learned_avoidances.append(action)
 
     return PreferredPolicies(
@@ -308,6 +342,9 @@ def _target_policies(
         learned_avoidances=learned_avoidances[:3],
         learned_preferences=learned_preferences,
         last_updated_tick=0,
+        strategy_confidence=round(float(strategy_confidence), 6),
+        policy_evidence_count=policy_evidence_count,
+        surface_majority_coverage=round(float(surface_majority_coverage), 6),
     )
 
 
@@ -334,6 +371,10 @@ def apply_train_state_calibration(
 
     action_counts: Counter[str] = Counter()
     strategy_counts: Counter[str] = Counter()
+    policy_action_counts: Counter[str] = Counter()
+    policy_strategy_counts: Counter[str] = Counter()
+    surface_bucket_counts: Counter[str] = Counter()
+    policy_pair_weights: list[float] = []
     lengths: list[int] = []
     tokens: Counter[str] = Counter()
     partner_questions = 0
@@ -341,6 +382,13 @@ def apply_train_state_calibration(
     for (partner_text, reply_text), (action, strategy) in zip(pairs, predicted_actions):
         action_counts[action] += 1
         strategy_counts[strategy] += 1
+        info_bucket = semantic_pair_info_bucket(reply_text)
+        pair_weight = float(semantic_pair_weight_for_text(reply_text))
+        surface_bucket_counts[info_bucket] += 1
+        policy_pair_weights.append(pair_weight)
+        if pair_weight >= 0.70:
+            policy_action_counts[action] += pair_weight
+            policy_strategy_counts[strategy] += pair_weight
         lengths.append(len(reply_text))
         tokens.update(tokenize_surface(reply_text))
         if "?" in partner_text or "锛?" in partner_text or "？" in partner_text:
@@ -365,20 +413,26 @@ def apply_train_state_calibration(
         partner_question_ratio=partner_question_ratio,
     )
     priors = _target_priors(traits, token_variety)
+    raw_strategy_entropy = _distribution_entropy(strategy_counts)
+    raw_strategy_majority_coverage = _majority_coverage(strategy_counts)
+    policy_strategy_entropy = _weighted_entropy(policy_strategy_counts)
+    policy_strategy_majority_coverage = _weighted_coverage(policy_strategy_counts)
+    surface_majority_coverage = _majority_coverage(strategy_counts)
     policies = _target_policies(
-        action_counts,
-        strategy_counts,
+        policy_action_counts,
+        policy_strategy_counts,
         reply_count=reply_count,
-        strategy_entropy=_distribution_entropy(strategy_counts),
-        strategy_majority_coverage=_majority_coverage(strategy_counts),
+        strategy_entropy=policy_strategy_entropy,
+        strategy_majority_coverage=policy_strategy_majority_coverage,
+        raw_action_counts=action_counts,
+        raw_strategy_counts=strategy_counts,
+        surface_majority_coverage=surface_majority_coverage,
     )
     agent.slow_variable_learner.state.traits = traits
     agent.self_model.narrative_priors = priors
     agent.self_model.preferred_policies = policies
     after_traits = traits.to_dict()
     after_priors = priors.to_dict()
-    strategy_entropy = _distribution_entropy(strategy_counts)
-    strategy_majority_coverage = _majority_coverage(strategy_counts)
     return {
         "source": source,
         "train_only": True,
@@ -386,13 +440,24 @@ def apply_train_state_calibration(
         "reply_count": int(reply_count),
         "action_counts": {key: int(value) for key, value in sorted(action_counts.items())},
         "strategy_counts": {key: int(value) for key, value in sorted(strategy_counts.items())},
+        "surface_bucket_counts": {key: int(value) for key, value in sorted(surface_bucket_counts.items())},
+        "policy_action_counts": {key: round(float(value), 6) for key, value in sorted(policy_action_counts.items())},
+        "policy_strategy_counts": {key: round(float(value), 6) for key, value in sorted(policy_strategy_counts.items())},
         "policy_action_distribution": dict(policies.action_distribution),
         "policy_dominant_strategy": policies.dominant_strategy,
         "policy_dominant_strategy_confident": bool(policies.dominant_strategy != "expected_free_energy"),
+        "policy_strategy_confidence": round(float(policies.strategy_confidence), 6),
+        "policy_evidence_count": int(policies.policy_evidence_count),
+        "policy_evidence_weight": round(float(sum(policy_pair_weights)), 6),
+        "surface_majority_coverage": round(float(surface_majority_coverage), 6),
         "policy_learned_preferences": list(policies.learned_preferences),
         "policy_learned_avoidances": list(policies.learned_avoidances),
-        "strategy_entropy": round(float(strategy_entropy), 6),
-        "strategy_majority_coverage": round(float(strategy_majority_coverage), 6),
+        "strategy_entropy": round(float(raw_strategy_entropy), 6),
+        "strategy_majority_coverage": round(float(raw_strategy_majority_coverage), 6),
+        "policy_strategy_entropy": round(float(policy_strategy_entropy), 6),
+        "policy_strategy_majority_coverage": round(float(policy_strategy_majority_coverage), 6),
+        "raw_strategy_entropy": round(float(raw_strategy_entropy), 6),
+        "raw_strategy_majority_coverage": round(float(raw_strategy_majority_coverage), 6),
         "avg_reply_chars": round(avg_reply_chars, 6),
         "ultra_short_ratio": round(float(ultra_short_ratio), 6),
         "token_variety": round(float(token_variety), 6),

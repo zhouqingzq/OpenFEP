@@ -219,6 +219,95 @@ def _is_cooperative_ack(text: str) -> bool:
     return lowered in _COOPERATIVE_ACKS or compact in _COOPERATIVE_ACKS
 
 
+def _transactional_cooperation_prediction(text: str, *, source_prefix: str) -> ActionPrediction | None:
+    normalized = str(text).strip()
+    if not normalized:
+        return None
+    if any(marker in normalized for marker in ("?", "？", "嗎", "吗", "哪", "怎麼", "怎么")):
+        return ActionPrediction(
+            label_11="ask_question",
+            label_3="explore",
+            confidence=0.74,
+            source=f"{source_prefix}_transactional_feature",
+        )
+    compact = _compact_reply(normalized)
+    cooperative_markers = (
+        "可以",
+        "可",
+        "好",
+        "好的",
+        "哈哈",
+        "呵呵",
+        "😂",
+        "🤣",
+        "😆",
+        "[哈哈]",
+        "[愛心]",
+        "[爱心]",
+        "[強]",
+        "[强]",
+        "[花]",
+        "收到",
+        "謝謝",
+        "谢谢",
+        "辛苦",
+        "幫你",
+        "帮你",
+        "我先幫",
+        "我先帮",
+        "有需要",
+        "密我",
+        "儲",
+        "鑽",
+        "钻",
+        "匯",
+        "汇",
+        "帳號",
+        "账号",
+        "官方",
+        "任務",
+        "任务",
+        "查一下",
+        "搶到",
+        "抢到",
+        "唱號",
+        "唱号",
+        "連絡",
+        "聯絡",
+        "联系",
+        "寶",
+        "宝",
+        "处理",
+        "處理",
+        "確認",
+        "确认",
+    )
+    evasive_markers = (
+        "不建議",
+        "不建议",
+        "不太",
+        "不能",
+        "先別",
+        "先别",
+        "先放",
+        "暫時不",
+        "暂时不",
+        "到這裡",
+        "到这里",
+        "先停",
+    )
+    if any(marker in normalized for marker in evasive_markers):
+        return None
+    if any(marker in normalized for marker in cooperative_markers) or compact.startswith(("好", "ok", "收到")):
+        return ActionPrediction(
+            label_11="elaborate" if len(normalized) > 4 else "agree",
+            label_3="exploit",
+            confidence=0.74,
+            source=f"{source_prefix}_transactional_feature",
+        )
+    return None
+
+
 _STRATEGY_CUE_PATTERNS: dict[str, tuple[tuple[str, float], ...]] = {
     "explore": (
         ("\uff1f", 3.0),
@@ -633,6 +722,14 @@ class DialogueActClassifier:
                 confidence=max(float(base.confidence), 0.72),
                 source=f"{source_prefix}_ack_feature",
             )
+        transactional = _transactional_cooperation_prediction(text, source_prefix=source_prefix)
+        if transactional is not None:
+            return ActionPrediction(
+                label_11=transactional.label_11,
+                label_3=transactional.label_3,
+                confidence=max(float(base.confidence), float(transactional.confidence)),
+                source=transactional.source,
+            )
         cue = _cue_prediction(text)
         if cue is None:
             return base
@@ -687,6 +784,15 @@ class DialogueActClassifier:
                         label_3="exploit",
                         confidence=max(float(base.confidence), 0.72),
                         source="embedding_centroid_ack_feature",
+                    )
+                    continue
+                transactional = _transactional_cooperation_prediction(text, source_prefix="embedding_centroid")
+                if transactional is not None:
+                    out[idx] = ActionPrediction(
+                        label_11=transactional.label_11,
+                        label_3=transactional.label_3,
+                        confidence=max(float(base.confidence), float(transactional.confidence)),
+                        source=transactional.source,
                     )
                     continue
                 cue = _cue_prediction(text)

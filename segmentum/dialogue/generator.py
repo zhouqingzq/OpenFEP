@@ -54,6 +54,47 @@ def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, float(value)))
 
 
+def _policy_lift_metadata(personality_state: Mapping[str, object], action: str) -> dict[str, object]:
+    policies = personality_state.get("preferred_policies")
+    if not isinstance(policies, Mapping):
+        return {
+            "applied": False,
+            "strategy_confidence": 0.0,
+            "policy_evidence_count": 0,
+            "policy_evidence_weight": 0.0,
+            "policy_source": "missing",
+        }
+    try:
+        confidence = _clamp01(float(policies.get("strategy_confidence", 0.0)))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    try:
+        evidence_count = int(policies.get("policy_evidence_count", 0) or 0)
+    except (TypeError, ValueError):
+        evidence_count = 0
+    distribution = policies.get("action_distribution", {})
+    action_frequency = 0.0
+    if isinstance(distribution, Mapping):
+        try:
+            action_frequency = float(distribution.get(action, 0.0))
+        except (TypeError, ValueError):
+            action_frequency = 0.0
+    raw_preferences = policies.get("learned_preferences", [])
+    learned_preferences = {str(item) for item in raw_preferences} if isinstance(raw_preferences, list) else set()
+    applied = bool(
+        evidence_count >= 3
+        and confidence >= 0.20
+        and (action in learned_preferences or action_frequency >= 0.12)
+    )
+    return {
+        "applied": applied,
+        "strategy_confidence": round(float(confidence), 6),
+        "policy_evidence_count": int(evidence_count),
+        "policy_evidence_weight": round(float(action_frequency), 6),
+        "policy_source": "evidence_bearing_distribution" if evidence_count > 0 else "surface_only_or_missing",
+    }
+
+
 def _bucket_personality(personality_state: Mapping[str, object]) -> str:
     parts: list[str] = []
     traits = personality_state.get("slow_traits")
@@ -239,6 +280,7 @@ def _profile_reply(
     rhetorical_move: str,
     master_seed: int,
     turn_index: int,
+    policy_lift_applied: bool = False,
     diagnostics: dict[str, object] | None = None,
 ) -> str:
     source = str(profile.get("source", "profile"))
@@ -296,6 +338,8 @@ def _profile_reply(
                 "profile_degraded_reason": degraded_reason,
                 "profile_anchor_match": anchor_match,
                 "profile_length_bucket": length_bucket,
+                "policy_lift_applied": bool(policy_lift_applied),
+                "surface_shortcut_suppressed": bool(population_state_only),
             }
         )
 
@@ -303,6 +347,9 @@ def _profile_reply(
         ultra_short = float(profile.get("ultra_short_ratio", 0.0))
     except (TypeError, ValueError):
         ultra_short = 0.0
+    raw_ultra_short = ultra_short
+    if policy_lift_applied and raw_ultra_short >= 0.45 and diagnostics is not None:
+        diagnostics["surface_shortcut_suppressed"] = True
     if population_state_only:
         ultra_short = 0.0
 
@@ -316,16 +363,20 @@ def _profile_reply(
         _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
         reply = _generic_focused_reply(action, base, generic_focus)
         if population_state_only and len(reply.strip()) <= 12:
+            if diagnostics is not None:
+                diagnostics["surface_shortcut_suppressed"] = True
             reply = reply.rstrip("。.!?") + "，我会按当前信息继续判断。"
         return reply
     if not expression_available:
         _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
         reply = _generic_focused_reply(action, base, generic_focus)
         if population_state_only and len(reply.strip()) <= 12:
+            if diagnostics is not None:
+                diagnostics["surface_shortcut_suppressed"] = True
             reply = reply.rstrip("。.!?") + "，我会按当前信息继续判断。"
         return reply
 
-    if ultra_short >= 0.45 and action in {"minimal_response", "agree", "deflect"}:
+    if ultra_short >= 0.45 and action in {"minimal_response", "agree", "deflect"} and not policy_lift_applied:
         if diagnostics is not None:
             diagnostics["rhetorical_move"] = rhetorical_move
         selected_source = (
@@ -339,7 +390,10 @@ def _profile_reply(
         )
         _set_expression_sources(diagnostics, [selected_source])
         return phrase or connector or opening or base
-    if ultra_short >= 0.60 and phrase:
+    if ultra_short >= 0.45 and action in {"minimal_response", "agree", "deflect"} and policy_lift_applied:
+        if diagnostics is not None:
+            diagnostics["surface_shortcut_suppressed"] = True
+    if ultra_short >= 0.60 and phrase and not policy_lift_applied:
         if diagnostics is not None:
             diagnostics["rhetorical_move"] = rhetorical_move
         _set_expression_sources(diagnostics, ["action_phrase"])
@@ -369,12 +423,34 @@ def _profile_reply(
     if anchor and confidence >= 0.90 and anchor not in " ".join(bits):
         bits.append(f"我会把{anchor}也放进判断里")
         expression_sources.append("anchor")
+    if policy_lift_applied and target_context_surface and focus and action in {
+        "ask_question",
+        "introduce_topic",
+        "share_opinion",
+        "agree",
+        "empathize",
+        "elaborate",
+        "joke",
+    }:
+        if action in {"ask_question", "introduce_topic", "share_opinion"}:
+            bits.append(f"我会围绕“{focus}”再确认具体线索")
+        else:
+            bits.append(f"我会把“{focus}”的细节接住并继续确认")
+        expression_sources.append("policy_detail")
     if not bits:
         bits.append(base)
         expression_sources.append("generic")
     reply = "，".join(bits)
     if not reply.endswith(("。", "！", "？", ".", "!", "?")):
         reply += "。"
+    if population_state_only and len(reply.strip()) <= 12:
+        if diagnostics is not None:
+            diagnostics["surface_shortcut_suppressed"] = True
+        reply = reply.rstrip("。.!?") + "，我会按当前信息继续判断。"
+    if policy_lift_applied and len(reply.strip()) <= 12 and focus:
+        if diagnostics is not None:
+            diagnostics["surface_shortcut_suppressed"] = True
+        reply = f"关于“{focus}”，{reply.rstrip('。.!?')}，我会再补充一点。"
     _set_expression_sources(diagnostics, expression_sources)
     return reply
 
@@ -426,6 +502,12 @@ class RuleBasedGenerator:
         templates = _RULE_TEMPLATES.get(action, ("我在。", "请继续。", "我在听。"))
         bucket = _bucket_personality(personality_state)
         style = _rhetorical_move(personality_state, action)
+        policy_meta = _policy_lift_metadata(personality_state, action)
+        policy_lift_applied = bool(policy_meta.get("applied", False))
+        if policy_lift_applied and action in {"ask_question", "introduce_topic", "share_opinion"}:
+            style = "exploratory_questioning"
+        elif policy_lift_applied and action in {"agree", "empathize", "elaborate", "joke"}:
+            style = "warm_supportive"
         idx = pick_index(
             master_seed,
             "surface",
@@ -455,6 +537,11 @@ class RuleBasedGenerator:
             "profile_expression_sources": [],
             "profile_expression_source": "generic",
             "rhetorical_move": style,
+            "policy_lift_applied": policy_lift_applied,
+            "policy_evidence_weight": policy_meta.get("policy_evidence_weight", 0.0),
+            "policy_strategy_confidence": policy_meta.get("strategy_confidence", 0.0),
+            "calibration_policy_source": policy_meta.get("policy_source", "missing"),
+            "surface_shortcut_suppressed": False,
         }
         if style == "warm_supportive" and action in {"ask_question", "empathize", "agree", "elaborate"}:
             base = "我在认真听你说，" + base
@@ -473,6 +560,7 @@ class RuleBasedGenerator:
                 rhetorical_move=style,
                 master_seed=master_seed,
                 turn_index=turn_index,
+                policy_lift_applied=policy_lift_applied,
                 diagnostics=generation_diagnostics,
             )
             self.last_diagnostics = generation_diagnostics

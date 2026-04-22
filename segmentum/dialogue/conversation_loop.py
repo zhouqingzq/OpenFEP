@@ -105,6 +105,12 @@ def run_conversation(
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
         }
+        policies = getattr(agent.self_model, "preferred_policies", None)
+        if policies is not None and hasattr(policies, "to_dict"):
+            personality_state["preferred_policies"] = policies.to_dict()
+        priors = getattr(agent.self_model, "narrative_priors", None)
+        if priors is not None and hasattr(priors, "to_dict"):
+            personality_state["narrative_priors"] = priors.to_dict()
         surface_profile = getattr(agent, "dialogue_surface_profile", None)
         if isinstance(surface_profile, dict):
             personality_state["surface_profile"] = dict(surface_profile)

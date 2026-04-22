@@ -20,6 +20,7 @@ from segmentum.dialogue.validation.constants import (
     M54_CLASSIFIER_LABEL_SCHEMA_VERSION,
 )
 from segmentum.dialogue.validation.metrics import SimilarityResult
+from segmentum.dialogue.validation.metrics import behavioral_similarity, semantic_pair_weights
 from segmentum.dialogue.validation.pipeline import (
     ValidationConfig,
     ValidationReport,
@@ -410,6 +411,44 @@ class TestM54Validation(unittest.TestCase):
         self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
         self.assertFalse(summary["policy_dominant_strategy_confident"])
 
+    def test_low_info_replies_do_not_drive_policy_preferences(self) -> None:
+        user = _build_user(183, sessions=8)
+        for session in user["sessions"]:
+            for turn in session["turns"]:
+                if int(turn["sender_uid"]) == int(user["uid"]):
+                    turn["body"] = "8888"
+        agent = SegmentAgent()
+
+        summary = apply_train_state_calibration(agent, user, source="unit_low_info")
+
+        self.assertGreater(summary["surface_bucket_counts"].get("ultra_low_info", 0), 0)
+        self.assertEqual(summary["policy_action_distribution"], {})
+        self.assertEqual(summary["policy_evidence_count"], 0)
+        self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
+
+    def test_weighted_behavioral_similarity_downweights_low_info_majority(self) -> None:
+        real_texts = ["8888", "好", "我补充一下项目的关键细节和下一步判断"]
+        real_strategy = ["escape", "exploit", "exploit"]
+        majority_strategy = ["escape", "escape", "escape"]
+        personality_strategy = ["exploit", "exploit", "exploit"]
+        weights = semantic_pair_weights(real_texts)
+
+        majority = behavioral_similarity(
+            majority_strategy,
+            real_strategy,
+            granularity="strategy",
+            weights=weights,
+        )
+        personality = behavioral_similarity(
+            personality_strategy,
+            real_strategy,
+            granularity="strategy",
+            weights=weights,
+        )
+
+        self.assertGreater(float(personality.value), float(majority.value))
+        self.assertEqual(majority.details["aggregation"], "information_weighted_pair_distribution")
+
     def test_population_surface_profile_drops_target_like_anchors(self) -> None:
         profile_a = DialogueSurfaceProfile(
             source="a",
@@ -542,6 +581,42 @@ class TestM54Validation(unittest.TestCase):
 
         self.assertGreater(len(reply), 12)
         self.assertTrue(generator.last_diagnostics["population_surface_state_only"])
+        self.assertTrue(generator.last_diagnostics["surface_shortcut_suppressed"])
+
+    def test_policy_lift_suppresses_ultra_short_surface_shortcut(self) -> None:
+        generator = RuleBasedGenerator()
+        reply = generator.generate(
+            "agree",
+            {
+                "current_turn": "我们继续确认项目排期和付款细节",
+                "partner_uid": 1000,
+                "observation": {"conflict_tension": 0.0, "emotional_tone": 0.6},
+            },
+            {
+                "slow_traits": {"caution_bias": 0.8, "trust_stance": 0.3, "social_approach": 0.3},
+                "preferred_policies": {
+                    "strategy_confidence": 0.8,
+                    "policy_evidence_count": 12,
+                    "action_distribution": {"agree": 0.4, "elaborate": 0.3},
+                    "learned_preferences": ["agree", "elaborate"],
+                },
+                "surface_profile": {
+                    "source": "random:train",
+                    "reply_count": 100,
+                    "median_reply_chars": 2,
+                    "ultra_short_ratio": 1.0,
+                    "connector_phrases": ["好"],
+                },
+            },
+            [],
+            master_seed=4,
+            turn_index=0,
+        )
+
+        self.assertGreater(len(reply), 12)
+        self.assertTrue(generator.last_diagnostics["policy_lift_applied"])
+        self.assertTrue(generator.last_diagnostics["surface_shortcut_suppressed"])
+        self.assertEqual(generator.last_diagnostics["rhetorical_move"], "warm_supportive")
 
     def test_rhetorical_move_categories_are_reachable(self) -> None:
         generator = RuleBasedGenerator()
@@ -612,6 +687,16 @@ class TestM54Validation(unittest.TestCase):
         evasive = clf.predict("...")
         self.assertEqual(evasive.label_11, "minimal_response")
         self.assertEqual(evasive.label_3, "escape")
+
+    def test_transactional_cooperative_replies_are_not_escape(self) -> None:
+        clf = DialogueActClassifier(_classifier_samples(4))
+
+        for text in ("那我先幫你儲鑽好了", "早喔，有需要可以密我", "是喔，謝謝，妳辛苦了"):
+            pred = clf.predict(text)
+            self.assertEqual(pred.label_3, "exploit")
+
+        question = clf.predict("合唱入圍有二個，那還有邀請卡嗎")
+        self.assertEqual(question.label_3, "explore")
 
     def test_supervised_classifier_fixture_gate_degrades_when_tfidf_forced(self) -> None:
         train = _classifier_samples(100, offset=0)

@@ -474,6 +474,7 @@ def behavioral_similarity(
     real_actions: list[str],
     *,
     granularity: str = "strategy",
+    weights: list[float] | None = None,
 ) -> SimilarityResult:
     if granularity not in {"strategy", "action11"}:
         raise ValueError("granularity must be 'strategy' or 'action11'")
@@ -492,8 +493,23 @@ def behavioral_similarity(
     else:
         gen_labels = list(generated_actions)
         real_labels = list(real_actions)
-    gen_dist = Counter(gen_labels)
-    real_dist = Counter(real_labels)
+    raw_gen_dist = Counter(gen_labels)
+    raw_real_dist = Counter(real_labels)
+    total = min(len(gen_labels), len(real_labels))
+    if weights is None:
+        pair_weights = [1.0] * total
+        aggregation = "raw_pair_distribution"
+    else:
+        pair_weights = [max(0.0, float(weights[idx])) if idx < len(weights) else 1.0 for idx in range(total)]
+        aggregation = "information_weighted_pair_distribution"
+    gen_dist: Counter[str] = Counter()
+    real_dist: Counter[str] = Counter()
+    for idx in range(total):
+        weight = pair_weights[idx]
+        if weight <= 0.0:
+            continue
+        gen_dist[gen_labels[idx]] += weight
+        real_dist[real_labels[idx]] += weight
     keys = sorted(set(gen_dist.keys()) | set(real_dist.keys()))
     gen_total = float(sum(gen_dist.values()))
     real_total = float(sum(real_dist.values()))
@@ -501,7 +517,14 @@ def behavioral_similarity(
         return SimilarityResult(
             metric_name=f"behavioral_similarity_{granularity}",
             value=0.0,
-            details={"chi_square_distance": 0.0, "categories": keys},
+            details={
+                "chi_square_distance": 0.0,
+                "categories": keys,
+                "aggregation": aggregation,
+                "raw_generated_distribution": dict(raw_gen_dist),
+                "raw_real_distribution": dict(raw_real_dist),
+                "effective_pair_weight": round(float(sum(pair_weights)), 6),
+            },
         )
     chi2 = 0.0
     for key in keys:
@@ -513,7 +536,16 @@ def behavioral_similarity(
     return SimilarityResult(
         metric_name=f"behavioral_similarity_{granularity}",
         value=round(float(max(0.0, min(1.0, similarity))), 6),
-        details={"chi_square_distance": round(float(chi2), 6), "categories": keys},
+        details={
+            "chi_square_distance": round(float(chi2), 6),
+            "categories": keys,
+            "aggregation": aggregation,
+            "raw_generated_distribution": dict(raw_gen_dist),
+            "raw_real_distribution": dict(raw_real_dist),
+            "weighted_generated_distribution": {key: round(float(value), 6) for key, value in gen_dist.items()},
+            "weighted_real_distribution": {key: round(float(value), 6) for key, value in real_dist.items()},
+            "effective_pair_weight": round(float(sum(pair_weights)), 6),
+        },
     )
 
 

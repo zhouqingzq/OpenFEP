@@ -1375,6 +1375,7 @@ def _behavioral_majority_baseline_gate(
 ) -> dict[str, object]:
     personality_values: list[float] = []
     majority_values: list[float] = []
+    effective_weights: list[float] = []
     for report in reports:
         for strategy_result in report.per_strategy.values():
             if not _strategy_eligible(strategy_result):
@@ -1387,6 +1388,7 @@ def _behavioral_majority_baseline_gate(
                 continue
             personality_values.append(_safe_float(p.get("behavioral_similarity_strategy")))
             majority_values.append(_safe_float(majority.get("behavioral_similarity_strategy")))
+            effective_weights.append(_safe_float(majority.get("behavioral_pair_weight_sum")))
     personality_mean = float(mean(personality_values)) if personality_values else 0.0
     majority_mean = float(mean(majority_values)) if majority_values else 0.0
     warning = bool(majority_values and majority_mean >= personality_mean - 1e-12)
@@ -1397,6 +1399,7 @@ def _behavioral_majority_baseline_gate(
         "behavioral_metric_majority_warning": bool(warning),
         "personality_behavioral_strategy_mean": round(float(personality_mean), 6),
         "majority_behavioral_strategy_mean": round(float(majority_mean), 6),
+        "mean_effective_pair_weight": round(float(mean(effective_weights)) if effective_weights else 0.0, 6),
         "comparisons_evaluated": int(len(majority_values)),
         "policy": "formal acceptance blocks when train-majority behavioral baseline matches or beats personality",
     }

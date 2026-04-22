@@ -550,6 +550,9 @@ class PreferredPolicies:
     learned_avoidances: list[str] = field(default_factory=list)
     learned_preferences: list[str] = field(default_factory=list)
     last_updated_tick: int = 0
+    strategy_confidence: float = 0.0
+    policy_evidence_count: int = 0
+    surface_majority_coverage: float = 0.0
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -559,6 +562,9 @@ class PreferredPolicies:
             "learned_avoidances": list(self.learned_avoidances),
             "learned_preferences": list(self.learned_preferences),
             "last_updated_tick": self.last_updated_tick,
+            "strategy_confidence": float(self.strategy_confidence),
+            "policy_evidence_count": int(self.policy_evidence_count),
+            "surface_majority_coverage": float(self.surface_majority_coverage),
         }
 
     @classmethod
@@ -575,6 +581,9 @@ class PreferredPolicies:
             learned_avoidances=[str(item) for item in data.get("learned_avoidances", [])],
             learned_preferences=[str(item) for item in data.get("learned_preferences", [])],
             last_updated_tick=int(data.get("last_updated_tick", 0)),
+            strategy_confidence=float(data.get("strategy_confidence", 0.0)),
+            policy_evidence_count=int(data.get("policy_evidence_count", 0)),
+            surface_majority_coverage=float(data.get("surface_majority_coverage", 0.0)),
         )
 
 
