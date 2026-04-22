@@ -8,6 +8,7 @@ from statistics import mean, pstdev
 from typing import Mapping
 
 from ...agent import SegmentAgent
+from ...self_model import NarrativePriors
 from ...slow_learning import SlowTraitState
 from ..conversation_loop import run_conversation
 from ..lifecycle import ImplantationConfig, implant_personality
@@ -34,7 +35,9 @@ from .metrics import (
     behavioral_similarity,
     balanced_behavioral_similarity,
     personality_similarity,
+    semantic_pair_info_buckets,
     semantic_pair_scores,
+    semantic_pair_weights,
     semantic_similarity,
     stylistic_similarity,
     surface_similarity,
@@ -364,6 +367,10 @@ def _mean_semantic_pair_score(left: list[str], right: list[str]) -> float:
     return round(float(mean(scores)) if scores else 0.0, 6)
 
 
+def _semantic_weight_info(real_texts: list[str]) -> tuple[list[float], list[str]]:
+    return semantic_pair_weights(real_texts), semantic_pair_info_buckets(real_texts)
+
+
 def _state_vector(agent: SegmentAgent) -> dict[str, float]:
     out: dict[str, float] = {}
     traits = getattr(getattr(agent.slow_variable_learner, "state", None), "traits", None)
@@ -486,6 +493,8 @@ def _semantic_trace_rows(
     baseline_b_worst_trace = baseline_b_worst_trace or []
     baseline_b_best_scores = baseline_b_best_scores or []
     baseline_b_worst_scores = baseline_b_worst_scores or []
+    real_texts = [str(row.get("real_text", "")) for row in personality_trace]
+    semantic_weights, semantic_buckets = _semantic_weight_info(real_texts)
     total = min(
         len(personality_trace),
         len(baseline_a_trace),
@@ -493,6 +502,8 @@ def _semantic_trace_rows(
         len(personality_scores),
         len(baseline_a_scores),
         len(baseline_c_scores),
+        len(semantic_weights),
+        len(semantic_buckets),
     )
     for idx in range(total):
         p = dict(personality_trace[idx])
@@ -523,6 +534,8 @@ def _semantic_trace_rows(
                 "baseline_c_generated_chars": int(c.get("generated_chars", 0) or 0),
                 "baseline_b_best_generated_chars": int(b_best.get("generated_chars", 0) or 0),
                 "baseline_b_worst_generated_chars": int(b_worst.get("generated_chars", 0) or 0),
+                "semantic_pair_weight": round(float(semantic_weights[idx]), 6),
+                "semantic_info_bucket": semantic_buckets[idx],
                 "personality_semantic_pair_score": round(float(personality_scores[idx]), 6),
                 "baseline_a_semantic_pair_score": round(float(baseline_a_scores[idx]), 6),
                 "baseline_c_semantic_pair_score": round(float(baseline_c_scores[idx]), 6),
@@ -640,6 +653,9 @@ def _ablation_trace_rows(
         trace = item.get("trace", []) if isinstance(item, Mapping) else []
         if isinstance(trace, list):
             total = min(total, len(trace))
+    real_texts = [str(row.get("real_text", "")) for row in personality_trace]
+    semantic_weights, semantic_buckets = _semantic_weight_info(real_texts)
+    total = min(total, len(semantic_weights), len(semantic_buckets))
     for idx in range(total):
         p = dict(personality_trace[idx])
         p_diag = _trace_generation_diagnostics(p)
@@ -659,6 +675,8 @@ def _ablation_trace_rows(
             "full_personality_template_id": p_diag.get("template_id"),
             "full_personality_surface_source": p_diag.get("surface_source"),
             "full_personality_rhetorical_move": p_diag.get("rhetorical_move"),
+            "semantic_pair_weight": round(float(semantic_weights[idx]), 6),
+            "semantic_info_bucket": semantic_buckets[idx],
             "full_personality_semantic_pair_score": round(float(personality_scores[idx]), 6),
             "baseline_a_semantic_pair_score": round(float(baseline_a_scores[idx]), 6),
             "baseline_c_semantic_pair_score": round(float(baseline_c_scores[idx]), 6),
@@ -992,6 +1010,8 @@ def run_validation(
                 seed=int(config.seed) + 808 + config.strategies.index(strategy),
             )
             no_policy_agent.slow_variable_learner.state.traits = SlowTraitState()
+            no_policy_agent.self_model.narrative_priors = NarrativePriors()
+            no_policy_agent.self_model.preferred_policies = None
             attach_surface_profile(no_policy_agent, train_surface_profile)
             np_gen, np_real, np_g11, np_r11, np_g3, np_r3, np_trace = _call_generate_from_sessions(
                 no_policy_agent,

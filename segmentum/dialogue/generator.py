@@ -241,6 +241,8 @@ def _profile_reply(
     turn_index: int,
     diagnostics: dict[str, object] | None = None,
 ) -> str:
+    source = str(profile.get("source", "profile"))
+    population_state_only = source == "population_average" or source.startswith("population:")
     matched_tokens, anchor_match, partner_anchor_used = _matched_anchor_candidates(
         profile,
         partner_uid=partner_uid,
@@ -282,7 +284,8 @@ def _profile_reply(
     if diagnostics is not None:
         diagnostics.update(
             {
-                "surface_source": str(profile.get("source", "profile")),
+                "surface_source": source,
+                "population_surface_state_only": population_state_only,
                 "profile_phrase_used": bool(phrase),
                 "profile_phrase": phrase,
                 "profile_opening_used": bool(opening),
@@ -300,21 +303,27 @@ def _profile_reply(
         ultra_short = float(profile.get("ultra_short_ratio", 0.0))
     except (TypeError, ValueError):
         ultra_short = 0.0
+    if population_state_only:
+        ultra_short = 0.0
 
-    source = str(profile.get("source", "profile"))
     target_context_surface = not (
-        source == "population_average"
-        or source.startswith("population:")
+        population_state_only
         or source.startswith("wrong_user")
     )
     generic_focus = focus if target_context_surface else ""
     expression_available = bool(phrase or connector or opening or anchor)
     if confidence < 0.75:
         _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
-        return _generic_focused_reply(action, base, generic_focus)
+        reply = _generic_focused_reply(action, base, generic_focus)
+        if population_state_only and len(reply.strip()) <= 12:
+            reply = reply.rstrip("。.!?") + "，我会按当前信息继续判断。"
+        return reply
     if not expression_available:
         _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
-        return _generic_focused_reply(action, base, generic_focus)
+        reply = _generic_focused_reply(action, base, generic_focus)
+        if population_state_only and len(reply.strip()) <= 12:
+            reply = reply.rstrip("。.!?") + "，我会按当前信息继续判断。"
+        return reply
 
     if ultra_short >= 0.45 and action in {"minimal_response", "agree", "deflect"}:
         if diagnostics is not None:

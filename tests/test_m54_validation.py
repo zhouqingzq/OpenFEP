@@ -395,6 +395,21 @@ class TestM54Validation(unittest.TestCase):
         self.assertNotIn(holdout_session_id, payload)
         self.assertNotEqual(agent.slow_variable_learner.state.traits.to_dict(), SlowVariableLearner().state.traits.to_dict())
 
+    def test_state_calibration_marks_collapsed_majority_as_uncertain(self) -> None:
+        user = _build_user(182, sessions=8)
+        for session in user["sessions"]:
+            for turn in session["turns"]:
+                if int(turn["sender_uid"]) == int(user["uid"]):
+                    turn["body"] = "好"
+        agent = SegmentAgent()
+
+        summary = apply_train_state_calibration(agent, user, source="unit_majority")
+
+        self.assertGreaterEqual(float(summary["strategy_majority_coverage"]), 0.75)
+        self.assertLess(float(summary["strategy_entropy"]), 0.35)
+        self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
+        self.assertFalse(summary["policy_dominant_strategy_confident"])
+
     def test_population_surface_profile_drops_target_like_anchors(self) -> None:
         profile_a = DialogueSurfaceProfile(
             source="a",
@@ -502,6 +517,32 @@ class TestM54Validation(unittest.TestCase):
         self.assertIn("connector", generator.last_diagnostics["profile_expression_sources"])
         self.assertIn("template_id", generator.last_diagnostics)
 
+    def test_population_average_surface_does_not_emit_ultra_short_template(self) -> None:
+        generator = RuleBasedGenerator()
+        reply = generator.generate(
+            "minimal_response",
+            {
+                "current_turn": "確認匯款資訊",
+                "partner_uid": 1000,
+                "observation": {"conflict_tension": 0.0, "emotional_tone": 0.5},
+            },
+            {
+                "slow_traits": {"caution_bias": 0.8, "trust_stance": 0.3},
+                "surface_profile": {
+                    "source": "population_average",
+                    "reply_count": 100,
+                    "median_reply_chars": 2,
+                    "ultra_short_ratio": 1.0,
+                },
+            },
+            [],
+            master_seed=4,
+            turn_index=0,
+        )
+
+        self.assertGreater(len(reply), 12)
+        self.assertTrue(generator.last_diagnostics["population_surface_state_only"])
+
     def test_rhetorical_move_categories_are_reachable(self) -> None:
         generator = RuleBasedGenerator()
         context = {
@@ -559,6 +600,18 @@ class TestM54Validation(unittest.TestCase):
         self.assertEqual(clf.engine, "keyword_debug")
         self.assertFalse(clf.formal_engine)
         self.assertEqual(pred.label_3, "explore")
+
+    def test_short_cooperative_replies_are_exploit_not_escape(self) -> None:
+        clf = KeywordDialogueActClassifier()
+
+        for text in ("好", "收到", "ok", "got it"):
+            pred = clf.predict(text)
+            self.assertEqual(pred.label_11, "agree")
+            self.assertEqual(pred.label_3, "exploit")
+
+        evasive = clf.predict("...")
+        self.assertEqual(evasive.label_11, "minimal_response")
+        self.assertEqual(evasive.label_3, "escape")
 
     def test_supervised_classifier_fixture_gate_degrades_when_tfidf_forced(self) -> None:
         train = _classifier_samples(100, offset=0)

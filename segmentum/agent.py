@@ -167,6 +167,16 @@ class PolicyEvaluator:
                 policy_memory_bias -= 0.35
             frequency = float(policies.action_distribution.get(action, 0.0))
             policy_memory_bias += (frequency - 0.20) * 0.30
+            if is_dialogue_action(action):
+                dominant_strategy = str(policies.dominant_strategy or "")
+                action_strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "")
+                if action in policies.learned_preferences:
+                    policy_memory_bias += 0.15
+                policy_memory_bias += (frequency - 0.10) * 0.45
+                if dominant_strategy not in {"", "expected_free_energy"} and action_strategy == dominant_strategy:
+                    policy_memory_bias += 0.10
+                if action in policies.learned_avoidances:
+                    policy_memory_bias -= 0.15
 
         threat_bias = self._threat_awareness_bias(action, cost)
         narrative_bias = self._narrative_bias(action)

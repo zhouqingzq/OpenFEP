@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import math
 from statistics import mean
 from typing import Iterable, Mapping, Protocol
 
@@ -19,6 +20,33 @@ class _Predictor(Protocol):
 _EXPLOIT_ACTIONS = {"agree", "empathize", "elaborate", "joke"}
 _ESCAPE_ACTIONS = {"deflect", "minimal_response", "disengage", "disagree"}
 _EXPLORE_ACTIONS = {"ask_question", "introduce_topic", "share_opinion"}
+_COOPERATIVE_ACKS = frozenset(
+    {
+        "ok",
+        "okay",
+        "sure",
+        "fine",
+        "noted",
+        "got it",
+        "gotit",
+        "yes",
+        "yep",
+        "收到",
+        "知道",
+        "知道了",
+        "好",
+        "好的",
+        "嗯",
+        "嗯嗯",
+        "可以",
+        "對",
+        "对",
+        "謝謝",
+        "谢谢",
+        "感謝",
+        "感谢",
+    }
+)
 
 
 def _safe_int(value: object, default: int = 0) -> int:
@@ -37,6 +65,36 @@ def _safe_float(value: object, default: float = 0.5) -> float:
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
     return max(low, min(high, float(value)))
+
+
+def _compact_reply(text: str) -> str:
+    return "".join(ch for ch in str(text).strip().lower() if ch not in " \t\r\n.,!?;:，。！？；：~…")
+
+
+def _is_cooperative_ack(text: str) -> bool:
+    lowered = " ".join(str(text).strip().lower().split())
+    compact = _compact_reply(text)
+    return lowered in _COOPERATIVE_ACKS or compact in _COOPERATIVE_ACKS
+
+
+def _majority_coverage(counts: Counter[str]) -> float:
+    total = sum(counts.values())
+    if total <= 0:
+        return 0.0
+    return float(max(counts.values())) / float(total)
+
+
+def _distribution_entropy(counts: Counter[str]) -> float:
+    total = sum(counts.values())
+    if total <= 0:
+        return 0.0
+    labels = ("explore", "exploit", "escape")
+    entropy = 0.0
+    for label in labels:
+        p = float(counts.get(label, 0)) / float(total)
+        if p > 0.0:
+            entropy -= p * math.log(p)
+    return entropy / math.log(float(len(labels)))
 
 
 def _iter_reply_pairs(
@@ -69,6 +127,8 @@ def _iter_reply_pairs(
 def _fallback_action(text: str) -> tuple[str, str]:
     compact = text.strip()
     if len(compact) <= 3:
+        if _is_cooperative_ack(compact):
+            return "agree", "exploit"
         return "minimal_response", "escape"
     if "?" in compact or "锛?" in compact or "？" in compact:
         return "ask_question", "explore"
@@ -204,6 +264,8 @@ def _target_policies(
     strategy_counts: Counter[str],
     *,
     reply_count: int,
+    strategy_entropy: float,
+    strategy_majority_coverage: float,
 ) -> PreferredPolicies:
     total = float(max(1, reply_count))
     action_distribution = {
@@ -211,7 +273,8 @@ def _target_policies(
         for action in DIALOGUE_ACTION_NAMES
         if action_counts.get(action, 0) > 0
     }
-    if strategy_counts:
+    majority_is_collapse = bool(strategy_majority_coverage >= 0.75 and strategy_entropy < 0.35)
+    if strategy_counts and not majority_is_collapse:
         dominant_strategy = max(
             strategy_counts.items(),
             key=lambda item: (int(item[1]), str(item[0])),
@@ -306,12 +369,16 @@ def apply_train_state_calibration(
         action_counts,
         strategy_counts,
         reply_count=reply_count,
+        strategy_entropy=_distribution_entropy(strategy_counts),
+        strategy_majority_coverage=_majority_coverage(strategy_counts),
     )
     agent.slow_variable_learner.state.traits = traits
     agent.self_model.narrative_priors = priors
     agent.self_model.preferred_policies = policies
     after_traits = traits.to_dict()
     after_priors = priors.to_dict()
+    strategy_entropy = _distribution_entropy(strategy_counts)
+    strategy_majority_coverage = _majority_coverage(strategy_counts)
     return {
         "source": source,
         "train_only": True,
@@ -321,8 +388,11 @@ def apply_train_state_calibration(
         "strategy_counts": {key: int(value) for key, value in sorted(strategy_counts.items())},
         "policy_action_distribution": dict(policies.action_distribution),
         "policy_dominant_strategy": policies.dominant_strategy,
+        "policy_dominant_strategy_confident": bool(policies.dominant_strategy != "expected_free_energy"),
         "policy_learned_preferences": list(policies.learned_preferences),
         "policy_learned_avoidances": list(policies.learned_avoidances),
+        "strategy_entropy": round(float(strategy_entropy), 6),
+        "strategy_majority_coverage": round(float(strategy_majority_coverage), 6),
         "avg_reply_chars": round(avg_reply_chars, 6),
         "ultra_short_ratio": round(float(ultra_short_ratio), 6),
         "token_variety": round(float(token_variety), 6),

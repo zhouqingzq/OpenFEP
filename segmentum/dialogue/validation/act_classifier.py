@@ -175,9 +175,48 @@ _ACTION_KEYWORDS: dict[str, tuple[str, ...]] = {
     "joke": ("haha", "lol", "funny", "joke", "hh", "233"),
     "disagree": ("disagree", "i object", "not right", "i do not buy", "no way"),
     "deflect": ("not now", "skip this", "let us move on", "another time", "park this"),
-    "minimal_response": ("ok", "fine", "noted", "sure", "got it"),
+    "minimal_response": ("no comment", "whatever", "...", "later"),
     "disengage": ("bye", "goodbye", "talk later", "i have to go", "stop here"),
 }
+
+_COOPERATIVE_ACKS = frozenset(
+    {
+        "ok",
+        "okay",
+        "sure",
+        "fine",
+        "noted",
+        "got it",
+        "gotit",
+        "yes",
+        "yep",
+        "收到",
+        "知道",
+        "知道了",
+        "好",
+        "好的",
+        "嗯",
+        "嗯嗯",
+        "可以",
+        "對",
+        "对",
+        "謝謝",
+        "谢谢",
+        "感謝",
+        "感谢",
+    }
+)
+
+
+def _compact_reply(text: str) -> str:
+    lowered = " ".join(str(text).strip().lower().split())
+    return re.sub(r"[\s.,!?;:，。！？；：~…]+", "", lowered)
+
+
+def _is_cooperative_ack(text: str) -> bool:
+    lowered = " ".join(str(text).strip().lower().split())
+    compact = _compact_reply(text)
+    return lowered in _COOPERATIVE_ACKS or compact in _COOPERATIVE_ACKS
 
 
 _STRATEGY_CUE_PATTERNS: dict[str, tuple[tuple[str, float], ...]] = {
@@ -318,7 +357,9 @@ class KeywordDialogueActClassifier:
                 hits += 1.0
         if action == "ask_question" and ("?" in normalized or "？" in normalized):
             hits += 1.5
-        if action == "minimal_response" and len(_tokenize(normalized)) <= 2:
+        if action == "agree" and _is_cooperative_ack(normalized):
+            hits += 2.0
+        if action == "minimal_response" and len(_tokenize(normalized)) <= 2 and not _is_cooperative_ack(normalized):
             hits += 1.0
         return hits
 
@@ -328,6 +369,8 @@ class KeywordDialogueActClassifier:
             return "minimal_response"
         if "?" in normalized or "？" in normalized:
             return "ask_question"
+        if _is_cooperative_ack(normalized):
+            return "agree"
         if len(_tokenize(normalized)) <= 2:
             return "minimal_response"
         return "elaborate"
@@ -583,6 +626,13 @@ class DialogueActClassifier:
         else:
             base = self._predict_tfidf(text)
             source_prefix = "tfidf_centroid"
+        if _is_cooperative_ack(text):
+            return ActionPrediction(
+                label_11="agree",
+                label_3="exploit",
+                confidence=max(float(base.confidence), 0.72),
+                source=f"{source_prefix}_ack_feature",
+            )
         cue = _cue_prediction(text)
         if cue is None:
             return base
@@ -631,6 +681,14 @@ class DialogueActClassifier:
             rows = self._embedding_rows_for_texts(pending_texts)
             for idx, text, row in zip(pending_indices, pending_texts, rows):
                 base = self._predict_embedding_from_row(text, row)
+                if _is_cooperative_ack(text):
+                    out[idx] = ActionPrediction(
+                        label_11="agree",
+                        label_3="exploit",
+                        confidence=max(float(base.confidence), 0.72),
+                        source="embedding_centroid_ack_feature",
+                    )
+                    continue
                 cue = _cue_prediction(text)
                 if cue is not None:
                     _cue_label, cue_score, cue_margin = _cue_strategy_score(text)

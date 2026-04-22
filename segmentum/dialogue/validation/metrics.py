@@ -25,6 +25,32 @@ class SimilarityResult:
 
 
 _TOKEN_RE = re.compile(r"[A-Za-z0-9_]+|[\u4e00-\u9fff]")
+_COOPERATIVE_ACKS = frozenset(
+    {
+        "ok",
+        "okay",
+        "sure",
+        "fine",
+        "got it",
+        "gotit",
+        "yes",
+        "yep",
+        "收到",
+        "知道",
+        "知道了",
+        "好",
+        "好的",
+        "嗯",
+        "嗯嗯",
+        "可以",
+        "對",
+        "对",
+        "謝謝",
+        "谢谢",
+        "感謝",
+        "感谢",
+    }
+)
 _PUNCT = tuple("。！？,，.!?")
 
 
@@ -214,7 +240,10 @@ def _semantic_similarity_sentence_embedding(pairs: list[tuple[str, str]]) -> Sim
         "paraphrase-multilingual-MiniLM-L12-v2",
     )
     pair_scores, embedding_dim = _sentence_embedding_pair_scores(pairs, model_name=model_name)
-    value = sum(pair_scores) / float(len(pair_scores))
+    real_texts = [real for _, real in pairs]
+    weights = semantic_pair_weights(real_texts)
+    value = weighted_semantic_mean(pair_scores, weights)
+    raw_mean = sum(pair_scores) / float(len(pair_scores))
     return SimilarityResult(
         metric_name="semantic_similarity",
         value=round(float(max(0.0, min(1.0, value))), 6),
@@ -223,6 +252,11 @@ def _semantic_similarity_sentence_embedding(pairs: list[tuple[str, str]]) -> Sim
             "method": "sentence_embedding_cosine",
             "model": model_name,
             "embedding_dim": embedding_dim,
+            "aggregation": "information_weighted_pair_mean",
+            "raw_pair_mean": round(float(raw_mean), 6),
+            "weighted_pair_mean": round(float(value), 6),
+            "mean_pair_weight": round(float(sum(weights) / float(len(weights))) if weights else 0.0, 6),
+            "info_bucket_counts": dict(Counter(semantic_pair_info_buckets(real_texts))),
         },
     )
 
@@ -274,7 +308,21 @@ def semantic_similarity(generated: list[str], real: list[str]) -> SimilarityResu
         "on",
     )
     if force_tfidf:
-        return _semantic_similarity_tfidf_pairs(pairs)
+        result = _semantic_similarity_tfidf_pairs(pairs)
+        scores = semantic_pair_scores(generated, real)
+        weights = semantic_pair_weights(real)
+        weighted = weighted_semantic_mean(scores, weights)
+        result.value = round(float(weighted), 6)
+        result.details.update(
+            {
+                "aggregation": "information_weighted_pair_mean",
+                "raw_pair_mean": round(float(sum(scores) / float(len(scores))) if scores else 0.0, 6),
+                "weighted_pair_mean": round(float(weighted), 6),
+                "mean_pair_weight": round(float(sum(weights) / float(len(weights))) if weights else 0.0, 6),
+                "info_bucket_counts": dict(Counter(semantic_pair_info_buckets(real))),
+            }
+        )
+        return result
 
     try:
         return _semantic_similarity_sentence_embedding(pairs)
@@ -320,6 +368,58 @@ def semantic_pair_scores(generated: list[str], real: list[str]) -> list[float]:
         round(float(max(0.0, min(1.0, _cosine_similarity(vectors[idx], vectors[idx + 1])))), 6)
         for idx in range(0, len(vectors), 2)
     ]
+
+
+def semantic_pair_info_bucket(text: str) -> str:
+    """Bucket real replies by information content for formal semantic aggregation."""
+    compact = " ".join(str(text).strip().lower().split())
+    if not compact:
+        return "empty"
+    stripped = re.sub(r"[\s.,!?;:，。！？；：~…]+", "", compact)
+    tokens = _tokenize(compact)
+    token_count = len(tokens)
+    char_count = len(stripped)
+    if stripped in _COOPERATIVE_ACKS or compact in _COOPERATIVE_ACKS:
+        return "low_info_ack"
+    if char_count <= 2 or token_count <= 1:
+        return "ultra_low_info"
+    if char_count <= 8 or token_count <= 2:
+        return "low_info_short"
+    if char_count <= 20 or token_count <= 5:
+        return "medium_info"
+    return "high_info"
+
+
+def semantic_pair_weight_for_text(text: str) -> float:
+    bucket = semantic_pair_info_bucket(text)
+    if bucket == "empty":
+        return 0.0
+    if bucket in {"low_info_ack", "ultra_low_info"}:
+        return 0.15
+    if bucket == "low_info_short":
+        return 0.35
+    if bucket == "medium_info":
+        return 0.70
+    return 1.0
+
+
+def semantic_pair_weights(real: list[str]) -> list[float]:
+    return [round(float(semantic_pair_weight_for_text(text)), 6) for text in real]
+
+
+def semantic_pair_info_buckets(real: list[str]) -> list[str]:
+    return [semantic_pair_info_bucket(text) for text in real]
+
+
+def weighted_semantic_mean(scores: list[float], weights: list[float]) -> float:
+    total = min(len(scores), len(weights))
+    if total <= 0:
+        return 0.0
+    pairs = [(float(scores[idx]), max(0.0, float(weights[idx]))) for idx in range(total)]
+    denom = sum(weight for _, weight in pairs)
+    if denom <= 1e-12:
+        return sum(score for score, _ in pairs) / float(len(pairs))
+    return sum(score * weight for score, weight in pairs) / denom
 
 
 def stylistic_similarity(generated: list[str], real: list[str]) -> SimilarityResult:
