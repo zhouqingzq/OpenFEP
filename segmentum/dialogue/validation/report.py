@@ -1214,6 +1214,43 @@ def _profile_expression_source_summary(reports: list[ValidationReport]) -> dict[
     return summary
 
 
+def _context_anchor_usage_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    by_strategy: dict[str, dict[str, object]] = {}
+    for strategy_key in _strategy_keys_union(reports):
+        source_counts: Counter[str] = Counter()
+        rows = 0
+        topic_anchor_used = 0
+        partner_anchor_used = 0
+        for report in reports:
+            strategy_result = report.per_strategy.get(strategy_key, {})
+            if not isinstance(strategy_result, dict):
+                continue
+            trace = strategy_result.get("diagnostic_trace", [])
+            if not isinstance(trace, list):
+                continue
+            for row in trace:
+                if not isinstance(row, dict):
+                    continue
+                rows += 1
+                source = str(row.get("personality_topic_anchor_source", "none") or "none")
+                source_counts.update([source])
+                if bool(row.get("personality_topic_anchor_used", False)):
+                    topic_anchor_used += 1
+                if bool(row.get("personality_partner_anchor_used", False)):
+                    partner_anchor_used += 1
+        by_strategy[str(strategy_key)] = {
+            "rows": int(rows),
+            "source_counts": dict(sorted(source_counts.items())),
+            "source_rates": {
+                key: round(float(value) / float(max(1, rows)), 6)
+                for key, value in sorted(source_counts.items())
+            },
+            "topic_anchor_used_rate": round(float(topic_anchor_used) / float(max(1, rows)), 6),
+            "partner_anchor_used_rate": round(float(partner_anchor_used) / float(max(1, rows)), 6),
+        }
+    return {"by_strategy": by_strategy}
+
+
 def _state_saturation_summary(reports: list[ValidationReport]) -> dict[str, object]:
     personality_values: list[float] = []
     distances: dict[str, list[float]] = {}
@@ -1841,6 +1878,7 @@ def generate_report(
     semantic_delta_summary = _semantic_delta_summary(reports)
     baseline_audit_summary = _baseline_audit_summary(reports)
     profile_expression_summary = _profile_expression_source_summary(reports)
+    context_anchor_usage_summary = _context_anchor_usage_summary(reports)
     state_saturation_summary = _state_saturation_summary(reports)
     debug_readiness_gate = _debug_readiness_gate(
         baseline_audit_summary=baseline_audit_summary,
@@ -1919,6 +1957,7 @@ def generate_report(
         "baseline_audit_summary": baseline_audit_summary,
         "ablation_summary": ablation_summary,
         "profile_expression_source_summary": profile_expression_summary,
+        "context_anchor_usage_summary": context_anchor_usage_summary,
         "state_saturation_summary": state_saturation_summary,
         "debug_readiness_gate": debug_readiness_gate,
         "baseline_c_behavioral_failure_audit": baseline_c_behavioral_failure_audit,
@@ -1929,6 +1968,9 @@ def generate_report(
         "ablation_summary_json": str((output_dir / "ablation_summary.json").as_posix()),
         "profile_expression_source_summary_json": str(
             (output_dir / "profile_expression_source_summary.json").as_posix()
+        ),
+        "context_anchor_usage_summary_json": str(
+            (output_dir / "context_anchor_usage_summary.json").as_posix()
         ),
         "state_saturation_summary_json": str((output_dir / "state_saturation_summary.json").as_posix()),
         "diagnostic_trace_jsonl": (
@@ -1954,6 +1996,7 @@ def generate_report(
     _write_json(output_dir / "baseline_audit_summary.json", baseline_audit_summary)
     _write_json(output_dir / "ablation_summary.json", ablation_summary)
     _write_json(output_dir / "profile_expression_source_summary.json", profile_expression_summary)
+    _write_json(output_dir / "context_anchor_usage_summary.json", context_anchor_usage_summary)
     _write_json(output_dir / "state_saturation_summary.json", state_saturation_summary)
     _write_json(output_dir / "baseline_c_behavioral_failure_audit.json", baseline_c_behavioral_failure_audit)
     _write_json(output_dir / "aggregate_report.json", aggregate_payload)

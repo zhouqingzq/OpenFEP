@@ -207,6 +207,7 @@ def _generate_from_sessions(
                         "policy_action_selection_lift_applied": bool(
                             gen_diag.get("policy_action_selection_lift_applied", False)
                         ),
+                        "topic_anchor_source": str(gen_diag.get("topic_anchor_source", "none") or "none"),
                         "surface_shortcut_suppressed": bool(gen_diag.get("surface_shortcut_suppressed", False)),
                         "calibration_policy_source": str(gen_diag.get("calibration_policy_source", "")),
                         "dominant_component": str(getattr(chosen, "dominant_component", "")),
@@ -410,6 +411,7 @@ def _surface_profile_summary(profile: DialogueSurfaceProfile) -> dict[str, objec
         "median_reply_chars": payload.get("median_reply_chars"),
         "ultra_short_ratio": payload.get("ultra_short_ratio"),
         "top_tokens": list(payload.get("top_tokens", []))[:8],
+        "context_top_tokens": list(payload.get("context_top_tokens", []))[:8],
         "opening_phrases": list(payload.get("opening_phrases", []))[:5],
         "strategy_counts": dict(payload.get("strategy_counts", {})),
     }
@@ -674,6 +676,7 @@ def _semantic_trace_rows(
                 "personality_profile_expression_sources": p_gen_diag.get("profile_expression_sources", []),
                 "personality_profile_expression_source": p_gen_diag.get("profile_expression_source"),
                 "personality_topic_anchor_used": p_gen_diag.get("topic_anchor_used"),
+                "personality_topic_anchor_source": p_gen_diag.get("topic_anchor_source", "none"),
                 "personality_partner_anchor_used": p_gen_diag.get("partner_anchor_used"),
                 "personality_rhetorical_move": p_gen_diag.get("rhetorical_move"),
                 "personality_profile_confidence": p_gen_diag.get("profile_confidence"),
@@ -699,6 +702,7 @@ def _semantic_trace_rows(
                 "baseline_c_profile_degraded_reason": c_gen_diag.get("profile_degraded_reason"),
                 "baseline_c_profile_expression_sources": c_gen_diag.get("profile_expression_sources", []),
                 "baseline_c_profile_expression_source": c_gen_diag.get("profile_expression_source"),
+                "baseline_c_topic_anchor_source": c_gen_diag.get("topic_anchor_source", "none"),
                 "baseline_c_surface_shortcut_suppressed": c_gen_diag.get("surface_shortcut_suppressed"),
                 "dominant_component": p.get("dominant_component"),
                 "behavioral_pair_weight": p.get("behavioral_pair_weight"),
@@ -762,6 +766,7 @@ def _ablation_trace_rows(
             "full_personality_template_id": p_diag.get("template_id"),
             "full_personality_surface_source": p_diag.get("surface_source"),
             "full_personality_rhetorical_move": p_diag.get("rhetorical_move"),
+            "full_personality_topic_anchor_source": p_diag.get("topic_anchor_source", "none"),
             "full_personality_policy_evidence_weight": p_diag.get("policy_evidence_weight"),
             "full_personality_policy_lift_applied": p_diag.get("policy_lift_applied"),
             "full_personality_policy_context_bucket": p_diag.get("policy_context_bucket"),

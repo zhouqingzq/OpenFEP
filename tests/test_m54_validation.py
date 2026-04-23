@@ -373,15 +373,22 @@ class TestM54Validation(unittest.TestCase):
         user = _build_user(18, sessions=4)
         train_dataset = dict(user)
         train_dataset["sessions"] = user["sessions"][:2]
+        train_dataset["sessions"][0]["turns"][0]["body"] = "train ctx alpha signal"
+        train_dataset["sessions"][1]["turns"][0]["body"] = "train ctx beta signal"
         holdout_text = "HOLDOUT_UNIQUE_TOKEN_DO_NOT_LEAK"
+        holdout_context = "HOLDOUT_CONTEXT_TOKEN_DO_NOT_LEAK"
         user["sessions"][3]["turns"][1]["body"] = holdout_text
+        user["sessions"][3]["turns"][0]["body"] = holdout_context
 
         profile = build_surface_profile(train_dataset, source="unit_train")
         payload = json.dumps(profile.to_dict(), ensure_ascii=False)
 
         self.assertEqual(profile.source, "unit_train")
         self.assertGreater(profile.reply_count, 0)
+        self.assertIn("train", profile.context_top_tokens)
+        self.assertTrue(any(tokens for tokens in profile.partner_context_tokens.values()))
         self.assertNotIn(holdout_text, payload)
+        self.assertNotIn(holdout_context, payload)
         self.assertNotIn(str(user["sessions"][3]["session_id"]), payload)
 
     def test_state_calibration_uses_train_sessions_only(self) -> None:
@@ -443,7 +450,8 @@ class TestM54Validation(unittest.TestCase):
         self.assertGreater(summary["policy_action_distribution"].get("minimal_response", 0.0), 0.0)
         self.assertGreater(summary["policy_evidence_count"], 0)
         self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
-        self.assertIn("ctx:partner_statement", summary["policy_by_context"])
+        context_bucket = dialogue_policy_context_bucket(user["sessions"][0]["turns"][0]["body"])
+        self.assertIn(context_bucket, summary["policy_by_context"])
 
     def test_context_policy_bias_uses_partner_turn_not_holdout_reply(self) -> None:
         user = _build_user(185, sessions=8)
@@ -487,6 +495,10 @@ class TestM54Validation(unittest.TestCase):
             cost=0.0,
         )
         self.assertGreater(escape_bias, exploit_bias)
+        self.assertEqual(
+            agent.policy_evaluator._last_policy_context_by_action["minimal_response"]["policy_context_bucket"],
+            context_bucket,
+        )
         self.assertTrue(
             agent.policy_evaluator._last_policy_context_by_action["minimal_response"][
                 "policy_action_selection_lift_applied"
@@ -613,9 +625,11 @@ class TestM54Validation(unittest.TestCase):
             opening_phrases=["target opener"],
             connector_phrases=["target connector"],
             top_tokens=["target_topic"],
+            context_top_tokens=["target_context"],
             action_phrases={"elaborate": ["target phrase"]},
             strategy_counts={"exploit": 4},
             partner_tokens={"100": ["partner_secret"]},
+            partner_context_tokens={"100": ["partner_context_secret"]},
         )
         profile_b = DialogueSurfaceProfile(
             source="b",
@@ -626,9 +640,11 @@ class TestM54Validation(unittest.TestCase):
             opening_phrases=["other opener"],
             connector_phrases=["other connector"],
             top_tokens=["other_topic"],
+            context_top_tokens=["other_context"],
             action_phrases={"ask_question": ["other phrase"]},
             strategy_counts={"explore": 6},
             partner_tokens={"200": ["other_secret"]},
+            partner_context_tokens={"200": ["other_context_secret"]},
         )
 
         population = average_surface_profiles(
@@ -637,10 +653,12 @@ class TestM54Validation(unittest.TestCase):
         )
 
         self.assertEqual(population.top_tokens, [])
+        self.assertEqual(population.context_top_tokens, [])
         self.assertEqual(population.opening_phrases, [])
         self.assertEqual(population.connector_phrases, [])
         self.assertEqual(population.action_phrases, {})
         self.assertEqual(population.partner_tokens, {})
+        self.assertEqual(population.partner_context_tokens, {})
         self.assertEqual(population.strategy_counts["exploit"], 4)
         self.assertEqual(population.strategy_counts["explore"], 6)
 
@@ -657,16 +675,20 @@ class TestM54Validation(unittest.TestCase):
             "reply_count": 8,
             "connector_phrases": ["我会认真回应"],
             "top_tokens": ["alpha"],
+            "context_top_tokens": ["alpha"],
             "action_phrases": {"elaborate": ["我补充 alpha 的关键细节"]},
             "partner_tokens": {"1000": ["partner_alpha"]},
+            "partner_context_tokens": {"1000": ["alpha"]},
         }
         profile_b = {
             "source": "b",
             "reply_count": 8,
             "connector_phrases": ["先看 beta"],
             "top_tokens": ["beta"],
+            "context_top_tokens": ["beta"],
             "action_phrases": {"elaborate": ["我补充 beta 的关键细节"]},
             "partner_tokens": {"1000": ["partner_beta"]},
+            "partner_context_tokens": {"1000": ["beta"]},
         }
 
         first = generator.generate(
@@ -699,16 +721,60 @@ class TestM54Validation(unittest.TestCase):
         self.assertNotEqual(first, different)
         self.assertIn("alpha", first)
         self.assertTrue(first_diag["topic_anchor_used"])
+        self.assertEqual(first_diag["topic_anchor_source"], "partner_context")
         self.assertEqual(first_diag["profile_degraded_reason"], "")
         self.assertTrue(first_diag["profile_phrase_used"])
         self.assertIn("action_phrase", first_diag["profile_expression_sources"])
         self.assertEqual(generator.last_diagnostics["surface_source"], "b")
         self.assertFalse(generator.last_diagnostics["profile_phrase_used"])
         self.assertFalse(generator.last_diagnostics["topic_anchor_used"])
+        self.assertEqual(generator.last_diagnostics["topic_anchor_source"], "none")
         self.assertIn("anchor_mismatch", generator.last_diagnostics["profile_degraded_reason"])
         self.assertLess(generator.last_diagnostics["profile_confidence"], first_diag["profile_confidence"])
         self.assertIn("connector", generator.last_diagnostics["profile_expression_sources"])
         self.assertIn("template_id", generator.last_diagnostics)
+
+    def test_rule_generator_falls_back_to_context_top_tokens(self) -> None:
+        generator = RuleBasedGenerator()
+        reply = generator.generate(
+            "elaborate",
+            {
+                "current_turn": "please revisit alpha tomorrow",
+                "partner_uid": 1000,
+                "observation": {"conflict_tension": 0.0, "emotional_tone": 0.5},
+            },
+            {
+                "slow_traits": {"social_approach": 0.7, "caution_bias": 0.2},
+                "surface_profile": {
+                    "source": "unit",
+                    "reply_count": 8,
+                    "connector_phrases": ["alpha first"],
+                    "context_top_tokens": ["alpha"],
+                    "partner_context_tokens": {},
+                },
+            },
+            [],
+            master_seed=9,
+            turn_index=0,
+        )
+
+        self.assertIn("alpha", reply)
+        self.assertTrue(generator.last_diagnostics["topic_anchor_used"])
+        self.assertEqual(generator.last_diagnostics["topic_anchor_source"], "context_global")
+
+    def test_dialogue_policy_context_bucket_refines_generic_temporal_and_confirmation(self) -> None:
+        self.assertEqual(dialogue_policy_context_bucket("ok"), "ctx:partner_low_info_ack")
+        self.assertEqual(dialogue_policy_context_bucket("tmr"), "ctx:partner_low_info_temporal")
+        self.assertEqual(dialogue_policy_context_bucket("tomorrow"), "ctx:partner_short_temporal")
+        self.assertEqual(dialogue_policy_context_bucket("okayyy"), "ctx:partner_short_confirmation")
+        self.assertEqual(
+            dialogue_policy_context_bucket("about alpha project details"),
+            "ctx:partner_statement_topicish",
+        )
+        self.assertEqual(
+            dialogue_policy_context_bucket("we can finish this later after lunch"),
+            "ctx:partner_statement_temporal",
+        )
 
     def test_population_average_surface_does_not_emit_ultra_short_template(self) -> None:
         generator = RuleBasedGenerator()
@@ -1150,6 +1216,7 @@ class TestM54Validation(unittest.TestCase):
                     "personality_profile_expression_sources": ["focus", "action_phrase", "anchor"],
                     "baseline_c_profile_expression_sources": ["generic"],
                     "personality_topic_anchor_used": True,
+                    "personality_topic_anchor_source": "partner_context",
                     "personality_rhetorical_move": "warm_supportive",
                     "baseline_c_rhetorical_move": "direct_advisory",
                     "reply_length_bucket": "medium",
@@ -1193,10 +1260,12 @@ class TestM54Validation(unittest.TestCase):
             self.assertIn("ablation_summary", aggregate)
             self.assertIn("state_saturation_summary", aggregate)
             self.assertIn("profile_expression_source_summary", aggregate)
+            self.assertIn("context_anchor_usage_summary", aggregate)
             self.assertTrue((output_dir / "baseline_audit_summary.json").exists())
             self.assertTrue((output_dir / "ablation_summary.json").exists())
             self.assertTrue((output_dir / "state_saturation_summary.json").exists())
             self.assertTrue((output_dir / "profile_expression_source_summary.json").exists())
+            self.assertTrue((output_dir / "context_anchor_usage_summary.json").exists())
             self.assertIn("debug_readiness_gate", aggregate)
             self.assertTrue(aggregate["debug_readiness_gate"]["passed"])
             self.assertTrue(aggregate["baseline_audit_summary"]["baseline_c_too_close_warning"])
@@ -1211,6 +1280,10 @@ class TestM54Validation(unittest.TestCase):
             self.assertFalse(aggregate["baseline_audit_summary"]["baseline_c_too_weak_warning"])
             self.assertEqual(
                 aggregate["profile_expression_source_summary"]["personality"]["source_counts"]["action_phrase"],
+                1,
+            )
+            self.assertEqual(
+                aggregate["context_anchor_usage_summary"]["by_strategy"]["random"]["source_counts"]["partner_context"],
                 1,
             )
             self.assertIn("no_surface_profile", aggregate["ablation_summary"])

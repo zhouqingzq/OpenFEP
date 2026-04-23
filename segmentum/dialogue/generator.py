@@ -274,17 +274,41 @@ def _matched_anchor_candidates(
     *,
     partner_uid: str,
     context_text: str,
-) -> tuple[list[str], bool, bool]:
-    tokens = _list_from_profile(profile, "top_tokens")
-    partner_anchor_available = False
+) -> tuple[list[str], bool, bool, str]:
+    candidate_groups: list[tuple[str, list[str], bool]] = []
+    partner_context_raw = profile.get("partner_context_tokens", {})
+    if isinstance(partner_context_raw, Mapping):
+        partner_context = partner_context_raw.get(partner_uid, [])
+        if isinstance(partner_context, list) and partner_context:
+            candidate_groups.append(
+                (
+                    "partner_context",
+                    [str(item).strip() for item in partner_context if str(item).strip()],
+                    True,
+                )
+            )
+    context_tokens = _list_from_profile(profile, "context_top_tokens")
+    if context_tokens:
+        candidate_groups.append(("context_global", context_tokens, False))
     partner_tokens_raw = profile.get("partner_tokens", {})
     if isinstance(partner_tokens_raw, Mapping):
         partner_tokens = partner_tokens_raw.get(partner_uid, [])
         if isinstance(partner_tokens, list) and partner_tokens:
-            partner_anchor_available = True
-            tokens = [str(item).strip() for item in partner_tokens if str(item).strip()] + tokens
-    matched = [token for token in tokens[:12] if _context_matches(token, context_text)]
-    return matched, bool(matched), bool(partner_anchor_available and matched)
+            candidate_groups.append(
+                (
+                    "reply_partner_legacy",
+                    [str(item).strip() for item in partner_tokens if str(item).strip()],
+                    True,
+                )
+            )
+    top_tokens = _list_from_profile(profile, "top_tokens")
+    if top_tokens:
+        candidate_groups.append(("reply_global_legacy", top_tokens, False))
+    for source, tokens, partner_specific in candidate_groups:
+        matched = [token for token in tokens[:12] if _context_matches(token, context_text)]
+        if matched:
+            return matched, True, bool(partner_specific), source
+    return [], False, False, "none"
 
 
 def _profile_reply(
@@ -304,7 +328,7 @@ def _profile_reply(
 ) -> str:
     source = str(profile.get("source", "profile"))
     population_state_only = source == "population_average" or source.startswith("population:")
-    matched_tokens, anchor_match, partner_anchor_used = _matched_anchor_candidates(
+    matched_tokens, anchor_match, partner_anchor_used, topic_anchor_source = _matched_anchor_candidates(
         profile,
         partner_uid=partner_uid,
         context_text=context_text,
@@ -352,6 +376,7 @@ def _profile_reply(
                 "profile_opening_used": bool(opening),
                 "topic_anchor_used": bool(anchor),
                 "topic_anchor": anchor,
+                "topic_anchor_source": topic_anchor_source if anchor else "none",
                 "partner_anchor_used": partner_anchor_used,
                 "profile_confidence": confidence,
                 "profile_degraded_reason": degraded_reason,
@@ -558,6 +583,7 @@ class RuleBasedGenerator:
             "profile_opening_used": False,
             "topic_anchor_used": False,
             "topic_anchor": "",
+            "topic_anchor_source": "none",
             "partner_anchor_used": False,
             "profile_confidence": 0.0,
             "profile_degraded_reason": "",

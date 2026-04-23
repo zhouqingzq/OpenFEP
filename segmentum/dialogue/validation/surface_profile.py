@@ -7,7 +7,7 @@ from statistics import mean
 from typing import Iterable, Mapping, Protocol
 
 
-_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+|[\u4e00-\u9fff]")
+_TOKEN_RE = re.compile(r"[A-Za-z0-9_]+|[\u4e00-\u9fff]+")
 _PUNCT_CHARS = tuple(".,!?;:，。！？；：")
 _STOP_TOKENS = frozenset(
     {
@@ -18,18 +18,15 @@ _STOP_TOKENS = frozenset(
         "this",
         "with",
         "for",
-        "了",
         "的",
         "是",
         "我",
         "你",
-        "他",
-        "她",
-        "它",
-        "们",
-        "啊",
-        "吗",
-        "吧",
+        "了",
+        "在",
+        "也",
+        "都",
+        "就",
     }
 )
 
@@ -56,9 +53,11 @@ class DialogueSurfaceProfile:
     opening_phrases: list[str] = field(default_factory=list)
     connector_phrases: list[str] = field(default_factory=list)
     top_tokens: list[str] = field(default_factory=list)
+    context_top_tokens: list[str] = field(default_factory=list)
     action_phrases: dict[str, list[str]] = field(default_factory=dict)
     strategy_counts: dict[str, int] = field(default_factory=dict)
     partner_tokens: dict[str, list[str]] = field(default_factory=dict)
+    partner_context_tokens: dict[str, list[str]] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -81,6 +80,7 @@ class DialogueSurfaceProfile:
             opening_phrases=[str(x) for x in payload.get("opening_phrases", [])],
             connector_phrases=[str(x) for x in payload.get("connector_phrases", [])],
             top_tokens=[str(x) for x in payload.get("top_tokens", [])],
+            context_top_tokens=[str(x) for x in payload.get("context_top_tokens", [])],
             action_phrases={
                 str(k): [str(x) for x in v]
                 for k, v in dict(payload.get("action_phrases", {})).items()
@@ -94,6 +94,11 @@ class DialogueSurfaceProfile:
             partner_tokens={
                 str(k): [str(x) for x in v]
                 for k, v in dict(payload.get("partner_tokens", {})).items()
+                if isinstance(v, list)
+            },
+            partner_context_tokens={
+                str(k): [str(x) for x in v]
+                for k, v in dict(payload.get("partner_context_tokens", {})).items()
                 if isinstance(v, list)
             },
         )
@@ -120,22 +125,27 @@ def _iter_user_replies(
     sessions: Iterable[Mapping[str, object]],
     *,
     user_uid: int,
-) -> Iterable[tuple[str, str]]:
+) -> Iterable[tuple[str, str, str]]:
     for session in sessions:
         if not isinstance(session, Mapping):
             continue
         partner_uid = str(_session_partner_uid(user_uid, session))
+        partner_uid_int = _safe_int(partner_uid, -1)
         turns = session.get("turns", [])
         if not isinstance(turns, list):
             continue
+        last_partner_text = ""
         for turn in turns:
             if not isinstance(turn, Mapping):
                 continue
-            if _safe_int(turn.get("sender_uid"), -1) != int(user_uid):
+            sender_uid = _safe_int(turn.get("sender_uid"), -1)
+            if sender_uid != int(user_uid):
+                if sender_uid == partner_uid_int:
+                    last_partner_text = str(turn.get("body", "")).strip()
                 continue
             body = str(turn.get("body", "")).strip()
             if body:
-                yield partner_uid, body
+                yield partner_uid, last_partner_text, body
 
 
 def _phrase(text: str, *, max_chars: int) -> str:
@@ -163,45 +173,50 @@ def build_surface_profile(
     if not replies:
         return DialogueSurfaceProfile(source=source)
 
-    lengths = [len(text) for _, text in replies]
+    lengths = [len(reply_text) for _, _, reply_text in replies]
     sorted_lengths = sorted(lengths)
     mid = len(sorted_lengths) // 2
     median = sorted_lengths[mid] if sorted_lengths else 0
     token_counts: Counter[str] = Counter()
+    context_token_counts: Counter[str] = Counter()
     prefix_counts: Counter[str] = Counter()
     connector_counts: Counter[str] = Counter()
     punct_counts: Counter[str] = Counter()
     action_phrases: dict[str, Counter[str]] = defaultdict(Counter)
     strategy_counts: Counter[str] = Counter()
     partner_tokens: dict[str, Counter[str]] = defaultdict(Counter)
+    partner_context_tokens: dict[str, Counter[str]] = defaultdict(Counter)
     predictions: list[object] = []
     if classifier is not None:
-        texts = [text for _, text in replies]
+        texts = [reply_text for _, _, reply_text in replies]
         try:
             predictions = list(classifier.predict_batch(texts))
         except Exception:
             predictions = []
 
-    for idx, (partner_uid, text) in enumerate(replies):
-        tokens = [tok for tok in tokenize_surface(text) if tok not in _STOP_TOKENS]
+    for idx, (partner_uid, context_text, reply_text) in enumerate(replies):
+        tokens = [tok for tok in tokenize_surface(reply_text) if tok not in _STOP_TOKENS]
+        context_tokens = [tok for tok in tokenize_surface(context_text) if tok not in _STOP_TOKENS]
         token_counts.update(tokens)
+        context_token_counts.update(context_tokens)
         partner_tokens[partner_uid].update(tokens)
-        prefix_counts[_phrase(text, max_chars=18)] += 1
-        pieces = [piece.strip() for piece in re.split(r"[，。！？,.!?;；:：]", text) if piece.strip()]
+        partner_context_tokens[partner_uid].update(context_tokens)
+        prefix_counts[_phrase(reply_text, max_chars=18)] += 1
+        pieces = [piece.strip() for piece in re.split(r"[，。！？,.!?;；:：]", reply_text) if piece.strip()]
         if pieces:
             connector_counts[_phrase(pieces[0], max_chars=16)] += 1
-        punct_counts.update(ch for ch in text if ch in _PUNCT_CHARS)
+        punct_counts.update(ch for ch in reply_text if ch in _PUNCT_CHARS)
         if classifier is not None:
             if idx < len(predictions):
                 pred = predictions[idx]
             else:
-                pred = classifier.predict(text)
+                pred = classifier.predict(reply_text)
             action = str(getattr(pred, "label_11", "elaborate"))
             strategy = str(getattr(pred, "label_3", "exploit"))
         else:
             action = "elaborate"
             strategy = "exploit"
-        action_phrases[action][_phrase(text, max_chars=36)] += 1
+        action_phrases[action][_phrase(reply_text, max_chars=36)] += 1
         strategy_counts[strategy] += 1
 
     return DialogueSurfaceProfile(
@@ -217,9 +232,11 @@ def build_surface_profile(
         opening_phrases=_top(prefix_counts, max_items),
         connector_phrases=_top(connector_counts, max_items),
         top_tokens=_top(token_counts, max_items),
+        context_top_tokens=_top(context_token_counts, max_items),
         action_phrases={k: _top(v, 5) for k, v in action_phrases.items()},
         strategy_counts={k: int(v) for k, v in strategy_counts.items()},
         partner_tokens={k: _top(v, 6) for k, v in partner_tokens.items()},
+        partner_context_tokens={k: _top(v, 6) for k, v in partner_context_tokens.items()},
     )
 
 
@@ -271,6 +288,7 @@ def average_surface_profiles(
         opening_phrases=_top(prefix_counts, max_items) if include_surface_anchors else [],
         connector_phrases=_top(connector_counts, max_items) if include_surface_anchors else [],
         top_tokens=_top(token_counts, max_items) if include_surface_anchors else [],
+        context_top_tokens=[],
         action_phrases=(
             {k: _top(v, 5) for k, v in action_phrases.items()}
             if include_surface_anchors
@@ -278,6 +296,7 @@ def average_surface_profiles(
         ),
         strategy_counts={k: int(v) for k, v in strategy_counts.items()},
         partner_tokens={},
+        partner_context_tokens={},
     )
 
 
