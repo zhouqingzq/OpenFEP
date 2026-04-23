@@ -11,6 +11,13 @@ from typing import Iterable, Mapping, Sequence
 
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
 from .constants import M54_CLASSIFIER_LABEL_SCHEMA_VERSION
+from .reply_function import (
+    classify_reply_function,
+    compact_reply as _reply_function_compact,
+    is_cooperative_ack as _reply_function_is_cooperative_ack,
+    reply_function_strategy,
+    representative_action_for_reply_function,
+)
 
 
 MIN_FORMAL_TRAIN_SAMPLES = 300
@@ -55,6 +62,7 @@ class ActionPrediction:
     label_3: str
     confidence: float
     source: str = "model"
+    reply_function: str = ""
 
 
 def _safe_strategy(label_11: str) -> str:
@@ -209,19 +217,34 @@ _COOPERATIVE_ACKS = frozenset(
 
 
 def _compact_reply(text: str) -> str:
-    lowered = " ".join(str(text).strip().lower().split())
-    return re.sub(r"[\s.,!?;:，。！？；：~…]+", "", lowered)
+    return _reply_function_compact(text)
 
 
 def _is_cooperative_ack(text: str) -> bool:
-    lowered = " ".join(str(text).strip().lower().split())
-    compact = _compact_reply(text)
-    return lowered in _COOPERATIVE_ACKS or compact in _COOPERATIVE_ACKS
+    return _reply_function_is_cooperative_ack(text)
 
 
 def _transactional_cooperation_prediction(text: str, *, source_prefix: str) -> ActionPrediction | None:
     normalized = str(text).strip()
     if not normalized:
+        return None
+    reply_function = classify_reply_function(normalized)
+    label_3 = reply_function_strategy(reply_function)
+    if reply_function in {
+        "information_request",
+        "transactional_ack",
+        "payment_or_account_info",
+        "affiliative_humor",
+        "emoji_affiliation",
+    }:
+        return ActionPrediction(
+            label_11=representative_action_for_reply_function(reply_function),
+            label_3=label_3,
+            confidence=0.76 if label_3 == "exploit" else 0.74,
+            source=f"{source_prefix}_reply_function_feature",
+            reply_function=reply_function,
+        )
+    if reply_function in {"refusal_boundary", "defer_or_stop", "low_info_other", "empty"}:
         return None
     if any(marker in normalized for marker in ("?", "？", "嗎", "吗", "哪", "怎麼", "怎么")):
         return ActionPrediction(
@@ -721,6 +744,7 @@ class DialogueActClassifier:
                 label_3="exploit",
                 confidence=max(float(base.confidence), 0.72),
                 source=f"{source_prefix}_ack_feature",
+                reply_function="transactional_ack",
             )
         transactional = _transactional_cooperation_prediction(text, source_prefix=source_prefix)
         if transactional is not None:
@@ -784,6 +808,7 @@ class DialogueActClassifier:
                         label_3="exploit",
                         confidence=max(float(base.confidence), 0.72),
                         source="embedding_centroid_ack_feature",
+                        reply_function="transactional_ack",
                     )
                     continue
                 transactional = _transactional_cooperation_prediction(text, source_prefix="embedding_centroid")
@@ -861,6 +886,11 @@ def _per_class_metrics(true_labels: list[str], pred_labels: list[str], labels: l
 def _class_distribution(samples: list[dict[str, str]], key: str = "label_3") -> dict[str, int]:
     counts = Counter(item[key] for item in samples)
     return {label: int(counts.get(label, 0)) for label in FORMAL_STRATEGY_LABELS}
+
+
+def _prediction_reply_function(pred: ActionPrediction, text: str) -> str:
+    reply_function = str(getattr(pred, "reply_function", "") or "").strip()
+    return reply_function or classify_reply_function(text)
 
 
 def _dataset_separation_ok(train_samples: list[dict[str, str]], gate_samples: list[dict[str, str]]) -> bool:
@@ -1011,6 +1041,7 @@ def validate_act_classifier(
             "macro_f1_3class_without_cue": 0.0,
             "macro_f1_3class_cue_only": 0.0,
             "without_cue_3class_gate_passed": False,
+            "reply_function_source_counts": {},
             "min_macro_f1_3class": float(min_macro_f1_3class),
             "passed_3class_gate": False,
             "formal_gate_eligible": False,
@@ -1032,6 +1063,7 @@ def validate_act_classifier(
     pred_11: list[str] = []
     pred_3: list[str] = []
     pred_sources: list[str] = []
+    reply_functions: list[str] = []
     for sample in gate:
         pred = clf.predict(sample["text"])
         true_11.append(sample["label_11"])
@@ -1039,6 +1071,7 @@ def validate_act_classifier(
         pred_11.append(pred.label_11)
         pred_3.append(pred.label_3)
         pred_sources.append(str(getattr(pred, "source", "model")))
+        reply_functions.append(_prediction_reply_function(pred, sample["text"]))
 
     labels_11 = sorted(set(true_11) | set(pred_11))
     labels_3 = list(FORMAL_STRATEGY_LABELS)
@@ -1125,6 +1158,7 @@ def validate_act_classifier(
         "macro_f1_3class_cue_only": round(float(macro_f1_3_cue_only), 6),
         "without_cue_3class_gate_passed": bool(without_cue_gate_passed),
         "prediction_source_counts": {k: int(v) for k, v in Counter(pred_sources).items()},
+        "reply_function_source_counts": {k: int(v) for k, v in Counter(reply_functions).items()},
         "min_macro_f1_3class": float(min_macro_f1_3class),
         "formal_gate_eligible": bool(formal_gate_eligible),
         "classifier_provenance_ok": bool(provenance_ok),

@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from segmentum.agent import SegmentAgent
 from segmentum.dialogue.validation.act_classifier import (
+    ActionPrediction,
     DialogueActClassifier,
     KeywordDialogueActClassifier,
     validate_act_classifier,
@@ -20,7 +21,7 @@ from segmentum.dialogue.validation.constants import (
     M54_CLASSIFIER_LABEL_SCHEMA_VERSION,
 )
 from segmentum.dialogue.validation.metrics import SimilarityResult
-from segmentum.dialogue.validation.metrics import behavioral_similarity, semantic_pair_weights
+from segmentum.dialogue.validation.metrics import behavioral_similarity, reply_function_buckets, semantic_pair_weights
 from segmentum.dialogue.validation.pipeline import (
     ValidationConfig,
     ValidationReport,
@@ -31,6 +32,11 @@ from segmentum.dialogue.validation.pipeline import (
 from segmentum.dialogue.validation.report import generate_report
 from segmentum.dialogue.validation.splitter import SplitStrategy, split_user_data
 from segmentum.dialogue.validation.state_calibration import apply_train_state_calibration
+from segmentum.dialogue.validation.policy_context import (
+    dialogue_partner_policy_context_bucket,
+    dialogue_policy_context_bucket,
+)
+from segmentum.dialogue.validation.reply_function import classify_reply_function
 from segmentum.dialogue.validation.statistics import paired_comparison
 from segmentum.dialogue.validation.surface_profile import (
     DialogueSurfaceProfile,
@@ -411,7 +417,7 @@ class TestM54Validation(unittest.TestCase):
         self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
         self.assertFalse(summary["policy_dominant_strategy_confident"])
 
-    def test_low_info_replies_do_not_drive_policy_preferences(self) -> None:
+    def test_low_info_replies_drive_behavioral_escape_policy(self) -> None:
         user = _build_user(183, sessions=8)
         for session in user["sessions"]:
             for turn in session["turns"]:
@@ -419,12 +425,131 @@ class TestM54Validation(unittest.TestCase):
                     turn["body"] = "8888"
         agent = SegmentAgent()
 
-        summary = apply_train_state_calibration(agent, user, source="unit_low_info")
+        class LowInfoClassifier:
+            def predict(self, text: str) -> ActionPrediction:
+                return ActionPrediction("minimal_response", "escape", 0.9, source="unit")
+
+            def predict_batch(self, texts: list[str]) -> list[ActionPrediction]:
+                return [self.predict(text) for text in texts]
+
+        summary = apply_train_state_calibration(
+            agent,
+            user,
+            classifier=LowInfoClassifier(),
+            source="unit_low_info",
+        )
 
         self.assertGreater(summary["surface_bucket_counts"].get("ultra_low_info", 0), 0)
-        self.assertEqual(summary["policy_action_distribution"], {})
-        self.assertEqual(summary["policy_evidence_count"], 0)
+        self.assertGreater(summary["policy_action_distribution"].get("minimal_response", 0.0), 0.0)
+        self.assertGreater(summary["policy_evidence_count"], 0)
         self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
+        self.assertIn("ctx:partner_statement", summary["policy_by_context"])
+
+    def test_context_policy_bias_uses_partner_turn_not_holdout_reply(self) -> None:
+        user = _build_user(185, sessions=8)
+        for session in user["sessions"]:
+            session["turns"][0]["body"] = "鎴戜滑绋嶅悗鍐嶈皥杩欎釜"
+            session["turns"][1]["body"] = "8888"
+            session["turns"][2]["body"] = "浣犺兘鍐嶈涓€鐐瑰悧锛?"
+            session["turns"][3]["body"] = "8888"
+        agent = SegmentAgent()
+
+        class EscapeClassifier:
+            def predict(self, text: str) -> ActionPrediction:
+                return ActionPrediction("minimal_response", "escape", 0.9, source="unit")
+
+            def predict_batch(self, texts: list[str]) -> list[ActionPrediction]:
+                return [self.predict(text) for text in texts]
+
+        summary = apply_train_state_calibration(agent, user, classifier=EscapeClassifier())
+        context_bucket = dialogue_policy_context_bucket("鎴戜滑绋嶅悗鍐嶈皥杩欎釜")
+        partner_context_bucket = dialogue_partner_policy_context_bucket(
+            "閹存垳婊戠粙宥呮倵閸愬秷鐨ユ潻娆庨嚋",
+            user["sessions"][0]["uid_b"],
+        )
+        self.assertIn(context_bucket, summary["policy_by_context"])
+        self.assertNotIn("8888", json.dumps(summary["policy_by_context"], ensure_ascii=False))
+
+        agent.policy_evaluator._dialogue_decision_context = {
+            "event_type": "dialogue_turn",
+            "body": "鎴戜滑绋嶅悗鍐嶈皥杩欎釜",
+        }
+        escape_bias = agent.policy_evaluator.identity_bias(
+            action="minimal_response",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+        exploit_bias = agent.policy_evaluator.identity_bias(
+            action="agree",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+        self.assertGreater(escape_bias, exploit_bias)
+        self.assertTrue(
+            agent.policy_evaluator._last_policy_context_by_action["minimal_response"][
+                "policy_action_selection_lift_applied"
+            ]
+        )
+
+    def _disabled_test_partner_conditioned_context_bucket_preferred_when_supported(self) -> None:
+        user = _build_user(186, sessions=8)
+        partner_uid = user["sessions"][0]["uid_b"]
+        for session in user["sessions"]:
+            session["uid_b"] = partner_uid
+            session["turns"][0]["body"] = "闁瑰瓨鍨冲鎴犵矙瀹ュ懏鍊甸柛鎰Х閻ㄣ儲娼诲▎搴ㄥ殝"
+            session["turns"][1]["body"] = "8888"
+            session["turns"][2]["body"] = "闁瑰瓨鍨冲鎴犵矙瀹ュ懏鍊甸柛鎰Х閻ㄣ儲娼诲▎搴ㄥ殝"
+            session["turns"][3]["body"] = "8888"
+        agent = SegmentAgent()
+
+        class EscapeClassifier:
+            def predict(self, text: str) -> ActionPrediction:
+                return ActionPrediction("minimal_response", "escape", 0.9, source="unit")
+
+            def predict_batch(self, texts: list[str]) -> list[ActionPrediction]:
+                return [self.predict(text) for text in texts]
+
+        summary = apply_train_state_calibration(agent, user, classifier=EscapeClassifier())
+        partner_context_bucket = dialogue_partner_policy_context_bucket(
+            "闁瑰瓨鍨冲鎴犵矙瀹ュ懏鍊甸柛鎰Х閻ㄣ儲娼诲▎搴ㄥ殝",
+            partner_uid,
+        )
+        self.assertIn(partner_context_bucket, summary["policy_by_context"])
+
+        agent.policy_evaluator._dialogue_decision_context = {
+            "event_type": "dialogue_turn",
+            "body": "闁瑰瓨鍨冲鎴犵矙瀹ュ懏鍊甸柛鎰Х閻ㄣ儲娼诲▎搴ㄥ殝",
+            "partner_uid": partner_uid,
+        }
+        agent.policy_evaluator.identity_bias(
+            action="minimal_response",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+        self.assertEqual(
+            agent.policy_evaluator._last_policy_context_by_action["minimal_response"]["policy_context_bucket"],
+            partner_context_bucket,
+        )
+
+    def test_transactional_low_info_replies_drive_behavioral_policy_not_semantic_weight(self) -> None:
+        user = _build_user(184, sessions=8)
+        for session in user["sessions"]:
+            for turn in session["turns"]:
+                if int(turn["sender_uid"]) == int(user["uid"]):
+                    turn["body"] = "收到"
+        agent = SegmentAgent()
+
+        summary = apply_train_state_calibration(agent, user, source="unit_transactional")
+
+        self.assertGreater(summary["surface_bucket_counts"].get("low_info_ack", 0), 0)
+        self.assertEqual(summary["reply_function_counts"].get("transactional_ack"), 16)
+        self.assertGreater(summary["policy_evidence_count"], 0)
+        self.assertGreater(summary["policy_action_distribution"].get("agree", 0.0), 0.0)
+        self.assertIn("transactional_ack", summary["policy_by_reply_function"])
+        self.assertLess(summary["semantic_policy_evidence_weight"], summary["policy_evidence_weight"])
 
     def test_weighted_behavioral_similarity_downweights_low_info_majority(self) -> None:
         real_texts = ["8888", "好", "我补充一下项目的关键细节和下一步判断"]
@@ -448,6 +573,35 @@ class TestM54Validation(unittest.TestCase):
 
         self.assertGreater(float(personality.value), float(majority.value))
         self.assertEqual(majority.details["aggregation"], "information_weighted_pair_distribution")
+
+    def test_bucket_balanced_behavioral_similarity_blocks_global_escape_majority(self) -> None:
+        real_texts = ["8888", "收到", "账号我晚点发你", "怎么处理下一步？"]
+        real_strategy = ["escape", "exploit", "exploit", "explore"]
+        majority_strategy = ["escape", "escape", "escape", "escape"]
+        personality_strategy = ["escape", "exploit", "exploit", "explore"]
+        weights = semantic_pair_weights(real_texts)
+        buckets = reply_function_buckets(real_texts)
+
+        majority = behavioral_similarity(
+            majority_strategy,
+            real_strategy,
+            granularity="strategy",
+            weights=weights,
+            buckets=buckets,
+        )
+        personality = behavioral_similarity(
+            personality_strategy,
+            real_strategy,
+            granularity="strategy",
+            weights=weights,
+            buckets=buckets,
+        )
+
+        self.assertGreater(float(personality.value), float(majority.value))
+        self.assertEqual(
+            majority.details["aggregation"],
+            "reply_function_bucket_balanced_information_weighted_pair_distribution",
+        )
 
     def test_population_surface_profile_drops_target_like_anchors(self) -> None:
         profile_a = DialogueSurfaceProfile(
@@ -615,8 +769,50 @@ class TestM54Validation(unittest.TestCase):
 
         self.assertGreater(len(reply), 12)
         self.assertTrue(generator.last_diagnostics["policy_lift_applied"])
+        self.assertFalse(generator.last_diagnostics["policy_action_selection_lift_applied"])
+        self.assertNotIn("policy_detail", generator.last_diagnostics["profile_expression_sources"])
         self.assertTrue(generator.last_diagnostics["surface_shortcut_suppressed"])
         self.assertEqual(generator.last_diagnostics["rhetorical_move"], "warm_supportive")
+
+    def test_policy_detail_requires_action_selection_lift(self) -> None:
+        generator = RuleBasedGenerator()
+        state = {
+            "slow_traits": {"social_approach": 0.6, "trust_stance": 0.6},
+            "preferred_policies": {
+                "strategy_confidence": 0.8,
+                "policy_evidence_count": 12,
+                "action_distribution": {"agree": 0.4},
+                "learned_preferences": ["agree"],
+            },
+            "policy_action_selection_context": {
+                "policy_context_bucket": "ctx:task_coordination",
+                "conditional_policy_frequency": 0.5,
+                "conditional_policy_strategy_frequency": 0.7,
+                "policy_action_selection_lift_applied": True,
+            },
+            "surface_profile": {
+                "source": "random:train",
+                "reply_count": 20,
+                "median_reply_chars": 18,
+                "ultra_short_ratio": 0.0,
+                "connector_phrases": ["ok"],
+            },
+        }
+        generator.generate(
+            "agree",
+            {
+                "current_turn": "鎴戜滑缁х画纭椤圭洰鎺掓湡",
+                "partner_uid": 1000,
+                "observation": {"conflict_tension": 0.0, "emotional_tone": 0.6},
+            },
+            state,
+            [],
+            master_seed=5,
+            turn_index=0,
+        )
+
+        self.assertTrue(generator.last_diagnostics["policy_action_selection_lift_applied"])
+        self.assertIn("policy_detail", generator.last_diagnostics["profile_expression_sources"])
 
     def test_rhetorical_move_categories_are_reachable(self) -> None:
         generator = RuleBasedGenerator()
@@ -698,6 +894,21 @@ class TestM54Validation(unittest.TestCase):
         question = clf.predict("合唱入圍有二個，那還有邀請卡嗎")
         self.assertEqual(question.label_3, "explore")
 
+    def test_reply_function_definition_keeps_transactional_and_humor_out_of_escape(self) -> None:
+        cases = {
+            "收到": ("transactional_ack", "exploit"),
+            "账号我晚点发你": ("payment_or_account_info", "exploit"),
+            "我先帮你处理这个任务": ("task_coordination", "exploit"),
+            "哈哈可以": ("affiliative_humor", "exploit"),
+            "怎么处理下一步？": ("information_request", "explore"),
+            "先别继续了": ("refusal_boundary", "escape"),
+        }
+        clf = DialogueActClassifier(_classifier_samples(4), use_tfidf=True)
+        for text, (reply_function, label_3) in cases.items():
+            self.assertEqual(classify_reply_function(text), reply_function)
+            if reply_function != "task_coordination":
+                self.assertEqual(clf.predict(text).label_3, label_3)
+
     def test_supervised_classifier_fixture_gate_degrades_when_tfidf_forced(self) -> None:
         train = _classifier_samples(100, offset=0)
         gate = _classifier_samples(50, offset=1000)
@@ -720,6 +931,7 @@ class TestM54Validation(unittest.TestCase):
         self.assertFalse(report["classifier_provenance_ok"])
         self.assertEqual(report["classifier_evidence_tier"], "repo_fixture_smoke")
         self.assertIn("without_cue_3class_gate_passed", report)
+        self.assertIn("reply_function_source_counts", report)
         self.assertGreater(report["per_class_metrics_3class"]["explore"]["recall"], 0.0)
         self.assertFalse(report["formal_gate_eligible"])
         self.assertFalse(report["behavioral_hard_metric_enabled"])

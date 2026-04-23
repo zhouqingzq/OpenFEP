@@ -63,6 +63,11 @@ def _policy_lift_metadata(personality_state: Mapping[str, object], action: str) 
             "policy_evidence_count": 0,
             "policy_evidence_weight": 0.0,
             "policy_source": "missing",
+            "policy_context_bucket": "",
+            "conditional_policy_frequency": 0.0,
+            "conditional_policy_strategy_frequency": 0.0,
+            "conditional_policy_top_strategy": "",
+            "policy_action_selection_lift_applied": False,
         }
     try:
         confidence = _clamp01(float(policies.get("strategy_confidence", 0.0)))
@@ -86,12 +91,25 @@ def _policy_lift_metadata(personality_state: Mapping[str, object], action: str) 
         and confidence >= 0.20
         and (action in learned_preferences or action_frequency >= 0.12)
     )
+    selection_context = personality_state.get("policy_action_selection_context", {})
+    if not isinstance(selection_context, Mapping):
+        selection_context = {}
     return {
         "applied": applied,
         "strategy_confidence": round(float(confidence), 6),
         "policy_evidence_count": int(evidence_count),
         "policy_evidence_weight": round(float(action_frequency), 6),
         "policy_source": "evidence_bearing_distribution" if evidence_count > 0 else "surface_only_or_missing",
+        "policy_context_bucket": str(selection_context.get("policy_context_bucket", "")),
+        "conditional_policy_frequency": selection_context.get("conditional_policy_frequency", 0.0),
+        "conditional_policy_strategy_frequency": selection_context.get(
+            "conditional_policy_strategy_frequency",
+            0.0,
+        ),
+        "conditional_policy_top_strategy": str(selection_context.get("conditional_policy_top_strategy", "")),
+        "policy_action_selection_lift_applied": bool(
+            selection_context.get("policy_action_selection_lift_applied", False)
+        ),
     }
 
 
@@ -281,6 +299,7 @@ def _profile_reply(
     master_seed: int,
     turn_index: int,
     policy_lift_applied: bool = False,
+    policy_detail_applied: bool = False,
     diagnostics: dict[str, object] | None = None,
 ) -> str:
     source = str(profile.get("source", "profile"))
@@ -339,6 +358,7 @@ def _profile_reply(
                 "profile_anchor_match": anchor_match,
                 "profile_length_bucket": length_bucket,
                 "policy_lift_applied": bool(policy_lift_applied),
+                "policy_action_selection_lift_applied": bool(policy_detail_applied),
                 "surface_shortcut_suppressed": bool(population_state_only),
             }
         )
@@ -423,7 +443,7 @@ def _profile_reply(
     if anchor and confidence >= 0.90 and anchor not in " ".join(bits):
         bits.append(f"我会把{anchor}也放进判断里")
         expression_sources.append("anchor")
-    if policy_lift_applied and target_context_surface and focus and action in {
+    if policy_detail_applied and target_context_surface and focus and action in {
         "ask_question",
         "introduce_topic",
         "share_opinion",
@@ -436,6 +456,14 @@ def _profile_reply(
             bits.append(f"我会围绕“{focus}”再确认具体线索")
         else:
             bits.append(f"我会把“{focus}”的细节接住并继续确认")
+        expression_sources.append("policy_detail")
+    if (
+        policy_detail_applied
+        and target_context_surface
+        and focus
+        and action in {"deflect", "minimal_response", "disengage"}
+    ):
+        bits.append(f"关于“{focus}”，我先保持简短边界")
         expression_sources.append("policy_detail")
     if not bits:
         bits.append(base)
@@ -504,6 +532,7 @@ class RuleBasedGenerator:
         style = _rhetorical_move(personality_state, action)
         policy_meta = _policy_lift_metadata(personality_state, action)
         policy_lift_applied = bool(policy_meta.get("applied", False))
+        policy_detail_applied = bool(policy_meta.get("policy_action_selection_lift_applied", False))
         if policy_lift_applied and action in {"ask_question", "introduce_topic", "share_opinion"}:
             style = "exploratory_questioning"
         elif policy_lift_applied and action in {"agree", "empathize", "elaborate", "joke"}:
@@ -540,6 +569,14 @@ class RuleBasedGenerator:
             "policy_lift_applied": policy_lift_applied,
             "policy_evidence_weight": policy_meta.get("policy_evidence_weight", 0.0),
             "policy_strategy_confidence": policy_meta.get("strategy_confidence", 0.0),
+            "policy_context_bucket": policy_meta.get("policy_context_bucket", ""),
+            "conditional_policy_frequency": policy_meta.get("conditional_policy_frequency", 0.0),
+            "conditional_policy_strategy_frequency": policy_meta.get(
+                "conditional_policy_strategy_frequency",
+                0.0,
+            ),
+            "conditional_policy_top_strategy": policy_meta.get("conditional_policy_top_strategy", ""),
+            "policy_action_selection_lift_applied": policy_detail_applied,
             "calibration_policy_source": policy_meta.get("policy_source", "missing"),
             "surface_shortcut_suppressed": False,
         }
@@ -561,6 +598,7 @@ class RuleBasedGenerator:
                 master_seed=master_seed,
                 turn_index=turn_index,
                 policy_lift_applied=policy_lift_applied,
+                policy_detail_applied=policy_detail_applied,
                 diagnostics=generation_diagnostics,
             )
             self.last_diagnostics = generation_diagnostics

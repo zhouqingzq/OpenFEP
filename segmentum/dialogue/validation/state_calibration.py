@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, defaultdict
 import math
 from statistics import mean
 from typing import Iterable, Mapping, Protocol
@@ -11,6 +11,11 @@ from ...slow_learning import SlowTraitState
 from ..actions import DIALOGUE_ACTION_NAMES
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
 from .metrics import semantic_pair_info_bucket, semantic_pair_weight_for_text
+from .policy_context import dialogue_policy_context_bucket
+from .reply_function import (
+    behavioral_policy_weight_for_reply_function,
+    classify_reply_function,
+)
 from .surface_profile import tokenize_surface
 
 
@@ -117,6 +122,30 @@ def _weighted_entropy(counts: Counter[str]) -> float:
         if p > 0.0:
             entropy -= p * math.log(p)
     return entropy / math.log(float(len(labels)))
+
+
+def _normalize_nested_action_counts(
+    values: Mapping[str, Mapping[str, float]] | None,
+) -> dict[str, dict[str, float]]:
+    out: dict[str, dict[str, float]] = {}
+    for bucket, actions in dict(values or {}).items():
+        total = sum(float(value) for value in dict(actions).values())
+        if total <= 0.0:
+            continue
+        out[str(bucket)] = {
+            str(action): round(float(value) / total, 6)
+            for action, value in dict(actions).items()
+            if float(value) > 0.0
+        }
+    return out
+
+
+def _nested_support(values: Mapping[str, Mapping[str, float]] | None) -> dict[str, float]:
+    return {
+        str(bucket): round(float(sum(float(value) for value in dict(actions).values())), 6)
+        for bucket, actions in dict(values or {}).items()
+        if isinstance(actions, Mapping)
+    }
 
 
 def _iter_reply_pairs(
@@ -291,6 +320,8 @@ def _target_policies(
     raw_action_counts: Counter[str] | None = None,
     raw_strategy_counts: Counter[str] | None = None,
     surface_majority_coverage: float = 0.0,
+    policy_by_reply_function: Mapping[str, Mapping[str, float]] | None = None,
+    policy_by_context: Mapping[str, Mapping[str, float]] | None = None,
 ) -> PreferredPolicies:
     evidence_total = float(sum(float(v) for v in action_counts.values()))
     total = float(max(1.0, evidence_total))
@@ -345,6 +376,9 @@ def _target_policies(
         strategy_confidence=round(float(strategy_confidence), 6),
         policy_evidence_count=policy_evidence_count,
         surface_majority_coverage=round(float(surface_majority_coverage), 6),
+        policy_by_reply_function=_normalize_nested_action_counts(policy_by_reply_function),
+        policy_by_context=_normalize_nested_action_counts(policy_by_context),
+        policy_context_support=_nested_support(policy_by_context),
     )
 
 
@@ -373,7 +407,11 @@ def apply_train_state_calibration(
     strategy_counts: Counter[str] = Counter()
     policy_action_counts: Counter[str] = Counter()
     policy_strategy_counts: Counter[str] = Counter()
+    policy_reply_function_actions: dict[str, Counter[str]] = defaultdict(Counter)
+    policy_context_actions: dict[str, Counter[str]] = defaultdict(Counter)
     surface_bucket_counts: Counter[str] = Counter()
+    reply_function_counts: Counter[str] = Counter()
+    behavioral_policy_weights: list[float] = []
     policy_pair_weights: list[float] = []
     lengths: list[int] = []
     tokens: Counter[str] = Counter()
@@ -384,11 +422,18 @@ def apply_train_state_calibration(
         strategy_counts[strategy] += 1
         info_bucket = semantic_pair_info_bucket(reply_text)
         pair_weight = float(semantic_pair_weight_for_text(reply_text))
+        reply_function = classify_reply_function(reply_text)
+        context_bucket = dialogue_policy_context_bucket(partner_text)
+        behavioral_weight = float(behavioral_policy_weight_for_reply_function(reply_function))
         surface_bucket_counts[info_bucket] += 1
+        reply_function_counts[reply_function] += 1
         policy_pair_weights.append(pair_weight)
-        if pair_weight >= 0.70:
-            policy_action_counts[action] += pair_weight
-            policy_strategy_counts[strategy] += pair_weight
+        behavioral_policy_weights.append(behavioral_weight)
+        if behavioral_weight > 0.0:
+            policy_action_counts[action] += behavioral_weight
+            policy_strategy_counts[strategy] += behavioral_weight
+            policy_reply_function_actions[reply_function][action] += behavioral_weight
+            policy_context_actions[context_bucket][action] += behavioral_weight
         lengths.append(len(reply_text))
         tokens.update(tokenize_surface(reply_text))
         if "?" in partner_text or "锛?" in partner_text or "？" in partner_text:
@@ -427,6 +472,8 @@ def apply_train_state_calibration(
         raw_action_counts=action_counts,
         raw_strategy_counts=strategy_counts,
         surface_majority_coverage=surface_majority_coverage,
+        policy_by_reply_function=policy_reply_function_actions,
+        policy_by_context=policy_context_actions,
     )
     agent.slow_variable_learner.state.traits = traits
     agent.self_model.narrative_priors = priors
@@ -441,14 +488,19 @@ def apply_train_state_calibration(
         "action_counts": {key: int(value) for key, value in sorted(action_counts.items())},
         "strategy_counts": {key: int(value) for key, value in sorted(strategy_counts.items())},
         "surface_bucket_counts": {key: int(value) for key, value in sorted(surface_bucket_counts.items())},
+        "reply_function_counts": {key: int(value) for key, value in sorted(reply_function_counts.items())},
         "policy_action_counts": {key: round(float(value), 6) for key, value in sorted(policy_action_counts.items())},
         "policy_strategy_counts": {key: round(float(value), 6) for key, value in sorted(policy_strategy_counts.items())},
+        "policy_by_reply_function": dict(policies.policy_by_reply_function),
+        "policy_by_context": dict(policies.policy_by_context),
+        "policy_context_support": dict(policies.policy_context_support),
         "policy_action_distribution": dict(policies.action_distribution),
         "policy_dominant_strategy": policies.dominant_strategy,
         "policy_dominant_strategy_confident": bool(policies.dominant_strategy != "expected_free_energy"),
         "policy_strategy_confidence": round(float(policies.strategy_confidence), 6),
         "policy_evidence_count": int(policies.policy_evidence_count),
-        "policy_evidence_weight": round(float(sum(policy_pair_weights)), 6),
+        "semantic_policy_evidence_weight": round(float(sum(policy_pair_weights)), 6),
+        "policy_evidence_weight": round(float(sum(behavioral_policy_weights)), 6),
         "surface_majority_coverage": round(float(surface_majority_coverage), 6),
         "policy_learned_preferences": list(policies.learned_preferences),
         "policy_learned_avoidances": list(policies.learned_avoidances),

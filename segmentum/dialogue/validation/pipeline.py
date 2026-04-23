@@ -35,6 +35,7 @@ from .metrics import (
     behavioral_similarity,
     balanced_behavioral_similarity,
     personality_similarity,
+    reply_function_buckets,
     semantic_pair_info_buckets,
     semantic_pair_scores,
     semantic_pair_weights,
@@ -196,6 +197,16 @@ def _generate_from_sessions(
                         "generation_diagnostics": gen_diag,
                         "policy_evidence_weight": float(gen_diag.get("policy_evidence_weight", 0.0) or 0.0),
                         "policy_lift_applied": bool(gen_diag.get("policy_lift_applied", False)),
+                        "policy_context_bucket": str(gen_diag.get("policy_context_bucket", "")),
+                        "conditional_policy_frequency": float(
+                            gen_diag.get("conditional_policy_frequency", 0.0) or 0.0
+                        ),
+                        "conditional_policy_strategy_frequency": float(
+                            gen_diag.get("conditional_policy_strategy_frequency", 0.0) or 0.0
+                        ),
+                        "policy_action_selection_lift_applied": bool(
+                            gen_diag.get("policy_action_selection_lift_applied", False)
+                        ),
                         "surface_shortcut_suppressed": bool(gen_diag.get("surface_shortcut_suppressed", False)),
                         "calibration_policy_source": str(gen_diag.get("calibration_policy_source", "")),
                         "dominant_component": str(getattr(chosen, "dominant_component", "")),
@@ -208,11 +219,13 @@ def _generate_from_sessions(
     real_3 = [item.label_3 for item in preds_r]
     if diagnostic_trace and trace_rows:
         behavior_weights = semantic_pair_weights(real_texts)
+        behavior_buckets = reply_function_buckets(real_texts)
         for idx, row in enumerate(trace_rows):
             if idx >= len(real_11) or idx >= len(real_3):
                 break
             row["real_action"] = str(real_11[idx])
             row["real_strategy"] = str(real_3[idx])
+            row["real_reply_function"] = str(behavior_buckets[idx]) if idx < len(behavior_buckets) else "unknown"
             row["behavioral_pair_weight"] = round(float(behavior_weights[idx]), 6) if idx < len(behavior_weights) else 1.0
     return generated_texts, real_texts, gen_11, real_11, gen_3, real_3, trace_rows
 
@@ -270,6 +283,7 @@ def _metrics_bundle(
     real_3: list[str],
 ) -> dict[str, SimilarityResult]:
     behavior_weights = semantic_pair_weights(real_texts)
+    behavior_buckets = reply_function_buckets(real_texts)
     raw_strategy = behavioral_similarity(gen_3, real_3, granularity="strategy")
     raw_action11 = behavioral_similarity(gen_11, real_11, granularity="action11")
     return {
@@ -282,12 +296,14 @@ def _metrics_bundle(
             real_3,
             granularity="strategy",
             weights=behavior_weights,
+            buckets=behavior_buckets,
         ),
         "behavioral_similarity_action11": behavioral_similarity(
             gen_11,
             real_11,
             granularity="action11",
             weights=behavior_weights,
+            buckets=behavior_buckets,
         ),
         "behavioral_similarity_strategy_raw": raw_strategy,
         "behavioral_similarity_action11_raw": raw_action11,
@@ -336,10 +352,23 @@ def _majority_behavioral_metrics(
     gen_11 = [majority_action] * len(real_11)
     gen_3 = [majority_strategy] * len(real_3)
     behavior_weights = semantic_pair_weights(real_texts)
+    behavior_buckets = reply_function_buckets(real_texts)
     raw_strategy_result = behavioral_similarity(gen_3, real_3, granularity="strategy")
     raw_action_result = behavioral_similarity(gen_11, real_11, granularity="action11")
-    strategy_result = behavioral_similarity(gen_3, real_3, granularity="strategy", weights=behavior_weights)
-    action_result = behavioral_similarity(gen_11, real_11, granularity="action11", weights=behavior_weights)
+    strategy_result = behavioral_similarity(
+        gen_3,
+        real_3,
+        granularity="strategy",
+        weights=behavior_weights,
+        buckets=behavior_buckets,
+    )
+    action_result = behavioral_similarity(
+        gen_11,
+        real_11,
+        granularity="action11",
+        weights=behavior_weights,
+        buckets=behavior_buckets,
+    )
     balanced_strategy_result = balanced_behavioral_similarity(gen_3, real_3, granularity="strategy")
     balanced_action_result = balanced_behavioral_similarity(gen_11, real_11, granularity="action11")
     return {
@@ -384,6 +413,16 @@ def _surface_profile_summary(profile: DialogueSurfaceProfile) -> dict[str, objec
         "opening_phrases": list(payload.get("opening_phrases", []))[:5],
         "strategy_counts": dict(payload.get("strategy_counts", {})),
     }
+
+
+def _anchor_only_surface_profile(profile: DialogueSurfaceProfile, *, source: str) -> DialogueSurfaceProfile:
+    """Surface ablations keep train-only anchors but lose action-conditioned snippets."""
+    payload = profile.to_dict()
+    payload["source"] = source
+    payload["opening_phrases"] = []
+    payload["connector_phrases"] = []
+    payload["action_phrases"] = {}
+    return DialogueSurfaceProfile.from_dict(payload)
 
 
 def _agreement_rate(left: list[str], right: list[str]) -> float:
@@ -555,6 +594,7 @@ def _semantic_trace_rows(
                 "real_text": p.get("real_text"),
                 "real_action": p.get("real_action"),
                 "real_strategy": p.get("real_strategy"),
+                "real_reply_function": p.get("real_reply_function"),
                 "personality_text": p.get("generated_text"),
                 "baseline_a_text": a.get("generated_text"),
                 "baseline_c_text": c.get("generated_text"),
@@ -642,6 +682,15 @@ def _semantic_trace_rows(
                 "personality_profile_length_bucket": p_gen_diag.get("profile_length_bucket"),
                 "personality_policy_evidence_weight": p_gen_diag.get("policy_evidence_weight"),
                 "personality_policy_lift_applied": p_gen_diag.get("policy_lift_applied"),
+                "personality_policy_context_bucket": p_gen_diag.get("policy_context_bucket"),
+                "personality_conditional_policy_frequency": p_gen_diag.get("conditional_policy_frequency"),
+                "personality_conditional_policy_strategy_frequency": p_gen_diag.get(
+                    "conditional_policy_strategy_frequency"
+                ),
+                "personality_conditional_policy_top_strategy": p_gen_diag.get("conditional_policy_top_strategy"),
+                "personality_policy_action_selection_lift_applied": p_gen_diag.get(
+                    "policy_action_selection_lift_applied"
+                ),
                 "personality_surface_shortcut_suppressed": p_gen_diag.get("surface_shortcut_suppressed"),
                 "personality_calibration_policy_source": p_gen_diag.get("calibration_policy_source"),
                 "baseline_a_rhetorical_move": a_gen_diag.get("rhetorical_move"),
@@ -705,6 +754,7 @@ def _ablation_trace_rows(
             "real_text": p.get("real_text"),
             "real_action": p.get("real_action"),
             "real_strategy": p.get("real_strategy"),
+            "real_reply_function": p.get("real_reply_function"),
             "full_personality_text": p.get("generated_text"),
             "full_personality_action": p.get("action"),
             "full_personality_strategy": p.get("strategy"),
@@ -714,6 +764,15 @@ def _ablation_trace_rows(
             "full_personality_rhetorical_move": p_diag.get("rhetorical_move"),
             "full_personality_policy_evidence_weight": p_diag.get("policy_evidence_weight"),
             "full_personality_policy_lift_applied": p_diag.get("policy_lift_applied"),
+            "full_personality_policy_context_bucket": p_diag.get("policy_context_bucket"),
+            "full_personality_conditional_policy_frequency": p_diag.get("conditional_policy_frequency"),
+            "full_personality_conditional_policy_strategy_frequency": p_diag.get(
+                "conditional_policy_strategy_frequency"
+            ),
+            "full_personality_conditional_policy_top_strategy": p_diag.get("conditional_policy_top_strategy"),
+            "full_personality_policy_action_selection_lift_applied": p_diag.get(
+                "policy_action_selection_lift_applied"
+            ),
             "full_personality_surface_shortcut_suppressed": p_diag.get("surface_shortcut_suppressed"),
             "full_personality_calibration_policy_source": p_diag.get("calibration_policy_source"),
             "semantic_pair_weight": round(float(semantic_weights[idx]), 6),
@@ -739,6 +798,10 @@ def _ablation_trace_rows(
             payload[f"{prefix}_surface_source"] = diag.get("surface_source")
             payload[f"{prefix}_rhetorical_move"] = diag.get("rhetorical_move")
             payload[f"{prefix}_policy_lift_applied"] = diag.get("policy_lift_applied")
+            payload[f"{prefix}_policy_action_selection_lift_applied"] = diag.get(
+                "policy_action_selection_lift_applied"
+            )
+            payload[f"{prefix}_policy_context_bucket"] = diag.get("policy_context_bucket")
             payload[f"{prefix}_surface_shortcut_suppressed"] = diag.get("surface_shortcut_suppressed")
             payload[f"{prefix}_calibration_policy_source"] = diag.get("calibration_policy_source")
             payload[f"{prefix}_semantic_pair_score"] = (
@@ -1058,7 +1121,11 @@ def run_validation(
             no_policy_agent.slow_variable_learner.state.traits = SlowTraitState()
             no_policy_agent.self_model.narrative_priors = NarrativePriors()
             no_policy_agent.self_model.preferred_policies = None
-            attach_surface_profile(no_policy_agent, train_surface_profile)
+            no_policy_surface_profile = _anchor_only_surface_profile(
+                train_surface_profile,
+                source=f"{strategy_key}:train:no_policy_anchor_only",
+            )
+            attach_surface_profile(no_policy_agent, no_policy_surface_profile)
             np_gen, np_real, np_g11, np_r11, np_g3, np_r3, np_trace = _call_generate_from_sessions(
                 no_policy_agent,
                 split.holdout_sessions,
@@ -1084,7 +1151,11 @@ def run_validation(
                 )
             )
             surface_only_agent = create_default_agent(seed=int(config.seed) + 909)
-            attach_surface_profile(surface_only_agent, train_surface_profile)
+            surface_only_profile = _anchor_only_surface_profile(
+                train_surface_profile,
+                source=f"{strategy_key}:train:surface_only_anchor_only",
+            )
+            attach_surface_profile(surface_only_agent, surface_only_profile)
             so_gen, so_real, so_g11, so_r11, so_g3, so_r3, so_trace = _call_generate_from_sessions(
                 surface_only_agent,
                 split.holdout_sessions,

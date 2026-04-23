@@ -13,6 +13,7 @@ _ST_EMBEDDING_CACHE: dict[tuple[str, str], object] = {}
 
 from ...personality_analyzer import PersonalityAnalyzer
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
+from .reply_function import classify_reply_function
 
 _STRATEGY_LABELS = frozenset({"explore", "exploit", "escape"})
 
@@ -411,6 +412,10 @@ def semantic_pair_info_buckets(real: list[str]) -> list[str]:
     return [semantic_pair_info_bucket(text) for text in real]
 
 
+def reply_function_buckets(real: list[str]) -> list[str]:
+    return [classify_reply_function(text) for text in real]
+
+
 def weighted_semantic_mean(scores: list[float], weights: list[float]) -> float:
     total = min(len(scores), len(weights))
     if total <= 0:
@@ -475,6 +480,7 @@ def behavioral_similarity(
     *,
     granularity: str = "strategy",
     weights: list[float] | None = None,
+    buckets: list[str] | None = None,
 ) -> SimilarityResult:
     if granularity not in {"strategy", "action11"}:
         raise ValueError("granularity must be 'strategy' or 'action11'")
@@ -496,6 +502,42 @@ def behavioral_similarity(
     raw_gen_dist = Counter(gen_labels)
     raw_real_dist = Counter(real_labels)
     total = min(len(gen_labels), len(real_labels))
+    if buckets is not None:
+        active_buckets = [str(buckets[idx]) if idx < len(buckets) else "unknown" for idx in range(total)]
+        grouped: dict[str, list[int]] = {}
+        for idx, bucket in enumerate(active_buckets):
+            grouped.setdefault(bucket, []).append(idx)
+        bucket_scores: dict[str, float] = {}
+        bucket_counts: dict[str, int] = {}
+        for bucket, indices in sorted(grouped.items()):
+            sub_weights = [float(weights[idx]) for idx in indices] if weights is not None else None
+            sub = behavioral_similarity(
+                [gen_labels[idx] for idx in indices],
+                [real_labels[idx] for idx in indices],
+                granularity=granularity,
+                weights=sub_weights,
+            )
+            bucket_scores[bucket] = float(sub.value)
+            bucket_counts[bucket] = int(len(indices))
+        value = sum(bucket_scores.values()) / float(len(bucket_scores)) if bucket_scores else 0.0
+        aggregation = (
+            "reply_function_bucket_balanced_information_weighted_pair_distribution"
+            if weights is not None
+            else "reply_function_bucket_balanced_pair_distribution"
+        )
+        return SimilarityResult(
+            metric_name=f"behavioral_similarity_{granularity}",
+            value=round(float(max(0.0, min(1.0, value))), 6),
+            details={
+                "aggregation": aggregation,
+                "bucket_scores": {key: round(float(value), 6) for key, value in bucket_scores.items()},
+                "bucket_counts": bucket_counts,
+                "bucket_count": int(len(bucket_scores)),
+                "raw_generated_distribution": dict(raw_gen_dist),
+                "raw_real_distribution": dict(raw_real_dist),
+                "effective_pair_weight": round(float(sum(weights[:total])) if weights is not None else float(total), 6),
+            },
+        )
     if weights is None:
         pair_weights = [1.0] * total
         aggregation = "raw_pair_distribution"

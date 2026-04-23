@@ -114,6 +114,15 @@ def run_conversation(
         surface_profile = getattr(agent, "dialogue_surface_profile", None)
         if isinstance(surface_profile, dict):
             personality_state["surface_profile"] = dict(surface_profile)
+        policy_context = getattr(
+            getattr(agent, "policy_evaluator", None),
+            "_last_policy_context_by_action",
+            {},
+        )
+        if isinstance(policy_context, dict):
+            chosen_policy_context = policy_context.get(action, {})
+            if isinstance(chosen_policy_context, dict):
+                personality_state["policy_action_selection_context"] = dict(chosen_policy_context)
         reply = gen.generate(
             action,
             dialogue_context,
@@ -127,6 +136,10 @@ def run_conversation(
             generation_diagnostics = dict(generation_diagnostics)
         else:
             generation_diagnostics = {}
+        if isinstance(policy_context, dict):
+            chosen_policy_context = policy_context.get(action, {})
+            if isinstance(chosen_policy_context, dict):
+                generation_diagnostics.update(chosen_policy_context)
         transcript.append(TranscriptUtterance(role="interlocutor", text=partner_text))
         transcript.append(TranscriptUtterance(role="agent", text=reply))
 

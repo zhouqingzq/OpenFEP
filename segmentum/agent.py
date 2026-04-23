@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import asdict, dataclass
 import random
 from statistics import mean, pvariance
@@ -129,6 +130,8 @@ class PolicyEvaluator:
         self.self_model = self_model
         self.goal_stack = goal_stack
         self.slow_variable_learner = slow_variable_learner
+        self._dialogue_decision_context: dict[str, object] | None = None
+        self._last_policy_context_by_action: dict[str, dict[str, object]] = {}
 
     def identity_bias(
         self,
@@ -173,17 +176,93 @@ class PolicyEvaluator:
             if is_dialogue_action(action):
                 dominant_strategy = str(policies.dominant_strategy or "")
                 action_strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(action, "")
+                context_bucket = ""
+                conditional_frequency = 0.0
+                conditional_strategy_frequency = 0.0
+                conditional_support = 0.0
+                conditional_lift_applied = False
+                conditional_top_strategy = ""
+                ctx = getattr(self, "_dialogue_decision_context", None)
+                if isinstance(ctx, dict) and policies.policy_by_context:
+                    from .dialogue.validation.policy_context import dialogue_policy_context_bucket
+
+                    context_bucket = dialogue_policy_context_bucket(
+                        str(ctx.get("body", "") or ctx.get("current_turn", ""))
+                    )
+                    conditional = policies.policy_by_context.get(context_bucket, {})
+                    if isinstance(conditional, dict):
+                        conditional_frequency = float(conditional.get(action, 0.0))
+                        conditional_strategy_frequency = sum(
+                            float(value)
+                            for candidate, value in conditional.items()
+                            if DIALOGUE_ACTION_STRATEGY_MAP.get(str(candidate), "") == action_strategy
+                        )
+                        strategy_totals: dict[str, float] = {}
+                        for candidate, value in conditional.items():
+                            strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(str(candidate), "")
+                            strategy_totals[strategy] = strategy_totals.get(strategy, 0.0) + float(value)
+                        if strategy_totals:
+                            conditional_top_strategy = max(
+                                strategy_totals.items(),
+                                key=lambda item: (float(item[1]), str(item[0])),
+                            )[0]
+                    conditional_support = float(policies.policy_context_support.get(context_bucket, 0.0))
                 if action in policies.learned_preferences:
                     policy_memory_bias += 0.15 + (0.35 * policy_lift)
                 policy_memory_bias += (frequency - 0.10) * (0.45 + 0.65 * policy_lift)
+                conditional_strength = max(
+                    policy_lift,
+                    min(0.75, max(0.0, conditional_support) / 12.0),
+                )
+                if conditional_support >= 2.0 and (
+                    policy_lift >= 0.20
+                    or conditional_frequency >= 0.12
+                    or conditional_strategy_frequency >= 0.35
+                ):
+                    conditional_lift_applied = bool(
+                        conditional_frequency >= 0.12 or conditional_strategy_frequency >= 0.35
+                    )
+                    policy_memory_bias += (conditional_frequency - 0.08) * (
+                        2.00 + 3.00 * conditional_strength
+                    )
+                    policy_memory_bias += (
+                        conditional_strategy_frequency - 0.30
+                    ) * (1.50 + 2.50 * conditional_strength)
+                    if (
+                        conditional_top_strategy
+                        and action_strategy != conditional_top_strategy
+                        and conditional_strategy_frequency < 0.25
+                    ):
+                        policy_memory_bias -= 0.75 + (1.25 * conditional_strength)
                 if dominant_strategy not in {"", "expected_free_energy"} and action_strategy == dominant_strategy:
                     policy_memory_bias += 0.10 + (0.30 * policy_lift)
-                if policy_lift >= 0.20 and action_strategy == "escape" and action not in policies.learned_preferences:
+                escape_supported_by_context = bool(
+                    conditional_support >= 2.0
+                    and action_strategy == "escape"
+                    and conditional_strategy_frequency >= 0.35
+                )
+                if (
+                    policy_lift >= 0.20
+                    and action_strategy == "escape"
+                    and action not in policies.learned_preferences
+                    and not escape_supported_by_context
+                ):
                     policy_memory_bias -= 0.20 + (0.45 * policy_lift)
                 if policy_lift >= 0.20 and action_strategy in {"exploit", "explore"} and frequency >= 0.12:
                     policy_memory_bias += 0.18 * policy_lift
                 if action in policies.learned_avoidances:
                     policy_memory_bias -= 0.15
+                self._last_policy_context_by_action[action] = {
+                    "policy_context_bucket": context_bucket,
+                    "conditional_policy_frequency": round(float(conditional_frequency), 6),
+                    "conditional_policy_strategy_frequency": round(
+                        float(conditional_strategy_frequency),
+                        6,
+                    ),
+                    "conditional_policy_support": round(float(conditional_support), 6),
+                    "conditional_policy_top_strategy": conditional_top_strategy,
+                    "policy_action_selection_lift_applied": conditional_lift_applied,
+                }
 
         threat_bias = self._threat_awareness_bias(action, cost)
         narrative_bias = self._narrative_bias(action)
@@ -3153,6 +3232,34 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 for option in ranked_options:
                     if option.choice == "forage" and option.policy_score > best_safe:
                         option.policy_score = best_safe - 0.10
+        if dialogue_subspace_active and not self.policy_expected_free_energy_only_enabled:
+            policy_context = getattr(self.policy_evaluator, "_last_policy_context_by_action", {})
+            if isinstance(policy_context, dict):
+                top_strategies = [
+                    str(item.get("conditional_policy_top_strategy", ""))
+                    for item in policy_context.values()
+                    if isinstance(item, dict)
+                    and bool(item.get("policy_action_selection_lift_applied", False))
+                ]
+                top_strategy = Counter(top_strategies).most_common(1)[0][0] if top_strategies else ""
+                if top_strategy in {"escape", "explore"}:
+                    for option in ranked_options:
+                        action_strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(option.choice, "")
+                        ctx_payload = policy_context.get(option.choice, {})
+                        if not isinstance(ctx_payload, dict):
+                            ctx_payload = {}
+                        try:
+                            action_frequency = float(ctx_payload.get("conditional_policy_frequency", 0.0) or 0.0)
+                            strategy_frequency = float(
+                                ctx_payload.get("conditional_policy_strategy_frequency", 0.0) or 0.0
+                            )
+                        except (TypeError, ValueError):
+                            action_frequency = 0.0
+                            strategy_frequency = 0.0
+                        if action_strategy == top_strategy:
+                            option.policy_score += 1.20 + (1.40 * strategy_frequency) + action_frequency
+                        else:
+                            option.policy_score -= 0.80 + max(0.0, 0.35 - strategy_frequency)
 
         tb_seed: int | None
         if self._use_dialogue_action_subspace(observed):
@@ -3576,6 +3683,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
     ) -> dict[str, object]:
         """Run the full decision cycle from dict observations."""
         self._dialogue_decision_context = dict(context) if context is not None else {}
+        self.policy_evaluator._dialogue_decision_context = dict(self._dialogue_decision_context)
+        self.policy_evaluator._last_policy_context_by_action = {}
         try:
             if context:
                 self.social_memory.observe_counterpart(
@@ -3599,6 +3708,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             return result
         finally:
             self._dialogue_decision_context = None
+            self.policy_evaluator._dialogue_decision_context = None
 
     def conscious_report(self) -> dict[str, object]:
         if self.last_decision_diagnostics is None:

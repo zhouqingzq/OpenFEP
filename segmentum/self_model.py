@@ -553,6 +553,9 @@ class PreferredPolicies:
     strategy_confidence: float = 0.0
     policy_evidence_count: int = 0
     surface_majority_coverage: float = 0.0
+    policy_by_reply_function: dict[str, dict[str, float]] = field(default_factory=dict)
+    policy_by_context: dict[str, dict[str, float]] = field(default_factory=dict)
+    policy_context_support: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -565,6 +568,18 @@ class PreferredPolicies:
             "strategy_confidence": float(self.strategy_confidence),
             "policy_evidence_count": int(self.policy_evidence_count),
             "surface_majority_coverage": float(self.surface_majority_coverage),
+            "policy_by_reply_function": {
+                str(bucket): {str(action): float(value) for action, value in actions.items()}
+                for bucket, actions in self.policy_by_reply_function.items()
+            },
+            "policy_by_context": {
+                str(bucket): {str(action): float(value) for action, value in actions.items()}
+                for bucket, actions in self.policy_by_context.items()
+            },
+            "policy_context_support": {
+                str(bucket): float(value)
+                for bucket, value in self.policy_context_support.items()
+            },
         }
 
     @classmethod
@@ -574,6 +589,15 @@ class PreferredPolicies:
         distribution = data.get("action_distribution")
         if not isinstance(distribution, dict):
             distribution = {}
+        conditional = data.get("policy_by_reply_function")
+        if not isinstance(conditional, dict):
+            conditional = {}
+        by_context = data.get("policy_by_context")
+        if not isinstance(by_context, dict):
+            by_context = {}
+        context_support = data.get("policy_context_support")
+        if not isinstance(context_support, dict):
+            context_support = {}
         return cls(
             dominant_strategy=str(data.get("dominant_strategy", "expected_free_energy")),
             action_distribution={str(key): float(value) for key, value in distribution.items()},
@@ -584,6 +608,20 @@ class PreferredPolicies:
             strategy_confidence=float(data.get("strategy_confidence", 0.0)),
             policy_evidence_count=int(data.get("policy_evidence_count", 0)),
             surface_majority_coverage=float(data.get("surface_majority_coverage", 0.0)),
+            policy_by_reply_function={
+                str(bucket): {str(action): float(value) for action, value in dict(actions).items()}
+                for bucket, actions in conditional.items()
+                if isinstance(actions, Mapping)
+            },
+            policy_by_context={
+                str(bucket): {str(action): float(value) for action, value in dict(actions).items()}
+                for bucket, actions in by_context.items()
+                if isinstance(actions, Mapping)
+            },
+            policy_context_support={
+                str(bucket): float(value)
+                for bucket, value in context_support.items()
+            },
         )
 
 

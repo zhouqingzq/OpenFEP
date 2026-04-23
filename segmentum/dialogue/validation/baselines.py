@@ -96,6 +96,10 @@ def _mean_preferred_policies(values: list[PreferredPolicies]) -> PreferredPolici
         return None
     action_maps = [dict(item.action_distribution) for item in values]
     mean_actions = _mean_map(action_maps)
+    conditional: dict[str, list[dict[str, float]]] = {}
+    for item in values:
+        for bucket, actions in item.policy_by_reply_function.items():
+            conditional.setdefault(str(bucket), []).append(dict(actions))
     strategy_counts: dict[str, int] = {}
     for item in values:
         if item.dominant_strategy:
@@ -114,6 +118,10 @@ def _mean_preferred_policies(values: list[PreferredPolicies]) -> PreferredPolici
         learned_avoidances=[],
         learned_preferences=learned_preferences,
         last_updated_tick=0,
+        policy_by_reply_function={
+            bucket: {key: round(float(value), 6) for key, value in _mean_map(rows).items()}
+            for bucket, rows in conditional.items()
+        },
     )
 
 
