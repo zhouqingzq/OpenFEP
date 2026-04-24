@@ -10,25 +10,15 @@ Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Gen
 
 ## Summary
 
-M4 benchmark work in this repository should currently be read as a prototype benchmark/probe pipeline, not as completed real-world behavioral validation. In particular, the confidence benchmark repo slice is a smoke-test fixture, while M4.5-M4.7 now cover the staged human-like memory system. M4.8 targets ablation-contrast proof that memory causally changes agent behavior, M4.9 targets representation-level recall reconstruction that constrains subsequent cognition, M4.10 targets dynamical encoding/consolidation upstream of recall, and M4.11 targets natural-rollout memory phenomenology.
-
 FEP remains relatively marginal in mainstream AGI engineering. The dominant practical path has centered on scaling laws, RLHF, and architecture search rather than FEP, not only because FEP is often criticized as difficult to falsify, but because it has not yet produced a system that surpasses Transformers on standard benchmarks. In its conventional form, FEP explains how a system maintains its own existence; it does not, by itself, explain the core powers of language such as compositionality, recursion, and pragmatic reasoning across contexts.
 
-Language matters because it acts as an offline simulator: it lets an agent construct situations it has never directly experienced and still reason within them. A sentence like "fire will burn you" can build an internal model of pain and avoidance without requiring actual injury. In that sense, language allows one mind's history of prediction-error correction to be encoded into symbols, transmitted to another, and re-instantiated there as simulated prediction-error signals through partially overlapping embodied circuits. This is also why human advantage appears to come less from radically superior neural hardware than from cumulative culture, intergenerational knowledge transfer, and shared experience mediated by language.
+From that perspective, human-like intelligence is not defined by a different objective function, but by a structural upgrade built on the same biological substrate. Under finite energy, compute, and memory budgets, living systems continually minimize tractable variational free energy through perception-action loops that preserve boundary conditions and non-equilibrium stability. FEP and active inference therefore describe a common substrate of life, but they do not by themselves distinguish plant, animal, and human cognition.
 
-From that perspective, **personality** is a more natural target for FEP than intelligence itself. If personality is understood as a stable structure of prior preferences formed through long-term interaction with the environment, then FEP offers a compelling account of how personality emerges, stabilizes, and self-reinforces. On this view, personality has two layers: **temperament**, the pre-linguistic prediction-preference structure shaped through embodied interaction, and **characterological personality**, the linguistically mediated self-concept through which a person interprets, narrates, reinforces, or revises those deeper dispositions.
+What differentiates cognitive paradigms, in this framing, is the stack of structural increments laid on top of that substrate: action channel, control architecture, offline simulation, abstract memory form, higher-order observer loops, and symbolic externalization. Plants primarily express morphological action and distributed regulation; animals add fast reversible movement and centralized control; humans further add reconfigurable abstraction, metacognitive observer circuits, and public symbol systems. The key difference is not the final goal, but the architecture available for minimizing uncertainty under constraint.
 
-## M4 Acceptance Status Note
+Memory dynamics is the bottleneck that shapes those higher layers. Intelligence is not produced by preserving all detail, but by differential survival under decay: patterns that are repeatedly reconstructable, action-guiding, error-reducing, and cheap enough to maintain are consolidated, while incidental detail fades. Multi-timescale memory therefore compresses experience into reusable predictive templates, and higher-order observer loops decide what is selected, compared, replayed, inhibited, and generalized. In that sense, abstraction is not exhaustive storage, but the selective survival of useful invariants under resource pressure.
 
-As of April 11, 2026, the official repository status for the memory milestones is:
-
-- `M4.6`: `INCOMPLETE / NOT_ISSUED` because the current acceptance builder still records `legacy_integration=NOT_RUN`.
-- `M4.7`: `INCOMPLETE / NOT_ISSUED` because the current acceptance builder still records `regression=NOT_RUN`.
-- `M4.8`: `PASS / PARTIAL_ACCEPT` with `structural_pass=True`, `behavioral_pass=True`, and `phenomenological_pass=False`. It proves layer (b), not the full three-layer memory milestone by itself.
-- `M4.10`: `PASS / PARTIAL_ACCEPT` with `structural_pass=True`, `behavioral_pass=True`, and `phenomenological_pass='pending(M4.11)'`. It is not a full three-layer `ACCEPT` until M4.11 supplies the phenomenological evidence.
-- `M4.11`: natural-rollout phenomenology supplies layer (c) when the four effects and paired negative controls pass; the honesty audit remains a safety net, not the primary grader.
-
-Committed acceptance artifacts should be read as canonical only when they match the current builder outputs and the artifact drift test passes.
+Language and writing then externalize those higher-order structures into transmissible symbols. Once stable abstractions can circulate across individuals and generations, memory selection no longer happens only within one nervous system; it scales into collective knowledge accumulation. This repository treats that combination of multi-rate memory, higher-order observation, and symbolic inheritance as the main route from the common FEP substrate toward human-like cognition.
 
 ## Core Principles
 
@@ -36,6 +26,7 @@ Committed acceptance artifacts should be read as canonical only when they match 
 - **Top-down prediction** - strategic priors shaped by competing drives generate expected sensory streams.
 - **Bottom-up error** - only the mismatch between reality and prediction is propagated upward.
 - **Active inference** - the agent either updates its internal model (high metabolic cost) or acts on the world (lower cost).
+- **Memory dynamics** - multi-timescale encoding, decay, replay, and consolidation selectively preserve reconstructable, action-guiding invariants under finite resource budgets.
 - **Sleep consolidation** - episodic memory is compressed, beliefs are smoothed, and dreams are replayed for offline learning.
 - **Defense mechanisms** - a four-pathway, EFE-driven strategy selector chooses between accommodate / assimilate / suppress / redirect with precision manipulation.
 - **Metacognition** - monitors internal precision patterns and generates cognitive dissociation signals to break vicious cycles.
