@@ -44,6 +44,7 @@ from segmentum.dialogue.validation.surface_profile import (
     build_surface_profile,
 )
 from segmentum.dialogue.generator import RuleBasedGenerator
+from segmentum.self_model import PreferredPolicies
 from segmentum.slow_learning import SlowVariableLearner
 from scripts.run_m54_validation import _parse_required_users_error
 
@@ -450,11 +451,15 @@ class TestM54Validation(unittest.TestCase):
         self.assertGreater(summary["policy_action_distribution"].get("minimal_response", 0.0), 0.0)
         self.assertGreater(summary["policy_evidence_count"], 0)
         self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
-        context_bucket = dialogue_policy_context_bucket(user["sessions"][0]["turns"][0]["body"])
-        self.assertIn(context_bucket, summary["policy_by_context"])
+        partner_context_bucket = dialogue_partner_policy_context_bucket(
+            user["sessions"][0]["turns"][0]["body"],
+            user["sessions"][0]["uid_b"],
+        )
+        self.assertIn(partner_context_bucket, summary["policy_by_context"])
 
     def test_context_policy_bias_uses_partner_turn_not_holdout_reply(self) -> None:
         user = _build_user(185, sessions=8)
+        partner_uid = user["sessions"][0]["uid_b"]
         for session in user["sessions"]:
             session["turns"][0]["body"] = "鎴戜滑绋嶅悗鍐嶈皥杩欎釜"
             session["turns"][1]["body"] = "8888"
@@ -476,6 +481,10 @@ class TestM54Validation(unittest.TestCase):
             user["sessions"][0]["uid_b"],
         )
         self.assertIn(context_bucket, summary["policy_by_context"])
+        self.assertIn(
+            dialogue_partner_policy_context_bucket("閹存垳婊戠粙宥呮倵閸愬秷鐨ユ潻娆庨嚋", partner_uid),
+            summary["policy_by_context"],
+        )
         self.assertNotIn("8888", json.dumps(summary["policy_by_context"], ensure_ascii=False))
 
         agent.policy_evaluator._dialogue_decision_context = {
@@ -505,7 +514,7 @@ class TestM54Validation(unittest.TestCase):
             ]
         )
 
-    def _disabled_test_partner_conditioned_context_bucket_preferred_when_supported(self) -> None:
+    def test_partner_conditioned_context_bucket_preferred_when_supported(self) -> None:
         user = _build_user(186, sessions=8)
         partner_uid = user["sessions"][0]["uid_b"]
         for session in user["sessions"]:
@@ -544,6 +553,89 @@ class TestM54Validation(unittest.TestCase):
         self.assertEqual(
             agent.policy_evaluator._last_policy_context_by_action["minimal_response"]["policy_context_bucket"],
             partner_context_bucket,
+        )
+
+    def test_context_policy_bias_falls_back_to_global_bucket_without_partner_uid(self) -> None:
+        agent = SegmentAgent()
+        context_bucket = dialogue_policy_context_bucket("ok")
+        agent.self_model.preferred_policies = PreferredPolicies(
+            dominant_strategy="escape",
+            action_distribution={"minimal_response": 0.6, "agree": 0.1},
+            learned_preferences=["minimal_response"],
+            strategy_confidence=0.8,
+            policy_evidence_count=8,
+            policy_by_context={context_bucket: {"minimal_response": 1.0}},
+            policy_context_support={context_bucket: 4.0},
+        )
+
+        agent.policy_evaluator._dialogue_decision_context = {
+            "event_type": "dialogue_turn",
+            "body": "ok",
+        }
+        escape_bias = agent.policy_evaluator.identity_bias(
+            action="minimal_response",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+        agree_bias = agent.policy_evaluator.identity_bias(
+            action="agree",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+
+        self.assertGreater(escape_bias, agree_bias)
+        self.assertEqual(
+            agent.policy_evaluator._last_policy_context_by_action["minimal_response"]["policy_context_bucket"],
+            context_bucket,
+        )
+        self.assertTrue(
+            agent.policy_evaluator._last_policy_context_by_action["minimal_response"][
+                "policy_action_selection_lift_applied"
+            ]
+        )
+
+    def test_context_policy_bias_with_unknown_partner_uid_falls_back_to_global_bucket(self) -> None:
+        agent = SegmentAgent()
+        context_bucket = dialogue_policy_context_bucket("about alpha project details")
+        agent.self_model.preferred_policies = PreferredPolicies(
+            dominant_strategy="exploit",
+            action_distribution={"agree": 0.1, "elaborate": 0.5},
+            learned_preferences=["elaborate"],
+            strategy_confidence=0.8,
+            policy_evidence_count=8,
+            policy_by_context={context_bucket: {"elaborate": 1.0}},
+            policy_context_support={context_bucket: 4.0},
+        )
+
+        agent.policy_evaluator._dialogue_decision_context = {
+            "event_type": "dialogue_turn",
+            "body": "about alpha project details",
+            "partner_uid": 424242,
+        }
+        elaborate_bias = agent.policy_evaluator.identity_bias(
+            action="elaborate",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+        minimal_bias = agent.policy_evaluator.identity_bias(
+            action="minimal_response",
+            projected_state={},
+            predicted_outcome={},
+            cost=0.0,
+        )
+
+        self.assertGreater(elaborate_bias, minimal_bias)
+        self.assertEqual(
+            agent.policy_evaluator._last_policy_context_by_action["elaborate"]["policy_context_bucket"],
+            context_bucket,
+        )
+        self.assertTrue(
+            agent.policy_evaluator._last_policy_context_by_action["elaborate"][
+                "policy_action_selection_lift_applied"
+            ]
         )
 
     def test_transactional_low_info_replies_drive_behavioral_policy_not_semantic_weight(self) -> None:
@@ -879,6 +971,47 @@ class TestM54Validation(unittest.TestCase):
 
         self.assertTrue(generator.last_diagnostics["policy_action_selection_lift_applied"])
         self.assertIn("policy_detail", generator.last_diagnostics["profile_expression_sources"])
+
+    def test_policy_detail_priority_bucket_overrides_low_info_generic_fallback(self) -> None:
+        generator = RuleBasedGenerator()
+        reply = generator.generate(
+            "minimal_response",
+            {
+                "current_turn": "ok about alpha timeline",
+                "partner_uid": 1000,
+                "observation": {"conflict_tension": 0.0, "emotional_tone": 0.5},
+            },
+            {
+                "slow_traits": {"caution_bias": 0.6, "trust_stance": 0.5},
+                "preferred_policies": {
+                    "strategy_confidence": 0.8,
+                    "policy_evidence_count": 12,
+                    "action_distribution": {"minimal_response": 0.3},
+                    "learned_preferences": ["minimal_response"],
+                },
+                "policy_action_selection_context": {
+                    "policy_context_bucket": "ctx:partner_short_confirmation|partner:1000",
+                    "conditional_policy_frequency": 0.4,
+                    "conditional_policy_strategy_frequency": 0.6,
+                    "conditional_policy_support": 3.0,
+                    "policy_action_selection_lift_applied": True,
+                },
+                "surface_profile": {
+                    "source": "random:train",
+                    "reply_count": 20,
+                    "median_reply_chars": 2,
+                    "ultra_short_ratio": 1.0,
+                },
+            },
+            [],
+            master_seed=7,
+            turn_index=0,
+        )
+
+        self.assertGreater(len(reply), 12)
+        self.assertTrue(generator.last_diagnostics["policy_action_selection_lift_applied"])
+        self.assertIn("policy_detail", generator.last_diagnostics["profile_expression_sources"])
+        self.assertTrue(generator.last_diagnostics["surface_shortcut_suppressed"])
 
     def test_rhetorical_move_categories_are_reachable(self) -> None:
         generator = RuleBasedGenerator()

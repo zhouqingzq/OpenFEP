@@ -66,6 +66,7 @@ def _policy_lift_metadata(personality_state: Mapping[str, object], action: str) 
             "policy_context_bucket": "",
             "conditional_policy_frequency": 0.0,
             "conditional_policy_strategy_frequency": 0.0,
+            "conditional_policy_support": 0.0,
             "conditional_policy_top_strategy": "",
             "policy_action_selection_lift_applied": False,
         }
@@ -106,10 +107,21 @@ def _policy_lift_metadata(personality_state: Mapping[str, object], action: str) 
             "conditional_policy_strategy_frequency",
             0.0,
         ),
+        "conditional_policy_support": selection_context.get("conditional_policy_support", 0.0),
         "conditional_policy_top_strategy": str(selection_context.get("conditional_policy_top_strategy", "")),
         "policy_action_selection_lift_applied": bool(
             selection_context.get("policy_action_selection_lift_applied", False)
         ),
+    }
+
+
+def _policy_detail_priority_bucket(bucket: str) -> bool:
+    base_bucket = str(bucket).split("|partner:", 1)[0]
+    return base_bucket in {
+        "ctx:partner_low_info_ack",
+        "ctx:partner_short_confirmation",
+        "ctx:partner_short_other",
+        "ctx:partner_statement_topicish",
     }
 
 
@@ -393,6 +405,13 @@ def _profile_reply(
     except (TypeError, ValueError):
         ultra_short = 0.0
     raw_ultra_short = ultra_short
+    policy_context_bucket = ""
+    force_policy_detail = False
+    if diagnostics is not None:
+        policy_context_bucket = str(diagnostics.get("policy_context_bucket", ""))
+        force_policy_detail = bool(
+            policy_detail_applied and _policy_detail_priority_bucket(policy_context_bucket)
+        )
     if policy_lift_applied and raw_ultra_short >= 0.45 and diagnostics is not None:
         diagnostics["surface_shortcut_suppressed"] = True
     if population_state_only:
@@ -404,7 +423,7 @@ def _profile_reply(
     )
     generic_focus = focus if target_context_surface else ""
     expression_available = bool(phrase or connector or opening or anchor)
-    if confidence < 0.75:
+    if confidence < 0.75 and not (force_policy_detail and generic_focus):
         _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
         reply = _generic_focused_reply(action, base, generic_focus)
         if population_state_only and len(reply.strip()) <= 12:
@@ -412,7 +431,7 @@ def _profile_reply(
                 diagnostics["surface_shortcut_suppressed"] = True
             reply = reply.rstrip("。.!?") + "，我会按当前信息继续判断。"
         return reply
-    if not expression_available:
+    if not expression_available and not (force_policy_detail and generic_focus):
         _set_expression_sources(diagnostics, ["generic_focus" if generic_focus else "generic"])
         reply = _generic_focused_reply(action, base, generic_focus)
         if population_state_only and len(reply.strip()) <= 12:
@@ -446,6 +465,14 @@ def _profile_reply(
 
     bits: list[str] = []
     expression_sources: list[str] = []
+    if (
+        force_policy_detail
+        and target_context_surface
+        and focus
+        and action in {"agree", "minimal_response", "deflect", "disengage"}
+    ):
+        bits.append(f'关于“{focus}”，我先按当前线索稳住回应。')
+        expression_sources.append("policy_detail")
     if target_context_surface and focus and action in {
         "ask_question",
         "elaborate",
@@ -601,6 +628,7 @@ class RuleBasedGenerator:
                 "conditional_policy_strategy_frequency",
                 0.0,
             ),
+            "conditional_policy_support": policy_meta.get("conditional_policy_support", 0.0),
             "conditional_policy_top_strategy": policy_meta.get("conditional_policy_top_strategy", ""),
             "policy_action_selection_lift_applied": policy_detail_applied,
             "calibration_policy_source": policy_meta.get("policy_source", "missing"),

@@ -527,6 +527,36 @@ class TestM54ReportAcceptance(unittest.TestCase):
         self.assertFalse(payload["hard_pass"])
         self.assertFalse(payload["partner_gate"]["passed"])
 
+    def test_per_strategy_gate_evidence_separates_comparison_from_classifier_gating(self) -> None:
+        reports = [
+            ValidationReport(
+                user_uid=uid,
+                per_strategy=_all_formal_strategies(
+                    uid,
+                    _bundle(
+                        sem=0.80 + 0.001 * uid,
+                        beh=0.70 + 0.001 * uid,
+                        ast=0.90,
+                        base_sem=0.50,
+                        base_beh=0.40,
+                        base_beh_c=0.35,
+                        classifier_pass=False,
+                    ),
+                ),
+                aggregate=_aggregate(required_users=8, formal_requested=True),
+                conclusion="completed",
+            )
+            for uid in range(8)
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        partner_row = payload["per_strategy_gate_evidence"]["partner"]
+        self.assertTrue(partner_row["comparison_evidence"]["behavioral_vs_baseline_c_significant_better"])
+        self.assertFalse(partner_row["formal_hard_pass"])
+        self.assertTrue(partner_row["behavioral_hard_pass_blocked_by_classifier_gate"])
+
     def test_classifier_failure_degrades_behavioral_without_blocking(self) -> None:
         reports = [
             ValidationReport(

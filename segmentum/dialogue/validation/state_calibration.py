@@ -11,7 +11,7 @@ from ...slow_learning import SlowTraitState
 from ..actions import DIALOGUE_ACTION_NAMES
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
 from .metrics import semantic_pair_info_bucket, semantic_pair_weight_for_text
-from .policy_context import dialogue_policy_context_bucket
+from .policy_context import dialogue_policy_context_candidates
 from .reply_function import (
     behavioral_policy_weight_for_reply_function,
     classify_reply_function,
@@ -148,14 +148,21 @@ def _nested_support(values: Mapping[str, Mapping[str, float]] | None) -> dict[st
     }
 
 
+def _session_partner_uid(user_uid: int, session: Mapping[str, object]) -> int:
+    uid_a = _safe_int(session.get("uid_a"), user_uid)
+    uid_b = _safe_int(session.get("uid_b"), user_uid)
+    return uid_b if uid_a == int(user_uid) else uid_a
+
+
 def _iter_reply_pairs(
     sessions: Iterable[Mapping[str, object]],
     *,
     user_uid: int,
-) -> Iterable[tuple[str, str]]:
+) -> Iterable[tuple[str, str, int]]:
     for session in sessions:
         if not isinstance(session, Mapping):
             continue
+        partner_uid = _session_partner_uid(user_uid, session)
         turns = session.get("turns", [])
         if not isinstance(turns, list):
             continue
@@ -169,7 +176,7 @@ def _iter_reply_pairs(
             sender_uid = _safe_int(turn.get("sender_uid"), -1)
             if sender_uid == int(user_uid):
                 if pending_partner:
-                    yield pending_partner, body
+                    yield pending_partner, body, partner_uid
                     pending_partner = ""
                 continue
             pending_partner = body
@@ -416,14 +423,14 @@ def apply_train_state_calibration(
     lengths: list[int] = []
     tokens: Counter[str] = Counter()
     partner_questions = 0
-    predicted_actions = _predict_actions([reply_text for _, reply_text in pairs], classifier)
-    for (partner_text, reply_text), (action, strategy) in zip(pairs, predicted_actions):
+    predicted_actions = _predict_actions([reply_text for _, reply_text, _ in pairs], classifier)
+    for (partner_text, reply_text, partner_uid), (action, strategy) in zip(pairs, predicted_actions):
         action_counts[action] += 1
         strategy_counts[strategy] += 1
         info_bucket = semantic_pair_info_bucket(reply_text)
         pair_weight = float(semantic_pair_weight_for_text(reply_text))
         reply_function = classify_reply_function(reply_text)
-        context_bucket = dialogue_policy_context_bucket(partner_text)
+        context_candidates = dialogue_policy_context_candidates(partner_text, partner_uid)
         behavioral_weight = float(behavioral_policy_weight_for_reply_function(reply_function))
         surface_bucket_counts[info_bucket] += 1
         reply_function_counts[reply_function] += 1
@@ -433,7 +440,8 @@ def apply_train_state_calibration(
             policy_action_counts[action] += behavioral_weight
             policy_strategy_counts[strategy] += behavioral_weight
             policy_reply_function_actions[reply_function][action] += behavioral_weight
-            policy_context_actions[context_bucket][action] += behavioral_weight
+            for bucket_key in context_candidates:
+                policy_context_actions[bucket_key][action] += behavioral_weight
         lengths.append(len(reply_text))
         tokens.update(tokenize_surface(reply_text))
         if "?" in partner_text or "锛?" in partner_text or "？" in partner_text:

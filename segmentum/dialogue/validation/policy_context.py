@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Collection
 
 
 _PUNCT_RE = re.compile(r"[\s.,!?;:\u3002\uff0c\uff01\uff1f\uff1b\uff1a\[\](){}'\"\-_/\\]+")
@@ -201,3 +202,29 @@ def dialogue_partner_policy_context_bucket(text: str, partner_uid: object) -> st
     if not partner_key:
         return base_bucket
     return f"{base_bucket}|partner:{partner_key}"
+
+
+def dialogue_policy_context_candidates(text: str, partner_uid: object | None = None) -> tuple[str, ...]:
+    """Ordered policy-context lookup candidates: partner-conditioned first, then global."""
+    base_bucket = dialogue_policy_context_bucket(text)
+    partner_key = str(partner_uid).strip()
+    if not partner_key:
+        return (base_bucket,)
+    return (f"{base_bucket}|partner:{partner_key}", base_bucket)
+
+
+def resolve_dialogue_policy_context_bucket(
+    text: str,
+    partner_uid: object | None = None,
+    *,
+    available_buckets: Collection[object] | None = None,
+) -> str:
+    """Choose the preferred bucket, falling back to the global safe bucket when unsupported."""
+    candidates = dialogue_policy_context_candidates(text, partner_uid)
+    if available_buckets is None:
+        return candidates[0]
+    available = {str(item) for item in available_buckets}
+    for candidate in candidates:
+        if candidate in available:
+            return candidate
+    return candidates[-1]

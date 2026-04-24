@@ -184,10 +184,13 @@ class PolicyEvaluator:
                 conditional_top_strategy = ""
                 ctx = getattr(self, "_dialogue_decision_context", None)
                 if isinstance(ctx, dict) and policies.policy_by_context:
-                    from .dialogue.validation.policy_context import dialogue_policy_context_bucket
+                    from .dialogue.validation.policy_context import resolve_dialogue_policy_context_bucket
 
-                    context_bucket = dialogue_policy_context_bucket(
-                        str(ctx.get("body", "") or ctx.get("current_turn", ""))
+                    context_text = str(ctx.get("body", "") or ctx.get("current_turn", ""))
+                    context_bucket = resolve_dialogue_policy_context_bucket(
+                        context_text,
+                        ctx.get("partner_uid"),
+                        available_buckets=policies.policy_by_context.keys(),
                     )
                     conditional = policies.policy_by_context.get(context_bucket, {})
                     if isinstance(conditional, dict):
@@ -207,6 +210,16 @@ class PolicyEvaluator:
                                 key=lambda item: (float(item[1]), str(item[0])),
                             )[0]
                     conditional_support = float(policies.policy_context_support.get(context_bucket, 0.0))
+                base_context_bucket = context_bucket.split("|partner:", 1)[0]
+                context_sensitive_bucket = base_context_bucket in {
+                    "ctx:partner_low_info_ack",
+                    "ctx:partner_short_confirmation",
+                    "ctx:partner_short_other",
+                    "ctx:partner_statement_topicish",
+                }
+                min_context_support = 1.0 if context_sensitive_bucket else 2.0
+                min_conditional_frequency = 0.08 if context_sensitive_bucket else 0.12
+                min_conditional_strategy_frequency = 0.28 if context_sensitive_bucket else 0.35
                 if action in policies.learned_preferences:
                     policy_memory_bias += 0.15 + (0.35 * policy_lift)
                 policy_memory_bias += (frequency - 0.10) * (0.45 + 0.65 * policy_lift)
@@ -214,32 +227,39 @@ class PolicyEvaluator:
                     policy_lift,
                     min(0.75, max(0.0, conditional_support) / 12.0),
                 )
-                if conditional_support >= 2.0 and (
+                if conditional_support >= min_context_support and (
                     policy_lift >= 0.20
-                    or conditional_frequency >= 0.12
-                    or conditional_strategy_frequency >= 0.35
+                    or conditional_frequency >= min_conditional_frequency
+                    or conditional_strategy_frequency >= min_conditional_strategy_frequency
                 ):
                     conditional_lift_applied = bool(
-                        conditional_frequency >= 0.12 or conditional_strategy_frequency >= 0.35
+                        conditional_frequency >= min_conditional_frequency
+                        or conditional_strategy_frequency >= min_conditional_strategy_frequency
                     )
-                    policy_memory_bias += (conditional_frequency - 0.08) * (
+                    policy_memory_bias += (conditional_frequency - min_conditional_frequency) * (
                         2.00 + 3.00 * conditional_strength
                     )
                     policy_memory_bias += (
-                        conditional_strategy_frequency - 0.30
+                        conditional_strategy_frequency - (0.24 if context_sensitive_bucket else 0.30)
                     ) * (1.50 + 2.50 * conditional_strength)
                     if (
                         conditional_top_strategy
                         and action_strategy != conditional_top_strategy
-                        and conditional_strategy_frequency < 0.25
+                        and conditional_strategy_frequency < (0.20 if context_sensitive_bucket else 0.25)
                     ):
                         policy_memory_bias -= 0.75 + (1.25 * conditional_strength)
+                    if (
+                        context_sensitive_bucket
+                        and conditional_top_strategy
+                        and action_strategy == conditional_top_strategy
+                    ):
+                        policy_memory_bias += 0.25 + (0.35 * conditional_strength)
                 if dominant_strategy not in {"", "expected_free_energy"} and action_strategy == dominant_strategy:
                     policy_memory_bias += 0.10 + (0.30 * policy_lift)
                 escape_supported_by_context = bool(
-                    conditional_support >= 2.0
+                    conditional_support >= min_context_support
                     and action_strategy == "escape"
-                    and conditional_strategy_frequency >= 0.35
+                    and conditional_strategy_frequency >= min_conditional_strategy_frequency
                 )
                 if (
                     policy_lift >= 0.20
@@ -248,8 +268,17 @@ class PolicyEvaluator:
                     and not escape_supported_by_context
                 ):
                     policy_memory_bias -= 0.20 + (0.45 * policy_lift)
+                    if context_sensitive_bucket and conditional_top_strategy in {"exploit", "explore"}:
+                        policy_memory_bias -= 0.20 + (0.25 * conditional_strength)
                 if policy_lift >= 0.20 and action_strategy in {"exploit", "explore"} and frequency >= 0.12:
                     policy_memory_bias += 0.18 * policy_lift
+                if (
+                    context_sensitive_bucket
+                    and conditional_lift_applied
+                    and action_strategy in {"exploit", "explore"}
+                    and conditional_top_strategy == action_strategy
+                ):
+                    policy_memory_bias += 0.18 + (0.30 * conditional_strength)
                 if action in policies.learned_avoidances:
                     policy_memory_bias -= 0.15
                 self._last_policy_context_by_action[action] = {

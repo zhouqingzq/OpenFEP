@@ -593,6 +593,41 @@ def _per_strategy_hard_pass(
     return out
 
 
+def _per_strategy_gate_evidence(
+    per_strategy_hard_pass: dict[str, dict[str, bool]],
+    comparisons_by_strategy: dict[str, dict[str, dict[str, object]]],
+    *,
+    classifier_3class_gate_passed: bool,
+    formal_requested: bool,
+) -> dict[str, dict[str, object]]:
+    out: dict[str, dict[str, object]] = {}
+    for sk, hard_row in per_strategy_hard_pass.items():
+        comparison = comparisons_by_strategy.get(sk, {})
+        beh_row = comparison.get("behavioral_similarity_strategy", {})
+        out[sk] = {
+            "comparison_evidence": {
+                "semantic_vs_baseline_a_significant_better": bool(
+                    hard_row.get("semantic_similarity_vs_baseline_a_significant_better", False)
+                ),
+                "semantic_vs_baseline_c_significant_better": bool(
+                    hard_row.get("semantic_similarity_vs_baseline_c_significant_better", False)
+                ),
+                "behavioral_vs_baseline_c_significant_better": bool(
+                    hard_row.get("behavioral_similarity_strategy_vs_baseline_c_significant_better", False)
+                ),
+                "behavioral_vs_baseline_c_pvalue": beh_row.get("vs_c_pvalue"),
+                "behavioral_vs_baseline_c_mean_diff": beh_row.get("vs_c_mean_diff"),
+            },
+            "formal_hard_pass": bool(hard_row.get("hard_pass", False)),
+            "behavioral_hard_pass_blocked_by_classifier_gate": bool(
+                formal_requested
+                and not classifier_3class_gate_passed
+                and hard_row.get("behavioral_similarity_strategy_vs_baseline_c_significant_better", False)
+            ),
+        }
+    return out
+
+
 def _fmt_cell_num(val: object) -> str:
     if val is None:
         return "—"
@@ -1733,6 +1768,12 @@ def generate_report(
         classifier_3class_gate_passed=classifier_gate,
         formal_requested=formal_requested,
     )
+    per_strategy_gate_evidence = _per_strategy_gate_evidence(
+        per_strategy_hard_pass,
+        per_strategy_comparisons,
+        classifier_3class_gate_passed=classifier_gate,
+        formal_requested=formal_requested,
+    )
     partner_hard_pass = per_strategy_hard_pass.get("partner", {}).get("hard_pass")
     topic_hard_pass = per_strategy_hard_pass.get("topic", {}).get("hard_pass")
     topic_split_summary = _topic_split_summary(reports)
@@ -1901,6 +1942,7 @@ def generate_report(
         "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
+        "per_strategy_gate_evidence": "reports raw per-strategy comparison evidence separately from formal hard-pass gating so classifier-gated failures are not misread as modeling failures",
         "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
         "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
         "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
@@ -1937,6 +1979,7 @@ def generate_report(
         "comparisons": comparisons,
         "per_strategy_comparisons": per_strategy_comparisons,
         "per_strategy_hard_pass": per_strategy_hard_pass,
+        "per_strategy_gate_evidence": per_strategy_gate_evidence,
         "partner_hard_pass": partner_hard_pass,
         "topic_hard_pass": topic_hard_pass,
         "topic_split_summary": topic_split_summary,
@@ -2195,6 +2238,22 @@ def generate_report(
             )
     else:
         lines.append("_No per-strategy rows._")
+    lines.extend(["", "## Per-strategy gate evidence"])
+    if per_strategy_gate_evidence:
+        lines.append("")
+        lines.append(
+            "| Strategy | comparison behavioral vs C sig | formal hard pass | classifier-gated hard-pass block |"
+        )
+        lines.append("| --- | --- | --- | --- |")
+        for sk in sorted(per_strategy_gate_evidence.keys()):
+            row = per_strategy_gate_evidence[sk]
+            comparison_evidence = row.get("comparison_evidence", {})
+            lines.append(
+                f"| `{sk}` | {comparison_evidence.get('behavioral_vs_baseline_c_significant_better')} | "
+                f"{row.get('formal_hard_pass')} | {row.get('behavioral_hard_pass_blocked_by_classifier_gate')} |"
+            )
+    else:
+        lines.append("_No per-strategy gate-evidence rows._")
     md_path = output_dir / "aggregate_report.md"
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return md_path
