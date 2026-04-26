@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "artifact_rules_version": "m54_v9_behavioral_policy_lift",
+    "artifact_rules_version": "m54_v10_discriminative_diagnostics",
     "baseline_c_builder": "population_average_full_implant",
     "behavioral_baseline_c_mean": 0.34790299999999996,
     "behavioral_hard_metric_enabled": false,
@@ -104,7 +104,7 @@
     },
     "diagnostic_trace_enabled": true,
     "formal_requested": true,
-    "metric_version": "m54_v9_behavioral_policy_lift",
+    "metric_version": "m54_v10_discriminative_diagnostics",
     "pilot": {
       "behavioral_diff_sd": 0.20798,
       "behavioral_escalated": false,
@@ -3699,6 +3699,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.87037,
+          "balanced_behavioral_similarity_strategy": 0.680556,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.870716,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -3833,6 +3844,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.500247,
+            "conscientiousness": 0.483266,
+            "extraversion": 0.500734,
+            "neuroticism": 0.517367,
+            "openness": 0.501983
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.500247,
+            "conscientiousness": 0.483266,
+            "extraversion": 0.500734,
+            "neuroticism": 0.517367,
+            "openness": 0.501983
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.500247,
+            "conscientiousness": 0.483266,
+            "extraversion": 0.500734,
+            "neuroticism": 0.517367,
+            "openness": 0.501983
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -3867,11 +3944,14 @@
       "baseline_a_metrics": {
         "balanced_behavioral_similarity_action11": 0.87037,
         "balanced_behavioral_similarity_strategy": 0.680556,
+        "behavioral_fingerprint_similarity": 0.785023,
         "behavioral_similarity_action11": 0.049879,
         "behavioral_similarity_action11_raw": 0.410842,
         "behavioral_similarity_strategy": 0.557576,
         "behavioral_similarity_strategy_raw": 0.520833,
         "personality_similarity": 0.999998,
+        "personality_trait_l2": 0.001143,
+        "personality_trait_mae": 0.000973,
         "semantic_similarity": 0.400231,
         "stylistic_similarity": 0.870716,
         "surface_similarity": 0.027179
@@ -3880,14 +3960,105 @@
         "reply_count": 0,
         "source": "empty"
       },
+      "baseline_b_metric_details": {
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.878704,
+          "balanced_behavioral_similarity_strategy": 0.759259,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.875443,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
+        "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        }
+      },
       "baseline_b_metrics": {
         "balanced_behavioral_similarity_action11": 0.8787036666666667,
         "balanced_behavioral_similarity_strategy": 0.7592593333333333,
+        "behavioral_fingerprint_similarity": 0.824302,
         "behavioral_similarity_action11": 0.03627266666666667,
         "behavioral_similarity_action11_raw": 0.17513466666666666,
         "behavioral_similarity_strategy": 0.289449,
         "behavioral_similarity_strategy_raw": 0.5494603333333333,
-        "personality_similarity": 0.9999993333333334,
+        "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.40714700000000004,
         "stylistic_similarity": 0.8754433333333334,
         "surface_similarity": 0.018075666666666667
@@ -3922,6 +4093,17 @@
             "exploit",
             "explore"
           ]
+        },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.87963,
+          "balanced_behavioral_similarity_strategy": 0.986111,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.772995,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
         },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
@@ -4060,6 +4242,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -4094,11 +4342,14 @@
       "baseline_c_metrics": {
         "balanced_behavioral_similarity_action11": 0.87963,
         "balanced_behavioral_similarity_strategy": 0.986111,
+        "behavioral_fingerprint_similarity": 0.906219,
         "behavioral_similarity_action11": 0.155851,
         "behavioral_similarity_action11_raw": 0.457215,
         "behavioral_similarity_strategy": 0.384275,
         "behavioral_similarity_strategy_raw": 0.978684,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.224843,
         "stylistic_similarity": 0.772995,
         "surface_similarity": 0.005934
@@ -9807,6 +10058,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.866667,
+          "balanced_behavioral_similarity_strategy": 0.75,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.907058,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -9951,6 +10213,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.500247,
+            "conscientiousness": 0.483266,
+            "extraversion": 0.500734,
+            "neuroticism": 0.517367,
+            "openness": 0.501983
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.500247,
+            "conscientiousness": 0.483266,
+            "extraversion": 0.500734,
+            "neuroticism": 0.517367,
+            "openness": 0.501983
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.500247,
+            "conscientiousness": 0.483266,
+            "extraversion": 0.500734,
+            "neuroticism": 0.517367,
+            "openness": 0.501983
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -9986,11 +10314,14 @@
         "agent_state_similarity": 0.995127,
         "balanced_behavioral_similarity_action11": 0.866667,
         "balanced_behavioral_similarity_strategy": 0.75,
+        "behavioral_fingerprint_similarity": 0.822245,
         "behavioral_similarity_action11": 0.066667,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.066667,
         "behavioral_similarity_strategy_raw": 0.411779,
         "personality_similarity": 0.999998,
+        "personality_trait_l2": 0.001143,
+        "personality_trait_mae": 0.000973,
         "semantic_similarity": 0.364448,
         "stylistic_similarity": 0.907058,
         "surface_similarity": 0.027323
@@ -11116,6 +11447,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.775,
+          "balanced_behavioral_similarity_strategy": 0.6,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.87086,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -11243,6 +11585,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -11277,11 +11685,14 @@
       "baseline_a_metrics": {
         "balanced_behavioral_similarity_action11": 0.775,
         "balanced_behavioral_similarity_strategy": 0.6,
+        "behavioral_fingerprint_similarity": 0.715422,
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.425,
         "behavioral_similarity_strategy_raw": 0.4,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.418951,
         "stylistic_similarity": 0.87086,
         "surface_similarity": 0.023253
@@ -11290,14 +11701,105 @@
         "reply_count": 0,
         "source": "empty"
       },
+      "baseline_b_metric_details": {
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.775,
+          "balanced_behavioral_similarity_strategy": 0.644445,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.818542,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
+        "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        }
+      },
       "baseline_b_metrics": {
         "balanced_behavioral_similarity_action11": 0.775,
         "balanced_behavioral_similarity_strategy": 0.6444446666666667,
+        "behavioral_fingerprint_similarity": 0.724958,
         "behavioral_similarity_action11": 0.2,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.4083333333333333,
         "behavioral_similarity_strategy_raw": 0.4568626666666667,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.5076013333333333,
         "stylistic_similarity": 0.818542,
         "surface_similarity": 0.005169
@@ -11330,6 +11832,17 @@
             "exploit",
             "explore"
           ]
+        },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.8,
+          "balanced_behavioral_similarity_strategy": 0.866667,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.791299,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
         },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
@@ -11460,6 +11973,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -11494,11 +12073,14 @@
       "baseline_c_metrics": {
         "balanced_behavioral_similarity_action11": 0.8,
         "balanced_behavioral_similarity_strategy": 0.866667,
+        "behavioral_fingerprint_similarity": 0.82826,
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_action11_raw": 0.227273,
         "behavioral_similarity_strategy": 0.26087,
         "behavioral_similarity_strategy_raw": 0.819672,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.270271,
         "stylistic_similarity": 0.791299,
         "surface_similarity": 0.005
@@ -13166,6 +13748,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.8,
+          "balanced_behavioral_similarity_strategy": 0.733333,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.890589,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -13302,6 +13895,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -13337,11 +13996,14 @@
         "agent_state_similarity": 0.999986,
         "balanced_behavioral_similarity_action11": 0.8,
         "balanced_behavioral_similarity_strategy": 0.733333,
+        "behavioral_fingerprint_similarity": 0.788118,
         "behavioral_similarity_action11": 0.2,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.2,
         "behavioral_similarity_strategy_raw": 0.581395,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.407508,
         "stylistic_similarity": 0.890589,
         "surface_similarity": 0.026593
@@ -15971,6 +16633,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.775,
+          "balanced_behavioral_similarity_strategy": 0.666667,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.925095,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -16101,6 +16774,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -16136,11 +16875,14 @@
       "baseline_a_metrics": {
         "balanced_behavioral_similarity_action11": 0.775,
         "balanced_behavioral_similarity_strategy": 0.666667,
+        "behavioral_fingerprint_similarity": 0.756269,
         "behavioral_similarity_action11": 0.2,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.2,
         "behavioral_similarity_strategy_raw": 0.426036,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.390774,
         "stylistic_similarity": 0.925095,
         "surface_similarity": 0.01918
@@ -16149,14 +16891,105 @@
         "reply_count": 0,
         "source": "empty"
       },
+      "baseline_b_metric_details": {
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.780159,
+          "balanced_behavioral_similarity_strategy": 0.644445,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.849374,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
+        "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        }
+      },
       "baseline_b_metrics": {
         "balanced_behavioral_similarity_action11": 0.7801586666666667,
         "balanced_behavioral_similarity_strategy": 0.6444446666666667,
+        "behavioral_fingerprint_similarity": 0.73293,
         "behavioral_similarity_action11": 0.14674533333333334,
         "behavioral_similarity_action11_raw": 0.08029966666666667,
         "behavioral_similarity_strategy": 0.3618656666666667,
         "behavioral_similarity_strategy_raw": 0.462162,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.44299466666666665,
         "stylistic_similarity": 0.8493736666666667,
         "surface_similarity": 0.013013666666666666
@@ -16189,6 +17022,17 @@
             "exploit",
             "explore"
           ]
+        },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.790476,
+          "balanced_behavioral_similarity_strategy": 0.6,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.797125,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
         },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
@@ -16316,6 +17160,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -16351,11 +17261,14 @@
       "baseline_c_metrics": {
         "balanced_behavioral_similarity_action11": 0.790476,
         "balanced_behavioral_similarity_strategy": 0.6,
+        "behavioral_fingerprint_similarity": 0.706092,
         "behavioral_similarity_action11": 0.036878,
         "behavioral_similarity_action11_raw": 0.240899,
         "behavioral_similarity_strategy": 0.485597,
         "behavioral_similarity_strategy_raw": 0.4,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.232629,
         "stylistic_similarity": 0.797125,
         "surface_similarity": 0.010124
@@ -20144,6 +21057,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.775,
+          "balanced_behavioral_similarity_strategy": 0.666667,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.944421,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -20274,6 +21198,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -20310,11 +21300,14 @@
         "agent_state_similarity": 0.999774,
         "balanced_behavioral_similarity_action11": 0.775,
         "balanced_behavioral_similarity_strategy": 0.666667,
+        "behavioral_fingerprint_similarity": 0.760134,
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.2,
         "behavioral_similarity_strategy_raw": 0.496552,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.420645,
         "stylistic_similarity": 0.944421,
         "surface_similarity": 0.017281
@@ -21457,6 +22450,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.775,
+          "balanced_behavioral_similarity_strategy": 0.6,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.87086,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -21584,6 +22588,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -21618,11 +22688,14 @@
       "baseline_a_metrics": {
         "balanced_behavioral_similarity_action11": 0.775,
         "balanced_behavioral_similarity_strategy": 0.6,
+        "behavioral_fingerprint_similarity": 0.715422,
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.425,
         "behavioral_similarity_strategy_raw": 0.4,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.418951,
         "stylistic_similarity": 0.87086,
         "surface_similarity": 0.023253
@@ -21631,14 +22704,105 @@
         "reply_count": 0,
         "source": "empty"
       },
+      "baseline_b_metric_details": {
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.775,
+          "balanced_behavioral_similarity_strategy": 0.644445,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.818542,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
+        "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        }
+      },
       "baseline_b_metrics": {
         "balanced_behavioral_similarity_action11": 0.775,
         "balanced_behavioral_similarity_strategy": 0.6444446666666667,
+        "behavioral_fingerprint_similarity": 0.724958,
         "behavioral_similarity_action11": 0.2,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.4083333333333333,
         "behavioral_similarity_strategy_raw": 0.4568626666666667,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.5076013333333333,
         "stylistic_similarity": 0.818542,
         "surface_similarity": 0.005169
@@ -21671,6 +22835,17 @@
             "exploit",
             "explore"
           ]
+        },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.8,
+          "balanced_behavioral_similarity_strategy": 0.866667,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.791299,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
         },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
@@ -21801,6 +22976,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -21835,11 +23076,14 @@
       "baseline_c_metrics": {
         "balanced_behavioral_similarity_action11": 0.8,
         "balanced_behavioral_similarity_strategy": 0.866667,
+        "behavioral_fingerprint_similarity": 0.82826,
         "behavioral_similarity_action11": 0.0,
         "behavioral_similarity_action11_raw": 0.227273,
         "behavioral_similarity_strategy": 0.26087,
         "behavioral_similarity_strategy_raw": 0.819672,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.270271,
         "stylistic_similarity": 0.791299,
         "surface_similarity": 0.005
@@ -23507,6 +24751,17 @@
             "explore"
           ]
         },
+        "behavioral_fingerprint_similarity": {
+          "balanced_behavioral_similarity_action11": 0.8,
+          "balanced_behavioral_similarity_strategy": 0.733333,
+          "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+          "stylistic_similarity": 0.890589,
+          "weights": {
+            "balanced_behavioral_similarity_action11": 0.35,
+            "balanced_behavioral_similarity_strategy": 0.45,
+            "stylistic_similarity": 0.2
+          }
+        },
         "behavioral_similarity_action11": {
           "aggregation": "reply_function_bucket_balanced_information_weighted_pair_distribution",
           "bucket_count": 5,
@@ -23643,6 +24898,72 @@
           }
         },
         "personality_similarity": {
+          "diagnostic_only": true,
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "saturation_prone": true,
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_l2": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "vector_keys": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ]
+        },
+        "personality_trait_mae": {
+          "diagnostic_only": true,
+          "direction": "lower_is_better",
+          "generated_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
+          "real_vector": {
+            "agreeableness": 0.5,
+            "conscientiousness": 0.482,
+            "extraversion": 0.5,
+            "neuroticism": 0.518,
+            "openness": 0.5
+          },
           "vector_keys": [
             "openness",
             "conscientiousness",
@@ -23678,11 +24999,14 @@
         "agent_state_similarity": 0.999986,
         "balanced_behavioral_similarity_action11": 0.8,
         "balanced_behavioral_similarity_strategy": 0.733333,
+        "behavioral_fingerprint_similarity": 0.788118,
         "behavioral_similarity_action11": 0.2,
         "behavioral_similarity_action11_raw": 0.0,
         "behavioral_similarity_strategy": 0.2,
         "behavioral_similarity_strategy_raw": 0.581395,
         "personality_similarity": 1.0,
+        "personality_trait_l2": 0.0,
+        "personality_trait_mae": 0.0,
         "semantic_similarity": 0.407508,
         "stylistic_similarity": 0.890589,
         "surface_similarity": 0.026593

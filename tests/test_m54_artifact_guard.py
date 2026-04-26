@@ -16,6 +16,7 @@ REQUIRED_SUMMARY_FIELDS = {
     "partial_acceptance_eligible",
     "partial_acceptance_gate",
     "surface_ablation_gate",
+    "split_weakness_summary",
     "formal_blockers",
 }
 CONSISTENT_SUMMARY_FIELDS = (
@@ -95,6 +96,9 @@ class TestM54ArtifactGuard(unittest.TestCase):
                 self.assertEqual(_rules_version(payload), M54_ACCEPTANCE_RULES_VERSION)
                 self.assertTrue(REQUIRED_SUMMARY_FIELDS <= set(payload))
                 self.assertIsInstance(payload["surface_ablation_gate"], dict)
+                self.assertIsInstance(payload["split_weakness_summary"], dict)
+                self.assertTrue(payload["split_weakness_summary"]["random"]["monitored"])
+                self.assertTrue(payload["split_weakness_summary"]["temporal"]["monitored"])
                 self.assertIsInstance(payload["formal_blockers"], list)
                 if _is_formal_path(path):
                     self.assertTrue(payload.get("formal_requested"))

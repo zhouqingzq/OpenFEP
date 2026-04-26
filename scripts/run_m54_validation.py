@@ -227,6 +227,8 @@ def main() -> None:
         "baseline_c_gate": agg.get("baseline_c_gate"),
         "baseline_c_builder": agg.get("baseline_c_builder"),
         "surface_ablation_gate": agg.get("surface_ablation_gate"),
+        "split_weakness_summary": agg.get("split_weakness_summary"),
+        "diagnostic_metric_summary": agg.get("diagnostic_metric_summary"),
         "formal_blockers": agg.get("formal_blockers"),
         "diagnostic_trace_gate": agg.get("diagnostic_trace_gate"),
         "agent_state_differentiation_gate": agg.get("agent_state_differentiation_gate"),

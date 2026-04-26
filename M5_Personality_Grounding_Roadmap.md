@@ -439,8 +439,9 @@ For each user with sufficient data:
    - **Surface**: BLEU-4, ROUGE-L (expected low — sanity check only).
    - **Semantic**: sentence embedding cosine similarity (multilingual model).
    - **Stylistic**: Jensen-Shannon divergence of style feature distributions.
-   - **Personality**: cosine similarity of personality vectors extracted
-     independently from generated vs. real holdout text.
+   - **Personality diagnostics**: legacy personality-vector cosine is retained
+     only as a saturation warning; trait MAE/L2 and behavioral fingerprints are
+     used for discriminative diagnostics.
    - **Behavioral**: response strategy distribution similarity (how often
      explore/exploit/escape), initiative rate, conversation engagement depth.
    - **Agent state**: cosine similarity of `SlowTraitState` and
@@ -459,7 +460,8 @@ For each user with sufficient data:
 1. **Data splitter**: implement four split strategies.
 2. **Automated evaluation pipeline**: split → implant → generate → compare,
    fully automated per user.
-3. **Metric suite**: all six similarity levels + three baselines.
+3. **Metric suite**: semantic, stylistic, behavioral, discriminative
+   personality diagnostics, agent-state metrics, and three baselines.
 4. **Report generator**: per-user and aggregate results with statistical
    significance and Markdown tables (optional extra plots are non-blocking;
    narrative summary may be brief procedural text in aggregate Markdown).
@@ -501,11 +503,20 @@ dimensions:
    counterpart.
 2. **Cross-context personality extraction**: extract personality-relevant metrics
    from behavior in each scenario.
-3. **Consistency metrics**: personality vector similarity across all 7 scenarios;
-   define "adaptation envelope" — acceptable variance range.
+3. **Consistency metrics**: behavioral fingerprint stability across all 7
+   scenarios; define "adaptation envelope" — acceptable variance range. The
+   legacy personality-vector cosine is diagnostic-only because M5.4 showed it
+   saturates and cannot distinguish real weaknesses from baselines.
 4. **Adaptation analysis**: quantify how much the agent adapts to context
    (healthy flexibility) vs. core personality preservation. Compare with real
    user's cross-partner behavioral variance from M5.0 data.
+5. **Split weakness carry-forward**: every M5.5 report must slice scenario
+   results by `random` and `temporal` M5.4 split lineage, because these were
+   the monitored weak points in M5.4 partial acceptance.
+6. **Discriminative identity diagnostics**: report within-person vs.
+   between-person retrieval, state-distance decomposition (`SlowTraitState`,
+   `NarrativePriors`, defense profile, precision debt), and scenario-level
+   behavioral fingerprint deltas.
 
 ---
 

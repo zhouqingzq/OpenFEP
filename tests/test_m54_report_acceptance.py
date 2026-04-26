@@ -22,6 +22,9 @@ def _bundle(
     base_beh: float,
     base_sem_c: float | None = None,
     base_beh_c: float | None = None,
+    fp: float | None = None,
+    base_fp: float | None = None,
+    base_fp_c: float | None = None,
     classifier_pass: bool = True,
     topic_not_applicable: bool = False,
 ) -> dict[str, dict]:
@@ -30,34 +33,49 @@ def _bundle(
         "semantic_similarity",
         "behavioral_similarity_strategy",
         "behavioral_similarity_action11",
+        "behavioral_fingerprint_similarity",
         "stylistic_similarity",
         "personality_similarity",
+        "personality_trait_mae",
+        "personality_trait_l2",
         "agent_state_similarity",
     )
     c_sem = float(base_sem_c) if base_sem_c is not None else base_sem
     c_beh = float(base_beh_c) if base_beh_c is not None else base_beh
+    fp_value = float(fp) if fp is not None else float(beh)
+    base_fp_value = float(base_fp) if base_fp is not None else float(base_beh)
+    c_fp = float(base_fp_c) if base_fp_c is not None else base_fp_value
     p = {
         "semantic_similarity": sem,
         "behavioral_similarity_strategy": beh,
         "behavioral_similarity_action11": 0.5,
+        "behavioral_fingerprint_similarity": fp_value,
         "stylistic_similarity": 0.4,
         "personality_similarity": 0.7,
+        "personality_trait_mae": 0.1,
+        "personality_trait_l2": 0.12,
         "agent_state_similarity": ast,
     }
     a = {
         "semantic_similarity": base_sem,
         "behavioral_similarity_strategy": base_beh,
         "behavioral_similarity_action11": 0.4,
+        "behavioral_fingerprint_similarity": base_fp_value,
         "stylistic_similarity": 0.35,
         "personality_similarity": 0.65,
+        "personality_trait_mae": 0.2,
+        "personality_trait_l2": 0.22,
     }
     b = dict(a)
     c = {
         "semantic_similarity": c_sem,
         "behavioral_similarity_strategy": c_beh,
         "behavioral_similarity_action11": 0.4,
+        "behavioral_fingerprint_similarity": c_fp,
         "stylistic_similarity": 0.35,
         "personality_similarity": 0.65,
+        "personality_trait_mae": 0.2,
+        "personality_trait_l2": 0.22,
     }
     assert set(p.keys()) == set(keys)
     return {
@@ -309,6 +327,11 @@ class TestM54ReportAcceptance(unittest.TestCase):
         self.assertTrue(payload["hard_pass_breakdown"]["classifier_3class_gate_passed"])
         self.assertTrue(payload["hard_pass"])
         self.assertEqual(payload["overall_conclusion"], "pass")
+        self.assertNotIn("personality_similarity", payload["hard_metrics"])
+        self.assertNotIn("personality_similarity", payload["soft_metrics"])
+        self.assertIn("behavioral_fingerprint_similarity", payload["soft_metrics"])
+        self.assertIn("diagnostic_metric_summary", payload)
+        self.assertFalse(payload["diagnostic_metric_summary"]["personality_similarity"]["acceptance_evidence"])
         self.assertTrue(payload["pilot_gate"]["passed"])
         self.assertTrue(payload["split_gate"]["passed"])
         self.assertTrue(payload["partner_gate"]["passed"])
@@ -321,6 +344,51 @@ class TestM54ReportAcceptance(unittest.TestCase):
         self.assertIsNone(ast["baseline_a_mean"])
         self.assertIn("interpretation_notes", ast)
         self.assertFalse(payload["behavioral_hard_metric_degraded"])
+
+    def test_split_weakness_summary_monitors_random_and_temporal(self) -> None:
+        reports = []
+        for uid in range(8):
+            good = _bundle(
+                sem=0.80 + 0.001 * uid,
+                beh=0.75 + 0.001 * uid,
+                fp=0.76 + 0.001 * uid,
+                ast=0.90,
+                base_sem=0.50,
+                base_beh=0.40,
+                base_fp=0.40,
+                base_beh_c=0.35,
+                base_fp_c=0.35,
+            )
+            strategies = _all_strategies(good)
+            strategies["temporal"] = _bundle(
+                sem=0.80 + 0.001 * uid,
+                beh=0.50,
+                fp=0.51,
+                ast=0.90,
+                base_sem=0.50,
+                base_beh=0.40,
+                base_fp=0.40,
+                base_beh_c=0.50,
+                base_fp_c=0.51,
+            )
+            reports.append(
+                ValidationReport(
+                    user_uid=uid,
+                    per_strategy=strategies,
+                    aggregate=_aggregate(required_users=8),
+                    conclusion="completed",
+                )
+            )
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp)
+            generate_report(reports, p)
+            payload = json.loads((p / "aggregate_report.json").read_text(encoding="utf-8"))
+        summary = payload["split_weakness_summary"]
+        self.assertTrue(summary["random"]["monitored"])
+        self.assertTrue(summary["temporal"]["monitored"])
+        self.assertTrue(summary["temporal"]["weakness_detected"])
+        self.assertFalse(summary["temporal"]["behavioral_vs_baseline_c_significant_better"])
+        self.assertFalse(summary["temporal"]["fingerprint_vs_baseline_c_significant_better"])
 
     def test_hard_fail_when_agent_state_low(self) -> None:
         reports = [

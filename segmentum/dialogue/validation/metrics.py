@@ -16,6 +16,13 @@ from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
 from .reply_function import classify_reply_function
 
 _STRATEGY_LABELS = frozenset({"explore", "exploit", "escape"})
+_PERSONALITY_VECTOR_KEYS = (
+    "openness",
+    "conscientiousness",
+    "extraversion",
+    "agreeableness",
+    "neuroticism",
+)
 
 
 @dataclass(slots=True)
@@ -459,18 +466,85 @@ def stylistic_similarity(generated: list[str], real: list[str]) -> SimilarityRes
     )
 
 
-def personality_similarity(generated: list[str], real: list[str]) -> SimilarityResult:
+def _personality_vectors(generated: list[str], real: list[str]) -> tuple[dict[str, float], dict[str, float]]:
     analyzer = PersonalityAnalyzer()
     generated_result = analyzer.analyze(generated)
     real_result = analyzer.analyze(real)
-    keys = ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism")
-    left = {key: float(generated_result.big_five.get(key, 0.0)) for key in keys}
-    right = {key: float(real_result.big_five.get(key, 0.0)) for key in keys}
+    left = {key: float(generated_result.big_five.get(key, 0.0)) for key in _PERSONALITY_VECTOR_KEYS}
+    right = {key: float(real_result.big_five.get(key, 0.0)) for key in _PERSONALITY_VECTOR_KEYS}
+    return left, right
+
+
+def _personality_metric_results(left: Mapping[str, float], right: Mapping[str, float]) -> dict[str, SimilarityResult]:
     cosine = _cosine_similarity(left, right)
+    deltas = [float(left.get(key, 0.0)) - float(right.get(key, 0.0)) for key in _PERSONALITY_VECTOR_KEYS]
+    abs_deltas = [abs(delta) for delta in deltas]
+    mae = sum(abs_deltas) / float(len(abs_deltas)) if abs_deltas else 0.0
+    rmse = math.sqrt(sum(delta * delta for delta in deltas) / float(len(deltas))) if deltas else 0.0
+    details = {
+        "vector_keys": list(_PERSONALITY_VECTOR_KEYS),
+        "generated_vector": {key: round(float(left.get(key, 0.0)), 6) for key in _PERSONALITY_VECTOR_KEYS},
+        "real_vector": {key: round(float(right.get(key, 0.0)), 6) for key in _PERSONALITY_VECTOR_KEYS},
+    }
+    return {
+        "personality_similarity": SimilarityResult(
+            metric_name="personality_similarity",
+            value=round(float(max(0.0, min(1.0, cosine))), 6),
+            details={**details, "diagnostic_only": True, "saturation_prone": True},
+        ),
+        "personality_trait_mae": SimilarityResult(
+            metric_name="personality_trait_mae",
+            value=round(float(mae), 6),
+            details={**details, "direction": "lower_is_better", "diagnostic_only": True},
+        ),
+        "personality_trait_l2": SimilarityResult(
+            metric_name="personality_trait_l2",
+            value=round(float(rmse), 6),
+            details={**details, "direction": "lower_is_better", "diagnostic_only": True},
+        ),
+    }
+
+
+def personality_profile_metrics(generated: list[str], real: list[str]) -> dict[str, SimilarityResult]:
+    left, right = _personality_vectors(generated, real)
+    return _personality_metric_results(left, right)
+
+
+def personality_similarity(generated: list[str], real: list[str]) -> SimilarityResult:
+    return personality_profile_metrics(generated, real)["personality_similarity"]
+
+
+def personality_trait_mae(generated: list[str], real: list[str]) -> SimilarityResult:
+    return personality_profile_metrics(generated, real)["personality_trait_mae"]
+
+
+def personality_trait_l2(generated: list[str], real: list[str]) -> SimilarityResult:
+    return personality_profile_metrics(generated, real)["personality_trait_l2"]
+
+
+def behavioral_fingerprint_similarity(
+    balanced_strategy: SimilarityResult,
+    balanced_action11: SimilarityResult,
+    style: SimilarityResult,
+) -> SimilarityResult:
+    strategy = float(balanced_strategy.value)
+    action11 = float(balanced_action11.value)
+    stylistic = float(style.value)
+    value = (0.45 * strategy) + (0.35 * action11) + (0.20 * stylistic)
     return SimilarityResult(
-        metric_name="personality_similarity",
-        value=round(float(max(0.0, min(1.0, cosine))), 6),
-        details={"vector_keys": list(keys)},
+        metric_name="behavioral_fingerprint_similarity",
+        value=round(float(max(0.0, min(1.0, value))), 6),
+        details={
+            "formula": "0.45 * balanced_behavioral_similarity_strategy + 0.35 * balanced_behavioral_similarity_action11 + 0.20 * stylistic_similarity",
+            "balanced_behavioral_similarity_strategy": round(strategy, 6),
+            "balanced_behavioral_similarity_action11": round(action11, 6),
+            "stylistic_similarity": round(stylistic, 6),
+            "weights": {
+                "balanced_behavioral_similarity_strategy": 0.45,
+                "balanced_behavioral_similarity_action11": 0.35,
+                "stylistic_similarity": 0.20,
+            },
+        },
     )
 
 

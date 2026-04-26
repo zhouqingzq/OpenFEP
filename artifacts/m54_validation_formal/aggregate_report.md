@@ -4,7 +4,7 @@
 - Required users: 15
 - Agent state: users with metric 15, skipped 0
 - Topic split: {'users_with_topic_strategy_row': 15, 'users_topic_split_not_applicable': 0, 'users_topic_split_applicable': 15, 'users_topic_split_valid_for_hard_gate': 15}
-- Metric version: m54_v9_behavioral_policy_lift (generated_action_direct_real_reply_classifier)
+- Metric version: m54_v10_discriminative_diagnostics (generated_action_direct_real_reply_classifier)
 - Classifier 3-class gate: False
 - Classifier evidence tier: llm_generated_provisional
 - Semantic embedding gate: True
@@ -98,7 +98,16 @@
 ## State Saturation Diagnostics
 
 - Personality similarity diagnostic-only saturation warning: True
+- Personality similarity is diagnostic-only legacy cosine and is not acceptance evidence.
 - State distance means: {'train_default_cosine': 0.944713, 'train_default_l2': 0.372433, 'train_full_cosine': 0.995034, 'train_full_l2': 0.076561, 'train_wrong_user_cosine': 0.964163, 'train_wrong_user_l2': 0.275078}
+
+## Diagnostic Metrics
+
+| Metric | direction | personality | baseline A | baseline C | acceptance evidence |
+| --- | --- | --- | --- | --- | --- |
+| `personality_similarity` | diagnostic_only | 1.0000 | 1.0000 | 1.0000 | False |
+| `personality_trait_mae` | lower_is_better | 0.0001 | 0.0001 | 0.0000 | False |
+| `personality_trait_l2` | lower_is_better | 0.0001 | 0.0001 | 0.0000 | False |
 
 ## Debug Readiness Gate
 
@@ -112,8 +121,8 @@
 | `semantic_similarity` | 0.4291 | 0.3806 | 0.0484 | 0.0001 | True |
 | `behavioral_similarity_strategy` | 0.4094 | 0.4456 | -0.0362 | 1.0000 | False |
 | `behavioral_similarity_action11` | 0.1783 | 0.1513 | 0.0270 | 0.2315 | False |
+| `behavioral_fingerprint_similarity` | 0.7592 | 0.7113 | 0.0479 | 0.0008 | True |
 | `stylistic_similarity` | 0.8667 | 0.8661 | 0.0006 | 0.4890 | False |
-| `personality_similarity` | 1.0000 | 1.0000 | 0.0000 | 1.0000 | False |
 | `agent_state_similarity` | 0.9950 | — | — | — | — |
 
 ## Comparisons vs baseline C (directional)
@@ -123,8 +132,8 @@
 | `semantic_similarity` | 0.4291 | 0.2481 | 0.1810 | 0.0000 | True |
 | `behavioral_similarity_strategy` | 0.4094 | 0.2970 | 0.1124 | 0.0319 | True |
 | `behavioral_similarity_action11` | 0.1783 | 0.1193 | 0.0590 | 0.0042 | True |
+| `behavioral_fingerprint_similarity` | 0.7592 | 0.7593 | -0.0002 | 1.0000 | False |
 | `stylistic_similarity` | 0.8667 | 0.7862 | 0.0805 | 0.0000 | True |
-| `personality_similarity` | 1.0000 | 1.0000 | -0.0000 | 1.0000 | False |
 | `agent_state_similarity` | 0.9950 | — | — | — | — |
 
 ## Hard metric rows (summary)
@@ -134,8 +143,17 @@
 
 ## Soft Metrics
 - `behavioral_similarity_action11`: personality=0.1783, baseline_a=0.1513, baseline_c=0.1193
+- `behavioral_fingerprint_similarity`: personality=0.7592, baseline_a=0.7113, baseline_c=0.7593
 - `stylistic_similarity`: personality=0.8667, baseline_a=0.8661, baseline_c=0.7862
-- `personality_similarity`: personality=1.0000, baseline_a=1.0000, baseline_c=1.0000
+
+## Split Weakness Summary
+
+| Strategy | monitored | weakness | semantic vs C sig | behavioral vs C diff | behavioral p | fingerprint vs C diff | fingerprint p |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `random` | True | True | True | 0.1495 | 0.0503 | 0.0152 | 0.8486 |
+| `temporal` | True | True | True | -0.0343 | 1.0000 | -0.0615 | 1.0000 |
+| `partner` | False | True | True | 0.2069 | 0.0207 | 0.0434 | 0.2622 |
+| `topic` | False | True | True | 0.1274 | 0.0422 | 0.0022 | 0.9465 |
 
 ## Per-strategy hard pass
 

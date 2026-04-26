@@ -14,6 +14,9 @@ from .statistics import ComparisonResult, paired_comparison, scipy_wilcoxon_avai
 ACCEPTANCE_RULES_VERSION = M54_ACCEPTANCE_RULES_VERSION
 AGENT_STATE_MIN_MEAN = 0.80
 REQUIRED_STRATEGIES = ("random", "temporal", "partner", "topic")
+MONITORED_WEAKNESS_STRATEGIES = ("random", "temporal")
+DIAGNOSTIC_LOWER_IS_BETTER_METRICS = ("personality_trait_mae", "personality_trait_l2")
+DIAGNOSTIC_ONLY_METRICS = ("personality_similarity", *DIAGNOSTIC_LOWER_IS_BETTER_METRICS)
 
 
 def _write_json(path: Path, payload: object) -> None:
@@ -623,6 +626,38 @@ def _per_strategy_gate_evidence(
                 formal_requested
                 and not classifier_3class_gate_passed
                 and hard_row.get("behavioral_similarity_strategy_vs_baseline_c_significant_better", False)
+            ),
+        }
+    return out
+
+
+def _split_weakness_summary(
+    per_strategy_comparisons: dict[str, dict[str, dict[str, object]]],
+) -> dict[str, dict[str, object]]:
+    out: dict[str, dict[str, object]] = {}
+    for strategy in REQUIRED_STRATEGIES:
+        comparison = per_strategy_comparisons.get(strategy, {})
+        sem = comparison.get("semantic_similarity", {})
+        beh = comparison.get("behavioral_similarity_strategy", {})
+        fingerprint = comparison.get("behavioral_fingerprint_similarity", {})
+        behavioral_sig = bool(beh.get("vs_c_significant", False))
+        fingerprint_sig = bool(fingerprint.get("vs_c_significant", False))
+        weakness_detected = bool((not behavioral_sig) or (not fingerprint_sig))
+        out[strategy] = {
+            "monitored": strategy in MONITORED_WEAKNESS_STRATEGIES,
+            "users_included": int(sem.get("users_included") or 0),
+            "semantic_vs_baseline_a_significant_better": bool(sem.get("vs_a_significant", False)),
+            "semantic_vs_baseline_c_significant_better": bool(sem.get("vs_c_significant", False)),
+            "behavioral_vs_baseline_c_significant_better": behavioral_sig,
+            "behavioral_vs_baseline_c_pvalue": beh.get("vs_c_pvalue"),
+            "behavioral_vs_baseline_c_mean_diff": beh.get("vs_c_mean_diff"),
+            "fingerprint_vs_baseline_c_significant_better": fingerprint_sig,
+            "fingerprint_vs_baseline_c_pvalue": fingerprint.get("vs_c_pvalue"),
+            "fingerprint_vs_baseline_c_mean_diff": fingerprint.get("vs_c_mean_diff"),
+            "weakness_detected": weakness_detected,
+            "policy": (
+                "weakness when behavioral_similarity_strategy or behavioral_fingerprint_similarity "
+                "does not significantly beat Baseline C"
             ),
         }
     return out
@@ -1331,6 +1366,46 @@ def _state_saturation_summary(reports: list[ValidationReport]) -> dict[str, obje
     }
 
 
+def _diagnostic_metric_summary(reports: list[ValidationReport]) -> dict[str, object]:
+    out: dict[str, object] = {}
+    for metric_name in DIAGNOSTIC_ONLY_METRICS:
+        values: dict[str, list[float]] = {
+            "personality": [],
+            "baseline_a": [],
+            "baseline_b": [],
+            "baseline_c": [],
+        }
+        users_with_metric = 0
+        for report in reports:
+            per_user_seen = False
+            for strategy_result in report.per_strategy.values():
+                if not _strategy_eligible(strategy_result):
+                    continue
+                sources = {
+                    "personality": strategy_result.get("personality_metrics", {}),
+                    "baseline_a": strategy_result.get("baseline_a_metrics", {}),
+                    "baseline_b": strategy_result.get("baseline_b_metrics", {}),
+                    "baseline_c": strategy_result.get("baseline_c_metrics", {}),
+                }
+                if not all(isinstance(payload, dict) and metric_name in payload for payload in sources.values()):
+                    continue
+                per_user_seen = True
+                for source_name, payload in sources.items():
+                    values[source_name].append(_safe_float(payload.get(metric_name)))
+            if per_user_seen:
+                users_with_metric += 1
+        out[metric_name] = {
+            "direction": "lower_is_better" if metric_name in DIAGNOSTIC_LOWER_IS_BETTER_METRICS else "diagnostic_only",
+            "acceptance_evidence": False,
+            "users_with_metric": int(users_with_metric),
+            "means": {
+                key: round(float(mean(items)) if items else 0.0, 6)
+                for key, items in values.items()
+            },
+        }
+    return out
+
+
 def _debug_readiness_gate(
     *,
     baseline_audit_summary: dict[str, object],
@@ -1707,8 +1782,8 @@ def generate_report(
         "semantic_similarity",
         "behavioral_similarity_strategy",
         "behavioral_similarity_action11",
+        "behavioral_fingerprint_similarity",
         "stylistic_similarity",
-        "personality_similarity",
         "agent_state_similarity",
     ]
     baseline_metrics = [name for name in metric_names if name != "agent_state_similarity"]
@@ -1746,16 +1821,16 @@ def generate_report(
         ]
         soft_metrics_list = [
             "behavioral_similarity_action11",
+            "behavioral_fingerprint_similarity",
             "stylistic_similarity",
-            "personality_similarity",
         ]
     else:
         hard_metrics_list = ["semantic_similarity", "agent_state_similarity"]
         soft_metrics_list = [
             "behavioral_similarity_strategy",
             "behavioral_similarity_action11",
+            "behavioral_fingerprint_similarity",
             "stylistic_similarity",
-            "personality_similarity",
         ]
 
     metric_hard_pass, metric_hard_breakdown = _compute_hard_pass(
@@ -1774,6 +1849,7 @@ def generate_report(
         classifier_3class_gate_passed=classifier_gate,
         formal_requested=formal_requested,
     )
+    split_weakness_summary = _split_weakness_summary(per_strategy_comparisons)
     partner_hard_pass = per_strategy_hard_pass.get("partner", {}).get("hard_pass")
     topic_hard_pass = per_strategy_hard_pass.get("topic", {}).get("hard_pass")
     topic_split_summary = _topic_split_summary(reports)
@@ -1921,6 +1997,7 @@ def generate_report(
     profile_expression_summary = _profile_expression_source_summary(reports)
     context_anchor_usage_summary = _context_anchor_usage_summary(reports)
     state_saturation_summary = _state_saturation_summary(reports)
+    diagnostic_metric_summary = _diagnostic_metric_summary(reports)
     debug_readiness_gate = _debug_readiness_gate(
         baseline_audit_summary=baseline_audit_summary,
         ablation_summary=ablation_summary,
@@ -1935,6 +2012,9 @@ def generate_report(
         "soft_metrics": list(soft_metrics_list),
         "semantic_similarity": "formal paired Wilcoxon one-sided greater vs baseline A and baseline C (p < 0.05) with mean paired diff > 0; one paired sample per user (mean across split strategies)",
         "behavioral_similarity_strategy": "formal paired Wilcoxon one-sided greater vs baseline C; external-human 3-class classifier gate is required before this can count as hard evidence",
+        "behavioral_fingerprint_similarity": "diagnostic paired Wilcoxon one-sided greater vs baseline C using fixed weights: 0.45 balanced strategy + 0.35 balanced action11 + 0.20 stylistic similarity; supports M5.5 weakness monitoring, not M5.4 formal acceptance",
+        "personality_similarity": "diagnostic-only legacy Big Five cosine; saturation-prone and not acceptance evidence",
+        "personality_trait_distance": "diagnostic-only lower-is-better Big Five MAE/RMSE; not included in greater-is-better acceptance comparisons",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
         "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
@@ -1943,6 +2023,7 @@ def generate_report(
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
         "per_strategy_gate_evidence": "reports raw per-strategy comparison evidence separately from formal hard-pass gating so classifier-gated failures are not misread as modeling failures",
+        "split_weakness_summary": "random and temporal are monitored strategies; weakness means behavioral strategy or behavioral fingerprint does not significantly beat Baseline C",
         "agent_state_similarity_detail": "mean of per-user means across strategies; threshold on global mean; not a baseline contrast",
         "pilot": "run_pilot_validation estimates sd of per-user semantic (personality vs baseline A) and behavioral (personality vs baseline C) mean differences; suggested_min_users uses max of thresholds when either exceeds pilot_sd_threshold",
         "topic_gate": "topic_split_not_applicable users are excluded from topic statistics, but valid topic users must still meet required_users",
@@ -1980,6 +2061,7 @@ def generate_report(
         "per_strategy_comparisons": per_strategy_comparisons,
         "per_strategy_hard_pass": per_strategy_hard_pass,
         "per_strategy_gate_evidence": per_strategy_gate_evidence,
+        "split_weakness_summary": split_weakness_summary,
         "partner_hard_pass": partner_hard_pass,
         "topic_hard_pass": topic_hard_pass,
         "topic_split_summary": topic_split_summary,
@@ -2002,6 +2084,7 @@ def generate_report(
         "profile_expression_source_summary": profile_expression_summary,
         "context_anchor_usage_summary": context_anchor_usage_summary,
         "state_saturation_summary": state_saturation_summary,
+        "diagnostic_metric_summary": diagnostic_metric_summary,
         "debug_readiness_gate": debug_readiness_gate,
         "baseline_c_behavioral_failure_audit": baseline_c_behavioral_failure_audit,
         "baseline_c_behavioral_failure_audit_json": str(
@@ -2016,6 +2099,7 @@ def generate_report(
             (output_dir / "context_anchor_usage_summary.json").as_posix()
         ),
         "state_saturation_summary_json": str((output_dir / "state_saturation_summary.json").as_posix()),
+        "diagnostic_metric_summary_json": str((output_dir / "diagnostic_metric_summary.json").as_posix()),
         "diagnostic_trace_jsonl": (
             str((output_dir / "diagnostic_trace.jsonl").as_posix())
             if diagnostic_trace_rows
@@ -2041,6 +2125,7 @@ def generate_report(
     _write_json(output_dir / "profile_expression_source_summary.json", profile_expression_summary)
     _write_json(output_dir / "context_anchor_usage_summary.json", context_anchor_usage_summary)
     _write_json(output_dir / "state_saturation_summary.json", state_saturation_summary)
+    _write_json(output_dir / "diagnostic_metric_summary.json", diagnostic_metric_summary)
     _write_json(output_dir / "baseline_c_behavioral_failure_audit.json", baseline_c_behavioral_failure_audit)
     _write_json(output_dir / "aggregate_report.json", aggregate_payload)
 
@@ -2163,7 +2248,26 @@ def generate_report(
             "",
             f"- Personality similarity diagnostic-only saturation warning: "
             f"{state_saturation_summary['personality_similarity']['saturation_warning']}",
+            "- Personality similarity is diagnostic-only legacy cosine and is not acceptance evidence.",
             f"- State distance means: {state_saturation_summary['state_distances']}",
+            "",
+            "## Diagnostic Metrics",
+            "",
+            "| Metric | direction | personality | baseline A | baseline C | acceptance evidence |",
+            "| --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for name, row in diagnostic_metric_summary.items():
+        means = row.get("means", {}) if isinstance(row, dict) else {}
+        means = means if isinstance(means, dict) else {}
+        lines.append(
+            f"| `{name}` | {row.get('direction') if isinstance(row, dict) else ''} | "
+            f"{_fmt_cell_num(means.get('personality'))} | {_fmt_cell_num(means.get('baseline_a'))} | "
+            f"{_fmt_cell_num(means.get('baseline_c'))} | "
+            f"{row.get('acceptance_evidence') if isinstance(row, dict) else False} |"
+        )
+    lines.extend(
+        [
             "",
             "## Debug Readiness Gate",
             "",
@@ -2223,6 +2327,25 @@ def generate_report(
             f"- `{name}`: personality={_fmt_cell_num(row['personality_mean'])}, "
             f"baseline_a={_fmt_cell_num(row.get('baseline_a_mean'))}, baseline_c={_fmt_cell_num(row.get('baseline_c_mean'))}"
         )
+    lines.extend(["", "## Split Weakness Summary"])
+    if split_weakness_summary:
+        lines.append("")
+        lines.append(
+            "| Strategy | monitored | weakness | semantic vs C sig | behavioral vs C diff | behavioral p | fingerprint vs C diff | fingerprint p |"
+        )
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- |")
+        for sk in REQUIRED_STRATEGIES:
+            row = split_weakness_summary.get(sk, {})
+            lines.append(
+                f"| `{sk}` | {row.get('monitored')} | {row.get('weakness_detected')} | "
+                f"{row.get('semantic_vs_baseline_c_significant_better')} | "
+                f"{_fmt_cell_num(row.get('behavioral_vs_baseline_c_mean_diff'))} | "
+                f"{_fmt_cell_num(row.get('behavioral_vs_baseline_c_pvalue'))} | "
+                f"{_fmt_cell_num(row.get('fingerprint_vs_baseline_c_mean_diff'))} | "
+                f"{_fmt_cell_num(row.get('fingerprint_vs_baseline_c_pvalue'))} |"
+            )
+    else:
+        lines.append("_No split weakness rows._")
     lines.extend(["", "## Per-strategy hard pass"])
     if per_strategy_hard_pass:
         lines.append("")

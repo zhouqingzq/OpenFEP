@@ -15,7 +15,7 @@
   },
   "aggregate_report_json": "artifacts/m54_validation_direction/aggregate_report.json",
   "aggregate_report_md": "artifacts/m54_validation_direction/aggregate_report.md",
-  "artifact_rules_version": "m54_v9_behavioral_policy_lift",
+  "artifact_rules_version": "m54_v10_discriminative_diagnostics",
   "baseline_c_behavioral_failure_audit_json": "artifacts/m54_validation_direction/baseline_c_behavioral_failure_audit.json",
   "baseline_c_builder": "population_average_full_implant",
   "baseline_c_gate": {
@@ -121,6 +121,41 @@
     "train_count": 0,
     "without_cue_3class_gate_passed": false
   },
+  "diagnostic_metric_summary": {
+    "personality_similarity": {
+      "acceptance_evidence": false,
+      "direction": "diagnostic_only",
+      "means": {
+        "baseline_a": 1.0,
+        "baseline_b": 1.0,
+        "baseline_c": 1.0,
+        "personality": 1.0
+      },
+      "users_with_metric": 15
+    },
+    "personality_trait_l2": {
+      "acceptance_evidence": false,
+      "direction": "lower_is_better",
+      "means": {
+        "baseline_a": 9.9e-05,
+        "baseline_b": 2.5e-05,
+        "baseline_c": 2.5e-05,
+        "personality": 9.9e-05
+      },
+      "users_with_metric": 15
+    },
+    "personality_trait_mae": {
+      "acceptance_evidence": false,
+      "direction": "lower_is_better",
+      "means": {
+        "baseline_a": 8.4e-05,
+        "baseline_b": 2.1e-05,
+        "baseline_c": 2.1e-05,
+        "personality": 8.4e-05
+      },
+      "users_with_metric": 15
+    }
+  },
   "diagnostic_trace_gate": {
     "diagnostic_trace_rows": 1884,
     "formal_requested": false,
@@ -163,7 +198,7 @@
     "surface_ablation_gate": true,
     "topic_gate": true
   },
-  "metric_version": "m54_v9_behavioral_policy_lift",
+  "metric_version": "m54_v10_discriminative_diagnostics",
   "milestone": "M5.4",
   "overall_conclusion": "partial",
   "partial_acceptance_eligible": true,
@@ -244,6 +279,64 @@
       "partner",
       "topic"
     ]
+  },
+  "split_weakness_summary": {
+    "partner": {
+      "behavioral_vs_baseline_c_mean_diff": 0.024137,
+      "behavioral_vs_baseline_c_pvalue": 0.37777,
+      "behavioral_vs_baseline_c_significant_better": false,
+      "fingerprint_vs_baseline_c_mean_diff": -0.128815,
+      "fingerprint_vs_baseline_c_pvalue": 1.0,
+      "fingerprint_vs_baseline_c_significant_better": false,
+      "monitored": false,
+      "policy": "weakness when behavioral_similarity_strategy or behavioral_fingerprint_similarity does not significantly beat Baseline C",
+      "semantic_vs_baseline_a_significant_better": true,
+      "semantic_vs_baseline_c_significant_better": true,
+      "users_included": 15,
+      "weakness_detected": true
+    },
+    "random": {
+      "behavioral_vs_baseline_c_mean_diff": 0.001132,
+      "behavioral_vs_baseline_c_pvalue": 0.5,
+      "behavioral_vs_baseline_c_significant_better": false,
+      "fingerprint_vs_baseline_c_mean_diff": -0.122542,
+      "fingerprint_vs_baseline_c_pvalue": 1.0,
+      "fingerprint_vs_baseline_c_significant_better": false,
+      "monitored": true,
+      "policy": "weakness when behavioral_similarity_strategy or behavioral_fingerprint_similarity does not significantly beat Baseline C",
+      "semantic_vs_baseline_a_significant_better": true,
+      "semantic_vs_baseline_c_significant_better": true,
+      "users_included": 15,
+      "weakness_detected": true
+    },
+    "temporal": {
+      "behavioral_vs_baseline_c_mean_diff": -0.018779,
+      "behavioral_vs_baseline_c_pvalue": 1.0,
+      "behavioral_vs_baseline_c_significant_better": false,
+      "fingerprint_vs_baseline_c_mean_diff": -0.14801,
+      "fingerprint_vs_baseline_c_pvalue": 1.0,
+      "fingerprint_vs_baseline_c_significant_better": false,
+      "monitored": true,
+      "policy": "weakness when behavioral_similarity_strategy or behavioral_fingerprint_similarity does not significantly beat Baseline C",
+      "semantic_vs_baseline_a_significant_better": true,
+      "semantic_vs_baseline_c_significant_better": true,
+      "users_included": 15,
+      "weakness_detected": true
+    },
+    "topic": {
+      "behavioral_vs_baseline_c_mean_diff": -0.019964,
+      "behavioral_vs_baseline_c_pvalue": 1.0,
+      "behavioral_vs_baseline_c_significant_better": false,
+      "fingerprint_vs_baseline_c_mean_diff": -0.124046,
+      "fingerprint_vs_baseline_c_pvalue": 1.0,
+      "fingerprint_vs_baseline_c_significant_better": false,
+      "monitored": false,
+      "policy": "weakness when behavioral_similarity_strategy or behavioral_fingerprint_similarity does not significantly beat Baseline C",
+      "semantic_vs_baseline_a_significant_better": true,
+      "semantic_vs_baseline_c_significant_better": true,
+      "users_included": 15,
+      "weakness_detected": true
+    }
   },
   "statistical_gate": {
     "engine": "scipy.stats.wilcoxon",

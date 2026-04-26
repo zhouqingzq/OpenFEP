@@ -32,9 +32,10 @@ from .constants import M54_ACCEPTANCE_RULES_VERSION
 from .metrics import (
     SimilarityResult,
     agent_state_similarity,
+    behavioral_fingerprint_similarity,
     behavioral_similarity,
     balanced_behavioral_similarity,
-    personality_similarity,
+    personality_profile_metrics,
     reply_function_buckets,
     semantic_pair_info_buckets,
     semantic_pair_scores,
@@ -285,13 +286,25 @@ def _metrics_bundle(
 ) -> dict[str, SimilarityResult]:
     behavior_weights = semantic_pair_weights(real_texts)
     behavior_buckets = reply_function_buckets(real_texts)
+    style = stylistic_similarity(generated_texts, real_texts)
+    personality_metrics = personality_profile_metrics(generated_texts, real_texts)
     raw_strategy = behavioral_similarity(gen_3, real_3, granularity="strategy")
     raw_action11 = behavioral_similarity(gen_11, real_11, granularity="action11")
+    balanced_strategy = balanced_behavioral_similarity(
+        gen_3,
+        real_3,
+        granularity="strategy",
+    )
+    balanced_action11 = balanced_behavioral_similarity(
+        gen_11,
+        real_11,
+        granularity="action11",
+    )
     return {
         "surface_similarity": surface_similarity(generated_texts, real_texts),
         "semantic_similarity": semantic_similarity(generated_texts, real_texts),
-        "stylistic_similarity": stylistic_similarity(generated_texts, real_texts),
-        "personality_similarity": personality_similarity(generated_texts, real_texts),
+        "stylistic_similarity": style,
+        **personality_metrics,
         "behavioral_similarity_strategy": behavioral_similarity(
             gen_3,
             real_3,
@@ -308,15 +321,12 @@ def _metrics_bundle(
         ),
         "behavioral_similarity_strategy_raw": raw_strategy,
         "behavioral_similarity_action11_raw": raw_action11,
-        "balanced_behavioral_similarity_strategy": balanced_behavioral_similarity(
-            gen_3,
-            real_3,
-            granularity="strategy",
-        ),
-        "balanced_behavioral_similarity_action11": balanced_behavioral_similarity(
-            gen_11,
-            real_11,
-            granularity="action11",
+        "balanced_behavioral_similarity_strategy": balanced_strategy,
+        "balanced_behavioral_similarity_action11": balanced_action11,
+        "behavioral_fingerprint_similarity": behavioral_fingerprint_similarity(
+            balanced_strategy,
+            balanced_action11,
+            style,
         ),
     }
 

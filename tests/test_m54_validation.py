@@ -22,6 +22,10 @@ from segmentum.dialogue.validation.constants import (
 )
 from segmentum.dialogue.validation.metrics import SimilarityResult
 from segmentum.dialogue.validation.metrics import behavioral_similarity, reply_function_buckets, semantic_pair_weights
+from segmentum.dialogue.validation.metrics import (
+    behavioral_fingerprint_similarity,
+    personality_profile_metrics,
+)
 from segmentum.dialogue.validation.pipeline import (
     ValidationConfig,
     ValidationReport,
@@ -1289,21 +1293,72 @@ class TestM54Validation(unittest.TestCase):
         self.assertLessEqual(p2, 1.0)
         self.assertIsInstance(sig2, bool)
 
+    def test_personality_trait_distances_detect_cosine_saturation(self) -> None:
+        class FakeAnalyzer:
+            def analyze(self, texts: list[str]):
+                if texts and texts[0] == "generated":
+                    vector = {
+                        "openness": 0.9,
+                        "conscientiousness": 0.8,
+                        "extraversion": 0.7,
+                        "agreeableness": 0.6,
+                        "neuroticism": 0.5,
+                    }
+                else:
+                    vector = {
+                        "openness": 0.8,
+                        "conscientiousness": 0.7,
+                        "extraversion": 0.6,
+                        "agreeableness": 0.5,
+                        "neuroticism": 0.4,
+                    }
+                return type("Result", (), {"big_five": vector})()
+
+        with patch("segmentum.dialogue.validation.metrics.PersonalityAnalyzer", return_value=FakeAnalyzer()):
+            metrics = personality_profile_metrics(["generated"], ["real"])
+        self.assertGreaterEqual(metrics["personality_similarity"].value, 0.99)
+        self.assertGreater(metrics["personality_trait_mae"].value, 0.0)
+        self.assertGreater(metrics["personality_trait_l2"].value, 0.0)
+        self.assertTrue(metrics["personality_trait_mae"].details["diagnostic_only"])
+
+    def test_behavioral_fingerprint_similarity_uses_fixed_weights(self) -> None:
+        result = behavioral_fingerprint_similarity(
+            SimilarityResult("balanced_behavioral_similarity_strategy", 0.8, {}),
+            SimilarityResult("balanced_behavioral_similarity_action11", 0.6, {}),
+            SimilarityResult("stylistic_similarity", 0.5, {}),
+        )
+        self.assertEqual(result.metric_name, "behavioral_fingerprint_similarity")
+        self.assertAlmostEqual(result.value, 0.67)
+        self.assertEqual(
+            result.details["weights"],
+            {
+                "balanced_behavioral_similarity_strategy": 0.45,
+                "balanced_behavioral_similarity_action11": 0.35,
+                "stylistic_similarity": 0.20,
+            },
+        )
+
     def test_report_writes_semantic_diagnostics(self) -> None:
         metrics_p = {
             "semantic_similarity": 0.70,
             "behavioral_similarity_strategy": 0.8,
             "behavioral_similarity_action11": 0.8,
+            "behavioral_fingerprint_similarity": 0.8,
             "stylistic_similarity": 0.8,
             "personality_similarity": 0.8,
+            "personality_trait_mae": 0.1,
+            "personality_trait_l2": 0.1,
             "agent_state_similarity": 0.9,
         }
         metrics_a = {
             "semantic_similarity": 0.40,
             "behavioral_similarity_strategy": 0.4,
             "behavioral_similarity_action11": 0.4,
+            "behavioral_fingerprint_similarity": 0.4,
             "stylistic_similarity": 0.4,
             "personality_similarity": 0.4,
+            "personality_trait_mae": 0.2,
+            "personality_trait_l2": 0.2,
         }
         strategy = {
             "skipped": False,

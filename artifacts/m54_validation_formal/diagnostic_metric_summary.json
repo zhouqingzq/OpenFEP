@@ -1,0 +1,35 @@
+{
+  "personality_similarity": {
+    "acceptance_evidence": false,
+    "direction": "diagnostic_only",
+    "means": {
+      "baseline_a": 1.0,
+      "baseline_b": 1.0,
+      "baseline_c": 1.0,
+      "personality": 1.0
+    },
+    "users_with_metric": 15
+  },
+  "personality_trait_l2": {
+    "acceptance_evidence": false,
+    "direction": "lower_is_better",
+    "means": {
+      "baseline_a": 9.9e-05,
+      "baseline_b": 3.5e-05,
+      "baseline_c": 2.5e-05,
+      "personality": 9.9e-05
+    },
+    "users_with_metric": 15
+  },
+  "personality_trait_mae": {
+    "acceptance_evidence": false,
+    "direction": "lower_is_better",
+    "means": {
+      "baseline_a": 8.4e-05,
+      "baseline_b": 2.9e-05,
+      "baseline_c": 2.1e-05,
+      "personality": 8.4e-05
+    },
+    "users_with_metric": 15
+  }
+}
