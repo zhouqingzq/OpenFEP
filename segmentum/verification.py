@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import Enum
+
+try:
+    from enum import StrEnum  # Python >=3.11
+except ImportError:
+
+    class StrEnum(str, Enum):  # Python <3.11
+        pass
 from typing import Mapping
 
 from .prediction_ledger import (

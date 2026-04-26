@@ -338,12 +338,16 @@ def _target_policies(
         if action_counts.get(action, 0.0) > 0
     }
     policy_evidence_count = int(round(evidence_total))
-    majority_is_collapse = bool(strategy_majority_coverage >= 0.75 and strategy_entropy < 0.35)
+    majority_is_collapse = bool(strategy_majority_coverage >= 0.65 and strategy_entropy < 0.45)
+    strategy_total = float(max(1, sum(strategy_counts.values())))
+    escape_majority = bool(strategy_counts.get("escape", 0) / strategy_total >= 0.50)
     if strategy_counts and not majority_is_collapse and policy_evidence_count >= 3:
         dominant_strategy = max(
             strategy_counts.items(),
             key=lambda item: (float(item[1]), str(item[0])),
         )[0]
+    elif escape_majority and policy_evidence_count >= 3:
+        dominant_strategy = "escape"
     else:
         dominant_strategy = "expected_free_energy"
     strategy_confidence = 0.0
@@ -354,10 +358,11 @@ def _target_policies(
         key=lambda item: (-float(item[1]), DIALOGUE_ACTION_NAMES.index(item[0])),
     )
     preference_floor = 0.12 if policy_evidence_count >= 12 else 0.20
+    escape_actions = {"minimal_response", "deflect", "disengage"}
     learned_preferences = [
         action
         for action, frequency in ranked_actions
-        if float(frequency) >= preference_floor
+        if float(frequency) >= (0.06 if action in escape_actions else preference_floor)
     ][:4]
     if not learned_preferences and ranked_actions:
         learned_preferences = [ranked_actions[0][0]]
@@ -424,14 +429,22 @@ def apply_train_state_calibration(
     tokens: Counter[str] = Counter()
     partner_questions = 0
     predicted_actions = _predict_actions([reply_text for _, reply_text, _ in pairs], classifier)
-    for (partner_text, reply_text, partner_uid), (action, strategy) in zip(pairs, predicted_actions):
+    pair_count = len(pairs)
+    max_idx = float(max(1, pair_count - 1))
+    for idx, ((partner_text, reply_text, partner_uid), (action, strategy)) in enumerate(
+        zip(pairs, predicted_actions)
+    ):
         action_counts[action] += 1
         strategy_counts[strategy] += 1
         info_bucket = semantic_pair_info_bucket(reply_text)
         pair_weight = float(semantic_pair_weight_for_text(reply_text))
         reply_function = classify_reply_function(reply_text)
         context_candidates = dialogue_policy_context_candidates(partner_text, partner_uid)
-        behavioral_weight = float(behavioral_policy_weight_for_reply_function(reply_function))
+        session_position = idx / max_idx if max_idx > 0 else 1.0
+        recency_weight = 0.70 + 0.30 * session_position
+        behavioral_weight = (
+            float(behavioral_policy_weight_for_reply_function(reply_function)) * recency_weight
+        )
         surface_bucket_counts[info_bucket] += 1
         reply_function_counts[reply_function] += 1
         policy_pair_weights.append(pair_weight)

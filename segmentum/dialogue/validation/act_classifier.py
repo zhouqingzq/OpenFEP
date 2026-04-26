@@ -994,6 +994,7 @@ def validate_act_classifier(
     gate_samples: list[dict[str, str]] | None = None,
     classifier: DialogueActClassifier | KeywordDialogueActClassifier | None = None,
     min_macro_f1_3class: float = 0.70,
+    min_escape_recall: float = 0.40,
     dataset_origin: str = "unspecified",
     max_cue_override_rate: float = DEFAULT_MAX_CUE_OVERRIDE_RATE,
     require_classifier_provenance: bool = True,
@@ -1119,6 +1120,11 @@ def validate_act_classifier(
     without_cue_gate_passed = bool(
         non_cue_indices and macro_f1_3_without_cue >= float(min_macro_f1_3class)
     )
+    per_class_3 = _per_class_metrics(true_3, pred_3, labels_3)
+    escape_recall = float(per_class_3.get("escape", {}).get("recall", 0.0))
+    exploit_recall = float(per_class_3.get("exploit", {}).get("recall", 0.0))
+    explore_recall = float(per_class_3.get("explore", {}).get("recall", 0.0))
+    escape_recall_gate_passed = bool(escape_recall >= float(min_escape_recall))
     formal_gate_eligible = bool(
         dataset_ok
         and formal_engine
@@ -1126,6 +1132,7 @@ def validate_act_classifier(
         and evidence_tier == "external_human_labeled"
         and cue_override_gate_passed
         and without_cue_gate_passed
+        and escape_recall_gate_passed
     )
     passed = bool(formal_gate_eligible and macro_f1_3 >= float(min_macro_f1_3class))
     return {
@@ -1149,7 +1156,12 @@ def validate_act_classifier(
         "macro_f1_3class": round(float(macro_f1_3), 6),
         "macro_f1_11class": round(float(macro_f1_11), 6),
         "confusion_matrix_3class": _confusion_matrix(true_3, pred_3, labels_3),
-        "per_class_metrics_3class": _per_class_metrics(true_3, pred_3, labels_3),
+        "per_class_metrics_3class": per_class_3,
+        "escape_recall": round(float(escape_recall), 6),
+        "exploit_recall": round(float(exploit_recall), 6),
+        "explore_recall": round(float(explore_recall), 6),
+        "escape_recall_gate_passed": bool(escape_recall_gate_passed),
+        "min_escape_recall": float(min_escape_recall),
         "cue_override_rate": cue_override_rate,
         "cue_feature_assist_rate": cue_feature_assist_rate,
         "cue_override_gate_passed": bool(cue_override_gate_passed),

@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Literal, NotRequired, TypedDict
+from typing import Literal, TypedDict
+
+try:
+    from typing import NotRequired  # Python >=3.11
+except ImportError:
+    from typing_extensions import NotRequired  # Python <3.11
 
 
 class TranscriptUtterance(TypedDict):
