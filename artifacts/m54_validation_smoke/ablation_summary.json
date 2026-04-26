@@ -1,0 +1,26 @@
+{
+  "no_policy_trait_bias": {
+    "action_agreement_vs_personality_mean": 0.691618,
+    "count": 60,
+    "semantic_mean": 0.405251,
+    "semantic_vs_baseline_a_diff_mean": 0.02461,
+    "semantic_vs_baseline_c_diff_mean": 0.155436,
+    "text_similarity_vs_personality_mean": 0.814767
+  },
+  "no_surface_profile": {
+    "action_agreement_vs_personality_mean": 0.936939,
+    "count": 60,
+    "semantic_mean": 0.389664,
+    "semantic_vs_baseline_a_diff_mean": 0.009024,
+    "semantic_vs_baseline_c_diff_mean": 0.13985,
+    "text_similarity_vs_personality_mean": 0.702705
+  },
+  "surface_only_default_agent": {
+    "action_agreement_vs_personality_mean": 0.52752,
+    "count": 60,
+    "semantic_mean": 0.404272,
+    "semantic_vs_baseline_a_diff_mean": 0.023631,
+    "semantic_vs_baseline_c_diff_mean": 0.154458,
+    "text_similarity_vs_personality_mean": 0.816026
+  }
+}

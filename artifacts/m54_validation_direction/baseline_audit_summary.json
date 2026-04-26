@@ -1,0 +1,190 @@
+{
+  "baseline_c_too_close_fields": {
+    "action_agreement_rate": 0.153397,
+    "mean_baseline_semantic": 0.261881,
+    "mean_semantic_delta": 0.115328,
+    "mean_text_similarity": 0.448263,
+    "template_agreement_rate": 0.050425
+  },
+  "baseline_c_too_close_reason": "",
+  "baseline_c_too_close_warning": false,
+  "baseline_c_too_weak_reason": "",
+  "baseline_c_too_weak_warning": false,
+  "baselines": {
+    "baseline_a": {
+      "action_agreement_rate": 0.467091,
+      "action_distribution_delta": 0.067923,
+      "baseline_action_distribution": {
+        "agree": 1053,
+        "elaborate": 521,
+        "introduce_topic": 51,
+        "share_opinion": 259
+      },
+      "exact_duplicate_rate": 0.001592,
+      "mean_baseline_semantic": 0.358915,
+      "mean_length_delta": 20.367834,
+      "mean_semantic_delta": 0.018294,
+      "mean_text_similarity": 0.688891,
+      "personality_action_distribution": {
+        "agree": 1295,
+        "ask_question": 10,
+        "deflect": 2,
+        "elaborate": 246,
+        "introduce_topic": 22,
+        "joke": 2,
+        "minimal_response": 205,
+        "share_opinion": 102
+      },
+      "rows": 1884,
+      "strategy_agreement_rate": 0.693737,
+      "strategy_jsd": 0.047637,
+      "template_agreement_rate": 0.153928
+    },
+    "baseline_b_best": {
+      "action_agreement_rate": 0.603503,
+      "action_distribution_delta": 0.024045,
+      "baseline_action_distribution": {
+        "agree": 1531,
+        "elaborate": 145,
+        "introduce_topic": 16,
+        "joke": 7,
+        "minimal_response": 46,
+        "share_opinion": 139
+      },
+      "exact_duplicate_rate": 0.0,
+      "mean_baseline_semantic": 0.455353,
+      "mean_length_delta": 37.882696,
+      "mean_semantic_delta": -0.078144,
+      "mean_text_similarity": 0.38548,
+      "personality_action_distribution": {
+        "agree": 1295,
+        "ask_question": 10,
+        "deflect": 2,
+        "elaborate": 246,
+        "introduce_topic": 22,
+        "joke": 2,
+        "minimal_response": 205,
+        "share_opinion": 102
+      },
+      "rows": 1884,
+      "strategy_agreement_rate": 0.738854,
+      "strategy_jsd": 0.015714,
+      "template_agreement_rate": 0.0
+    },
+    "baseline_c": {
+      "action_agreement_rate": 0.153397,
+      "action_distribution_delta": 0.363417,
+      "baseline_action_distribution": {
+        "agree": 39,
+        "elaborate": 1521,
+        "minimal_response": 324
+      },
+      "exact_duplicate_rate": 0.0,
+      "mean_baseline_semantic": 0.261881,
+      "mean_length_delta": 29.68896,
+      "mean_semantic_delta": 0.115328,
+      "mean_text_similarity": 0.448263,
+      "personality_action_distribution": {
+        "agree": 1295,
+        "ask_question": 10,
+        "deflect": 2,
+        "elaborate": 246,
+        "introduce_topic": 22,
+        "joke": 2,
+        "minimal_response": 205,
+        "share_opinion": 102
+      },
+      "rows": 1884,
+      "strategy_agreement_rate": 0.718684,
+      "strategy_jsd": 0.028112,
+      "template_agreement_rate": 0.050425
+    }
+  },
+  "per_user_rankings": {
+    "best": [
+      {
+        "baseline_a_action_agreement_rate": 1.0,
+        "baseline_a_text_similarity_mean": 0.623582,
+        "baseline_c_action_agreement_rate": 0.0,
+        "baseline_c_text_similarity_mean": 0.173987,
+        "mean_semantic_delta": 0.265937,
+        "user_uid": 2637266
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.525735,
+        "baseline_a_text_similarity_mean": 0.604107,
+        "baseline_c_action_agreement_rate": 0.0,
+        "baseline_c_text_similarity_mean": 0.397811,
+        "mean_semantic_delta": 0.053505,
+        "user_uid": 2637485
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.588235,
+        "baseline_a_text_similarity_mean": 0.719342,
+        "baseline_c_action_agreement_rate": 0.058824,
+        "baseline_c_text_similarity_mean": 0.336159,
+        "mean_semantic_delta": 0.048797,
+        "user_uid": 2637171
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.383562,
+        "baseline_a_text_similarity_mean": 0.580137,
+        "baseline_c_action_agreement_rate": 0.356164,
+        "baseline_c_text_similarity_mean": 0.49061,
+        "mean_semantic_delta": 0.04117,
+        "user_uid": 2637509
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.521277,
+        "baseline_a_text_similarity_mean": 0.689432,
+        "baseline_c_action_agreement_rate": 0.021277,
+        "baseline_c_text_similarity_mean": 0.472484,
+        "mean_semantic_delta": 0.038945,
+        "user_uid": 2637134
+      }
+    ],
+    "worst": [
+      {
+        "baseline_a_action_agreement_rate": 0.888889,
+        "baseline_a_text_similarity_mean": 0.754358,
+        "baseline_c_action_agreement_rate": 0.0,
+        "baseline_c_text_similarity_mean": 0.30742,
+        "mean_semantic_delta": -0.006116,
+        "user_uid": 2637594
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.375,
+        "baseline_a_text_similarity_mean": 0.748599,
+        "baseline_c_action_agreement_rate": 0.377273,
+        "baseline_c_text_similarity_mean": 0.484561,
+        "mean_semantic_delta": -0.004564,
+        "user_uid": 2637470
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.553459,
+        "baseline_a_text_similarity_mean": 0.565782,
+        "baseline_c_action_agreement_rate": 0.025157,
+        "baseline_c_text_similarity_mean": 0.38676,
+        "mean_semantic_delta": -0.000603,
+        "user_uid": 2637532
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.467949,
+        "baseline_a_text_similarity_mean": 0.718637,
+        "baseline_c_action_agreement_rate": 0.326923,
+        "baseline_c_text_similarity_mean": 0.483087,
+        "mean_semantic_delta": 0.001726,
+        "user_uid": 2637215
+      },
+      {
+        "baseline_a_action_agreement_rate": 0.489796,
+        "baseline_a_text_similarity_mean": 0.707435,
+        "baseline_c_action_agreement_rate": 0.010204,
+        "baseline_c_text_similarity_mean": 0.374194,
+        "mean_semantic_delta": 0.007641,
+        "user_uid": 2637376
+      }
+    ]
+  },
+  "wrong_user_masked_by_generic_template_warning": false
+}

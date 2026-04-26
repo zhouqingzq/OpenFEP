@@ -1,0 +1,1344 @@
+{
+  "ablation_diagnosis": {
+    "beating_full_clusters": {
+      "no_policy_trait_bias": {
+        "real=escape|template=agree:0|surface=partner:train:no_policy_anchor_only|len=medium": 27,
+        "real=escape|template=agree:0|surface=random:train:no_policy_anchor_only|len=medium": 23,
+        "real=escape|template=agree:0|surface=topic:train:no_policy_anchor_only|len=medium": 22,
+        "real=escape|template=agree:1|surface=partner:train:no_policy_anchor_only|len=medium": 20,
+        "real=escape|template=agree:1|surface=random:train:no_policy_anchor_only|len=medium": 21,
+        "real=escape|template=agree:1|surface=temporal:train:no_policy_anchor_only|len=medium": 16,
+        "real=escape|template=agree:1|surface=topic:train:no_policy_anchor_only|len=medium": 19,
+        "real=escape|template=agree:2|surface=partner:train:no_policy_anchor_only|len=medium": 26,
+        "real=escape|template=agree:2|surface=random:train:no_policy_anchor_only|len=medium": 23,
+        "real=escape|template=agree:2|surface=topic:train:no_policy_anchor_only|len=medium": 22,
+        "real=exploit|template=agree:0|surface=partner:train:no_policy_anchor_only|len=medium": 16,
+        "real=exploit|template=agree:0|surface=random:train:no_policy_anchor_only|len=medium": 19,
+        "real=exploit|template=agree:0|surface=topic:train:no_policy_anchor_only|len=medium": 16,
+        "real=exploit|template=agree:1|surface=random:train:no_policy_anchor_only|len=medium": 15,
+        "real=exploit|template=agree:1|surface=topic:train:no_policy_anchor_only|len=medium": 18,
+        "real=exploit|template=agree:2|surface=random:train:no_policy_anchor_only|len=medium": 16
+      },
+      "surface_only_default_agent": {
+        "real=escape|template=agree:0|surface=partner:train:surface_only_anchor_only|len=medium": 17,
+        "real=escape|template=agree:0|surface=random:train:surface_only_anchor_only|len=medium": 20,
+        "real=escape|template=agree:0|surface=random:train:surface_only_anchor_only|len=short": 13,
+        "real=escape|template=agree:0|surface=topic:train:surface_only_anchor_only|len=medium": 18,
+        "real=escape|template=agree:0|surface=topic:train:surface_only_anchor_only|len=short": 13,
+        "real=escape|template=agree:1|surface=random:train:surface_only_anchor_only|len=medium": 13,
+        "real=escape|template=agree:1|surface=temporal:train:surface_only_anchor_only|len=medium": 11,
+        "real=escape|template=agree:1|surface=topic:train:surface_only_anchor_only|len=medium": 11,
+        "real=escape|template=agree:2|surface=partner:train:surface_only_anchor_only|len=medium": 24,
+        "real=escape|template=agree:2|surface=random:train:surface_only_anchor_only|len=medium": 14,
+        "real=escape|template=elaborate:0|surface=partner:train:surface_only_anchor_only|len=medium": 12,
+        "real=escape|template=elaborate:1|surface=partner:train:surface_only_anchor_only|len=medium": 15,
+        "real=escape|template=elaborate:2|surface=partner:train:surface_only_anchor_only|len=medium": 13,
+        "real=exploit|template=agree:0|surface=random:train:surface_only_anchor_only|len=medium": 16,
+        "real=exploit|template=agree:0|surface=topic:train:surface_only_anchor_only|len=medium": 16,
+        "real=exploit|template=agree:1|surface=partner:train:surface_only_anchor_only|len=medium": 13
+      }
+    },
+    "close_or_beating_full_cases": {
+      "no_policy_trait_bias": [
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.55002,
+          "ablation_score": 0.986107,
+          "ablation_surface_source": "random:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:1",
+          "full_action": "minimal_response",
+          "full_score": 0.436087,
+          "full_surface_source": "random:train",
+          "full_template": "minimal_response:0",
+          "pair_index": 5,
+          "strategy": "random",
+          "user_uid": 2637509
+        },
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.55002,
+          "ablation_score": 0.986107,
+          "ablation_surface_source": "topic:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:1",
+          "full_action": "minimal_response",
+          "full_score": 0.436087,
+          "full_surface_source": "topic:train",
+          "full_template": "minimal_response:0",
+          "pair_index": 5,
+          "strategy": "topic",
+          "user_uid": 2637509
+        },
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.48498,
+          "ablation_score": 0.937598,
+          "ablation_surface_source": "partner:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:0",
+          "full_action": "agree",
+          "full_score": 0.452618,
+          "full_surface_source": "partner:train",
+          "full_template": "agree:1",
+          "pair_index": 25,
+          "strategy": "partner",
+          "user_uid": 2637376
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.480558,
+          "ablation_score": 0.781616,
+          "ablation_surface_source": "partner:train:no_policy_anchor_only",
+          "ablation_template": "agree:2",
+          "full_action": "agree",
+          "full_score": 0.301058,
+          "full_surface_source": "partner:train",
+          "full_template": "agree:0",
+          "pair_index": 1,
+          "strategy": "partner",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.433891,
+          "ablation_score": 0.555142,
+          "ablation_surface_source": "temporal:train:no_policy_anchor_only",
+          "ablation_template": "agree:0",
+          "full_action": "introduce_topic",
+          "full_score": 0.121251,
+          "full_surface_source": "temporal:train",
+          "full_template": "introduce_topic:0",
+          "pair_index": 3,
+          "strategy": "temporal",
+          "user_uid": 2637376
+        },
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.413906,
+          "ablation_score": 0.949536,
+          "ablation_surface_source": "random:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:1",
+          "full_action": "deflect",
+          "full_score": 0.53563,
+          "full_surface_source": "random:train",
+          "full_template": "deflect:2",
+          "pair_index": 25,
+          "strategy": "random",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.413906,
+          "ablation_score": 0.949536,
+          "ablation_surface_source": "topic:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:1",
+          "full_action": "deflect",
+          "full_score": 0.53563,
+          "full_surface_source": "topic:train",
+          "full_template": "deflect:2",
+          "pair_index": 25,
+          "strategy": "topic",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.38349,
+          "ablation_score": 0.793822,
+          "ablation_surface_source": "random:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:1",
+          "full_action": "deflect",
+          "full_score": 0.410332,
+          "full_surface_source": "random:train",
+          "full_template": "deflect:1",
+          "pair_index": 59,
+          "strategy": "random",
+          "user_uid": 2637215
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.352317,
+          "ablation_score": 0.637084,
+          "ablation_surface_source": "partner:train:no_policy_anchor_only",
+          "ablation_template": "agree:0",
+          "full_action": "share_opinion",
+          "full_score": 0.284767,
+          "full_surface_source": "partner:train",
+          "full_template": "share_opinion:1",
+          "pair_index": 9,
+          "strategy": "partner",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "minimal_response",
+          "ablation_minus_full": 0.320359,
+          "ablation_score": 0.551211,
+          "ablation_surface_source": "partner:train:no_policy_anchor_only",
+          "ablation_template": "minimal_response:0",
+          "full_action": "introduce_topic",
+          "full_score": 0.230852,
+          "full_surface_source": "partner:train",
+          "full_template": "introduce_topic:1",
+          "pair_index": 29,
+          "strategy": "partner",
+          "user_uid": 2637376
+        }
+      ],
+      "surface_only_default_agent": [
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.480558,
+          "ablation_score": 0.781616,
+          "ablation_surface_source": "partner:train:surface_only_anchor_only",
+          "ablation_template": "agree:0",
+          "full_action": "agree",
+          "full_score": 0.301058,
+          "full_surface_source": "partner:train",
+          "full_template": "agree:0",
+          "pair_index": 1,
+          "strategy": "partner",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.433891,
+          "ablation_score": 0.555142,
+          "ablation_surface_source": "temporal:train:surface_only_anchor_only",
+          "ablation_template": "agree:2",
+          "full_action": "introduce_topic",
+          "full_score": 0.121251,
+          "full_surface_source": "temporal:train",
+          "full_template": "introduce_topic:0",
+          "pair_index": 3,
+          "strategy": "temporal",
+          "user_uid": 2637376
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.305744,
+          "ablation_score": 0.565794,
+          "ablation_surface_source": "random:train:surface_only_anchor_only",
+          "ablation_template": "agree:1",
+          "full_action": "agree",
+          "full_score": 0.26005,
+          "full_surface_source": "random:train",
+          "full_template": "agree:2",
+          "pair_index": 10,
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.305744,
+          "ablation_score": 0.565794,
+          "ablation_surface_source": "topic:train:surface_only_anchor_only",
+          "ablation_template": "agree:1",
+          "full_action": "agree",
+          "full_score": 0.26005,
+          "full_surface_source": "topic:train",
+          "full_template": "agree:2",
+          "pair_index": 10,
+          "strategy": "topic",
+          "user_uid": 2637101
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.270794,
+          "ablation_score": 0.331795,
+          "ablation_surface_source": "temporal:train:surface_only_anchor_only",
+          "ablation_template": "agree:1",
+          "full_action": "share_opinion",
+          "full_score": 0.061001,
+          "full_surface_source": "temporal:train",
+          "full_template": "share_opinion:1",
+          "pair_index": 6,
+          "strategy": "temporal",
+          "user_uid": 2637532
+        },
+        {
+          "ablation_action": "elaborate",
+          "ablation_minus_full": 0.25543,
+          "ablation_score": 0.262268,
+          "ablation_surface_source": "random:train:surface_only_anchor_only",
+          "ablation_template": "elaborate:1",
+          "full_action": "introduce_topic",
+          "full_score": 0.006838,
+          "full_surface_source": "random:train",
+          "full_template": "introduce_topic:0",
+          "pair_index": 5,
+          "strategy": "random",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "elaborate",
+          "ablation_minus_full": 0.25543,
+          "ablation_score": 0.262268,
+          "ablation_surface_source": "topic:train:surface_only_anchor_only",
+          "ablation_template": "elaborate:1",
+          "full_action": "introduce_topic",
+          "full_score": 0.006838,
+          "full_surface_source": "topic:train",
+          "full_template": "introduce_topic:0",
+          "pair_index": 5,
+          "strategy": "topic",
+          "user_uid": 2637134
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.254074,
+          "ablation_score": 0.522243,
+          "ablation_surface_source": "random:train:surface_only_anchor_only",
+          "ablation_template": "agree:1",
+          "full_action": "introduce_topic",
+          "full_score": 0.268169,
+          "full_surface_source": "random:train",
+          "full_template": "introduce_topic:0",
+          "pair_index": 6,
+          "strategy": "random",
+          "user_uid": 2637376
+        },
+        {
+          "ablation_action": "agree",
+          "ablation_minus_full": 0.254074,
+          "ablation_score": 0.522243,
+          "ablation_surface_source": "topic:train:surface_only_anchor_only",
+          "ablation_template": "agree:1",
+          "full_action": "introduce_topic",
+          "full_score": 0.268169,
+          "full_surface_source": "topic:train",
+          "full_template": "introduce_topic:0",
+          "pair_index": 6,
+          "strategy": "topic",
+          "user_uid": 2637376
+        },
+        {
+          "ablation_action": "elaborate",
+          "ablation_minus_full": 0.249661,
+          "ablation_score": 0.450566,
+          "ablation_surface_source": "partner:train:surface_only_anchor_only",
+          "ablation_template": "elaborate:2",
+          "full_action": "introduce_topic",
+          "full_score": 0.200905,
+          "full_surface_source": "partner:train",
+          "full_template": "introduce_topic:2",
+          "pair_index": 42,
+          "strategy": "partner",
+          "user_uid": 2637376
+        }
+      ]
+    },
+    "lift_means": {
+      "surface_anchor_standalone_lift_vs_baseline_c": 0.122969,
+      "surface_lift_full_minus_no_surface": 0.015379,
+      "trait_policy_lift_full_minus_no_policy": 0.013975
+    },
+    "lift_medians": {
+      "surface_anchor_standalone_lift_vs_baseline_c": 0.109654,
+      "surface_lift_full_minus_no_surface": 0.015854,
+      "trait_policy_lift_full_minus_no_policy": 0.010322
+    },
+    "trace_available": true
+  },
+  "artifact_dir": "artifacts/m54_validation_formal",
+  "artifact_sanity": {
+    "ablation_baseline_c_consistency": [
+      {
+        "absolute_error": 0.0,
+        "baseline_c_mean": 0.248103,
+        "expected_semantic_vs_baseline_c_diff_mean": 0.144798,
+        "name": "no_surface_profile",
+        "observed_semantic_vs_baseline_c_diff_mean": 0.144798,
+        "passed": true,
+        "semantic_mean": 0.392901
+      },
+      {
+        "absolute_error": 0.0,
+        "baseline_c_mean": 0.248103,
+        "expected_semantic_vs_baseline_c_diff_mean": 0.156852,
+        "name": "no_policy_trait_bias",
+        "observed_semantic_vs_baseline_c_diff_mean": 0.156852,
+        "passed": true,
+        "semantic_mean": 0.404955
+      },
+      {
+        "absolute_error": 0.0,
+        "baseline_c_mean": 0.248103,
+        "expected_semantic_vs_baseline_c_diff_mean": 0.156169,
+        "name": "surface_only_default_agent",
+        "observed_semantic_vs_baseline_c_diff_mean": 0.156169,
+        "passed": true,
+        "semantic_mean": 0.404272
+      }
+    ],
+    "ablation_trace_rows": 1884,
+    "diagnostic_trace_rows": 1884,
+    "missing_files": [],
+    "passed": true,
+    "stale_ablation_baseline_c_warning": false
+  },
+  "baseline_c_diagnosis": {
+    "baseline_c_surface_metric_suspect": true,
+    "baseline_c_surface_metric_suspect_reason": "filtered_personality_delta_positive",
+    "baseline_c_win_rate": 0.206476,
+    "baseline_c_win_turns": 389,
+    "filtered_semantic_deltas": {
+      "all_rows": {
+        "mean_personality_vs_c_delta": 0.138689,
+        "median_personality_vs_c_delta": 0.128479,
+        "personality_win_rate": 0.793524,
+        "rows": 1884
+      },
+      "exclude_baseline_c_short_replies": {
+        "mean_personality_vs_c_delta": 0.138689,
+        "median_personality_vs_c_delta": 0.128479,
+        "personality_win_rate": 0.793524,
+        "rows": 1884
+      },
+      "exclude_population_surface": {
+        "mean_personality_vs_c_delta": 0.0,
+        "median_personality_vs_c_delta": 0.0,
+        "personality_win_rate": 0.0,
+        "rows": 0
+      },
+      "exclude_short_or_population_surface": {
+        "mean_personality_vs_c_delta": 0.0,
+        "median_personality_vs_c_delta": 0.0,
+        "personality_win_rate": 0.0,
+        "rows": 0
+      },
+      "length_bucket_matched_to_real": {
+        "mean_personality_vs_c_delta": 0.0,
+        "median_personality_vs_c_delta": 0.0,
+        "personality_win_rate": 0.0,
+        "rows": 0
+      }
+    },
+    "interpretation": {
+      "population_averaged_state_like_win_rate": 0.0,
+      "population_surface_win_rate": 1.0,
+      "short_reply_template_win_rate": 0.0
+    },
+    "per_user_strategy": [
+      {
+        "mean_delta": 0.080499,
+        "median_delta": 0.006816,
+        "p10_delta": -0.117627,
+        "p90_delta": 0.393429,
+        "personality_win_rate": 0.5,
+        "strategy": "partner",
+        "turns": 20,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.043465,
+        "median_delta": -0.009425,
+        "p10_delta": -0.118421,
+        "p90_delta": 0.313667,
+        "personality_win_rate": 0.473684,
+        "strategy": "random",
+        "turns": 19,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.09802,
+        "median_delta": 0.092615,
+        "p10_delta": -0.09789,
+        "p90_delta": 0.299626,
+        "personality_win_rate": 0.8,
+        "strategy": "temporal",
+        "turns": 10,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.043465,
+        "median_delta": -0.009425,
+        "p10_delta": -0.118421,
+        "p90_delta": 0.313667,
+        "personality_win_rate": 0.473684,
+        "strategy": "topic",
+        "turns": 19,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.083252,
+        "median_delta": 0.084042,
+        "p10_delta": -0.134159,
+        "p90_delta": 0.315763,
+        "personality_win_rate": 0.705882,
+        "strategy": "partner",
+        "turns": 17,
+        "user_uid": "2637134"
+      },
+      {
+        "mean_delta": 0.138686,
+        "median_delta": 0.118592,
+        "p10_delta": -0.078748,
+        "p90_delta": 0.405458,
+        "personality_win_rate": 0.769231,
+        "strategy": "random",
+        "turns": 26,
+        "user_uid": "2637134"
+      },
+      {
+        "mean_delta": 0.079408,
+        "median_delta": 0.079115,
+        "p10_delta": -0.115675,
+        "p90_delta": 0.279618,
+        "personality_win_rate": 0.72,
+        "strategy": "temporal",
+        "turns": 25,
+        "user_uid": "2637134"
+      },
+      {
+        "mean_delta": 0.138686,
+        "median_delta": 0.118592,
+        "p10_delta": -0.078748,
+        "p90_delta": 0.405458,
+        "personality_win_rate": 0.769231,
+        "strategy": "topic",
+        "turns": 26,
+        "user_uid": "2637134"
+      },
+      {
+        "mean_delta": 0.284603,
+        "median_delta": 0.311156,
+        "p10_delta": 0.168477,
+        "p90_delta": 0.381548,
+        "personality_win_rate": 1.0,
+        "strategy": "partner",
+        "turns": 5,
+        "user_uid": "2637171"
+      },
+      {
+        "mean_delta": 0.242362,
+        "median_delta": 0.242362,
+        "p10_delta": 0.210763,
+        "p90_delta": 0.273962,
+        "personality_win_rate": 1.0,
+        "strategy": "random",
+        "turns": 2,
+        "user_uid": "2637171"
+      },
+      {
+        "mean_delta": 0.233938,
+        "median_delta": 0.17931,
+        "p10_delta": 0.070128,
+        "p90_delta": 0.418413,
+        "personality_win_rate": 1.0,
+        "strategy": "temporal",
+        "turns": 8,
+        "user_uid": "2637171"
+      },
+      {
+        "mean_delta": 0.281355,
+        "median_delta": 0.281355,
+        "p10_delta": 0.218561,
+        "p90_delta": 0.344149,
+        "personality_win_rate": 1.0,
+        "strategy": "topic",
+        "turns": 2,
+        "user_uid": "2637171"
+      },
+      {
+        "mean_delta": 0.13946,
+        "median_delta": 0.104305,
+        "p10_delta": 0.009127,
+        "p90_delta": 0.302289,
+        "personality_win_rate": 0.909091,
+        "strategy": "partner",
+        "turns": 22,
+        "user_uid": "2637215"
+      },
+      {
+        "mean_delta": 0.142933,
+        "median_delta": 0.119732,
+        "p10_delta": -0.018007,
+        "p90_delta": 0.325658,
+        "personality_win_rate": 0.864865,
+        "strategy": "random",
+        "turns": 74,
+        "user_uid": "2637215"
+      },
+      {
+        "mean_delta": 0.221916,
+        "median_delta": 0.205364,
+        "p10_delta": 0.01042,
+        "p90_delta": 0.526341,
+        "personality_win_rate": 0.9,
+        "strategy": "temporal",
+        "turns": 20,
+        "user_uid": "2637215"
+      },
+      {
+        "mean_delta": 0.174977,
+        "median_delta": 0.176401,
+        "p10_delta": -0.022509,
+        "p90_delta": 0.324827,
+        "personality_win_rate": 0.875,
+        "strategy": "topic",
+        "turns": 40,
+        "user_uid": "2637215"
+      },
+      {
+        "mean_delta": 0.588585,
+        "median_delta": 0.591543,
+        "p10_delta": 0.526727,
+        "p90_delta": 0.648075,
+        "personality_win_rate": 1.0,
+        "strategy": "partner",
+        "turns": 4,
+        "user_uid": "2637266"
+      },
+      {
+        "mean_delta": 0.533438,
+        "median_delta": 0.533438,
+        "p10_delta": 0.463663,
+        "p90_delta": 0.603212,
+        "personality_win_rate": 1.0,
+        "strategy": "random",
+        "turns": 2,
+        "user_uid": "2637266"
+      },
+      {
+        "mean_delta": 0.238892,
+        "median_delta": 0.238892,
+        "p10_delta": 0.238892,
+        "p90_delta": 0.238892,
+        "personality_win_rate": 1.0,
+        "strategy": "temporal",
+        "turns": 1,
+        "user_uid": "2637266"
+      },
+      {
+        "mean_delta": 0.533438,
+        "median_delta": 0.533438,
+        "p10_delta": 0.463663,
+        "p90_delta": 0.603212,
+        "personality_win_rate": 1.0,
+        "strategy": "topic",
+        "turns": 2,
+        "user_uid": "2637266"
+      },
+      {
+        "mean_delta": 0.155645,
+        "median_delta": 0.159417,
+        "p10_delta": -0.00851,
+        "p90_delta": 0.307578,
+        "personality_win_rate": 0.85,
+        "strategy": "partner",
+        "turns": 20,
+        "user_uid": "2637318"
+      },
+      {
+        "mean_delta": 0.127154,
+        "median_delta": 0.094606,
+        "p10_delta": -0.093524,
+        "p90_delta": 0.397293,
+        "personality_win_rate": 0.694444,
+        "strategy": "random",
+        "turns": 36,
+        "user_uid": "2637318"
+      },
+      {
+        "mean_delta": 0.230082,
+        "median_delta": 0.237143,
+        "p10_delta": 0.005927,
+        "p90_delta": 0.405641,
+        "personality_win_rate": 0.846154,
+        "strategy": "temporal",
+        "turns": 13,
+        "user_uid": "2637318"
+      },
+      {
+        "mean_delta": 0.127154,
+        "median_delta": 0.094606,
+        "p10_delta": -0.093524,
+        "p90_delta": 0.397293,
+        "personality_win_rate": 0.694444,
+        "strategy": "topic",
+        "turns": 36,
+        "user_uid": "2637318"
+      },
+      {
+        "mean_delta": 0.14222,
+        "median_delta": 0.12702,
+        "p10_delta": -0.052601,
+        "p90_delta": 0.36574,
+        "personality_win_rate": 0.808511,
+        "strategy": "partner",
+        "turns": 47,
+        "user_uid": "2637354"
+      },
+      {
+        "mean_delta": 0.206615,
+        "median_delta": 0.207292,
+        "p10_delta": -0.035671,
+        "p90_delta": 0.430594,
+        "personality_win_rate": 0.8125,
+        "strategy": "random",
+        "turns": 16,
+        "user_uid": "2637354"
+      },
+      {
+        "mean_delta": 0.149455,
+        "median_delta": 0.112293,
+        "p10_delta": -0.047475,
+        "p90_delta": 0.388447,
+        "personality_win_rate": 0.72,
+        "strategy": "temporal",
+        "turns": 25,
+        "user_uid": "2637354"
+      },
+      {
+        "mean_delta": 0.206615,
+        "median_delta": 0.207292,
+        "p10_delta": -0.035671,
+        "p90_delta": 0.430594,
+        "personality_win_rate": 0.8125,
+        "strategy": "topic",
+        "turns": 16,
+        "user_uid": "2637354"
+      },
+      {
+        "mean_delta": 0.128504,
+        "median_delta": 0.14437,
+        "p10_delta": -0.056101,
+        "p90_delta": 0.364045,
+        "personality_win_rate": 0.721311,
+        "strategy": "partner",
+        "turns": 61,
+        "user_uid": "2637372"
+      },
+      {
+        "mean_delta": 0.120251,
+        "median_delta": 0.107216,
+        "p10_delta": -0.081309,
+        "p90_delta": 0.328992,
+        "personality_win_rate": 0.746269,
+        "strategy": "random",
+        "turns": 67,
+        "user_uid": "2637372"
+      },
+      {
+        "mean_delta": 0.128908,
+        "median_delta": 0.148672,
+        "p10_delta": -0.020742,
+        "p90_delta": 0.224415,
+        "personality_win_rate": 0.888889,
+        "strategy": "temporal",
+        "turns": 36,
+        "user_uid": "2637372"
+      },
+      {
+        "mean_delta": 0.120251,
+        "median_delta": 0.107216,
+        "p10_delta": -0.081309,
+        "p90_delta": 0.328992,
+        "personality_win_rate": 0.746269,
+        "strategy": "topic",
+        "turns": 67,
+        "user_uid": "2637372"
+      },
+      {
+        "mean_delta": 0.135251,
+        "median_delta": 0.132236,
+        "p10_delta": -0.064287,
+        "p90_delta": 0.327091,
+        "personality_win_rate": 0.791667,
+        "strategy": "partner",
+        "turns": 48,
+        "user_uid": "2637376"
+      },
+      {
+        "mean_delta": 0.134831,
+        "median_delta": 0.127951,
+        "p10_delta": -2.6e-05,
+        "p90_delta": 0.321662,
+        "personality_win_rate": 0.9,
+        "strategy": "random",
+        "turns": 10,
+        "user_uid": "2637376"
+      },
+      {
+        "mean_delta": 0.174779,
+        "median_delta": 0.202105,
+        "p10_delta": -0.07821,
+        "p90_delta": 0.354834,
+        "personality_win_rate": 0.833333,
+        "strategy": "temporal",
+        "turns": 30,
+        "user_uid": "2637376"
+      },
+      {
+        "mean_delta": 0.134831,
+        "median_delta": 0.127951,
+        "p10_delta": -2.6e-05,
+        "p90_delta": 0.321662,
+        "personality_win_rate": 0.9,
+        "strategy": "topic",
+        "turns": 10,
+        "user_uid": "2637376"
+      },
+      {
+        "mean_delta": 0.01504,
+        "median_delta": 0.015478,
+        "p10_delta": -0.18661,
+        "p90_delta": 0.184619,
+        "personality_win_rate": 0.5,
+        "strategy": "partner",
+        "turns": 10,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.08087,
+        "median_delta": 0.061805,
+        "p10_delta": -0.126668,
+        "p90_delta": 0.357226,
+        "personality_win_rate": 0.727273,
+        "strategy": "random",
+        "turns": 11,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.108088,
+        "median_delta": 0.150093,
+        "p10_delta": -0.084555,
+        "p90_delta": 0.251265,
+        "personality_win_rate": 0.764706,
+        "strategy": "temporal",
+        "turns": 17,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.08087,
+        "median_delta": 0.061805,
+        "p10_delta": -0.126668,
+        "p90_delta": 0.357226,
+        "personality_win_rate": 0.727273,
+        "strategy": "topic",
+        "turns": 11,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.136743,
+        "median_delta": 0.137273,
+        "p10_delta": -0.039064,
+        "p90_delta": 0.30926,
+        "personality_win_rate": 0.825472,
+        "strategy": "partner",
+        "turns": 212,
+        "user_uid": "2637470"
+      },
+      {
+        "mean_delta": 0.121998,
+        "median_delta": 0.121795,
+        "p10_delta": -0.055483,
+        "p90_delta": 0.272403,
+        "personality_win_rate": 0.776471,
+        "strategy": "random",
+        "turns": 85,
+        "user_uid": "2637470"
+      },
+      {
+        "mean_delta": 0.153683,
+        "median_delta": 0.131032,
+        "p10_delta": 0.008462,
+        "p90_delta": 0.312389,
+        "personality_win_rate": 0.896552,
+        "strategy": "temporal",
+        "turns": 58,
+        "user_uid": "2637470"
+      },
+      {
+        "mean_delta": 0.121998,
+        "median_delta": 0.121795,
+        "p10_delta": -0.055483,
+        "p90_delta": 0.272403,
+        "personality_win_rate": 0.776471,
+        "strategy": "topic",
+        "turns": 85,
+        "user_uid": "2637470"
+      },
+      {
+        "mean_delta": 0.174191,
+        "median_delta": 0.171808,
+        "p10_delta": -0.009361,
+        "p90_delta": 0.41249,
+        "personality_win_rate": 0.858696,
+        "strategy": "partner",
+        "turns": 92,
+        "user_uid": "2637485"
+      },
+      {
+        "mean_delta": 0.162894,
+        "median_delta": 0.14867,
+        "p10_delta": -0.036237,
+        "p90_delta": 0.360042,
+        "personality_win_rate": 0.839286,
+        "strategy": "random",
+        "turns": 56,
+        "user_uid": "2637485"
+      },
+      {
+        "mean_delta": 0.151801,
+        "median_delta": 0.121383,
+        "p10_delta": -0.008143,
+        "p90_delta": 0.37613,
+        "personality_win_rate": 0.887324,
+        "strategy": "temporal",
+        "turns": 71,
+        "user_uid": "2637485"
+      },
+      {
+        "mean_delta": 0.185045,
+        "median_delta": 0.197724,
+        "p10_delta": -0.03229,
+        "p90_delta": 0.42453,
+        "personality_win_rate": 0.830189,
+        "strategy": "topic",
+        "turns": 53,
+        "user_uid": "2637485"
+      },
+      {
+        "mean_delta": 0.175062,
+        "median_delta": 0.161755,
+        "p10_delta": -0.004457,
+        "p90_delta": 0.351114,
+        "personality_win_rate": 0.878788,
+        "strategy": "partner",
+        "turns": 33,
+        "user_uid": "2637509"
+      },
+      {
+        "mean_delta": 0.135681,
+        "median_delta": 0.114145,
+        "p10_delta": -0.073867,
+        "p90_delta": 0.327,
+        "personality_win_rate": 0.818182,
+        "strategy": "random",
+        "turns": 11,
+        "user_uid": "2637509"
+      },
+      {
+        "mean_delta": 0.150233,
+        "median_delta": 0.108646,
+        "p10_delta": -0.085789,
+        "p90_delta": 0.355271,
+        "personality_win_rate": 0.833333,
+        "strategy": "temporal",
+        "turns": 18,
+        "user_uid": "2637509"
+      },
+      {
+        "mean_delta": 0.135681,
+        "median_delta": 0.114145,
+        "p10_delta": -0.073867,
+        "p90_delta": 0.327,
+        "personality_win_rate": 0.818182,
+        "strategy": "topic",
+        "turns": 11,
+        "user_uid": "2637509"
+      },
+      {
+        "mean_delta": 0.177216,
+        "median_delta": 0.175129,
+        "p10_delta": -0.056216,
+        "p90_delta": 0.434212,
+        "personality_win_rate": 0.666667,
+        "strategy": "partner",
+        "turns": 9,
+        "user_uid": "2637532"
+      },
+      {
+        "mean_delta": 0.093829,
+        "median_delta": 0.103808,
+        "p10_delta": -0.163145,
+        "p90_delta": 0.335453,
+        "personality_win_rate": 0.704225,
+        "strategy": "random",
+        "turns": 71,
+        "user_uid": "2637532"
+      },
+      {
+        "mean_delta": 0.083283,
+        "median_delta": 0.144447,
+        "p10_delta": -0.242533,
+        "p90_delta": 0.309288,
+        "personality_win_rate": 0.75,
+        "strategy": "temporal",
+        "turns": 8,
+        "user_uid": "2637532"
+      },
+      {
+        "mean_delta": 0.093829,
+        "median_delta": 0.103808,
+        "p10_delta": -0.163145,
+        "p90_delta": 0.335453,
+        "personality_win_rate": 0.704225,
+        "strategy": "topic",
+        "turns": 71,
+        "user_uid": "2637532"
+      },
+      {
+        "mean_delta": 0.204705,
+        "median_delta": 0.243201,
+        "p10_delta": 0.120228,
+        "p90_delta": 0.273783,
+        "personality_win_rate": 1.0,
+        "strategy": "partner",
+        "turns": 3,
+        "user_uid": "2637594"
+      },
+      {
+        "mean_delta": 0.2023,
+        "median_delta": 0.2023,
+        "p10_delta": 0.135222,
+        "p90_delta": 0.269378,
+        "personality_win_rate": 1.0,
+        "strategy": "random",
+        "turns": 2,
+        "user_uid": "2637594"
+      },
+      {
+        "mean_delta": 0.175274,
+        "median_delta": 0.175274,
+        "p10_delta": 0.120933,
+        "p90_delta": 0.229616,
+        "personality_win_rate": 1.0,
+        "strategy": "temporal",
+        "turns": 2,
+        "user_uid": "2637594"
+      },
+      {
+        "mean_delta": 0.2023,
+        "median_delta": 0.2023,
+        "p10_delta": 0.135222,
+        "p90_delta": 0.269378,
+        "personality_win_rate": 1.0,
+        "strategy": "topic",
+        "turns": 2,
+        "user_uid": "2637594"
+      }
+    ],
+    "win_slice": {
+      "baseline_c_action": {
+        "agree": 116,
+        "elaborate": 40,
+        "minimal_response": 233
+      },
+      "baseline_c_length_bucket": {
+        "medium": 389
+      },
+      "baseline_c_profile_degraded_reason": {
+        "anchor_mismatch": 389
+      },
+      "baseline_c_rhetorical_move": {
+        "guarded_short": 233,
+        "warm_supportive": 156
+      },
+      "baseline_c_strategy": {
+        "escape": 233,
+        "exploit": 156
+      },
+      "baseline_c_surface_source": {
+        "population_average": 389
+      },
+      "baseline_c_template_id": {
+        "agree:0": 40,
+        "agree:1": 32,
+        "agree:2": 44,
+        "elaborate:0": 16,
+        "elaborate:1": 11,
+        "elaborate:2": 13,
+        "minimal_response:0": 84,
+        "minimal_response:1": 81,
+        "minimal_response:2": 68
+      },
+      "real_length_bucket": {
+        "ultra_short": 389
+      }
+    },
+    "worst_user_strategies": [
+      {
+        "mean_delta": 0.01504,
+        "median_delta": 0.015478,
+        "p10_delta": -0.18661,
+        "p90_delta": 0.184619,
+        "personality_win_rate": 0.5,
+        "strategy": "partner",
+        "turns": 10,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.043465,
+        "median_delta": -0.009425,
+        "p10_delta": -0.118421,
+        "p90_delta": 0.313667,
+        "personality_win_rate": 0.473684,
+        "strategy": "random",
+        "turns": 19,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.043465,
+        "median_delta": -0.009425,
+        "p10_delta": -0.118421,
+        "p90_delta": 0.313667,
+        "personality_win_rate": 0.473684,
+        "strategy": "topic",
+        "turns": 19,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.079408,
+        "median_delta": 0.079115,
+        "p10_delta": -0.115675,
+        "p90_delta": 0.279618,
+        "personality_win_rate": 0.72,
+        "strategy": "temporal",
+        "turns": 25,
+        "user_uid": "2637134"
+      },
+      {
+        "mean_delta": 0.080499,
+        "median_delta": 0.006816,
+        "p10_delta": -0.117627,
+        "p90_delta": 0.393429,
+        "personality_win_rate": 0.5,
+        "strategy": "partner",
+        "turns": 20,
+        "user_uid": "2637101"
+      },
+      {
+        "mean_delta": 0.08087,
+        "median_delta": 0.061805,
+        "p10_delta": -0.126668,
+        "p90_delta": 0.357226,
+        "personality_win_rate": 0.727273,
+        "strategy": "random",
+        "turns": 11,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.08087,
+        "median_delta": 0.061805,
+        "p10_delta": -0.126668,
+        "p90_delta": 0.357226,
+        "personality_win_rate": 0.727273,
+        "strategy": "topic",
+        "turns": 11,
+        "user_uid": "2637379"
+      },
+      {
+        "mean_delta": 0.083252,
+        "median_delta": 0.084042,
+        "p10_delta": -0.134159,
+        "p90_delta": 0.315763,
+        "personality_win_rate": 0.705882,
+        "strategy": "partner",
+        "turns": 17,
+        "user_uid": "2637134"
+      },
+      {
+        "mean_delta": 0.083283,
+        "median_delta": 0.144447,
+        "p10_delta": -0.242533,
+        "p90_delta": 0.309288,
+        "personality_win_rate": 0.75,
+        "strategy": "temporal",
+        "turns": 8,
+        "user_uid": "2637532"
+      },
+      {
+        "mean_delta": 0.093829,
+        "median_delta": 0.103808,
+        "p10_delta": -0.163145,
+        "p90_delta": 0.335453,
+        "personality_win_rate": 0.704225,
+        "strategy": "random",
+        "turns": 71,
+        "user_uid": "2637532"
+      }
+    ]
+  },
+  "behavior_diagnosis": {
+    "balanced_recall": {
+      "baseline_c": 0.310959,
+      "personality": 0.355465,
+      "train_majority": 0.352915
+    },
+    "baseline_c_confusion": {
+      "escape": {
+        "escape": 453,
+        "exploit": 661
+      },
+      "exploit": {
+        "escape": 307,
+        "exploit": 341
+      },
+      "explore": {
+        "escape": 42,
+        "exploit": 80
+      }
+    },
+    "classifier_prediction_source_counts": {
+      "embedding_centroid": 38,
+      "embedding_centroid_cue_feature": 39,
+      "embedding_centroid_reply_function_feature": 40,
+      "embedding_centroid_transactional_feature": 33
+    },
+    "cue_feature_assist_rate": 0.26,
+    "cue_override_rate": 0.0,
+    "diagnosis_tags": [],
+    "label_examples": {
+      "escape": [
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "exploit",
+          "real_action": "minimal_response",
+          "real_text": "沒辦法啦",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "exploit",
+          "personality_strategy": "exploit",
+          "real_action": "disengage",
+          "real_text": "5570161",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "exploit",
+          "personality_strategy": "exploit",
+          "real_action": "disengage",
+          "real_text": "感謝",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "explore",
+          "real_action": "disengage",
+          "real_text": "我要睡一下了",
+          "strategy": "random",
+          "user_uid": 2637101
+        }
+      ],
+      "exploit": [
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "exploit",
+          "real_action": "elaborate",
+          "real_text": "4萬鑽2500元",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "exploit",
+          "real_action": "agree",
+          "real_text": "匯這帳號",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "exploit",
+          "real_action": "elaborate",
+          "real_text": "這是官方給的",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "exploit",
+          "personality_strategy": "exploit",
+          "real_action": "agree",
+          "real_text": "好",
+          "strategy": "random",
+          "user_uid": 2637101
+        }
+      ],
+      "explore": [
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "explore",
+          "real_action": "ask_question",
+          "real_text": "鑽入這號嗎",
+          "strategy": "random",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "exploit",
+          "real_action": "ask_question",
+          "real_text": "鑽入這號嗎",
+          "strategy": "partner",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "escape",
+          "personality_strategy": "explore",
+          "real_action": "ask_question",
+          "real_text": "鑽入這號嗎",
+          "strategy": "topic",
+          "user_uid": 2637101
+        },
+        {
+          "baseline_c_strategy": "exploit",
+          "personality_strategy": "explore",
+          "real_action": "ask_question",
+          "real_text": "合唱入圍有二個，那還有邀請卡嗎",
+          "strategy": "random",
+          "user_uid": 2637134
+        }
+      ]
+    },
+    "macro_f1_3class_without_cue": 0.704732,
+    "majority_vs_personality": {
+      "majority_behavioral_strategy_mean": 0.363177,
+      "majority_minus_personality": -0.0462,
+      "personality_behavioral_strategy_mean": 0.409377
+    },
+    "personality_confusion": {
+      "escape": {
+        "escape": 295,
+        "exploit": 725,
+        "explore": 94
+      },
+      "exploit": {
+        "escape": 132,
+        "exploit": 461,
+        "explore": 55
+      },
+      "explore": {
+        "escape": 35,
+        "exploit": 76,
+        "explore": 11
+      }
+    },
+    "real_majority_class_coverage": 0.591295,
+    "real_strategy_distribution": {
+      "escape": 1114,
+      "exploit": 648,
+      "explore": 122
+    },
+    "real_strategy_entropy_normalized": 0.778272,
+    "state_collapse": {
+      "evaluated": 60,
+      "mean_strategy_majority_coverage": 0.628867,
+      "policy_dominant_match_rate": 0.916667
+    },
+    "train_majority_confusion": {
+      "escape": {
+        "escape": 1023,
+        "exploit": 91
+      },
+      "exploit": {
+        "escape": 557,
+        "exploit": 91
+      },
+      "explore": {
+        "escape": 114,
+        "exploit": 8
+      }
+    }
+  }
+}

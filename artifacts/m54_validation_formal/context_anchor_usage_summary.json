@@ -1,0 +1,70 @@
+{
+  "by_strategy": {
+    "partner": {
+      "partner_anchor_used_rate": 0.0,
+      "rows": 603,
+      "source_counts": {
+        "context_global": 8,
+        "none": 594,
+        "reply_global_legacy": 1
+      },
+      "source_rates": {
+        "context_global": 0.013267,
+        "none": 0.985075,
+        "reply_global_legacy": 0.001658
+      },
+      "topic_anchor_used_rate": 0.014925
+    },
+    "random": {
+      "partner_anchor_used_rate": 0.002049,
+      "rows": 488,
+      "source_counts": {
+        "context_global": 1,
+        "none": 484,
+        "partner_context": 1,
+        "reply_global_legacy": 2
+      },
+      "source_rates": {
+        "context_global": 0.002049,
+        "none": 0.991803,
+        "partner_context": 0.002049,
+        "reply_global_legacy": 0.004098
+      },
+      "topic_anchor_used_rate": 0.008197
+    },
+    "temporal": {
+      "partner_anchor_used_rate": 0.008772,
+      "rows": 342,
+      "source_counts": {
+        "context_global": 8,
+        "none": 330,
+        "partner_context": 3,
+        "reply_global_legacy": 1
+      },
+      "source_rates": {
+        "context_global": 0.023392,
+        "none": 0.964912,
+        "partner_context": 0.008772,
+        "reply_global_legacy": 0.002924
+      },
+      "topic_anchor_used_rate": 0.035088
+    },
+    "topic": {
+      "partner_anchor_used_rate": 0.002217,
+      "rows": 451,
+      "source_counts": {
+        "context_global": 1,
+        "none": 447,
+        "partner_context": 1,
+        "reply_global_legacy": 2
+      },
+      "source_rates": {
+        "context_global": 0.002217,
+        "none": 0.991131,
+        "partner_context": 0.002217,
+        "reply_global_legacy": 0.004435
+      },
+      "topic_anchor_used_rate": 0.008869
+    }
+  }
+}

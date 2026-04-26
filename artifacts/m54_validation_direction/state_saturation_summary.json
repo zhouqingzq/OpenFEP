@@ -1,0 +1,29 @@
+{
+  "per_dimension_variance_mean": {
+    "prior:contamination_sensitivity": 0.0,
+    "prior:controllability_prior": 0.003789,
+    "prior:meaning_stability": 0.002205,
+    "prior:trauma_bias": 0.00022,
+    "prior:trust_prior": 0.00824,
+    "trait:caution_bias": 0.004094,
+    "trait:exploration_posture": 0.003931,
+    "trait:social_approach": 0.003694,
+    "trait:threat_sensitivity": 0.000644,
+    "trait:trust_stance": 0.005722
+  },
+  "personality_similarity": {
+    "count": 60,
+    "diagnostic_only": true,
+    "mean": 1.0,
+    "saturation_warning": true,
+    "std": 1e-06
+  },
+  "state_distances": {
+    "train_default_cosine": 0.952409,
+    "train_default_l2": 0.353787,
+    "train_full_cosine": 0.998752,
+    "train_full_l2": 0.047235,
+    "train_wrong_user_cosine": 0.97716,
+    "train_wrong_user_l2": 0.233577
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "baseline_c": {
+    "rhetorical_move_counts": {
+      "guarded_short": 802,
+      "warm_supportive": 1082
+    },
+    "rhetorical_move_rates": {
+      "guarded_short": 0.42569,
+      "warm_supportive": 0.57431
+    },
+    "rows": 1884,
+    "source_counts": {
+      "connector": 1884
+    },
+    "source_rates": {
+      "connector": 1.0
+    }
+  },
+  "personality": {
+    "rhetorical_move_counts": {
+      "direct_advisory": 31,
+      "exploratory_questioning": 37,
+      "guarded_short": 862,
+      "warm_supportive": 954
+    },
+    "rhetorical_move_rates": {
+      "direct_advisory": 0.016454,
+      "exploratory_questioning": 0.019639,
+      "guarded_short": 0.457537,
+      "warm_supportive": 0.506369
+    },
+    "rows": 1884,
+    "source_counts": {
+      "action_phrase": 26,
+      "anchor": 11,
+      "connector": 1819,
+      "focus": 1362,
+      "generic_focus": 21,
+      "policy_detail": 2141
+    },
+    "source_rates": {
+      "action_phrase": 0.0138,
+      "anchor": 0.005839,
+      "connector": 0.965499,
+      "focus": 0.72293,
+      "generic_focus": 0.011146,
+      "policy_detail": 1.136412
+    }
+  }
+}

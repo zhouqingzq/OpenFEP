@@ -31,6 +31,11 @@ CONSISTENT_SUMMARY_FIELDS = (
 )
 BASELINE_C_INPUT_SCOPE = "leave_one_out_population_train_and_profile_data"
 HISTORICAL_MISSING = "historical_missing"
+CANONICAL_M54_ROOTS = (
+    "artifacts/m54_validation_smoke",
+    "artifacts/m54_validation_direction",
+    "artifacts/m54_validation_formal",
+)
 
 
 def _repo_root() -> Path:
@@ -50,14 +55,15 @@ def _git_ls_files(*patterns: str) -> list[Path]:
 
 
 def _tracked_m54_summary_artifacts() -> list[Path]:
-    return _git_ls_files(
-        "artifacts/m54_validation*/aggregate_report.json",
-        "artifacts/m54_validation*/m54_acceptance.json",
-    )
+    patterns: list[str] = []
+    for root in CANONICAL_M54_ROOTS:
+        patterns.append(f"{root}/aggregate_report.json")
+        patterns.append(f"{root}/m54_acceptance.json")
+    return _git_ls_files(*patterns)
 
 
 def _tracked_m54_per_user_artifacts() -> list[Path]:
-    return _git_ls_files("artifacts/m54_validation*/per_user/*_report.json")
+    return _git_ls_files(*(f"{root}/per_user/*_report.json" for root in CANONICAL_M54_ROOTS))
 
 
 def _load(path: Path) -> dict[str, object]:

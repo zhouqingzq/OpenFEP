@@ -1,0 +1,2431 @@
+{
+  "policy": "diagnostic distribution audit for Baseline C and train-majority behavioral baselines",
+  "row_count": 60,
+  "rows": [
+    {
+      "baseline_c_action_distribution": {
+        "elaborate": 6,
+        "minimal_response": 13
+      },
+      "baseline_c_behavioral_strategy": 0.359271,
+      "baseline_c_strategy_distribution": {
+        "escape": 13,
+        "exploit": 6
+      },
+      "majority_action": "agree",
+      "majority_balanced_behavioral_strategy": 0.649123,
+      "majority_behavioral_strategy": 0.340909,
+      "majority_strategy": "escape",
+      "pair_count": 19,
+      "personality_action_distribution": {
+        "agree": 17,
+        "share_opinion": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.684211,
+      "personality_behavioral_strategy": 0.657143,
+      "personality_strategy_distribution": {
+        "exploit": 17,
+        "explore": 2
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "ask_question": 1,
+        "disengage": 4,
+        "elaborate": 6,
+        "minimal_response": 5
+      },
+      "real_strategy_distribution": {
+        "escape": 9,
+        "exploit": 9,
+        "explore": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637101
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 2,
+        "minimal_response": 8
+      },
+      "baseline_c_behavioral_strategy": 0.5,
+      "baseline_c_strategy_distribution": {
+        "escape": 8,
+        "exploit": 2
+      },
+      "majority_action": "disengage",
+      "majority_balanced_behavioral_strategy": 0.533333,
+      "majority_behavioral_strategy": 0.25,
+      "majority_strategy": "escape",
+      "pair_count": 10,
+      "personality_action_distribution": {
+        "agree": 9,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.8,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "exploit": 9,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 4,
+        "deflect": 1,
+        "elaborate": 2,
+        "joke": 1,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 3,
+        "exploit": 7
+      },
+      "strategy": "temporal",
+      "user_uid": 2637101
+    },
+    {
+      "baseline_c_action_distribution": {
+        "elaborate": 6,
+        "minimal_response": 14
+      },
+      "baseline_c_behavioral_strategy": 0.022222,
+      "baseline_c_strategy_distribution": {
+        "escape": 14,
+        "exploit": 6
+      },
+      "majority_action": "disengage",
+      "majority_balanced_behavioral_strategy": 0.566667,
+      "majority_behavioral_strategy": 0.222222,
+      "majority_strategy": "escape",
+      "pair_count": 20,
+      "personality_action_distribution": {
+        "agree": 17,
+        "share_opinion": 3
+      },
+      "personality_balanced_behavioral_strategy": 0.766667,
+      "personality_behavioral_strategy": 0.355556,
+      "personality_strategy_distribution": {
+        "exploit": 17,
+        "explore": 3
+      },
+      "real_action_distribution": {
+        "agree": 6,
+        "ask_question": 1,
+        "deflect": 1,
+        "disengage": 2,
+        "elaborate": 5,
+        "joke": 1,
+        "minimal_response": 4
+      },
+      "real_strategy_distribution": {
+        "escape": 7,
+        "exploit": 12,
+        "explore": 1
+      },
+      "strategy": "partner",
+      "user_uid": 2637101
+    },
+    {
+      "baseline_c_action_distribution": {
+        "elaborate": 6,
+        "minimal_response": 13
+      },
+      "baseline_c_behavioral_strategy": 0.359271,
+      "baseline_c_strategy_distribution": {
+        "escape": 13,
+        "exploit": 6
+      },
+      "majority_action": "agree",
+      "majority_balanced_behavioral_strategy": 0.649123,
+      "majority_behavioral_strategy": 0.340909,
+      "majority_strategy": "escape",
+      "pair_count": 19,
+      "personality_action_distribution": {
+        "agree": 17,
+        "share_opinion": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.684211,
+      "personality_behavioral_strategy": 0.657143,
+      "personality_strategy_distribution": {
+        "exploit": 17,
+        "explore": 2
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "ask_question": 1,
+        "disengage": 4,
+        "elaborate": 6,
+        "minimal_response": 5
+      },
+      "real_strategy_distribution": {
+        "escape": 9,
+        "exploit": 9,
+        "explore": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637101
+    },
+    {
+      "baseline_c_action_distribution": {
+        "elaborate": 8,
+        "minimal_response": 18
+      },
+      "baseline_c_behavioral_strategy": 0.176471,
+      "baseline_c_strategy_distribution": {
+        "escape": 18,
+        "exploit": 8
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.717949,
+      "majority_behavioral_strategy": 0.34375,
+      "majority_strategy": "escape",
+      "pair_count": 26,
+      "personality_action_distribution": {
+        "agree": 16,
+        "deflect": 1,
+        "introduce_topic": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.641026,
+      "personality_behavioral_strategy": 0.4,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 16,
+        "explore": 9
+      },
+      "real_action_distribution": {
+        "agree": 6,
+        "ask_question": 1,
+        "deflect": 1,
+        "disengage": 8,
+        "elaborate": 4,
+        "minimal_response": 6
+      },
+      "real_strategy_distribution": {
+        "escape": 15,
+        "exploit": 10,
+        "explore": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637134
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 10,
+        "minimal_response": 15
+      },
+      "baseline_c_behavioral_strategy": 0.115385,
+      "baseline_c_strategy_distribution": {
+        "escape": 15,
+        "exploit": 10
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.626667,
+      "majority_behavioral_strategy": 0.34375,
+      "majority_strategy": "escape",
+      "pair_count": 25,
+      "personality_action_distribution": {
+        "agree": 22,
+        "introduce_topic": 3
+      },
+      "personality_balanced_behavioral_strategy": 0.706667,
+      "personality_behavioral_strategy": 0.290609,
+      "personality_strategy_distribution": {
+        "exploit": 22,
+        "explore": 3
+      },
+      "real_action_distribution": {
+        "agree": 7,
+        "ask_question": 3,
+        "disengage": 5,
+        "elaborate": 4,
+        "minimal_response": 6
+      },
+      "real_strategy_distribution": {
+        "escape": 11,
+        "exploit": 11,
+        "explore": 3
+      },
+      "strategy": "temporal",
+      "user_uid": 2637134
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 6,
+        "minimal_response": 11
+      },
+      "baseline_c_behavioral_strategy": 0.15,
+      "baseline_c_strategy_distribution": {
+        "escape": 11,
+        "exploit": 6
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.686275,
+      "majority_behavioral_strategy": 0.35,
+      "majority_strategy": "escape",
+      "pair_count": 17,
+      "personality_action_distribution": {
+        "agree": 15,
+        "minimal_response": 1,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.686275,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 15,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "deflect": 1,
+        "disagree": 1,
+        "disengage": 2,
+        "elaborate": 6,
+        "minimal_response": 5
+      },
+      "real_strategy_distribution": {
+        "escape": 9,
+        "exploit": 8
+      },
+      "strategy": "partner",
+      "user_uid": 2637134
+    },
+    {
+      "baseline_c_action_distribution": {
+        "elaborate": 8,
+        "minimal_response": 18
+      },
+      "baseline_c_behavioral_strategy": 0.176471,
+      "baseline_c_strategy_distribution": {
+        "escape": 18,
+        "exploit": 8
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.717949,
+      "majority_behavioral_strategy": 0.34375,
+      "majority_strategy": "escape",
+      "pair_count": 26,
+      "personality_action_distribution": {
+        "agree": 16,
+        "deflect": 1,
+        "introduce_topic": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.641026,
+      "personality_behavioral_strategy": 0.4,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 16,
+        "explore": 9
+      },
+      "real_action_distribution": {
+        "agree": 6,
+        "ask_question": 1,
+        "deflect": 1,
+        "disengage": 8,
+        "elaborate": 4,
+        "minimal_response": 6
+      },
+      "real_strategy_distribution": {
+        "escape": 15,
+        "exploit": 10,
+        "explore": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637134
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.5,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "joke",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.5,
+      "majority_strategy": "exploit",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 1,
+        "minimal_response": 1
+      },
+      "personality_balanced_behavioral_strategy": 1.0,
+      "personality_behavioral_strategy": 1.0,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 1
+      },
+      "real_action_distribution": {
+        "deflect": 1,
+        "joke": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 1,
+        "exploit": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637171
+    },
+    {
+      "baseline_c_action_distribution": {
+        "elaborate": 2,
+        "minimal_response": 6
+      },
+      "baseline_c_behavioral_strategy": 0.333333,
+      "baseline_c_strategy_distribution": {
+        "escape": 6,
+        "exploit": 2
+      },
+      "majority_action": "joke",
+      "majority_balanced_behavioral_strategy": 0.5,
+      "majority_behavioral_strategy": 0.333333,
+      "majority_strategy": "escape",
+      "pair_count": 8,
+      "personality_action_distribution": {
+        "agree": 7,
+        "joke": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.833333,
+      "personality_behavioral_strategy": 0.666667,
+      "personality_strategy_distribution": {
+        "exploit": 8
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "disengage": 1,
+        "joke": 4,
+        "minimal_response": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 2,
+        "exploit": 6
+      },
+      "strategy": "temporal",
+      "user_uid": 2637171
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 1,
+        "minimal_response": 4
+      },
+      "baseline_c_behavioral_strategy": 0.166666,
+      "baseline_c_strategy_distribution": {
+        "escape": 4,
+        "exploit": 1
+      },
+      "majority_action": "joke",
+      "majority_balanced_behavioral_strategy": 0.866667,
+      "majority_behavioral_strategy": 0.833333,
+      "majority_strategy": "exploit",
+      "pair_count": 5,
+      "personality_action_distribution": {
+        "agree": 3,
+        "minimal_response": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.866667,
+      "personality_behavioral_strategy": 0.666667,
+      "personality_strategy_distribution": {
+        "escape": 2,
+        "exploit": 3
+      },
+      "real_action_distribution": {
+        "deflect": 1,
+        "elaborate": 1,
+        "joke": 3
+      },
+      "real_strategy_distribution": {
+        "escape": 1,
+        "exploit": 4
+      },
+      "strategy": "partner",
+      "user_uid": 2637171
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.5,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "joke",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.5,
+      "majority_strategy": "exploit",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.666667,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "exploit": 2
+      },
+      "real_action_distribution": {
+        "deflect": 1,
+        "joke": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 1,
+        "exploit": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637171
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 38,
+        "minimal_response": 36
+      },
+      "baseline_c_behavioral_strategy": 0.176926,
+      "baseline_c_strategy_distribution": {
+        "escape": 36,
+        "exploit": 38
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.684685,
+      "majority_behavioral_strategy": 0.327187,
+      "majority_strategy": "escape",
+      "pair_count": 74,
+      "personality_action_distribution": {
+        "agree": 45,
+        "deflect": 3,
+        "elaborate": 15,
+        "joke": 1,
+        "minimal_response": 10
+      },
+      "personality_balanced_behavioral_strategy": 0.648649,
+      "personality_behavioral_strategy": 0.091307,
+      "personality_strategy_distribution": {
+        "escape": 13,
+        "exploit": 61
+      },
+      "real_action_distribution": {
+        "agree": 4,
+        "ask_question": 13,
+        "deflect": 5,
+        "disagree": 3,
+        "disengage": 15,
+        "elaborate": 8,
+        "empathize": 3,
+        "joke": 7,
+        "minimal_response": 16
+      },
+      "real_strategy_distribution": {
+        "escape": 39,
+        "exploit": 22,
+        "explore": 13
+      },
+      "strategy": "random",
+      "user_uid": 2637215
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 11,
+        "minimal_response": 9
+      },
+      "baseline_c_behavioral_strategy": 0.5875,
+      "baseline_c_strategy_distribution": {
+        "escape": 9,
+        "exploit": 11
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.275,
+      "majority_strategy": "escape",
+      "pair_count": 20,
+      "personality_action_distribution": {
+        "agree": 15,
+        "elaborate": 5
+      },
+      "personality_balanced_behavioral_strategy": 0.633333,
+      "personality_behavioral_strategy": 0.525,
+      "personality_strategy_distribution": {
+        "exploit": 20
+      },
+      "real_action_distribution": {
+        "agree": 1,
+        "ask_question": 1,
+        "disengage": 5,
+        "elaborate": 3,
+        "empathize": 3,
+        "joke": 2,
+        "minimal_response": 5
+      },
+      "real_strategy_distribution": {
+        "escape": 10,
+        "exploit": 9,
+        "explore": 1
+      },
+      "strategy": "temporal",
+      "user_uid": 2637215
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 12,
+        "minimal_response": 10
+      },
+      "baseline_c_behavioral_strategy": 0.215385,
+      "baseline_c_strategy_distribution": {
+        "escape": 10,
+        "exploit": 12
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.575758,
+      "majority_behavioral_strategy": 0.359375,
+      "majority_strategy": "escape",
+      "pair_count": 22,
+      "personality_action_distribution": {
+        "agree": 16,
+        "elaborate": 6
+      },
+      "personality_balanced_behavioral_strategy": 0.727273,
+      "personality_behavioral_strategy": 0.609375,
+      "personality_strategy_distribution": {
+        "exploit": 22
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "ask_question": 1,
+        "deflect": 1,
+        "disengage": 2,
+        "elaborate": 2,
+        "empathize": 1,
+        "joke": 7,
+        "minimal_response": 5
+      },
+      "real_strategy_distribution": {
+        "escape": 8,
+        "exploit": 13,
+        "explore": 1
+      },
+      "strategy": "partner",
+      "user_uid": 2637215
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 22,
+        "minimal_response": 18
+      },
+      "baseline_c_behavioral_strategy": 0.386753,
+      "baseline_c_strategy_distribution": {
+        "escape": 18,
+        "exploit": 22
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.65,
+      "majority_behavioral_strategy": 0.314554,
+      "majority_strategy": "escape",
+      "pair_count": 40,
+      "personality_action_distribution": {
+        "agree": 25,
+        "elaborate": 9,
+        "minimal_response": 6
+      },
+      "personality_balanced_behavioral_strategy": 0.716667,
+      "personality_behavioral_strategy": 0.308064,
+      "personality_strategy_distribution": {
+        "escape": 6,
+        "exploit": 34
+      },
+      "real_action_distribution": {
+        "agree": 5,
+        "ask_question": 4,
+        "deflect": 2,
+        "disagree": 2,
+        "disengage": 5,
+        "elaborate": 2,
+        "empathize": 2,
+        "joke": 8,
+        "minimal_response": 10
+      },
+      "real_strategy_distribution": {
+        "escape": 19,
+        "exploit": 17,
+        "explore": 4
+      },
+      "strategy": "topic",
+      "user_uid": 2637215
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.5,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "elaborate",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.5,
+      "majority_strategy": "exploit",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.666667,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "exploit": 2
+      },
+      "real_action_distribution": {
+        "elaborate": 1,
+        "minimal_response": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 1,
+        "exploit": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637266
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 1
+      },
+      "baseline_c_behavioral_strategy": 1.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 1
+      },
+      "majority_action": "elaborate",
+      "majority_balanced_behavioral_strategy": 0.333333,
+      "majority_behavioral_strategy": 0.0,
+      "majority_strategy": "exploit",
+      "pair_count": 1,
+      "personality_action_distribution": {
+        "agree": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.333333,
+      "personality_behavioral_strategy": 0.0,
+      "personality_strategy_distribution": {
+        "exploit": 1
+      },
+      "real_action_distribution": {
+        "minimal_response": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 1
+      },
+      "strategy": "temporal",
+      "user_uid": 2637266
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 4
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 4
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.333333,
+      "majority_behavioral_strategy": 0.0,
+      "majority_strategy": "escape",
+      "pair_count": 4,
+      "personality_action_distribution": {
+        "agree": 3,
+        "minimal_response": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.833333,
+      "personality_behavioral_strategy": 0.0,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 3
+      },
+      "real_action_distribution": {
+        "elaborate": 4
+      },
+      "real_strategy_distribution": {
+        "exploit": 4
+      },
+      "strategy": "partner",
+      "user_uid": 2637266
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.5,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "elaborate",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.5,
+      "majority_strategy": "exploit",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.666667,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "exploit": 2
+      },
+      "real_action_distribution": {
+        "elaborate": 1,
+        "minimal_response": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 1,
+        "exploit": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637266
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 21,
+        "minimal_response": 15
+      },
+      "baseline_c_behavioral_strategy": 0.07619,
+      "baseline_c_strategy_distribution": {
+        "escape": 15,
+        "exploit": 21
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.814815,
+      "majority_behavioral_strategy": 0.573333,
+      "majority_strategy": "escape",
+      "pair_count": 36,
+      "personality_action_distribution": {
+        "agree": 20,
+        "deflect": 1,
+        "minimal_response": 14,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.796296,
+      "personality_behavioral_strategy": 0.4,
+      "personality_strategy_distribution": {
+        "escape": 15,
+        "exploit": 20,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 4,
+        "deflect": 4,
+        "disagree": 1,
+        "disengage": 6,
+        "elaborate": 1,
+        "joke": 5,
+        "minimal_response": 15
+      },
+      "real_strategy_distribution": {
+        "escape": 26,
+        "exploit": 10
+      },
+      "strategy": "random",
+      "user_uid": 2637318
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 8,
+        "minimal_response": 5
+      },
+      "baseline_c_behavioral_strategy": 0.320513,
+      "baseline_c_strategy_distribution": {
+        "escape": 5,
+        "exploit": 8
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.74359,
+      "majority_behavioral_strategy": 0.5,
+      "majority_strategy": "escape",
+      "pair_count": 13,
+      "personality_action_distribution": {
+        "agree": 11,
+        "share_opinion": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.589744,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "exploit": 11,
+        "explore": 2
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "deflect": 1,
+        "elaborate": 3,
+        "minimal_response": 7
+      },
+      "real_strategy_distribution": {
+        "escape": 8,
+        "exploit": 5
+      },
+      "strategy": "temporal",
+      "user_uid": 2637318
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 11,
+        "minimal_response": 9
+      },
+      "baseline_c_behavioral_strategy": 0.583333,
+      "baseline_c_strategy_distribution": {
+        "escape": 9,
+        "exploit": 11
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.733333,
+      "majority_behavioral_strategy": 0.471178,
+      "majority_strategy": "escape",
+      "pair_count": 20,
+      "personality_action_distribution": {
+        "agree": 14,
+        "minimal_response": 4,
+        "share_opinion": 2
+      },
+      "personality_balanced_behavioral_strategy": 0.733333,
+      "personality_behavioral_strategy": 0.219178,
+      "personality_strategy_distribution": {
+        "escape": 4,
+        "exploit": 14,
+        "explore": 2
+      },
+      "real_action_distribution": {
+        "agree": 4,
+        "deflect": 2,
+        "disengage": 3,
+        "elaborate": 4,
+        "minimal_response": 7
+      },
+      "real_strategy_distribution": {
+        "escape": 12,
+        "exploit": 8
+      },
+      "strategy": "partner",
+      "user_uid": 2637318
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 21,
+        "minimal_response": 15
+      },
+      "baseline_c_behavioral_strategy": 0.07619,
+      "baseline_c_strategy_distribution": {
+        "escape": 15,
+        "exploit": 21
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.814815,
+      "majority_behavioral_strategy": 0.573333,
+      "majority_strategy": "escape",
+      "pair_count": 36,
+      "personality_action_distribution": {
+        "agree": 20,
+        "deflect": 1,
+        "minimal_response": 14,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.796296,
+      "personality_behavioral_strategy": 0.4,
+      "personality_strategy_distribution": {
+        "escape": 15,
+        "exploit": 20,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 4,
+        "deflect": 4,
+        "disagree": 1,
+        "disengage": 6,
+        "elaborate": 1,
+        "joke": 5,
+        "minimal_response": 15
+      },
+      "real_strategy_distribution": {
+        "escape": 26,
+        "exploit": 10
+      },
+      "strategy": "topic",
+      "user_uid": 2637318
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 10,
+        "minimal_response": 6
+      },
+      "baseline_c_behavioral_strategy": 0.475,
+      "baseline_c_strategy_distribution": {
+        "escape": 6,
+        "exploit": 10
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.791667,
+      "majority_behavioral_strategy": 0.375,
+      "majority_strategy": "escape",
+      "pair_count": 16,
+      "personality_action_distribution": {
+        "agree": 10,
+        "minimal_response": 1,
+        "share_opinion": 5
+      },
+      "personality_balanced_behavioral_strategy": 0.583333,
+      "personality_behavioral_strategy": 0.25,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 10,
+        "explore": 5
+      },
+      "real_action_distribution": {
+        "ask_question": 1,
+        "disengage": 1,
+        "elaborate": 2,
+        "empathize": 1,
+        "joke": 1,
+        "minimal_response": 10
+      },
+      "real_strategy_distribution": {
+        "escape": 11,
+        "exploit": 4,
+        "explore": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637354
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 13,
+        "minimal_response": 12
+      },
+      "baseline_c_behavioral_strategy": 0.664474,
+      "baseline_c_strategy_distribution": {
+        "escape": 12,
+        "exploit": 13
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.84,
+      "majority_behavioral_strategy": 0.375,
+      "majority_strategy": "escape",
+      "pair_count": 25,
+      "personality_action_distribution": {
+        "agree": 18,
+        "share_opinion": 7
+      },
+      "personality_balanced_behavioral_strategy": 0.493333,
+      "personality_behavioral_strategy": 0.607143,
+      "personality_strategy_distribution": {
+        "exploit": 18,
+        "explore": 7
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "ask_question": 2,
+        "deflect": 1,
+        "disengage": 6,
+        "elaborate": 2,
+        "minimal_response": 12
+      },
+      "real_strategy_distribution": {
+        "escape": 19,
+        "exploit": 4,
+        "explore": 2
+      },
+      "strategy": "temporal",
+      "user_uid": 2637354
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 27,
+        "minimal_response": 20
+      },
+      "baseline_c_behavioral_strategy": 0.129803,
+      "baseline_c_strategy_distribution": {
+        "escape": 20,
+        "exploit": 27
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.929078,
+      "majority_behavioral_strategy": 0.611111,
+      "majority_strategy": "escape",
+      "pair_count": 47,
+      "personality_action_distribution": {
+        "agree": 37,
+        "share_opinion": 10
+      },
+      "personality_balanced_behavioral_strategy": 0.404255,
+      "personality_behavioral_strategy": 0.333333,
+      "personality_strategy_distribution": {
+        "exploit": 37,
+        "explore": 10
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "deflect": 3,
+        "disagree": 2,
+        "disengage": 11,
+        "elaborate": 2,
+        "empathize": 1,
+        "minimal_response": 26
+      },
+      "real_strategy_distribution": {
+        "escape": 42,
+        "exploit": 5
+      },
+      "strategy": "partner",
+      "user_uid": 2637354
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 10,
+        "minimal_response": 6
+      },
+      "baseline_c_behavioral_strategy": 0.475,
+      "baseline_c_strategy_distribution": {
+        "escape": 6,
+        "exploit": 10
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.791667,
+      "majority_behavioral_strategy": 0.375,
+      "majority_strategy": "escape",
+      "pair_count": 16,
+      "personality_action_distribution": {
+        "agree": 10,
+        "minimal_response": 1,
+        "share_opinion": 5
+      },
+      "personality_balanced_behavioral_strategy": 0.583333,
+      "personality_behavioral_strategy": 0.25,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 10,
+        "explore": 5
+      },
+      "real_action_distribution": {
+        "ask_question": 1,
+        "disengage": 1,
+        "elaborate": 2,
+        "empathize": 1,
+        "joke": 1,
+        "minimal_response": 10
+      },
+      "real_strategy_distribution": {
+        "escape": 11,
+        "exploit": 4,
+        "explore": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637354
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 35,
+        "minimal_response": 32
+      },
+      "baseline_c_behavioral_strategy": 0.25183,
+      "baseline_c_strategy_distribution": {
+        "escape": 32,
+        "exploit": 35
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.741294,
+      "majority_behavioral_strategy": 0.247129,
+      "majority_strategy": "escape",
+      "pair_count": 67,
+      "personality_action_distribution": {
+        "agree": 43,
+        "elaborate": 1,
+        "minimal_response": 20,
+        "share_opinion": 3
+      },
+      "personality_balanced_behavioral_strategy": 0.791045,
+      "personality_behavioral_strategy": 0.285714,
+      "personality_strategy_distribution": {
+        "escape": 20,
+        "exploit": 44,
+        "explore": 3
+      },
+      "real_action_distribution": {
+        "agree": 14,
+        "ask_question": 3,
+        "deflect": 2,
+        "disagree": 6,
+        "disengage": 13,
+        "elaborate": 6,
+        "joke": 3,
+        "minimal_response": 20
+      },
+      "real_strategy_distribution": {
+        "escape": 41,
+        "exploit": 23,
+        "explore": 3
+      },
+      "strategy": "random",
+      "user_uid": 2637372
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 20,
+        "minimal_response": 16
+      },
+      "baseline_c_behavioral_strategy": 0.23374,
+      "baseline_c_strategy_distribution": {
+        "escape": 16,
+        "exploit": 20
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.232143,
+      "majority_strategy": "escape",
+      "pair_count": 36,
+      "personality_action_distribution": {
+        "agree": 15,
+        "minimal_response": 20,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.962963,
+      "personality_behavioral_strategy": 0.355507,
+      "personality_strategy_distribution": {
+        "escape": 20,
+        "exploit": 15,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 9,
+        "ask_question": 3,
+        "disagree": 2,
+        "disengage": 8,
+        "elaborate": 3,
+        "joke": 3,
+        "minimal_response": 8
+      },
+      "real_strategy_distribution": {
+        "escape": 18,
+        "exploit": 15,
+        "explore": 3
+      },
+      "strategy": "temporal",
+      "user_uid": 2637372
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 32,
+        "minimal_response": 29
+      },
+      "baseline_c_behavioral_strategy": 0.238399,
+      "baseline_c_strategy_distribution": {
+        "escape": 29,
+        "exploit": 32
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.726776,
+      "majority_behavioral_strategy": 0.240871,
+      "majority_strategy": "escape",
+      "pair_count": 61,
+      "personality_action_distribution": {
+        "agree": 26,
+        "deflect": 2,
+        "disengage": 3,
+        "minimal_response": 29,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.956284,
+      "personality_behavioral_strategy": 0.404276,
+      "personality_strategy_distribution": {
+        "escape": 34,
+        "exploit": 26,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 16,
+        "ask_question": 3,
+        "deflect": 2,
+        "disagree": 4,
+        "disengage": 10,
+        "elaborate": 3,
+        "empathize": 1,
+        "joke": 2,
+        "minimal_response": 20
+      },
+      "real_strategy_distribution": {
+        "escape": 36,
+        "exploit": 22,
+        "explore": 3
+      },
+      "strategy": "partner",
+      "user_uid": 2637372
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 35,
+        "minimal_response": 32
+      },
+      "baseline_c_behavioral_strategy": 0.25183,
+      "baseline_c_strategy_distribution": {
+        "escape": 32,
+        "exploit": 35
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.741294,
+      "majority_behavioral_strategy": 0.247129,
+      "majority_strategy": "escape",
+      "pair_count": 67,
+      "personality_action_distribution": {
+        "agree": 43,
+        "elaborate": 1,
+        "minimal_response": 20,
+        "share_opinion": 3
+      },
+      "personality_balanced_behavioral_strategy": 0.791045,
+      "personality_behavioral_strategy": 0.285714,
+      "personality_strategy_distribution": {
+        "escape": 20,
+        "exploit": 44,
+        "explore": 3
+      },
+      "real_action_distribution": {
+        "agree": 14,
+        "ask_question": 3,
+        "deflect": 2,
+        "disagree": 6,
+        "disengage": 13,
+        "elaborate": 6,
+        "joke": 3,
+        "minimal_response": 20
+      },
+      "real_strategy_distribution": {
+        "escape": 41,
+        "exploit": 23,
+        "explore": 3
+      },
+      "strategy": "topic",
+      "user_uid": 2637372
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 6,
+        "minimal_response": 4
+      },
+      "baseline_c_behavioral_strategy": 0.26087,
+      "baseline_c_strategy_distribution": {
+        "escape": 4,
+        "exploit": 6
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.375,
+      "majority_strategy": "escape",
+      "pair_count": 10,
+      "personality_action_distribution": {
+        "agree": 8,
+        "introduce_topic": 1,
+        "minimal_response": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.733333,
+      "personality_behavioral_strategy": 0.2,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 8,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 1,
+        "ask_question": 1,
+        "deflect": 1,
+        "disengage": 2,
+        "empathize": 1,
+        "joke": 2,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 5,
+        "exploit": 4,
+        "explore": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637376
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 16,
+        "elaborate": 14
+      },
+      "baseline_c_behavioral_strategy": 0.485597,
+      "baseline_c_strategy_distribution": {
+        "exploit": 30
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.314403,
+      "majority_strategy": "escape",
+      "pair_count": 30,
+      "personality_action_distribution": {
+        "agree": 25,
+        "introduce_topic": 5
+      },
+      "personality_balanced_behavioral_strategy": 0.666667,
+      "personality_behavioral_strategy": 0.2,
+      "personality_strategy_distribution": {
+        "exploit": 25,
+        "explore": 5
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "ask_question": 3,
+        "deflect": 4,
+        "disengage": 1,
+        "elaborate": 5,
+        "joke": 4,
+        "minimal_response": 10
+      },
+      "real_strategy_distribution": {
+        "escape": 15,
+        "exploit": 12,
+        "explore": 3
+      },
+      "strategy": "temporal",
+      "user_uid": 2637376
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 25,
+        "minimal_response": 23
+      },
+      "baseline_c_behavioral_strategy": 0.384275,
+      "baseline_c_strategy_distribution": {
+        "escape": 23,
+        "exploit": 25
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.638889,
+      "majority_behavioral_strategy": 0.242424,
+      "majority_strategy": "escape",
+      "pair_count": 48,
+      "personality_action_distribution": {
+        "agree": 36,
+        "introduce_topic": 8,
+        "minimal_response": 4
+      },
+      "personality_balanced_behavioral_strategy": 0.75,
+      "personality_behavioral_strategy": 0.066667,
+      "personality_strategy_distribution": {
+        "escape": 4,
+        "exploit": 36,
+        "explore": 8
+      },
+      "real_action_distribution": {
+        "agree": 12,
+        "ask_question": 1,
+        "deflect": 6,
+        "disagree": 1,
+        "disengage": 5,
+        "elaborate": 8,
+        "empathize": 3,
+        "joke": 2,
+        "minimal_response": 10
+      },
+      "real_strategy_distribution": {
+        "escape": 22,
+        "exploit": 25,
+        "explore": 1
+      },
+      "strategy": "partner",
+      "user_uid": 2637376
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 6,
+        "minimal_response": 4
+      },
+      "baseline_c_behavioral_strategy": 0.26087,
+      "baseline_c_strategy_distribution": {
+        "escape": 4,
+        "exploit": 6
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.666667,
+      "majority_behavioral_strategy": 0.375,
+      "majority_strategy": "escape",
+      "pair_count": 10,
+      "personality_action_distribution": {
+        "agree": 8,
+        "introduce_topic": 1,
+        "minimal_response": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.733333,
+      "personality_behavioral_strategy": 0.2,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 8,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 1,
+        "ask_question": 1,
+        "deflect": 1,
+        "disengage": 2,
+        "empathize": 1,
+        "joke": 2,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 5,
+        "exploit": 4,
+        "explore": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637376
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 3,
+        "minimal_response": 8
+      },
+      "baseline_c_behavioral_strategy": 0.411765,
+      "baseline_c_strategy_distribution": {
+        "escape": 8,
+        "exploit": 3
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.515152,
+      "majority_behavioral_strategy": 0.222222,
+      "majority_strategy": "escape",
+      "pair_count": 11,
+      "personality_action_distribution": {
+        "agree": 10,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.818182,
+      "personality_behavioral_strategy": 0.666667,
+      "personality_strategy_distribution": {
+        "exploit": 10,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "deflect": 1,
+        "elaborate": 2,
+        "joke": 3,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 3,
+        "exploit": 8
+      },
+      "strategy": "random",
+      "user_uid": 2637379
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 5,
+        "minimal_response": 12
+      },
+      "baseline_c_behavioral_strategy": 0.545455,
+      "baseline_c_strategy_distribution": {
+        "escape": 12,
+        "exploit": 5
+      },
+      "majority_action": "agree",
+      "majority_balanced_behavioral_strategy": 0.529412,
+      "majority_behavioral_strategy": 0.628571,
+      "majority_strategy": "exploit",
+      "pair_count": 17,
+      "personality_action_distribution": {
+        "agree": 10,
+        "joke": 7
+      },
+      "personality_balanced_behavioral_strategy": 0.529412,
+      "personality_behavioral_strategy": 0.628571,
+      "personality_strategy_distribution": {
+        "exploit": 17
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "deflect": 1,
+        "disengage": 3,
+        "joke": 3,
+        "minimal_response": 8
+      },
+      "real_strategy_distribution": {
+        "escape": 12,
+        "exploit": 5
+      },
+      "strategy": "temporal",
+      "user_uid": 2637379
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 3,
+        "minimal_response": 7
+      },
+      "baseline_c_behavioral_strategy": 0.366667,
+      "baseline_c_strategy_distribution": {
+        "escape": 7,
+        "exploit": 3
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.466667,
+      "majority_behavioral_strategy": 0.233333,
+      "majority_strategy": "escape",
+      "pair_count": 10,
+      "personality_action_distribution": {
+        "agree": 9,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.866667,
+      "personality_behavioral_strategy": 0.566667,
+      "personality_strategy_distribution": {
+        "exploit": 9,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "elaborate": 3,
+        "joke": 2,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 2,
+        "exploit": 8
+      },
+      "strategy": "partner",
+      "user_uid": 2637379
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 3,
+        "minimal_response": 8
+      },
+      "baseline_c_behavioral_strategy": 0.411765,
+      "baseline_c_strategy_distribution": {
+        "escape": 8,
+        "exploit": 3
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.515152,
+      "majority_behavioral_strategy": 0.222222,
+      "majority_strategy": "escape",
+      "pair_count": 11,
+      "personality_action_distribution": {
+        "agree": 10,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.818182,
+      "personality_behavioral_strategy": 0.666667,
+      "personality_strategy_distribution": {
+        "exploit": 10,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 3,
+        "deflect": 1,
+        "elaborate": 2,
+        "joke": 3,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 3,
+        "exploit": 8
+      },
+      "strategy": "topic",
+      "user_uid": 2637379
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 48,
+        "minimal_response": 37
+      },
+      "baseline_c_behavioral_strategy": 0.148182,
+      "baseline_c_strategy_distribution": {
+        "escape": 37,
+        "exploit": 48
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.709804,
+      "majority_behavioral_strategy": 0.337473,
+      "majority_strategy": "escape",
+      "pair_count": 85,
+      "personality_action_distribution": {
+        "agree": 54,
+        "elaborate": 22,
+        "minimal_response": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.615686,
+      "personality_behavioral_strategy": 0.276037,
+      "personality_strategy_distribution": {
+        "escape": 9,
+        "exploit": 76
+      },
+      "real_action_distribution": {
+        "agree": 17,
+        "ask_question": 10,
+        "deflect": 1,
+        "disagree": 5,
+        "disengage": 8,
+        "elaborate": 5,
+        "empathize": 1,
+        "joke": 4,
+        "minimal_response": 34
+      },
+      "real_strategy_distribution": {
+        "escape": 48,
+        "exploit": 27,
+        "explore": 10
+      },
+      "strategy": "random",
+      "user_uid": 2637470
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 30,
+        "elaborate": 28
+      },
+      "baseline_c_behavioral_strategy": 0.30166,
+      "baseline_c_strategy_distribution": {
+        "exploit": 58
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.770115,
+      "majority_behavioral_strategy": 0.409594,
+      "majority_strategy": "escape",
+      "pair_count": 58,
+      "personality_action_distribution": {
+        "agree": 28,
+        "elaborate": 12,
+        "minimal_response": 18
+      },
+      "personality_balanced_behavioral_strategy": 0.678161,
+      "personality_behavioral_strategy": 0.1045,
+      "personality_strategy_distribution": {
+        "escape": 18,
+        "exploit": 40
+      },
+      "real_action_distribution": {
+        "agree": 8,
+        "ask_question": 7,
+        "deflect": 1,
+        "disengage": 5,
+        "elaborate": 2,
+        "empathize": 2,
+        "introduce_topic": 1,
+        "minimal_response": 32
+      },
+      "real_strategy_distribution": {
+        "escape": 38,
+        "exploit": 12,
+        "explore": 8
+      },
+      "strategy": "temporal",
+      "user_uid": 2637470
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 106,
+        "elaborate": 106
+      },
+      "baseline_c_behavioral_strategy": 0.445177,
+      "baseline_c_strategy_distribution": {
+        "exploit": 212
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.798742,
+      "majority_behavioral_strategy": 0.341754,
+      "majority_strategy": "escape",
+      "pair_count": 212,
+      "personality_action_distribution": {
+        "ask_question": 1,
+        "disengage": 61,
+        "minimal_response": 150
+      },
+      "personality_balanced_behavioral_strategy": 0.801887,
+      "personality_behavioral_strategy": 0.341754,
+      "personality_strategy_distribution": {
+        "escape": 211,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 26,
+        "ask_question": 18,
+        "deflect": 6,
+        "disagree": 7,
+        "disengage": 30,
+        "elaborate": 7,
+        "empathize": 8,
+        "joke": 5,
+        "minimal_response": 105
+      },
+      "real_strategy_distribution": {
+        "escape": 148,
+        "exploit": 46,
+        "explore": 18
+      },
+      "strategy": "partner",
+      "user_uid": 2637470
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 48,
+        "minimal_response": 37
+      },
+      "baseline_c_behavioral_strategy": 0.148182,
+      "baseline_c_strategy_distribution": {
+        "escape": 37,
+        "exploit": 48
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.709804,
+      "majority_behavioral_strategy": 0.337473,
+      "majority_strategy": "escape",
+      "pair_count": 85,
+      "personality_action_distribution": {
+        "agree": 54,
+        "elaborate": 22,
+        "minimal_response": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.615686,
+      "personality_behavioral_strategy": 0.276037,
+      "personality_strategy_distribution": {
+        "escape": 9,
+        "exploit": 76
+      },
+      "real_action_distribution": {
+        "agree": 17,
+        "ask_question": 10,
+        "deflect": 1,
+        "disagree": 5,
+        "disengage": 8,
+        "elaborate": 5,
+        "empathize": 1,
+        "joke": 4,
+        "minimal_response": 34
+      },
+      "real_strategy_distribution": {
+        "escape": 48,
+        "exploit": 27,
+        "explore": 10
+      },
+      "strategy": "topic",
+      "user_uid": 2637470
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 31,
+        "minimal_response": 25
+      },
+      "baseline_c_behavioral_strategy": 0.237147,
+      "baseline_c_strategy_distribution": {
+        "escape": 25,
+        "exploit": 31
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.821429,
+      "majority_behavioral_strategy": 0.298333,
+      "majority_strategy": "escape",
+      "pair_count": 56,
+      "personality_action_distribution": {
+        "agree": 46,
+        "share_opinion": 10
+      },
+      "personality_balanced_behavioral_strategy": 0.511905,
+      "personality_behavioral_strategy": 0.201412,
+      "personality_strategy_distribution": {
+        "exploit": 46,
+        "explore": 10
+      },
+      "real_action_distribution": {
+        "agree": 7,
+        "ask_question": 1,
+        "deflect": 4,
+        "disengage": 7,
+        "elaborate": 2,
+        "empathize": 1,
+        "joke": 3,
+        "minimal_response": 30,
+        "share_opinion": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 41,
+        "exploit": 13,
+        "explore": 2
+      },
+      "strategy": "random",
+      "user_uid": 2637485
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 38,
+        "minimal_response": 33
+      },
+      "baseline_c_behavioral_strategy": 0.078182,
+      "baseline_c_strategy_distribution": {
+        "escape": 33,
+        "exploit": 38
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.784038,
+      "majority_behavioral_strategy": 0.29992,
+      "majority_strategy": "escape",
+      "pair_count": 71,
+      "personality_action_distribution": {
+        "agree": 56,
+        "minimal_response": 1,
+        "share_opinion": 14
+      },
+      "personality_balanced_behavioral_strategy": 0.558685,
+      "personality_behavioral_strategy": 0.365466,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 56,
+        "explore": 14
+      },
+      "real_action_distribution": {
+        "agree": 10,
+        "ask_question": 4,
+        "deflect": 6,
+        "disengage": 9,
+        "elaborate": 3,
+        "joke": 5,
+        "minimal_response": 33,
+        "share_opinion": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 48,
+        "exploit": 18,
+        "explore": 5
+      },
+      "strategy": "temporal",
+      "user_uid": 2637485
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 51,
+        "minimal_response": 41
+      },
+      "baseline_c_behavioral_strategy": 0.074161,
+      "baseline_c_strategy_distribution": {
+        "escape": 41,
+        "exploit": 51
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.746377,
+      "majority_behavioral_strategy": 0.296443,
+      "majority_strategy": "escape",
+      "pair_count": 92,
+      "personality_action_distribution": {
+        "agree": 80,
+        "minimal_response": 1,
+        "share_opinion": 11
+      },
+      "personality_balanced_behavioral_strategy": 0.594203,
+      "personality_behavioral_strategy": 0.034812,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 80,
+        "explore": 11
+      },
+      "real_action_distribution": {
+        "agree": 15,
+        "ask_question": 4,
+        "deflect": 7,
+        "disengage": 13,
+        "elaborate": 3,
+        "joke": 12,
+        "minimal_response": 37,
+        "share_opinion": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 57,
+        "exploit": 30,
+        "explore": 5
+      },
+      "strategy": "partner",
+      "user_uid": 2637485
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 30,
+        "minimal_response": 23
+      },
+      "baseline_c_behavioral_strategy": 0.41599,
+      "baseline_c_strategy_distribution": {
+        "escape": 23,
+        "exploit": 30
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.786164,
+      "majority_behavioral_strategy": 0.296989,
+      "majority_strategy": "escape",
+      "pair_count": 53,
+      "personality_action_distribution": {
+        "agree": 42,
+        "minimal_response": 2,
+        "share_opinion": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.572327,
+      "personality_behavioral_strategy": 0.541208,
+      "personality_strategy_distribution": {
+        "escape": 2,
+        "exploit": 42,
+        "explore": 9
+      },
+      "real_action_distribution": {
+        "agree": 9,
+        "ask_question": 2,
+        "deflect": 3,
+        "disengage": 4,
+        "elaborate": 2,
+        "empathize": 1,
+        "joke": 2,
+        "minimal_response": 29,
+        "share_opinion": 1
+      },
+      "real_strategy_distribution": {
+        "escape": 36,
+        "exploit": 14,
+        "explore": 3
+      },
+      "strategy": "topic",
+      "user_uid": 2637485
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 5,
+        "minimal_response": 6
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 6,
+        "exploit": 5
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.818182,
+      "majority_behavioral_strategy": 0.6,
+      "majority_strategy": "escape",
+      "pair_count": 11,
+      "personality_action_distribution": {
+        "agree": 4,
+        "minimal_response": 7
+      },
+      "personality_balanced_behavioral_strategy": 0.878788,
+      "personality_behavioral_strategy": 0.0,
+      "personality_strategy_distribution": {
+        "escape": 7,
+        "exploit": 4
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "ask_question": 1,
+        "disengage": 1,
+        "minimal_response": 7
+      },
+      "real_strategy_distribution": {
+        "escape": 8,
+        "exploit": 2,
+        "explore": 1
+      },
+      "strategy": "random",
+      "user_uid": 2637509
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 10,
+        "minimal_response": 8
+      },
+      "baseline_c_behavioral_strategy": 0.189229,
+      "baseline_c_strategy_distribution": {
+        "escape": 8,
+        "exploit": 10
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.851852,
+      "majority_behavioral_strategy": 0.589744,
+      "majority_strategy": "escape",
+      "pair_count": 18,
+      "personality_action_distribution": {
+        "agree": 12,
+        "share_opinion": 6
+      },
+      "personality_balanced_behavioral_strategy": 0.481481,
+      "personality_behavioral_strategy": 0.067183,
+      "personality_strategy_distribution": {
+        "exploit": 12,
+        "explore": 6
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "ask_question": 1,
+        "disengage": 4,
+        "elaborate": 1,
+        "minimal_response": 10
+      },
+      "real_strategy_distribution": {
+        "escape": 14,
+        "exploit": 3,
+        "explore": 1
+      },
+      "strategy": "temporal",
+      "user_uid": 2637509
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 20,
+        "minimal_response": 13
+      },
+      "baseline_c_behavioral_strategy": 0.131876,
+      "baseline_c_strategy_distribution": {
+        "escape": 13,
+        "exploit": 20
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.878788,
+      "majority_behavioral_strategy": 0.613333,
+      "majority_strategy": "escape",
+      "pair_count": 33,
+      "personality_action_distribution": {
+        "disagree": 2,
+        "disengage": 6,
+        "minimal_response": 25
+      },
+      "personality_balanced_behavioral_strategy": 0.878788,
+      "personality_behavioral_strategy": 0.613333,
+      "personality_strategy_distribution": {
+        "escape": 33
+      },
+      "real_action_distribution": {
+        "agree": 4,
+        "ask_question": 1,
+        "deflect": 3,
+        "disengage": 7,
+        "elaborate": 1,
+        "minimal_response": 17
+      },
+      "real_strategy_distribution": {
+        "escape": 27,
+        "exploit": 5,
+        "explore": 1
+      },
+      "strategy": "partner",
+      "user_uid": 2637509
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 5,
+        "minimal_response": 6
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 6,
+        "exploit": 5
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.818182,
+      "majority_behavioral_strategy": 0.6,
+      "majority_strategy": "escape",
+      "pair_count": 11,
+      "personality_action_distribution": {
+        "agree": 4,
+        "minimal_response": 7
+      },
+      "personality_balanced_behavioral_strategy": 0.878788,
+      "personality_behavioral_strategy": 0.0,
+      "personality_strategy_distribution": {
+        "escape": 7,
+        "exploit": 4
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "ask_question": 1,
+        "disengage": 1,
+        "minimal_response": 7
+      },
+      "real_strategy_distribution": {
+        "escape": 8,
+        "exploit": 2,
+        "explore": 1
+      },
+      "strategy": "topic",
+      "user_uid": 2637509
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 30,
+        "minimal_response": 41
+      },
+      "baseline_c_behavioral_strategy": 0.550015,
+      "baseline_c_strategy_distribution": {
+        "escape": 41,
+        "exploit": 30
+      },
+      "majority_action": "agree",
+      "majority_balanced_behavioral_strategy": 0.652582,
+      "majority_behavioral_strategy": 0.428549,
+      "majority_strategy": "exploit",
+      "pair_count": 71,
+      "personality_action_distribution": {
+        "agree": 61,
+        "minimal_response": 1,
+        "share_opinion": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.699531,
+      "personality_behavioral_strategy": 0.438616,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 61,
+        "explore": 9
+      },
+      "real_action_distribution": {
+        "agree": 6,
+        "ask_question": 4,
+        "deflect": 1,
+        "disagree": 2,
+        "disengage": 12,
+        "elaborate": 14,
+        "empathize": 8,
+        "joke": 6,
+        "minimal_response": 18
+      },
+      "real_strategy_distribution": {
+        "escape": 33,
+        "exploit": 34,
+        "explore": 4
+      },
+      "strategy": "random",
+      "user_uid": 2637532
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 2,
+        "minimal_response": 6
+      },
+      "baseline_c_behavioral_strategy": 0.470588,
+      "baseline_c_strategy_distribution": {
+        "escape": 6,
+        "exploit": 2
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.75,
+      "majority_behavioral_strategy": 0.75,
+      "majority_strategy": "exploit",
+      "pair_count": 8,
+      "personality_action_distribution": {
+        "agree": 7,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.75,
+      "personality_behavioral_strategy": 0.5,
+      "personality_strategy_distribution": {
+        "exploit": 7,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "disengage": 1,
+        "elaborate": 3,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 3,
+        "exploit": 5
+      },
+      "strategy": "temporal",
+      "user_uid": 2637532
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 2,
+        "minimal_response": 7
+      },
+      "baseline_c_behavioral_strategy": 0.45,
+      "baseline_c_strategy_distribution": {
+        "escape": 7,
+        "exploit": 2
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.703704,
+      "majority_behavioral_strategy": 0.75,
+      "majority_strategy": "exploit",
+      "pair_count": 9,
+      "personality_action_distribution": {
+        "agree": 5,
+        "elaborate": 4
+      },
+      "personality_balanced_behavioral_strategy": 0.703704,
+      "personality_behavioral_strategy": 0.75,
+      "personality_strategy_distribution": {
+        "exploit": 9
+      },
+      "real_action_distribution": {
+        "agree": 2,
+        "disengage": 2,
+        "elaborate": 3,
+        "minimal_response": 2
+      },
+      "real_strategy_distribution": {
+        "escape": 4,
+        "exploit": 5
+      },
+      "strategy": "partner",
+      "user_uid": 2637532
+    },
+    {
+      "baseline_c_action_distribution": {
+        "agree": 30,
+        "minimal_response": 41
+      },
+      "baseline_c_behavioral_strategy": 0.550015,
+      "baseline_c_strategy_distribution": {
+        "escape": 41,
+        "exploit": 30
+      },
+      "majority_action": "agree",
+      "majority_balanced_behavioral_strategy": 0.652582,
+      "majority_behavioral_strategy": 0.428549,
+      "majority_strategy": "exploit",
+      "pair_count": 71,
+      "personality_action_distribution": {
+        "agree": 61,
+        "minimal_response": 1,
+        "share_opinion": 9
+      },
+      "personality_balanced_behavioral_strategy": 0.699531,
+      "personality_behavioral_strategy": 0.438616,
+      "personality_strategy_distribution": {
+        "escape": 1,
+        "exploit": 61,
+        "explore": 9
+      },
+      "real_action_distribution": {
+        "agree": 6,
+        "ask_question": 4,
+        "deflect": 1,
+        "disagree": 2,
+        "disengage": 12,
+        "elaborate": 14,
+        "empathize": 8,
+        "joke": 6,
+        "minimal_response": 18
+      },
+      "real_strategy_distribution": {
+        "escape": 33,
+        "exploit": 34,
+        "explore": 4
+      },
+      "strategy": "topic",
+      "user_uid": 2637532
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "elaborate",
+      "majority_balanced_behavioral_strategy": 0.333333,
+      "majority_behavioral_strategy": 0.0,
+      "majority_strategy": "escape",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 2
+      },
+      "personality_balanced_behavioral_strategy": 1.0,
+      "personality_behavioral_strategy": 1.0,
+      "personality_strategy_distribution": {
+        "exploit": 2
+      },
+      "real_action_distribution": {
+        "agree": 2
+      },
+      "real_strategy_distribution": {
+        "exploit": 2
+      },
+      "strategy": "random",
+      "user_uid": 2637594
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.333333,
+      "majority_behavioral_strategy": 0.0,
+      "majority_strategy": "escape",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 1,
+        "share_opinion": 1
+      },
+      "personality_balanced_behavioral_strategy": 0.666667,
+      "personality_behavioral_strategy": 0.0,
+      "personality_strategy_distribution": {
+        "exploit": 1,
+        "explore": 1
+      },
+      "real_action_distribution": {
+        "agree": 1,
+        "elaborate": 1
+      },
+      "real_strategy_distribution": {
+        "exploit": 2
+      },
+      "strategy": "temporal",
+      "user_uid": 2637594
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 3
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 3
+      },
+      "majority_action": "minimal_response",
+      "majority_balanced_behavioral_strategy": 0.333333,
+      "majority_behavioral_strategy": 0.0,
+      "majority_strategy": "escape",
+      "pair_count": 3,
+      "personality_action_distribution": {
+        "agree": 3
+      },
+      "personality_balanced_behavioral_strategy": 1.0,
+      "personality_behavioral_strategy": 1.0,
+      "personality_strategy_distribution": {
+        "exploit": 3
+      },
+      "real_action_distribution": {
+        "agree": 1,
+        "elaborate": 2
+      },
+      "real_strategy_distribution": {
+        "exploit": 3
+      },
+      "strategy": "partner",
+      "user_uid": 2637594
+    },
+    {
+      "baseline_c_action_distribution": {
+        "minimal_response": 2
+      },
+      "baseline_c_behavioral_strategy": 0.0,
+      "baseline_c_strategy_distribution": {
+        "escape": 2
+      },
+      "majority_action": "elaborate",
+      "majority_balanced_behavioral_strategy": 0.333333,
+      "majority_behavioral_strategy": 0.0,
+      "majority_strategy": "escape",
+      "pair_count": 2,
+      "personality_action_distribution": {
+        "agree": 2
+      },
+      "personality_balanced_behavioral_strategy": 1.0,
+      "personality_behavioral_strategy": 1.0,
+      "personality_strategy_distribution": {
+        "exploit": 2
+      },
+      "real_action_distribution": {
+        "agree": 2
+      },
+      "real_strategy_distribution": {
+        "exploit": 2
+      },
+      "strategy": "topic",
+      "user_uid": 2637594
+    }
+  ]
+}

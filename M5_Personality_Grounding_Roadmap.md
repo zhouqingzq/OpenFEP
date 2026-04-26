@@ -63,7 +63,7 @@ Real chat data
 | **M5.1** | Dialogue World Channels | Observability-classified perception channels + precision bounds |
 | **M5.2** | Past Life Implantation | Chat data as lived experience → personality emerges from FEP dynamics |
 | **M5.3** | Dialogue as Action | Response generation as EFE-driven action in dialogue world |
-| **M5.4** | Consistency Validation | Train/test split proof that emergent personality is real and stable |
+| **M5.4** | Consistency Validation | Train/test split proof that emergent personality is real and stable (partial accepted / engineering complete) |
 | **M5.5** | Cross-Context Stability | Same personality, 7 different scenarios → consistent behavior |
 | **M5.6** | Persona Runtime | Game-ready API with persistent living persona |
 | **M5.7** | Integration Trial | End-to-end: raw chat → playable digital life entity |
@@ -399,11 +399,12 @@ SlowLearning: update traits based on outcome
 
 ## M5.4: Consistency Validation
 
-**Status (2026-04-18): partial / not accepted.** M5.4 must not be used as a
-completed gate for M5.5 until a fresh formal artifact with external-human
-classifier labels passes all hard gates: semantic vs Baseline A and Baseline C,
-behavioral vs Baseline C, no-surface/no-policy/surface-only ablations, and
-artifact guard schema.
+**Status (2026-04-26): partial accepted / engineering complete.** M5.4 has
+canonical smoke, direction, and formal artifacts with partial acceptance
+eligible. It must not be used as a fully accepted gate for M5.5 until a fresh
+formal artifact with external-human classifier labels passes all hard gates:
+semantic vs Baseline A and Baseline C, behavioral vs Baseline C,
+no-surface/no-policy/surface-only ablations, and artifact guard schema.
 
 ### Title
 
