@@ -266,19 +266,22 @@ class PolicyEvaluator:
                     and action_strategy == "escape"
                     and action not in policies.learned_preferences
                     and not escape_supported_by_context
-                    and (
-                        not context_sensitive_bucket
-                        or conditional_top_strategy in {"exploit", "explore"}
-                    )
                 ):
                     policy_memory_bias -= 0.20 + (0.45 * policy_lift)
                     if context_sensitive_bucket and conditional_top_strategy in {"exploit", "explore"}:
                         policy_memory_bias -= 0.20 + (0.25 * conditional_strength)
-                if policy_lift >= 0.20 and frequency >= 0.10:
-                    policy_memory_bias += 0.12 * policy_lift
+                if policy_lift >= 0.20 and action_strategy in {"exploit", "explore"} and frequency >= 0.12:
+                    policy_memory_bias += 0.18 * policy_lift
+                if escape_supported_by_context and base_context_bucket in {
+                    "ctx:partner_low_info_ack",
+                    "ctx:partner_short_confirmation",
+                    "ctx:partner_short_other",
+                }:
+                    policy_memory_bias += 0.20 + (0.35 * conditional_strength)
                 if (
                     context_sensitive_bucket
                     and conditional_lift_applied
+                    and action_strategy in {"exploit", "explore"}
                     and conditional_top_strategy == action_strategy
                 ):
                     policy_memory_bias += 0.18 + (0.30 * conditional_strength)

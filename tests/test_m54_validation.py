@@ -454,7 +454,7 @@ class TestM54Validation(unittest.TestCase):
         self.assertGreater(summary["surface_bucket_counts"].get("ultra_low_info", 0), 0)
         self.assertGreater(summary["policy_action_distribution"].get("minimal_response", 0.0), 0.0)
         self.assertGreater(summary["policy_evidence_count"], 0)
-        self.assertEqual(summary["policy_dominant_strategy"], "escape")
+        self.assertEqual(summary["policy_dominant_strategy"], "expected_free_energy")
         partner_context_bucket = dialogue_partner_policy_context_bucket(
             user["sessions"][0]["turns"][0]["body"],
             user["sessions"][0]["uid_b"],

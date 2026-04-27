@@ -338,16 +338,12 @@ def _target_policies(
         if action_counts.get(action, 0.0) > 0
     }
     policy_evidence_count = int(round(evidence_total))
-    majority_is_collapse = bool(strategy_majority_coverage >= 0.65 and strategy_entropy < 0.45)
-    strategy_total = float(max(1, sum(strategy_counts.values())))
-    escape_majority = bool(strategy_counts.get("escape", 0) / strategy_total >= 0.50)
+    majority_is_collapse = bool(strategy_majority_coverage >= 0.75 and strategy_entropy < 0.35)
     if strategy_counts and not majority_is_collapse and policy_evidence_count >= 3:
         dominant_strategy = max(
             strategy_counts.items(),
             key=lambda item: (float(item[1]), str(item[0])),
         )[0]
-    elif escape_majority and policy_evidence_count >= 3:
-        dominant_strategy = "escape"
     else:
         dominant_strategy = "expected_free_energy"
     strategy_confidence = 0.0
@@ -358,11 +354,10 @@ def _target_policies(
         key=lambda item: (-float(item[1]), DIALOGUE_ACTION_NAMES.index(item[0])),
     )
     preference_floor = 0.12 if policy_evidence_count >= 12 else 0.20
-    escape_actions = {"minimal_response", "deflect", "disengage"}
     learned_preferences = [
         action
         for action, frequency in ranked_actions
-        if float(frequency) >= (0.06 if action in escape_actions else preference_floor)
+        if float(frequency) >= preference_floor
     ][:4]
     if not learned_preferences and ranked_actions:
         learned_preferences = [ranked_actions[0][0]]
