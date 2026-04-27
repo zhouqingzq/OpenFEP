@@ -157,7 +157,9 @@ def _rhetorical_move(personality_state: Mapping[str, object], action: str) -> st
         exploration = float(traits.get("exploration_posture", 0.5))
     except (TypeError, ValueError):
         exploration = 0.5
-    if action in {"deflect", "minimal_response", "disengage", "disagree"}:
+    if action in {"deflect", "minimal_response", "disengage", "disagree"} and (
+        caution >= 0.50 or trust <= 0.50
+    ):
         return "guarded_short"
     if action in {"ask_question", "introduce_topic"} or (
         action == "share_opinion" and exploration >= 0.56
