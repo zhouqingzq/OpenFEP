@@ -395,6 +395,7 @@ def apply_train_state_calibration(
     *,
     classifier: _Predictor | None = None,
     source: str = "train",
+    use_recency_weighting: bool = False,
 ) -> dict[str, object]:
     user_uid = _safe_int(user_dataset.get("uid"), 0)
     sessions = user_dataset.get("sessions", [])
@@ -435,8 +436,11 @@ def apply_train_state_calibration(
         pair_weight = float(semantic_pair_weight_for_text(reply_text))
         reply_function = classify_reply_function(reply_text)
         context_candidates = dialogue_policy_context_candidates(partner_text, partner_uid)
-        session_position = idx / max_idx if max_idx > 0 else 1.0
-        recency_weight = 0.70 + 0.30 * session_position
+        if use_recency_weighting:
+            session_position = idx / max_idx if max_idx > 0 else 1.0
+            recency_weight = 0.70 + 0.30 * session_position
+        else:
+            recency_weight = 1.0
         behavioral_weight = (
             float(behavioral_policy_weight_for_reply_function(reply_function)) * recency_weight
         )
@@ -499,6 +503,7 @@ def apply_train_state_calibration(
     return {
         "source": source,
         "train_only": True,
+        "use_recency_weighting": bool(use_recency_weighting),
         "applied": True,
         "reply_count": int(reply_count),
         "action_counts": {key: int(value) for key, value in sorted(action_counts.items())},

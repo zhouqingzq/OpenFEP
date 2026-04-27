@@ -921,6 +921,7 @@ def run_validation(
             train_dataset,
             classifier=classifier,
             source=f"{strategy_key}:train",
+            use_recency_weighting=(strategy == SplitStrategy.TEMPORAL),
         )
         agent_state_result = agent_state_similarity(train_agent, full_agent)
         agent_state_result.details["agent_state_measured_before_holdout_generation"] = True

@@ -276,8 +276,9 @@ class PolicyEvaluator:
                     "ctx:partner_low_info_ack",
                     "ctx:partner_short_confirmation",
                     "ctx:partner_short_other",
+                    "ctx:partner_statement_topicish",
                 }:
-                    policy_memory_bias += 0.20 + (0.35 * conditional_strength)
+                    policy_memory_bias += 0.30 + (0.50 * conditional_strength)
                 if (
                     context_sensitive_bucket
                     and conditional_lift_applied
