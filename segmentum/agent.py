@@ -3278,6 +3278,21 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     and bool(item.get("policy_action_selection_lift_applied", False))
                 ]
                 top_strategy = Counter(top_strategies).most_common(1)[0][0] if top_strategies else ""
+                if top_strategy not in {"escape", "explore"}:
+                    policies = self.self_model.preferred_policies
+                    if policies is not None:
+                        strategy_totals: dict[str, float] = {
+                            "escape": 0.0,
+                            "exploit": 0.0,
+                            "explore": 0.0,
+                        }
+                        for action_name, freq in policies.action_distribution.items():
+                            strat = DIALOGUE_ACTION_STRATEGY_MAP.get(action_name, "")
+                            if strat in strategy_totals:
+                                strategy_totals[strat] += float(freq)
+                        total = sum(strategy_totals.values())
+                        if total > 0 and (strategy_totals.get("escape", 0.0) / total) >= 0.50:
+                            top_strategy = "escape"
                 if top_strategy in {"escape", "explore"}:
                     for option in ranked_options:
                         action_strategy = DIALOGUE_ACTION_STRATEGY_MAP.get(option.choice, "")
