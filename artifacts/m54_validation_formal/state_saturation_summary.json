@@ -1,15 +1,15 @@
 {
   "per_dimension_variance_mean": {
     "prior:contamination_sensitivity": 0.0,
-    "prior:controllability_prior": 0.01189,
-    "prior:meaning_stability": 0.003254,
-    "prior:trauma_bias": 0.001797,
-    "prior:trust_prior": 0.004716,
-    "trait:caution_bias": 0.007018,
-    "trait:exploration_posture": 0.004598,
-    "trait:social_approach": 0.003799,
-    "trait:threat_sensitivity": 0.00227,
-    "trait:trust_stance": 0.003275
+    "prior:controllability_prior": 0.013611,
+    "prior:meaning_stability": 0.002974,
+    "prior:trauma_bias": 0.001927,
+    "prior:trust_prior": 0.006523,
+    "trait:caution_bias": 0.008456,
+    "trait:exploration_posture": 0.005464,
+    "trait:social_approach": 0.004691,
+    "trait:threat_sensitivity": 0.002553,
+    "trait:trust_stance": 0.00453
   },
   "personality_similarity": {
     "count": 60,
@@ -19,11 +19,11 @@
     "std": 1e-06
   },
   "state_distances": {
-    "train_default_cosine": 0.944713,
-    "train_default_l2": 0.372433,
-    "train_full_cosine": 0.995034,
-    "train_full_l2": 0.076561,
-    "train_wrong_user_cosine": 0.964163,
-    "train_wrong_user_l2": 0.275078
+    "train_default_cosine": 0.931235,
+    "train_default_l2": 0.415421,
+    "train_full_cosine": 0.984661,
+    "train_full_l2": 0.116136,
+    "train_wrong_user_cosine": 0.949159,
+    "train_wrong_user_l2": 0.333378
   }
 }

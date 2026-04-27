@@ -2,69 +2,53 @@
   "by_strategy": {
     "partner": {
       "partner_anchor_used_rate": 0.0,
-      "rows": 603,
+      "rows": 512,
       "source_counts": {
-        "context_global": 8,
-        "none": 594,
-        "reply_global_legacy": 1
+        "context_global": 2,
+        "none": 510
       },
       "source_rates": {
-        "context_global": 0.013267,
-        "none": 0.985075,
-        "reply_global_legacy": 0.001658
+        "context_global": 0.003906,
+        "none": 0.996094
       },
-      "topic_anchor_used_rate": 0.014925
+      "topic_anchor_used_rate": 0.003906
     },
     "random": {
-      "partner_anchor_used_rate": 0.002049,
-      "rows": 488,
+      "partner_anchor_used_rate": 0.0,
+      "rows": 502,
       "source_counts": {
-        "context_global": 1,
-        "none": 484,
-        "partner_context": 1,
-        "reply_global_legacy": 2
+        "none": 502
       },
       "source_rates": {
-        "context_global": 0.002049,
-        "none": 0.991803,
-        "partner_context": 0.002049,
-        "reply_global_legacy": 0.004098
+        "none": 1.0
       },
-      "topic_anchor_used_rate": 0.008197
+      "topic_anchor_used_rate": 0.0
     },
     "temporal": {
-      "partner_anchor_used_rate": 0.008772,
-      "rows": 342,
+      "partner_anchor_used_rate": 0.0,
+      "rows": 374,
       "source_counts": {
-        "context_global": 8,
-        "none": 330,
-        "partner_context": 3,
+        "context_global": 1,
+        "none": 372,
         "reply_global_legacy": 1
       },
       "source_rates": {
-        "context_global": 0.023392,
-        "none": 0.964912,
-        "partner_context": 0.008772,
-        "reply_global_legacy": 0.002924
+        "context_global": 0.002674,
+        "none": 0.994652,
+        "reply_global_legacy": 0.002674
       },
-      "topic_anchor_used_rate": 0.035088
+      "topic_anchor_used_rate": 0.005348
     },
     "topic": {
-      "partner_anchor_used_rate": 0.002217,
-      "rows": 451,
+      "partner_anchor_used_rate": 0.0,
+      "rows": 502,
       "source_counts": {
-        "context_global": 1,
-        "none": 447,
-        "partner_context": 1,
-        "reply_global_legacy": 2
+        "none": 502
       },
       "source_rates": {
-        "context_global": 0.002217,
-        "none": 0.991131,
-        "partner_context": 0.002217,
-        "reply_global_legacy": 0.004435
+        "none": 1.0
       },
-      "topic_anchor_used_rate": 0.008869
+      "topic_anchor_used_rate": 0.0
     }
   }
 }

@@ -1,16 +1,16 @@
 {
   "baseline_c": {
     "rhetorical_move_counts": {
-      "guarded_short": 802,
-      "warm_supportive": 1082
+      "guarded_short": 1872,
+      "warm_supportive": 18
     },
     "rhetorical_move_rates": {
-      "guarded_short": 0.42569,
-      "warm_supportive": 0.57431
+      "guarded_short": 0.990476,
+      "warm_supportive": 0.009524
     },
-    "rows": 1884,
+    "rows": 1890,
     "source_counts": {
-      "connector": 1884
+      "connector": 1890
     },
     "source_rates": {
       "connector": 1.0
@@ -18,33 +18,33 @@
   },
   "personality": {
     "rhetorical_move_counts": {
-      "direct_advisory": 31,
-      "exploratory_questioning": 37,
-      "guarded_short": 862,
-      "warm_supportive": 954
+      "direct_advisory": 36,
+      "exploratory_questioning": 193,
+      "guarded_short": 683,
+      "warm_supportive": 978
     },
     "rhetorical_move_rates": {
-      "direct_advisory": 0.016454,
-      "exploratory_questioning": 0.019639,
-      "guarded_short": 0.457537,
-      "warm_supportive": 0.506369
+      "direct_advisory": 0.019048,
+      "exploratory_questioning": 0.102116,
+      "guarded_short": 0.361376,
+      "warm_supportive": 0.51746
     },
-    "rows": 1884,
+    "rows": 1890,
     "source_counts": {
-      "action_phrase": 26,
-      "anchor": 11,
-      "connector": 1819,
-      "focus": 1362,
-      "generic_focus": 21,
-      "policy_detail": 2141
+      "action_phrase": 4,
+      "anchor": 1,
+      "connector": 1706,
+      "focus": 1540,
+      "generic_focus": 76,
+      "policy_detail": 1849
     },
     "source_rates": {
-      "action_phrase": 0.0138,
-      "anchor": 0.005839,
-      "connector": 0.965499,
-      "focus": 0.72293,
-      "generic_focus": 0.011146,
-      "policy_detail": 1.136412
+      "action_phrase": 0.002116,
+      "anchor": 0.000529,
+      "connector": 0.902646,
+      "focus": 0.814815,
+      "generic_focus": 0.040212,
+      "policy_detail": 0.978307
     }
   }
 }

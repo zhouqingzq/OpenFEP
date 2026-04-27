@@ -1,26 +1,26 @@
 {
   "no_policy_trait_bias": {
-    "action_agreement_vs_personality_mean": 0.639209,
+    "action_agreement_vs_personality_mean": 0.636989,
     "count": 60,
-    "semantic_mean": 0.404955,
-    "semantic_vs_baseline_a_diff_mean": 0.024315,
-    "semantic_vs_baseline_c_diff_mean": 0.156852,
-    "text_similarity_vs_personality_mean": 0.810431
+    "semantic_mean": 0.384597,
+    "semantic_vs_baseline_a_diff_mean": 0.014545,
+    "semantic_vs_baseline_c_diff_mean": 0.111724,
+    "text_similarity_vs_personality_mean": 0.786587
   },
   "no_surface_profile": {
-    "action_agreement_vs_personality_mean": 0.920971,
+    "action_agreement_vs_personality_mean": 0.949874,
     "count": 60,
-    "semantic_mean": 0.392901,
-    "semantic_vs_baseline_a_diff_mean": 0.01226,
-    "semantic_vs_baseline_c_diff_mean": 0.144798,
-    "text_similarity_vs_personality_mean": 0.6863
+    "semantic_mean": 0.377382,
+    "semantic_vs_baseline_a_diff_mean": 0.00733,
+    "semantic_vs_baseline_c_diff_mean": 0.10451,
+    "text_similarity_vs_personality_mean": 0.667927
   },
   "surface_only_default_agent": {
-    "action_agreement_vs_personality_mean": 0.500768,
+    "action_agreement_vs_personality_mean": 0.504958,
     "count": 60,
-    "semantic_mean": 0.404272,
-    "semantic_vs_baseline_a_diff_mean": 0.023631,
-    "semantic_vs_baseline_c_diff_mean": 0.156169,
-    "text_similarity_vs_personality_mean": 0.809811
+    "semantic_mean": 0.387432,
+    "semantic_vs_baseline_a_diff_mean": 0.01738,
+    "semantic_vs_baseline_c_diff_mean": 0.11456,
+    "text_similarity_vs_personality_mean": 0.801865
   }
 }
