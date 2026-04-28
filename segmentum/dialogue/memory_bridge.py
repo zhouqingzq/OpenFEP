@@ -2,14 +2,11 @@ from __future__ import annotations
 
 from typing import Mapping
 
+from .utils import clamp as _clamp
+
 # Context field written by DialogueWorld.current_turn (and M5.3+ generators): plain text, no six-channel encoding.
 PRIOR_SELF_BODY_KEY = "prior_self_body"
-# Small nudge when the agent's prior turn was interrogative — placeholder until M5.3 enriches this path.
 PRIOR_SELF_QUESTION_RELEVANCE_SELF_DELTA = 0.04
-
-
-def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-    return max(low, min(high, float(value)))
 
 
 def _prior_self_looks_like_question(text: str) -> bool:

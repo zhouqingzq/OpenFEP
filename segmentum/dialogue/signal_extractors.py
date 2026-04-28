@@ -4,9 +4,7 @@ from dataclasses import dataclass
 import re
 from typing import Protocol
 
-
-def _clamp(value: float, lo: float = 0.0, hi: float = 1.0) -> float:
-    return max(lo, min(hi, value))
+from .utils import clamp as _clamp
 
 
 def _tokenize(text: str) -> list[str]:

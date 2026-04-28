@@ -9,6 +9,67 @@ if TYPE_CHECKING:
     from ..agent import SegmentAgent
     from .lifecycle import ImplantationConfig
 
+from .utils import clamp as _clamp
+
+
+# ── Big Five → SlowTraitState ──────────────────────────────────────────────
+
+# Default linear coefficients mapping OCEAN (0–1) to the five SlowTraitState dims.
+# Each tuple: (O_weight, C_weight, E_weight, A_weight, N_weight, intercept)
+# The intercept centers the trait at 0.5 when all Big Five dims are 0.5 (neutral).
+_BIG_FIVE_COEFFICIENTS: dict[str, tuple[float, float, float, float, float, float]] = {
+    #                  O      C      E      A      N     intercept
+    "caution_bias":       ( 0.00, 0.15, -0.30, 0.00, 0.50, 0.325),
+    "threat_sensitivity": ( 0.00, 0.00, -0.15, -0.25, 0.60, 0.400),
+    "trust_stance":       ( 0.10, 0.00, 0.15, 0.45, -0.35, 0.325),
+    "exploration_posture":( 0.60, -0.10, 0.25, 0.00, 0.00, 0.125),
+    "social_approach":    ( 0.20, 0.00, 0.60, 0.15, -0.10, 0.075),
+}
+
+
+def big_five_to_slow_traits(
+    openness: float = 0.5,
+    conscientiousness: float = 0.5,
+    extraversion: float = 0.5,
+    agreeableness: float = 0.5,
+    neuroticism: float = 0.5,
+    *,
+    coefficients: dict[str, tuple[float, float, float, float, float, float]] | None = None,
+) -> dict[str, float]:
+    """Map Big Five (OCEAN) scores to SlowTraitState dimensions.
+
+    All Big Five inputs are expected in 0–1 range (normalized).  The default
+    coefficients encode reasonable personality-psychology priors:
+
+    * **caution_bias** ← Neuroticism (+) + low Extraversion (+)
+    * **threat_sensitivity** ← Neuroticism (++) + low Agreeableness (+)
+    * **trust_stance** ← Agreeableness (++) + low Neuroticism (+)
+    * **exploration_posture** ← Openness (++) + Extraversion (+)
+    * **social_approach** ← Extraversion (++) + Openness (+)
+
+    Pass a custom ``coefficients`` dict to override the mapping.
+    """
+    coeffs = coefficients if coefficients is not None else _BIG_FIVE_COEFFICIENTS
+    big5: dict[str, float] = {
+        "O": float(openness),
+        "C": float(conscientiousness),
+        "E": float(extraversion),
+        "A": float(agreeableness),
+        "N": float(neuroticism),
+    }
+    out: dict[str, float] = {}
+    for trait_key, (wo, wc, we, wa, wn, intercept) in coeffs.items():
+        raw = (
+            wo * big5["O"]
+            + wc * big5["C"]
+            + we * big5["E"]
+            + wa * big5["A"]
+            + wn * big5["N"]
+            + intercept
+        )
+        out[trait_key] = round(_clamp(raw, 0.05, 0.95), 6)
+    return out
+
 
 @dataclass(slots=True)
 class PersonalitySnapshot:

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import json
+import time
+from pathlib import Path
 from typing import Mapping, Protocol, Sequence
 
 from .seed_utils import pick_index
 from .types import TranscriptUtterance
+from .utils import clamp as _clamp01
 
 
 class ResponseGenerator(Protocol):
@@ -48,10 +52,6 @@ _ACTION_FALLBACKS: dict[str, str] = {
     "minimal_response": "嗯",
     "disengage": "先到这里",
 }
-
-
-def _clamp01(value: float) -> float:
-    return max(0.0, min(1.0, float(value)))
 
 
 def _policy_lift_metadata(personality_state: Mapping[str, object], action: str) -> dict[str, object]:
@@ -137,7 +137,34 @@ def _bucket_personality(personality_state: Mapping[str, object]) -> str:
     return "|".join(parts) if parts else "default"
 
 
+# ── Rhetorical move thresholds ─────────────────────────────────────────────
+# These thresholds govern how personality traits map to conversational style.
+# Calibrated to produce visibly different surface behavior for agents whose
+# slow traits differ by >= 0.25 on at least two dimensions (M5.4 surface
+# ablation gate).  Tuning them shifts the gentleness/suspiciousness/curiosity
+# boundary; they are NOT validated against human conversational data.
+
+_RHETORICAL_GUARDED_CAUTION_FLOOR = 0.50   # caution >= this → guarded possible
+_RHETORICAL_GUARDED_TRUST_CEILING = 0.50   # trust  <= this → guarded possible
+_RHETORICAL_WARM_SOCIAL_FLOOR = 0.42       # social >= this → warm possible
+_RHETORICAL_WARM_TRUST_FLOOR = 0.50        # trust  >= this → warm possible
+_RHETORICAL_EXPLORE_EXPLORATION_FLOOR = 0.56  # exploration >= this (for share_opinion)
+_RHETORICAL_HIGH_CAUTION = 0.62            # definitely guarded
+_RHETORICAL_LOW_TRUST = 0.38               # definitely guarded
+_RHETORICAL_HIGH_EXPLORATION = 0.62        # definitely exploratory
+_RHETORICAL_HIGH_SOCIAL = 0.62             # definitely warm
+_RHETORICAL_HIGH_TRUST = 0.62              # definitely warm
+
+
 def _rhetorical_move(personality_state: Mapping[str, object], action: str) -> str:
+    """Map (slow_traits, action) → conversational stance label.
+
+    Four stances:
+    - ``"guarded_short"`` — defensive, brief, boundary-protecting
+    - ``"exploratory_questioning"`` — curious, probing, topic-introducing
+    - ``"warm_supportive"`` — agreeable, empathetic, elaborating
+    - ``"direct_advisory"`` — neutral, factual (fallback)
+    """
     traits = personality_state.get("slow_traits")
     if not isinstance(traits, Mapping):
         return "direct_advisory"
@@ -158,20 +185,22 @@ def _rhetorical_move(personality_state: Mapping[str, object], action: str) -> st
     except (TypeError, ValueError):
         exploration = 0.5
     if action in {"deflect", "minimal_response", "disengage", "disagree"} and (
-        caution >= 0.50 or trust <= 0.50
+        caution >= _RHETORICAL_GUARDED_CAUTION_FLOOR or trust <= _RHETORICAL_GUARDED_TRUST_CEILING
     ):
         return "guarded_short"
     if action in {"ask_question", "introduce_topic"} or (
-        action == "share_opinion" and exploration >= 0.56
+        action == "share_opinion" and exploration >= _RHETORICAL_EXPLORE_EXPLORATION_FLOOR
     ):
         return "exploratory_questioning"
-    if action in {"agree", "empathize", "elaborate"} and (social >= 0.42 or trust >= 0.50):
+    if action in {"agree", "empathize", "elaborate"} and (
+        social >= _RHETORICAL_WARM_SOCIAL_FLOOR or trust >= _RHETORICAL_WARM_TRUST_FLOOR
+    ):
         return "warm_supportive"
-    if caution >= 0.62 or trust <= 0.38:
+    if caution >= _RHETORICAL_HIGH_CAUTION or trust <= _RHETORICAL_LOW_TRUST:
         return "guarded_short"
-    if exploration >= 0.62:
+    if exploration >= _RHETORICAL_HIGH_EXPLORATION:
         return "exploratory_questioning"
-    if social >= 0.62 or trust >= 0.62:
+    if social >= _RHETORICAL_HIGH_SOCIAL or trust >= _RHETORICAL_HIGH_TRUST:
         return "warm_supportive"
     return "direct_advisory"
 
@@ -535,8 +564,178 @@ def _profile_reply(
     return reply
 
 
+# ── LLM prompt helpers ──────────────────────────────────────────────────────
+
+_ACTION_INSTRUCTIONS: dict[str, str] = {
+    "ask_question": "自然地提出一个问题，引导对方继续说下去",
+    "introduce_topic": "换个新话题聊聊",
+    "share_opinion": "分享你的真实看法或观点",
+    "elaborate": "补充更多细节，展开说说",
+    "agree": "表示同意或认同对方的观点",
+    "empathize": "表达理解和共情，给对方情感上的支持",
+    "joke": "用轻松幽默的方式回应，活跃气氛",
+    "disagree": "委婉地表达不同意见",
+    "deflect": "巧妙地避开这个话题，不深入讨论",
+    "minimal_response": "简单回应一下就好，不用展开",
+    "disengage": "礼貌自然地结束这段对话",
+}
+
+_TRAIT_LABELS: dict[str, tuple[str, str]] = {
+    "caution_bias": ("大大咧咧、不拘小节", "谨慎小心、思虑周全"),
+    "threat_sensitivity": ("心态平和、不容易感到威胁", "警觉敏锐、对环境变化很敏感"),
+    "trust_stance": ("多疑戒备、不容易相信别人", "信任开放、愿意相信他人"),
+    "exploration_posture": ("安于现状、喜欢熟悉的事物", "充满好奇、喜欢探索新事物"),
+    "social_approach": ("内向安静、喜欢独处", "外向健谈、喜欢社交"),
+}
+
+
+def _describe_trait(value: float, low_label: str, high_label: str) -> str:
+    if value <= 0.25:
+        return f"非常{low_label}"
+    elif value <= 0.40:
+        return f"比较{low_label}"
+    elif value <= 0.60:
+        return "中性"
+    elif value <= 0.75:
+        return f"比较{high_label}"
+    else:
+        return f"非常{high_label}"
+
+
+def _emotional_label(value: float) -> str:
+    if value >= 0.65:
+        return "积极愉快"
+    elif value >= 0.55:
+        return "偏正面"
+    elif value >= 0.45:
+        return "中性平稳"
+    elif value >= 0.30:
+        return "偏负面"
+    else:
+        return "低落沮丧"
+
+
+def _conflict_label(value: float) -> str:
+    if value >= 0.70:
+        return "剑拔弩张，火药味很重"
+    elif value >= 0.50:
+        return "有明显分歧和张力"
+    elif value >= 0.30:
+        return "有一些小摩擦"
+    else:
+        return "气氛平和"
+
+
+def _format_history(history: Sequence[TranscriptUtterance], max_turns: int = 8) -> str:
+    if not history:
+        return "（这是对话的开始）"
+    recent = history[-(max_turns * 2):]  # pairs of utterances
+    lines: list[str] = []
+    for u in recent:
+        role = str(u.get("role", ""))
+        text = str(u.get("text", "")).strip()
+        if not text:
+            continue
+        label = "对方" if role == "interlocutor" else "我"
+        lines.append(f"{label}：{text}")
+    return "\n".join(lines) if lines else "（这是对话的开始）"
+
+
+def _build_system_prompt(
+    action: str,
+    personality_state: dict[str, object],
+    emotional_tone: float,
+    conflict_tension: float,
+) -> str:
+    traits = personality_state.get("slow_traits")
+    trait_lines: list[str] = []
+    if isinstance(traits, Mapping):
+        for key in ("caution_bias", "threat_sensitivity", "trust_stance",
+                     "exploration_posture", "social_approach"):
+            labels = _TRAIT_LABELS.get(key, ("低", "高"))
+            try:
+                v = float(traits.get(key, 0.5))
+            except (TypeError, ValueError):
+                v = 0.5
+            desc = _describe_trait(v, *labels)
+            trait_lines.append(f"- {labels[0]} ↔ {labels[1]}：{desc}")
+
+    action_instruction = _ACTION_INSTRUCTIONS.get(action, "自然地回应对方")
+    emotional_desc = _emotional_label(emotional_tone)
+    conflict_desc = _conflict_label(conflict_tension)
+
+    # Narrative priors add color
+    priors = personality_state.get("narrative_priors")
+    priors_text = ""
+    if isinstance(priors, Mapping):
+        try:
+            trust_prior = float(priors.get("trust_prior", 0.0))
+        except (TypeError, ValueError):
+            trust_prior = 0.0
+        if trust_prior >= 0.50:
+            priors_text = "\n你过往的经历让你对人际关系总体持正面态度。"
+        elif trust_prior <= -0.50:
+            priors_text = "\n你过往的经历让你对人际关系总体持谨慎态度。"
+
+    return f"""你是一个正在和朋友微信聊天的人。你的聊天风格自然、口语化，像真人一样。
+
+## 你的性格特质
+{chr(10).join(trait_lines) if trait_lines else '- 性格中性平和'}
+{priors_text}
+## 当前对话
+你需要：{action_instruction}
+对方情绪：{emotional_desc}
+对话气氛：{conflict_desc}
+
+## 回复要求
+- 用中文回复，自然口语化，像真人微信聊天
+- 1-4句话，不要太长
+- 不要说"作为一个人工智能"或类似的话，你就是你
+- 直接回复内容本身，不要加引号或前缀标签"""
+
+
+# ── LLMGenerator ────────────────────────────────────────────────────────────
+
 class LLMGenerator:
-    """Deferred M5.6: structured LLM surface; CI and M5.3 acceptance use RuleBasedGenerator only."""
+    """Structured LLM surface backed by OpenRouter (deepseek/deepseek-v4-flash).
+
+    Personality state (slow_traits + narrative_priors) is injected via a
+    structured system prompt.  Action and observation channels constrain the
+    response direction.  Conversation history provides dialogue coherence.
+
+    Errors are recorded in ``last_diagnostics`` and returned as a visible
+    error string — there is no silent fallback to rule-based generation.
+    """
+
+    def __init__(
+        self,
+        *,
+        model: str = "deepseek/deepseek-v4-flash",
+        temperature: float = 0.7,
+        timeout_seconds: float = 30.0,
+    ) -> None:
+        self.model = model
+        self.temperature = temperature
+        self.timeout_seconds = timeout_seconds
+        self.last_diagnostics: dict[str, object] = {}
+
+    # ── config loading ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _load_openrouter_config() -> dict:
+        config_path = (
+            Path(__file__).resolve().parent.parent.parent
+            / "secrets" / "openrouter.json"
+        )
+        if not config_path.exists():
+            return {}
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return {}
+        return data if isinstance(data, dict) else {}
+
+    # ── generate ────────────────────────────────────────────────────────
 
     def generate(
         self,
@@ -548,9 +747,129 @@ class LLMGenerator:
         master_seed: int,
         turn_index: int,
     ) -> str:
-        raise NotImplementedError(
-            "LLMGenerator requires M5.6 runtime wiring; use RuleBasedGenerator for M5.3."
+        del master_seed, turn_index  # reserved for future caching
+
+        cfg = self._load_openrouter_config()
+        api_key = cfg.get("api_key")
+        base_url = str(cfg.get("base_url", "https://openrouter.ai/api/v1"))
+
+        if not api_key:
+            self.last_diagnostics = {
+                "llm_error": "missing_api_key",
+                "llm_error_detail": "secrets/openrouter.json missing or invalid",
+            }
+            return "[LLM 错误：未配置 API key，请检查 secrets/openrouter.json]"
+
+        observation = dialogue_context.get("observation")
+        if isinstance(observation, Mapping):
+            emotional_tone = float(observation.get("emotional_tone", 0.5))
+            conflict_tension = float(observation.get("conflict_tension", 0.0))
+        else:
+            emotional_tone = 0.5
+            conflict_tension = 0.0
+
+        current_turn = str(dialogue_context.get("current_turn", "")).strip()
+        history_text = _format_history(conversation_history)
+
+        system_prompt = _build_system_prompt(
+            action, personality_state, emotional_tone, conflict_tension
         )
+
+        user_content = f"对话历史：\n{history_text}\n\n对方刚说：{current_turn}\n\n请回复："
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+            "temperature": self.temperature,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+
+        start = time.monotonic()
+        try:
+            import requests
+        except ImportError:
+            self.last_diagnostics = {
+                "llm_error": "missing_requests",
+                "llm_error_detail": "requests library not installed",
+            }
+            return "[LLM 错误：缺少 requests 库，无法调用 API]"
+
+        try:
+            response = requests.post(
+                f"{base_url}/chat/completions",
+                json=payload,
+                headers=headers,
+                timeout=self.timeout_seconds,
+            )
+            elapsed = round(time.monotonic() - start, 3)
+        except requests.Timeout:
+            self.last_diagnostics = {
+                "llm_error": "timeout",
+                "llm_error_detail": f"API timeout after {self.timeout_seconds}s",
+                "llm_latency_ms": int(self.timeout_seconds * 1000),
+            }
+            return f"[LLM 超时：{self.timeout_seconds}秒内未收到回复]"
+        except requests.ConnectionError as exc:
+            self.last_diagnostics = {
+                "llm_error": "connection_error",
+                "llm_error_detail": str(exc),
+            }
+            return "[LLM 错误：无法连接到 OpenRouter API]"
+        except Exception as exc:
+            self.last_diagnostics = {
+                "llm_error": "request_failed",
+                "llm_error_detail": f"{type(exc).__name__}: {exc}",
+            }
+            return f"[LLM 错误：请求失败 — {type(exc).__name__}]"
+
+        if response.status_code != 200:
+            self.last_diagnostics = {
+                "llm_error": f"http_{response.status_code}",
+                "llm_error_detail": response.text[:500],
+                "llm_latency_ms": int(elapsed * 1000),
+            }
+            return f"[LLM 错误：API 返回 HTTP {response.status_code}]"
+
+        try:
+            body = response.json()
+        except ValueError:
+            self.last_diagnostics = {
+                "llm_error": "invalid_json",
+                "llm_error_detail": response.text[:500],
+                "llm_latency_ms": int(elapsed * 1000),
+            }
+            return "[LLM 错误：API 返回非 JSON 响应]"
+
+        try:
+            reply = body["choices"][0]["message"]["content"].strip()
+        except (KeyError, IndexError, TypeError) as exc:
+            self.last_diagnostics = {
+                "llm_error": "unexpected_response_shape",
+                "llm_error_detail": str(exc),
+                "llm_raw_body": body,
+            }
+            return "[LLM 错误：API 返回格式异常]"
+
+        # Remove common model artifacts
+        for prefix in ("回复：", "我：", "我说：", "答："):
+            if reply.startswith(prefix):
+                reply = reply[len(prefix):].strip()
+
+        self.last_diagnostics = {
+            "llm_model": self.model,
+            "llm_latency_ms": int(elapsed * 1000),
+            "llm_tokens_prompt": body.get("usage", {}).get("prompt_tokens", 0),
+            "llm_tokens_completion": body.get("usage", {}).get("completion_tokens", 0),
+            "llm_tokens_total": body.get("usage", {}).get("total_tokens", 0),
+        }
+        return reply
 
 
 class RuleBasedGenerator:

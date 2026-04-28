@@ -109,18 +109,16 @@ def test_adaptation_nonzero() -> None:
 
 
 def test_adaptation_envelope_nonzero() -> None:
-    """Non-neutral agent: adaptation envelope is not completely frozen.
+    """Non-neutral agent: behavioral adaptation is present across scenarios.
 
     M5.5 design intent: a personality-implanted agent should show healthy
-    cross-context adaptation in the slow trait envelope. However, slow traits
-    operate on a much longer timescale than 12-turn scenarios — they barely
-    shift within a single battery run. This test verifies the agent is not
-    completely frozen (at least 1 dim shows any variance), but the primary
-    cross-context adaptation signal comes from behavioral_adaptation
-    (action/strategy distribution variation across scenarios), not from
-    slow trait drift.
+    cross-context adaptation.  Slow traits operate on a much longer timescale
+    than 12-turn scenarios and show zero within-battery variance even for
+    non-neutral implants.  The primary adaptation signal is therefore
+    behavioral (action/strategy distribution variation), not slow trait drift.
 
-    Longer scenarios (M5.7+) would make the 3/5 dims > 0.01 criterion testable.
+    Slow trait envelope assertions (>= 3/5 dims > 0.01) are deferred to M5.7+
+    where longer scenarios make them testable.
     """
     agent = _make_configured_agent({
         "caution_bias": 0.75,
@@ -132,11 +130,13 @@ def test_adaptation_envelope_nonzero() -> None:
     conductor = ScenarioConductor()
     results = conductor.run_battery(agent, seed=43, split_strategy="random")
 
+    # Slow trait envelope std is expected to be zero for 12-turn scenarios
+    # (M5.7 deferred: assert >= 3/5 dims > 0.01 with longer scenarios).
     envelope = adaptation_envelope(results)
-    # Slow traits barely move in 12-turn scenarios; verify not all are literal zero
-    nonzero_dims = sum(1 for v in envelope.values() if v > 0.0)
-    assert nonzero_dims >= 0, f"envelope={envelope}"  # diagnostics-only gate
-    # Behavioral adaptation is the primary cross-context signal
+    for key, std in envelope.items():
+        assert std <= 0.5, f"{key} std {std:.4f} — envelope unstable"
+
+    # Behavioral adaptation is the primary cross-context signal at this scale.
     ba = behavioral_adaptation(results)
     ba_nonzero = int(ba.get("nonzero_action_dims", 0)) + int(ba.get("nonzero_strategy_dims", 0))
     assert ba_nonzero >= 2, (
@@ -312,15 +312,28 @@ def test_split_strategy_reporting() -> None:
 
 
 def test_state_distance_decomposition() -> None:
-    """State distance decomposition returns valid between/within components."""
+    """State distance decomposition returns valid between/within components.
+
+    A healthy agent shows some total variance (not all identical) and
+    does not have all variation concentrated between scenarios (which would
+    mean within-scenario determinism combined with cross-scenario randomness).
+    """
     results = _run_battery_fresh()
     decomp = state_distance_decomposition(results)
     assert "between_scenario_variance" in decomp
     assert "within_scenario_variance" in decomp
     assert "total_variance" in decomp
     assert "between_ratio" in decomp
-    assert float(decomp["total_variance"]) >= 0.0
-    assert 0.0 <= float(decomp["between_ratio"]) <= 1.0
+    total = float(decomp["total_variance"])
+    between_ratio = float(decomp["between_ratio"])
+    assert total > 0.0, f"total_variance={total:.6f} is 0 — all scenarios identical"
+    assert 0.0 <= between_ratio <= 1.0
+    # Between-scenario variance must not be the ONLY source of variation;
+    # otherwise the agent is deterministic within each scenario.
+    assert between_ratio < 0.95, (
+        f"between_ratio={between_ratio:.4f} >= 0.95 — agent is nearly "
+        f"deterministic within each scenario"
+    )
 
 
 def test_channel_means_per_scenario() -> None:

@@ -8,6 +8,7 @@ from typing import Iterable, Mapping, Protocol
 from ...agent import SegmentAgent
 from ...self_model import NarrativePriors, PreferredPolicies
 from ...slow_learning import SlowTraitState
+from ..utils import clamp as _clamp
 from ..actions import DIALOGUE_ACTION_NAMES
 from ..actions import DIALOGUE_ACTION_STRATEGY_MAP
 from .metrics import semantic_pair_info_bucket, semantic_pair_weight_for_text
@@ -68,10 +69,6 @@ def _safe_float(value: object, default: float = 0.5) -> float:
         return float(value)
     except (TypeError, ValueError):
         return float(default)
-
-
-def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-    return max(low, min(high, float(value)))
 
 
 def _compact_reply(text: str) -> str:
