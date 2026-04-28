@@ -63,7 +63,7 @@ Real chat data
 | **M5.1** | Dialogue World Channels | Observability-classified perception channels + precision bounds |
 | **M5.2** | Past Life Implantation | Chat data as lived experience → personality emerges from FEP dynamics |
 | **M5.3** | Dialogue as Action | Response generation as EFE-driven action in dialogue world |
-| **M5.4** | Consistency Validation | Train/test split proof that emergent personality is real and stable (partial accepted / engineering complete) |
+| **M5.4** | Consistency Validation | Train/test split evidence for emergent personality behavior (engineering accepted; formal human validation deferred) |
 | **M5.5** | Cross-Context Stability | Same personality, 7 different scenarios → consistent behavior |
 | **M5.6** | Persona Runtime | Game-ready API with persistent living persona |
 | **M5.7** | Integration Trial | End-to-end: raw chat → playable digital life entity |
@@ -399,12 +399,27 @@ SlowLearning: update traits based on outcome
 
 ## M5.4: Consistency Validation
 
-**Status (2026-04-26): partial accepted / engineering complete.** M5.4 has
+**Status (2026-04-28): engineering accepted / provisional validation.** M5.4 has
 canonical smoke, direction, and formal artifacts with partial acceptance
-eligible. It must not be used as a fully accepted gate for M5.5 until a fresh
-formal artifact with external-human classifier labels passes all hard gates:
-semantic vs Baseline A and Baseline C, behavioral vs Baseline C,
-no-surface/no-policy/surface-only ablations, and artifact guard schema.
+eligible. For engineering development, M5.4 is sufficient to unblock M5.5-M5.7
+when automated metrics, LLM-generated provisional labels, baselines, ablations,
+and artifact guards pass their engineering gates.
+
+External-human classifier labels are no longer a blocker for downstream
+engineering milestones. They remain a future **formal human validation** gate
+for strong scientific or product claims such as "validated real-personality
+fidelity." Without that gate, M5.4 evidence should be described as
+`engineering_accept` / `provisional_validation`, not `formal_accept`.
+
+Gate semantics:
+
+- `engineering_accept`: implementation works, regression tests pass, automated
+  metrics and LLM/provisional judges support continued development.
+- `provisional_validation`: multi-judge or LLM-generated labels, baselines,
+  split checks, ablations, and diagnostic traces provide internal confidence.
+- `formal_human_validation`: independent human-labeled blind evaluation. This
+  is deferred and required only for strong validation/publication claims, not
+  for M5.5-M5.7 engineering progression.
 
 ### Title
 
@@ -511,8 +526,8 @@ dimensions:
    (healthy flexibility) vs. core personality preservation. Compare with real
    user's cross-partner behavioral variance from M5.0 data.
 5. **Split weakness carry-forward**: every M5.5 report must slice scenario
-   results by `random` and `temporal` M5.4 split lineage, because these were
-   the monitored weak points in M5.4 partial acceptance.
+   results by `random` and `temporal` M5.4 split lineage, because these remain
+   monitored weak points under M5.4 engineering acceptance.
 6. **Discriminative identity diagnostics**: report within-person vs.
    between-person retrieval, state-distance decomposition (`SlowTraitState`,
    `NarrativePriors`, defense profile, precision debt), and scenario-level
@@ -582,8 +597,9 @@ digital personas, and validate the full chain under stress.
 2. **Longitudinal trial**: 5 personas, 200+ turns each, over simulated "days"
    with sleep cycles. Measure personality stability, memory coherence, defense
    pattern evolution.
-3. **Comparative evaluation**: blind human evaluation panel — digital persona
-   vs. real user responses to same prompts.
+3. **Comparative evaluation**: automated and LLM-judged comparison by default;
+   optional blind human evaluation panel for formal validation claims — digital
+   persona vs. real user responses to same prompts.
 4. **Adversarial stress test**: manipulation attempts, rapid context switching,
    emotional exploitation — verify persona stability and safety.
 5. **Technical report**: methodology, results, limitations, publication-ready.

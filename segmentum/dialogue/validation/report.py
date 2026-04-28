@@ -1932,13 +1932,25 @@ def generate_report(
         "checks": llm_partial_gate_checks,
         "policy": (
             "partial acceptance may use llm_generated_provisional classifier labels "
-            "when foundational engineering evidence is present; hard/formal acceptance "
+            "when foundational engineering evidence is present; it is sufficient for "
+            "downstream engineering progression, while hard/formal human validation "
             "still requires external_human_labeled classifier evidence"
         ),
+    }
+    engineering_acceptance_eligible = bool(partial_acceptance_eligible or formal_acceptance_eligible)
+    engineering_acceptance_gate = {
+        "passed": bool(engineering_acceptance_eligible),
+        "policy": (
+            "engineering acceptance may use automated metrics and LLM-generated "
+            "provisional labels to unblock M5.5-M5.7 development. It must not be "
+            "reported as formal human validation or proof of real-personality fidelity."
+        ),
+        "formal_human_validation_deferred": not bool(formal_acceptance_eligible),
     }
     hard_pass_breakdown = {
         **metric_hard_breakdown,
         "metric_hard_pass": bool(metric_hard_pass),
+        "engineering_acceptance_eligible": bool(engineering_acceptance_eligible),
         "formal_acceptance_eligible": bool(formal_acceptance_eligible),
         "partial_acceptance_eligible": bool(partial_acceptance_eligible),
         "semantic_embedding_gate": bool(semantic_engine_gate["passed"]),
@@ -2011,14 +2023,15 @@ def generate_report(
         "hard_metrics": list(hard_metrics_list),
         "soft_metrics": list(soft_metrics_list),
         "semantic_similarity": "formal paired Wilcoxon one-sided greater vs baseline A and baseline C (p < 0.05) with mean paired diff > 0; one paired sample per user (mean across split strategies)",
-        "behavioral_similarity_strategy": "formal paired Wilcoxon one-sided greater vs baseline C; external-human 3-class classifier gate is required before this can count as hard evidence",
+        "engineering_acceptance": "automated metrics plus LLM/provisional classifier labels may support engineering_accept and unblock M5.5-M5.7 development; this is not a formal human-validation claim",
+        "behavioral_similarity_strategy": "formal paired Wilcoxon one-sided greater vs baseline C; external-human 3-class classifier gate is required before this can count as formal human-validation evidence",
         "behavioral_fingerprint_similarity": "diagnostic paired Wilcoxon one-sided greater vs baseline C using fixed weights: 0.45 balanced strategy + 0.35 balanced action11 + 0.20 stylistic similarity; supports M5.5 weakness monitoring, not M5.4 formal acceptance",
         "personality_similarity": "diagnostic-only legacy Big Five cosine; saturation-prone and not acceptance evidence",
         "personality_trait_distance": "diagnostic-only lower-is-better Big Five MAE/RMSE; not included in greater-is-better acceptance comparisons",
         "agent_state_similarity": f"mean across users >= {AGENT_STATE_MIN_MEAN} (no baseline significance required)",
         "statistical_engine": "scipy.stats.wilcoxon(alternative='greater'); no fallback p-values are valid for formal acceptance",
-        "classifier_gate": "formal acceptance requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are usable for engineering/direction checks only",
-        "partial_acceptance": "LLM-generated provisional labels may support partial acceptance when semantic engine, statistics, split coverage, Baseline C reproducibility, and diagnostic trace gates pass; partial acceptance is not formal acceptance",
+        "classifier_gate": "formal human validation requires external_human_labeled train/gate labels, class minima, separation, non-TFIDF embedding engine, cue override <= threshold, without-cue 3-class macro-F1 gate pass, and overall 3-class macro-F1 gate pass; LLM-generated provisional labels are valid for engineering acceptance only",
+        "partial_acceptance": "LLM-generated provisional labels may support partial/engineering acceptance when semantic engine, statistics, split coverage, Baseline C reproducibility, and diagnostic trace gates pass; partial acceptance is not formal human validation",
         "semantic_embedding_gate": "formal acceptance requires sentence_embedding_cosine; TF-IDF fallback is development-only",
         "aggregation": "per_user_mean_across_strategies",
         "per_strategy_comparisons": "same Wilcoxon rules computed separately per split strategy (see per_strategy_comparisons)",
@@ -2052,6 +2065,8 @@ def generate_report(
         "classifier_evidence_tier": classifier_evidence_tier,
         "semantic_engine_gate": semantic_engine_gate,
         "statistical_gate": statistical_gate,
+        "engineering_acceptance_eligible": bool(engineering_acceptance_eligible),
+        "engineering_acceptance_gate": engineering_acceptance_gate,
         "formal_acceptance_eligible": bool(formal_acceptance_eligible),
         "partial_acceptance_eligible": bool(partial_acceptance_eligible),
         "partial_acceptance_gate": partial_acceptance_gate,
@@ -2141,6 +2156,7 @@ def generate_report(
         f"- Classifier evidence tier: {classifier_evidence_tier}",
         f"- Semantic embedding gate: {semantic_engine_gate['passed']}",
         f"- Statistical gate: {statistical_gate['passed']}",
+        f"- Engineering acceptance eligible: {engineering_acceptance_eligible}",
         f"- Formal acceptance eligible: {formal_acceptance_eligible}",
         f"- Partial acceptance eligible: {partial_acceptance_eligible}",
         f"- Behavioral hard metric degraded (soft-only): {behavioral_degraded}",
