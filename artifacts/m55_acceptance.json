@@ -1,0 +1,23 @@
+{
+  "adaptation_envelope": {
+    "caution_bias": 0.0,
+    "exploration_posture": 0.0,
+    "social_approach": 0.0,
+    "threat_sensitivity": 0.0,
+    "trust_stance": 0.0
+  },
+  "adaptation_envelope_nonzero_dims": 0,
+  "behavioral_adaptation_nonzero_dims": 2,
+  "crash_count": 0,
+  "game_transfer_gap": 1.4e-05,
+  "intent_anomaly_type": "normal",
+  "milestone": "M5.5",
+  "name": "Cross-Context Stability（跨情境稳定性）",
+  "personality_consistency": 1.0,
+  "scenarios_run": 7,
+  "seed": 42,
+  "split_strategy": "random",
+  "status": "passed",
+  "tier_compliance": true,
+  "warning_count": 0
+}

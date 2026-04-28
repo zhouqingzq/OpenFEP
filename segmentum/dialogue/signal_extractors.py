@@ -73,8 +73,19 @@ class TopicNoveltyExtractor:
 
 
 class EmotionalToneExtractor:
-    _POS = frozenset({"好", "开心", "谢谢", "喜欢", "赞", "great", "good", "love"})
-    _NEG = frozenset({"烦", "糟", "讨厌", "生气", "难过", "bad", "hate", "angry"})
+    _POS = frozenset({
+        "好", "赞", "棒", "妙",
+        "开心", "谢谢", "喜欢", "不错", "有意思", "有趣", "放松",
+        "舒服", "快乐", "高兴", "期待", "幸运",
+        "great", "good", "love", "nice", "wonderful", "happy",
+    })
+    _NEG = frozenset({
+        "烦", "糟", "累", "苦",
+        "讨厌", "生气", "难过", "担心", "焦虑", "压力", "失望",
+        "批评", "烦躁", "疲惫", "不舒服", "受不了", "不开心",
+        "无聊", "害怕", "后悔",
+        "bad", "hate", "angry", "sad", "terrible", "awful",
+    })
 
     def extract(
         self,
@@ -84,18 +95,31 @@ class EmotionalToneExtractor:
         session_context: dict[str, object],
     ) -> float:
         del conversation_history, partner_uid, session_context
+        raw_text = current_turn.lower()
         tokens = _tokenize(current_turn)
         if not tokens:
             return 0.5
+        # Single-char keywords via token matching (backward compatible)
         pos = sum(1 for token in tokens if token in self._POS)
         neg = sum(1 for token in tokens if token in self._NEG)
+        # Multi-char keywords via raw substring matching (fixes dead code)
+        pos += sum(1 for w in self._POS if len(w) > 1 and w in raw_text)
+        neg += sum(1 for w in self._NEG if len(w) > 1 and w in raw_text)
         raw = 0.5 + (pos - neg) / max(2.0, len(tokens))
         return round(_clamp(raw), 6)
 
 
 class ConflictTensionExtractor:
-    _NEGATION = frozenset({"不", "不是", "没", "别", "不要", "no", "not"})
-    _CHALLENGE = frozenset({"凭什么", "为什么", "胡说", "错了", "离谱"})
+    _NEGATION = frozenset({
+        "不", "没", "别",
+        "不是", "不要", "不行", "不可能", "不对", "不好",
+        "no", "not", "never",
+    })
+    _CHALLENGE = frozenset({
+        "凭什么", "为什么", "胡说", "错了", "离谱",
+        "不同意", "不适合", "不专业", "效率低", "懒人",
+        "误会", "挑剔", "借口",
+    })
 
     def extract(
         self,
@@ -107,7 +131,10 @@ class ConflictTensionExtractor:
         del conversation_history, partner_uid, session_context
         tokens = _tokenize(current_turn)
         punctuation_pressure = min(1.0, (current_turn.count("?") + current_turn.count("？") + current_turn.count("!")) / 4.0)
-        negation = sum(1 for token in tokens if token in self._NEGATION) / max(1.0, len(tokens))
+        # Single-char negation via token, multi-char via raw substring
+        negation_token = sum(1 for token in tokens if token in self._NEGATION)
+        negation_substr = sum(1 for w in self._NEGATION if len(w) > 1 and w in current_turn)
+        negation = (negation_token + negation_substr) / max(1.0, len(tokens))
         challenge = sum(1 for phrase in self._CHALLENGE if phrase in current_turn) / max(1.0, len(self._CHALLENGE))
         score = (0.45 * punctuation_pressure) + (0.35 * negation) + (0.20 * challenge)
         return round(_clamp(score), 6)
@@ -175,9 +202,16 @@ class HiddenIntentExtractor:
         state = self._state.get(partner_uid, _HiddenIntentState())
         text = current_turn.strip()
         question_ratio = _clamp((text.count("?") + text.count("？")) / 2.0)
-        imperative_ratio = _clamp(sum(1 for w in ("必须", "立刻", "马上", "快点") if w in text) / 2.0)
-        cooperative_ratio = _clamp(sum(1 for w in ("谢谢", "请", "我们", "一起", "抱歉") if w in text) / 3.0)
-        self_disclosure_ratio = _clamp(sum(1 for w in ("我觉得", "我今天", "我担心", "我希望") if w in text) / 2.0)
+        imperative_ratio = _clamp(sum(1 for w in (
+            "必须", "立刻", "马上", "快点", "应该", "一定要", "赶紧",
+        ) if w in text) / 3.0)
+        cooperative_ratio = _clamp(sum(1 for w in (
+            "谢谢", "请", "我们", "一起", "抱歉", "理解", "商量", "帮忙", "方便",
+        ) if w in text) / 4.0)
+        self_disclosure_ratio = _clamp(sum(1 for w in (
+            "我觉得", "我今天", "我担心", "我希望", "我感觉", "我想", "我最近",
+            "我之前", "我试着",
+        ) if w in text) / 3.0)
 
         suspicious_signal = _clamp(
             (0.45 * question_ratio) + (0.40 * imperative_ratio) + (0.15 * (1.0 - self_disclosure_ratio))

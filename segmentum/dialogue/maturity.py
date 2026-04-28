@@ -54,6 +54,27 @@ def personality_distance(a: PersonalitySnapshot, b: PersonalitySnapshot) -> floa
     return round(max(0.0, 1.0 - cosine), 6)
 
 
+def personality_trait_distance(a: PersonalitySnapshot, b: PersonalitySnapshot) -> float:
+    """Cosine distance using ONLY slow_traits (deconfounded from memory growth).
+
+    Unlike personality_distance() which mixes slow_traits, narrative_priors,
+    precision_debt, memory_stats, and defense_distribution, this isolates the
+    true personality signal from slowly-changing trait dimensions.
+    """
+    keys = sorted(set(a.slow_traits) & set(b.slow_traits))
+    if not keys:
+        return 0.0
+    left = [float(a.slow_traits[k]) for k in keys]
+    right = [float(b.slow_traits[k]) for k in keys]
+    numerator = sum(x * y for x, y in zip(left, right))
+    norm_left = math.sqrt(sum(x * x for x in left))
+    norm_right = math.sqrt(sum(y * y for y in right))
+    if norm_left <= 1e-9 or norm_right <= 1e-9:
+        return 0.0
+    cosine_trait = max(-1.0, min(1.0, numerator / (norm_left * norm_right)))
+    return round(max(0.0, 1.0 - cosine_trait), 6)
+
+
 def capture_personality_snapshot(
     agent: "SegmentAgent",
     sleep_cycle: int,

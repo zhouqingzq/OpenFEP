@@ -41,6 +41,7 @@ def run_conversation(
     partner_uid: int = 0,
     session_id: str = "live",
     master_seed: int = 0,
+    session_context_extra: dict[str, object] | None = None,
 ) -> list[ConversationTurn]:
     """Drive a scripted multi-turn dialogue (partner lines only); agent replies each turn."""
     register_dialogue_actions(agent.action_registry)
@@ -50,6 +51,8 @@ def run_conversation(
     last_action: str | None = None
     turns_out: list[ConversationTurn] = []
     session_context: dict[str, object] = {"session_id": session_id, "partner_uid": partner_uid}
+    if session_context_extra:
+        session_context.update(session_context_extra)
 
     for turn_index, partner_text in enumerate(interlocutor_turns):
         obs_obj = observer.observe(

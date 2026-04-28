@@ -8,6 +8,10 @@ from segmentum.dialogue.channel_registry import (
     ObservabilityTier,
     get_channel_spec,
 )
+from segmentum.dialogue.signal_extractors import (
+    ConflictTensionExtractor,
+    EmotionalToneExtractor,
+)
 from segmentum.dialogue.observer import DialogueObserver
 from segmentum.dialogue.precision_bounds import ChannelPrecisionBounds
 from segmentum.dialogue.signal_extractors import (
@@ -171,3 +175,52 @@ def test_dialogue_observer_transcript_utterance_history() -> None:
         speaker_uid=0,
     )
     assert 0.0 <= out.channels["semantic_content"] <= 1.0
+
+
+# ── Fix 3: Chinese keyword matching ──────────────────────────────────────
+
+
+def test_emotional_tone_multi_char_keywords() -> None:
+    """Multi-character Chinese keywords now match via raw substring."""
+    extractor = EmotionalToneExtractor()
+
+    # Positive multi-char keywords (were dead code before fix)
+    assert extractor.extract("我今天很开心", [], 0, {}) > 0.5  # "开心"
+    assert extractor.extract("谢谢你帮助我", [], 0, {}) > 0.5  # "谢谢"
+    assert extractor.extract("这个很有意思", [], 0, {}) > 0.5  # "有意思"
+
+    # Negative multi-char keywords
+    assert extractor.extract("我很难过", [], 0, {}) < 0.5  # "难过"
+    assert extractor.extract("我很生气", [], 0, {}) < 0.5  # "生气"
+
+    # Neutral baseline
+    neutral = extractor.extract("今天天气怎么样", [], 0, {})
+    assert 0.4 <= neutral <= 0.6, f"neutral tone={neutral:.4f}"
+
+
+def test_conflict_tension_multi_char_negation() -> None:
+    """Multi-character negation keywords ("不是", "不要") now match."""
+    extractor = ConflictTensionExtractor()
+
+    not_baseline = extractor.extract("我同意这个观点", [], 0, {})
+    with_negation = extractor.extract("我不是这个意思", [], 0, {})
+    assert with_negation > not_baseline, (
+        f"with '不是'={with_negation:.4f} should exceed baseline={not_baseline:.4f}"
+    )
+
+
+def test_expanded_keyword_coverage() -> None:
+    """Expanded keywords cover scenario-script vocabulary."""
+    emotional = EmotionalToneExtractor()
+
+    # Casual chat scenario vocabulary
+    assert emotional.extract("今天心情挺好的", [], 0, {}) > 0.5  # "好"
+    assert emotional.extract("我觉得挺有意思的", [], 0, {}) > 0.5  # "有意思"
+
+    # Emotional support scenario vocabulary
+    assert emotional.extract("最近压力很大很焦虑", [], 0, {}) < 0.5  # "压力", "焦虑"
+    assert emotional.extract("我对这个结果很失望", [], 0, {}) < 0.5  # "失望"
+
+    # Conflict scenario vocabulary
+    conflict = ConflictTensionExtractor()
+    assert conflict.extract("我不同意你的说法", [], 0, {}) > 0.0  # "不同意"
