@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 import re
+import time
+from pathlib import Path
 from typing import Protocol
 
 from .utils import clamp as _clamp
@@ -231,4 +234,214 @@ class HiddenIntentExtractor:
         state.estimate = _clamp(state.estimate + (self.alpha * (capped_delta / max(self.alpha, 1e-9))))
         self._state[partner_uid] = state
         return round(state.estimate, 6)
+
+
+# ── Structured LLM channel extractor ────────────────────────────────────────
+
+_CHANNEL_EXTRACTION_SYSTEM = """\
+Analyze the conversation turn and output a JSON object with exactly 6 scores.
+Each score is a float between 0.0 and 1.0.  Output ONLY the JSON object.
+
+Channel definitions:
+- emotional_tone: emotional valence (0=very negative/distressed, 0.5=neutral, 1=very positive/happy)
+- conflict_tension: disagreement or confrontation level (0=none, 0.5=moderate friction, 1=intense)
+- hidden_intent: likelihood of unstated/covert motives behind the words (0=none, 1=obviously hiding something)
+- semantic_content: how much substantive/meaningful content (0=empty/ritual, 1=rich/detailed)
+- topic_novelty: how new or surprising the topic is relative to everyday chat (0=mundane, 1=completely new)
+- relationship_depth: intimacy/trust/closeness signaled (0=surface/transactional, 1=deep/vulnerable)
+
+Scoring guidelines:
+- emotional_tone: "我太开心了"→0.85+, "我很难过"→0.15-, "今天天气还行"→0.5, sarcasm should lower the score
+- conflict_tension: polite disagreement→0.3, direct challenge→0.6+, insult→0.8+
+- hidden_intent: probing questions with unclear motive→0.6+, genuine sharing→0.1-
+- semantic_content: "嗯"→0.05, detailed story→0.8+
+- topic_novelty: routine greeting→0.1, completely new subject→0.7+
+- relationship_depth: "吃了吗"→0.1, sharing a secret→0.7+"""
+
+
+class LLMChannelExtractor:
+    """Extract all 6 dialogue channels in one structured LLM call.
+
+    Uses a short system prompt to produce a JSON dict of channel scores.
+    On any failure (API error, parse error, timeout) returns an empty dict
+    so the caller can fall back to rule-based extraction.
+    """
+
+    def __init__(
+        self,
+        *,
+        model: str = "deepseek/deepseek-v4-flash",
+        timeout_seconds: float = 15.0,
+    ) -> None:
+        self.model = model
+        self.timeout_seconds = timeout_seconds
+        self.last_diagnostics: dict[str, object] = {}
+
+    @staticmethod
+    def _load_config() -> dict:
+        config_path = (
+            Path(__file__).resolve().parent.parent.parent
+            / "secrets" / "openrouter.json"
+        )
+        if not config_path.exists():
+            return {}
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return {}
+        return data if isinstance(data, dict) else {}
+
+    def extract_all(
+        self,
+        current_turn: str,
+        conversation_history: list[str],
+    ) -> dict[str, float]:
+        """Return {channel: value} for all 6 channels, or {} on failure."""
+        cfg = self._load_config()
+        api_key = cfg.get("api_key")
+        base_url = str(cfg.get("base_url", "https://openrouter.ai/api/v1"))
+
+        if not api_key:
+            self.last_diagnostics = {"llm_extraction_error": "missing_api_key"}
+            return {}
+
+        # Build a minimal context snippet from recent history
+        recent = conversation_history[-4:] if len(conversation_history) > 4 else conversation_history
+        history_block = "\n".join(f"- {t}" for t in recent) if recent else "(no prior turns)"
+
+        user_content = (
+            f"Recent conversation:\n{history_block}\n\n"
+            f'Current message: "{current_turn}"\n\n'
+            f"JSON:"
+        )
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": _CHANNEL_EXTRACTION_SYSTEM},
+                {"role": "user", "content": user_content},
+            ],
+            "temperature": 0.0,  # deterministic for channel extraction
+            "max_tokens": 2048,  # headroom: DeepSeek v4 Flash reasoning tokens consume budget
+        }
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+
+        start = time.monotonic()
+        try:
+            import requests
+        except ImportError:
+            self.last_diagnostics = {"llm_extraction_error": "missing_requests"}
+            return {}
+
+        try:
+            response = requests.post(
+                f"{base_url}/chat/completions",
+                json=payload,
+                headers=headers,
+                timeout=self.timeout_seconds,
+            )
+            elapsed = round(time.monotonic() - start, 3)
+        except Exception as exc:
+            self.last_diagnostics = {
+                "llm_extraction_error": f"{type(exc).__name__}: {exc}",
+            }
+            return {}
+
+        if response.status_code != 200:
+            self.last_diagnostics = {
+                "llm_extraction_error": f"http_{response.status_code}",
+                "llm_extraction_detail": response.text[:300],
+            }
+            return {}
+
+        try:
+            body = response.json()
+            raw = body["choices"][0]["message"]["content"]
+            if raw is None:
+                self.last_diagnostics = {
+                    "llm_extraction_error": "null_content",
+                    "llm_extraction_finish_reason": str(
+                        body.get("choices", [{}])[0].get("finish_reason", "unknown")
+                    ),
+                }
+                return {}
+            raw = raw.strip()
+        except (KeyError, IndexError, TypeError, ValueError) as exc:
+            self.last_diagnostics = {
+                "llm_extraction_error": f"response_parse: {exc}",
+            }
+            return {}
+
+        # Extract JSON from the response (may be wrapped in ```json fences)
+        if "```" in raw:
+            # Extract content between first ``` and last ```
+            blocks = raw.split("```")
+            # Find the block after "json" marker if present
+            json_str = ""
+            for i, block in enumerate(blocks):
+                if block.strip().startswith("json"):
+                    if i + 1 < len(blocks):
+                        json_str = blocks[i + 1].strip()
+                        break
+            if not json_str and len(blocks) >= 2:
+                json_str = blocks[1].strip()
+            raw = json_str or raw
+
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            # Try to salvage: look for a JSON object in the text
+            import re as _re
+            m = _re.search(r'\{[^{}]*\}', raw.replace("\n", " "))
+            if m:
+                try:
+                    parsed = json.loads(m.group())
+                except json.JSONDecodeError:
+                    self.last_diagnostics = {
+                        "llm_extraction_error": "json_parse_failed",
+                        "llm_extraction_raw": raw[:500],
+                    }
+                    return {}
+            else:
+                self.last_diagnostics = {
+                    "llm_extraction_error": "json_parse_failed",
+                    "llm_extraction_raw": raw[:500],
+                }
+                return {}
+
+        if not isinstance(parsed, dict):
+            self.last_diagnostics = {"llm_extraction_error": "output_not_a_dict"}
+            return {}
+
+        expected_channels = {
+            "emotional_tone", "conflict_tension", "hidden_intent",
+            "semantic_content", "topic_novelty", "relationship_depth",
+        }
+        channels: dict[str, float] = {}
+        for ch in expected_channels:
+            if ch not in parsed:
+                self.last_diagnostics = {
+                    "llm_extraction_error": f"missing_channel_{ch}",
+                }
+                return {}
+            try:
+                val = float(parsed[ch])
+            except (TypeError, ValueError):
+                self.last_diagnostics = {
+                    "llm_extraction_error": f"non_numeric_{ch}",
+                }
+                return {}
+            channels[ch] = round(_clamp(val), 6)
+
+        usage = body.get("usage", {})
+        self.last_diagnostics = {
+            "llm_extraction_model": self.model,
+            "llm_extraction_latency_ms": int(elapsed * 1000),
+            "llm_extraction_tokens": usage.get("total_tokens", 0),
+        }
+        return channels
 

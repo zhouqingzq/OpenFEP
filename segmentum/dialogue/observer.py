@@ -11,6 +11,7 @@ from .signal_extractors import (
     ConflictTensionExtractor,
     EmotionalToneExtractor,
     HiddenIntentExtractor,
+    LLMChannelExtractor,
     RelationshipDepthExtractor,
     SemanticContentExtractor,
     SignalExtractor,
@@ -52,9 +53,13 @@ class DialogueObserver:
         self,
         extractors: dict[str, SignalExtractor] | None = None,
         channel_registry: tuple[DialogueChannelSpec, ...] = DIALOGUE_CHANNELS,
+        llm_extractor: LLMChannelExtractor | None = None,
     ) -> None:
         self.extractors = extractors or _default_extractors()
         self.channel_registry = channel_registry
+        self.llm_extractor = llm_extractor
+        #: Source of the most recent observation channels ("rule" or "llm").
+        self.last_channel_source: str = "rule"
         missing = sorted(set(DIALOGUE_CHANNEL_NAMES) - set(self.extractors))
         if missing:
             raise ValueError(f"missing extractors for channels: {missing}")
@@ -72,15 +77,27 @@ class DialogueObserver:
     ) -> DialogueObservation:
         flat_history = normalize_conversation_history(conversation_history)
         channels: dict[str, float] = {}
-        for channel in DIALOGUE_CHANNEL_NAMES:
-            channels[channel] = float(
-                self.extractors[channel].extract(
-                    current_turn=current_turn,
-                    conversation_history=flat_history,
-                    partner_uid=partner_uid,
-                    session_context=session_context,
-                )
+
+        # Try structured LLM extraction first; fall back to rule-based on failure.
+        if self.llm_extractor is not None:
+            llm_channels = self.llm_extractor.extract_all(
+                current_turn=current_turn,
+                conversation_history=flat_history,
             )
+            if llm_channels and all(ch in llm_channels for ch in DIALOGUE_CHANNEL_NAMES):
+                channels = dict(llm_channels)
+                self.last_channel_source = "llm"
+        if not channels:
+            self.last_channel_source = "rule"
+            for channel in DIALOGUE_CHANNEL_NAMES:
+                channels[channel] = float(
+                    self.extractors[channel].extract(
+                        current_turn=current_turn,
+                        conversation_history=flat_history,
+                        partner_uid=partner_uid,
+                        session_context=session_context,
+                    )
+                )
         return DialogueObservation(
             channels=channels,
             raw_text=current_turn,
