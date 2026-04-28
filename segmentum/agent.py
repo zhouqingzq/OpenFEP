@@ -36,7 +36,7 @@ from .predictive_coding import (
     default_predictive_coding_hyperparameters,
 )
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
-from .preferences import Goal, GoalStack
+from .preferences import Goal, GoalStack, PreferenceModel
 from .narrative_compiler import NarrativeCompiler
 from .narrative_uncertainty import UncertaintyDecompositionResult
 from .narrative_experiment import ExperimentDesignResult, NarrativeExperimentDesigner
@@ -902,6 +902,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.action_registry = action_registry or build_default_action_registry()
         self.long_term_memory = AutobiographicalMemory()
         self.autobiographical_memory = self.long_term_memory
+        self.preference_model = self.long_term_memory.preference_model
         self.long_term_memory.memory_backend = self.long_term_memory._normalize_memory_backend(memory_backend)
         self.identity_traits = IdentityTraits()
         self.self_model = build_default_self_model()
@@ -945,6 +946,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_decision_observation: dict[str, float] = {}
         self.last_memory_context: dict[str, object] = {}
         self.memory_enabled: bool = memory_enabled
+        self.last_retrieval_result: dict[str, object] = {}
         self.memory_legacy_policy_bias_enabled: bool = True
         self.memory_action_rollups_enabled: bool = True
         self.memory_representation_prior_enabled: bool = True
@@ -996,10 +998,40 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.long_term_memory.agent_state_vector = self.agent_state_vector.to_dict()
         self.long_term_memory.memory_cognitive_style = self.memory_cognitive_style.to_dict()
         self.long_term_memory.memory_cycle_interval = self.memory_cycle_interval
-        self.long_term_memory.memory_backend = self._active_memory_backend()
 
     def _active_memory_backend(self) -> str:
         return self.long_term_memory._normalize_memory_backend(self.long_term_memory.memory_backend)
+
+    def _gated_store_episode(
+        self,
+        cycle: int,
+        observation: dict[str, float],
+        prediction: dict[str, float],
+        errors: dict[str, float],
+        action,
+        outcome: dict[str, float],
+        body_state: dict[str, float] | None = None,
+    ) -> MemoryDecision:
+        original_surprise_threshold = self.long_term_memory.surprise_threshold
+        self.long_term_memory.surprise_threshold = max(
+            0.05,
+            original_surprise_threshold
+            + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
+            + self.prediction_ledger.memory_threshold_delta(),
+            + self.reconciliation_engine.memory_threshold_delta(),
+            + self.verification_loop.memory_threshold_delta(),
+            + subject_memory_threshold_delta(self.subject_state),
+            + self.slow_variable_learner.memory_threshold_delta(),
+        )
+        try:
+            memory_decision = self.long_term_memory.maybe_store_episode(
+                cycle, observation, prediction, errors, action, outcome,
+                body_state=body_state,
+            )
+        finally:
+            self.long_term_memory.surprise_threshold = original_surprise_threshold
+        self.sync_memory_awareness_to_long_term_memory()
+        return memory_decision
 
     def configure_memory_decision_pathways(
         self,
@@ -1066,20 +1098,14 @@ class SegmentAgent(MemoryAwareAgentMixin):
         k: int,
     ) -> list[dict[str, object]]:
         if not self.memory_enabled:
-            self.long_term_memory.last_retrieval_result = {
-                "memory_backend": self._active_memory_backend(),
+            self.last_retrieval_result = {
+                "memory_backend": "memory_store",
                 "memory_enabled": False,
                 "candidates": [],
                 "recall_hypothesis": {},
                 "reconstruction_trace": {},
             }
             return []
-        if self._active_memory_backend() != "memory_store":
-            with suppress_legacy_memory_warnings():
-                return self.long_term_memory.retrieve_similar_memories(
-                    current_state_snapshot,
-                    k=k,
-                )
         self.sync_memory_awareness_to_long_term_memory()
         query = self._decision_retrieval_query(observed, baseline_prediction, baseline_errors)
         result = self.retrieve_for_decision(
@@ -1109,6 +1135,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "memory_backend": "memory_store",
             **result.to_dict(),
         }
+        self.last_retrieval_result = self.long_term_memory.last_retrieval_result
         return similar_memories
 
     def configure_attention_bottleneck(
@@ -1749,7 +1776,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             outcome_totals.items(),
             key=lambda item: (-item[1], item[0]),
         )[0][0]
-        recall_hypothesis = dict(self.long_term_memory.last_retrieval_result.get("recall_hypothesis", {}) or {})
+        recall_hypothesis = dict(self.last_retrieval_result.get("recall_hypothesis", {}) or {})
         competition_snapshot = dict(recall_hypothesis.get("competition_snapshot", {}) or {})
         recall_projection = {}
         latent_perturbation = {}
@@ -2046,7 +2073,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         )
         self.self_model.update_identity_narrative(
             episodic_memory=list(self.long_term_memory.episodes),
-            preference_labels=self.long_term_memory.preference_model.legacy_value_hierarchy_dict(),
+            preference_labels=self.preference_model.legacy_value_hierarchy_dict(),
             current_tick=self.cycle,
             decision_history=list(self.decision_history),
             sleep_metrics=asdict(sleep_summary) if sleep_summary is not None else {},
@@ -2084,7 +2111,11 @@ class SegmentAgent(MemoryAwareAgentMixin):
             self.energy < 0.30
             or self.fatigue > 0.75
             or len(self.episodes) >= 10
-            or self.long_term_memory.should_sleep(self.cycle)
+            or (
+                self.cycle > 0
+                and self.long_term_memory.sleep_interval > 0
+                and self.cycle % self.long_term_memory.sleep_interval == 0
+            )
         )
 
     def perceive(
@@ -2239,9 +2270,9 @@ class SegmentAgent(MemoryAwareAgentMixin):
             ),
             "retrieved_memories": similar_memories,
             "memory_backend": self._active_memory_backend(),
-            "recall_hypothesis": dict(self.long_term_memory.last_retrieval_result.get("recall_hypothesis", {}) or {}),
+            "recall_hypothesis": dict(self.last_retrieval_result.get("recall_hypothesis", {}) or {}),
             "reconstruction_trace": dict(
-                self.long_term_memory.last_retrieval_result.get("reconstruction_trace", {}) or {}
+                self.last_retrieval_result.get("reconstruction_trace", {}) or {}
             ),
             "memory_enabled": self.memory_enabled,
             "memory_bias": 0.0,
@@ -2378,7 +2409,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         projected_snapshot: dict[str, object],
         predicted_effects: dict[str, float],
     ) -> tuple[str, float, float, float]:
-        preference = self.long_term_memory.preference_model.evaluate_state(
+        preference = self.preference_model.evaluate_state(
             {
                 **projected_snapshot,
                 "predicted_outcome": predicted_effects,
@@ -2426,8 +2457,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 1e-12,
                 float(outcome_distribution.get(predicted_outcome, 0.0)),
             )
-            risk = self.long_term_memory.preference_model.risk(predicted_outcome)
-            value_score = self.long_term_memory.preference_model.normalized_score(
+            risk = self.preference_model.risk(predicted_outcome)
+            value_score = self.preference_model.normalized_score(
                 predicted_outcome
             )
 
@@ -2673,7 +2704,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         preferred_probability = float(memory_refinement["preferred_probability"])
         risk = float(memory_refinement["risk"])
         predicted_error = float(memory_refinement["expected_surprise"])
-        expected_free_energy = self.long_term_memory.preference_model.expected_free_energy(
+        expected_free_energy = self.preference_model.expected_free_energy(
             outcome=predicted_outcome,
             predicted_error=predicted_error,
             action_ambiguity=action_ambiguity,
@@ -3824,7 +3855,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
     ) -> DecisionDiagnostics:
         """Backward-compatible chooser for older callers."""
         prediction_error = compute_prediction_error(prediction, prediction)
-        neutral_preference = self.long_term_memory.preference_model.evaluate_state(
+        neutral_preference = self.preference_model.evaluate_state(
             {
                 "observation": dict(prediction),
                 "prediction": dict(prediction),
@@ -4026,30 +4057,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "free_energy_drop": fe_delta,
         }
         action = ensure_action_schema(choice)
-        original_surprise_threshold = self.long_term_memory.surprise_threshold
-        self.long_term_memory.surprise_threshold = max(
-            0.05,
-            original_surprise_threshold
-            + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
-            + self.prediction_ledger.memory_threshold_delta(),
-            + self.reconciliation_engine.memory_threshold_delta(),
-            + self.verification_loop.memory_threshold_delta(),
-            + subject_memory_threshold_delta(self.subject_state),
-            + self.slow_variable_learner.memory_threshold_delta(),
+        memory_decision = self._gated_store_episode(
+            self.cycle, observed, prediction, errors, action, outcome,
+            body_state=body_state,
         )
-        try:
-            memory_decision = self.long_term_memory.maybe_store_episode(
-                self.cycle,
-                observed,
-                prediction,
-                errors,
-                action,
-                outcome,
-                body_state=body_state,
-            )
-        finally:
-            self.long_term_memory.surprise_threshold = original_surprise_threshold
-        self.sync_memory_awareness_to_long_term_memory()
         if not memory_decision.episode_created:
             recent_episode_actions = {
                 action_name(payload.get("action_taken", payload.get("action", "")))
@@ -4065,12 +4076,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 )
             if action.name not in recent_episode_actions or (self.cycle - last_episode_cycle) >= 2:
                 payload = self.long_term_memory.store_episode(
-                    self.cycle,
-                    observed,
-                    prediction,
-                    errors,
-                    action,
-                    outcome,
+                    self.cycle, observed, prediction, errors, action, outcome,
                     body_state=body_state,
                 )
                 memory_decision = MemoryDecision(
@@ -4156,7 +4162,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         observation = dict(embodied_episode.observation)
         prediction, semantic_prediction = apply_schema_conditioned_prediction(
             dict(self.world_model.beliefs),
-            semantic_schemas=self.long_term_memory.semantic_schemas,
+            semantic_schemas=self.memory_store.semantic_schemas,
             semantic_grounding=embodied_episode.semantic_grounding,
         )
         errors = {
@@ -4170,29 +4176,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "temperature": float(embodied_episode.body_state.get("temperature", self.temperature)),
         }
         outcome = self._narrative_outcome_effects(embodied_episode)
-        original_surprise_threshold = self.long_term_memory.surprise_threshold
-        self.long_term_memory.surprise_threshold = max(
-            0.05,
-            original_surprise_threshold
-            + self.global_workspace.memory_threshold_delta(self.last_workspace_state),
-            + self.prediction_ledger.memory_threshold_delta(),
-            + self.reconciliation_engine.memory_threshold_delta(),
-            + self.verification_loop.memory_threshold_delta(),
-            + self.slow_variable_learner.memory_threshold_delta(),
+        memory_decision = self._gated_store_episode(
+            embodied_episode.timestamp, observation, prediction, errors,
+            "observe_world", outcome, body_state=body_state,
         )
-        try:
-            memory_decision = self.long_term_memory.maybe_store_episode(
-                embodied_episode.timestamp,
-                observation,
-                prediction,
-                errors,
-                "observe_world",
-                outcome,
-                body_state=body_state,
-            )
-        finally:
-            self.long_term_memory.surprise_threshold = original_surprise_threshold
-        self.sync_memory_awareness_to_long_term_memory()
         target_payload = None
         if memory_decision.episode_created and self.long_term_memory.episodes:
             target_payload = self.long_term_memory.episodes[-1]
@@ -4246,15 +4233,15 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "narrative_uncertainty": uncertainty.to_dict(),
             "narrative_experiment": self.latest_narrative_experiment.to_dict(),
             "social_update": social_update,
-            "semantic_schemas": list(self.long_term_memory.semantic_schemas[-6:]),
+            "semantic_schemas": list(self.memory_store.semantic_schemas[-6:]),
             "semantic_priority_bonus": semantic_uncertainty_priority_bonus(
                 semantic_grounding=embodied_episode.semantic_grounding,
-                semantic_schemas=self.long_term_memory.semantic_schemas,
+                semantic_schemas=self.memory_store.semantic_schemas,
             ),
             "verification_semantic_priority": semantic_priority_adjustment(
                 prediction_id=f"narrative:{embodied_episode.episode_id}",
                 semantic_grounding=embodied_episode.semantic_grounding,
-                semantic_schemas=self.long_term_memory.semantic_schemas,
+                semantic_schemas=self.memory_store.semantic_schemas,
             ),
         }
         self.narrative_trace.append(trace_payload)
@@ -4700,7 +4687,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 continue
 
             prediction_error = 1.0 - predicted_probability
-            risk = -self.long_term_memory.preference_model.log_preferred_probability(
+            risk = -self.preference_model.log_preferred_probability(
                 str(payload.get("predicted_outcome", "neutral"))
             )
             total_surprise = compute_total_surprise(prediction_error, risk)
@@ -4899,11 +4886,13 @@ class SegmentAgent(MemoryAwareAgentMixin):
             consolidation
         )
         if self.cycle >= 20:
-            memory_store_consolidation_payload = self.long_term_memory.run_memory_consolidation_cycle(
-                current_cycle=self.cycle,
-                rng=self.rng,
-                current_state=self.build_memory_state_context(),
-            ).to_dict()
+            consolidation_result = self.run_memory_consolidation_if_due(
+                self.cycle, rng=self.rng,
+            )
+            memory_store_consolidation_payload = (
+                consolidation_result.to_dict() if consolidation_result
+                else {"skipped": True, "reason": "interval_not_due"}
+            )
             self.sync_memory_awareness_to_long_term_memory()
         else:
             memory_store_consolidation_payload = {
@@ -4956,7 +4945,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             current_cycle=self.cycle,
             episodes=replay_batch,
             world_model=self.world_model,
-            preference_model=self.long_term_memory.preference_model,
+            preference_model=self.preference_model,
             action_registry=self.action_registry,
             rng=self.rng,
             surprise_threshold=self.long_term_memory.surprise_threshold,
@@ -5091,8 +5080,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "verification_sleep": verification_sleep.to_dict(),
                 "reconciliation_sleep": reconciliation_sleep,
                 "rule_ids": [rule.rule_id for rule in consolidation.rules],
-                "semantic_schemas": list(self.long_term_memory.semantic_schemas),
-                "semantic_schema_update": dict(self.long_term_memory.latest_schema_update),
+                "semantic_schemas": list(self.memory_store.semantic_schemas),
+                "semantic_schema_update": dict(self.memory_store.latest_schema_update),
                 "m410_memory_store_consolidation": memory_store_consolidation_payload,
                 "slow_learning": slow_learning_audit.to_dict(),
             }

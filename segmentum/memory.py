@@ -329,7 +329,13 @@ def _cosine_similarity(left: list[float], right: list[float]) -> float:
 
 @dataclass
 class LongTermMemory:
-    """Episodic and semantic memory for pattern retrieval."""
+    """Episodic and semantic memory for pattern retrieval.
+
+    Deprecated: Prefer MemoryStore (segmentum.memory_store) for new code.
+    This class is retained for backward compatibility with the sleep pipeline,
+    legacy episode serialization, and existing audit/benchmark files.
+    New code should use MemoryStore + MemoryAwareAgentMixin (M4.5c).
+    """
 
     episodes: list[dict] = field(default_factory=list)
     semantic_patterns: list[dict] = field(default_factory=list)
@@ -2628,7 +2634,12 @@ def _cosine_distance(left: list[float], right: list[float]) -> float:
     return 1.0 - _cosine_similarity(left, right)
 
 class AutobiographicalMemory(LongTermMemory):
-    """Named M2 memory surface for persistent autobiographical continuity."""
+    """Named M2 memory surface for persistent autobiographical continuity.
+
+    Deprecated: Prefer MemoryStore + MemoryAwareAgentMixin (M4.5c).
+    This class is retained for backward compatibility with the sleep pipeline
+    and legacy episode serialization.
+    """
 
     def replay_during_sleep(
         self,

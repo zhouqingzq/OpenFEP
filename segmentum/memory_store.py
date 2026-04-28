@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import random
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -420,6 +421,8 @@ class MemoryStore:
     state_window_size: int = 30
     agent_state_vector: dict[str, object] | None = None
     last_cleanup_report: dict[str, object] = field(default_factory=dict)
+    semantic_schemas: list[dict[str, object]] = field(default_factory=list)
+    latest_schema_update: dict[str, object] = field(default_factory=dict)
 
     def _find_index(self, entry_id: str) -> int | None:
         for index, entry in enumerate(self.entries):
@@ -762,6 +765,21 @@ class MemoryStore:
         scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
         return [entry for _, _, entry in scored[:k]]
 
+    def get_latest_episodic_entry(self) -> MemoryEntry | None:
+        episodic = [e for e in self.entries if e.memory_class is MemoryClass.EPISODIC]
+        if not episodic:
+            return None
+        episodic.sort(key=lambda e: e.created_at, reverse=True)
+        return episodic[0]
+
+    def episodic_entries(self) -> list[MemoryEntry]:
+        result = [e for e in self.entries if e.memory_class is MemoryClass.EPISODIC]
+        result.sort(key=lambda e: e.created_at)
+        return result
+
+    def episodic_count(self) -> int:
+        return sum(1 for e in self.entries if e.memory_class is MemoryClass.EPISODIC)
+
     def retrieve(
         self,
         query,
@@ -940,6 +958,79 @@ class MemoryStore:
         report.deleted_short_residue = sorted(before_cleanup - after_cleanup)
         return report
 
+    def delete_entry(self, entry_id: str) -> bool:
+        index = self._find_index(entry_id)
+        if index is None:
+            return False
+        self.entries.pop(index)
+        return True
+
+    def archive_entry(self, entry_id: str, *, archive_cycle: int, reason: str = "") -> bool:
+        entry = self.get(entry_id)
+        if entry is None:
+            return False
+        entry.store_level = StoreLevel.DORMANT
+        cm = dict(entry.compression_metadata or {})
+        cm["archived_at_cycle"] = archive_cycle
+        cm["archive_reason"] = reason
+        entry.compression_metadata = cm
+        return True
+
+    def replay_sample(
+        self,
+        rng,
+        *,
+        batch_size: int | None = None,
+        limit: int | None = None,
+    ) -> list[MemoryEntry]:
+        if not self.entries:
+            return []
+        size = batch_size or 6
+        latest_cycle = max(e.created_at for e in self.entries)
+        scored: list[tuple[float, MemoryEntry]] = []
+        for entry in self.entries:
+            recency_weight = 1.0 / (1.0 + max(0.0, latest_cycle - entry.created_at))
+            priority = entry.salience + entry.novelty + recency_weight
+            scored.append((priority, entry))
+        scored.sort(key=lambda item: -item[0])
+        sample_size = min(size, len(scored))
+        high_priority_count = min(len(scored), int(round(sample_size * 0.8)))
+        high_priority = [entry for _, entry in scored[:high_priority_count]]
+        remaining = [entry for _, entry in scored[high_priority_count:]]
+        random_count = sample_size - len(high_priority)
+        if remaining and random_count > 0:
+            random_replay = rng.sample(remaining, min(random_count, len(remaining)))
+        else:
+            random_replay = []
+        result = high_priority + random_replay
+        if limit is not None:
+            result = result[: max(0, int(limit))]
+        return result
+
+    def assign_clusters(self, cluster_distance_threshold: float = 0.65) -> int:
+        if not self.entries:
+            return 0
+        created = 0
+        centroids: list[list[float]] = []
+        for entry in sorted(self.entries, key=lambda e: e.created_at):
+            if entry.cluster_id is not None:
+                continue
+            embedding = list(entry.embedding) if entry.embedding else [0.0] * 32
+            best_distance = float("inf")
+            best_cluster = -1
+            for cid, centroid in enumerate(centroids):
+                dist = math.sqrt(sum((a - b) ** 2 for a, b in zip(embedding, centroid)))
+                if dist < best_distance:
+                    best_distance = dist
+                    best_cluster = cid
+            if best_distance < cluster_distance_threshold and best_cluster >= 0:
+                entry.cluster_id = best_cluster
+            else:
+                entry.cluster_id = len(centroids)
+                centroids.append(list(embedding))
+                created += 1
+        return created
+
     def to_dict(self) -> dict[str, object]:
         return {
             "entries": [entry.to_dict() for entry in self.entries],
@@ -952,6 +1043,8 @@ class MemoryStore:
             "state_window_size": self.state_window_size,
             "agent_state_vector": dict(self.agent_state_vector or {}),
             "last_cleanup_report": dict(self.last_cleanup_report),
+            "semantic_schemas": [dict(s) for s in self.semantic_schemas if isinstance(s, dict)],
+            "latest_schema_update": dict(self.latest_schema_update),
         }
 
     @classmethod
@@ -986,6 +1079,13 @@ class MemoryStore:
             else None,
             last_cleanup_report=dict(payload.get("last_cleanup_report", {}))
             if isinstance(payload.get("last_cleanup_report"), dict)
+            else {},
+            semantic_schemas=[
+                dict(s) for s in payload.get("semantic_schemas", [])
+                if isinstance(s, dict)
+            ],
+            latest_schema_update=dict(payload.get("latest_schema_update", {}))
+            if isinstance(payload.get("latest_schema_update"), dict)
             else {},
         )
 

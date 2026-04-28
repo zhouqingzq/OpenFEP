@@ -4,7 +4,7 @@ import random
 from pathlib import Path
 from typing import Any, Callable
 
-from .memory import Episode, LongTermMemory
+from .memory import LongTermMemory
 from .m45_acceptance_shared import (
     baseline_body_state,
     baseline_errors,
