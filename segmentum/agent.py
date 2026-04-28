@@ -994,6 +994,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self._sync_self_model_body_schema()
 
     def sync_memory_awareness_to_long_term_memory(self) -> None:
+        # _commit_episode_projection replaces long_term_memory.memory_store
+        # with a fresh snapshot; pick up the new reference.
         self.memory_store = self.long_term_memory.memory_store
         self.long_term_memory.agent_state_vector = self.agent_state_vector.to_dict()
         self.long_term_memory.memory_cognitive_style = self.memory_cognitive_style.to_dict()
