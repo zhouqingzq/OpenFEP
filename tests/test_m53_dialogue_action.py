@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from collections import Counter
 import math
+from types import SimpleNamespace
+
+import pytest
 
 from segmentum.agent import SegmentAgent
 from segmentum.dialogue.actions import DIALOGUE_ACTION_NAMES, is_dialogue_action
 from segmentum.dialogue.conversation_loop import run_conversation
+from segmentum.dialogue.fep_prompt import build_fep_prompt_capsule
 from segmentum.dialogue.generator import RuleBasedGenerator
 from segmentum.dialogue.observer import DialogueObserver, normalize_conversation_history
 from segmentum.dialogue.outcome import (
@@ -72,22 +76,80 @@ def test_detect_dialogue_patterns_withdrawal_and_question_reward() -> None:
     assert "question_reward_pattern" in q
 
 
-def test_llm_generator_is_placeholder() -> None:
+def test_llm_generator_reports_missing_api_key(monkeypatch) -> None:
     from segmentum.dialogue.generator import LLMGenerator
 
     gen = LLMGenerator()
-    try:
-        gen.generate(
-            "agree",
-            {},
-            {},
-            [],
-            master_seed=1,
-            turn_index=0,
-        )
-    except NotImplementedError:
-        return
-    raise AssertionError("LLMGenerator.generate should raise NotImplementedError")
+    monkeypatch.setattr(LLMGenerator, "_load_openrouter_config", staticmethod(lambda: {}))
+    reply = gen.generate(
+        "agree",
+        {},
+        {},
+        [],
+        master_seed=1,
+        turn_index=0,
+    )
+    assert "LLM 错误" in reply
+    assert gen.last_diagnostics["llm_error"] == "missing_api_key"
+
+
+def test_fep_prompt_capsule_summarizes_top_options() -> None:
+    options = [
+        SimpleNamespace(
+            choice="empathize",
+            expected_free_energy=0.20,
+            policy_score=0.90,
+            risk=0.8,
+            predicted_outcome="dialogue_reward",
+            dominant_component="expected_free_energy",
+        ),
+        SimpleNamespace(
+            choice="ask_question",
+            expected_free_energy=0.215,
+            policy_score=0.87,
+            risk=1.2,
+            predicted_outcome="dialogue_epistemic_gain",
+            dominant_component="epistemic_bonus",
+        ),
+        SimpleNamespace(
+            choice="disagree",
+            expected_free_energy=0.60,
+            policy_score=0.20,
+            risk=4.0,
+            predicted_outcome="dialogue_threat",
+            dominant_component="risk",
+        ),
+    ]
+    diagnostics = SimpleNamespace(
+        chosen=options[0],
+        ranked_options=options,
+        prediction_error=0.42,
+        workspace_broadcast_channels=["hidden_intent", "conflict_tension"],
+        workspace_suppressed_channels=["topic_novelty"],
+    )
+    capsule = build_fep_prompt_capsule(
+        diagnostics,
+        {"hidden_intent": 0.76, "conflict_tension": 0.52},
+        previous_outcome="SOCIAL_THREAT",
+    ).to_dict()
+
+    assert capsule["chosen_action"] == "empathize"
+    assert capsule["chosen_predicted_outcome"] == "dialogue_reward"
+    assert capsule["chosen_risk_label"] == "low"
+    assert len(capsule["top_alternatives"]) == 3
+    assert capsule["policy_margin"] == pytest.approx(0.03)
+    assert capsule["efe_margin"] == pytest.approx(0.015)
+    assert capsule["decision_uncertainty"] == "high"
+    assert capsule["prediction_error_label"] == "volatile"
+    assert capsule["hidden_intent_label"] == "clear_subtext"
+    assert capsule["previous_outcome"] == "social_threat"
+
+
+def test_fep_prompt_capsule_fallback_without_diagnostics() -> None:
+    capsule = build_fep_prompt_capsule(None, {"hidden_intent": 0.2}).to_dict()
+    assert capsule["chosen_action"] == "ask_question"
+    assert capsule["top_alternatives"] == []
+    assert capsule["decision_uncertainty"] == "low"
 
 
 def test_register_dialogue_actions_count() -> None:

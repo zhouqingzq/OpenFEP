@@ -713,11 +713,31 @@ class LLMGenerator:
         model: str = "deepseek/deepseek-v4-flash",
         temperature: float = 0.7,
         timeout_seconds: float = 30.0,
+        system_prompt: str | None = None,
+        user_message: str | None = None,
     ) -> None:
         self.model = model
         self.temperature = temperature
         self.timeout_seconds = timeout_seconds
         self.last_diagnostics: dict[str, object] = {}
+        self._system_prompt_override: str | None = system_prompt
+        self._user_message_override: str | None = user_message
+
+    @property
+    def system_prompt(self) -> str | None:
+        return self._system_prompt_override
+
+    @system_prompt.setter
+    def system_prompt(self, value: str | None) -> None:
+        self._system_prompt_override = value
+
+    @property
+    def user_message(self) -> str | None:
+        return self._user_message_override
+
+    @user_message.setter
+    def user_message(self, value: str | None) -> None:
+        self._user_message_override = value
 
     # ── config loading ──────────────────────────────────────────────────
 
@@ -769,13 +789,18 @@ class LLMGenerator:
             conflict_tension = 0.0
 
         current_turn = str(dialogue_context.get("current_turn", "")).strip()
-        history_text = _format_history(conversation_history)
 
-        system_prompt = _build_system_prompt(
-            action, personality_state, emotional_tone, conflict_tension
-        )
-
-        user_content = f"对话历史：\n{history_text}\n\n对方刚说：{current_turn}\n\n请回复："
+        if self._system_prompt_override is not None:
+            system_prompt = self._system_prompt_override
+            user_content = (
+                self._user_message_override
+                or f"对话历史：\n{_format_history(conversation_history)}\n\n对方刚说：{current_turn}\n\n请回复："
+            )
+        else:
+            system_prompt = _build_system_prompt(
+                action, personality_state, emotional_tone, conflict_tension
+            )
+            user_content = f"对话历史：\n{_format_history(conversation_history)}\n\n对方刚说：{current_turn}\n\n请回复："
 
         payload = {
             "model": self.model,
@@ -954,9 +979,11 @@ class RuleBasedGenerator:
             "surface_shortcut_suppressed": False,
         }
         if style == "warm_supportive" and action in {"ask_question", "empathize", "agree", "elaborate"}:
-            base = "我在认真听你说，" + base
+            if idx % 3 == 0:
+                base = "我在认真听你说，" + base
         elif style == "guarded_short" and action in {"deflect", "minimal_response", "disengage", "disagree"}:
-            base = "我先保守一点，" + base
+            if idx % 3 == 0:
+                base = "我先保守一点，" + base
 
         profile = personality_state.get("surface_profile")
         if isinstance(profile, Mapping) and int(profile.get("reply_count", 0) or 0) > 0:
@@ -983,6 +1010,10 @@ class RuleBasedGenerator:
                 return f"关于“{focus}”，{base}"
             if action == "empathize":
                 return f"你提到“{focus}”，{base}"
+            if action == "agree" and idx % 2 == 0:
+                return base
+            if action == "elaborate" and idx % 2 == 0:
+                return base
             return f"你说“{focus}”，{base}"
 
         if conflict >= 0.70 and action in {"agree", "joke"}:

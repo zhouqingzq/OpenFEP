@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from .generator import ResponseGenerator, RuleBasedGenerator
 from .observer import DialogueObserver
+from .fep_prompt import build_fep_prompt_capsule
 from .outcome import classify_dialogue_outcome, inject_outcome_semantics
 from .prediction_bridge import (
     register_dialogue_actions,
@@ -42,13 +43,17 @@ def run_conversation(
     session_id: str = "live",
     master_seed: int = 0,
     session_context_extra: dict[str, object] | None = None,
+    initial_prior_observation: dict[str, float] | None = None,
+    initial_last_action: str | None = None,
 ) -> list[ConversationTurn]:
     """Drive a scripted multi-turn dialogue (partner lines only); agent replies each turn."""
     register_dialogue_actions(agent.action_registry)
     gen = generator or RuleBasedGenerator()
     transcript: list[TranscriptUtterance] = []
-    prior_obs: dict[str, float] | None = None
-    last_action: str | None = None
+    prior_obs: dict[str, float] | None = (
+        dict(initial_prior_observation) if initial_prior_observation is not None else None
+    )
+    last_action: str | None = initial_last_action
     turns_out: list[ConversationTurn] = []
     session_context: dict[str, object] = {"session_id": session_id, "partner_uid": partner_uid}
     if session_context_extra:
@@ -105,6 +110,16 @@ def run_conversation(
             if diagnostics is not None
             else "ask_question"
         )
+
+        fep_capsule = build_fep_prompt_capsule(
+            diagnostics,
+            channels,
+            previous_outcome=outcome_label or "",
+        ).to_dict()
+        efe_margin = float(fep_capsule.get("efe_margin", 1.0) or 1.0)
+        dialogue_context["efe_margin"] = efe_margin
+        dialogue_context["fep_prompt_capsule"] = fep_capsule
+
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
         }
@@ -139,6 +154,8 @@ def run_conversation(
             generation_diagnostics = dict(generation_diagnostics)
         else:
             generation_diagnostics = {}
+        generation_diagnostics["fep_prompt_capsule"] = fep_capsule
+        generation_diagnostics["selected_action"] = action
         if isinstance(policy_context, dict):
             chosen_policy_context = policy_context.get(action, {})
             if isinstance(chosen_policy_context, dict):
