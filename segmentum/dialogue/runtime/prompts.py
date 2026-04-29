@@ -838,6 +838,23 @@ _CHANNEL_LABELS = {
     "hidden_intent": "隐含意图",
 }
 
+_DOMINANT_COMPONENT_PHRASES: dict[str, str] = {
+    "memory_bias": "选这个方向更多是被你最近的记忆痕迹推动的——不是纯推理，是经验在牵引。",
+    "pattern_bias": "你识别出了一种熟悉的对话模式，这个方向是你习惯的应对方式。",
+    "policy_bias": "选这个方向是因为你过去学到它在这种情境下比较有效——是学来的偏好，不是最优解。",
+    "epistemic_bonus": "选这个方向主要是想获取更多信息——你在试探，而不是在确认。",
+    "workspace_bias": "你的注意力当前集中在某些信号上，这个方向是被注意力引导的——你可能忽略了其他维度。",
+    "social_bias": "社交情境对你的选择影响比较大——你在意关系的维护多于信息的准确。",
+    "commitment_bias": "你对之前的回应方向有一定承诺感，所以继续沿着类似方向走——不一定是当下最优的。",
+    "identity_bias": "这个选择更多来自你的人格倾向，而不是对当下对话的精确判断——是你'本来就容易这样回应'。",
+    "ledger_bias": "你对过往预测的账本在影响你——之前类似情境的结果记忆在驱动这个选择。",
+    "subject_bias": "你当前的内部状态——精力、心情、自我保护程度——在影响你选这个方向。",
+    "goal_alignment": "这个方向与你当前心里在意的事情比较对齐——不是随机的，是目标在牵引。",
+    "verification_bias": "你选这个方向是想验证之前的某个预测——你在测试自己的判断准不准。",
+    "experiment_bias": "这个方向带一点实验性质——你不太确定会发生什么，但想试试。",
+    "inquiry_scheduler_bias": "你的好奇心调度器觉得现在是追问的好时机——被内在节奏推动的。",
+}
+
 
 def _capsule_str(capsule: Mapping[str, object], key: str, default: str = "") -> str:
     value = capsule.get(key, default)
@@ -891,6 +908,13 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
     outcome = _capsule_str(capsule, "chosen_predicted_outcome", "neutral")
 
     lines = [f"你此刻的回应方向：{_action_phrase(action)}"]
+
+    # Why was this direction chosen? (dominant FEP component)
+    dominant = _capsule_str(capsule, "chosen_dominant_component", "")
+    dominant_reason = _DOMINANT_COMPONENT_PHRASES.get(dominant)
+    if dominant_reason:
+        lines.append(dominant_reason)
+
     lines.append(_predicted_outcome_phrase(outcome))
 
     if risk_label == "high":
@@ -933,6 +957,17 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
         ]
         if focus:
             lines.append("当前最需要留意：" + "、".join(focus) + "。")
+
+    raw_suppressed = capsule.get("workspace_suppressed", [])
+    if isinstance(raw_suppressed, ABCSequence) and not isinstance(raw_suppressed, (str, bytes)):
+        suppressed = [
+            _CHANNEL_LABELS.get(str(ch), str(ch))
+            for ch in list(raw_suppressed)[:3]
+            if str(ch)
+        ]
+        if suppressed:
+            lines.append("当前被注意力压低的信号：" + "、".join(suppressed)
+                         + "——你可能不太能察觉到这些维度，不必强行关注。")
 
     alternatives = capsule.get("top_alternatives", [])
     if isinstance(alternatives, ABCSequence) and not isinstance(alternatives, (str, bytes)):
