@@ -12,6 +12,7 @@ if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 
 st.set_page_config(page_title="M5.6 Persona Runtime", layout="wide")
@@ -25,7 +26,7 @@ from segmentum.dialogue.runtime.safety import SafetyLayer
 def init_session() -> None:
     if "pm" not in st.session_state:
         st.session_state.pm = PersonaManager(
-            storage_dir=Path("artifacts") / "m56_personas"
+            storage_dir=_project_root / "artifacts" / "m56_personas"
         )
     if "chat_iface" not in st.session_state:
         st.session_state.chat_iface = ChatInterface()
@@ -41,45 +42,63 @@ def inject_app_style() -> None:
     st.markdown(
         """
         <style>
+        :root {
+            --wechat-bg: #1f1f1f;
+            --wechat-panel-bg: #202020;
+            --wechat-divider: #2f2f2f;
+            --bubble-other-bg: #2f3136;
+            --bubble-other-text: #e8e8e8;
+            --bubble-mine-bg: #3cd681;
+            --bubble-mine-text: #111111;
+            --name-color: #8a8a8a;
+            --time-color: #7b7b7b;
+            --input-bg: #202020;
+            --input-border: #3a3a3a;
+            --input-placeholder: #8b8b8b;
+            --icon-color: #9a9a9a;
+            --send-disabled-bg: #2b2b2b;
+            --send-disabled-text: #7c7c7c;
+        }
         .stApp {
-            background: #15171b;
-            color: #f3f3f3;
+            background: var(--wechat-bg);
+            color: var(--bubble-other-text);
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
         }
         [data-testid="stHeader"] {
-            background: rgba(21, 23, 27, 0.94);
+            background: rgba(31, 31, 31, 0.96);
         }
         [data-testid="stSidebar"] {
-            background: #191b20;
+            background: #191919;
         }
         .main .block-container {
-            max-width: 1120px;
-            padding-top: 0.8rem;
-            padding-bottom: 1rem;
+            max-width: none;
+            padding: 0.6rem 1rem 1rem;
         }
         .app-caption {
-            color: #9ca3af;
-            font-size: 0.86rem;
-            margin: -0.4rem 0 1rem;
+            color: #777777;
+            font-size: 14px;
+            margin: -0.4rem 0 0.7rem;
         }
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            border-bottom: 1px solid #2b3038;
+            gap: 0;
+            border-bottom: 1px solid var(--wechat-divider);
+            background: var(--wechat-bg);
         }
         .stTabs [data-baseweb="tab"] {
-            height: 42px;
+            height: 38px;
             padding: 0 18px;
             border-radius: 0;
-            color: #a4abb6;
+            color: #8a8a8a;
             background: transparent;
         }
         .stTabs [aria-selected="true"] {
-            color: #f3f3f3;
-            border-bottom: 3px solid #07c160;
+            color: #e8e8e8;
+            border-bottom: 2px solid var(--bubble-mine-bg);
         }
         .wechat-panel {
-            min-height: calc(100vh - 330px);
-            background: #1f1f1f;
-            border: 1px solid #292b30;
+            min-height: calc(100vh - 360px);
+            background: var(--wechat-bg);
+            border: 0;
             border-bottom: 0;
             border-radius: 0;
             overflow: hidden;
@@ -89,194 +108,303 @@ def inject_app_style() -> None:
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #1f1f1f;
-            border-bottom: 1px solid #292b30;
-            font-weight: 600;
-            color: #f4f4f5;
+            background: var(--wechat-bg);
+            border-bottom: 1px solid var(--wechat-divider);
+            font-size: 16px;
+            font-weight: 400;
+            color: #e7e7e7;
         }
         .wechat-subtitle {
             margin-left: 8px;
-            color: #9ca3af;
-            font-size: 0.82rem;
+            color: #777777;
+            font-size: 14px;
             font-weight: 400;
         }
         .wechat-body {
-            min-height: calc(100vh - 380px);
-            padding: 26px 30px 30px;
+            min-height: calc(100vh - 410px);
+            max-height: calc(100vh - 360px);
+            overflow-y: auto;
+            padding: 20px 28px 12px;
+            background: var(--wechat-bg);
+            box-sizing: border-box;
         }
         .wechat-row {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin: 24px 0;
+            gap: 10px;
+            margin: 0 0 18px;
         }
         .wechat-row.user {
-            justify-content: flex-end;
+            flex-direction: row-reverse;
+            justify-content: flex-start;
         }
         .wechat-row.assistant {
             justify-content: flex-start;
         }
+        .wechat-row.user + .wechat-row.user {
+            margin-top: -7px;
+        }
         .wechat-avatar {
-            width: 40px;
-            height: 40px;
-            flex: 0 0 40px;
-            border-radius: 7px;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 13px;
             font-weight: 700;
             color: #ffffff;
             user-select: none;
+            overflow: hidden;
         }
         .wechat-row.user .wechat-avatar {
             background:
-                linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
-                linear-gradient(135deg, #f3c28c, #9162e4 54%, #ffd37a);
+                linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
+                linear-gradient(135deg, #5270df, #73b6ff 52%, #e7f0ff);
+            color: #101010;
         }
         .wechat-row.assistant .wechat-avatar {
             background:
-                linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0)),
-                linear-gradient(135deg, #5c6470, #29303a);
+                linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
+                linear-gradient(135deg, #565b64, #252a31);
         }
         .wechat-stack {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            max-width: min(60%, 720px);
+            max-width: min(62vw, 460px);
         }
         .wechat-row.user .wechat-stack {
             align-items: flex-end;
         }
         .wechat-name {
-            margin: -2px 0 6px;
-            color: #8b8d93;
-            font-size: 0.82rem;
-            line-height: 1;
+            margin: -1px 0 6px;
+            color: var(--name-color);
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: 400;
         }
         .wechat-bubble {
             position: relative;
-            padding: 10px 14px;
-            border-radius: 7px;
-            line-height: 1.55;
-            font-size: 1.02rem;
+            display: inline-block;
+            width: fit-content;
+            max-width: min(58vw, 390px);
+            min-height: 38px;
+            padding: 11px 15px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0;
             white-space: pre-wrap;
             word-break: break-word;
             box-shadow: none;
+            box-sizing: border-box;
         }
         .wechat-row.user .wechat-bubble {
-            background: #39d98a;
-            color: #07130b;
-            margin-right: 1px;
+            background: var(--bubble-mine-bg);
+            color: var(--bubble-mine-text);
+            margin-right: 0;
         }
         .wechat-row.assistant .wechat-bubble {
-            background: #303133;
-            color: #eeeeee;
+            background: var(--bubble-other-bg);
+            color: var(--bubble-other-text);
             border: 0;
-            margin-left: 1px;
+            margin-left: 0;
         }
         .wechat-row.user .wechat-bubble::after {
             content: "";
             position: absolute;
             top: 13px;
             right: -6px;
-            border-width: 6px 0 6px 7px;
+            border-width: 6px 0 6px 6px;
             border-style: solid;
-            border-color: transparent transparent transparent #39d98a;
+            border-color: transparent transparent transparent var(--bubble-mine-bg);
         }
         .wechat-row.assistant .wechat-bubble::before {
             content: "";
             position: absolute;
             top: 13px;
             left: -6px;
-            border-width: 6px 7px 6px 0;
+            border-width: 6px 6px 6px 0;
             border-style: solid;
-            border-color: transparent #303133 transparent transparent;
+            border-color: transparent var(--bubble-other-bg) transparent transparent;
+        }
+        .time-divider {
+            text-align: center;
+            color: var(--time-color);
+            font-size: 15px;
+            line-height: 1;
+            margin: 20px 0 18px;
         }
         .wechat-empty {
             display: flex;
             min-height: 240px;
             align-items: center;
             justify-content: center;
-            color: #8f98a6;
-            font-size: 0.94rem;
+            color: #777777;
+            font-size: 16px;
         }
         .wechat-typing {
-            color: #8f98a6;
+            color: #8a8a8a;
         }
-        div[data-testid="stForm"] {
-            background: #1f1f1f;
-            border: 1px solid #393b40;
-            border-radius: 10px;
-            padding: 12px 16px 14px;
-            margin-top: 0;
+        .wechat-body::-webkit-scrollbar {
+            width: 8px;
         }
-        div[data-testid="stForm"] input {
-            height: 48px !important;
-            background: transparent !important;
+        .wechat-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .wechat-body::-webkit-scrollbar-thumb {
+            background: #666666;
+            border-radius: 8px;
+        }
+        [data-testid="stBottomBlockContainer"],
+        [data-testid="stChatInputContainer"],
+        .stChatInputContainer {
+            width: 100% !important;
+            max-width: none !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        [data-testid="stChatInput"] {
+            position: relative;
+            width: 100% !important;
+            max-width: none !important;
+            height: 210px !important;
+            min-height: 210px !important;
+            background: var(--wechat-bg) !important;
             border: 0 !important;
-            color: #efefef !important;
-            font-size: 1rem !important;
-            box-shadow: none !important;
-        }
-        div[data-testid="stForm"] input:focus {
-            border: 0 !important;
+            border-top: 1px solid var(--wechat-divider) !important;
+            border-radius: 0 !important;
             box-shadow: none !important;
             outline: 0 !important;
+            padding: 14px 30px 64px !important;
+            margin-top: 0 !important;
+            box-sizing: border-box !important;
         }
-        div[data-testid="stForm"] input::placeholder {
-            color: #85888f;
-        }
-        div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button {
-            min-width: 74px;
-            height: 36px;
-            border: 0;
-            border-radius: 9px;
-            background: #2f3033;
-            color: #9b9da3;
-            font-size: 0.95rem;
-        }
-        div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button:hover {
-            background: #07c160;
-            color: #101810;
-        }
-        .wechat-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            color: #a8abb2;
-            font-size: 1.25rem;
+        [data-testid="stChatInput"]::before {
+            content: "☻   ◇   ▭   ✂⌄   ◎   ♫";
+            position: absolute;
+            left: 48px;
+            right: 126px;
+            bottom: 27px;
+            color: var(--icon-color);
+            font-size: 22px;
             line-height: 1;
-            margin-bottom: 6px;
-            user-select: none;
+            letter-spacing: 0;
+            white-space: nowrap;
+            pointer-events: none;
         }
-        .wechat-toolbar-spacer {
-            flex: 1 1 auto;
-        }
-        .wechat-tool-divider {
+        [data-testid="stChatInput"]::after {
+            content: "";
+            position: absolute;
+            right: 126px;
+            bottom: 18px;
             width: 1px;
-            height: 22px;
-            background: #2d2f33;
-            margin-left: -8px;
+            height: 30px;
+            background: var(--wechat-divider);
+            pointer-events: none;
+        }
+        [data-testid="stChatInput"] > div {
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 132px !important;
+            background: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            outline: 0 !important;
+            overflow: hidden;
+            padding: 0 !important;
+        }
+        [data-testid="stChatInput"] > div > div,
+        [data-testid="stChatInput"] [data-baseweb="base-input"],
+        [data-testid="stChatInput"] [data-baseweb="textarea"] {
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 130px !important;
+            background: var(--input-bg) !important;
+            border: 0 !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            outline: 0 !important;
+            padding: 0 !important;
+        }
+        [data-testid="stChatInput"] textarea {
+            min-height: 130px !important;
+            max-height: 130px !important;
+            background: var(--input-bg) !important;
+            border: 0 !important;
+            border-radius: 12px !important;
+            color: #eaeaea !important;
+            -webkit-text-fill-color: #eaeaea !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+            font-weight: 400 !important;
+            box-shadow: none !important;
+            caret-color: var(--bubble-mine-bg);
+            padding: 18px 20px !important;
+            resize: none !important;
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
+            box-sizing: border-box !important;
+        }
+        [data-testid="stChatInput"] textarea:focus {
+            border: 0 !important;
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
+        [data-testid="stChatInput"] textarea::placeholder {
+            color: var(--input-placeholder);
+            -webkit-text-fill-color: var(--input-placeholder);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        [data-testid="stChatInput"] button {
+            position: absolute;
+            right: 36px;
+            bottom: 18px;
+            width: 80px;
+            height: 40px;
+            background: var(--send-disabled-bg) !important;
+            border-radius: 8px !important;
+            color: var(--send-disabled-text) !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            font-size: 16px !important;
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
+        }
+        [data-testid="stChatInput"] button:not(:disabled):not([aria-disabled="true"]) {
+            background: #07c160 !important;
+            color: #ffffff !important;
+        }
+        [data-testid="stChatInput"] button:not(:disabled):not([aria-disabled="true"]):hover {
+            background: #07c160 !important;
+            color: #ffffff !important;
         }
         @media (max-width: 760px) {
             .main .block-container {
-                padding-left: 0.8rem;
-                padding-right: 0.8rem;
+                padding-left: 0;
+                padding-right: 0;
             }
             .wechat-body {
-                padding: 18px 12px 22px;
+                padding: 18px 20px 12px;
             }
             .wechat-stack {
-                max-width: 74%;
+                max-width: min(70vw, 460px);
             }
             .wechat-bubble {
-                font-size: 0.95rem;
+                font-size: 15px;
+                max-width: min(70vw, 390px);
             }
             .wechat-avatar {
-                width: 34px;
-                height: 34px;
-                flex-basis: 34px;
+                width: 40px;
+                height: 40px;
+                flex-basis: 40px;
+            }
+            [data-testid="stChatInput"] {
+                padding-left: 24px !important;
+                padding-right: 24px !important;
             }
         }
         </style>
@@ -297,10 +425,10 @@ def _message_html(role: str, text: str, *, assistant_name: str = "AI") -> str:
     if role == "user":
         return (
             '<div class="wechat-row user">'
+            '<div class="wechat-avatar">我</div>'
             '<div class="wechat-stack">'
             f'<div class="wechat-bubble">{safe_text}</div>'
             "</div>"
-            '<div class="wechat-avatar">我</div>'
             "</div>"
         )
     safe_name = escape(assistant_name or "AI")
@@ -316,15 +444,25 @@ def _message_html(role: str, text: str, *, assistant_name: str = "AI") -> str:
     )
 
 
-def _queue_composer_message() -> None:
-    text = str(st.session_state.get("wechat_composer_input", "")).strip()
-    chat_iface: ChatInterface | None = st.session_state.get("chat_iface")
-    if not text or st.session_state.get("pending_user_message"):
-        return
-    if chat_iface is None or not chat_iface.has_agent():
-        return
-    st.session_state.messages.append({"role": "user", "text": text})
-    st.session_state.pending_user_message = text
+def _auto_scroll_chat() -> None:
+    components.html(
+        """
+        <script>
+        const scrollChatToBottom = () => {
+          const doc = window.parent.document;
+          const bodies = doc.querySelectorAll(".wechat-body");
+          const body = bodies[bodies.length - 1];
+          if (!body) return;
+          body.scrollTop = body.scrollHeight;
+        };
+        requestAnimationFrame(scrollChatToBottom);
+        setTimeout(scrollChatToBottom, 120);
+        setTimeout(scrollChatToBottom, 450);
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
 
 def render_sidebar() -> None:
@@ -439,6 +577,8 @@ def render_chat() -> None:
 
     # Display message history in a WeChat-like conversation surface.
     message_parts: list[str] = []
+    if st.session_state.messages:
+        message_parts.append('<div class="time-divider">今天</div>')
     for msg in st.session_state.messages:
         message_parts.append(
             _message_html(msg["role"], msg["text"], assistant_name=assistant_name)
@@ -471,6 +611,7 @@ def render_chat() -> None:
         ),
         unsafe_allow_html=True,
     )
+    _auto_scroll_chat()
 
     if pending_text and chat_iface.has_agent():
         with st.spinner("AI 正在回复..."):
@@ -490,30 +631,13 @@ def render_chat() -> None:
         st.session_state.pending_user_message = None
 
     disabled = not chat_iface.has_agent() or pending_text is not None
-    with st.form("wechat_composer", clear_on_submit=True):
-        st.markdown(
-            (
-                '<div class="wechat-toolbar">'
-                "<span>☺</span><span>◇</span><span>▭</span><span>✂</span>"
-                '<span class="wechat-toolbar-spacer"></span>'
-                "<span>◉</span><span>♬</span>"
-                '<span class="wechat-tool-divider"></span>'
-                "</div>"
-            ),
-            unsafe_allow_html=True,
-        )
-        user_input = st.text_input(
-            "发消息",
-            placeholder="发消息" if not disabled else "先加载一个 persona...",
-            label_visibility="collapsed",
-            disabled=disabled,
-            key="wechat_composer_input",
-        )
-        _, send_col = st.columns([1, 0.12])
-        submitted = send_col.form_submit_button("发送", disabled=disabled)
-
-    if submitted and user_input.strip():
-        _queue_composer_message()
+    user_input = st.chat_input(
+        "发消息" if not disabled else "先加载一个 persona...",
+        disabled=disabled,
+    )
+    if user_input:
+        st.session_state.messages.append({"role": "user", "text": user_input})
+        st.session_state.pending_user_message = user_input
         st.rerun()
 
 
