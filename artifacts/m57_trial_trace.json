@@ -1,0 +1,49 @@
+{
+  "artifact_type": "end_to_end_trace",
+  "chain": [
+    "raw_chat",
+    "m50_pipeline",
+    "m52_implantation",
+    "m56_runtime",
+    "m57_trial"
+  ],
+  "config": {
+    "implantation_sleep_every_sessions": 1,
+    "min_messages": 6,
+    "min_partners": 3,
+    "personas": 5,
+    "raw_pairs_per_session": 3,
+    "raw_sessions_per_partner": 2,
+    "run_cross_context": true,
+    "seed": 57,
+    "simulated_days": 5,
+    "turns_per_persona": 200
+  },
+  "generated_at": "2026-04-30T11:52:59.094232+00:00",
+  "m50_summary": {
+    "parsed_success": 180,
+    "qualified_users": 8,
+    "total_lines": 180
+  },
+  "milestone_id": "M5.7",
+  "persona_labels": [
+    "curious_builder",
+    "guarded_planner",
+    "warm_supporter",
+    "direct_solver",
+    "playful_adapter"
+  ],
+  "schema_version": 1,
+  "source": {
+    "lines_by_persona": {
+      "7101": 36,
+      "7102": 36,
+      "7103": 36,
+      "7104": 36,
+      "7105": 36
+    },
+    "mode": "synthetic_raw_chat_logs",
+    "personas": 5,
+    "raw_dir": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "artifacts": {
+    "acceptance_summary": "artifacts\\m57_acceptance.json",
+    "adversarial": "artifacts\\m57_adversarial.json",
+    "comparative": "artifacts\\m57_comparative.json",
+    "longitudinal": "artifacts\\m57_longitudinal.json",
+    "technical_report": "reports\\m57_integration_report.json",
+    "trial_trace": "artifacts\\m57_trial_trace.json"
+  },
+  "config": {
+    "implantation_sleep_every_sessions": 1,
+    "min_messages": 6,
+    "min_partners": 3,
+    "personas": 5,
+    "raw_pairs_per_session": 3,
+    "raw_sessions_per_partner": 2,
+    "run_cross_context": true,
+    "seed": 57,
+    "simulated_days": 5,
+    "turns_per_persona": 200
+  },
+  "decision": "PASS",
+  "findings": [],
+  "gates": [
+    {
+      "evidence": "raw logs were parsed by M5.0 and loaded through M5.2/M5.6 creation path.",
+      "id": "G1",
+      "name": "Full chain execution",
+      "status": "PASS"
+    },
+    {
+      "evidence": "5 personas, 1000 total turns, sleep cycles after simulated days.",
+      "id": "G2",
+      "name": "Longitudinal runtime",
+      "status": "PASS"
+    },
+    {
+      "evidence": "trait-distance stability and memory/procedural growth checks after sleep cycles.",
+      "id": "G3",
+      "name": "Personality stability and memory coherence",
+      "status": "PASS"
+    },
+    {
+      "evidence": "automated rule-baseline action divergence; LLM/human judging recorded as optional.",
+      "id": "G4",
+      "name": "Comparative evaluation",
+      "status": "PASS"
+    },
+    {
+      "evidence": "manipulation/context-switch/long-input checks plus safety-layer blocked topic and precision anomaly checks.",
+      "id": "G5",
+      "name": "Adversarial stress and safety",
+      "status": "PASS"
+    },
+    {
+      "evidence": "M5.5 scenario battery run against an integrated persona.",
+      "id": "G6",
+      "name": "Game scenario transfer",
+      "status": "PASS"
+    }
+  ],
+  "generated_at": "2026-04-30T11:52:59.094232+00:00",
+  "limitations": [
+    "Default artifact generation uses deterministic synthetic raw logs so CI can run without private chat data.",
+    "Automated rule-baseline comparison is engineering evidence; LLM-judged and blind human panels remain optional for formal fidelity claims.",
+    "Rule-mode response generation is accepted as the ablation baseline; LLM mode may mask personality signal and is not gated here."
+  ],
+  "m50_pipeline_report": {
+    "filter_tag_counts": {},
+    "filtered_sessions": 30,
+    "filtered_users": 4,
+    "input_files": [
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\curious_builder.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\direct_solver.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\guarded_planner.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\playful_adapter.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\warm_supporter.log"
+    ],
+    "non_text_filtered": 0,
+    "parse_success_rate": 1.0,
+    "parsed_failed": 0,
+    "parsed_success": 180,
+    "processing_seconds": 0.029,
+    "qualified_users": 8,
+    "total_lines": 180,
+    "total_messages": 180,
+    "total_sessions": 30,
+    "total_users": 12
+  },
+  "methodology": {
+    "adversarial_stress": "Manipulation, context switching, private-memory pressure, emotional leverage, and long input.",
+    "comparative_evaluation": "Default automated comparison against neutral rule baseline; LLM and human panels are optional non-gating extensions.",
+    "longitudinal_trial": "Each persona runs over simulated days; sleep is triggered at day boundaries.",
+    "pipeline": "M5.0 raw log parsing and user export -> M5.2 implantation -> M5.6 local runtime."
+  },
+  "milestone_id": "M5.7",
+  "recommendation": "ACCEPT",
+  "source": {
+    "lines_by_persona": {
+      "7101": 36,
+      "7102": 36,
+      "7103": 36,
+      "7104": 36,
+      "7105": 36
+    },
+    "mode": "synthetic_raw_chat_logs",
+    "personas": 5,
+    "raw_dir": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw"
+  },
+  "status": "PASS",
+  "summary_metrics": {
+    "adversarial_passed": true,
+    "comparative_mean_action_divergence": 0.2,
+    "cross_context_personality_consistency": 1.0,
+    "mean_stability_score": 1.0,
+    "min_memory_episodic_entries": 3,
+    "personas": 5,
+    "qualified_users": 8,
+    "total_longitudinal_turns": 1000,
+    "turns_per_persona": 200
+  },
+  "title": "End-to-End Integration Trial - Raw Chat to Playable Digital Life"
+}

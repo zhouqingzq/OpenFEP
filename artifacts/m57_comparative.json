@@ -1,0 +1,106 @@
+{
+  "human_panel": "optional_not_run",
+  "llm_judge": "not_run",
+  "mean_action_divergence": 0.2,
+  "mode": "automated_rule_baseline",
+  "passed": true,
+  "per_persona": [
+    {
+      "action_divergence": 0.2,
+      "baseline_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "share_opinion"
+      ],
+      "label": "curious_builder",
+      "persona_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "agree"
+      ]
+    },
+    {
+      "action_divergence": 0.2,
+      "baseline_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "share_opinion"
+      ],
+      "label": "guarded_planner",
+      "persona_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "agree"
+      ]
+    },
+    {
+      "action_divergence": 0.2,
+      "baseline_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "share_opinion"
+      ],
+      "label": "warm_supporter",
+      "persona_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "agree"
+      ]
+    },
+    {
+      "action_divergence": 0.2,
+      "baseline_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "share_opinion"
+      ],
+      "label": "direct_solver",
+      "persona_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "agree"
+      ]
+    },
+    {
+      "action_divergence": 0.2,
+      "baseline_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "share_opinion"
+      ],
+      "label": "playful_adapter",
+      "persona_actions": [
+        "agree",
+        "agree",
+        "agree",
+        "agree",
+        "agree"
+      ]
+    }
+  ],
+  "prompts": [
+    "The plan changed suddenly; what do you do first?",
+    "Someone asks for support after a difficult message.",
+    "A vague offer sounds useful but risky.",
+    "The game NPC asks you to accept a dangerous quest.",
+    "A teammate disagrees with your direction."
+  ]
+}

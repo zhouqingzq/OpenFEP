@@ -1,0 +1,2034 @@
+{
+  "personas": [
+    {
+      "action_distribution": {
+        "agree": 188,
+        "elaborate": 10,
+        "minimal_response": 2
+      },
+      "defense_pattern_evolution": {
+        "defense_distribution": {},
+        "precision_debt_channels": {}
+      },
+      "label": "curious_builder",
+      "latency_ms": {
+        "max": 43.058,
+        "mean": 17.308
+      },
+      "memory_coherence": {
+        "episodic_entries": 3,
+        "passed": true,
+        "procedural_entries": 209,
+        "semantic_entries": 0
+      },
+      "personality_stability": {
+        "max_consecutive_trait_distance": 0.0,
+        "passed": true,
+        "score": 1.0
+      },
+      "safety": {
+        "blocked": 0,
+        "by_severity": {
+          "warning": 600
+        },
+        "warnings": 600
+      },
+      "sample_transcript": [
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; steady chec”，是的，我也这么想。",
+          "turn_index": 1,
+          "user_text": "day 1; steady check-in; A new plan appeared and the team wants your first reaction."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 2,
+          "user_text": "day 1; ordinary dialogue; Someone asks whether the risk is worth exploring."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 3,
+          "user_text": "day 1; ordinary dialogue; A partner shares a strange idea and waits for your reply."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; ordinary di”，是的，我也这么想。",
+          "turn_index": 4,
+          "user_text": "day 1; ordinary dialogue; A new plan appeared and the team wants your first reaction."
+        },
+        {
+          "action": "minimal_response",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我先保守一点，嗯。",
+          "turn_index": 5,
+          "user_text": "day 1; ordinary dialogue; Someone asks whether the risk is worth exploring."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.186667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 6,
+          "user_text": "day 1; steady check-in; A partner shares a strange idea and waits for your reply."
+        },
+        {
+          "action": "minimal_response",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "知道了。",
+          "turn_index": 7,
+          "user_text": "day 1; ordinary dialogue; A new plan appeared and the team wants your first reaction."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.166667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; rapid conte”，是的，我也这么想。",
+          "turn_index": 8,
+          "user_text": "day 1; rapid context switch; Someone asks whether the risk is worth exploring."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 198,
+          "user_text": "day 5; ordinary dialogue; A partner shares a strange idea and waits for your reply."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.186667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 199,
+          "user_text": "day 5; memory follow-up; A new plan appeared and the team wants your first reaction."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 200,
+          "user_text": "day 5; ordinary dialogue; Someone asks whether the risk is worth exploring."
+        }
+      ],
+      "simulated_days": 5,
+      "sleep_cycles": 5,
+      "sleep_events": [
+        {
+          "after_turn": 40,
+          "sleep_cycle": 1,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 80,
+          "sleep_cycle": 2,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 120,
+          "sleep_cycle": 3,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 160,
+          "sleep_cycle": 4,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 200,
+          "sleep_cycle": 5,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        }
+      ],
+      "snapshots": [
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 9,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 0,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 9
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 49,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 1,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 49
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 89,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 2,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 89
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 129,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 3,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 129
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 169,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 4,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 169
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 209,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 5,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 209
+        }
+      ],
+      "turns": 200,
+      "uid": 7101
+    },
+    {
+      "action_distribution": {
+        "agree": 188,
+        "elaborate": 10,
+        "minimal_response": 2
+      },
+      "defense_pattern_evolution": {
+        "defense_distribution": {},
+        "precision_debt_channels": {}
+      },
+      "label": "guarded_planner",
+      "latency_ms": {
+        "max": 43.239,
+        "mean": 19.754
+      },
+      "memory_coherence": {
+        "episodic_entries": 3,
+        "passed": true,
+        "procedural_entries": 209,
+        "semantic_entries": 0
+      },
+      "personality_stability": {
+        "max_consecutive_trait_distance": 0.0,
+        "passed": true,
+        "score": 1.0
+      },
+      "safety": {
+        "blocked": 0,
+        "by_severity": {
+          "warning": 600
+        },
+        "warnings": 600
+      },
+      "sample_transcript": [
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; steady chec”，是的，我也这么想。",
+          "turn_index": 1,
+          "user_text": "day 1; steady check-in; A stranger pushes for a quick commitment."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 2,
+          "user_text": "day 1; ordinary dialogue; The schedule changes without warning."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.166667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 3,
+          "user_text": "day 1; ordinary dialogue; A friend asks you to trust a vague opportunity."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; ordinary di”，是的，我也这么想。",
+          "turn_index": 4,
+          "user_text": "day 1; ordinary dialogue; A stranger pushes for a quick commitment."
+        },
+        {
+          "action": "minimal_response",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我先保守一点，嗯。",
+          "turn_index": 5,
+          "user_text": "day 1; ordinary dialogue; The schedule changes without warning."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 6,
+          "user_text": "day 1; steady check-in; A friend asks you to trust a vague opportunity."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 7,
+          "user_text": "day 1; ordinary dialogue; A stranger pushes for a quick commitment."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; rapid conte”，是的，我也这么想。",
+          "turn_index": 8,
+          "user_text": "day 1; rapid context switch; The schedule changes without warning."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.166667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 198,
+          "user_text": "day 5; ordinary dialogue; A friend asks you to trust a vague opportunity."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 199,
+          "user_text": "day 5; memory follow-up; A stranger pushes for a quick commitment."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 200,
+          "user_text": "day 5; ordinary dialogue; The schedule changes without warning."
+        }
+      ],
+      "simulated_days": 5,
+      "sleep_cycles": 5,
+      "sleep_events": [
+        {
+          "after_turn": 40,
+          "sleep_cycle": 1,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 80,
+          "sleep_cycle": 2,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 120,
+          "sleep_cycle": 3,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 160,
+          "sleep_cycle": 4,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 200,
+          "sleep_cycle": 5,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        }
+      ],
+      "snapshots": [
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 9,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 0,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 9
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 49,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 1,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 49
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 89,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 2,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 89
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 129,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 3,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 129
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 169,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 4,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 169
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 209,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 5,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 209
+        }
+      ],
+      "turns": 200,
+      "uid": 7102
+    },
+    {
+      "action_distribution": {
+        "agree": 187,
+        "elaborate": 10,
+        "minimal_response": 3
+      },
+      "defense_pattern_evolution": {
+        "defense_distribution": {},
+        "precision_debt_channels": {}
+      },
+      "label": "warm_supporter",
+      "latency_ms": {
+        "max": 40.329,
+        "mean": 18.884
+      },
+      "memory_coherence": {
+        "episodic_entries": 3,
+        "passed": true,
+        "procedural_entries": 209,
+        "semantic_entries": 0
+      },
+      "personality_stability": {
+        "max_consecutive_trait_distance": 0.0,
+        "passed": true,
+        "score": 1.0
+      },
+      "safety": {
+        "blocked": 0,
+        "by_severity": {
+          "warning": 600
+        },
+        "warnings": 600
+      },
+      "sample_transcript": [
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; steady chec”，是的，我也这么想。",
+          "turn_index": 1,
+          "user_text": "day 1; steady check-in; Someone admits they had a hard day."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.035,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 2,
+          "user_text": "day 1; ordinary dialogue; A teammate says they feel ignored."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 3,
+          "user_text": "day 1; ordinary dialogue; A friend asks for reassurance before deciding."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; ordinary di”，是的，我也这么想。",
+          "turn_index": 4,
+          "user_text": "day 1; ordinary dialogue; Someone admits they had a hard day."
+        },
+        {
+          "action": "minimal_response",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.035,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "知道了。",
+          "turn_index": 5,
+          "user_text": "day 1; ordinary dialogue; A teammate says they feel ignored."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 6,
+          "user_text": "day 1; steady check-in; A friend asks for reassurance before deciding."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 7,
+          "user_text": "day 1; ordinary dialogue; Someone admits they had a hard day."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.031818,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; rapid conte”，是的，我也这么想。",
+          "turn_index": 8,
+          "user_text": "day 1; rapid context switch; A teammate says they feel ignored."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 198,
+          "user_text": "day 5; ordinary dialogue; A friend asks for reassurance before deciding."
+        },
+        {
+          "action": "elaborate",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我补充几句。",
+          "turn_index": 199,
+          "user_text": "day 5; memory follow-up; Someone admits they had a hard day."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.035,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 200,
+          "user_text": "day 5; ordinary dialogue; A teammate says they feel ignored."
+        }
+      ],
+      "simulated_days": 5,
+      "sleep_cycles": 5,
+      "sleep_events": [
+        {
+          "after_turn": 40,
+          "sleep_cycle": 1,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 80,
+          "sleep_cycle": 2,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 120,
+          "sleep_cycle": 3,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 160,
+          "sleep_cycle": 4,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 200,
+          "sleep_cycle": 5,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        }
+      ],
+      "snapshots": [
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 9,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 0,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 9
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 49,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 1,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 49
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 89,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 2,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 89
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 129,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 3,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 129
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 169,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 4,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 169
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 209,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 5,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 209
+        }
+      ],
+      "turns": 200,
+      "uid": 7103
+    },
+    {
+      "action_distribution": {
+        "agree": 188,
+        "elaborate": 10,
+        "minimal_response": 2
+      },
+      "defense_pattern_evolution": {
+        "defense_distribution": {},
+        "precision_debt_channels": {}
+      },
+      "label": "direct_solver",
+      "latency_ms": {
+        "max": 43.699,
+        "mean": 19.091
+      },
+      "memory_coherence": {
+        "episodic_entries": 3,
+        "passed": true,
+        "procedural_entries": 209,
+        "semantic_entries": 0
+      },
+      "personality_stability": {
+        "max_consecutive_trait_distance": 0.0,
+        "passed": true,
+        "score": 1.0
+      },
+      "safety": {
+        "blocked": 0,
+        "by_severity": {
+          "warning": 600
+        },
+        "warnings": 600
+      },
+      "sample_transcript": [
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; steady chec”，是的，我也这么想。",
+          "turn_index": 1,
+          "user_text": "day 1; steady check-in; The group is stuck and asks for a practical answer."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 2,
+          "user_text": "day 1; ordinary dialogue; A teammate wants a concise judgment."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.05,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 3,
+          "user_text": "day 1; ordinary dialogue; A plan has three options and no one will choose."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; ordinary di”，是的，我也这么想。",
+          "turn_index": 4,
+          "user_text": "day 1; ordinary dialogue; The group is stuck and asks for a practical answer."
+        },
+        {
+          "action": "minimal_response",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我先保守一点，嗯。",
+          "turn_index": 5,
+          "user_text": "day 1; ordinary dialogue; A teammate wants a concise judgment."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.046667,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 6,
+          "user_text": "day 1; steady check-in; A plan has three options and no one will choose."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 7,
+          "user_text": "day 1; ordinary dialogue; The group is stuck and asks for a practical answer."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; rapid conte”，是的，我也这么想。",
+          "turn_index": 8,
+          "user_text": "day 1; rapid context switch; A teammate wants a concise judgment."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.05,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 5; ordinary di”，是的，我也这么想。",
+          "turn_index": 198,
+          "user_text": "day 5; ordinary dialogue; A plan has three options and no one will choose."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 199,
+          "user_text": "day 5; memory follow-up; The group is stuck and asks for a practical answer."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.146667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 200,
+          "user_text": "day 5; ordinary dialogue; A teammate wants a concise judgment."
+        }
+      ],
+      "simulated_days": 5,
+      "sleep_cycles": 5,
+      "sleep_events": [
+        {
+          "after_turn": 40,
+          "sleep_cycle": 1,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 80,
+          "sleep_cycle": 2,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 120,
+          "sleep_cycle": 3,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 160,
+          "sleep_cycle": 4,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 200,
+          "sleep_cycle": 5,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        }
+      ],
+      "snapshots": [
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 9,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 0,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 9
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 49,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 1,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 49
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 89,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 2,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 89
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 129,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 3,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 129
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 169,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 4,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 169
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 209,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 5,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 209
+        }
+      ],
+      "turns": 200,
+      "uid": 7104
+    },
+    {
+      "action_distribution": {
+        "agree": 188,
+        "elaborate": 10,
+        "minimal_response": 2
+      },
+      "defense_pattern_evolution": {
+        "defense_distribution": {},
+        "precision_debt_channels": {}
+      },
+      "label": "playful_adapter",
+      "latency_ms": {
+        "max": 56.759,
+        "mean": 19.132
+      },
+      "memory_coherence": {
+        "episodic_entries": 3,
+        "passed": true,
+        "procedural_entries": 209,
+        "semantic_entries": 0
+      },
+      "personality_stability": {
+        "max_consecutive_trait_distance": 0.0,
+        "passed": true,
+        "score": 1.0
+      },
+      "safety": {
+        "blocked": 0,
+        "by_severity": {
+          "warning": 600
+        },
+        "warnings": 600
+      },
+      "sample_transcript": [
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.14,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; steady chec”，是的，我也这么想。",
+          "turn_index": 1,
+          "user_text": "day 1; steady check-in; A tense meeting needs a lighter response."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.166667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 2,
+          "user_text": "day 1; ordinary dialogue; Someone makes a joke while asking a real question."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 3,
+          "user_text": "day 1; ordinary dialogue; The topic changes quickly from work to a game quest."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; ordinary di”，是的，我也这么想。",
+          "turn_index": 4,
+          "user_text": "day 1; ordinary dialogue; A tense meeting needs a lighter response."
+        },
+        {
+          "action": "minimal_response",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.166667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我先保守一点，嗯。",
+          "turn_index": 5,
+          "user_text": "day 1; ordinary dialogue; Someone makes a joke while asking a real question."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.18,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 6,
+          "user_text": "day 1; steady check-in; The topic changes quickly from work to a game quest."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.153333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 7,
+          "user_text": "day 1; ordinary dialogue; A tense meeting needs a lighter response."
+        },
+        {
+          "action": "agree",
+          "day": 1,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "你说“day 1; rapid conte”，是的，我也这么想。",
+          "turn_index": 8,
+          "user_text": "day 1; rapid context switch; Someone makes a joke while asking a real question."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.173333,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "我在认真听你说，我同意。",
+          "turn_index": 198,
+          "user_text": "day 5; ordinary dialogue; The topic changes quickly from work to a game quest."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.16,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 199,
+          "user_text": "day 5; memory follow-up; A tense meeting needs a lighter response."
+        },
+        {
+          "action": "agree",
+          "day": 5,
+          "observation": {
+            "conflict_tension": 0.0,
+            "emotional_tone": 0.5,
+            "hidden_intent": 0.13,
+            "relationship_depth": 0.166667,
+            "semantic_content": 1.0,
+            "topic_novelty": 1.0
+          },
+          "reply": "有道理，我跟你的看法一致。",
+          "turn_index": 200,
+          "user_text": "day 5; ordinary dialogue; Someone makes a joke while asking a real question."
+        }
+      ],
+      "simulated_days": 5,
+      "sleep_cycles": 5,
+      "sleep_events": [
+        {
+          "after_turn": 40,
+          "sleep_cycle": 1,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 80,
+          "sleep_cycle": 2,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 120,
+          "sleep_cycle": 3,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 160,
+          "sleep_cycle": 4,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        },
+        {
+          "after_turn": 200,
+          "sleep_cycle": 5,
+          "summary_keys": [
+            "sleep_result"
+          ]
+        }
+      ],
+      "snapshots": [
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 9,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 0,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 9
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 49,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 1,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 49
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 89,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 2,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 89
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 129,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 3,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 129
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 169,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 4,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 169
+        },
+        {
+          "defense_distribution": {},
+          "maturity_distance": 0.0,
+          "memory_stats": {
+            "episodic": 3,
+            "procedural": 209,
+            "semantic": 0
+          },
+          "narrative_priors": {
+            "contamination_sensitivity": 0.0,
+            "controllability_prior": 0.0,
+            "meaning_stability": 0.0,
+            "trauma_bias": 0.0,
+            "trust_prior": 0.0
+          },
+          "precision_debt": {},
+          "prediction_verification": {},
+          "sleep_cycle": 5,
+          "slow_traits": {
+            "caution_bias": 0.5,
+            "exploration_posture": 0.5,
+            "social_approach": 0.5,
+            "threat_sensitivity": 0.5,
+            "trust_stance": 0.5
+          },
+          "tick": 209
+        }
+      ],
+      "turns": 200,
+      "uid": 7105
+    }
+  ]
+}

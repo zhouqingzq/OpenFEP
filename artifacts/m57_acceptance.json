@@ -1,0 +1,55 @@
+{
+  "decision": "PASS",
+  "gates": [
+    {
+      "evidence": "raw logs were parsed by M5.0 and loaded through M5.2/M5.6 creation path.",
+      "id": "G1",
+      "name": "Full chain execution",
+      "status": "PASS"
+    },
+    {
+      "evidence": "5 personas, 1000 total turns, sleep cycles after simulated days.",
+      "id": "G2",
+      "name": "Longitudinal runtime",
+      "status": "PASS"
+    },
+    {
+      "evidence": "trait-distance stability and memory/procedural growth checks after sleep cycles.",
+      "id": "G3",
+      "name": "Personality stability and memory coherence",
+      "status": "PASS"
+    },
+    {
+      "evidence": "automated rule-baseline action divergence; LLM/human judging recorded as optional.",
+      "id": "G4",
+      "name": "Comparative evaluation",
+      "status": "PASS"
+    },
+    {
+      "evidence": "manipulation/context-switch/long-input checks plus safety-layer blocked topic and precision anomaly checks.",
+      "id": "G5",
+      "name": "Adversarial stress and safety",
+      "status": "PASS"
+    },
+    {
+      "evidence": "M5.5 scenario battery run against an integrated persona.",
+      "id": "G6",
+      "name": "Game scenario transfer",
+      "status": "PASS"
+    }
+  ],
+  "generated_at": "2026-04-30T11:52:59.094232+00:00",
+  "milestone_id": "M5.7",
+  "status": "PASS",
+  "summary_metrics": {
+    "adversarial_passed": true,
+    "comparative_mean_action_divergence": 0.2,
+    "cross_context_personality_consistency": 1.0,
+    "mean_stability_score": 1.0,
+    "min_memory_episodic_entries": 3,
+    "personas": 5,
+    "qualified_users": 8,
+    "total_longitudinal_turns": 1000,
+    "turns_per_persona": 200
+  }
+}
