@@ -1,0 +1,31 @@
+{
+  "milestone_id": "M5.6",
+  "artifact_type": "stress_failure_injection",
+  "schema_version": 1,
+  "seed": 42,
+  "checks": {
+    "long_input": {
+      "input_length": 3500,
+      "reply_length": 32,
+      "action": "agree",
+      "no_crash": true
+    },
+    "controlled_no_agent_failure": {
+      "raised_runtime_error": true,
+      "message": "No persona loaded. Create or load a persona first."
+    },
+    "persistence_after_stress": {
+      "path_name": "stress_after_long_input.json",
+      "cycle_equal_after_reload": true
+    },
+    "blocked_topic_filter": {
+      "filtered_text": "[Response filtered by safety policy]",
+      "blocked": true
+    },
+    "precision_health_filter": {
+      "text_preserved": true,
+      "anomaly_reported": true
+    }
+  },
+  "passed": true
+}

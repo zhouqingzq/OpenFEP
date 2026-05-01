@@ -1,0 +1,36 @@
+{
+  "milestone_id": "M5.6",
+  "artifact_type": "ablation",
+  "schema_version": 1,
+  "seed": 42,
+  "mechanism": "persona_profile_conditioning",
+  "control": {
+    "name": "guarded_low_openness_high_neuroticism",
+    "actions": [
+      "minimal_response",
+      "minimal_response",
+      "minimal_response",
+      "minimal_response"
+    ],
+    "action_distribution": {
+      "minimal_response": 4
+    }
+  },
+  "treatment": {
+    "name": "curious_high_openness_low_neuroticism",
+    "actions": [
+      "agree",
+      "agree",
+      "agree",
+      "agree"
+    ],
+    "action_distribution": {
+      "agree": 4
+    }
+  },
+  "metrics": {
+    "different_action_positions": 4,
+    "total_positions": 4
+  },
+  "passed": true
+}

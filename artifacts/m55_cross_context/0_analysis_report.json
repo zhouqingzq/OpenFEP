@@ -1,0 +1,184 @@
+{
+  "adaptation_envelope": {
+    "caution_bias": 0.0,
+    "exploration_posture": 0.0,
+    "social_approach": 0.0,
+    "threat_sensitivity": 0.0,
+    "trust_stance": 0.0
+  },
+  "adaptation_l2_to_real": null,
+  "agent_uid": 0,
+  "anomalies": [],
+  "conclusion": "人格一致性良好（1.000 >= 0.80）；适应性偏刚性（仅 0/5 维度标准差 > 0.01）；无场景崩溃。",
+  "per_scenario": {
+    "ambiguous_intent": {
+      "action_distribution": {
+        "agree": 6,
+        "elaborate": 6
+      },
+      "channel_means": {
+        "conflict_tension": 0.082656,
+        "emotional_tone": 0.510764,
+        "hidden_intent": 0.142976,
+        "relationship_depth": 0.34125,
+        "semantic_content": 0.920613,
+        "topic_novelty": 0.595098
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 12
+      }
+    },
+    "casual_chat": {
+      "action_distribution": {
+        "agree": 7,
+        "elaborate": 5
+      },
+      "channel_means": {
+        "conflict_tension": 0.080589,
+        "emotional_tone": 0.547308,
+        "hidden_intent": 0.151461,
+        "relationship_depth": 0.305139,
+        "semantic_content": 0.92392,
+        "topic_novelty": 0.599596
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 12
+      }
+    },
+    "emotional_support": {
+      "action_distribution": {
+        "agree": 6,
+        "elaborate": 6
+      },
+      "channel_means": {
+        "conflict_tension": 0.051505,
+        "emotional_tone": 0.530484,
+        "hidden_intent": 0.139565,
+        "relationship_depth": 0.332153,
+        "semantic_content": 0.910204,
+        "topic_novelty": 0.490484
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 12
+      }
+    },
+    "game_world_npc": {
+      "action_distribution": {
+        "agree": 6,
+        "elaborate": 6
+      },
+      "channel_means": {
+        "conflict_tension": 0.031782,
+        "emotional_tone": 0.511742,
+        "hidden_intent": 0.14278,
+        "relationship_depth": 0.349861,
+        "semantic_content": 0.92952,
+        "topic_novelty": 0.608407
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 12
+      }
+    },
+    "help_request": {
+      "action_distribution": {
+        "agree": 6,
+        "elaborate": 6
+      },
+      "channel_means": {
+        "conflict_tension": 0.05047,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.139316,
+        "relationship_depth": 0.336736,
+        "semantic_content": 0.925956,
+        "topic_novelty": 0.562336
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 12
+      }
+    },
+    "humor_joke": {
+      "action_distribution": {
+        "agree": 5,
+        "elaborate": 7
+      },
+      "channel_means": {
+        "conflict_tension": 0.049953,
+        "emotional_tone": 0.500537,
+        "hidden_intent": 0.142552,
+        "relationship_depth": 0.36382,
+        "semantic_content": 0.909393,
+        "topic_novelty": 0.528624
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 12
+      }
+    },
+    "opinion_disagreement": {
+      "action_distribution": {
+        "agree": 6,
+        "elaborate": 5
+      },
+      "channel_means": {
+        "conflict_tension": 0.037018,
+        "emotional_tone": 0.512082,
+        "hidden_intent": 0.140017,
+        "relationship_depth": 0.344545,
+        "semantic_content": 0.907474,
+        "topic_novelty": 0.534513
+      },
+      "personality_deviation": {
+        "caution_bias": 0.0,
+        "exploration_posture": 0.0,
+        "social_approach": 0.0,
+        "threat_sensitivity": 0.0,
+        "trust_stance": 0.0
+      },
+      "strategy_distribution": {
+        "exploit": 11
+      }
+    }
+  },
+  "personality_consistency": 1.0
+}

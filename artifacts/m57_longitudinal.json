@@ -12,8 +12,8 @@
       },
       "label": "curious_builder",
       "latency_ms": {
-        "max": 43.058,
-        "mean": 17.308
+        "max": 27.343,
+        "mean": 13.787
       },
       "memory_coherence": {
         "episodic_entries": 3,
@@ -418,8 +418,8 @@
       },
       "label": "guarded_planner",
       "latency_ms": {
-        "max": 43.239,
-        "mean": 19.754
+        "max": 34.663,
+        "mean": 15.637
       },
       "memory_coherence": {
         "episodic_entries": 3,
@@ -824,8 +824,8 @@
       },
       "label": "warm_supporter",
       "latency_ms": {
-        "max": 40.329,
-        "mean": 18.884
+        "max": 33.746,
+        "mean": 14.978
       },
       "memory_coherence": {
         "episodic_entries": 3,
@@ -1230,8 +1230,8 @@
       },
       "label": "direct_solver",
       "latency_ms": {
-        "max": 43.699,
-        "mean": 19.091
+        "max": 31.573,
+        "mean": 15.097
       },
       "memory_coherence": {
         "episodic_entries": 3,
@@ -1636,8 +1636,8 @@
       },
       "label": "playful_adapter",
       "latency_ms": {
-        "max": 56.759,
-        "mean": 19.132
+        "max": 40.051,
+        "mean": 15.091
       },
       "memory_coherence": {
         "episodic_entries": 3,

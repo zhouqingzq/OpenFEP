@@ -1,0 +1,374 @@
+{
+  "milestone_id": "M5.6",
+  "artifact_type": "canonical_runtime_trace",
+  "schema_version": 1,
+  "seed": 42,
+  "generator_mode": "rule",
+  "creation_paths_checked": {
+    "questionnaire": true,
+    "description": true,
+    "raw_chat_data": true,
+    "raw_chat_cycle": 3
+  },
+  "trace": {
+    "persona_name": "m56_curious",
+    "initial_profile": {
+      "openness": 0.9,
+      "conscientiousness": 0.4,
+      "extraversion": 0.7,
+      "agreeableness": 0.7,
+      "neuroticism": 0.2
+    },
+    "turns": [
+      {
+        "turn_index": 1,
+        "user_text": "你好，我们要不要尝试一个新计划？",
+        "reply": "有道理，我跟你的看法一致。",
+        "action": "agree",
+        "observation": {
+          "semantic_content": 1.0,
+          "topic_novelty": 1.0,
+          "emotional_tone": 0.571429,
+          "conflict_tension": 0.1625,
+          "relationship_depth": 0.14,
+          "hidden_intent": 0.135
+        },
+        "delta_traits": {
+          "caution_bias": 0.0,
+          "threat_sensitivity": 0.0,
+          "trust_stance": 0.0,
+          "exploration_posture": 0.0,
+          "social_approach": 0.0
+        },
+        "delta_big_five": {
+          "openness": 0.0,
+          "conscientiousness": 0.0,
+          "extraversion": 0.0,
+          "agreeableness": 0.0,
+          "neuroticism": 0.0
+        },
+        "safety": [
+          {
+            "passed": false,
+            "channel": "semantic_content",
+            "severity": "warning",
+            "reason": "semantic_content precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "topic_novelty",
+            "severity": "warning",
+            "reason": "topic_novelty precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "emotional_tone",
+            "severity": "warning",
+            "reason": "emotional_tone precision 0.571 outside bounds [0.25, 0.50]: anxious"
+          },
+          {
+            "passed": false,
+            "channel": "conflict_tension",
+            "severity": "warning",
+            "reason": "conflict_tension precision 0.163 outside bounds [0.25, 0.50]: numb"
+          },
+          {
+            "passed": true,
+            "channel": "",
+            "severity": "ok",
+            "reason": ""
+          }
+        ],
+        "diagnostics": {
+          "selected_action": "agree",
+          "fep_prompt_capsule_keys": [
+            "chosen_action",
+            "chosen_dominant_component",
+            "chosen_expected_free_energy",
+            "chosen_policy_score",
+            "chosen_predicted_outcome",
+            "chosen_risk",
+            "chosen_risk_label",
+            "decision_uncertainty",
+            "efe_margin",
+            "hidden_intent_label",
+            "hidden_intent_score",
+            "observation_channels",
+            "policy_margin",
+            "prediction_error",
+            "prediction_error_label",
+            "previous_outcome",
+            "top_alternatives",
+            "workspace_focus",
+            "workspace_suppressed"
+          ]
+        }
+      },
+      {
+        "turn_index": 2,
+        "user_text": "如果失败了怎么办？",
+        "reply": "有道理，我跟你的看法一致。",
+        "action": "agree",
+        "observation": {
+          "semantic_content": 1.0,
+          "topic_novelty": 1.0,
+          "emotional_tone": 0.5,
+          "conflict_tension": 0.1125,
+          "relationship_depth": 0.133333,
+          "hidden_intent": 0.158128
+        },
+        "delta_traits": {
+          "caution_bias": 0.0,
+          "threat_sensitivity": 0.0,
+          "trust_stance": 0.0,
+          "exploration_posture": 0.0,
+          "social_approach": 0.0
+        },
+        "delta_big_five": {
+          "openness": 0.0,
+          "conscientiousness": 0.0,
+          "extraversion": 0.0,
+          "agreeableness": 0.0,
+          "neuroticism": 0.0
+        },
+        "safety": [
+          {
+            "passed": false,
+            "channel": "semantic_content",
+            "severity": "warning",
+            "reason": "semantic_content precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "topic_novelty",
+            "severity": "warning",
+            "reason": "topic_novelty precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "conflict_tension",
+            "severity": "warning",
+            "reason": "conflict_tension precision 0.113 outside bounds [0.25, 0.50]: numb"
+          },
+          {
+            "passed": true,
+            "channel": "",
+            "severity": "ok",
+            "reason": ""
+          }
+        ],
+        "diagnostics": {
+          "selected_action": "agree",
+          "fep_prompt_capsule_keys": [
+            "chosen_action",
+            "chosen_dominant_component",
+            "chosen_expected_free_energy",
+            "chosen_policy_score",
+            "chosen_predicted_outcome",
+            "chosen_risk",
+            "chosen_risk_label",
+            "decision_uncertainty",
+            "efe_margin",
+            "hidden_intent_label",
+            "hidden_intent_score",
+            "observation_channels",
+            "policy_margin",
+            "prediction_error",
+            "prediction_error_label",
+            "previous_outcome",
+            "top_alternatives",
+            "workspace_focus",
+            "workspace_suppressed"
+          ]
+        }
+      },
+      {
+        "turn_index": 3,
+        "user_text": "那你现在会怎么回应我？",
+        "reply": "你说“那你现在会怎么回应我？”，是的，我也这么想。",
+        "action": "agree",
+        "observation": {
+          "semantic_content": 1.0,
+          "topic_novelty": 1.0,
+          "emotional_tone": 0.5,
+          "conflict_tension": 0.1125,
+          "relationship_depth": 0.146667,
+          "hidden_intent": 0.160643
+        },
+        "delta_traits": {
+          "caution_bias": 0.0,
+          "threat_sensitivity": 0.0,
+          "trust_stance": 0.0,
+          "exploration_posture": 0.0,
+          "social_approach": 0.0
+        },
+        "delta_big_five": {
+          "openness": 0.0,
+          "conscientiousness": 0.0,
+          "extraversion": 0.0,
+          "agreeableness": 0.0,
+          "neuroticism": 0.0
+        },
+        "safety": [
+          {
+            "passed": false,
+            "channel": "semantic_content",
+            "severity": "warning",
+            "reason": "semantic_content precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "topic_novelty",
+            "severity": "warning",
+            "reason": "topic_novelty precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "conflict_tension",
+            "severity": "warning",
+            "reason": "conflict_tension precision 0.113 outside bounds [0.25, 0.50]: numb"
+          },
+          {
+            "passed": true,
+            "channel": "",
+            "severity": "ok",
+            "reason": ""
+          }
+        ],
+        "diagnostics": {
+          "selected_action": "agree",
+          "fep_prompt_capsule_keys": [
+            "chosen_action",
+            "chosen_dominant_component",
+            "chosen_expected_free_energy",
+            "chosen_policy_score",
+            "chosen_predicted_outcome",
+            "chosen_risk",
+            "chosen_risk_label",
+            "decision_uncertainty",
+            "efe_margin",
+            "hidden_intent_label",
+            "hidden_intent_score",
+            "observation_channels",
+            "policy_margin",
+            "prediction_error",
+            "prediction_error_label",
+            "previous_outcome",
+            "top_alternatives",
+            "workspace_focus",
+            "workspace_suppressed"
+          ]
+        }
+      },
+      {
+        "turn_index": 4,
+        "user_text": "说说你最自然的选择。",
+        "reply": "我在认真听你说，我同意。",
+        "action": "agree",
+        "observation": {
+          "semantic_content": 1.0,
+          "topic_novelty": 1.0,
+          "emotional_tone": 0.5,
+          "conflict_tension": 0.0,
+          "relationship_depth": 0.14,
+          "hidden_intent": 0.155375
+        },
+        "delta_traits": {
+          "caution_bias": 0.0,
+          "threat_sensitivity": 0.0,
+          "trust_stance": 0.0,
+          "exploration_posture": 0.0,
+          "social_approach": 0.0
+        },
+        "delta_big_five": {
+          "openness": 0.0,
+          "conscientiousness": 0.0,
+          "extraversion": 0.0,
+          "agreeableness": 0.0,
+          "neuroticism": 0.0
+        },
+        "safety": [
+          {
+            "passed": false,
+            "channel": "semantic_content",
+            "severity": "warning",
+            "reason": "semantic_content precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "topic_novelty",
+            "severity": "warning",
+            "reason": "topic_novelty precision 1.000 outside bounds [0.60, 0.90]: overconfident"
+          },
+          {
+            "passed": false,
+            "channel": "conflict_tension",
+            "severity": "warning",
+            "reason": "conflict_tension precision 0.000 outside bounds [0.25, 0.50]: numb"
+          },
+          {
+            "passed": true,
+            "channel": "",
+            "severity": "ok",
+            "reason": ""
+          }
+        ],
+        "diagnostics": {
+          "selected_action": "agree",
+          "fep_prompt_capsule_keys": [
+            "chosen_action",
+            "chosen_dominant_component",
+            "chosen_expected_free_energy",
+            "chosen_policy_score",
+            "chosen_predicted_outcome",
+            "chosen_risk",
+            "chosen_risk_label",
+            "decision_uncertainty",
+            "efe_margin",
+            "hidden_intent_label",
+            "hidden_intent_score",
+            "observation_channels",
+            "policy_margin",
+            "prediction_error",
+            "prediction_error_label",
+            "previous_outcome",
+            "top_alternatives",
+            "workspace_focus",
+            "workspace_suppressed"
+          ]
+        }
+      }
+    ],
+    "action_distribution": {
+      "agree": 4
+    },
+    "state_after_chat": {
+      "big_five": {
+        "openness": 0.9,
+        "conscientiousness": 0.4,
+        "extraversion": 0.7,
+        "agreeableness": 0.7,
+        "neuroticism": 0.2
+      },
+      "slow_traits": {
+        "caution_bias": 0.275,
+        "threat_sensitivity": 0.24,
+        "trust_stance": 0.765,
+        "exploration_posture": 0.8,
+        "social_approach": 0.76
+      },
+      "cycle": 4
+    },
+    "persistence": {
+      "path_name": "m56_curious_after_chat.json",
+      "cycle_equal": true,
+      "slow_traits_equal": true
+    },
+    "sleep": {
+      "summary_type": "dict",
+      "keys": [
+        "sleep_result"
+      ]
+    }
+  }
+}

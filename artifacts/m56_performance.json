@@ -1,0 +1,39 @@
+{
+  "milestone_id": "M5.6",
+  "artifact_type": "performance",
+  "schema_version": 1,
+  "seed": 123,
+  "mode": "rule",
+  "turns": 20,
+  "latency_ms": {
+    "min": 11.147,
+    "mean": 13.249,
+    "median": 13.3,
+    "p95": 14.728,
+    "max": 14.917
+  },
+  "target_p95_ms": 2000.0,
+  "actions": [
+    "agree",
+    "agree",
+    "agree",
+    "minimal_response",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "minimal_response",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree",
+    "agree"
+  ],
+  "passed": true
+}

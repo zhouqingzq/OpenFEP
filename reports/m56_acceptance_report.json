@@ -1,0 +1,89 @@
+{
+  "milestone_id": "M5.6",
+  "title": "Persona Runtime - Local Living Persona Runtime Acceptance",
+  "status": "PASS",
+  "generated_at": "2026-04-30T11:32:46.513632+00:00",
+  "seed_set": [
+    42,
+    123
+  ],
+  "artifacts": {
+    "canonical_trace": "artifacts\\m56_runtime_trace.json",
+    "ablation": "artifacts\\m56_ablation.json",
+    "stress": "artifacts\\m56_stress.json",
+    "performance": "artifacts\\m56_performance.json",
+    "acceptance_summary": "artifacts\\m56_acceptance.json",
+    "acceptance_report": "reports\\m56_acceptance_report.json"
+  },
+  "tests": {
+    "m56_runtime": "py -m pytest tests/test_m56_runtime.py tests/test_m56_acceptance_artifacts.py -q",
+    "m5_regression": "py -m pytest tests/test_m50_chat_pipeline.py tests/test_m51_dialogue_channels.py tests/test_m52_implantation.py tests/test_m53_dialogue_action.py tests/test_m55_cross_context.py -q"
+  },
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Local runtime lifecycle",
+      "status": "PASS",
+      "evidence": "questionnaire, description, raw chat creation paths are exercised; chat, state persistence, memory/state inspection, and sleep trigger are available in-process."
+    },
+    {
+      "id": "G2",
+      "name": "Persona conditioning causality",
+      "status": "PASS",
+      "evidence": "curious and guarded profiles produce different action distributions under identical messages."
+    },
+    {
+      "id": "G3",
+      "name": "Stress and failure injection",
+      "status": "PASS",
+      "evidence": "long input, no-agent controlled failure, safety blocking, precision anomaly, and persistence-after-stress checks pass."
+    },
+    {
+      "id": "G4",
+      "name": "Rule-mode p95 latency below 2s",
+      "status": "PASS",
+      "evidence": "p95=14.728ms over 20 turns."
+    },
+    {
+      "id": "G5",
+      "name": "REST/WebSocket API",
+      "status": "WAIVED_BY_OWNER",
+      "evidence": "Owner removed this from the current M5.6 acceptance scope on 2026-04-30."
+    },
+    {
+      "id": "G6",
+      "name": "Scenario endpoint",
+      "status": "WAIVED_BY_OWNER",
+      "evidence": "Owner removed POST /persona/{id}/scenario from the current M5.6 acceptance scope on 2026-04-30."
+    }
+  ],
+  "findings": [],
+  "residual_risks": [
+    "REST/WebSocket and scenario endpoint integration are explicitly deferred and must not be claimed for this acceptance.",
+    "LLM-mode latency is not gated in this acceptance; rule-mode runtime is the accepted baseline."
+  ],
+  "freshness": {
+    "generated_current_round": true,
+    "generated_artifact_paths": [
+      "artifacts\\m56_runtime_trace.json",
+      "artifacts\\m56_ablation.json",
+      "artifacts\\m56_stress.json",
+      "artifacts\\m56_performance.json",
+      "artifacts\\m56_acceptance.json",
+      "reports\\m56_acceptance_report.json"
+    ]
+  },
+  "waived_requirements": [
+    "generic REST/WebSocket persona API",
+    "Unity SDK",
+    "POST /persona/{id}/scenario endpoint"
+  ],
+  "recommendation": "ACCEPT",
+  "decision": "PASS",
+  "summary_metrics": {
+    "ablation_different_action_positions": 4,
+    "stress_passed": true,
+    "rule_mode_p95_ms": 14.728,
+    "trace_turns": 4
+  }
+}

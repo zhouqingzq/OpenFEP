@@ -1,0 +1,1317 @@
+[
+  {
+    "action_distribution": {
+      "agree": 7,
+      "elaborate": 5
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.078968,
+      "emotional_tone": 0.521222,
+      "hidden_intent": 0.150753,
+      "relationship_depth": 0.305139,
+      "semantic_content": 0.91996,
+      "topic_novelty": 0.59404
+    },
+    "channel_stds": {
+      "conflict_tension": 0.05165,
+      "emotional_tone": 0.031408,
+      "hidden_intent": 0.007134,
+      "relationship_depth": 0.092949,
+      "semantic_content": 0.032399,
+      "topic_novelty": 0.189772
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 7,
+        "procedural": 12,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 12
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 0,
+        "procedural": 0,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 0
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.026923,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.13,
+        "relationship_depth": 0.14,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.15208,
+        "relationship_depth": 0.18,
+        "semantic_content": 0.947368,
+        "topic_novelty": 0.866667
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.157422,
+        "relationship_depth": 0.22,
+        "semantic_content": 0.897959,
+        "topic_novelty": 0.6875
+      },
+      {
+        "conflict_tension": 0.046667,
+        "emotional_tone": 0.566667,
+        "hidden_intent": 0.151949,
+        "relationship_depth": 0.2475,
+        "semantic_content": 0.894737,
+        "topic_novelty": 0.571429
+      },
+      {
+        "conflict_tension": 0.15625,
+        "emotional_tone": 0.5625,
+        "hidden_intent": 0.155328,
+        "relationship_depth": 0.276667,
+        "semantic_content": 0.895522,
+        "topic_novelty": 0.533333
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.558824,
+        "hidden_intent": 0.157422,
+        "relationship_depth": 0.305833,
+        "semantic_content": 0.88,
+        "topic_novelty": 0.4
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.149249,
+        "relationship_depth": 0.345833,
+        "semantic_content": 0.920455,
+        "topic_novelty": 0.65
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.151751,
+        "relationship_depth": 0.344167,
+        "semantic_content": 0.925532,
+        "topic_novelty": 0.5625
+      },
+      {
+        "conflict_tension": 0.019444,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.149827,
+        "relationship_depth": 0.38,
+        "semantic_content": 0.902174,
+        "topic_novelty": 0.375
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.151817,
+        "relationship_depth": 0.4025,
+        "semantic_content": 0.908046,
+        "topic_novelty": 0.4
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.153393,
+        "relationship_depth": 0.391667,
+        "semantic_content": 0.94382,
+        "topic_novelty": 0.615385
+      },
+      {
+        "conflict_tension": 0.023333,
+        "emotional_tone": 0.566667,
+        "hidden_intent": 0.148804,
+        "relationship_depth": 0.4275,
+        "semantic_content": 0.923913,
+        "topic_novelty": 0.466667
+      }
+    ],
+    "scenario_id": "casual_chat",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 12
+    },
+    "turn_count": 12
+  },
+  {
+    "action_distribution": {
+      "agree": 5,
+      "elaborate": 7
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.042416,
+      "emotional_tone": 0.526318,
+      "hidden_intent": 0.139904,
+      "relationship_depth": 0.336667,
+      "semantic_content": 0.911415,
+      "topic_novelty": 0.490484
+    },
+    "channel_stds": {
+      "conflict_tension": 0.042452,
+      "emotional_tone": 0.051559,
+      "hidden_intent": 0.002451,
+      "relationship_depth": 0.043774,
+      "semantic_content": 0.041039,
+      "topic_novelty": 0.277972
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 15,
+        "procedural": 24,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 24
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 7,
+        "procedural": 12,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 12
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.038889,
+        "emotional_tone": 0.611111,
+        "hidden_intent": 0.144831,
+        "relationship_depth": 0.3875,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.45,
+        "hidden_intent": 0.143947,
+        "relationship_depth": 0.3475,
+        "semantic_content": 0.95122,
+        "topic_novelty": 0.894737
+      },
+      {
+        "conflict_tension": 0.019444,
+        "emotional_tone": 0.611111,
+        "hidden_intent": 0.140681,
+        "relationship_depth": 0.3075,
+        "semantic_content": 0.929825,
+        "topic_novelty": 0.764706
+      },
+      {
+        "conflict_tension": 0.041176,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140101,
+        "relationship_depth": 0.2675,
+        "semantic_content": 0.857143,
+        "topic_novelty": 0.4
+      },
+      {
+        "conflict_tension": 0.038889,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.139574,
+        "relationship_depth": 0.29,
+        "semantic_content": 0.88,
+        "topic_novelty": 0.470588
+      },
+      {
+        "conflict_tension": 0.041176,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.139092,
+        "relationship_depth": 0.305833,
+        "semantic_content": 0.915663,
+        "topic_novelty": 0.533333
+      },
+      {
+        "conflict_tension": 0.141667,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.141081,
+        "relationship_depth": 0.295,
+        "semantic_content": 0.94382,
+        "topic_novelty": 0.545455
+      },
+      {
+        "conflict_tension": 0.025,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.138609,
+        "relationship_depth": 0.330833,
+        "semantic_content": 0.862069,
+        "topic_novelty": 0.071429
+      },
+      {
+        "conflict_tension": 0.023333,
+        "emotional_tone": 0.566667,
+        "hidden_intent": 0.138229,
+        "relationship_depth": 0.36,
+        "semantic_content": 0.901235,
+        "topic_novelty": 0.4
+      },
+      {
+        "conflict_tension": 0.026923,
+        "emotional_tone": 0.576923,
+        "hidden_intent": 0.137877,
+        "relationship_depth": 0.369167,
+        "semantic_content": 0.911392,
+        "topic_novelty": 0.333333
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136509,
+        "relationship_depth": 0.371667,
+        "semantic_content": 0.907895,
+        "topic_novelty": 0.222222
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.138312,
+        "relationship_depth": 0.4075,
+        "semantic_content": 0.876712,
+        "topic_novelty": 0.25
+      }
+    ],
+    "scenario_id": "emotional_support",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 12
+    },
+    "turn_count": 12
+  },
+  {
+    "action_distribution": {
+      "agree": 6,
+      "elaborate": 5
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.028257,
+      "emotional_tone": 0.508715,
+      "hidden_intent": 0.135971,
+      "relationship_depth": 0.344545,
+      "semantic_content": 0.907389,
+      "topic_novelty": 0.534513
+    },
+    "channel_stds": {
+      "conflict_tension": 0.047087,
+      "emotional_tone": 0.019992,
+      "hidden_intent": 0.000936,
+      "relationship_depth": 0.049891,
+      "semantic_content": 0.043123,
+      "topic_novelty": 0.232891
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 23,
+        "procedural": 35,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 35
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 15,
+        "procedural": 24,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 24
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136372,
+        "relationship_depth": 0.3675,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.0175,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136136,
+        "relationship_depth": 0.3275,
+        "semantic_content": 0.875,
+        "topic_novelty": 0.684211
+      },
+      {
+        "conflict_tension": 0.130921,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137795,
+        "relationship_depth": 0.2875,
+        "semantic_content": 0.870968,
+        "topic_novelty": 0.555556
+      },
+      {
+        "conflict_tension": 0.019444,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137524,
+        "relationship_depth": 0.2675,
+        "semantic_content": 0.975,
+        "topic_novelty": 0.882353
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.13582,
+        "relationship_depth": 0.296667,
+        "semantic_content": 0.862069,
+        "topic_novelty": 0.368421
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135626,
+        "relationship_depth": 0.3125,
+        "semantic_content": 0.905263,
+        "topic_novelty": 0.470588
+      },
+      {
+        "conflict_tension": 0.0175,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135442,
+        "relationship_depth": 0.348333,
+        "semantic_content": 0.883495,
+        "topic_novelty": 0.4
+      },
+      {
+        "conflict_tension": 0.012963,
+        "emotional_tone": 0.537037,
+        "hidden_intent": 0.135267,
+        "relationship_depth": 0.388333,
+        "semantic_content": 0.88785,
+        "topic_novelty": 0.518519
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.558824,
+        "hidden_intent": 0.135101,
+        "relationship_depth": 0.373333,
+        "semantic_content": 0.913462,
+        "topic_novelty": 0.375
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.134942,
+        "relationship_depth": 0.4025,
+        "semantic_content": 0.902913,
+        "topic_novelty": 0.25
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135661,
+        "relationship_depth": 0.418333,
+        "semantic_content": 0.905263,
+        "topic_novelty": 0.375
+      }
+    ],
+    "scenario_id": "opinion_disagreement",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 11
+    },
+    "turn_count": 11
+  },
+  {
+    "action_distribution": {
+      "agree": 6,
+      "elaborate": 6
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.047729,
+      "emotional_tone": 0.5,
+      "hidden_intent": 0.136763,
+      "relationship_depth": 0.336736,
+      "semantic_content": 0.92815,
+      "topic_novelty": 0.562336
+    },
+    "channel_stds": {
+      "conflict_tension": 0.049175,
+      "emotional_tone": 0.0,
+      "hidden_intent": 0.000783,
+      "relationship_depth": 0.043775,
+      "semantic_content": 0.03748,
+      "topic_novelty": 0.264236
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 32,
+        "procedural": 47,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 47
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 23,
+        "procedural": 35,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 35
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136311,
+        "relationship_depth": 0.378333,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136133,
+        "relationship_depth": 0.338333,
+        "semantic_content": 0.882353,
+        "topic_novelty": 0.764706
+      },
+      {
+        "conflict_tension": 0.015909,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135963,
+        "relationship_depth": 0.298333,
+        "semantic_content": 0.95,
+        "topic_novelty": 0.863636
+      },
+      {
+        "conflict_tension": 0.036842,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135799,
+        "relationship_depth": 0.274167,
+        "semantic_content": 0.873239,
+        "topic_novelty": 0.5
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137059,
+        "relationship_depth": 0.276667,
+        "semantic_content": 0.884615,
+        "topic_novelty": 0.307692
+      },
+      {
+        "conflict_tension": 0.023333,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136873,
+        "relationship_depth": 0.2925,
+        "semantic_content": 0.931034,
+        "topic_novelty": 0.6
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136693,
+        "relationship_depth": 0.3325,
+        "semantic_content": 0.950495,
+        "topic_novelty": 0.705882
+      },
+      {
+        "conflict_tension": 0.0175,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136521,
+        "relationship_depth": 0.370833,
+        "semantic_content": 0.914286,
+        "topic_novelty": 0.526316
+      },
+      {
+        "conflict_tension": 0.029167,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136354,
+        "relationship_depth": 0.34,
+        "semantic_content": 0.971154,
+        "topic_novelty": 0.666667
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137508,
+        "relationship_depth": 0.355833,
+        "semantic_content": 0.913978,
+        "topic_novelty": 0.090909
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.13859,
+        "relationship_depth": 0.371667,
+        "semantic_content": 0.932584,
+        "topic_novelty": 0.222222
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137356,
+        "relationship_depth": 0.411667,
+        "semantic_content": 0.934066,
+        "topic_novelty": 0.5
+      }
+    ],
+    "scenario_id": "help_request",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 12
+    },
+    "turn_count": 12
+  },
+  {
+    "action_distribution": {
+      "agree": 6,
+      "elaborate": 6
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.044533,
+      "emotional_tone": 0.508831,
+      "hidden_intent": 0.135437,
+      "relationship_depth": 0.359861,
+      "semantic_content": 0.907917,
+      "topic_novelty": 0.525291
+    },
+    "channel_stds": {
+      "conflict_tension": 0.063388,
+      "emotional_tone": 0.021021,
+      "hidden_intent": 0.001061,
+      "relationship_depth": 0.04326,
+      "semantic_content": 0.0399,
+      "topic_novelty": 0.240957
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 41,
+        "procedural": 59,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 59
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 32,
+        "procedural": 47,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 47
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.023333,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137181,
+        "relationship_depth": 0.371667,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137012,
+        "relationship_depth": 0.331667,
+        "semantic_content": 0.904762,
+        "topic_novelty": 0.8
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136848,
+        "relationship_depth": 0.291667,
+        "semantic_content": 0.844828,
+        "topic_novelty": 0.590909
+      },
+      {
+        "conflict_tension": 0.014,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135709,
+        "relationship_depth": 0.314167,
+        "semantic_content": 0.909091,
+        "topic_novelty": 0.72
+      },
+      {
+        "conflict_tension": 0.012963,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135578,
+        "relationship_depth": 0.35,
+        "semantic_content": 0.857143,
+        "topic_novelty": 0.48
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.543478,
+        "hidden_intent": 0.134496,
+        "relationship_depth": 0.345833,
+        "semantic_content": 0.90566,
+        "topic_novelty": 0.545455
+      },
+      {
+        "conflict_tension": 0.018421,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.134395,
+        "relationship_depth": 0.341667,
+        "semantic_content": 0.940171,
+        "topic_novelty": 0.611111
+      },
+      {
+        "conflict_tension": 0.134375,
+        "emotional_tone": 0.5625,
+        "hidden_intent": 0.134555,
+        "relationship_depth": 0.344167,
+        "semantic_content": 0.894737,
+        "topic_novelty": 0.2
+      },
+      {
+        "conflict_tension": 0.021875,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.134456,
+        "relationship_depth": 0.366667,
+        "semantic_content": 0.908257,
+        "topic_novelty": 0.375
+      },
+      {
+        "conflict_tension": 0.167763,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135508,
+        "relationship_depth": 0.406667,
+        "semantic_content": 0.88785,
+        "topic_novelty": 0.176471
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.134498,
+        "relationship_depth": 0.446667,
+        "semantic_content": 0.90566,
+        "topic_novelty": 0.35
+      },
+      {
+        "conflict_tension": 0.141667,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135014,
+        "relationship_depth": 0.4075,
+        "semantic_content": 0.936842,
+        "topic_novelty": 0.454545
+      }
+    ],
+    "scenario_id": "humor_joke",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 12
+    },
+    "turn_count": 12
+  },
+  {
+    "action_distribution": {
+      "agree": 6,
+      "elaborate": 6
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.080712,
+      "emotional_tone": 0.505556,
+      "hidden_intent": 0.138909,
+      "relationship_depth": 0.34125,
+      "semantic_content": 0.914389,
+      "topic_novelty": 0.583193
+    },
+    "channel_stds": {
+      "conflict_tension": 0.051845,
+      "emotional_tone": 0.019245,
+      "hidden_intent": 0.001801,
+      "relationship_depth": 0.055858,
+      "semantic_content": 0.038761,
+      "topic_novelty": 0.202951
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 52,
+        "procedural": 71,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 71
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 41,
+        "procedural": 59,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 59
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.135995,
+        "relationship_depth": 0.3675,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136928,
+        "relationship_depth": 0.3275,
+        "semantic_content": 0.852941,
+        "topic_novelty": 0.642857
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.136791,
+        "relationship_depth": 0.2875,
+        "semantic_content": 0.94,
+        "topic_novelty": 0.823529
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.137682,
+        "relationship_depth": 0.2475,
+        "semantic_content": 0.9,
+        "topic_novelty": 0.6
+      },
+      {
+        "conflict_tension": 0.134375,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.138532,
+        "relationship_depth": 0.276667,
+        "semantic_content": 0.897059,
+        "topic_novelty": 0.533333
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.138368,
+        "relationship_depth": 0.316667,
+        "semantic_content": 0.9,
+        "topic_novelty": 0.6
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.139182,
+        "relationship_depth": 0.315,
+        "semantic_content": 0.94382,
+        "topic_novelty": 0.642857
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.139961,
+        "relationship_depth": 0.355,
+        "semantic_content": 0.862069,
+        "topic_novelty": 0.176471
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140707,
+        "relationship_depth": 0.373333,
+        "semantic_content": 0.910112,
+        "topic_novelty": 0.411765
+      },
+      {
+        "conflict_tension": 0.023333,
+        "emotional_tone": 0.566667,
+        "hidden_intent": 0.140511,
+        "relationship_depth": 0.3825,
+        "semantic_content": 0.931818,
+        "topic_novelty": 0.571429
+      },
+      {
+        "conflict_tension": 0.1125,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.141229,
+        "relationship_depth": 0.418333,
+        "semantic_content": 0.924731,
+        "topic_novelty": 0.529412
+      },
+      {
+        "conflict_tension": 0.023333,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.141027,
+        "relationship_depth": 0.4275,
+        "semantic_content": 0.910112,
+        "topic_novelty": 0.466667
+      }
+    ],
+    "scenario_id": "ambiguous_intent",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 12
+    },
+    "turn_count": 12
+  },
+  {
+    "action_distribution": {
+      "agree": 6,
+      "elaborate": 6
+    },
+    "agent_uid": 0,
+    "channel_means": {
+      "conflict_tension": 0.031782,
+      "emotional_tone": 0.511742,
+      "hidden_intent": 0.140611,
+      "relationship_depth": 0.349861,
+      "semantic_content": 0.928768,
+      "topic_novelty": 0.608407
+    },
+    "channel_stds": {
+      "conflict_tension": 0.049824,
+      "emotional_tone": 0.028778,
+      "hidden_intent": 0.000286,
+      "relationship_depth": 0.053862,
+      "semantic_content": 0.035641,
+      "topic_novelty": 0.163071
+    },
+    "personality_deviation": {
+      "caution_bias": 0.0,
+      "exploration_posture": 0.0,
+      "social_approach": 0.0,
+      "threat_sensitivity": 0.0,
+      "trust_stance": 0.0
+    },
+    "post_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 61,
+        "procedural": 83,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 83
+    },
+    "pre_snapshot": {
+      "defense_distribution": {},
+      "maturity_distance": 0.0,
+      "memory_stats": {
+        "episodic": 52,
+        "procedural": 71,
+        "semantic": 0
+      },
+      "narrative_priors": {
+        "contamination_sensitivity": 0.0,
+        "controllability_prior": 0.0,
+        "meaning_stability": 0.0,
+        "trauma_bias": 0.0,
+        "trust_prior": 0.0
+      },
+      "precision_debt": {},
+      "prediction_verification": {},
+      "sleep_cycle": 0,
+      "slow_traits": {
+        "caution_bias": 0.5,
+        "exploration_posture": 0.5,
+        "social_approach": 0.5,
+        "threat_sensitivity": 0.5,
+        "trust_stance": 0.5
+      },
+      "tick": 71
+    },
+    "precision_trajectory": [
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.14083,
+        "relationship_depth": 0.3875,
+        "semantic_content": 1.0,
+        "topic_novelty": 1.0
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.55,
+        "hidden_intent": 0.140636,
+        "relationship_depth": 0.3475,
+        "semantic_content": 0.866667,
+        "topic_novelty": 0.7
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140447,
+        "relationship_depth": 0.3075,
+        "semantic_content": 0.920635,
+        "topic_novelty": 0.736842
+      },
+      {
+        "conflict_tension": 0.04375,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140261,
+        "relationship_depth": 0.2675,
+        "semantic_content": 0.934211,
+        "topic_novelty": 0.666667
+      },
+      {
+        "conflict_tension": 0.038889,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140079,
+        "relationship_depth": 0.29,
+        "semantic_content": 0.915663,
+        "topic_novelty": 0.5
+      },
+      {
+        "conflict_tension": 0.131944,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140788,
+        "relationship_depth": 0.3125,
+        "semantic_content": 0.912088,
+        "topic_novelty": 0.5
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.1406,
+        "relationship_depth": 0.328333,
+        "semantic_content": 0.930693,
+        "topic_novelty": 0.588235
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140415,
+        "relationship_depth": 0.330833,
+        "semantic_content": 0.958763,
+        "topic_novelty": 0.538462
+      },
+      {
+        "conflict_tension": 0.134375,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.141102,
+        "relationship_depth": 0.366667,
+        "semantic_content": 0.95,
+        "topic_novelty": 0.6875
+      },
+      {
+        "conflict_tension": 0.018421,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140912,
+        "relationship_depth": 0.406667,
+        "semantic_content": 0.9,
+        "topic_novelty": 0.421053
+      },
+      {
+        "conflict_tension": 0.014,
+        "emotional_tone": 0.5,
+        "hidden_intent": 0.140725,
+        "relationship_depth": 0.446667,
+        "semantic_content": 0.894231,
+        "topic_novelty": 0.416667
+      },
+      {
+        "conflict_tension": 0.0,
+        "emotional_tone": 0.590909,
+        "hidden_intent": 0.140542,
+        "relationship_depth": 0.406667,
+        "semantic_content": 0.962264,
+        "topic_novelty": 0.545455
+      }
+    ],
+    "scenario_id": "game_world_npc",
+    "seed": 42,
+    "split_strategy": "random",
+    "strategy_distribution": {
+      "exploit": 12
+    },
+    "turn_count": 12
+  }
+]

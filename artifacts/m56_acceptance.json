@@ -1,0 +1,54 @@
+{
+  "milestone_id": "M5.6",
+  "status": "PASS",
+  "generated_at": "2026-04-30T11:32:46.513632+00:00",
+  "waived_requirements": [
+    "generic REST/WebSocket persona API",
+    "Unity SDK",
+    "POST /persona/{id}/scenario endpoint"
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Local runtime lifecycle",
+      "status": "PASS",
+      "evidence": "questionnaire, description, raw chat creation paths are exercised; chat, state persistence, memory/state inspection, and sleep trigger are available in-process."
+    },
+    {
+      "id": "G2",
+      "name": "Persona conditioning causality",
+      "status": "PASS",
+      "evidence": "curious and guarded profiles produce different action distributions under identical messages."
+    },
+    {
+      "id": "G3",
+      "name": "Stress and failure injection",
+      "status": "PASS",
+      "evidence": "long input, no-agent controlled failure, safety blocking, precision anomaly, and persistence-after-stress checks pass."
+    },
+    {
+      "id": "G4",
+      "name": "Rule-mode p95 latency below 2s",
+      "status": "PASS",
+      "evidence": "p95=14.728ms over 20 turns."
+    },
+    {
+      "id": "G5",
+      "name": "REST/WebSocket API",
+      "status": "WAIVED_BY_OWNER",
+      "evidence": "Owner removed this from the current M5.6 acceptance scope on 2026-04-30."
+    },
+    {
+      "id": "G6",
+      "name": "Scenario endpoint",
+      "status": "WAIVED_BY_OWNER",
+      "evidence": "Owner removed POST /persona/{id}/scenario from the current M5.6 acceptance scope on 2026-04-30."
+    }
+  ],
+  "summary_metrics": {
+    "ablation_different_action_positions": 4,
+    "stress_passed": true,
+    "rule_mode_p95_ms": 14.728,
+    "trace_turns": 4
+  }
+}

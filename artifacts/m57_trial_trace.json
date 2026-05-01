@@ -19,7 +19,7 @@
     "simulated_days": 5,
     "turns_per_persona": 200
   },
-  "generated_at": "2026-04-30T11:52:59.094232+00:00",
+  "generated_at": "2026-04-30T16:38:57.526247+00:00",
   "m50_summary": {
     "parsed_success": 180,
     "qualified_users": 8,
@@ -44,6 +44,6 @@
     },
     "mode": "synthetic_raw_chat_logs",
     "personas": 5,
-    "raw_dir": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw"
+    "raw_dir": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw"
   }
 }

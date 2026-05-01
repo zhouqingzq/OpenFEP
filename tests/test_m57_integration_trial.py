@@ -58,7 +58,10 @@ def test_m57_trial_writes_complete_bundle(tmp_path: Path) -> None:
     for path_text in report["artifacts"].values():
         path = Path(path_text)
         assert path.exists(), path
-        json.loads(path.read_text(encoding="utf-8"))
+        if path.suffix == ".json":
+            json.loads(path.read_text(encoding="utf-8"))
+        else:
+            assert path.read_text(encoding="utf-8").strip()
 
     trace = json.loads(Path(report["artifacts"]["trial_trace"]).read_text(encoding="utf-8"))
     assert trace["chain"] == [

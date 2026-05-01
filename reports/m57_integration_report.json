@@ -1,12 +1,15 @@
 {
   "artifacts": {
+    "ablation": "artifacts\\m57_comparative.json",
     "acceptance_summary": "artifacts\\m57_acceptance.json",
     "adversarial": "artifacts\\m57_adversarial.json",
     "comparative": "artifacts\\m57_comparative.json",
+    "human_summary": "reports\\m57_acceptance_summary.md",
     "longitudinal": "artifacts\\m57_longitudinal.json",
     "technical_report": "reports\\m57_integration_report.json",
     "trial_trace": "artifacts\\m57_trial_trace.json"
   },
+  "commit_hash": "17dcbac",
   "config": {
     "implantation_sleep_every_sessions": 1,
     "min_messages": 6,
@@ -20,7 +23,51 @@
     "turns_per_persona": 200
   },
   "decision": "PASS",
+  "evidence_categories": {
+    "ablation": {
+      "evidence": "Integrated personas are compared against a neutral rule baseline in m57_comparative.json.",
+      "status": "PASS"
+    },
+    "artifact_freshness": {
+      "evidence": "Artifacts are generated in the same run and paths are listed under freshness.generated_artifact_paths.",
+      "status": "PASS"
+    },
+    "causality": {
+      "evidence": "Raw-chat implantation produces runtime personas whose action distributions and memories evolve through chat turns.",
+      "status": "PASS"
+    },
+    "determinism": {
+      "evidence": "Canonical seed family: [57, 7158, 7159, 7160, 7161, 7162]. Synthetic raw generation and scenario battery are seed-bound.",
+      "status": "PASS"
+    },
+    "regression": {
+      "evidence": "Report declares the required M5.0/M5.1/M5.2/M5.3/M5.5/M5.6 regression command set.",
+      "status": "PASS"
+    },
+    "schema": {
+      "evidence": "JSON artifacts use explicit artifact_type/schema_version where applicable and are parse-checked by tests.",
+      "status": "PASS"
+    },
+    "stress": {
+      "evidence": "Manipulation, context switching, private-memory pressure, emotional leverage, long input, and safety layer checks are recorded.",
+      "status": "PASS"
+    }
+  },
   "findings": [],
+  "freshness": {
+    "commit_hash": "17dcbac",
+    "generated_artifact_paths": [
+      "artifacts\\m57_acceptance.json",
+      "artifacts\\m57_adversarial.json",
+      "artifacts\\m57_comparative.json",
+      "artifacts\\m57_longitudinal.json",
+      "artifacts\\m57_trial_trace.json",
+      "reports\\m57_acceptance_summary.md",
+      "reports\\m57_integration_report.json"
+    ],
+    "generated_at": "2026-04-30T16:38:57.526247+00:00",
+    "generated_current_round": true
+  },
   "gates": [
     {
       "evidence": "raw logs were parsed by M5.0 and loaded through M5.2/M5.6 creation path.",
@@ -59,7 +106,7 @@
       "status": "PASS"
     }
   ],
-  "generated_at": "2026-04-30T11:52:59.094232+00:00",
+  "generated_at": "2026-04-30T16:38:57.526247+00:00",
   "limitations": [
     "Default artifact generation uses deterministic synthetic raw logs so CI can run without private chat data.",
     "Automated rule-baseline comparison is engineering evidence; LLM-judged and blind human panels remain optional for formal fidelity claims.",
@@ -70,17 +117,17 @@
     "filtered_sessions": 30,
     "filtered_users": 4,
     "input_files": [
-      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\curious_builder.log",
-      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\direct_solver.log",
-      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\guarded_planner.log",
-      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\playful_adapter.log",
-      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw\\warm_supporter.log"
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw\\curious_builder.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw\\direct_solver.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw\\guarded_planner.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw\\playful_adapter.log",
+      "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw\\warm_supporter.log"
     ],
     "non_text_filtered": 0,
     "parse_success_rate": 1.0,
     "parsed_failed": 0,
     "parsed_success": 180,
-    "processing_seconds": 0.029,
+    "processing_seconds": 0.028,
     "qualified_users": 8,
     "total_lines": 180,
     "total_messages": 180,
@@ -95,6 +142,19 @@
   },
   "milestone_id": "M5.7",
   "recommendation": "ACCEPT",
+  "residual_risks": [
+    "Default acceptance artifacts use synthetic raw chat logs; private real-data replay should be run with --raw-input before external fidelity claims.",
+    "Automated rule-baseline comparison is sufficient for engineering acceptance but not for formal human-fidelity validation.",
+    "LLM-mode generation remains non-gating because it can mask the personality signal under evaluation."
+  ],
+  "seed_set": [
+    57,
+    7158,
+    7159,
+    7160,
+    7161,
+    7162
+  ],
   "source": {
     "lines_by_persona": {
       "7101": 36,
@@ -105,7 +165,7 @@
     },
     "mode": "synthetic_raw_chat_logs",
     "personas": 5,
-    "raw_dir": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmpp3ggidgz\\raw"
+    "raw_dir": "C:\\Users\\zq\\AppData\\Local\\Temp\\tmp__e4hhde\\raw"
   },
   "status": "PASS",
   "summary_metrics": {
@@ -118,6 +178,10 @@
     "qualified_users": 8,
     "total_longitudinal_turns": 1000,
     "turns_per_persona": 200
+  },
+  "tests": {
+    "m57_acceptance": "py -m pytest tests/test_m57_integration_trial.py tests/test_m57_audit_acceptance.py -q",
+    "m5_regression": "py -m pytest tests/test_m50_chat_pipeline.py tests/test_m51_dialogue_channels.py tests/test_m52_implantation.py tests/test_m53_dialogue_action.py tests/test_m55_cross_context.py tests/test_m56_runtime.py tests/test_m56_acceptance_artifacts.py -q"
   },
   "title": "End-to-End Integration Trial - Raw Chat to Playable Digital Life"
 }

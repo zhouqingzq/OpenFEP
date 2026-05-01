@@ -1,0 +1,1194 @@
+{
+  "energy": 0.8,
+  "stress": 0.25,
+  "fatigue": 0.2,
+  "temperature": 0.48,
+  "dopamine": 0.12,
+  "cycle": 0,
+  "base_metabolic_rate": 0.015,
+  "fatigue_accumulation_rate": 0.08,
+  "drive_urgencies": {
+    "hunger": 0.0,
+    "safety": 0.0,
+    "exploration": 0.0,
+    "comfort": 0.0,
+    "thermal": 0.0,
+    "social": 0.0
+  },
+  "process_valence": {
+    "active_focus_id": "",
+    "recent_closed_focus_id": "",
+    "unresolved_tension": 0.0,
+    "closure_satisfaction": 0.0,
+    "post_closure_decay": 0.0,
+    "boredom_pressure": 0.0,
+    "process_reward": 0.0,
+    "focus_persistence_ticks": 0,
+    "closure_events": 0,
+    "active_phase": "idle"
+  },
+  "world_model": {
+    "beliefs": {
+      "food": 0.5,
+      "danger": 0.3,
+      "novelty": 0.5,
+      "shelter": 0.4,
+      "temperature": 0.5,
+      "social": 0.3
+    },
+    "sensorimotor_layer": {
+      "beliefs": {
+        "food": 0.5,
+        "danger": 0.3,
+        "novelty": 0.5,
+        "shelter": 0.4,
+        "temperature": 0.5,
+        "social": 0.3
+      },
+      "initial_precision": 0.7,
+      "precisions": {
+        "food": 0.7,
+        "danger": 0.7,
+        "novelty": 0.7,
+        "shelter": 0.7,
+        "temperature": 0.7,
+        "social": 0.7
+      },
+      "top_down_mix": 0.55,
+      "base_error_precision": 0.65,
+      "error_precision_scale": 1.1,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.1,
+      "precision_decay": 0.02,
+      "channel_precision_bounds": {}
+    },
+    "learning_rate": 0.4,
+    "transition_counts": {},
+    "transition_model": {},
+    "outcome_model": {},
+    "policy_biases": {},
+    "counterfactual_biases": {},
+    "counterfactual_candidate_buffer": {},
+    "epistemic_uncertainty_bonuses": {},
+    "threat_priors": {},
+    "preference_penalties": {},
+    "kl_divergence_threshold": 0.25,
+    "last_prediction_details": {}
+  },
+  "action_registry": {
+    "forage": {
+      "action": {
+        "name": "forage",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.12,
+        "resource_cost": {
+          "energy": 0.12,
+          "attention": 0.18
+        },
+        "failure_modes": [
+          "resource_exhaustion",
+          "threat_exposure",
+          "environment_shift"
+        ],
+        "constraints": {
+          "requires_min_energy": 0.1
+        },
+        "reversible": true
+      },
+      "cost": 0.12
+    },
+    "hide": {
+      "action": {
+        "name": "hide",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.05,
+        "resource_cost": {
+          "energy": 0.05,
+          "attention": 0.08
+        },
+        "failure_modes": [
+          "resource_starvation",
+          "shelter_unavailable"
+        ],
+        "constraints": {
+          "preferred_when_danger_above": 0.45
+        },
+        "reversible": true
+      },
+      "cost": 0.05
+    },
+    "scan": {
+      "action": {
+        "name": "scan",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.06,
+        "resource_cost": {
+          "energy": 0.06,
+          "attention": 0.2
+        },
+        "failure_modes": [
+          "context_budget_exceeded",
+          "false_alarm"
+        ],
+        "constraints": {
+          "preferred_when_uncertainty_above": 0.35
+        },
+        "reversible": true
+      },
+      "cost": 0.06
+    },
+    "exploit_shelter": {
+      "action": {
+        "name": "exploit_shelter",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.08,
+        "resource_cost": {
+          "energy": 0.08,
+          "attention": 0.1
+        },
+        "failure_modes": [
+          "shelter_contested",
+          "resource_exhaustion"
+        ],
+        "constraints": {
+          "preferred_when_shelter_available": 0.2
+        },
+        "reversible": true
+      },
+      "cost": 0.08
+    },
+    "rest": {
+      "action": {
+        "name": "rest",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.03,
+        "resource_cost": {
+          "energy": 0.03,
+          "attention": 0.03
+        },
+        "failure_modes": [
+          "opportunity_loss",
+          "environment_shift"
+        ],
+        "constraints": {
+          "preferred_when_fatigue_above": 0.4
+        },
+        "reversible": true
+      },
+      "cost": 0.03
+    },
+    "seek_contact": {
+      "action": {
+        "name": "seek_contact",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.07,
+        "resource_cost": {
+          "energy": 0.07,
+          "attention": 0.14
+        },
+        "failure_modes": [
+          "external_rejection",
+          "threat_exposure"
+        ],
+        "constraints": {
+          "preferred_when_social_below": 0.35
+        },
+        "reversible": true
+      },
+      "cost": 0.07
+    },
+    "thermoregulate": {
+      "action": {
+        "name": "thermoregulate",
+        "params": {},
+        "params_schema": {},
+        "cost_estimate": 0.09,
+        "resource_cost": {
+          "energy": 0.09,
+          "attention": 0.12
+        },
+        "failure_modes": [
+          "resource_exhaustion",
+          "temperature_rebound"
+        ],
+        "constraints": {
+          "preferred_when_temperature_offset_above": 0.12
+        },
+        "reversible": true
+      },
+      "cost": 0.09
+    }
+  },
+  "interoceptive_layer": {
+    "beliefs": {
+      "food": 0.5,
+      "danger": 0.3,
+      "novelty": 0.5,
+      "shelter": 0.4,
+      "temperature": 0.5,
+      "social": 0.3
+    },
+    "initial_precision": 0.45,
+    "precisions": {
+      "food": 0.45,
+      "danger": 0.45,
+      "novelty": 0.45,
+      "shelter": 0.45,
+      "temperature": 0.45,
+      "social": 0.45
+    },
+    "top_down_mix": 0.72,
+    "base_error_precision": 0.8,
+    "error_precision_scale": 1.4,
+    "min_precision": 0.05,
+    "max_precision": 3.0,
+    "digestion_threshold": 0.06,
+    "precision_decay": 0.01,
+    "channel_precision_bounds": {}
+  },
+  "strategic_layer": {
+    "energy_floor": 0.5,
+    "danger_ceiling": 0.2,
+    "novelty_floor": 0.3,
+    "shelter_floor": 0.4,
+    "temperature_ideal": 0.5,
+    "social_floor": 0.25,
+    "belief_state": {
+      "beliefs": {
+        "food": 0.5,
+        "danger": 0.3,
+        "novelty": 0.5,
+        "shelter": 0.4,
+        "temperature": 0.5,
+        "social": 0.3
+      },
+      "initial_precision": 0.95,
+      "precisions": {
+        "food": 0.95,
+        "danger": 0.95,
+        "novelty": 0.95,
+        "shelter": 0.95,
+        "temperature": 0.95,
+        "social": 0.95
+      },
+      "top_down_mix": 0.63,
+      "base_error_precision": 0.55,
+      "error_precision_scale": 0.9,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.14,
+      "precision_decay": 0.03,
+      "channel_precision_bounds": {}
+    }
+  },
+  "long_term_memory": {
+    "episodes": [],
+    "semantic_patterns": [],
+    "semantic_schemas": [],
+    "max_episodes": 1024,
+    "surprise_threshold": 0.4,
+    "duplicate_similarity_threshold": 0.999,
+    "suppression_similarity_threshold": 0.992,
+    "novelty_window": 8,
+    "episode_score_threshold": 0.58,
+    "sleep_interval": 200,
+    "memory_threshold": 512,
+    "sleep_batch_size": 128,
+    "minimum_support": 5,
+    "sleep_minimum_support": 3,
+    "compression_similarity_threshold": 0.95,
+    "cluster_distance_threshold": 0.15,
+    "max_active_age": 5000,
+    "minimum_active_episodes": 3,
+    "cluster_centroids": [],
+    "cluster_counts": [],
+    "archived_episodes": [],
+    "lifecycle_events": [],
+    "rehearsal_log": [],
+    "preference_model": {
+      "outcomes": [
+        "survival_threat",
+        "integrity_loss",
+        "resource_loss",
+        "neutral",
+        "resource_gain"
+      ],
+      "log_preferences": {
+        "survival_threat": -1000.0,
+        "integrity_loss": -100.0,
+        "resource_loss": -10.0,
+        "neutral": 0.0,
+        "resource_gain": 5.0
+      },
+      "probabilities": {
+        "survival_threat": 0.0,
+        "integrity_loss": 2.4897906369168703e-46,
+        "resource_loss": 3.038548695455042e-07,
+        "neutral": 0.0066928488906295115,
+        "resource_gain": 0.993306847254501
+      },
+      "log_probabilities": {
+        "survival_threat": -1005.006715652344,
+        "integrity_loss": -105.00671565234403,
+        "resource_loss": -15.006715652344035,
+        "neutral": -5.006715652344034,
+        "resource_gain": -0.006715652344033707
+      }
+    },
+    "value_hierarchy": {
+      "survival": -1000.0,
+      "integrity": -100.0,
+      "resource_loss": -10.0,
+      "resource": -10.0,
+      "neutral": 0.0,
+      "resource_gain": 5.0
+    },
+    "restart_continuity_until_cycle": 0,
+    "restart_continuity_anchor_ids": [],
+    "latest_schema_update": {},
+    "agent_state_vector": {
+      "active_goals": [],
+      "recent_mood_baseline": "neutral",
+      "recent_dominant_tags": [],
+      "identity_active_themes": [],
+      "threat_level": 0.0,
+      "reward_context_active": false,
+      "social_context_active": false,
+      "last_updated": 0
+    },
+    "memory_cognitive_style": {
+      "schema_version": "m4.cognitive_style.v2",
+      "uncertainty_sensitivity": 0.65,
+      "error_aversion": 0.7,
+      "exploration_bias": 0.55,
+      "attention_selectivity": 0.6,
+      "confidence_gain": 0.7,
+      "update_rigidity": 0.65,
+      "resource_pressure_sensitivity": 0.75,
+      "virtual_prediction_error_gain": 0.68
+    },
+    "memory_cycle_interval": 5,
+    "memory_backend": "memory_store",
+    "migration_audit": {},
+    "last_retrieval_result": {},
+    "memory_store": {
+      "entries": [],
+      "short_to_mid_salience_threshold": 0.55,
+      "short_to_mid_retrieval_threshold": 2,
+      "mid_to_long_salience_threshold": 0.8,
+      "mid_to_long_retrieval_threshold": 3,
+      "identity_priority_threshold": 0.75,
+      "identity_long_threshold": 0.85,
+      "state_window_size": 30,
+      "agent_state_vector": {
+        "active_goals": [],
+        "recent_mood_baseline": "neutral",
+        "recent_dominant_tags": [],
+        "identity_active_themes": [],
+        "threat_level": 0.0,
+        "reward_context_active": false,
+        "social_context_active": false,
+        "last_updated": 0
+      },
+      "last_cleanup_report": {},
+      "semantic_schemas": [],
+      "latest_schema_update": {}
+    }
+  },
+  "episodes": [],
+  "semantic_memory": [],
+  "sleep_history": [],
+  "counterfactual_insights": [],
+  "action_history": [],
+  "action_history_limit": 256,
+  "decision_history": [],
+  "decision_history_limit": 512,
+  "drive_history": [],
+  "drive_history_limit": 128,
+  "free_energy_history": [],
+  "free_energy_history_limit": 64,
+  "narrative_trace": [],
+  "goal_stack": {
+    "base_weights": {
+      "SURVIVAL": 0.9,
+      "INTEGRITY": 0.8,
+      "CONTROL": 0.65,
+      "RESOURCES": 0.55,
+      "SOCIAL": 0.2
+    },
+    "active_goal": "CONTROL",
+    "goal_history": [],
+    "free_energy_window": 5,
+    "conflict_history": [],
+    "weight_adjustments": [],
+    "conflict_threshold": 0.1,
+    "last_review_tick": 0,
+    "conflict_counter": 0,
+    "last_chapter_signal": null
+  },
+  "self_model": {
+    "body_schema": {
+      "energy": 0.8,
+      "token_budget": 256,
+      "memory_usage": 0.0,
+      "compute_load": 0.25
+    },
+    "capability_model": {
+      "action_schemas": [
+        {
+          "name": "forage",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.12,
+          "resource_cost": {
+            "energy": 0.12,
+            "attention": 0.18
+          },
+          "failure_modes": [
+            "resource_exhaustion",
+            "threat_exposure",
+            "environment_shift"
+          ],
+          "constraints": {
+            "requires_min_energy": 0.1
+          },
+          "reversible": true
+        },
+        {
+          "name": "hide",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.05,
+          "resource_cost": {
+            "energy": 0.05,
+            "attention": 0.08
+          },
+          "failure_modes": [
+            "resource_starvation",
+            "shelter_unavailable"
+          ],
+          "constraints": {
+            "preferred_when_danger_above": 0.45
+          },
+          "reversible": true
+        },
+        {
+          "name": "scan",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.06,
+          "resource_cost": {
+            "energy": 0.06,
+            "attention": 0.2
+          },
+          "failure_modes": [
+            "context_budget_exceeded",
+            "false_alarm"
+          ],
+          "constraints": {
+            "preferred_when_uncertainty_above": 0.35
+          },
+          "reversible": true
+        },
+        {
+          "name": "exploit_shelter",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.08,
+          "resource_cost": {
+            "energy": 0.08,
+            "attention": 0.1
+          },
+          "failure_modes": [
+            "shelter_contested",
+            "resource_exhaustion"
+          ],
+          "constraints": {
+            "preferred_when_shelter_available": 0.2
+          },
+          "reversible": true
+        },
+        {
+          "name": "rest",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.03,
+          "resource_cost": {
+            "energy": 0.03,
+            "attention": 0.03
+          },
+          "failure_modes": [
+            "opportunity_loss",
+            "environment_shift"
+          ],
+          "constraints": {
+            "preferred_when_fatigue_above": 0.4
+          },
+          "reversible": true
+        },
+        {
+          "name": "seek_contact",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.07,
+          "resource_cost": {
+            "energy": 0.07,
+            "attention": 0.14
+          },
+          "failure_modes": [
+            "external_rejection",
+            "threat_exposure"
+          ],
+          "constraints": {
+            "preferred_when_social_below": 0.35
+          },
+          "reversible": true
+        },
+        {
+          "name": "thermoregulate",
+          "params": {},
+          "params_schema": {},
+          "cost_estimate": 0.09,
+          "resource_cost": {
+            "energy": 0.09,
+            "attention": 0.12
+          },
+          "failure_modes": [
+            "resource_exhaustion",
+            "temperature_rebound"
+          ],
+          "constraints": {
+            "preferred_when_temperature_offset_above": 0.12
+          },
+          "reversible": true
+        }
+      ],
+      "available_actions": [
+        "forage",
+        "hide",
+        "scan",
+        "exploit_shelter",
+        "rest",
+        "seek_contact",
+        "thermoregulate"
+      ],
+      "api_limits": {
+        "requests_per_minute": 60.0,
+        "context_window_tokens": 256.0,
+        "file_ops_per_window": 8.0,
+        "network_ops_per_window": 2.0,
+        "external_failures_before_lockout": 3.0
+      }
+    },
+    "resource_state": {
+      "tokens_remaining": 256,
+      "cpu_budget": 1.0,
+      "memory_free": 1024.0
+    },
+    "threat_model": {
+      "token_exhaustion_threshold": 32,
+      "memory_overflow_threshold": 96.0,
+      "fatal_exceptions": [
+        "fatal_exception"
+      ]
+    },
+    "threat_profile": {
+      "hard_limits": {
+        "energy": {
+          "critical_low": 0.05,
+          "source": "self"
+        },
+        "stress": {
+          "critical_high": 0.95,
+          "source": "self"
+        },
+        "fatigue": {
+          "critical_high": 0.95,
+          "source": "self"
+        },
+        "temperature": {
+          "critical_low": 0.05,
+          "critical_high": 0.95,
+          "source": "self"
+        }
+      },
+      "learned_threats": []
+    },
+    "error_classifier": {
+      "self_error_events": [
+        "token_exhaustion",
+        "out_of_memory",
+        "memory_index_corruption",
+        "tool_capability_downgrade"
+      ],
+      "world_error_events": [
+        "http_timeout",
+        "network_failure",
+        "read_only_filesystem",
+        "dom_structure_changed"
+      ],
+      "adapter_error_events": [
+        "missing_adapter",
+        "adapter_timeout",
+        "adapter_mismatch"
+      ],
+      "existential_events": [
+        "fatal_exception"
+      ]
+    },
+    "preferred_policies": {
+      "dominant_strategy": "expected_free_energy",
+      "action_distribution": {},
+      "risk_profile": "risk_neutral",
+      "learned_avoidances": [],
+      "learned_preferences": [],
+      "last_updated_tick": 0,
+      "strategy_confidence": 0.0,
+      "policy_evidence_count": 0,
+      "surface_majority_coverage": 0.0,
+      "policy_by_reply_function": {},
+      "policy_by_context": {},
+      "policy_context_support": {}
+    },
+    "identity_narrative": {
+      "chapters": [],
+      "current_chapter": null,
+      "core_identity": "",
+      "core_summary": "",
+      "autobiographical_summary": "",
+      "trait_self_model": {},
+      "behavioral_patterns": [],
+      "significant_events": [],
+      "values_statement": "",
+      "claims": [],
+      "commitments": [],
+      "chapter_transition_evidence": [],
+      "contradiction_summary": {},
+      "evidence_provenance": {},
+      "last_updated_tick": 0,
+      "version": 0
+    },
+    "narrative_priors": {
+      "trust_prior": 0.0,
+      "controllability_prior": 0.0,
+      "trauma_bias": 0.0,
+      "contamination_sensitivity": 0.0,
+      "meaning_stability": 0.0
+    },
+    "personality_profile": {
+      "openness": 0.62,
+      "conscientiousness": 0.547366,
+      "extraversion": 0.892727315,
+      "agreeableness": 0.8900606449999999,
+      "neuroticism": 0.482367,
+      "update_count": 0,
+      "last_updated_tick": 0,
+      "meaning_construction_tendency": 0.5,
+      "emotional_regulation_style": 0.5
+    },
+    "drift_budget": {
+      "personality_window": 0.45,
+      "narrative_window": 0.55,
+      "policy_window": 0.45,
+      "action_dominance_limit": 0.82,
+      "restart_tolerance": 0.18
+    },
+    "continuity_audit": {
+      "continuity_score": 1.0,
+      "dominant_action": "",
+      "dominant_action_ratio": 0.0,
+      "action_distribution": {},
+      "personality_drift": 0.0,
+      "narrative_drift": 0.0,
+      "policy_drift": 0.0,
+      "restart_divergence": 0.0,
+      "chapter_shift_excused": false,
+      "protected_anchor_ids": [],
+      "rehearsal_queue": [],
+      "interventions": [],
+      "personality_snapshot": {},
+      "policy_snapshot": {},
+      "commitment_snapshot": [],
+      "updated_tick": 0
+    },
+    "belief_calibration": {},
+    "commitments_enabled": true,
+    "repair_enabled": false,
+    "self_inconsistency_events": [],
+    "repair_history": []
+  },
+  "identity_traits": {
+    "risk_aversion": 0.65,
+    "resource_conservatism": 0.55
+  },
+  "last_body_state_snapshot": {
+    "energy": 0.8,
+    "stress": 0.25,
+    "fatigue": 0.2,
+    "temperature": 0.48
+  },
+  "last_decision_choice": "",
+  "last_decision_observation": {},
+  "agent_state_vector": {
+    "active_goals": [],
+    "recent_mood_baseline": "neutral",
+    "recent_dominant_tags": [],
+    "identity_active_themes": [],
+    "threat_level": 0.0,
+    "reward_context_active": false,
+    "social_context_active": false,
+    "last_updated": 0
+  },
+  "memory_cognitive_style": {
+    "schema_version": "m4.cognitive_style.v2",
+    "uncertainty_sensitivity": 0.65,
+    "error_aversion": 0.7,
+    "exploration_bias": 0.55,
+    "attention_selectivity": 0.6,
+    "confidence_gain": 0.7,
+    "update_rigidity": 0.65,
+    "resource_pressure_sensitivity": 0.75,
+    "virtual_prediction_error_gain": 0.68
+  },
+  "memory_cycle_interval": 5,
+  "memory_backend": "memory_store",
+  "memory_enabled": true,
+  "memory_legacy_policy_bias_enabled": true,
+  "memory_action_rollups_enabled": true,
+  "memory_representation_prior_enabled": true,
+  "policy_expected_free_energy_only_enabled": false,
+  "predictive_coding_hyperparameters": {
+    "interoceptive": {
+      "initial_precision": 0.45,
+      "top_down_mix": 0.72,
+      "base_error_precision": 0.8,
+      "error_precision_scale": 1.4,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.06,
+      "precision_decay": 0.01
+    },
+    "sensorimotor": {
+      "initial_precision": 0.7,
+      "top_down_mix": 0.55,
+      "base_error_precision": 0.65,
+      "error_precision_scale": 1.1,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.1,
+      "precision_decay": 0.02
+    },
+    "strategic": {
+      "initial_precision": 0.95,
+      "top_down_mix": 0.63,
+      "base_error_precision": 0.55,
+      "error_precision_scale": 0.9,
+      "min_precision": 0.05,
+      "max_precision": 3.0,
+      "digestion_threshold": 0.14,
+      "precision_decay": 0.03
+    }
+  },
+  "attention_bottleneck": {
+    "capacity": 3,
+    "enabled": true,
+    "novelty_weight": 0.2,
+    "threat_weight": 0.35,
+    "surprise_weight": 0.45
+  },
+  "last_attention_trace": null,
+  "last_attention_filtered_observation": {},
+  "global_workspace": {
+    "capacity": 2,
+    "enabled": true,
+    "action_bias_gain": 0.35,
+    "memory_gate_gain": 0.08,
+    "persistence_ticks": 2,
+    "carry_over_decay": 0.82,
+    "carry_over_min_salience": 0.12,
+    "report_carry_over": true,
+    "last_state": null
+  },
+  "last_workspace_state": null,
+  "social_memory": {
+    "others": {},
+    "interaction_history": []
+  },
+  "identity_tension_history": [],
+  "prediction_ledger": {
+    "predictions": [],
+    "discrepancies": [],
+    "archived_predictions": [],
+    "archived_discrepancies": [],
+    "last_tick": 0,
+    "max_active_predictions": 24,
+    "max_active_discrepancies": 24
+  },
+  "reconciliation_engine": {
+    "active_threads": [],
+    "archived_threads": [],
+    "recent_signature_counts": {},
+    "last_tick": 0,
+    "max_active_threads": 12,
+    "archive_limit": 48
+  },
+  "verification_loop": {
+    "active_targets": [],
+    "archived_targets": [],
+    "evidence_history": [],
+    "falsification_history": [],
+    "last_tick": 0,
+    "max_active_targets": 3,
+    "evidence_history_limit": 96,
+    "archive_limit": 48
+  },
+  "subject_state": {
+    "tick": 0,
+    "core_identity_summary": "",
+    "current_phase": "forming",
+    "current_self_narrative_phase": "forming",
+    "active_commitments": [],
+    "dominant_preferences": [],
+    "dominant_goal": "",
+    "dominant_needs": [],
+    "dominant_workspace_contents": [],
+    "active_social_focus": [],
+    "socially_salient_bindings": [],
+    "identity_tension_level": 0.0,
+    "self_inconsistency_level": 0.0,
+    "maintenance_pressure": 0.0,
+    "continuity_score": 1.0,
+    "continuity_anchors": [],
+    "unresolved_tensions": [],
+    "narrative_uncertainties": [],
+    "active_inquiries": [],
+    "deferred_inquiries": [],
+    "ambiguity_profile": {},
+    "subject_priority_stack": [],
+    "slow_biases": {},
+    "cognitive_style_label": "",
+    "cognitive_style_evidence": [],
+    "cognitive_style_continuity": 0.0,
+    "cognitive_style_history": [],
+    "status_flags": {},
+    "protected_targets": [],
+    "repair_targets": [],
+    "same_subject_basis": ""
+  },
+  "latest_narrative_uncertainty": {
+    "episode_id": "",
+    "source_episode_id": "",
+    "unknowns": [],
+    "competing_hypotheses": [],
+    "latent_causes": [],
+    "surface_cues": [],
+    "profile": {
+      "total_unknown_count": 0,
+      "decision_relevant_unknown_count": 0,
+      "competing_hypothesis_count": 0,
+      "latent_cause_count": 0,
+      "surface_cue_count": 0,
+      "interpretive_competition": 0.0,
+      "latent_cause_uncertainty_burden": 0.0,
+      "social_ambiguity_burden": 0.0,
+      "trust_ambiguity_burden": 0.0,
+      "environment_ambiguity_burden": 0.0,
+      "retained_uncertainty_burden": 0.0
+    },
+    "promoted_unknown_ids": [],
+    "summary": ""
+  },
+  "narrative_uncertainty_history": [],
+  "latest_narrative_experiment": {
+    "generated_tick": 0,
+    "source_episode_id": "",
+    "discrimination_targets": [],
+    "predictions": [],
+    "candidates": [],
+    "plans": [],
+    "summary": ""
+  },
+  "narrative_experiment_history": [],
+  "inquiry_budget_scheduler": {
+    "max_active_candidates": 4,
+    "max_workspace_slots": 3,
+    "max_verification_slots": 2,
+    "max_action_budget": 1,
+    "cooldown_ticks": 2,
+    "state": {
+      "last_tick": 0,
+      "max_active_candidates": 4,
+      "max_workspace_slots": 3,
+      "max_verification_slots": 2,
+      "max_action_budget": 1,
+      "candidates": [],
+      "priority_scores": [],
+      "precision_allocations": [],
+      "verification_assignments": [],
+      "workspace_allocations": [],
+      "action_allocations": [],
+      "decisions": [],
+      "active_candidate_ids": [],
+      "candidate_states": []
+    }
+  },
+  "slow_variable_learner": {
+    "state": {
+      "traits": {
+        "caution_bias": 0.38047,
+        "threat_sensitivity": 0.332996,
+        "trust_stance": 0.752608,
+        "exploration_posture": 0.665445,
+        "social_approach": 0.819909
+      },
+      "values": {
+        "survival_weight": 0.72,
+        "social_weight": 0.5,
+        "exploration_weight": 0.46,
+        "maintenance_weight": 0.62,
+        "hierarchy_stability": 0.68
+      },
+      "identity": {
+        "commitment_stability": 0.7,
+        "identity_rigidity": 0.58,
+        "plasticity": 0.42,
+        "continuity_resilience": 0.66
+      },
+      "style": {
+        "compute_conservatism": 0.5,
+        "process_attraction_decay": 0.5,
+        "compression_preference": 0.5,
+        "uncertainty_tolerance": 0.5
+      },
+      "effort_allocation_history": [],
+      "style_history": [],
+      "last_processed_tick": 0,
+      "sleep_cycles": 0,
+      "last_summary": ""
+    },
+    "drift_budget": {
+      "max_total_delta_per_cycle": 0.18,
+      "per_variable_budget": {
+        "traits.caution_bias": 0.05,
+        "traits.threat_sensitivity": 0.05,
+        "traits.trust_stance": 0.045,
+        "traits.exploration_posture": 0.05,
+        "traits.social_approach": 0.045,
+        "values.survival_weight": 0.04,
+        "values.social_weight": 0.04,
+        "values.exploration_weight": 0.04,
+        "values.maintenance_weight": 0.04,
+        "values.hierarchy_stability": 0.035,
+        "identity.commitment_stability": 0.035,
+        "identity.identity_rigidity": 0.03,
+        "identity.plasticity": 0.03,
+        "identity.continuity_resilience": 0.04,
+        "style.compute_conservatism": 0.04,
+        "style.process_attraction_decay": 0.04,
+        "style.compression_preference": 0.04,
+        "style.uncertainty_tolerance": 0.04
+      },
+      "max_divergent_updates": 7
+    },
+    "plasticity_windows": {
+      "identity.commitment_stability": {
+        "variable_path": "identity.commitment_stability",
+        "learning_rate": 0.3,
+        "evidence_threshold": 4,
+        "resistance": 0.45
+      },
+      "identity.continuity_resilience": {
+        "variable_path": "identity.continuity_resilience",
+        "learning_rate": 0.32,
+        "evidence_threshold": 3,
+        "resistance": 0.4
+      },
+      "identity.identity_rigidity": {
+        "variable_path": "identity.identity_rigidity",
+        "learning_rate": 0.22,
+        "evidence_threshold": 4,
+        "resistance": 0.5
+      },
+      "identity.plasticity": {
+        "variable_path": "identity.plasticity",
+        "learning_rate": 0.24,
+        "evidence_threshold": 3,
+        "resistance": 0.35
+      },
+      "style.compression_preference": {
+        "variable_path": "style.compression_preference",
+        "learning_rate": 0.36,
+        "evidence_threshold": 2,
+        "resistance": 0.18
+      },
+      "style.compute_conservatism": {
+        "variable_path": "style.compute_conservatism",
+        "learning_rate": 0.34,
+        "evidence_threshold": 3,
+        "resistance": 0.22
+      },
+      "style.process_attraction_decay": {
+        "variable_path": "style.process_attraction_decay",
+        "learning_rate": 0.32,
+        "evidence_threshold": 3,
+        "resistance": 0.2
+      },
+      "style.uncertainty_tolerance": {
+        "variable_path": "style.uncertainty_tolerance",
+        "learning_rate": 0.32,
+        "evidence_threshold": 3,
+        "resistance": 0.2
+      },
+      "traits.caution_bias": {
+        "variable_path": "traits.caution_bias",
+        "learning_rate": 0.7,
+        "evidence_threshold": 2,
+        "resistance": 0.15
+      },
+      "traits.exploration_posture": {
+        "variable_path": "traits.exploration_posture",
+        "learning_rate": 0.6,
+        "evidence_threshold": 2,
+        "resistance": 0.15
+      },
+      "traits.social_approach": {
+        "variable_path": "traits.social_approach",
+        "learning_rate": 0.45,
+        "evidence_threshold": 3,
+        "resistance": 0.2
+      },
+      "traits.threat_sensitivity": {
+        "variable_path": "traits.threat_sensitivity",
+        "learning_rate": 0.65,
+        "evidence_threshold": 2,
+        "resistance": 0.1
+      },
+      "traits.trust_stance": {
+        "variable_path": "traits.trust_stance",
+        "learning_rate": 0.5,
+        "evidence_threshold": 3,
+        "resistance": 0.2
+      },
+      "values.exploration_weight": {
+        "variable_path": "values.exploration_weight",
+        "learning_rate": 0.4,
+        "evidence_threshold": 2,
+        "resistance": 0.25
+      },
+      "values.hierarchy_stability": {
+        "variable_path": "values.hierarchy_stability",
+        "learning_rate": 0.3,
+        "evidence_threshold": 3,
+        "resistance": 0.35
+      },
+      "values.maintenance_weight": {
+        "variable_path": "values.maintenance_weight",
+        "learning_rate": 0.45,
+        "evidence_threshold": 2,
+        "resistance": 0.2
+      },
+      "values.social_weight": {
+        "variable_path": "values.social_weight",
+        "learning_rate": 0.35,
+        "evidence_threshold": 3,
+        "resistance": 0.25
+      },
+      "values.survival_weight": {
+        "variable_path": "values.survival_weight",
+        "learning_rate": 0.4,
+        "evidence_threshold": 3,
+        "resistance": 0.35
+      }
+    },
+    "protected_anchors": [
+      {
+        "variable_path": "values.survival_weight",
+        "label": "survival-priority",
+        "min_value": 0.58,
+        "max_value": 1.0,
+        "required_evidence": 4,
+        "anchor_strength": 0.9
+      },
+      {
+        "variable_path": "identity.commitment_stability",
+        "label": "commitment-continuity",
+        "min_value": 0.48,
+        "max_value": 1.0,
+        "required_evidence": 4,
+        "anchor_strength": 0.85
+      },
+      {
+        "variable_path": "identity.continuity_resilience",
+        "label": "continuity-resilience",
+        "min_value": 0.45,
+        "max_value": 1.0,
+        "required_evidence": 3,
+        "anchor_strength": 0.82
+      },
+      {
+        "variable_path": "traits.caution_bias",
+        "label": "survival-caution-floor",
+        "min_value": 0.25,
+        "max_value": 0.95,
+        "required_evidence": 2,
+        "anchor_strength": 0.65
+      },
+      {
+        "variable_path": "style.uncertainty_tolerance",
+        "label": "bounded-uncertainty-tolerance",
+        "min_value": 0.22,
+        "max_value": 0.88,
+        "required_evidence": 3,
+        "anchor_strength": 0.72
+      }
+    ],
+    "audit_history": [],
+    "max_audit_history": 64
+  },
+  "precision_manipulator": {
+    "channel_precisions": {
+      "food": 1.0,
+      "danger": 1.0,
+      "novelty": 1.0,
+      "shelter": 1.0,
+      "temperature": 1.0,
+      "social": 1.0,
+      "attachment": 1.0,
+      "self_worth": 1.0,
+      "threat": 1.0
+    },
+    "precision_debt": 0.0,
+    "neuroticism": 0.482367,
+    "openness": 0.62,
+    "extraversion": 0.892727315,
+    "agreeableness": 0.8900606449999999,
+    "conscientiousness": 0.547366,
+    "trust_prior": 0.0,
+    "manipulation_history": []
+  },
+  "defense_strategy_selector": {
+    "neuroticism": 0.482367,
+    "openness": 0.62,
+    "extraversion": 0.892727315,
+    "conscientiousness": 0.547366,
+    "agreeableness": 0.8900606449999999,
+    "strategy_history": []
+  },
+  "metacognitive_layer": {
+    "observation_window_size": 20,
+    "precision_history": [],
+    "strategy_history": [],
+    "meta_beliefs": {},
+    "dissociation_level": 0.0,
+    "meta_pe_history": [],
+    "enabled": true
+  },
+  "rng_state": "(3, (2147483648, 950789152, 1971639215, 739370771, 2836457657, 1474109927, 2981320036, 184412529, 107171398, 215409202, 263928611, 2593495506, 3105923383, 2930452265, 2325912549, 1309834296, 2328782670, 18181452, 314969064, 317917788, 2465376376, 3859160091, 4044511362, 1047960301, 2871056002, 1415654474, 147915624, 4293879407, 3114711198, 1088447350, 3636450497, 1948599009, 4091728935, 925011489, 3659434824, 4125722885, 1275889709, 3097260258, 3608249294, 2004504354, 3444035068, 586930232, 3877293860, 3366384931, 476538604, 2710887269, 3948455595, 910951766, 3954828446, 4191387873, 2675801552, 951010402, 375879721, 1740682010, 1278829270, 2929383451, 2129538332, 4238670612, 95247351, 1142597310, 791736112, 3620028371, 1228353449, 1715208288, 896023123, 661423550, 3919846237, 2187880022, 3529050305, 3082493182, 4126295675, 3235639060, 671098281, 2358984690, 3836024380, 1473867271, 582429372, 3017948504, 2531122728, 3929333400, 1225853781, 1099074174, 972652068, 3590433093, 2356540883, 4227161233, 3147897838, 2771084120, 270976564, 3940331421, 1626275993, 3723684757, 2777088932, 390772026, 1044704095, 1421304042, 1116665323, 186107722, 1098502346, 3371325817, 1595456394, 2427291909, 1938026334, 2167559200, 4294694586, 2444067332, 3748437053, 247814374, 4001722122, 3112276144, 683352708, 2509889360, 3819745401, 552929542, 390348157, 2790180335, 2939437180, 1207605278, 2710557170, 2785985563, 3344291975, 2384444186, 2034936598, 729953340, 3109477568, 2705238323, 4157280337, 2337554138, 3690056859, 2672805569, 3509840161, 4150894387, 2955935378, 1633033908, 1085871978, 1230515235, 228907933, 2863522305, 12100779, 1111527697, 2326670999, 3834458009, 4206414489, 1399243083, 3906847110, 2126524551, 3195733655, 585112679, 1605415470, 3044172720, 3579211789, 1070667136, 3283841558, 4283836040, 3396368263, 4080070334, 3820920214, 505894818, 511633838, 498399313, 2667162263, 2331433078, 2633349298, 1650236110, 1740578667, 492717440, 226269699, 3000372367, 730522797, 4110751680, 19097683, 3408688585, 1122986102, 730088111, 2805068278, 947223773, 3678996501, 383845641, 1964129276, 2820150616, 3518507303, 1312764120, 3383056222, 551229929, 1322078901, 2659885082, 942185902, 847222163, 1406390855, 2200355911, 3515653286, 2978019698, 4209036673, 1091205571, 3824944148, 1112337773, 1455345233, 1515904032, 1237463094, 1586942698, 2701560616, 2753593174, 1219751408, 3547188620, 205176078, 762459970, 1561288779, 3049216135, 2530449333, 2860709143, 1630847865, 3868665043, 1739312081, 1130949694, 1021907946, 1073965715, 2393091298, 1678727566, 3391566135, 2628949274, 3582059613, 223301875, 1367062818, 1566365831, 4071111790, 2684592817, 940446113, 3567276381, 773597136, 345144491, 936897035, 1862421081, 553038256, 1301566923, 1243789864, 3911035857, 2519438665, 656021497, 3569719862, 2885189642, 1301672029, 3821306929, 1149674897, 28684444, 1760147505, 3669972678, 1558236732, 4003688410, 3915401100, 1813546638, 2408702710, 1066457585, 2939452638, 1033316524, 1251003944, 1164970368, 4176461291, 3648468325, 1360212041, 568051777, 3137526249, 570990526, 629112637, 78697136, 2495088060, 1704942008, 2557239140, 799725462, 1394861096, 2694872442, 674213694, 3428191092, 689268297, 1556376242, 4089080404, 17805425, 3115079465, 2893502047, 945936798, 3533027241, 3410282968, 1717151528, 3041791696, 1873631, 1076061058, 1249474322, 676519379, 3524479885, 3145749738, 435756732, 4078778413, 3901233155, 3210202399, 2627285492, 2202588508, 2976855553, 3921101647, 2447318702, 1662022221, 2373842229, 3989614552, 1469444734, 764232050, 4101565351, 143309914, 2284809298, 2704284810, 423231466, 1566813908, 3531403613, 2277053885, 671107875, 3114450787, 3143167030, 2144972573, 2485977879, 2718586595, 3757042093, 2976273908, 3104258430, 1460518734, 1257444496, 3038128682, 4285753125, 229605978, 1507077391, 1262481752, 3529682397, 612581559, 2852469704, 966306282, 1669352509, 18382182, 3335056683, 4178310771, 3417743096, 4100925567, 65659693, 1502329687, 558000501, 3041854584, 2550447786, 3784250784, 1056340368, 3178957510, 3803573634, 3433047659, 2094748639, 321279903, 1613820873, 3906587244, 3075402117, 1111476443, 1393306606, 2122224119, 765766508, 1987068987, 765657873, 1246453046, 2003003811, 3833545584, 3919096901, 994634701, 3651572879, 3765303984, 2587322484, 323246022, 2397329395, 284335588, 1251280762, 3193932222, 659796774, 2992749174, 3110176425, 1167699349, 344354640, 3201209585, 3017215952, 1430687270, 774292141, 1966565603, 1755789839, 2148482060, 877073595, 1615819392, 920163876, 2166629926, 3843764813, 459328179, 1632646183, 3123060292, 1777846596, 1309016533, 1099560297, 1009854237, 3103327149, 2550738290, 2208916171, 1515498050, 687691602, 3780610170, 3335316572, 707150240, 2935675182, 2369281536, 2460763995, 3911516009, 1587491600, 3016227120, 2577651015, 1610761581, 1460043374, 1100754117, 954027486, 1742758769, 1061074317, 2718745845, 24004075, 1723652218, 3016347925, 2867907472, 931264588, 2571857410, 3372253690, 316894845, 2252111259, 3872132198, 2616130608, 1494810068, 3244720383, 214671157, 1366031611, 3595141537, 3809745442, 333347363, 2767499714, 429338750, 742138189, 238911519, 3149761282, 2583537128, 3732725741, 1414912589, 3086168604, 696295040, 1388048994, 2527339222, 1293820144, 1416560891, 216330826, 994331812, 3485478867, 2503336200, 3891955003, 3990912749, 1602333231, 1150097463, 1783196163, 1780918807, 2038669025, 3544142945, 3406611207, 4056596054, 1265585074, 3167968508, 3595158361, 2326891775, 2986283267, 312542142, 2415560124, 2467142478, 3280338200, 49751858, 1309268763, 137676309, 3415844649, 857793731, 1935726030, 1078046309, 242002592, 1660437623, 3710876519, 97561281, 2773497667, 1430268791, 3308777422, 3149895387, 3193780930, 3482869329, 4153197533, 3666212865, 3856921112, 1949603838, 3985951493, 2924033622, 2201801147, 60708917, 3614572762, 3794231013, 1479707764, 753768496, 3705458141, 3417601266, 4243596920, 2563652557, 2386088535, 3511489519, 1712139229, 3121526658, 3694741261, 2391524232, 1485522006, 4001465181, 1886923191, 2638179495, 896853924, 2079390231, 3715869021, 1468365911, 817614772, 2820135557, 1054013267, 4040662008, 1739192773, 132411105, 1254012552, 4231184053, 1660825099, 2952111569, 1068896085, 3573479846, 2971434424, 20096968, 3083645175, 1547163660, 1214711186, 3437916461, 521812450, 2355924873, 2466974, 3456466703, 3188052160, 3316294493, 1828198464, 714497598, 3369146537, 3006932865, 1676072205, 489397558, 2912565036, 3891511265, 2090068625, 2144520718, 3908924645, 1661298692, 3767919085, 469308078, 114989868, 3642989207, 1655594180, 3361479259, 4190614747, 2240862759, 1876694805, 3279736606, 871943083, 1809868255, 213282248, 1915738673, 2024532468, 3901797144, 3544979854, 1925949096, 3201025761, 1176595021, 372074203, 3353700199, 431127095, 2160991901, 2916073170, 2677269701, 305968325, 2603789743, 3582886180, 2721976606, 651340932, 3461638576, 2855015201, 4177634842, 4185590775, 454447985, 4189803286, 991065935, 510297424, 82701020, 689884799, 1608496068, 4250789661, 3916852192, 3729811558, 2730813580, 3750658407, 3437498020, 655566505, 871779526, 1852041426, 2735817179, 3272453016, 3657984340, 363869368, 137055940, 1591045220, 4137004289, 3700827061, 2520621291, 3120825225, 3751034365, 2906454419, 2943615064, 1733457391, 1178748480, 3919716220, 3514823442, 4110500115, 624), None)"
+}

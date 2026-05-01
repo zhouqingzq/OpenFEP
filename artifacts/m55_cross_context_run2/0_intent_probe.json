@@ -1,0 +1,29 @@
+{
+  "anomaly_label": "none",
+  "anomaly_type": "normal",
+  "clinical_mapping": "正常精度校准：hidden_intent 精度在 Tier 3 范围（0.05-0.20）内，对话回应正常，既不过度解读也不完全忽略潜在意图。",
+  "defense_actions": [],
+  "defense_actions_count": 0,
+  "mean_hidden_intent_precision": 0.138909,
+  "precision_trajectory": [
+    0.135995,
+    0.136928,
+    0.136791,
+    0.137682,
+    0.138532,
+    0.138368,
+    0.139182,
+    0.139961,
+    0.140707,
+    0.140511,
+    0.141229,
+    0.141027
+  ],
+  "scenario_id": "ambiguous_intent",
+  "tier": "LOW (Tier 3)",
+  "tier_ceiling": 0.2,
+  "tier_compliance": true,
+  "tier_floor": 0.05,
+  "tier_violation_ratio": 0.0,
+  "tier_violations": 0
+}

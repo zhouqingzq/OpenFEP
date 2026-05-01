@@ -1,0 +1,27 @@
+{
+  "adaptation_envelope": {
+    "caution_bias": 0.0,
+    "exploration_posture": 0.0,
+    "social_approach": 0.0,
+    "threat_sensitivity": 0.0,
+    "trust_stance": 0.0
+  },
+  "conclusion": "人格一致性良好（1.000 >= 0.80）；适应性偏刚性（仅 0/5 维度标准差 > 0.01）；无场景崩溃。",
+  "intent_probe": {
+    "anomaly_type": "normal",
+    "mean_hidden_intent_precision": 0.142976,
+    "tier_compliance": true
+  },
+  "milestone": "M5.5",
+  "personality_consistency": 1.0,
+  "scenario_count": 7,
+  "seed": 42,
+  "split_strategy": "random",
+  "state_distance_decomposition": {
+    "between_ratio": 0.0,
+    "between_scenario_variance": 0.0,
+    "total_variance": 0.010404,
+    "within_scenario_variance": 0.010404
+  },
+  "uid": 0
+}

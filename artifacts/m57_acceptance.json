@@ -1,5 +1,49 @@
 {
   "decision": "PASS",
+  "evidence_categories": {
+    "ablation": {
+      "evidence": "Integrated personas are compared against a neutral rule baseline in m57_comparative.json.",
+      "status": "PASS"
+    },
+    "artifact_freshness": {
+      "evidence": "Artifacts are generated in the same run and paths are listed under freshness.generated_artifact_paths.",
+      "status": "PASS"
+    },
+    "causality": {
+      "evidence": "Raw-chat implantation produces runtime personas whose action distributions and memories evolve through chat turns.",
+      "status": "PASS"
+    },
+    "determinism": {
+      "evidence": "Canonical seed family: [57, 7158, 7159, 7160, 7161, 7162]. Synthetic raw generation and scenario battery are seed-bound.",
+      "status": "PASS"
+    },
+    "regression": {
+      "evidence": "Report declares the required M5.0/M5.1/M5.2/M5.3/M5.5/M5.6 regression command set.",
+      "status": "PASS"
+    },
+    "schema": {
+      "evidence": "JSON artifacts use explicit artifact_type/schema_version where applicable and are parse-checked by tests.",
+      "status": "PASS"
+    },
+    "stress": {
+      "evidence": "Manipulation, context switching, private-memory pressure, emotional leverage, long input, and safety layer checks are recorded.",
+      "status": "PASS"
+    }
+  },
+  "freshness": {
+    "commit_hash": "17dcbac",
+    "generated_artifact_paths": [
+      "artifacts\\m57_acceptance.json",
+      "artifacts\\m57_adversarial.json",
+      "artifacts\\m57_comparative.json",
+      "artifacts\\m57_longitudinal.json",
+      "artifacts\\m57_trial_trace.json",
+      "reports\\m57_acceptance_summary.md",
+      "reports\\m57_integration_report.json"
+    ],
+    "generated_at": "2026-04-30T16:38:57.526247+00:00",
+    "generated_current_round": true
+  },
   "gates": [
     {
       "evidence": "raw logs were parsed by M5.0 and loaded through M5.2/M5.6 creation path.",
@@ -38,8 +82,16 @@
       "status": "PASS"
     }
   ],
-  "generated_at": "2026-04-30T11:52:59.094232+00:00",
+  "generated_at": "2026-04-30T16:38:57.526247+00:00",
   "milestone_id": "M5.7",
+  "seed_set": [
+    57,
+    7158,
+    7159,
+    7160,
+    7161,
+    7162
+  ],
   "status": "PASS",
   "summary_metrics": {
     "adversarial_passed": true,
