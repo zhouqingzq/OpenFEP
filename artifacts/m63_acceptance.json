@@ -1,0 +1,55 @@
+{
+  "gates": [
+    {
+      "evidence": "Sample latest state contains task, memory, gaps, affect, and meta_control sections.",
+      "id": "G1",
+      "name": "Derived cognitive state is present and serializable",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Sample dialogue produced 2 trace rows for 2 turns, each with cognitive_state.",
+      "id": "G2",
+      "name": "Trace attachment is compact and turn-scoped",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Only compressed self_prior_summary enters derived state; Self-consciousness.md content is not consumed or modified.",
+      "id": "G3",
+      "name": "Self-prior boundary is respected",
+      "status": "PASS"
+    },
+    {
+      "evidence": "A direct state update over existing diagnostics leaves chosen action and ranked option order unchanged.",
+      "id": "G4",
+      "name": "Policy behavior is unchanged",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Affective and meta-control numeric fields remain inside [0, 1].",
+      "id": "G5",
+      "name": "Affect and meta-control are bounded diagnostics",
+      "status": "PASS"
+    },
+    {
+      "evidence": "M6.3 tests and targeted M5.3/M5.6/M6.1/M6.2 regression suites pass in the current acceptance run.",
+      "id": "G6",
+      "name": "M6.3 and regression suites pass",
+      "status": "PASS"
+    }
+  ],
+  "milestone_id": "M6.3",
+  "status": "PASS",
+  "summary_metrics": {
+    "action_selection_unchanged": true,
+    "bounded_affect": true,
+    "bounded_meta_control": true,
+    "compressed_self_prior_consumed": true,
+    "full_self_prior_not_consumed": true,
+    "latest_state_present": true,
+    "sample_trace_rows": 2,
+    "sample_turns": 2,
+    "self_prior_unchanged": true,
+    "state_sections_present": true,
+    "trace_has_cognitive_state": true
+  }
+}

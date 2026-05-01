@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from ..cognitive_events import CognitiveEventBus, make_cognitive_event
+from ..cognitive_state import update_cognitive_state
 from .generator import ResponseGenerator, RuleBasedGenerator
 from .observer import DialogueObserver
 from .fep_prompt import build_fep_prompt_capsule
@@ -33,6 +34,7 @@ class ConversationTurn:
     observation: dict[str, float] | None
     strategy: str | None
     diagnostics: Any | None = None
+    cognitive_state: Any | None = None
     generation_diagnostics: dict[str, object] | None = None
     outcome: str | None = None
 
@@ -145,8 +147,7 @@ def run_conversation(
                 priority=priority,
                 ttl=ttl,
             )
-            if trace_writer is not None or conscious_writer is not None:
-                turn_events.append(event)
+            turn_events.append(event)
             if cognitive_event_bus is not None:
                 cognitive_event_bus.publish(event)
             event_sequence += 1
@@ -295,6 +296,15 @@ def run_conversation(
         efe_margin = float(fep_capsule.get("efe_margin", 1.0) or 1.0)
         dialogue_context["efe_margin"] = efe_margin
         dialogue_context["fep_prompt_capsule"] = fep_capsule
+        cognitive_state = update_cognitive_state(
+            getattr(agent, "latest_cognitive_state", None),
+            events=tuple(turn_events),
+            diagnostics=diagnostics,
+            observation=channels,
+            previous_outcome=outcome_label or "",
+            self_prior_summary=session_context.get("self_prior_summary"),
+        )
+        agent.latest_cognitive_state = cognitive_state
 
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
@@ -369,6 +379,7 @@ def run_conversation(
                 observation=channels,
                 strategy=strat,
                 diagnostics=diagnostics,
+                cognitive_state=cognitive_state,
                 generation_diagnostics=generation_diagnostics,
                 outcome=None,
             )
@@ -417,6 +428,7 @@ def run_conversation(
                 observation_channels=channels,
                 diagnostics=diagnostics,
                 fep_prompt_capsule=fep_capsule,
+                cognitive_state=cognitive_state,
                 generation_diagnostics=generation_diagnostics,
                 outcome_label=outcome_label or "neutral",
                 memory_update_signal=memory_update_signal,

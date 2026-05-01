@@ -316,6 +316,7 @@ class TurnTrace:
     workspace_focus: list[str]
     workspace_suppressed: list[str]
     affective_state_summary: dict[str, object]
+    cognitive_state: dict[str, object]
     retrieved_memory_summary: dict[str, object]
     ranked_options: list[dict[str, object]]
     chosen_action: str
@@ -352,6 +353,7 @@ class TurnTrace:
         generation_diagnostics: Mapping[str, object] | None,
         outcome_label: str,
         memory_update_signal: Mapping[str, object],
+        cognitive_state: object | None = None,
         events: Sequence[object] = (),
         debug: bool = False,
     ) -> "TurnTrace":
@@ -407,6 +409,11 @@ class TurnTrace:
             ],
             affective_state_summary=summarize_affective_state(
                 observation_channels, diagnostics
+            ),
+            cognitive_state=(
+                _redact_mapping(cognitive_state.to_dict())
+                if hasattr(cognitive_state, "to_dict")
+                else {}
             ),
             retrieved_memory_summary=summarize_retrieved_memory(diagnostics),
             ranked_options=ranked_options,

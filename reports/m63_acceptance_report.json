@@ -1,0 +1,103 @@
+{
+  "acceptance_state": "ACCEPT",
+  "artifacts": {
+    "acceptance_report": "reports\\m63_acceptance_report.json",
+    "acceptance_summary": "artifacts\\m63_acceptance.json",
+    "self_prior_guard_file": "artifacts\\conscious\\personas\\m63_sample_persona\\Self-consciousness.md",
+    "state_sample": "artifacts\\m63_cognitive_state_sample.json",
+    "turn_trace_sample": "artifacts\\m63_cognitive_state_trace_sample.jsonl"
+  },
+  "conclusion": "M6.3 acceptance criteria are satisfied. CognitiveStateMVP is deterministic, serializable, compact, trace-attached, self-prior bounded, and policy-neutral under the tested paths.",
+  "decision": "PASS",
+  "findings": [],
+  "gates": [
+    {
+      "evidence": "Sample latest state contains task, memory, gaps, affect, and meta_control sections.",
+      "id": "G1",
+      "name": "Derived cognitive state is present and serializable",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Sample dialogue produced 2 trace rows for 2 turns, each with cognitive_state.",
+      "id": "G2",
+      "name": "Trace attachment is compact and turn-scoped",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Only compressed self_prior_summary enters derived state; Self-consciousness.md content is not consumed or modified.",
+      "id": "G3",
+      "name": "Self-prior boundary is respected",
+      "status": "PASS"
+    },
+    {
+      "evidence": "A direct state update over existing diagnostics leaves chosen action and ranked option order unchanged.",
+      "id": "G4",
+      "name": "Policy behavior is unchanged",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Affective and meta-control numeric fields remain inside [0, 1].",
+      "id": "G5",
+      "name": "Affect and meta-control are bounded diagnostics",
+      "status": "PASS"
+    },
+    {
+      "evidence": "M6.3 tests and targeted M5.3/M5.6/M6.1/M6.2 regression suites pass in the current acceptance run.",
+      "id": "G6",
+      "name": "M6.3 and regression suites pass",
+      "status": "PASS"
+    }
+  ],
+  "generated_at": "2026-05-01T16:00:10Z",
+  "milestone_id": "M6.3",
+  "milestone_name": "Cognitive State MVP",
+  "recommendation": "ACCEPT",
+  "residual_risks": [
+    "M6.3 state is diagnostic only; later milestones must still add prompt guidance explicitly and cautiously.",
+    "Self-conscious prior consolidation remains a future slow-update concern and is intentionally not automatic per turn."
+  ],
+  "scope": {
+    "modified_modules": [
+      "segmentum/agent.py",
+      "segmentum/dialogue/conversation_loop.py",
+      "segmentum/dialogue/turn_trace.py"
+    ],
+    "new_modules": [
+      "segmentum/cognitive_state.py"
+    ],
+    "sample_artifacts": [
+      "artifacts/m63_cognitive_state_sample.json",
+      "artifacts/m63_cognitive_state_trace_sample.jsonl"
+    ],
+    "tests": [
+      "tests/test_m63_cognitive_state.py",
+      "tests/test_m63_acceptance.py"
+    ]
+  },
+  "status": "PASS",
+  "summary_metrics": {
+    "action_selection_unchanged": true,
+    "bounded_affect": true,
+    "bounded_meta_control": true,
+    "compressed_self_prior_consumed": true,
+    "full_self_prior_not_consumed": true,
+    "latest_state_present": true,
+    "sample_trace_rows": 2,
+    "sample_turns": 2,
+    "self_prior_unchanged": true,
+    "state_sections_present": true,
+    "trace_has_cognitive_state": true
+  },
+  "test_evidence": [
+    {
+      "command": "python -m pytest tests/test_m63_cognitive_state.py tests/test_m63_acceptance.py",
+      "result": "13 passed",
+      "status": "PASS"
+    },
+    {
+      "command": "python -m pytest tests/test_m53_dialogue_action.py tests/test_m56_runtime.py tests/test_m61_cognitive_events.py tests/test_m62_turn_trace.py",
+      "result": "66 passed",
+      "status": "PASS"
+    }
+  ]
+}

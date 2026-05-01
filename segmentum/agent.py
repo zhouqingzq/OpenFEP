@@ -36,6 +36,7 @@ from .predictive_coding import (
     default_predictive_coding_hyperparameters,
 )
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
+from .cognitive_state import CognitiveStateMVP
 from .preferences import Goal, GoalStack, PreferenceModel
 from .narrative_compiler import NarrativeCompiler
 from .narrative_uncertainty import UncertaintyDecompositionResult
@@ -944,6 +945,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_decision_diagnostics: DecisionDiagnostics | None = None
         self.last_decision_choice: str = ""
         self.last_decision_observation: dict[str, float] = {}
+        self.latest_cognitive_state: CognitiveStateMVP | None = None
         self.last_memory_context: dict[str, object] = {}
         self.memory_enabled: bool = memory_enabled
         self.last_retrieval_result: dict[str, object] = {}
@@ -5139,6 +5141,11 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "last_body_state_snapshot": dict(self.last_body_state_snapshot),
             "last_decision_choice": self.last_decision_choice,
             "last_decision_observation": dict(self.last_decision_observation),
+            "latest_cognitive_state": (
+                self.latest_cognitive_state.to_dict()
+                if self.latest_cognitive_state is not None
+                else None
+            ),
             "agent_state_vector": self.agent_state_vector.to_dict(),
             "memory_cognitive_style": self.memory_cognitive_style.to_dict(),
             "memory_cycle_interval": self.memory_cycle_interval,
@@ -5306,6 +5313,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
             if isinstance(value, (int, float))
         }
         agent.last_decision_choice = str(payload.get("last_decision_choice", ""))
+        cognitive_state_payload = payload.get("latest_cognitive_state")
+        agent.latest_cognitive_state = (
+            CognitiveStateMVP.from_dict(cognitive_state_payload)
+            if isinstance(cognitive_state_payload, dict)
+            else None
+        )
         agent.global_workspace = GlobalWorkspace.from_dict(
             payload.get("global_workspace")
             if isinstance(payload.get("global_workspace"), dict)

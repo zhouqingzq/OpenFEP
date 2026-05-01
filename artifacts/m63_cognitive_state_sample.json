@@ -1,0 +1,63 @@
+{
+  "affect": {
+    "affective_notes": [],
+    "arousal": 0.179237,
+    "decay_rate": 0.18,
+    "fatigue_pressure": 0.0,
+    "irritation": 0.009113,
+    "mood_valence": 0.5,
+    "repair_need": 0.009113,
+    "social_safety": 0.763819,
+    "warmth": 0.478557
+  },
+  "gaps": {
+    "blocking_gaps": [],
+    "contextual_gaps": [],
+    "epistemic_gaps": [
+      "low decision margin between candidate actions"
+    ],
+    "instrumental_gaps": [],
+    "resource_gaps": [],
+    "social_gaps": []
+  },
+  "memory": {
+    "abstraction_candidates": [
+      "semantic_content"
+    ],
+    "activated_memories": [
+      {
+        "episode_id": "ep-000000-agree",
+        "summary": "Legacy episode at cycle 0: agree -> resource_gain"
+      }
+    ],
+    "memory_conflicts": [],
+    "memory_helpfulness": 0.68,
+    "reusable_patterns": [
+      "1 episodic match(es), dominant outcome=resource_gain|recall:ep-000000-agree, risk=0.007, expected_surprise=0.241, chronic_threat",
+      "compressed self prior: clarify gently and repair first",
+      "ask before advising"
+    ]
+  },
+  "meta_control": {
+    "abstraction_gain": 0.2875,
+    "beta_efe": 0.68847,
+    "control_gain": 0.30319,
+    "exploration_temperature": 0.341992,
+    "lambda_attention": 0.412989,
+    "lambda_control": 0.302278,
+    "lambda_energy": 0.2,
+    "lambda_memory": 0.463,
+    "memory_retrieval_gain": 0.566
+  },
+  "task": {
+    "current_goal": "SURVIVAL",
+    "explicit_request": "agree",
+    "inferred_need": "reduce uncertainty",
+    "success_criteria": [
+      "address selected action",
+      "resolve uncertainty"
+    ],
+    "task_phase": "clarify",
+    "urgency": 0.190723
+  }
+}
