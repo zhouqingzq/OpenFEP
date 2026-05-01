@@ -13,3 +13,7 @@ igt dataset/
 An electroencephalographic and behavioral dataset.zip
 message.11729.log.2025/
 data/m50_output/
+# Runtime conscious artifacts: keep curated sample_persona fixtures tracked.
+artifacts/conscious/personas/*
+!artifacts/conscious/personas/sample_persona/
+!artifacts/conscious/personas/sample_persona/**
