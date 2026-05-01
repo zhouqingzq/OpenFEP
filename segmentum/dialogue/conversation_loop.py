@@ -92,16 +92,18 @@ def run_conversation(
     session_context_extra: dict[str, object] | None = None,
     initial_prior_observation: dict[str, float] | None = None,
     initial_last_action: str | None = None,
+    initial_transcript: list[TranscriptUtterance] | None = None,
     cognitive_event_bus: CognitiveEventBus | None = None,
     persona_id: str = "default",
     trace_writer: JsonlTraceWriter | None = None,
     trace_debug: bool = False,
     conscious_writer: ConsciousMarkdownWriter | None = None,
+    turn_index_offset: int = 0,
 ) -> list[ConversationTurn]:
     """Drive a scripted multi-turn dialogue (partner lines only); agent replies each turn."""
     register_dialogue_actions(agent.action_registry)
     gen = generator or RuleBasedGenerator()
-    transcript: list[TranscriptUtterance] = []
+    transcript: list[TranscriptUtterance] = list(initial_transcript or [])
     prior_obs: dict[str, float] | None = (
         dict(initial_prior_observation) if initial_prior_observation is not None else None
     )
@@ -111,7 +113,8 @@ def run_conversation(
     if session_context_extra:
         session_context.update(session_context_extra)
 
-    for turn_index, partner_text in enumerate(interlocutor_turns):
+    for local_turn_index, partner_text in enumerate(interlocutor_turns):
+        turn_index = int(turn_index_offset) + local_turn_index
         turn_id = f"turn_{turn_index:04d}"
         cycle_at_turn_start = int(agent.cycle)
         event_sequence = 0

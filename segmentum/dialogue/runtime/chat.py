@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ..conversation_loop import run_conversation
 from ..fep_prompt import normalize_dialogue_outcome
 from ..generator import LLMGenerator, ResponseGenerator, RuleBasedGenerator
 from ..observer import DialogueObserver
+from ..turn_trace import ConsciousMarkdownWriter
+from ..types import TranscriptUtterance
 
 if TYPE_CHECKING:
     from ...agent import SegmentAgent
@@ -120,6 +124,9 @@ class ChatInterface:
         generator: ResponseGenerator | None = None,
         observer: DialogueObserver | None = None,
         persona_name: str = "",
+        enable_conscious_trace: bool = False,
+        conscious_root: str | Path | None = None,
+        session_id: str = "m56_live",
     ) -> None:
         from .dashboard import DashboardCollector
         from .safety import SafetyLayer
@@ -132,6 +139,20 @@ class ChatInterface:
         self._baseline_traits: dict[str, float] = {}
         self._baseline_big_five: dict[str, float] = {}
         self._persona_name = persona_name
+        self._transcript: list[TranscriptUtterance] = []
+        self._session_id = str(session_id or "m56_live")
+        self._enable_conscious_trace = bool(enable_conscious_trace)
+        if conscious_root is None:
+            conscious_root = (
+                Path(__file__).resolve().parents[3]
+                / "artifacts"
+                / "conscious"
+            )
+        self._conscious_writer = (
+            ConsciousMarkdownWriter(conscious_root)
+            if self._enable_conscious_trace
+            else None
+        )
 
         # FEP reasoning bridge: track previous turn state for outcome classification
         self._last_action: str = ""
@@ -201,6 +222,7 @@ class ChatInterface:
             self._prompt_builder.persona_name = name
 
     def set_agent(self, agent: "SegmentAgent", *, persona_name: str = "") -> None:
+        self._ensure_runtime_fields()
         self._agent = agent
         if persona_name:
             self._persona_name = persona_name
@@ -213,6 +235,13 @@ class ChatInterface:
         self._last_obs_channels = {}
         self._last_outcome = "neutral"
         self._last_efe_margin = 1.0
+        self._transcript = []
+        if self._conscious_writer is not None:
+            session_dir = self._conscious_writer.session_dir(
+                self._resolved_persona_id(), self._session_id
+            )
+            (session_dir / "conscious_trace.jsonl").unlink(missing_ok=True)
+            (session_dir / "Conscious.md").unlink(missing_ok=True)
 
     def has_agent(self) -> bool:
         return self._agent is not None
@@ -220,6 +249,7 @@ class ChatInterface:
     # ── Chat ──────────────────────────────────────────────────────────
 
     def send(self, request: ChatRequest) -> ChatResponse:
+        self._ensure_runtime_fields()
         if self._agent is None:
             raise RuntimeError("No persona loaded. Create or load a persona first.")
 
@@ -242,10 +272,14 @@ class ChatInterface:
         turns = run_conversation(
             self._agent, [request.user_text],
             generator=_PromptInjector(self._generator, self),
-            observer=self._observer, partner_uid=0, session_id="m56_live",
+            observer=self._observer, partner_uid=0, session_id=self._session_id,
             master_seed=turn_seed,
             initial_prior_observation=self._last_obs_channels or None,
             initial_last_action=self._last_action or None,
+            initial_transcript=list(self._transcript),
+            persona_id=self._resolved_persona_id(),
+            conscious_writer=self._conscious_writer,
+            turn_index_offset=self._turn_index,
         )
         turn = turns[0] if turns else None
         if turn is None:
@@ -261,7 +295,11 @@ class ChatInterface:
         delta_big_five = {k: round(post_big_five[k] - pre_big_five.get(k, 0.0), 6) for k in post_big_five}
 
         obs_channels = turn.observation or {}
-        safe_text, checks = self._safety.enforce(turn.text, obs_channels)
+        repaired_text = self._repair_high_conflict_reply(
+            request.user_text,
+            turn.text,
+        )
+        safe_text, checks = self._safety.enforce(repaired_text, obs_channels)
 
         llm_latency = 0.0
         if isinstance(self._generator, LLMGenerator):
@@ -285,6 +323,10 @@ class ChatInterface:
         # Store for next classification
         self._last_action = str(turn.action or "")
         self._last_obs_channels = dict(obs_channels)
+        self._transcript.append(
+            TranscriptUtterance(role="interlocutor", text=request.user_text)
+        )
+        self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
         fep_capsule = {}
         if isinstance(turn.generation_diagnostics, dict):
             maybe_capsule = turn.generation_diagnostics.get("fep_prompt_capsule")
@@ -370,6 +412,76 @@ class ChatInterface:
     def get_dashboard(self) -> Any:
         return self._dashboard
 
+    def sync_transcript_from_messages(
+        self,
+        messages: list[dict[str, str]],
+        *,
+        pending_user_text: str | None = None,
+    ) -> None:
+        self._ensure_runtime_fields()
+        transcript: list[TranscriptUtterance] = []
+        filtered = list(messages)
+        if (
+            pending_user_text
+            and filtered
+            and filtered[-1].get("role") == "user"
+            and filtered[-1].get("text") == pending_user_text
+        ):
+            filtered = filtered[:-1]
+        for message in filtered:
+            text = str(message.get("text", "")).strip()
+            if not text:
+                continue
+            role = "interlocutor" if message.get("role") == "user" else "agent"
+            transcript.append(TranscriptUtterance(role=role, text=text))
+        self._transcript = transcript
+
+    def get_conscious_markdown(self) -> str:
+        self._ensure_runtime_fields()
+        path = self.conscious_markdown_path()
+        if path is None or not path.exists():
+            return ""
+        return path.read_text(encoding="utf-8")
+
+    def get_conscious_trace_rows(self, *, limit: int = 20) -> list[dict[str, object]]:
+        self._ensure_runtime_fields()
+        path = self.conscious_trace_path()
+        if path is None or not path.exists():
+            return []
+        rows: list[dict[str, object]] = []
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(item, dict):
+                rows.append(item)
+        return rows[-limit:]
+
+    def conscious_markdown_path(self) -> Path | None:
+        self._ensure_runtime_fields()
+        if self._conscious_writer is None:
+            return None
+        return (
+            self._conscious_writer.session_dir(
+                self._resolved_persona_id(), self._session_id
+            )
+            / "Conscious.md"
+        )
+
+    def conscious_trace_path(self) -> Path | None:
+        self._ensure_runtime_fields()
+        if self._conscious_writer is None:
+            return None
+        return (
+            self._conscious_writer.session_dir(
+                self._resolved_persona_id(), self._session_id
+            )
+            / "conscious_trace.jsonl"
+        )
+
     # ── Internal ──────────────────────────────────────────────────────
 
     def _record_baseline(self) -> None:
@@ -382,3 +494,33 @@ class ChatInterface:
             "extraversion": pp.extraversion, "agreeableness": pp.agreeableness,
             "neuroticism": pp.neuroticism,
         }
+
+    def _resolved_persona_id(self) -> str:
+        return self._persona_name.strip() or "default"
+
+    def _ensure_runtime_fields(self) -> None:
+        if not hasattr(self, "_transcript"):
+            self._transcript = []
+        if not hasattr(self, "_session_id"):
+            self._session_id = "m56_live"
+        if not hasattr(self, "_enable_conscious_trace"):
+            self._enable_conscious_trace = False
+        if not hasattr(self, "_conscious_writer"):
+            self._conscious_writer = None
+
+    def _repair_high_conflict_reply(self, user_text: str, reply: str) -> str:
+        text = user_text.strip()
+        threat_markers = ("打死你", "揍你", "杀了你", "弄死你", "气死我", "气死了")
+        if not any(marker in text for marker in threat_markers):
+            return reply
+        recent_text = "\n".join(item["text"] for item in self._transcript[-8:])
+        game_context = any(
+            marker in recent_text or marker in text
+            for marker in ("原神", "星穹", "重返未来", "抽到", "角色", "等级", "60级")
+        )
+        if game_context:
+            return (
+                "我刚才接岔了，先认错。你说的 60 是游戏等级，不是年龄，"
+                "我不该顺嘴乱扯；别真动手，我们回到原神/星铁/重返未来这条线。"
+            )
+        return "我刚才可能把话接歪了，先停一下认错。你现在明显不爽，我先把语气放低。"

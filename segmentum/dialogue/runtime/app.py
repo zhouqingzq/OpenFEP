@@ -29,7 +29,11 @@ def init_session() -> None:
             storage_dir=_project_root / "artifacts" / "m56_personas"
         )
     if "chat_iface" not in st.session_state:
-        st.session_state.chat_iface = ChatInterface()
+        st.session_state.chat_iface = ChatInterface(
+            enable_conscious_trace=True,
+            conscious_root=_project_root / "artifacts" / "conscious",
+            session_id="m56_live",
+        )
     if "messages" not in st.session_state:
         st.session_state.messages: list[dict[str, str]] = []
     if "loaded_persona" not in st.session_state:
@@ -614,6 +618,10 @@ def render_chat() -> None:
     _auto_scroll_chat()
 
     if pending_text and chat_iface.has_agent():
+        chat_iface.sync_transcript_from_messages(
+            st.session_state.messages,
+            pending_user_text=pending_text,
+        )
         with st.spinner("AI 正在回复..."):
             try:
                 resp = chat_iface.send(ChatRequest(user_text=pending_text))
@@ -754,6 +762,116 @@ def render_dashboard() -> None:
                 st.text(f"{k}: {prev.slow_traits.get(k, 0.0):.3f} → {latest.slow_traits[k]:.3f} ({direction}{delta:.4f})")
 
 
+def _join_values(value: object) -> str:
+    if isinstance(value, list):
+        return ", ".join(str(item) for item in value) or "无"
+    return str(value or "无")
+
+
+def _latest_trace() -> dict[str, object]:
+    chat_iface: ChatInterface = st.session_state.chat_iface
+    rows = chat_iface.get_conscious_trace_rows(limit=1)
+    return rows[-1] if rows else {}
+
+
+def render_inner_world() -> None:
+    st.header("内心观察")
+    chat_iface: ChatInterface = st.session_state.chat_iface
+
+    if not chat_iface.has_agent():
+        st.info("Load a persona to observe its current turn trace.")
+        return
+
+    markdown = chat_iface.get_conscious_markdown()
+    latest = _latest_trace()
+    if not markdown or not latest:
+        st.info("Send a message to generate the first conscious trace.")
+        return
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Turn", str(latest.get("turn_id", "")))
+    c2.metric("Action", str(latest.get("chosen_action", "")))
+    c3.metric("Policy Margin", f"{float(latest.get('policy_margin', 0.0)):.3f}")
+    c4.metric("EFE Margin", f"{float(latest.get('efe_margin', 0.0)):.3f}")
+
+    obs = latest.get("observation_channels", {})
+    if isinstance(obs, dict) and obs:
+        st.subheader("Observation")
+        obs_rows = [
+            {"Channel": key, "Value": float(value)}
+            for key, value in sorted(obs.items())
+        ]
+        st.dataframe(
+            pd.DataFrame(obs_rows).set_index("Channel"),
+            column_config={
+                "Value": st.column_config.ProgressColumn(
+                    "Value", min_value=0.0, max_value=1.0, format="%.3f"
+                )
+            },
+            use_container_width=True,
+        )
+
+    st.subheader("Attention / Workspace")
+    a1, a2 = st.columns(2)
+    a1.markdown(
+        "\n".join(
+            [
+                f"**Selected**  \n{_join_values(latest.get('attention_selected_channels'))}",
+                f"**Workspace focus**  \n{_join_values(latest.get('workspace_focus'))}",
+            ]
+        )
+    )
+    a2.markdown(
+        "\n".join(
+            [
+                f"**Dropped**  \n{_join_values(latest.get('attention_dropped_channels'))}",
+                f"**Suppressed**  \n{_join_values(latest.get('workspace_suppressed'))}",
+            ]
+        )
+    )
+
+    ranked = latest.get("ranked_options", [])
+    if isinstance(ranked, list) and ranked:
+        st.subheader("Candidate Paths")
+        rows = []
+        for item in ranked:
+            if isinstance(item, dict):
+                rows.append(
+                    {
+                        "Action": item.get("action", ""),
+                        "Policy": float(item.get("policy_score", 0.0)),
+                        "EFE": float(item.get("expected_free_energy", 0.0)),
+                        "Risk": float(item.get("risk", 0.0)),
+                        "Dominant": item.get("dominant_component", ""),
+                    }
+                )
+        if rows:
+            st.dataframe(pd.DataFrame(rows), use_container_width=True)
+
+    affect = latest.get("affective_state_summary", {})
+    capsule = latest.get("fep_prompt_capsule", {})
+    outcome = latest.get("memory_update_signal", {})
+    st.subheader("State / Prompt / Outcome")
+    s1, s2, s3 = st.columns(3)
+    if isinstance(affect, dict):
+        s1.json(affect, expanded=False)
+    if isinstance(capsule, dict):
+        s2.json(
+            {
+                "decision_uncertainty": capsule.get("decision_uncertainty", ""),
+                "prediction_error_label": capsule.get("prediction_error_label", ""),
+                "previous_outcome": capsule.get("previous_outcome", "neutral"),
+                "hidden_intent_label": capsule.get("hidden_intent_label", ""),
+            },
+            expanded=False,
+        )
+    if isinstance(outcome, dict):
+        s3.json(outcome, expanded=False)
+
+    st.subheader("Conscious.md")
+    st.markdown(markdown)
+
+
 def main() -> None:
     init_session()
     inject_app_style()
@@ -772,11 +890,13 @@ def main() -> None:
 
     render_sidebar()
 
-    chat_tab, dashboard_tab = st.tabs(["Chat", "Dashboard"])
+    chat_tab, dashboard_tab, inner_tab = st.tabs(["Chat", "Dashboard", "内心观察"])
     with chat_tab:
         render_chat()
     with dashboard_tab:
         render_dashboard()
+    with inner_tab:
+        render_inner_world()
 
 
 if __name__ == "__main__":

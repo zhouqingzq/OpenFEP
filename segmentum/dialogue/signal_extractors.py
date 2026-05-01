@@ -106,6 +106,23 @@ class EmotionalToneExtractor:
         # Multi-char keywords via raw substring matching (fixes dead code)
         pos += sum(1 for w in self._POS if len(w) > 1 and w in raw_text)
         neg += sum(1 for w in self._NEG if len(w) > 1 and w in raw_text)
+        neg += sum(
+            1
+            for w in (
+                "生气",
+                "气死",
+                "气死我",
+                "气死了",
+                "烦死",
+                "讨厌",
+                "恼火",
+                "难受",
+                "不爽",
+                "受不了",
+                "崩溃",
+            )
+            if w in raw_text
+        )
         raw = 0.5 + (pos - neg) / max(2.0, len(tokens))
         return round(_clamp(raw), 6)
 
@@ -138,6 +155,10 @@ class ConflictTensionExtractor:
         negation = (negation_token + negation_substr) / max(1.0, len(tokens))
         challenge = sum(1 for phrase in self._CHALLENGE if phrase in current_turn) / max(1.0, len(self._CHALLENGE))
         score = (0.45 * punctuation_pressure) + (0.35 * negation) + (0.20 * challenge)
+        if any(phrase in current_turn for phrase in ("打死你", "揍你", "杀了你", "弄死你")):
+            score = max(score, 0.82)
+        elif any(phrase in current_turn for phrase in ("气死我", "气死了", "你在骗我", "骗我", "你真的假的")):
+            score = max(score, 0.62)
         return round(_clamp(score), 6)
 
 
