@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from ..cognitive_events import CognitiveEventBus, make_cognitive_event
 from .generator import ResponseGenerator, RuleBasedGenerator
 from .observer import DialogueObserver
 from .fep_prompt import build_fep_prompt_capsule
@@ -14,10 +15,13 @@ from .prediction_bridge import (
     register_dialogue_predictions,
     verify_dialogue_predictions,
 )
+from .turn_trace import TurnTrace
 from .types import TranscriptUtterance
 
 if TYPE_CHECKING:
     from ..agent import SegmentAgent
+    from ..tracing import JsonlTraceWriter
+    from .turn_trace import ConsciousMarkdownWriter
 
 
 @dataclass
@@ -33,6 +37,49 @@ class ConversationTurn:
     outcome: str | None = None
 
 
+def _bounded_diagnostics_summary(diagnostics: Any) -> dict[str, object]:
+    if diagnostics is None:
+        return {}
+    chosen = getattr(diagnostics, "chosen", None)
+    ranked = list(getattr(diagnostics, "ranked_options", []) or [])
+    return {
+        "chosen_action": str(getattr(chosen, "choice", "")),
+        "ranked_option_count": len(ranked),
+        "prediction_error": float(getattr(diagnostics, "prediction_error", 0.0)),
+        "memory_hit": bool(getattr(diagnostics, "memory_hit", False)),
+        "retrieved_episode_ids": [
+            str(item) for item in getattr(diagnostics, "retrieved_episode_ids", []) or []
+        ][:5],
+        "workspace_broadcast_channels": [
+            str(item)
+            for item in getattr(diagnostics, "workspace_broadcast_channels", []) or []
+        ][:8],
+        "workspace_suppressed_channels": [
+            str(item)
+            for item in getattr(diagnostics, "workspace_suppressed_channels", []) or []
+        ][:8],
+    }
+
+
+def _candidate_path_summary(diagnostics: Any, *, limit: int = 3) -> list[dict[str, object]]:
+    ranked = list(getattr(diagnostics, "ranked_options", []) or [])
+    summary: list[dict[str, object]] = []
+    for option in ranked[:limit]:
+        summary.append(
+            {
+                "action": str(getattr(option, "choice", "")),
+                "policy_score": float(getattr(option, "policy_score", 0.0)),
+                "expected_free_energy": float(
+                    getattr(option, "expected_free_energy", 0.0)
+                ),
+                "dominant_component": str(
+                    getattr(option, "dominant_component", "")
+                ),
+            }
+        )
+    return summary
+
+
 def run_conversation(
     agent: "SegmentAgent",
     interlocutor_turns: list[str],
@@ -45,6 +92,11 @@ def run_conversation(
     session_context_extra: dict[str, object] | None = None,
     initial_prior_observation: dict[str, float] | None = None,
     initial_last_action: str | None = None,
+    cognitive_event_bus: CognitiveEventBus | None = None,
+    persona_id: str = "default",
+    trace_writer: JsonlTraceWriter | None = None,
+    trace_debug: bool = False,
+    conscious_writer: ConsciousMarkdownWriter | None = None,
 ) -> list[ConversationTurn]:
     """Drive a scripted multi-turn dialogue (partner lines only); agent replies each turn."""
     register_dialogue_actions(agent.action_registry)
@@ -60,6 +112,42 @@ def run_conversation(
         session_context.update(session_context_extra)
 
     for turn_index, partner_text in enumerate(interlocutor_turns):
+        turn_id = f"turn_{turn_index:04d}"
+        cycle_at_turn_start = int(agent.cycle)
+        event_sequence = 0
+        turn_events: list[object] = []
+
+        def publish_event(
+            event_type: str,
+            source: str,
+            payload: dict[str, object],
+            *,
+            salience: float = 0.5,
+            priority: float = 0.5,
+            ttl: int = 1,
+        ) -> None:
+            nonlocal event_sequence
+            if cognitive_event_bus is None and trace_writer is None and conscious_writer is None:
+                return
+            event = make_cognitive_event(
+                event_type=event_type,
+                turn_id=turn_id,
+                cycle=cycle_at_turn_start,
+                session_id=session_id,
+                persona_id=persona_id,
+                source=source,
+                sequence_index=event_sequence,
+                payload=payload,
+                salience=salience,
+                priority=priority,
+                ttl=ttl,
+            )
+            if trace_writer is not None or conscious_writer is not None:
+                turn_events.append(event)
+            if cognitive_event_bus is not None:
+                cognitive_event_bus.publish(event)
+            event_sequence += 1
+
         obs_obj = observer.observe(
             current_turn=partner_text,
             conversation_history=transcript,
@@ -71,6 +159,17 @@ def run_conversation(
             timestamp=None,
         )
         channels = dict(obs_obj.channels)
+        publish_event(
+            "ObservationEvent",
+            "DialogueObserver.observe",
+            {
+                "channel_count": len(channels),
+                "channel_names": sorted(channels),
+                "max_channel_value": max(channels.values()) if channels else 0.0,
+                "turn_index": turn_index,
+            },
+            salience=max(channels.values()) if channels else 0.0,
+        )
         dialogue_context: dict[str, object] = {
             "partner_uid": partner_uid,
             "session_id": session_id,
@@ -89,6 +188,17 @@ def run_conversation(
                 previous_observation=prior_obs,
             )
             outcome_label = outcome.value
+            publish_event(
+                "OutcomeEvent",
+                "classify_dialogue_outcome",
+                {
+                    "outcome": outcome_label,
+                    "last_action": last_action,
+                    "prior_turn_index": max(0, turn_index - 1),
+                },
+                salience=0.7 if outcome_label != "neutral" else 0.35,
+                priority=0.65,
+            )
             if turns_out:
                 turns_out[-1].outcome = outcome_label
             if agent.long_term_memory.episodes:
@@ -105,10 +215,53 @@ def run_conversation(
         }
         result = agent.decision_cycle_from_dict(channels, context=ctx)
         diagnostics = result.get("diagnostics")
+        publish_event(
+            "MemoryActivationEvent",
+            "SegmentAgent.decision_cycle_from_dict",
+            {
+                "memory_hit": bool(getattr(diagnostics, "memory_hit", False)),
+                "retrieved_episode_ids": [
+                    str(item)
+                    for item in getattr(diagnostics, "retrieved_episode_ids", []) or []
+                ][:5],
+                "retrieved_memory_count": len(
+                    getattr(diagnostics, "retrieved_memories", []) or []
+                ),
+            },
+            salience=0.65 if bool(getattr(diagnostics, "memory_hit", False)) else 0.25,
+        )
+        publish_event(
+            "DecisionEvent",
+            "SegmentAgent.decision_cycle_from_dict",
+            _bounded_diagnostics_summary(diagnostics),
+            salience=0.7,
+            priority=0.7,
+        )
+        publish_event(
+            "CandidatePathEvent",
+            "SegmentAgent.decision_cycle_from_dict",
+            {
+                "ranked_options": _candidate_path_summary(diagnostics),
+                "ranked_option_count": len(
+                    getattr(diagnostics, "ranked_options", []) or []
+                ),
+            },
+            salience=0.6,
+        )
         action = (
             str(diagnostics.chosen.choice)
             if diagnostics is not None
             else "ask_question"
+        )
+        publish_event(
+            "PathSelectionEvent",
+            "SegmentAgent.decision_cycle_from_dict",
+            {
+                "selected_action": action,
+                "cycle": cycle_at_turn_start,
+            },
+            salience=0.7,
+            priority=0.75,
         )
 
         fep_capsule = build_fep_prompt_capsule(
@@ -116,6 +269,26 @@ def run_conversation(
             channels,
             previous_outcome=outcome_label or "",
         ).to_dict()
+        publish_event(
+            "PromptAssemblyEvent",
+            "build_fep_prompt_capsule",
+            {
+                "selected_action": action,
+                "decision_uncertainty": str(
+                    fep_capsule.get("decision_uncertainty", "")
+                ),
+                "prediction_error_label": str(
+                    fep_capsule.get("prediction_error_label", "")
+                ),
+                "previous_outcome": str(fep_capsule.get("previous_outcome", "")),
+                "top_alternative_count": len(
+                    fep_capsule.get("top_alternatives", [])
+                    if isinstance(fep_capsule.get("top_alternatives"), list)
+                    else []
+                ),
+            },
+            salience=0.55,
+        )
         efe_margin = float(fep_capsule.get("efe_margin", 1.0) or 1.0)
         dialogue_context["efe_margin"] = efe_margin
         dialogue_context["fep_prompt_capsule"] = fep_capsule
@@ -156,6 +329,20 @@ def run_conversation(
             generation_diagnostics = {}
         generation_diagnostics["fep_prompt_capsule"] = fep_capsule
         generation_diagnostics["selected_action"] = action
+        publish_event(
+            "GenerationEvent",
+            "ResponseGenerator.generate",
+            {
+                "selected_action": action,
+                "reply_length": len(reply),
+                "diagnostic_keys": sorted(generation_diagnostics),
+                "template_id": str(generation_diagnostics.get("template_id", "")),
+                "surface_source": str(
+                    generation_diagnostics.get("surface_source", "")
+                ),
+            },
+            salience=0.5,
+        )
         if isinstance(policy_context, dict):
             chosen_policy_context = policy_context.get(action, {})
             if isinstance(chosen_policy_context, dict):
@@ -184,6 +371,8 @@ def run_conversation(
             )
         )
 
+        episodic_episode_count_before = len(agent.long_term_memory.episodes)
+        integrated_outcome = False
         if diagnostics is not None:
             agent.integrate_outcome(
                 choice=diagnostics.chosen.choice,
@@ -193,6 +382,8 @@ def run_conversation(
                 free_energy_before=float(result.get("free_energy_before", 0.0)),
                 free_energy_after=float(result.get("free_energy_after", 0.0)),
             )
+            integrated_outcome = True
+        episodic_episode_count_after = len(agent.long_term_memory.episodes)
 
         verify_dialogue_predictions(
             verification_loop=agent.verification_loop,
@@ -205,6 +396,34 @@ def run_conversation(
             current_observation=result.get("observed", channels),
             tick=agent.cycle,
         )
+
+        if trace_writer is not None or conscious_writer is not None:
+            memory_update_signal = {
+                "integrated": integrated_outcome,
+                "action": action,
+                "outcome_label": outcome_label or "neutral",
+                "episodic_episode_count_before": episodic_episode_count_before,
+                "episodic_episode_count_after": episodic_episode_count_after,
+            }
+            turn_trace = TurnTrace.from_runtime(
+                persona_id=persona_id,
+                session_id=session_id,
+                turn_id=turn_id,
+                turn_index=turn_index,
+                cycle=cycle_at_turn_start,
+                observation_channels=channels,
+                diagnostics=diagnostics,
+                fep_prompt_capsule=fep_capsule,
+                generation_diagnostics=generation_diagnostics,
+                outcome_label=outcome_label or "neutral",
+                memory_update_signal=memory_update_signal,
+                events=tuple(turn_events),
+                debug=trace_debug,
+            )
+            if trace_writer is not None:
+                turn_trace.write_jsonl(trace_writer, debug=trace_debug)
+            if conscious_writer is not None:
+                conscious_writer.write(turn_trace, debug=trace_debug)
 
         prior_obs = dict(channels)
         last_action = action

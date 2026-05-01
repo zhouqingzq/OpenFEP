@@ -1,0 +1,52 @@
+{
+  "gates": [
+    {
+      "evidence": "Sample dialogue produced 2 trace rows for 2 turns.",
+      "id": "G1",
+      "name": "Turn-level JSONL trace generation",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Rows include observation, events, affective summary, memory summary, ranked paths, prompt capsule, generation diagnostics, outcome, and memory update signal.",
+      "id": "G2",
+      "name": "Required trace chain coverage",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Default rows omit debug and do not contain raw prompt, secret, API, or Self-consciousness fragments.",
+      "id": "G3",
+      "name": "Redacted default output",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Conscious.md is Chinese-readable and written under artifacts/conscious/personas/sample_persona/sessions/sample_session.",
+      "id": "G4",
+      "name": "Conscious.md session artifact",
+      "status": "PASS"
+    },
+    {
+      "evidence": "tests/test_m62_turn_trace.py compares no-trace and trace-enabled run_conversation actions/text.",
+      "id": "G5",
+      "name": "Behavior preservation",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Targeted M6.0-M6.2, M5.3, and M5.6 suites pass in the current acceptance run.",
+      "id": "G6",
+      "name": "M6/M5 dialogue regression stability",
+      "status": "PASS"
+    }
+  ],
+  "milestone_id": "M6.2",
+  "status": "PASS",
+  "summary_metrics": {
+    "conscious_chinese_readable": true,
+    "debug_off_by_default": true,
+    "persona_session_scoped": true,
+    "raw_sensitive_text_absent": true,
+    "required_trace_keys_present": true,
+    "sample_conscious_trace_rows": 2,
+    "sample_trace_rows": 2,
+    "sample_turns": 2
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "milestone_id": "M6.1",
+  "milestone_name": "Cognitive Event Layer",
+  "status": "PASS",
+  "acceptance_state": "ACCEPT",
+  "recommendation": "ACCEPT",
+  "generated_at": "2026-05-01T22:28:08.7174811+08:00",
+  "scope": {
+    "new_modules": [
+      "segmentum/cognitive_events.py"
+    ],
+    "modified_modules": [
+      "segmentum/dialogue/conversation_loop.py"
+    ],
+    "tests": [
+      "tests/test_m61_cognitive_events.py"
+    ]
+  },
+  "implemented_event_types": [
+    "ObservationEvent",
+    "MemoryActivationEvent",
+    "DecisionEvent",
+    "CandidatePathEvent",
+    "PathSelectionEvent",
+    "PromptAssemblyEvent",
+    "GenerationEvent",
+    "OutcomeEvent"
+  ],
+  "publication_points": [
+    {
+      "event_type": "ObservationEvent",
+      "producer": "DialogueObserver.observe",
+      "consumer_surface": [
+        "state_update",
+        "trace"
+      ]
+    },
+    {
+      "event_type": "MemoryActivationEvent",
+      "producer": "SegmentAgent.decision_cycle_from_dict",
+      "consumer_surface": [
+        "state_update",
+        "trace"
+      ]
+    },
+    {
+      "event_type": "DecisionEvent",
+      "producer": "SegmentAgent.decision_cycle_from_dict",
+      "consumer_surface": [
+        "trace",
+        "evaluation"
+      ]
+    },
+    {
+      "event_type": "CandidatePathEvent",
+      "producer": "SegmentAgent.decision_cycle_from_dict",
+      "consumer_surface": [
+        "state_update",
+        "trace"
+      ]
+    },
+    {
+      "event_type": "PathSelectionEvent",
+      "producer": "SegmentAgent.decision_cycle_from_dict",
+      "consumer_surface": [
+        "prompt_assembly_audit",
+        "trace"
+      ]
+    },
+    {
+      "event_type": "PromptAssemblyEvent",
+      "producer": "build_fep_prompt_capsule",
+      "consumer_surface": [
+        "prompt_assembly_audit",
+        "trace"
+      ]
+    },
+    {
+      "event_type": "GenerationEvent",
+      "producer": "ResponseGenerator.generate",
+      "consumer_surface": [
+        "trace",
+        "evaluation"
+      ]
+    },
+    {
+      "event_type": "OutcomeEvent",
+      "producer": "classify_dialogue_outcome",
+      "consumer_surface": [
+        "state_update",
+        "trace",
+        "evaluation"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "name": "JSON-safe event serialization",
+      "status": "PASS",
+      "evidence": "CognitiveEvent.to_dict/from_dict round trip is covered by tests/test_m61_cognitive_events.py."
+    },
+    {
+      "id": "G2",
+      "name": "Required event metadata",
+      "status": "PASS",
+      "evidence": "Events include turn_id, cycle, session_id, persona_id, source, salience, priority, ttl, timestamp, and payload."
+    },
+    {
+      "id": "G3",
+      "name": "Deterministic identity and ordering",
+      "status": "PASS",
+      "evidence": "make_cognitive_event_id uses session_id, persona_id, turn_id, cycle, event_type, source, and sequence_index without wall-clock input."
+    },
+    {
+      "id": "G4",
+      "name": "Filtering and persona partitioning",
+      "status": "PASS",
+      "evidence": "CognitiveEventBus.filter supports event_type, source, min_salience, and persona_id."
+    },
+    {
+      "id": "G5",
+      "name": "No behavior side effects",
+      "status": "PASS",
+      "evidence": "Scripted dialogue actions and generated text match with and without CognitiveEventBus under RuleBasedGenerator."
+    },
+    {
+      "id": "G6",
+      "name": "PerceptionBus and ActionBus compatibility",
+      "status": "PASS",
+      "evidence": "tests/test_m212_io_bus.py and tests/test_m212_adapter_roundtrip.py pass unchanged."
+    },
+    {
+      "id": "G7",
+      "name": "No raw prompt or full history leakage",
+      "status": "PASS",
+      "evidence": "PromptAssemblyEvent stores bounded capsule metadata only; GenerationEvent stores bounded diagnostics keys and reply length, not raw prompt text or full conversation history."
+    },
+    {
+      "id": "G8",
+      "name": "Every MVP event type has a consumer surface",
+      "status": "PASS",
+      "evidence": "COGNITIVE_EVENT_CONSUMERS maps all MVP event types to trace, state_update, prompt_assembly_audit, or evaluation."
+    }
+  ],
+  "test_evidence": [
+    {
+      "command": "python -m pytest tests/test_m61_cognitive_events.py -q",
+      "status": "PASS",
+      "result": "6 passed in 0.38s"
+    },
+    {
+      "command": "python -m pytest tests/test_m212_io_bus.py tests/test_m212_adapter_roundtrip.py -q",
+      "status": "PASS",
+      "result": "3 passed in 0.55s"
+    },
+    {
+      "command": "python -m pytest tests/test_m50_chat_pipeline.py tests/test_m51_dialogue_channels.py tests/test_m53_dialogue_action.py tests/test_m56_runtime.py tests/test_m57_integration_trial.py tests/test_m60_architecture_alignment.py -q",
+      "status": "PASS",
+      "result": "78 passed in 36.68s"
+    }
+  ],
+  "non_gating_notes": [
+    "Default full-suite pytest was previously attempted and timed out at 304 seconds without reported failures; M6.1 acceptance uses the targeted compatibility and dialogue regression suites above."
+  ],
+  "conclusion": "M6.1 acceptance criteria are satisfied. The cognitive event layer is observable, serializable, filterable, persona-scoped, optional, and behavior-preserving under the tested scripted dialogue path."
+}
