@@ -6,6 +6,11 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, Mapping
 
+from ..cognitive_paths import (
+    cognitive_paths_from_diagnostics,
+    path_competition_summary,
+)
+
 
 _OUTCOME_ALIASES = {
     "social_reward": "social_reward",
@@ -39,6 +44,8 @@ class FEPPromptCapsule:
     hidden_intent_score: float
     hidden_intent_label: str
     observation_channels: dict[str, float]
+    cognitive_paths: list[dict[str, object]]
+    path_competition: dict[str, object]
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -113,6 +120,9 @@ def build_fep_prompt_capsule(
     obs = {str(k): float(v) for k, v in dict(observation or {}).items()}
     ranked = list(getattr(diagnostics, "ranked_options", []) or [])
     chosen = getattr(diagnostics, "chosen", ranked[0] if ranked else None)
+    paths = cognitive_paths_from_diagnostics(diagnostics) if diagnostics is not None else []
+    cognitive_paths = [path.to_dict() for path in paths]
+    path_competition = path_competition_summary(paths)
     if chosen is None:
         chosen_summary = {
             "action": "ask_question",
@@ -180,4 +190,6 @@ def build_fep_prompt_capsule(
         hidden_intent_score=hidden_intent_score,
         hidden_intent_label=_hidden_intent_label(hidden_intent_score),
         observation_channels=obs,
+        cognitive_paths=cognitive_paths,
+        path_competition=path_competition,
     )

@@ -7,6 +7,10 @@ import json
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
+from ..cognitive_paths import (
+    cognitive_paths_from_diagnostics,
+    path_competition_summary,
+)
 from ..tracing import JsonlTraceWriter
 
 
@@ -37,7 +41,9 @@ _FEP_CAPSULE_ALLOWED_KEYS = {
     "chosen_expected_free_energy",
     "chosen_policy_score",
     "chosen_dominant_component",
+    "cognitive_paths",
     "top_alternatives",
+    "path_competition",
     "policy_margin",
     "efe_margin",
     "decision_uncertainty",
@@ -137,10 +143,13 @@ def redacted_fep_prompt_capsule(capsule: Mapping[str, object] | None) -> dict[st
             continue
         value = capsule[key]
         if isinstance(value, Mapping):
-            safe[key] = {
-                str(k): _round_float(v) if isinstance(v, (int, float)) else str(v)
-                for k, v in value.items()
-            }
+            if key == "path_competition":
+                safe[key] = _redact_mapping(value)
+            else:
+                safe[key] = {
+                    str(k): _round_float(v) if isinstance(v, (int, float)) else str(v)
+                    for k, v in value.items()
+                }
         elif isinstance(value, list):
             safe[key] = [
                 _redact_mapping(item) if isinstance(item, Mapping) else _json_safe(item)
@@ -319,6 +328,8 @@ class TurnTrace:
     cognitive_state: dict[str, object]
     retrieved_memory_summary: dict[str, object]
     ranked_options: list[dict[str, object]]
+    cognitive_paths: list[dict[str, object]]
+    path_competition: dict[str, object]
     chosen_action: str
     policy_margin: float
     efe_margin: float
@@ -360,6 +371,13 @@ class TurnTrace:
         selected_events, suppressed_events = split_event_summaries(events)
         safe_capsule = redacted_fep_prompt_capsule(fep_prompt_capsule)
         ranked_options = summarize_ranked_options(diagnostics)
+        paths = (
+            cognitive_paths_from_diagnostics(diagnostics)
+            if diagnostics is not None
+            else []
+        )
+        cognitive_paths = [path.to_dict() for path in paths]
+        path_competition = path_competition_summary(paths)
         policy_margin = _round_float(safe_capsule.get("policy_margin", 1.0), 1.0)
         efe_margin = _round_float(safe_capsule.get("efe_margin", 1.0), 1.0)
         chosen_action = str(
@@ -417,6 +435,8 @@ class TurnTrace:
             ),
             retrieved_memory_summary=summarize_retrieved_memory(diagnostics),
             ranked_options=ranked_options,
+            cognitive_paths=cognitive_paths,
+            path_competition=path_competition,
             chosen_action=chosen_action,
             policy_margin=policy_margin,
             efe_margin=efe_margin,
