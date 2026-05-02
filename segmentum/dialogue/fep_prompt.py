@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from enum import Enum
 from typing import Any, Mapping, Sequence
 
@@ -151,6 +151,8 @@ def _compact_object(
         return value
     if isinstance(value, str):
         return _compact_text(value, limit=text_limit)
+    if is_dataclass(value):
+        value = asdict(value)
     if hasattr(value, "to_dict"):
         value = value.to_dict()
     if isinstance(value, Mapping):
