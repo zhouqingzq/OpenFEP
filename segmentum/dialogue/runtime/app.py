@@ -850,9 +850,11 @@ def render_inner_world() -> None:
 
     affect = latest.get("affective_state_summary", {})
     capsule = latest.get("fep_prompt_capsule", {})
+    guidance = latest.get("meta_control_guidance", {})
+    affective_guidance = latest.get("affective_maintenance_summary", {})
     outcome = latest.get("memory_update_signal", {})
     st.subheader("State / Prompt / Outcome")
-    s1, s2, s3 = st.columns(3)
+    s1, s2, s3, s4 = st.columns(4)
     if isinstance(affect, dict):
         s1.json(affect, expanded=False)
     if isinstance(capsule, dict):
@@ -867,6 +869,23 @@ def render_inner_world() -> None:
         )
     if isinstance(outcome, dict):
         s3.json(outcome, expanded=False)
+    if isinstance(guidance, dict):
+        flags = [
+            key
+            for key, value in sorted(guidance.items())
+            if isinstance(value, bool) and value
+        ]
+        s4.json(
+            {
+                "flags": flags,
+                "intensity": guidance.get("intensity", 0.0),
+                "trigger_reasons": guidance.get("trigger_reasons", []),
+                "affective_maintenance": affective_guidance
+                if isinstance(affective_guidance, dict)
+                else {},
+            },
+            expanded=False,
+        )
 
     st.subheader("Conscious.md")
     st.markdown(markdown)

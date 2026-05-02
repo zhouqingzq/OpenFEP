@@ -6,7 +6,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from ..cognitive_events import CognitiveEventBus, make_cognitive_event
+from ..cognitive_paths import cognitive_paths_from_diagnostics, path_competition_summary
 from ..cognitive_state import update_cognitive_state
+from ..meta_control_guidance import (
+    generate_meta_control_guidance,
+    summarize_affective_maintenance,
+)
 from .generator import ResponseGenerator, RuleBasedGenerator
 from .observer import DialogueObserver
 from .fep_prompt import build_fep_prompt_capsule
@@ -35,6 +40,7 @@ class ConversationTurn:
     strategy: str | None
     diagnostics: Any | None = None
     cognitive_state: Any | None = None
+    meta_control_guidance: Any | None = None
     generation_diagnostics: dict[str, object] | None = None
     outcome: str | None = None
 
@@ -268,10 +274,38 @@ def run_conversation(
             priority=0.75,
         )
 
+        cognitive_state = update_cognitive_state(
+            getattr(agent, "latest_cognitive_state", None),
+            events=tuple(turn_events),
+            diagnostics=diagnostics,
+            observation=channels,
+            previous_outcome=outcome_label or "",
+            self_prior_summary=session_context.get("self_prior_summary"),
+        )
+        agent.latest_cognitive_state = cognitive_state
+        path_summary = path_competition_summary(
+            cognitive_paths_from_diagnostics(diagnostics)
+            if diagnostics is not None
+            else []
+        )
+        prompt_budget = session_context.get("prompt_budget")
+        meta_control_guidance = generate_meta_control_guidance(
+            cognitive_state,
+            diagnostics=diagnostics,
+            path_summary=path_summary,
+            previous_outcome=outcome_label or "",
+            prompt_budget=prompt_budget if isinstance(prompt_budget, dict) else None,
+        )
+        meta_control_guidance_dict = meta_control_guidance.to_dict()
+        affective_maintenance_summary = summarize_affective_maintenance(
+            meta_control_guidance
+        )
+
         fep_capsule = build_fep_prompt_capsule(
             diagnostics,
             channels,
             previous_outcome=outcome_label or "",
+            meta_control_guidance=meta_control_guidance_dict,
         ).to_dict()
         publish_event(
             "PromptAssemblyEvent",
@@ -290,21 +324,19 @@ def run_conversation(
                     if isinstance(fep_capsule.get("top_alternatives"), list)
                     else []
                 ),
+                "meta_control_guidance_flags": [
+                    key
+                    for key, value in meta_control_guidance_dict.items()
+                    if isinstance(value, bool) and value
+                ],
+                "affective_maintenance_summary": affective_maintenance_summary,
             },
             salience=0.55,
         )
         efe_margin = float(fep_capsule.get("efe_margin", 1.0) or 1.0)
         dialogue_context["efe_margin"] = efe_margin
         dialogue_context["fep_prompt_capsule"] = fep_capsule
-        cognitive_state = update_cognitive_state(
-            getattr(agent, "latest_cognitive_state", None),
-            events=tuple(turn_events),
-            diagnostics=diagnostics,
-            observation=channels,
-            previous_outcome=outcome_label or "",
-            self_prior_summary=session_context.get("self_prior_summary"),
-        )
-        agent.latest_cognitive_state = cognitive_state
+        dialogue_context["meta_control_guidance"] = meta_control_guidance_dict
 
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
@@ -342,6 +374,10 @@ def run_conversation(
             generation_diagnostics = {}
         generation_diagnostics["fep_prompt_capsule"] = fep_capsule
         generation_diagnostics["selected_action"] = action
+        generation_diagnostics["meta_control_guidance"] = meta_control_guidance_dict
+        generation_diagnostics["affective_maintenance_summary"] = (
+            affective_maintenance_summary
+        )
         publish_event(
             "GenerationEvent",
             "ResponseGenerator.generate",
@@ -380,6 +416,7 @@ def run_conversation(
                 strategy=strat,
                 diagnostics=diagnostics,
                 cognitive_state=cognitive_state,
+                meta_control_guidance=meta_control_guidance,
                 generation_diagnostics=generation_diagnostics,
                 outcome=None,
             )
@@ -429,6 +466,7 @@ def run_conversation(
                 diagnostics=diagnostics,
                 fep_prompt_capsule=fep_capsule,
                 cognitive_state=cognitive_state,
+                meta_control_guidance=meta_control_guidance_dict,
                 generation_diagnostics=generation_diagnostics,
                 outcome_label=outcome_label or "neutral",
                 memory_update_signal=memory_update_signal,

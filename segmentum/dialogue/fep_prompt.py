@@ -46,6 +46,7 @@ class FEPPromptCapsule:
     observation_channels: dict[str, float]
     cognitive_paths: list[dict[str, object]]
     path_competition: dict[str, object]
+    meta_control_guidance: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -116,6 +117,7 @@ def build_fep_prompt_capsule(
     observation: Mapping[str, float],
     *,
     previous_outcome: str = "",
+    meta_control_guidance: Mapping[str, object] | None = None,
 ) -> FEPPromptCapsule:
     obs = {str(k): float(v) for k, v in dict(observation or {}).items()}
     ranked = list(getattr(diagnostics, "ranked_options", []) or [])
@@ -192,4 +194,5 @@ def build_fep_prompt_capsule(
         observation_channels=obs,
         cognitive_paths=cognitive_paths,
         path_competition=path_competition,
+        meta_control_guidance=dict(meta_control_guidance) if meta_control_guidance else None,
     )

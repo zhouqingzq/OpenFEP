@@ -11,6 +11,7 @@ from ..cognitive_paths import (
     cognitive_paths_from_diagnostics,
     path_competition_summary,
 )
+from ..meta_control_guidance import summarize_affective_maintenance
 from ..tracing import JsonlTraceWriter
 
 
@@ -54,6 +55,7 @@ _FEP_CAPSULE_ALLOWED_KEYS = {
     "previous_outcome",
     "hidden_intent_score",
     "hidden_intent_label",
+    "meta_control_guidance",
     "observation_channels",
 }
 
@@ -70,6 +72,7 @@ _GENERATION_ALLOWED_KEYS = {
     "llm_tokens_completion",
     "llm_tokens_prompt",
     "llm_tokens_total",
+    "meta_control_guidance",
     "partner_anchor_used",
     "policy_action_selection_lift_applied",
     "policy_context_bucket",
@@ -91,6 +94,7 @@ _GENERATION_ALLOWED_KEYS = {
     "template_id",
     "topic_anchor_source",
     "topic_anchor_used",
+    "affective_maintenance_summary",
 }
 
 
@@ -143,7 +147,7 @@ def redacted_fep_prompt_capsule(capsule: Mapping[str, object] | None) -> dict[st
             continue
         value = capsule[key]
         if isinstance(value, Mapping):
-            if key == "path_competition":
+            if key in {"path_competition", "meta_control_guidance"}:
                 safe[key] = _redact_mapping(value)
             else:
                 safe[key] = {
@@ -330,6 +334,8 @@ class TurnTrace:
     ranked_options: list[dict[str, object]]
     cognitive_paths: list[dict[str, object]]
     path_competition: dict[str, object]
+    meta_control_guidance: dict[str, object]
+    affective_maintenance_summary: dict[str, object]
     chosen_action: str
     policy_margin: float
     efe_margin: float
@@ -364,6 +370,7 @@ class TurnTrace:
         generation_diagnostics: Mapping[str, object] | None,
         outcome_label: str,
         memory_update_signal: Mapping[str, object],
+        meta_control_guidance: Mapping[str, object] | None = None,
         cognitive_state: object | None = None,
         events: Sequence[object] = (),
         debug: bool = False,
@@ -378,6 +385,10 @@ class TurnTrace:
         )
         cognitive_paths = [path.to_dict() for path in paths]
         path_competition = path_competition_summary(paths)
+        safe_guidance = _redact_mapping(dict(meta_control_guidance or {}))
+        affective_maintenance_summary = summarize_affective_maintenance(
+            safe_guidance
+        )
         policy_margin = _round_float(safe_capsule.get("policy_margin", 1.0), 1.0)
         efe_margin = _round_float(safe_capsule.get("efe_margin", 1.0), 1.0)
         chosen_action = str(
@@ -437,6 +448,8 @@ class TurnTrace:
             ranked_options=ranked_options,
             cognitive_paths=cognitive_paths,
             path_competition=path_competition,
+            meta_control_guidance=safe_guidance,
+            affective_maintenance_summary=affective_maintenance_summary,
             chosen_action=chosen_action,
             policy_margin=policy_margin,
             efe_margin=efe_margin,
@@ -507,6 +520,9 @@ class ConsciousMarkdownWriter:
             "",
             "## 提示引导",
             self._format_prompt_guidance(latest),
+            "",
+            "## Meta-control Guidance",
+            self._format_meta_control_guidance(latest),
             "",
             "## 结果反馈",
             self._format_outcome(latest),
@@ -589,6 +605,31 @@ class ConsciousMarkdownWriter:
             f"- 决策不确定性: {capsule.get('decision_uncertainty', '')}\n"
             f"- 预测误差: {capsule.get('prediction_error_label', '')}\n"
             f"- 上一反馈: {capsule.get('previous_outcome', 'neutral')}"
+        )
+
+    @staticmethod
+    def _format_meta_control_guidance(trace: Mapping[str, object]) -> str:
+        guidance = trace.get("meta_control_guidance", {})
+        affective = trace.get("affective_maintenance_summary", {})
+        if not isinstance(guidance, Mapping) or not guidance:
+            return "- 暂无 meta-control guidance。"
+        flags = [
+            key
+            for key, value in sorted(guidance.items())
+            if isinstance(value, bool) and value
+        ]
+        reasons = guidance.get("trigger_reasons", [])
+        if not isinstance(reasons, list):
+            reasons = []
+        affect_summary = ""
+        if isinstance(affective, Mapping):
+            affect_summary = str(affective.get("summary", ""))
+        return (
+            "- 来源: TurnTrace 派生提示，不是认知状态的来源\n"
+            f"- 强度: {guidance.get('intensity', 0.0)}\n"
+            f"- 标记: {', '.join(flags) or 'none'}\n"
+            f"- 触发: {', '.join(map(str, reasons[:4])) or 'none'}\n"
+            f"- 情感维护: {affect_summary or '维持默认表达强度'}"
         )
 
     @staticmethod
