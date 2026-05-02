@@ -300,12 +300,43 @@ def run_conversation(
         affective_maintenance_summary = summarize_affective_maintenance(
             meta_control_guidance
         )
+        prompt_budget_dict = prompt_budget if isinstance(prompt_budget, dict) else None
+        included_signals = [
+            "observation_channels",
+            "decision_diagnostics_summary",
+            "cognitive_state",
+            "cognitive_paths",
+            "path_competition",
+            "meta_control_guidance",
+            "affective_guidance",
+        ]
+        if session_context.get("self_prior_summary") is not None:
+            included_signals.append("self_prior_summary")
+        if prompt_budget_dict is not None:
+            included_signals.append("prompt_budget")
+        for channel in getattr(diagnostics, "workspace_broadcast_channels", []) or []:
+            signal = f"workspace:{channel}"
+            if signal not in included_signals:
+                included_signals.append(signal)
+        omitted_signals_raw = session_context.get("omitted_signals")
+        if omitted_signals_raw is None and prompt_budget_dict is not None:
+            omitted_signals_raw = prompt_budget_dict.get("omitted_signals") or prompt_budget_dict.get("omitted")
 
         fep_capsule = build_fep_prompt_capsule(
             diagnostics,
             channels,
             previous_outcome=outcome_label or "",
+            cognitive_state=cognitive_state,
+            self_prior_summary=session_context.get("self_prior_summary"),
+            path_summary=path_summary,
             meta_control_guidance=meta_control_guidance_dict,
+            affective_state=cognitive_state.affect,
+            affective_guidance=affective_maintenance_summary,
+            prompt_budget=prompt_budget_dict,
+            included_signals=included_signals,
+            omitted_signals=omitted_signals_raw if isinstance(omitted_signals_raw, list) else None,
+            persona_id=persona_id,
+            session_id=session_id,
         ).to_dict()
         publish_event(
             "PromptAssemblyEvent",
@@ -330,6 +361,15 @@ def run_conversation(
                     if isinstance(value, bool) and value
                 ],
                 "affective_maintenance_summary": affective_maintenance_summary,
+                "included_signals": included_signals,
+                "omitted_signals": fep_capsule.get("omitted_signals") or [],
+                "prompt_budget_summary": fep_capsule.get("prompt_budget_summary") or {},
+                "redaction_status": {
+                    "raw_events_included": False,
+                    "full_diagnostics_included": False,
+                    "full_prompt_included": False,
+                    "full_conscious_markdown_included": False,
+                },
             },
             salience=0.55,
         )
@@ -378,6 +418,12 @@ def run_conversation(
         generation_diagnostics["affective_maintenance_summary"] = (
             affective_maintenance_summary
         )
+        generation_diagnostics["prompt_capsule_guidance"] = {
+            "meta_control_guidance": fep_capsule.get("meta_control_guidance") or {},
+            "affective_guidance": fep_capsule.get("affective_guidance") or {},
+            "memory_use_guidance": fep_capsule.get("memory_use_guidance") or {},
+            "omitted_signals": fep_capsule.get("omitted_signals") or [],
+        }
         publish_event(
             "GenerationEvent",
             "ResponseGenerator.generate",

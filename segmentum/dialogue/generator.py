@@ -696,6 +696,42 @@ def _build_system_prompt(
 
 # ── LLMGenerator ────────────────────────────────────────────────────────────
 
+def _format_compact_capsule_guidance(capsule: Mapping[str, object]) -> str:
+    """Render prompt-facing capsule hints without raw internals."""
+    lines: list[str] = []
+    meta = capsule.get("meta_control_guidance")
+    if isinstance(meta, Mapping):
+        flags = [
+            str(key)
+            for key, value in sorted(meta.items())
+            if isinstance(value, bool) and value
+        ][:8]
+        if flags:
+            lines.append("Meta-control flags: " + ", ".join(flags))
+        notes = meta.get("guidance_notes", [])
+        if isinstance(notes, list) and notes:
+            lines.append("Meta-control notes: " + " | ".join(str(item)[:120] for item in notes[:3]))
+    affective = capsule.get("affective_guidance")
+    if isinstance(affective, Mapping):
+        actions = affective.get("actions", [])
+        if isinstance(actions, list) and actions:
+            lines.append("Affective stance constraints: " + ", ".join(str(item) for item in actions[:4]))
+    memory = capsule.get("memory_use_guidance")
+    if isinstance(memory, Mapping) and memory.get("reduce_memory_reliance"):
+        lines.append("Memory use: treat recalled context as tentative.")
+    prior = capsule.get("self_prior_summary")
+    if isinstance(prior, Mapping):
+        summary = prior.get("summary") or prior.get("current_prior")
+        if summary:
+            lines.append("Compact self-prior for stance only: " + str(summary)[:160])
+    omitted = capsule.get("omitted_signals")
+    if isinstance(omitted, list) and omitted:
+        lines.append("Omitted internal signals: " + ", ".join(str(item) for item in omitted[:6]))
+    if capsule.get("hidden_intent_label") in {"clear_subtext", "possible_subtext"}:
+        lines.append("Hidden-intent cues are low-confidence observable signals; avoid motive claims.")
+    return "\n".join(f"- {line}" for line in lines)
+
+
 class LLMGenerator:
     """Structured LLM surface backed by OpenRouter (deepseek/deepseek-v4-flash).
 
@@ -800,6 +836,15 @@ class LLMGenerator:
             system_prompt = _build_system_prompt(
                 action, personality_state, emotional_tone, conflict_tension
             )
+            fep_capsule = dialogue_context.get("fep_prompt_capsule")
+            if isinstance(fep_capsule, Mapping):
+                capsule_guidance = _format_compact_capsule_guidance(fep_capsule)
+                if capsule_guidance:
+                    system_prompt = (
+                        system_prompt
+                        + "\n\n## Compact FEP prompt guidance\n"
+                        + capsule_guidance
+                    )
             user_content = f"对话历史：\n{_format_history(conversation_history)}\n\n对方刚说：{current_turn}\n\n请回复："
 
         payload = {
@@ -978,6 +1023,15 @@ class RuleBasedGenerator:
             "calibration_policy_source": policy_meta.get("policy_source", "missing"),
             "surface_shortcut_suppressed": False,
         }
+        fep_capsule = dialogue_context.get("fep_prompt_capsule")
+        if isinstance(fep_capsule, Mapping):
+            generation_diagnostics["prompt_capsule_guidance"] = {
+                "meta_control_guidance": fep_capsule.get("meta_control_guidance") or {},
+                "affective_guidance": fep_capsule.get("affective_guidance") or {},
+                "memory_use_guidance": fep_capsule.get("memory_use_guidance") or {},
+                "omitted_signals": fep_capsule.get("omitted_signals") or [],
+                "prompt_budget_summary": fep_capsule.get("prompt_budget_summary") or {},
+            }
         if style == "warm_supportive" and action in {"ask_question", "empathize", "agree", "elaborate"}:
             if idx % 3 == 0:
                 base = "我在认真听你说，" + base

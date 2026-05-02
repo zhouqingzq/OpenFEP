@@ -55,7 +55,18 @@ _FEP_CAPSULE_ALLOWED_KEYS = {
     "previous_outcome",
     "hidden_intent_score",
     "hidden_intent_label",
+    "persona_id",
+    "session_id",
+    "self_prior_summary",
+    "selected_path_summary",
+    "path_competition_summary",
+    "active_gaps",
+    "affective_state_summary",
     "meta_control_guidance",
+    "affective_guidance",
+    "memory_use_guidance",
+    "omitted_signals",
+    "prompt_budget_summary",
     "observation_channels",
 }
 
@@ -79,6 +90,7 @@ _GENERATION_ALLOWED_KEYS = {
     "policy_evidence_weight",
     "policy_lift_applied",
     "policy_strategy_confidence",
+    "prompt_capsule_guidance",
     "profile_anchor_match",
     "profile_confidence",
     "profile_degraded_reason",
@@ -147,7 +159,18 @@ def redacted_fep_prompt_capsule(capsule: Mapping[str, object] | None) -> dict[st
             continue
         value = capsule[key]
         if isinstance(value, Mapping):
-            if key in {"path_competition", "meta_control_guidance"}:
+            if key in {
+                "path_competition",
+                "path_competition_summary",
+                "self_prior_summary",
+                "selected_path_summary",
+                "active_gaps",
+                "affective_state_summary",
+                "meta_control_guidance",
+                "affective_guidance",
+                "memory_use_guidance",
+                "prompt_budget_summary",
+            }:
                 safe[key] = _redact_mapping(value)
             else:
                 safe[key] = {

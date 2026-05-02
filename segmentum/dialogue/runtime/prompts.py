@@ -936,8 +936,10 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
 
     if hidden_label == "clear_subtext":
         lines.append("对方的表面话语下明显有弦外之音，注意没有直接说出来的部分。")
+        lines.append("Hidden-intent cues are low-confidence observable signals only; do not accuse, infer motives, or treat them as facts.")
     elif hidden_label == "possible_subtext":
         lines.append("对方语气里可能藏着一点没说出来的东西，留意但不要过度解读。")
+        lines.append("Treat possible subtext as tentative and answer what is observable.")
 
     if previous == "social_threat":
         lines.append("上一轮可能让对方感到距离感，这一轮要注意修复。")
@@ -980,6 +982,41 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
         if alt_names and uncertainty in {"high", "medium"}:
             lines.append("其他方向也接近，但这一轮先按当前方向轻轻落下。")
 
+    self_prior = capsule.get("self_prior_summary")
+    if isinstance(self_prior, ABCMapping):
+        prior_items: list[str] = []
+        for key in ("summary", "current_prior", "stable_patterns", "reusable_patterns"):
+            value = self_prior.get(key)
+            if isinstance(value, str) and value.strip():
+                prior_items.append(value.strip()[:120])
+            elif isinstance(value, ABCSequence) and not isinstance(value, (str, bytes)):
+                prior_items.extend(str(item).strip()[:120] for item in list(value)[:2] if str(item).strip())
+        if prior_items:
+            lines.append("Compact self-prior for stance only: " + " | ".join(prior_items[:3]))
+
+    affective_guidance = capsule.get("affective_guidance")
+    if isinstance(affective_guidance, ABCMapping):
+        actions = affective_guidance.get("actions", [])
+        if isinstance(actions, ABCSequence) and not isinstance(actions, (str, bytes)):
+            cleaned = [str(item).strip() for item in list(actions)[:4] if str(item).strip()]
+            if cleaned:
+                lines.append("Affective stance constraints: " + ", ".join(cleaned))
+        summary = str(affective_guidance.get("summary", "")).strip()
+        if summary:
+            lines.append("Affective guidance is about response stance, not claims about the user: " + summary[:120])
+
+    memory_guidance = capsule.get("memory_use_guidance")
+    if isinstance(memory_guidance, ABCMapping):
+        if memory_guidance.get("reduce_memory_reliance"):
+            lines.append("Memory use: treat recalled context as tentative when current evidence conflicts.")
+        conflicts = memory_guidance.get("memory_conflict_count")
+        if conflicts not in (None, "", 0):
+            lines.append(f"Memory use: {conflicts} compact conflict signal(s); avoid over-relying on memory.")
+
+    omitted = capsule.get("omitted_signals")
+    if isinstance(omitted, ABCSequence) and not isinstance(omitted, (str, bytes)) and omitted:
+        lines.append("Some internal signals were omitted for prompt budget; do not invent missing internal state.")
+
     return lines
 
 
@@ -1009,8 +1046,10 @@ def _build_dialogue_perception(
     else:
         if hidden_intent >= 0.70:
             lines.append("对方的表面话语之下明显有弦外之音——他们真正想说的和表面文字不太一样。仔细揣摩对方没有直接说出来的意图。")
+            lines.append("Hidden-intent cues are low-confidence observable signals only; avoid accusations or motive claims.")
         elif hidden_intent >= 0.55:
             lines.append("对方的语气里好像藏着点什么——注意他们没有直接说出来的部分。")
+            lines.append("Treat possible subtext as tentative and answer what is observable.")
 
         normalized_outcome = normalize_dialogue_outcome(previous_outcome)
         if normalized_outcome == "social_threat":
