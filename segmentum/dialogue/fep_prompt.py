@@ -84,6 +84,7 @@ class FEPPromptCapsule:
     active_gaps: dict[str, list[str]] | None = None
     affective_state_summary: dict[str, object] | None = None
     meta_control_guidance: dict[str, object] | None = None
+    cognitive_control_guidance: dict[str, object] | None = None
     affective_guidance: dict[str, object] | None = None
     memory_use_guidance: dict[str, object] | None = None
     omitted_signals: list[str] | None = None
@@ -354,6 +355,7 @@ def build_fep_prompt_capsule(
     cognitive_paths: Sequence[object] | None = None,
     path_summary: Mapping[str, object] | None = None,
     meta_control_guidance: Mapping[str, object] | None = None,
+    cognitive_control_guidance: Mapping[str, object] | None = None,
     affective_state: object | None = None,
     affective_guidance: Mapping[str, object] | None = None,
     prompt_budget: Mapping[str, object] | None = None,
@@ -457,6 +459,7 @@ def build_fep_prompt_capsule(
         active_gaps=_active_gaps_from_state(cognitive_state),
         affective_state_summary=_affective_summary_from_state(cognitive_state, affective_state),
         meta_control_guidance=_compact_mapping(meta_control_guidance, depth=2),
+        cognitive_control_guidance=_compact_mapping(cognitive_control_guidance, depth=2),
         affective_guidance=_compact_mapping(affective_guidance, depth=2),
         memory_use_guidance=_memory_guidance_from_state(cognitive_state, meta_control_guidance),
         omitted_signals=_compact_signal_names(omitted_signals),

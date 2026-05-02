@@ -63,6 +63,7 @@ _FEP_CAPSULE_ALLOWED_KEYS = {
     "active_gaps",
     "affective_state_summary",
     "meta_control_guidance",
+    "cognitive_control_guidance",
     "affective_guidance",
     "memory_use_guidance",
     "omitted_signals",
@@ -72,6 +73,7 @@ _FEP_CAPSULE_ALLOWED_KEYS = {
 
 _GENERATION_ALLOWED_KEYS = {
     "calibration_policy_source",
+    "action_shift_candidate",
     "conditional_policy_frequency",
     "conditional_policy_strategy_frequency",
     "conditional_policy_support",
@@ -83,6 +85,8 @@ _GENERATION_ALLOWED_KEYS = {
     "llm_tokens_completion",
     "llm_tokens_prompt",
     "llm_tokens_total",
+    "cognitive_control_signal",
+    "cognitive_path_selection",
     "meta_control_guidance",
     "meta_control_signal",
     "partner_anchor_used",
@@ -168,6 +172,7 @@ def redacted_fep_prompt_capsule(capsule: Mapping[str, object] | None) -> dict[st
                 "active_gaps",
                 "affective_state_summary",
                 "meta_control_guidance",
+                "cognitive_control_guidance",
                 "affective_guidance",
                 "memory_use_guidance",
                 "prompt_budget_summary",

@@ -78,6 +78,7 @@ class CognitivePathCandidate:
     effective_temperature: float
     cost_components: dict[str, float]
     scoring_lambdas: dict[str, float]
+    cognitive_control_adjustments: dict[str, float]
     source_action: str
     source_policy_score: float
 
@@ -167,6 +168,49 @@ def _meta_value(meta_control: object | None, name: str, default: float) -> float
     if isinstance(meta_control, Mapping):
         return _finite_float(meta_control.get(name), default)
     return _finite_float(getattr(meta_control, name, default), default)
+
+
+def _control_value(control: object | None, name: str, default: float) -> float:
+    if control is None:
+        return default
+    if isinstance(control, Mapping):
+        return _finite_float(control.get(name), default)
+    return _finite_float(getattr(control, name, default), default)
+
+
+def _control_int(control: object | None, name: str, default: int) -> int:
+    try:
+        return int(_control_value(control, name, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _is_clarification_action(action: str) -> bool:
+    lowered = action.lower()
+    return any(
+        token in lowered
+        for token in (
+            "ask",
+            "clarify",
+            "question",
+            "request_context",
+            "request_clarification",
+        )
+    )
+
+
+def _is_repair_action(action: str) -> bool:
+    lowered = action.lower()
+    return any(
+        token in lowered
+        for token in (
+            "repair",
+            "acknowledge",
+            "correct",
+            "apologize",
+            "empathize",
+        )
+    )
 
 
 def path_scoring_lambdas_from_meta_control(
@@ -298,12 +342,31 @@ def score_path_candidate(
     current_free_energy: float,
     lambdas: PathScoringLambdas,
     effective_temperature: float,
+    cognitive_control: object | None = None,
     posterior_weight: float = 0.0,
 ) -> CognitivePathCandidate:
     components = _candidate_cost_components(
         option,
         current_free_energy=current_free_energy,
     )
+    control_adjustments: dict[str, float] = {}
+    memory_gain = _control_value(cognitive_control, "memory_retrieval_gain", 1.0)
+    if memory_gain != 1.0:
+        components["memory_cost"] = max(0.0, components["memory_cost"] * memory_gain)
+        control_adjustments["memory_retrieval_gain"] = memory_gain
+    action = str(getattr(option, "choice", "") or "unknown_action")
+    clarification_bias = _control_value(cognitive_control, "clarification_bias", 0.0)
+    repair_bias = _control_value(cognitive_control, "repair_bias", 0.0)
+    clarification_adjustment = (
+        -clarification_bias if clarification_bias > 0.0 and _is_clarification_action(action) else 0.0
+    )
+    repair_adjustment = -repair_bias if repair_bias > 0.0 and _is_repair_action(action) else 0.0
+    if clarification_adjustment:
+        components["clarification_bias_adjustment"] = clarification_adjustment
+        control_adjustments["clarification_bias"] = clarification_bias
+    if repair_adjustment:
+        components["repair_bias_adjustment"] = repair_adjustment
+        control_adjustments["repair_bias"] = repair_bias
     total_cost = (
         components["current_free_energy"] * lambdas.current_free_energy
         + components["expected_free_energy"] * lambdas.beta_efe
@@ -313,8 +376,9 @@ def score_path_candidate(
         + components["control_cost"] * lambdas.lambda_control
         + components["social_risk"] * lambdas.social_risk
         - components["long_term_value"] * lambdas.long_term_value
+        + clarification_adjustment
+        + repair_adjustment
     )
-    action = str(getattr(option, "choice", "") or "unknown_action")
     return CognitivePathCandidate(
         path_id=f"candidate_{index}_{_safe_action_id(action, fallback='option')}",
         proposed_action=action,
@@ -334,6 +398,7 @@ def score_path_candidate(
         effective_temperature=effective_temperature,
         cost_components=components,
         scoring_lambdas=lambdas.to_dict(),
+        cognitive_control_adjustments=control_adjustments,
         source_action=action,
         source_policy_score=_option_float(option, "policy_score", 0.0),
     )
@@ -343,10 +408,12 @@ def cognitive_path_candidates_from_diagnostics(
     diagnostics: DecisionDiagnostics,
     *,
     meta_control: object | None = None,
+    cognitive_control: object | None = None,
     effective_temperature: float | None = None,
     max_paths: int = 5,
 ) -> list[CognitivePathCandidate]:
     ranked = list(getattr(diagnostics, "ranked_options", []) or [])
+    max_paths = max(0, max_paths + _control_int(cognitive_control, "candidate_budget_delta", 0))
     if max_paths <= 0 or not ranked:
         return []
     selected = ranked[:max_paths]
@@ -356,6 +423,13 @@ def cognitive_path_candidates_from_diagnostics(
         if effective_temperature is not None
         else effective_temperature_from_meta_control(meta_control)
     )
+    temperature = max(
+        0.01,
+        min(
+            1.0,
+            temperature + _control_value(cognitive_control, "effective_temperature_delta", 0.0),
+        ),
+    )
     current_free_energy = _finite_float(getattr(diagnostics, "prediction_error", 0.0))
     provisional = [
         score_path_candidate(
@@ -364,6 +438,7 @@ def cognitive_path_candidates_from_diagnostics(
             current_free_energy=current_free_energy,
             lambdas=lambdas,
             effective_temperature=temperature,
+            cognitive_control=cognitive_control,
         )
         for index, option in enumerate(selected)
     ]

@@ -199,6 +199,16 @@ class CandidatePathState:
 
 
 @dataclass(frozen=True)
+class SelfAgenda:
+    current_goal: str
+    next_intended_action: str
+    unresolved_gaps: list[str]
+    pending_repair: str
+    exploration_target: str
+    confidence: float
+
+
+@dataclass(frozen=True)
 class CognitiveStateMVP:
     task: TaskState
     memory: MemoryState
@@ -209,6 +219,7 @@ class CognitiveStateMVP:
     user: UserState
     world: WorldState
     candidate_paths: CandidatePathState
+    self_agenda: SelfAgenda
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -254,6 +265,11 @@ class CognitiveStateMVP:
                 _mapping(payload.get("candidate_paths"))
                 or asdict(_default_candidate_path_state()),
             ),
+            self_agenda=_dataclass_from_dict(
+                SelfAgenda,
+                _mapping(payload.get("self_agenda"))
+                or asdict(_default_self_agenda()),
+            ),
         )
 
 
@@ -298,6 +314,17 @@ def _default_candidate_path_state() -> CandidatePathState:
         uncertainty=0.0,
         low_confidence_reason="",
         effective_temperature=0.35,
+    )
+
+
+def _default_self_agenda() -> SelfAgenda:
+    return SelfAgenda(
+        current_goal="",
+        next_intended_action="observe",
+        unresolved_gaps=[],
+        pending_repair="",
+        exploration_target="",
+        confidence=0.5,
     )
 
 
@@ -383,6 +410,7 @@ def default_cognitive_state() -> CognitiveStateMVP:
         user=_default_user_state(),
         world=_default_world_state(),
         candidate_paths=_default_candidate_path_state(),
+        self_agenda=_default_self_agenda(),
     )
 
 
@@ -822,6 +850,75 @@ def _derive_task(
     )
 
 
+def _derive_self_agenda(
+    *,
+    previous: CognitiveStateMVP | None,
+    task: TaskState,
+    gaps: GapState,
+    affect: AffectiveState,
+    candidate_paths: CandidatePathState,
+    previous_outcome: str,
+) -> SelfAgenda:
+    previous_items = (
+        list(previous.self_agenda.unresolved_gaps)
+        if previous is not None and hasattr(previous, "self_agenda")
+        else []
+    )
+    current_items: list[str] = []
+    current_items.extend(gaps.blocking_gaps)
+    current_items.extend(gaps.contextual_gaps)
+    current_items.extend(gaps.epistemic_gaps)
+    current_items.extend(gaps.instrumental_gaps)
+    for gap in gaps.structured_gaps:
+        if gap.status == "blocking" or gap.severity >= 0.7:
+            current_items.append(gap.description)
+    unresolved = _strings([*previous_items, *current_items], limit=12, item_limit=128)
+
+    pending_repair = ""
+    if gaps.blocking_gaps:
+        pending_repair = gaps.blocking_gaps[0]
+    elif _outcome_negative(previous_outcome):
+        pending_repair = "previous outcome needs repair"
+    elif affect.repair_need >= 0.35:
+        pending_repair = "affective repair pressure"
+
+    exploration_target = ""
+    if gaps.contextual_gaps:
+        exploration_target = gaps.contextual_gaps[0]
+    elif gaps.epistemic_gaps:
+        exploration_target = gaps.epistemic_gaps[0]
+    elif unresolved:
+        exploration_target = unresolved[0]
+
+    if pending_repair:
+        next_action = "repair"
+    elif exploration_target:
+        next_action = "clarify"
+    elif candidate_paths.alternative_selection:
+        next_action = candidate_paths.alternative_selection
+    elif candidate_paths.selected_action:
+        next_action = candidate_paths.selected_action
+    else:
+        next_action = "observe"
+
+    confidence = _clamp(
+        1.0
+        - max(
+            candidate_paths.uncertainty,
+            0.18 * len(unresolved),
+            affect.repair_need * 0.7,
+        )
+    )
+    return SelfAgenda(
+        current_goal=task.current_goal,
+        next_intended_action=next_action,
+        unresolved_gaps=unresolved,
+        pending_repair=pending_repair,
+        exploration_target=exploration_target,
+        confidence=confidence,
+    )
+
+
 def _decay(previous_value: float, target: float, rate: float) -> float:
     return _clamp(previous_value + ((target - previous_value) * rate))
 
@@ -960,6 +1057,14 @@ def update_cognitive_state(
         observation=safe_observation,
     )
     candidate_paths = _derive_candidate_paths(diagnostics, meta_control, resource)
+    self_agenda = _derive_self_agenda(
+        previous=previous,
+        task=task,
+        gaps=gaps,
+        affect=affect,
+        candidate_paths=candidate_paths,
+        previous_outcome=previous_outcome,
+    )
     state = CognitiveStateMVP(
         task=task,
         memory=memory,
@@ -970,6 +1075,7 @@ def update_cognitive_state(
         user=user,
         world=world,
         candidate_paths=candidate_paths,
+        self_agenda=self_agenda,
     )
     if is_dataclass(state):
         return state

@@ -31,6 +31,7 @@ from .memory_dynamics import (
 from .memory_retrieval import RetrievalQuery
 from .memory_state import AgentStateVector, MemoryAwareAgentMixin
 from .meta_control import MetaControlSignal, adjust_memory_retrieval
+from .cognitive_control import CognitiveControlSignal
 from .m4_cognitive_style import CognitiveStyleParameters
 from .memory_encoding import SalienceConfig
 from .narrative_types import EmbodiedNarrativeEpisode
@@ -959,6 +960,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.latest_memory_consolidation: dict[str, object] = {}
         self.active_meta_control_signal: MetaControlSignal | None = None
         self.latest_meta_control_signal: MetaControlSignal | None = None
+        self.active_cognitive_control_signal: CognitiveControlSignal | None = None
+        self.latest_cognitive_control_signal: CognitiveControlSignal | None = None
         self.memory_legacy_policy_bias_enabled: bool = True
         self.memory_action_rollups_enabled: bool = True
         self.memory_representation_prior_enabled: bool = True
@@ -5210,6 +5213,11 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 if self.latest_cognitive_state is not None
                 else None
             ),
+            "latest_cognitive_control_signal": (
+                self.latest_cognitive_control_signal.to_dict()
+                if self.latest_cognitive_control_signal is not None
+                else None
+            ),
             "agent_state_vector": self.agent_state_vector.to_dict(),
             "memory_cognitive_style": self.memory_cognitive_style.to_dict(),
             "memory_cycle_interval": self.memory_cycle_interval,
@@ -5383,6 +5391,13 @@ class SegmentAgent(MemoryAwareAgentMixin):
             if isinstance(cognitive_state_payload, dict)
             else None
         )
+        cognitive_control_payload = payload.get("latest_cognitive_control_signal")
+        agent.latest_cognitive_control_signal = (
+            CognitiveControlSignal(**cognitive_control_payload)
+            if isinstance(cognitive_control_payload, dict)
+            else None
+        )
+        agent.active_cognitive_control_signal = agent.latest_cognitive_control_signal
         agent.global_workspace = GlobalWorkspace.from_dict(
             payload.get("global_workspace")
             if isinstance(payload.get("global_workspace"), dict)

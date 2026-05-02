@@ -144,6 +144,7 @@ def build_compressed_cognitive_guidance(capsule: Mapping[str, object]) -> dict[s
     """Build a prompt-safe guidance packet from an FEP capsule-like mapping."""
     selected_path = _selected_path(capsule)
     meta = _as_mapping(capsule.get("meta_control_guidance"))
+    control = _as_mapping(capsule.get("cognitive_control_guidance"))
     memory = _as_mapping(capsule.get("memory_use_guidance"))
     affective = _as_mapping(capsule.get("affective_guidance"))
     prior = _as_mapping(capsule.get("self_prior_summary"))
@@ -156,6 +157,10 @@ def build_compressed_cognitive_guidance(capsule: Mapping[str, object]) -> dict[s
     lower_assertiveness = (
         uncertainty_label in {"high", "medium"}
         or _safe_bool(meta.get("lower_assertiveness"))
+        or (
+            _safe_float(control.get("assertion_strength")) is not None
+            and float(_safe_float(control.get("assertion_strength")) or 1.0) < 0.85
+        )
         or (policy_margin is not None and policy_margin < 0.12)
         or (efe_margin is not None and efe_margin < 0.05)
         or (selection_margin is not None and selection_margin < 0.08)
@@ -186,6 +191,14 @@ def build_compressed_cognitive_guidance(capsule: Mapping[str, object]) -> dict[s
             "meta_flags": _meta_flags(meta),
         },
     }
+    if control:
+        guidance["bounded_control"] = {
+            "assertion_strength": _safe_float(control.get("assertion_strength")),
+            "clarification_bias": _safe_float(control.get("clarification_bias")),
+            "repair_bias": _safe_float(control.get("repair_bias")),
+            "memory_retrieval_gain": _safe_float(control.get("memory_retrieval_gain")),
+            "reasons": _safe_list(control.get("reasons"), limit=4),
+        }
 
     prior_items: list[str] = []
     for key in ("summary", "current_prior", "stable_patterns", "reusable_patterns"):
@@ -292,6 +305,17 @@ def format_compressed_cognitive_guidance(guidance: Mapping[str, object]) -> list
     conflicts = memory.get("memory_conflict_count")
     if conflicts not in (None, "", 0):
         lines.append(f"Memory use: {conflicts} compact conflict signal(s); avoid over-relying on memory.")
+
+    control = _as_mapping(guidance.get("bounded_control"))
+    reasons = _safe_list(control.get("reasons"), limit=4)
+    if reasons:
+        lines.append("Bounded control: " + ", ".join(reasons) + ".")
+    clarification = _safe_float(control.get("clarification_bias"))
+    if clarification is not None and clarification > 0:
+        lines.append("Bounded control: favor clarification when the missing constraint blocks confidence.")
+    repair = _safe_float(control.get("repair_bias"))
+    if repair is not None and repair > 0:
+        lines.append("Bounded control: favor repair before escalating the response.")
 
     if guidance.get("hidden_intent_constraint") == "observable_low_confidence_only":
         lines.append("Hidden-intent cues are low-confidence observable signals; avoid motive claims.")

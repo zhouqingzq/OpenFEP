@@ -6,13 +6,19 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from ..cognitive_events import CognitiveEventBus, make_cognitive_event
-from ..cognitive_paths import cognitive_paths_from_diagnostics, path_competition_summary
+from ..cognitive_control import CognitiveControlAdapter, MetaControlPolicy
+from ..cognitive_paths import (
+    cognitive_path_candidates_from_diagnostics,
+    cognitive_paths_from_diagnostics,
+    path_competition_summary,
+    select_cognitive_path_candidate,
+)
 from ..cognition import CognitiveLoop
 from ..memory_dynamics import (
     consolidate_successful_path_pattern,
     record_failed_path_outcome,
 )
-from ..meta_control import derive_meta_control_signal
+from ..meta_control import MetaControlSignal, derive_meta_control_signal
 from ..meta_control_guidance import (
     generate_meta_control_guidance,
     summarize_affective_maintenance,
@@ -91,6 +97,55 @@ def _candidate_path_summary(diagnostics: Any, *, limit: int = 3) -> list[dict[st
             }
         )
     return summary
+
+
+def _merge_meta_control_signals(
+    base: MetaControlSignal,
+    control: MetaControlSignal,
+) -> MetaControlSignal:
+    return MetaControlSignal(
+        signal_id="m7-combined-meta-control",
+        memory_retrieval_gain_multiplier=min(
+            base.memory_retrieval_gain_multiplier,
+            control.memory_retrieval_gain_multiplier,
+        ),
+        retrieval_k_delta=min(base.retrieval_k_delta, control.retrieval_k_delta),
+        lambda_energy_multiplier=max(
+            base.lambda_energy_multiplier,
+            control.lambda_energy_multiplier,
+        ),
+        lambda_attention_multiplier=max(
+            base.lambda_attention_multiplier,
+            control.lambda_attention_multiplier,
+        ),
+        lambda_memory_multiplier=min(
+            base.lambda_memory_multiplier,
+            control.lambda_memory_multiplier,
+        ),
+        lambda_control_multiplier=max(
+            base.lambda_control_multiplier,
+            control.lambda_control_multiplier,
+        ),
+        beta_efe_multiplier=max(base.beta_efe_multiplier, control.beta_efe_multiplier),
+        effective_temperature_delta=round(
+            min(
+                0.35,
+                max(
+                    base.effective_temperature_delta,
+                    control.effective_temperature_delta,
+                ),
+            ),
+            6,
+        ),
+        candidate_limit=(
+            min(base.candidate_limit, control.candidate_limit)
+            if base.candidate_limit is not None and control.candidate_limit is not None
+            else base.candidate_limit
+            if base.candidate_limit is not None
+            else control.candidate_limit
+        ),
+        reasons=tuple(dict.fromkeys([*base.reasons, *control.reasons])),
+    )
 
 
 def run_conversation(
@@ -249,6 +304,10 @@ def run_conversation(
             "event_type": "dialogue_turn",
             "master_seed": int(master_seed),
         }
+        ctx = CognitiveControlAdapter.decision_context(
+            ctx,
+            getattr(agent, "active_cognitive_control_signal", None),
+        )
         result = agent.decision_cycle_from_dict(channels, context=ctx)
         diagnostics = result.get("diagnostics")
         publish_event(
@@ -331,7 +390,33 @@ def run_conversation(
             diagnostics=diagnostics,
         )
         agent.latest_meta_control_signal = meta_control_signal
-        agent.active_meta_control_signal = meta_control_signal
+        cognitive_control_signal = MetaControlPolicy().derive(
+            cognitive_state,
+            diagnostics,
+            path_summary,
+            previous_outcome=outcome_label or "",
+        )
+        agent.latest_cognitive_control_signal = cognitive_control_signal
+        agent.active_cognitive_control_signal = cognitive_control_signal
+        agent.active_meta_control_signal = _merge_meta_control_signals(
+            meta_control_signal,
+            CognitiveControlAdapter.to_meta_control_signal(cognitive_control_signal),
+        )
+        cognitive_control_guidance = CognitiveControlAdapter.compact_prompt_guidance(
+            cognitive_control_signal
+        )
+        controlled_candidates = (
+            cognitive_path_candidates_from_diagnostics(
+                diagnostics,
+                meta_control=cognitive_state.to_dict().get("meta_control", {}),
+                cognitive_control=cognitive_control_signal,
+            )
+            if diagnostics is not None
+            else []
+        )
+        controlled_path_selection = select_cognitive_path_candidate(
+            controlled_candidates
+        )
         affective_maintenance_summary = summarize_affective_maintenance(
             meta_control_guidance
         )
@@ -343,6 +428,7 @@ def run_conversation(
             "cognitive_paths",
             "path_competition",
             "meta_control_guidance",
+            "cognitive_control_guidance",
             "affective_guidance",
         ]
         if session_context.get("self_prior_summary") is not None:
@@ -365,6 +451,7 @@ def run_conversation(
             self_prior_summary=session_context.get("self_prior_summary"),
             path_summary=path_summary,
             meta_control_guidance=meta_control_guidance_dict,
+            cognitive_control_guidance=cognitive_control_guidance,
             affective_state=cognitive_state.affect,
             affective_guidance=affective_maintenance_summary,
             prompt_budget=prompt_budget_dict,
@@ -395,6 +482,7 @@ def run_conversation(
                     for key, value in meta_control_guidance_dict.items()
                     if isinstance(value, bool) and value
                 ],
+                "cognitive_control_guidance": cognitive_control_guidance,
                 "affective_maintenance_summary": affective_maintenance_summary,
                 "included_signals": included_signals,
                 "omitted_signals": fep_capsule.get("omitted_signals") or [],
@@ -412,6 +500,7 @@ def run_conversation(
         dialogue_context["efe_margin"] = efe_margin
         dialogue_context["fep_prompt_capsule"] = fep_capsule
         dialogue_context["meta_control_guidance"] = meta_control_guidance_dict
+        dialogue_context["cognitive_control_guidance"] = cognitive_control_guidance
 
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
@@ -451,11 +540,30 @@ def run_conversation(
         generation_diagnostics["selected_action"] = action
         generation_diagnostics["meta_control_guidance"] = meta_control_guidance_dict
         generation_diagnostics["meta_control_signal"] = meta_control_signal.to_dict()
+        generation_diagnostics["cognitive_control_signal"] = (
+            cognitive_control_signal.to_dict()
+        )
+        generation_diagnostics["cognitive_path_selection"] = (
+            controlled_path_selection.to_dict()
+        )
+        selected_controlled_path = controlled_path_selection.selected_path
+        generation_diagnostics["action_shift_candidate"] = bool(
+            selected_controlled_path is not None
+            and str(getattr(selected_controlled_path, "proposed_action", ""))
+            != action
+            and cognitive_control_signal.clarification_bias >= 0.18
+            and (
+                cognitive_state.gaps.blocking_gaps
+                or cognitive_state.gaps.contextual_gaps
+            )
+            and cognitive_state.candidate_paths.low_margin
+        )
         generation_diagnostics["affective_maintenance_summary"] = (
             affective_maintenance_summary
         )
         generation_diagnostics["prompt_capsule_guidance"] = {
             "meta_control_guidance": fep_capsule.get("meta_control_guidance") or {},
+            "cognitive_control_guidance": fep_capsule.get("cognitive_control_guidance") or {},
             "affective_guidance": fep_capsule.get("affective_guidance") or {},
             "memory_use_guidance": fep_capsule.get("memory_use_guidance") or {},
             "omitted_signals": fep_capsule.get("omitted_signals") or [],
