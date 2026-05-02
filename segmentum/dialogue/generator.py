@@ -7,6 +7,10 @@ import time
 from pathlib import Path
 from typing import Mapping, Protocol, Sequence
 
+from .cognitive_guidance import (
+    build_compressed_cognitive_guidance,
+    format_compressed_cognitive_guidance,
+)
 from .seed_utils import pick_index
 from .types import TranscriptUtterance
 from .utils import clamp as _clamp01
@@ -698,37 +702,8 @@ def _build_system_prompt(
 
 def _format_compact_capsule_guidance(capsule: Mapping[str, object]) -> str:
     """Render prompt-facing capsule hints without raw internals."""
-    lines: list[str] = []
-    meta = capsule.get("meta_control_guidance")
-    if isinstance(meta, Mapping):
-        flags = [
-            str(key)
-            for key, value in sorted(meta.items())
-            if isinstance(value, bool) and value
-        ][:8]
-        if flags:
-            lines.append("Meta-control flags: " + ", ".join(flags))
-        notes = meta.get("guidance_notes", [])
-        if isinstance(notes, list) and notes:
-            lines.append("Meta-control notes: " + " | ".join(str(item)[:120] for item in notes[:3]))
-    affective = capsule.get("affective_guidance")
-    if isinstance(affective, Mapping):
-        actions = affective.get("actions", [])
-        if isinstance(actions, list) and actions:
-            lines.append("Affective stance constraints: " + ", ".join(str(item) for item in actions[:4]))
-    memory = capsule.get("memory_use_guidance")
-    if isinstance(memory, Mapping) and memory.get("reduce_memory_reliance"):
-        lines.append("Memory use: treat recalled context as tentative.")
-    prior = capsule.get("self_prior_summary")
-    if isinstance(prior, Mapping):
-        summary = prior.get("summary") or prior.get("current_prior")
-        if summary:
-            lines.append("Compact self-prior for stance only: " + str(summary)[:160])
-    omitted = capsule.get("omitted_signals")
-    if isinstance(omitted, list) and omitted:
-        lines.append("Omitted internal signals: " + ", ".join(str(item) for item in omitted[:6]))
-    if capsule.get("hidden_intent_label") in {"clear_subtext", "possible_subtext"}:
-        lines.append("Hidden-intent cues are low-confidence observable signals; avoid motive claims.")
+    guidance = build_compressed_cognitive_guidance(capsule)
+    lines = format_compressed_cognitive_guidance(guidance)
     return "\n".join(f"- {line}" for line in lines)
 
 
@@ -1025,7 +1000,9 @@ class RuleBasedGenerator:
         }
         fep_capsule = dialogue_context.get("fep_prompt_capsule")
         if isinstance(fep_capsule, Mapping):
+            compressed_guidance = build_compressed_cognitive_guidance(fep_capsule)
             generation_diagnostics["prompt_capsule_guidance"] = {
+                "compressed_cognitive_guidance": compressed_guidance,
                 "meta_control_guidance": fep_capsule.get("meta_control_guidance") or {},
                 "affective_guidance": fep_capsule.get("affective_guidance") or {},
                 "memory_use_guidance": fep_capsule.get("memory_use_guidance") or {},

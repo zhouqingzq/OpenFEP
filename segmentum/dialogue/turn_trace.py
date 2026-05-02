@@ -84,6 +84,7 @@ _GENERATION_ALLOWED_KEYS = {
     "llm_tokens_prompt",
     "llm_tokens_total",
     "meta_control_guidance",
+    "meta_control_signal",
     "partner_anchor_used",
     "policy_action_selection_lift_applied",
     "policy_context_bucket",
@@ -463,7 +464,9 @@ class TurnTrace:
                 observation_channels, diagnostics
             ),
             cognitive_state=(
-                _redact_mapping(cognitive_state.to_dict())
+                _redact_mapping(cognitive_state.to_legacy_dict())
+                if hasattr(cognitive_state, "to_legacy_dict")
+                else _redact_mapping(cognitive_state.to_dict())
                 if hasattr(cognitive_state, "to_dict")
                 else {}
             ),

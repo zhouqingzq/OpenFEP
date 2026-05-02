@@ -10,6 +10,10 @@ from __future__ import annotations
 from collections.abc import Mapping as ABCMapping, Sequence as ABCSequence
 from typing import TYPE_CHECKING, Any, Mapping, Sequence
 
+from ..cognitive_guidance import (
+    build_compressed_cognitive_guidance,
+    format_compressed_cognitive_guidance,
+)
 from ..fep_prompt import normalize_dialogue_outcome
 from ..generator import _format_history
 from ..types import TranscriptUtterance
@@ -899,6 +903,11 @@ def _predicted_outcome_phrase(outcome: str) -> str:
 
 
 def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
+    compressed = build_compressed_cognitive_guidance(capsule)
+    rendered = format_compressed_cognitive_guidance(compressed)
+    if rendered:
+        return rendered
+
     action = _capsule_str(capsule, "chosen_action", "ask_question")
     risk_label = _capsule_str(capsule, "chosen_risk_label", "low")
     uncertainty = _capsule_str(capsule, "decision_uncertainty", "low")

@@ -22,8 +22,15 @@ from .memory import (
     compute_total_surprise,
     suppress_legacy_memory_warnings,
 )
+from .memory_dynamics import (
+    consolidate_successful_path_pattern,
+    detect_memory_interference,
+    memory_overdominance_detected_from_retrieval,
+    record_failed_path_outcome,
+)
 from .memory_retrieval import RetrievalQuery
 from .memory_state import AgentStateVector, MemoryAwareAgentMixin
+from .meta_control import MetaControlSignal, adjust_memory_retrieval
 from .m4_cognitive_style import CognitiveStyleParameters
 from .memory_encoding import SalienceConfig
 from .narrative_types import EmbodiedNarrativeEpisode
@@ -949,6 +956,9 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.last_memory_context: dict[str, object] = {}
         self.memory_enabled: bool = memory_enabled
         self.last_retrieval_result: dict[str, object] = {}
+        self.latest_memory_consolidation: dict[str, object] = {}
+        self.active_meta_control_signal: MetaControlSignal | None = None
+        self.latest_meta_control_signal: MetaControlSignal | None = None
         self.memory_legacy_policy_bias_enabled: bool = True
         self.memory_action_rollups_enabled: bool = True
         self.memory_representation_prior_enabled: bool = True
@@ -1111,14 +1121,26 @@ class SegmentAgent(MemoryAwareAgentMixin):
             }
             return []
         self.sync_memory_awareness_to_long_term_memory()
+        base_gain = 0.25
+        latest_state = getattr(self, "latest_cognitive_state", None)
+        if latest_state is not None:
+            base_gain = float(
+                getattr(getattr(latest_state, "meta_control", None), "memory_retrieval_gain", 0.25)
+            )
+        adjustment = adjust_memory_retrieval(
+            k=k,
+            memory_retrieval_gain=base_gain,
+            signal=getattr(self, "active_meta_control_signal", None),
+        )
+        effective_k = int(adjustment.adjusted["k"])
         query = self._decision_retrieval_query(observed, baseline_prediction, baseline_errors)
         result = self.retrieve_for_decision(
             query,
             self.cycle,
             current_mood=self.agent_state_vector.recent_mood_baseline,
-            k=k,
+            k=effective_k,
         )
-        top_candidates = result.candidates[:k]
+        top_candidates = result.candidates[:effective_k]
         projected_by_id = self.memory_store.legacy_payloads_for_entries(
             [c.entry for c in top_candidates]
         )
@@ -1137,8 +1159,19 @@ class SegmentAgent(MemoryAwareAgentMixin):
             similar_memories.append(payload)
         self.long_term_memory.last_retrieval_result = {
             "memory_backend": "memory_store",
+            "meta_control_adjustment": adjustment.to_dict(),
             **result.to_dict(),
         }
+        interference = detect_memory_interference(
+            retrieved_memories=similar_memories,
+            prediction_delta=getattr(self.last_decision_diagnostics, "prediction_delta", {}),
+        )
+        self.long_term_memory.last_retrieval_result["memory_interference"] = interference.to_dict()
+        self.long_term_memory.last_retrieval_result["memory_overdominance"] = (
+            memory_overdominance_detected_from_retrieval(
+                self.long_term_memory.last_retrieval_result
+            )
+        )
         self.last_retrieval_result = self.long_term_memory.last_retrieval_result
         return similar_memories
 
@@ -3703,6 +3736,15 @@ class SegmentAgent(MemoryAwareAgentMixin):
         diagnostics.structured_explanation["narrative_uncertainty"] = (
             self.latest_narrative_uncertainty.explanation_payload()
         )
+        diagnostics.reusable_cognitive_paths = list(
+            self.long_term_memory.reusable_cognitive_paths
+        )
+        retrieval_interference = self.last_retrieval_result.get("memory_interference")
+        if isinstance(retrieval_interference, Mapping):
+            diagnostics.memory_interference = dict(retrieval_interference)
+        diagnostics.memory_overdominance = bool(
+            self.last_retrieval_result.get("memory_overdominance", False)
+        )
         workspace_review = self.metacognitive_layer.review_self_consistency(
             chosen_assessment,
             workspace_state=self.last_workspace_state,
@@ -4131,6 +4173,28 @@ class SegmentAgent(MemoryAwareAgentMixin):
                     ),
                 )
         self.action_history.append(action.name)
+        patterns_before = list(self.long_term_memory.reusable_cognitive_paths)
+        patterns_after, updated_pattern = consolidate_successful_path_pattern(
+            patterns_before,
+            diagnostics=self.last_decision_diagnostics,
+            outcome_label=memory_decision.predicted_outcome,
+            cycle=self.cycle,
+            outcome=outcome,
+        )
+        if updated_pattern is None:
+            patterns_after, updated_pattern = record_failed_path_outcome(
+                patterns_before,
+                diagnostics=self.last_decision_diagnostics,
+                outcome_label=memory_decision.predicted_outcome,
+                cycle=self.cycle,
+            )
+        self.long_term_memory.reusable_cognitive_paths = patterns_after
+        self.latest_memory_consolidation = {
+            "updated": updated_pattern is not None,
+            "pattern": dict(updated_pattern or {}),
+            "pattern_count": len(patterns_after),
+            "source": "integrate_outcome",
+        }
         self.action_history = self.action_history[-self.action_history_limit :]
         self.last_body_state_snapshot = dict(body_state)
         self.goal_stack.backfill_conflict_outcome(self.cycle, memory_decision.total_surprise)

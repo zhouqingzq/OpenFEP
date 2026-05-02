@@ -83,7 +83,13 @@ def _sample_state_and_trace(artifacts_dir: str | Path = "artifacts") -> dict[str
     )
     rows = _read_jsonl(trace_path)
     latest_state = agent.latest_cognitive_state
-    state_payload = latest_state.to_dict() if latest_state is not None else {}
+    state_payload = (
+        latest_state.to_legacy_dict()
+        if latest_state is not None and hasattr(latest_state, "to_legacy_dict")
+        else latest_state.to_dict()
+        if latest_state is not None
+        else {}
+    )
     _write_json(state_path, state_payload)
     trace_text = trace_path.read_text(encoding="utf-8")
     state_text = json.dumps(state_payload, ensure_ascii=False, sort_keys=True)

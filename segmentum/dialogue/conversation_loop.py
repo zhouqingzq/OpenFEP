@@ -7,7 +7,12 @@ from typing import TYPE_CHECKING, Any
 
 from ..cognitive_events import CognitiveEventBus, make_cognitive_event
 from ..cognitive_paths import cognitive_paths_from_diagnostics, path_competition_summary
-from ..cognitive_state import update_cognitive_state
+from ..cognition import CognitiveLoop
+from ..memory_dynamics import (
+    consolidate_successful_path_pattern,
+    record_failed_path_outcome,
+)
+from ..meta_control import derive_meta_control_signal
 from ..meta_control_guidance import (
     generate_meta_control_guidance,
     summarize_affective_maintenance,
@@ -127,6 +132,7 @@ def run_conversation(
         cycle_at_turn_start = int(agent.cycle)
         event_sequence = 0
         turn_events: list[object] = []
+        event_bus_for_turn = cognitive_event_bus or CognitiveEventBus()
 
         def publish_event(
             event_type: str,
@@ -138,8 +144,6 @@ def run_conversation(
             ttl: int = 1,
         ) -> None:
             nonlocal event_sequence
-            if cognitive_event_bus is None and trace_writer is None and conscious_writer is None:
-                return
             event = make_cognitive_event(
                 event_type=event_type,
                 turn_id=turn_id,
@@ -154,8 +158,7 @@ def run_conversation(
                 ttl=ttl,
             )
             turn_events.append(event)
-            if cognitive_event_bus is not None:
-                cognitive_event_bus.publish(event)
+            event_bus_for_turn.publish(event)
             event_sequence += 1
 
         obs_obj = observer.observe(
@@ -215,6 +218,29 @@ def run_conversation(
                 latest = agent.long_term_memory.episodes[-1]
                 if isinstance(latest, dict):
                     inject_outcome_semantics(latest, outcome)
+            if turns_out and turns_out[-1].diagnostics is not None:
+                patterns_before = list(agent.long_term_memory.reusable_cognitive_paths)
+                patterns_after, updated_pattern = consolidate_successful_path_pattern(
+                    patterns_before,
+                    diagnostics=turns_out[-1].diagnostics,
+                    outcome_label=outcome_label,
+                    cycle=cycle_at_turn_start,
+                )
+                if updated_pattern is None:
+                    patterns_after, updated_pattern = record_failed_path_outcome(
+                        patterns_before,
+                        diagnostics=turns_out[-1].diagnostics,
+                        outcome_label=outcome_label,
+                        cycle=cycle_at_turn_start,
+                    )
+                agent.long_term_memory.reusable_cognitive_paths = patterns_after
+                agent.latest_memory_consolidation = {
+                    "updated": updated_pattern is not None,
+                    "pattern": dict(updated_pattern or {}),
+                    "pattern_count": len(patterns_after),
+                    "source": "dialogue_outcome",
+                    "outcome_label": outcome_label,
+                }
 
         ctx = {
             "partner_uid": partner_uid,
@@ -274,14 +300,16 @@ def run_conversation(
             priority=0.75,
         )
 
-        cognitive_state = update_cognitive_state(
+        cognitive_loop_result = CognitiveLoop(event_bus_for_turn).consume_and_update(
             getattr(agent, "latest_cognitive_state", None),
-            events=tuple(turn_events),
+            turn_id=turn_id,
+            persona_id=persona_id,
             diagnostics=diagnostics,
             observation=channels,
             previous_outcome=outcome_label or "",
             self_prior_summary=session_context.get("self_prior_summary"),
         )
+        cognitive_state = cognitive_loop_result.state
         agent.latest_cognitive_state = cognitive_state
         path_summary = path_competition_summary(
             cognitive_paths_from_diagnostics(diagnostics)
@@ -297,6 +325,13 @@ def run_conversation(
             prompt_budget=prompt_budget if isinstance(prompt_budget, dict) else None,
         )
         meta_control_guidance_dict = meta_control_guidance.to_dict()
+        meta_control_signal = derive_meta_control_signal(
+            state=cognitive_state,
+            guidance=meta_control_guidance,
+            diagnostics=diagnostics,
+        )
+        agent.latest_meta_control_signal = meta_control_signal
+        agent.active_meta_control_signal = meta_control_signal
         affective_maintenance_summary = summarize_affective_maintenance(
             meta_control_guidance
         )
@@ -415,6 +450,7 @@ def run_conversation(
         generation_diagnostics["fep_prompt_capsule"] = fep_capsule
         generation_diagnostics["selected_action"] = action
         generation_diagnostics["meta_control_guidance"] = meta_control_guidance_dict
+        generation_diagnostics["meta_control_signal"] = meta_control_signal.to_dict()
         generation_diagnostics["affective_maintenance_summary"] = (
             affective_maintenance_summary
         )

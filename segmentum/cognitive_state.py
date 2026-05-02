@@ -23,6 +23,12 @@ from dataclasses import MISSING, asdict, dataclass, fields, is_dataclass
 from typing import Mapping, Sequence, TypeVar
 
 from .cognitive_events import CognitiveEvent
+from .cognitive_paths import (
+    cognitive_path_candidates_from_diagnostics,
+    select_cognitive_path_candidate,
+)
+from .memory_dynamics import detect_memory_interference, reusable_path_summary
+from .meta_control import adjust_path_scoring_meta_control, derive_meta_control_signal
 from .types import DecisionDiagnostics
 
 
@@ -106,6 +112,16 @@ class MemoryState:
 
 
 @dataclass(frozen=True)
+class Gap:
+    gap_id: str
+    kind: str
+    status: str
+    description: str
+    severity: float
+    source: str
+
+
+@dataclass(frozen=True)
 class GapState:
     epistemic_gaps: list[str]
     contextual_gaps: list[str]
@@ -113,6 +129,7 @@ class GapState:
     resource_gaps: list[str]
     social_gaps: list[str]
     blocking_gaps: list[str]
+    structured_gaps: list[Gap]
 
 
 @dataclass(frozen=True)
@@ -142,28 +159,176 @@ class MetaControlState:
 
 
 @dataclass(frozen=True)
+class ResourceState:
+    attention_budget: int
+    selected_event_count: int
+    cognitive_load: float
+    overload: bool
+    pressure_sources: list[str]
+
+
+@dataclass(frozen=True)
+class UserState:
+    explicit_signal: str
+    inferred_intent: str
+    ambiguity: float
+    relationship_depth: float
+    conflict_tension: float
+
+
+@dataclass(frozen=True)
+class WorldState:
+    salient_conditions: list[str]
+    observable_channels: dict[str, float]
+    uncertainty: float
+
+
+@dataclass(frozen=True)
+class CandidatePathState:
+    selected_action: str
+    candidate_count: int
+    top_candidates: list[dict[str, object]]
+    policy_margin: float
+    efe_margin: float
+    low_margin: bool
+    alternative_selection: str
+    selection_margin: float
+    uncertainty: float
+    low_confidence_reason: str
+    effective_temperature: float
+
+
+@dataclass(frozen=True)
 class CognitiveStateMVP:
     task: TaskState
     memory: MemoryState
     gaps: GapState
     affect: AffectiveState
     meta_control: MetaControlState
+    resource: ResourceState
+    user: UserState
+    world: WorldState
+    candidate_paths: CandidatePathState
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
+
+    def to_legacy_dict(self) -> dict[str, object]:
+        payload = asdict(self)
+        gaps = dict(payload.get("gaps", {}))
+        gaps.pop("structured_gaps", None)
+        payload["gaps"] = gaps
+        return {
+            key: payload[key]
+            for key in ("task", "memory", "gaps", "affect", "meta_control")
+        }
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "CognitiveStateMVP":
         return cls(
             task=_dataclass_from_dict(TaskState, _mapping(payload.get("task"))),
             memory=_dataclass_from_dict(MemoryState, _mapping(payload.get("memory"))),
-            gaps=_dataclass_from_dict(GapState, _mapping(payload.get("gaps"))),
+            gaps=_gap_state_from_dict(_mapping(payload.get("gaps"))),
             affect=_dataclass_from_dict(AffectiveState, _mapping(payload.get("affect"))),
             meta_control=_dataclass_from_dict(
                 MetaControlState,
                 _mapping(payload.get("meta_control")),
             ),
+            resource=_dataclass_from_dict(
+                ResourceState,
+                _mapping(payload.get("resource"))
+                or asdict(_default_resource_state()),
+            ),
+            user=_dataclass_from_dict(
+                UserState,
+                _mapping(payload.get("user"))
+                or asdict(_default_user_state()),
+            ),
+            world=_dataclass_from_dict(
+                WorldState,
+                _mapping(payload.get("world"))
+                or asdict(_default_world_state()),
+            ),
+            candidate_paths=_dataclass_from_dict(
+                CandidatePathState,
+                _mapping(payload.get("candidate_paths"))
+                or asdict(_default_candidate_path_state()),
+            ),
         )
+
+
+def _default_resource_state() -> ResourceState:
+    return ResourceState(
+        attention_budget=8,
+        selected_event_count=0,
+        cognitive_load=0.0,
+        overload=False,
+        pressure_sources=[],
+    )
+
+
+def _default_user_state() -> UserState:
+    return UserState(
+        explicit_signal="",
+        inferred_intent="unknown",
+        ambiguity=0.5,
+        relationship_depth=0.0,
+        conflict_tension=0.0,
+    )
+
+
+def _default_world_state() -> WorldState:
+    return WorldState(
+        salient_conditions=[],
+        observable_channels={},
+        uncertainty=0.0,
+    )
+
+
+def _default_candidate_path_state() -> CandidatePathState:
+    return CandidatePathState(
+        selected_action="",
+        candidate_count=0,
+        top_candidates=[],
+        policy_margin=1.0,
+        efe_margin=1.0,
+        low_margin=False,
+        alternative_selection="",
+        selection_margin=1.0,
+        uncertainty=0.0,
+        low_confidence_reason="",
+        effective_temperature=0.35,
+    )
+
+
+def _gap_from_dict(payload: Mapping[str, object]) -> Gap:
+    return Gap(
+        gap_id=_text(payload.get("gap_id"), limit=80),
+        kind=_text(payload.get("kind"), limit=32),
+        status=_text(payload.get("status"), limit=32) or "soft",
+        description=_text(payload.get("description"), limit=160),
+        severity=_clamp(payload.get("severity", 0.0)),
+        source=_text(payload.get("source"), limit=80),
+    )
+
+
+def _gap_state_from_dict(payload: Mapping[str, object] | None) -> GapState:
+    source = dict(payload or {})
+    structured_raw = source.get("structured_gaps", [])
+    structured = [
+        _gap_from_dict(item)
+        for item in (structured_raw if isinstance(structured_raw, list) else [])
+        if isinstance(item, Mapping)
+    ][:12]
+    return GapState(
+        epistemic_gaps=_strings(source.get("epistemic_gaps")),
+        contextual_gaps=_strings(source.get("contextual_gaps")),
+        instrumental_gaps=_strings(source.get("instrumental_gaps")),
+        resource_gaps=_strings(source.get("resource_gaps")),
+        social_gaps=_strings(source.get("social_gaps")),
+        blocking_gaps=_strings(source.get("blocking_gaps")),
+        structured_gaps=structured,
+    )
 
 
 def default_cognitive_state() -> CognitiveStateMVP:
@@ -190,6 +355,7 @@ def default_cognitive_state() -> CognitiveStateMVP:
             resource_gaps=[],
             social_gaps=[],
             blocking_gaps=[],
+            structured_gaps=[],
         ),
         affect=AffectiveState(
             mood_valence=0.5,
@@ -213,6 +379,10 @@ def default_cognitive_state() -> CognitiveStateMVP:
             memory_retrieval_gain=0.25,
             abstraction_gain=0.2,
         ),
+        resource=_default_resource_state(),
+        user=_default_user_state(),
+        world=_default_world_state(),
+        candidate_paths=_default_candidate_path_state(),
     )
 
 
@@ -312,12 +482,23 @@ def _derive_memory(
     if summary:
         reusable.append(summary)
     reusable.extend(_self_prior_notes(self_prior_summary))
+    for pattern in list(getattr(diagnostics, "reusable_cognitive_paths", []) or [])[:4]:
+        if isinstance(pattern, Mapping):
+            reusable.append(reusable_path_summary(pattern))
     prediction_delta = dict(getattr(diagnostics, "prediction_delta", {}) or {})
     conflicts = [
         f"memory prediction conflict: {key}"
         for key, value in sorted(prediction_delta.items())
         if abs(float(value)) >= 0.35
     ][:4]
+    interference = detect_memory_interference(
+        diagnostics=diagnostics,
+        retrieved_memories=list(getattr(diagnostics, "retrieved_memories", []) or []),
+        prediction_delta=prediction_delta,
+    )
+    if interference.detected:
+        for reason in interference.reasons:
+            conflicts.append(f"{interference.kind}: {reason}")
     abstraction = [
         str(key)
         for key, value in sorted(prediction_delta.items())
@@ -333,7 +514,9 @@ def _derive_memory(
         helpfulness += 0.15
     if reusable:
         helpfulness += 0.10
-    if conflicts:
+    if interference.detected:
+        helpfulness -= 0.10 + (interference.severity * 0.20)
+    elif conflicts:
         helpfulness -= 0.20
     return MemoryState(
         activated_memories=activated,
@@ -365,26 +548,80 @@ def _derive_gaps(
     resource: list[str] = []
     social: list[str] = []
     blocking: list[str] = []
+    structured: list[Gap] = []
+
+    def add_gap(
+        kind: str,
+        status: str,
+        description: str,
+        severity: float,
+        source: str,
+    ) -> None:
+        structured.append(
+            Gap(
+                gap_id=f"{kind}-{len(structured) + 1:02d}",
+                kind=kind,
+                status=status,
+                description=description,
+                severity=_clamp(severity),
+                source=source,
+            )
+        )
 
     if policy_margin < 0.12 or efe_margin < 0.12:
-        epistemic.append("low decision margin between candidate actions")
+        text = "low decision margin between candidate actions"
+        epistemic.append(text)
+        add_gap("epistemic", "soft", text, 1.0 - min(policy_margin, efe_margin), "decision_margin")
     if prediction_error >= 0.55:
-        epistemic.append("high prediction error needs verification")
+        text = "high prediction error needs verification"
+        epistemic.append(text)
+        add_gap("epistemic", "soft", text, prediction_error, "prediction_error")
+    elif prediction_error >= 0.35:
+        add_gap(
+            "epistemic",
+            "latent",
+            "moderate prediction error should be monitored",
+            prediction_error,
+            "prediction_error",
+        )
     if hidden_intent >= 0.72:
-        contextual.append("user intent signal is ambiguous")
+        text = "user intent signal is ambiguous"
+        contextual.append(text)
+        add_gap("contextual", "soft", text, hidden_intent, "hidden_intent")
     if missing_context >= 0.5 or contextual_uncertainty >= 0.5:
-        contextual.append("missing context for confident response")
+        text = "missing context for confident response"
+        contextual.append(text)
+        add_gap(
+            "contextual",
+            "soft",
+            text,
+            max(missing_context, contextual_uncertainty),
+            "context",
+        )
     if conflict >= 0.6:
-        social.append("high interpersonal conflict tension")
+        text = "high interpersonal conflict tension"
+        social.append(text)
+        add_gap("social", "soft", text, conflict, "conflict_tension")
     if hidden_intent >= 0.78 and social_depth <= 0.25:
-        social.append("low relational context for hidden-intent signal")
+        text = "low relational context for hidden-intent signal"
+        social.append(text)
+        add_gap("social", "soft", text, hidden_intent, "relationship_depth")
     if _body_pressure(observation) >= 0.65:
-        resource.append("body/resource pressure is elevated")
+        pressure = _body_pressure(observation)
+        text = "body/resource pressure is elevated"
+        resource.append(text)
+        add_gap("resource", "soft", text, pressure, "resource_pressure")
     if _outcome_negative(previous_outcome):
-        instrumental.append("previous outcome indicates failed or incomplete strategy")
-        blocking.append("prior failure should be repaired before escalation")
+        instrumental_text = "previous outcome indicates failed or incomplete strategy"
+        blocking_text = "prior failure should be repaired before escalation"
+        instrumental.append(instrumental_text)
+        blocking.append(blocking_text)
+        add_gap("instrumental", "soft", instrumental_text, 0.72, "previous_outcome")
+        add_gap("instrumental", "blocking", blocking_text, 0.82, "previous_outcome")
     if bool(getattr(diagnostics, "repair_triggered", False)):
-        blocking.append("identity or commitment repair is active")
+        text = "identity or commitment repair is active"
+        blocking.append(text)
+        add_gap("instrumental", "blocking", text, 0.9, "repair_trigger")
 
     return GapState(
         epistemic_gaps=epistemic[:5],
@@ -393,6 +630,151 @@ def _derive_gaps(
         resource_gaps=resource[:5],
         social_gaps=social[:5],
         blocking_gaps=blocking[:5],
+        structured_gaps=structured[:12],
+    )
+
+
+def _derive_resource(
+    *,
+    events: Sequence[CognitiveEvent],
+    observation: Mapping[str, float],
+    gaps: GapState,
+) -> ResourceState:
+    pressure = _body_pressure(observation)
+    pressure_sources = [
+        key
+        for key in ("fatigue", "fatigue_pressure", "stress", "danger", "threat", "urgency")
+        if _clamp(observation.get(key, 0.0)) >= 0.5
+    ]
+    selected_event_count = len(events)
+    cognitive_load = _clamp(
+        (selected_event_count / 8.0)
+        + pressure * 0.45
+        + (len(gaps.structured_gaps) / 12.0) * 0.25
+    )
+    return ResourceState(
+        attention_budget=8,
+        selected_event_count=selected_event_count,
+        cognitive_load=cognitive_load,
+        overload=bool(cognitive_load >= 0.82 or pressure >= 0.85),
+        pressure_sources=pressure_sources[:6],
+    )
+
+
+def _derive_user(
+    *,
+    events: Sequence[CognitiveEvent],
+    observation: Mapping[str, float],
+) -> UserState:
+    explicit_signal = _event_value(events, "current_turn")
+    if not explicit_signal:
+        explicit_signal = _event_value(events, "selected_action")
+    ambiguity = max(
+        _clamp(observation.get("hidden_intent", 0.5)),
+        _clamp(observation.get("missing_context", 0.0)),
+        _clamp(observation.get("contextual_uncertainty", 0.0)),
+    )
+    if ambiguity >= 0.7:
+        inferred_intent = "ambiguous"
+    elif _clamp(observation.get("conflict_tension", 0.0)) >= 0.6:
+        inferred_intent = "repair_needed"
+    else:
+        inferred_intent = "respond"
+    return UserState(
+        explicit_signal=explicit_signal,
+        inferred_intent=inferred_intent,
+        ambiguity=_clamp(ambiguity),
+        relationship_depth=_clamp(observation.get("relationship_depth", 0.0)),
+        conflict_tension=_clamp(observation.get("conflict_tension", 0.0)),
+    )
+
+
+def _derive_world(
+    *,
+    diagnostics: DecisionDiagnostics | None,
+    observation: Mapping[str, float],
+) -> WorldState:
+    salient = [
+        key
+        for key, value in sorted(
+            observation.items(),
+            key=lambda item: (-abs(float(item[1])), item[0]),
+        )
+        if abs(float(value)) >= 0.5
+    ][:8]
+    observable = {
+        str(key): _clamp(value)
+        for key, value in sorted(observation.items())
+        if abs(float(value)) >= 0.25
+    }
+    uncertainty = max(
+        _clamp(getattr(diagnostics, "prediction_error", 0.0)),
+        _clamp(observation.get("missing_context", 0.0)),
+        _clamp(observation.get("contextual_uncertainty", 0.0)),
+    )
+    return WorldState(
+        salient_conditions=salient,
+        observable_channels=observable,
+        uncertainty=_clamp(uncertainty),
+    )
+
+
+def _derive_candidate_paths(
+    diagnostics: DecisionDiagnostics | None,
+    meta_control: MetaControlState,
+    resource: ResourceState | None = None,
+) -> CandidatePathState:
+    ranked = list(getattr(diagnostics, "ranked_options", []) or [])
+    selected = _text(getattr(getattr(diagnostics, "chosen", None), "choice", ""))
+    signal = derive_meta_control_signal(
+        state={"resource": asdict(resource)} if resource is not None else None,
+        diagnostics=diagnostics,
+    )
+    path_adjustment = adjust_path_scoring_meta_control(meta_control, signal)
+    adjusted_meta_control = path_adjustment.adjusted
+    candidate_limit = int(adjusted_meta_control.get("candidate_limit", 5))
+    candidates = (
+        cognitive_path_candidates_from_diagnostics(
+            diagnostics,
+            meta_control=adjusted_meta_control,
+            max_paths=candidate_limit,
+        )
+        if diagnostics is not None
+        else []
+    )
+    selection = select_cognitive_path_candidate(candidates)
+    top_candidates = [
+        {
+            "action": candidate.proposed_action,
+            "policy_score": _clamp(candidate.source_policy_score),
+            "expected_free_energy": _clamp(candidate.expected_free_energy),
+            "total_cost": round(float(candidate.total_cost), 6),
+            "posterior_weight": round(float(candidate.posterior_weight), 6),
+            "cost_components": {
+                key: round(float(value), 6)
+                for key, value in candidate.cost_components.items()
+            },
+        }
+        for candidate in candidates[:3]
+    ]
+    policy_margin = _policy_margin(diagnostics)
+    efe_margin = _efe_margin(diagnostics)
+    return CandidatePathState(
+        selected_action=selected,
+        candidate_count=len(ranked),
+        top_candidates=top_candidates,
+        policy_margin=policy_margin,
+        efe_margin=efe_margin,
+        low_margin=bool(policy_margin < 0.12 or efe_margin < 0.12),
+        alternative_selection=(
+            selection.selected_path.proposed_action
+            if selection.selected_path is not None
+            else ""
+        ),
+        selection_margin=round(float(selection.selection_margin), 6),
+        uncertainty=round(float(selection.uncertainty), 6),
+        low_confidence_reason=selection.low_confidence_reason,
+        effective_temperature=round(float(selection.effective_temperature), 6),
     )
 
 
@@ -564,12 +946,30 @@ def update_cognitive_state(
         affect=affect,
         previous_outcome=previous_outcome,
     )
+    resource = _derive_resource(
+        events=events,
+        observation=safe_observation,
+        gaps=gaps,
+    )
+    user = _derive_user(
+        events=events,
+        observation=safe_observation,
+    )
+    world = _derive_world(
+        diagnostics=diagnostics,
+        observation=safe_observation,
+    )
+    candidate_paths = _derive_candidate_paths(diagnostics, meta_control, resource)
     state = CognitiveStateMVP(
         task=task,
         memory=memory,
         gaps=gaps,
         affect=affect,
         meta_control=meta_control,
+        resource=resource,
+        user=user,
+        world=world,
+        candidate_paths=candidate_paths,
     )
     if is_dataclass(state):
         return state

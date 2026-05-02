@@ -138,6 +138,7 @@ class CognitiveEvent:
 class CognitiveEventBus:
     def __init__(self, events: tuple[CognitiveEvent, ...] = ()) -> None:
         self._events: list[CognitiveEvent] = list(events)
+        self._consumed_event_ids: list[str] = []
 
     def publish(self, event: CognitiveEvent) -> CognitiveEvent:
         self._events.append(event)
@@ -145,6 +146,9 @@ class CognitiveEventBus:
 
     def events(self) -> tuple[CognitiveEvent, ...]:
         return tuple(self._events)
+
+    def consumed_event_ids(self) -> tuple[str, ...]:
+        return tuple(self._consumed_event_ids)
 
     def filter(
         self,
@@ -165,6 +169,31 @@ class CognitiveEventBus:
         if persona_id is not None:
             selected = [event for event in selected if event.persona_id == persona_id]
         return tuple(selected)
+
+    def consume(
+        self,
+        *,
+        turn_id: str | None = None,
+        persona_id: str | None = None,
+        event_type: str | None = None,
+        min_salience: float | None = None,
+        include_expired: bool = False,
+    ) -> tuple[CognitiveEvent, ...]:
+        selected = self.filter(
+            event_type=event_type,
+            min_salience=min_salience,
+            persona_id=persona_id,
+        )
+        if turn_id is not None:
+            selected = tuple(event for event in selected if event.turn_id == turn_id)
+        if not include_expired:
+            selected = tuple(event for event in selected if event.ttl > 0)
+        seen = set(self._consumed_event_ids)
+        for event in selected:
+            if event.event_id not in seen:
+                self._consumed_event_ids.append(event.event_id)
+                seen.add(event.event_id)
+        return selected
 
     def clear_expired(self) -> None:
         self._events = [event for event in self._events if event.ttl > 0]

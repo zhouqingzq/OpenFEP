@@ -340,6 +340,7 @@ class LongTermMemory:
     episodes: list[dict] = field(default_factory=list)
     semantic_patterns: list[dict] = field(default_factory=list)
     semantic_schemas: list[dict] = field(default_factory=list)
+    reusable_cognitive_paths: list[dict[str, object]] = field(default_factory=list)
     max_episodes: int = 1024
     surprise_threshold: float = 0.40
     duplicate_similarity_threshold: float = 0.999
@@ -1644,6 +1645,7 @@ class LongTermMemory:
             "episodes": list(self.episodes),
             "semantic_patterns": list(self.semantic_patterns),
             "semantic_schemas": list(self.semantic_schemas),
+            "reusable_cognitive_paths": list(self.reusable_cognitive_paths),
             "max_episodes": self.max_episodes,
             "surprise_threshold": self.surprise_threshold,
             "duplicate_similarity_threshold": self.duplicate_similarity_threshold,
@@ -1698,6 +1700,11 @@ class LongTermMemory:
             episodes=list(payload.get("episodes", [])),
             semantic_patterns=list(payload.get("semantic_patterns", [])),
             semantic_schemas=list(payload.get("semantic_schemas", [])),
+            reusable_cognitive_paths=[
+                dict(item)
+                for item in list(payload.get("reusable_cognitive_paths", []))
+                if isinstance(item, dict)
+            ],
             max_episodes=int(payload.get("max_episodes", 1024)),
             surprise_threshold=float(payload.get("surprise_threshold", 0.40)),
             duplicate_similarity_threshold=float(
