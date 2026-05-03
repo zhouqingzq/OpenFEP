@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from segmentum.memory_anchored import (
@@ -590,6 +592,62 @@ def test_rulebased_generator_repair_uses_conservative_template():
     # Diagnostics must record repair
     diag = gen.last_diagnostics
     assert diag.get("memory_repair_active") is True
+
+
+def test_llm_generator_prepends_memory_repair_to_user_message(monkeypatch):
+    """M8.5: Chat-style prompt overrides must still send repair text in the user message."""
+    import requests
+
+    from segmentum.dialogue.generator import LLMGenerator
+
+    captured: dict[str, object] = {}
+
+    def fake_post(*_args, **kwargs):
+        captured["json"] = kwargs.get("json")
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.json.return_value = {
+            "choices": [{"message": {"content": "OK."}}],
+            "usage": {},
+        }
+        return resp
+
+    # ASCII-only: stable across Windows/CI encodings (content assertions are structural).
+    repair = "[MEMORY_REPAIR] Rewrite shorter; avoid unanchored memory claims."
+
+    monkeypatch.setattr(requests, "post", fake_post)
+    monkeypatch.setattr(
+        LLMGenerator,
+        "_load_openrouter_config",
+        staticmethod(lambda: {"api_key": "test-key", "base_url": "https://example.invalid/v1"}),
+    )
+
+    gen = LLMGenerator()
+    gen.system_prompt = "<persona>test</persona>"
+    gen.user_message = "<conversation_history></conversation_history>\n\n<current_turn>\nhi\n</current_turn>"
+    gen.generate(
+        "empathize",
+        {
+            "observation": {"emotional_tone": 0.5, "conflict_tension": 0.0},
+            "current_turn": "hi",
+            "memory_repair_instruction": repair,
+        },
+        {},
+        [],
+        master_seed=0,
+        turn_index=0,
+    )
+
+    payload = captured.get("json")
+    assert isinstance(payload, dict), (
+        f"requests.post must receive json body; last_diagnostics={getattr(gen, 'last_diagnostics', {})}"
+    )
+    messages = payload.get("messages")
+    assert isinstance(messages, list) and len(messages) >= 2
+    user_content = str(messages[1].get("content", ""))
+    assert user_content.startswith(repair.strip())
+    assert "\n\n---\n\n" in user_content
+    assert "<current_turn>" in user_content
 
 
 # ── M8.5 Remediation: anchored item pruning ───────────────────────────────
