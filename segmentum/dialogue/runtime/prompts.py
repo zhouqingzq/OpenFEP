@@ -847,12 +847,12 @@ def _format_memory_context(mem_dict: dict[str, list[str]]) -> str:
         if has_anchored:
             parts.append("可显式引用：")
         else:
-            parts.append("可以在对话中自然提起的记忆：")
+            parts.append("以下历史片段仅作为语境线索，不是可直接断言的用户事实：")
         for m in mem_dict["explicit_usable"]:
             parts.append(f"  - {m}")
         if not has_anchored:
-            parts.append("不要炫耀记忆——只在和当前话题强相关时才自然提起。"
-                         "显式提起时要轻：'你上次好像说过……'。不要说'根据我的记忆……'。")
+            parts.append("除非当前对话或 anchored memory 支持，不要把它们表述为确定事实。")
+            parts.append("若 legacy memory 与 anchored memory 冲突，以 anchored memory 为准。")
 
     if mem_dict.get("implicit_tone"):
         if has_anchored:

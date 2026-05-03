@@ -14,7 +14,11 @@ from ..cognitive_paths import (
     select_cognitive_path_candidate,
 )
 from ..cognition import CognitiveLoop
-from ..memory_anchored import DialogueFactExtractor
+from ..memory_anchored import (
+    DialogueFactExtractor,
+    MemoryCitationGuard,
+    build_memory_repair_instruction,
+)
 from ..memory_dynamics import (
     consolidate_successful_path_pattern,
     record_failed_path_outcome,
@@ -580,6 +584,41 @@ def run_conversation(
             generation_diagnostics = dict(generation_diagnostics)
         else:
             generation_diagnostics = {}
+
+        # ── M8.5: Memory citation audit after generation ───────────────
+        store = _ensure_memory_store(agent)
+        anchored_items = list(getattr(store, "anchored_items", [])) if store else []
+        audit = MemoryCitationGuard.audit_structured(reply, anchored_items)
+        generation_diagnostics["memory_citation_audit"] = audit.to_dict()
+
+        # Conservative retry on blocking violation
+        if audit.has_blocking_violation:
+            repair_instruction = build_memory_repair_instruction(audit)
+            # Inject repair instruction via dialogue_context
+            retry_context = dict(dialogue_context)
+            retry_context["memory_repair_instruction"] = repair_instruction
+            retry_reply = gen.generate(
+                action,
+                retry_context,
+                personality_state,
+                transcript,
+                master_seed=master_seed,
+                turn_index=turn_index,
+            )
+            second_audit = MemoryCitationGuard.audit_structured(
+                retry_reply, anchored_items,
+            )
+            generation_diagnostics["memory_citation_audit_retry"] = second_audit.to_dict()
+            generation_diagnostics["memory_repair_triggered"] = True
+            # Use retry result
+            reply = retry_reply
+            retry_diag = getattr(gen, "last_diagnostics", None)
+            if isinstance(retry_diag, dict):
+                generation_diagnostics.update({f"retry_{k}": v for k, v in retry_diag.items()})
+        else:
+            generation_diagnostics["memory_repair_triggered"] = False
+            generation_diagnostics["memory_citation_audit_retry"] = None
+
         generation_diagnostics["fep_prompt_capsule"] = fep_capsule
         generation_diagnostics["selected_action"] = action
         generation_diagnostics["meta_control_guidance"] = meta_control_guidance_dict

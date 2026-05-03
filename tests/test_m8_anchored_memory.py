@@ -8,9 +8,12 @@ from segmentum.memory_anchored import (
     AnchoredMemoryItem,
     CitationAuditResult,
     DialogueFactExtractor,
+    MemoryCitationAudit,
     MemoryCitationGuard,
+    MemoryCitationViolation,
     MemoryPermissionBuckets,
     MemoryPermissionFilter,
+    build_memory_repair_instruction,
 )
 from segmentum.memory_store import MemoryStore
 
@@ -345,3 +348,221 @@ def test_behavior_preference_has_strategy_only_visibility():
     beh = items[0]
     assert beh.visibility == "strategy_only"
     assert beh.memory_type == "preference"
+
+
+# ── M8.5: MemoryCitationAudit structured output ────────────────────────────
+
+def test_memory_citation_audit_structured_output():
+    """audit_structured must return MemoryCitationAudit with proper fields."""
+    items = [
+        _make_item("用户已经完成了M7", status="asserted", visibility="explicit"),
+    ]
+    audit = MemoryCitationGuard.audit_structured("关于你说的M7，我有些想法", items)
+    assert isinstance(audit, MemoryCitationAudit)
+    assert not audit.has_violation
+    assert not audit.has_blocking_violation
+    assert audit.risk_level == "none"
+    assert audit.to_dict()["has_violation"] is False
+
+
+def test_retracted_fact_triggers_blocking_violation():
+    """Referencing a retracted fact must produce blocking violation."""
+    items = [
+        _make_item("鲁永刚是用户的同学", status="retracted", visibility="forbidden"),
+        _make_item("李四是用户的同学", status="asserted", visibility="explicit"),
+    ]
+    audit = MemoryCitationGuard.audit_structured("我记得鲁永刚是用户的同学", items)
+    assert audit.has_violation
+    assert audit.has_blocking_violation
+    assert audit.risk_level == "blocking"
+    assert any(v.type == "retracted_fact_referenced" for v in audit.violations)
+
+
+def test_hypothesis_as_fact_flagged():
+    """Certainty language without anchored support must be flagged."""
+    items: list[AnchoredMemoryItem] = [
+        _make_item("用户已经完成了M7", status="asserted", visibility="explicit"),
+    ]
+    audit = MemoryCitationGuard.audit_structured("你肯定是喜欢这个方案", items)
+    assert audit.has_violation
+    violation_types = {v.type for v in audit.violations}
+    assert "hypothesis_as_fact" in violation_types
+
+
+def test_unanchored_memory_claim_flagged():
+    """'你之前说过' without anchored support must be flagged."""
+    items: list[AnchoredMemoryItem] = [
+        _make_item("用户已经完成了M7", status="asserted", visibility="explicit"),
+    ]
+    audit = MemoryCitationGuard.audit_structured("你之前说过你喜欢短回复", items)
+    assert audit.has_violation
+    assert any(v.type == "unanchored_memory_claim" for v in audit.violations)
+
+
+def test_build_repair_instruction_from_audit():
+    """build_memory_repair_instruction must produce relevant constraints."""
+    audit = MemoryCitationAudit(
+        has_violation=True,
+        has_blocking_violation=True,
+        risk_level="blocking",
+        violations=[
+            MemoryCitationViolation(
+                type="retracted_fact_referenced",
+                span="鲁永刚",
+                message="ref retracted",
+                suggested_action="block",
+            ),
+            MemoryCitationViolation(
+                type="unanchored_memory_claim",
+                span="你之前说过",
+                message="unanchored claim",
+                suggested_action="retry",
+            ),
+        ],
+    )
+    instruction = build_memory_repair_instruction(audit)
+    assert "记忆引用契约" in instruction
+    assert "已撤回" in instruction.lower() or "retract" in instruction.lower()
+    assert "更短" in instruction
+
+
+# ── M8.5: user/agent fact split ─────────────────────────────────────────────
+
+def test_agent_turn_does_not_produce_explicit_user_facts():
+    """Agent reply extraction must produce agent_self_utterance, not user_fact."""
+    extractor = DialogueFactExtractor()
+    items = extractor.extract(
+        "我在考虑这个方案的可行性",
+        turn_id="turn_0001",
+        utterance_id="u1",
+        speaker="agent",
+    )
+    for item in items:
+        assert item.memory_type == "agent_self_utterance", (
+            f"Agent turn item must be agent_self_utterance, got {item.memory_type}"
+        )
+        assert item.visibility != "explicit", (
+            "Agent turn item must not have explicit visibility"
+        )
+
+
+def test_agent_self_utterance_not_in_explicit_facts():
+    """MemoryPermissionFilter must route agent_self_utterance to strategy_only."""
+    items = [
+        _make_item("用户已经完成了M7", status="asserted", visibility="explicit"),
+        _make_item(
+            "agent said something", status="asserted",
+            memory_type="agent_self_utterance", visibility="strategy_only",
+        ),
+    ]
+    buckets = MemoryPermissionFilter.filter(items)
+    explicit_props = {it.proposition for it in buckets.explicit_facts}
+    so_props = {it.proposition for it in buckets.strategy_only}
+    assert "agent said something" not in explicit_props
+    assert "agent said something" in so_props
+
+
+def test_user_turn_produces_explicit_facts():
+    """User turn extraction must produce explicit user_asserted_fact items."""
+    extractor = DialogueFactExtractor()
+    items = extractor.extract(
+        "我叫周青",
+        turn_id="turn_0001",
+        utterance_id="u1",
+        speaker="user",
+    )
+    assert len(items) >= 1
+    item = items[0]
+    assert item.visibility == "explicit"
+    assert item.speaker == "user"
+
+
+# ── M8.5: priority (retracted > asserted) ──────────────────────────────────
+
+def test_retracted_overrides_asserted_in_memory_context():
+    """When user corrects A→B, context must contain B, A must be forbidden."""
+    extractor = DialogueFactExtractor()
+    items1 = extractor.extract(
+        "鲁永刚是我同学", turn_id="turn_0001", utterance_id="u1", speaker="user",
+    )
+    items2 = extractor.extract(
+        "不是鲁永刚，是李四",
+        turn_id="turn_0002", utterance_id="u2", speaker="user",
+        existing_items=items1,
+    )
+    all_items = items1 + items2
+    buckets = MemoryPermissionFilter.filter(all_items)
+    explicit_props = {it.proposition for it in buckets.explicit_facts}
+    forbidden_props = {it.proposition for it in buckets.forbidden}
+
+    assert any("李四" in p for p in explicit_props), "New fact B must be in explicit"
+    assert any("鲁永刚" in p for p in forbidden_props), "Retracted A must be forbidden"
+    assert not any("鲁永刚" in p for p in explicit_props), "Retracted A must not be explicit"
+
+    # Audit check: referencing A must block
+    audit = MemoryCitationGuard.audit_structured(
+        "你之前提到的鲁永刚是你同学", all_items,
+    )
+    assert audit.has_blocking_violation
+
+
+# ── M8.5: legacy fallback downgrade ─────────────────────────────────────────
+
+def test_legacy_fallback_contains_downgrade_language():
+    """When legacy entries are formatted without anchored items, downgrade
+    language must appear."""
+    from segmentum.dialogue.runtime.prompts import (
+        _build_memory_context_v2,
+        _format_memory_context,
+    )
+
+    # We can't easily mock the full agent, so we test _format_memory_context directly.
+    mem_dict = {
+        "explicit_usable": ["Legacy: user talked about M7"],
+        "implicit_tone": [],
+        "do_not_use": [],
+    }
+    result = _format_memory_context(mem_dict)
+    assert "语境线索" in result, (
+        "Legacy fallback must label items as contextual clues"
+    )
+    assert "anchored memory" in result.lower(), (
+        "Legacy fallback must mention anchored memory priority"
+    )
+
+
+# ── M8.5: CitationAuditResult backward compat ───────────────────────────────
+
+def test_legacy_audit_still_works():
+    """The original CitationAuditResult audit method must still work."""
+    items = [
+        _make_item("用户已经完成了M7", status="asserted", visibility="explicit"),
+        _make_item("鲁永刚是用户的同学", status="retracted", visibility="forbidden"),
+    ]
+    result = MemoryCitationGuard.audit("鲁永刚是用户的同学", items)
+    assert isinstance(result, CitationAuditResult)
+    assert result.retracted_fact_referenced
+
+
+# ── M8.5: MemoryCitationAudit to_dict ───────────────────────────────────────
+
+def test_audit_to_dict_serializable():
+    """MemoryCitationAudit.to_dict must produce JSON-serializable output."""
+    audit = MemoryCitationAudit(
+        has_violation=True,
+        has_blocking_violation=True,
+        risk_level="blocking",
+        violations=[
+            MemoryCitationViolation(
+                type="hypothesis_as_fact",
+                span="你肯定",
+                message="test",
+                suggested_action="retry",
+            ),
+        ],
+    )
+    d = audit.to_dict()
+    assert isinstance(d, dict)
+    assert d["risk_level"] == "blocking"
+    assert len(d["violations"]) == 1
+    assert d["violations"][0]["type"] == "hypothesis_as_fact"

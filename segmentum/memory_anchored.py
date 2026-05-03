@@ -18,11 +18,14 @@ FactStatus = Literal['asserted', 'corroborated', 'retracted', 'hypothesis']
 FactVisibility = Literal['explicit', 'strategy_only', 'private', 'forbidden']
 FactMemoryType = Literal[
     'user_fact',
+    'user_asserted_fact',
     'relationship_fact',
     'project_fact',
     'preference',
     'task_state',
     'hypothesis',
+    'system_inferred_hypothesis',
+    'agent_self_utterance',
     'private_state',
 ]
 
@@ -33,10 +36,24 @@ FactMemoryType = Literal[
 class AnchoredMemoryItem:
     """A dialogue fact anchored to a specific utterance with provenance.
 
-    ``asserted`` means *the speaker said this* — it is NOT a claim of objective truth.
-    ``corroborated`` requires independent confirmation before stronger use.
-    ``hypothesis`` must carry a confidence score and cannot enter the explicit-fact bucket.
-    ``retracted`` items must never appear in memory_context or citation support.
+    Status semantics:
+    - ``asserted`` means *the speaker said this* — it is NOT a claim of objective
+      truth. The proposition records what was stated, not what is verified.
+    - ``corroborated`` means the fact has been independently confirmed. When
+      implemented, ``corroboration_source`` should distinguish between:
+      ``user_repeat``, ``user_confirmation``, ``tool``, ``external_evidence``.
+      TODO: add ``corroboration_source`` field to disambiguate confirmation paths.
+    - ``hypothesis`` must carry a confidence score and cannot enter the
+      explicit-fact bucket.
+    - ``retracted`` items must never appear in memory_context or citation support.
+      Retracted has HIGHEST priority — if a proposition is retracted, it overrides
+      any asserted/corroborated copy of the same fact.
+
+    Memory type guide:
+    - ``user_asserted_fact``: explicit user statement ("我叫周青")
+    - ``agent_self_utterance``: agent said something about itself; must NOT
+      be treated as a user fact in future turns.
+    - ``system_inferred_hypothesis``: inferred by the system, not stated by user.
     """
 
     memory_id: str = field(default_factory=lambda: str(uuid4()))
@@ -107,15 +124,68 @@ class MemoryPermissionBuckets(NamedTuple):
     forbidden: list[AnchoredMemoryItem]
 
 
-# ── CitationAuditResult ───────────────────────────────────────────────────
+# ── CitationAuditResult (legacy compat, thin wrapper) ─────────────────────
 
 @dataclass
 class CitationAuditResult:
+    """Legacy audit result — kept for backward compat. Prefer MemoryCitationAudit."""
     flags: list[str] = field(default_factory=list)
     cited_anchored_ids: list[str] = field(default_factory=list)
     hallucinated_detail_risk: bool = False
     retracted_fact_referenced: bool = False
     hypothesis_as_fact: bool = False
+    forbidden_topic_referenced: bool = False
+
+
+# ── MemoryCitationAudit (M8.5 structured output) ──────────────────────────
+
+ViolationType = Literal[
+    'retracted_fact_referenced',
+    'forbidden_topic_referenced',
+    'hypothesis_as_fact',
+    'unanchored_memory_claim',
+    'hallucinated_detail_risk',
+]
+
+
+@dataclass
+class MemoryCitationViolation:
+    type: ViolationType
+    span: str = ''
+    message: str = ''
+    suggested_action: Literal['retry', 'downgrade', 'log_only', 'block'] = 'log_only'
+
+
+@dataclass
+class MemoryCitationAudit:
+    """Structured audit output (M8.5).
+
+    Fields:
+    - has_violation: any violation at all
+    - has_blocking_violation: at least one violation with suggested_action='block' or 'retry'
+    - risk_level: aggregate severity
+    - violations: detailed list of violations found
+    """
+    has_violation: bool = False
+    has_blocking_violation: bool = False
+    risk_level: Literal['none', 'low', 'medium', 'high', 'blocking'] = 'none'
+    violations: list[MemoryCitationViolation] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            'has_violation': self.has_violation,
+            'has_blocking_violation': self.has_blocking_violation,
+            'risk_level': self.risk_level,
+            'violations': [
+                {
+                    'type': v.type,
+                    'span': v.span,
+                    'message': v.message,
+                    'suggested_action': v.suggested_action,
+                }
+                for v in self.violations
+            ],
+        }
 
 
 # ── DialogueFactExtractor ─────────────────────────────────────────────────
@@ -209,6 +279,14 @@ class DialogueFactExtractor:
 
     First version is purely regex-driven — no LLM calls.  If no clear fact
     matches, the extractor returns an empty list rather than guessing.
+
+    M8.5 user/agent split:
+    - ``speaker='user'`` → items can be ``user_asserted_fact`` with
+      ``visibility='explicit'``.
+    - ``speaker='agent'`` → items are forced to
+      ``memory_type='agent_self_utterance'`` with
+      ``visibility='strategy_only'``. Agent utterances must NEVER become
+      explicit user facts.
     """
 
     def extract(
@@ -230,6 +308,46 @@ class DialogueFactExtractor:
         if not text:
             return results
 
+        # M8.5: agent turns produce agent_self_utterance, not user facts
+        is_agent = speaker != 'user'
+
+        def _make(
+            proposition: str,
+            source_text: str,
+            status: FactStatus = 'asserted',
+            confidence: float = 1.0,
+            visibility: FactVisibility = 'explicit',
+            memory_type: FactMemoryType = 'user_fact',
+            tags: list[str] | None = None,
+        ) -> AnchoredMemoryItem:
+            if is_agent:
+                return AnchoredMemoryItem(
+                    speaker=speaker,
+                    utterance_id=utterance_id,
+                    turn_id=turn_id,
+                    proposition=proposition,
+                    source_text=source_text,
+                    status='asserted',
+                    confidence=0.5,
+                    visibility='strategy_only',
+                    memory_type='agent_self_utterance',
+                    created_turn_id=turn_id,
+                    tags=['agent_utterance'] + (tags or []),
+                )
+            return AnchoredMemoryItem(
+                speaker=speaker,
+                utterance_id=utterance_id,
+                turn_id=turn_id,
+                proposition=proposition,
+                source_text=source_text,
+                status=status,
+                confidence=confidence,
+                visibility=visibility,
+                memory_type=memory_type,
+                created_turn_id=turn_id,
+                tags=tags or [],
+            )
+
         # ── 1. Name declarations ──────────────────────────────────────
         for pattern, mem_type in _NAME_PATTERNS:
             m = re.search(pattern, text)
@@ -237,12 +355,11 @@ class DialogueFactExtractor:
                 name = m.group(1)
                 prop = f'用户的名字是{name}'
                 if not _fuzzy_proposition_match(prop, existing + results):
-                    results.append(AnchoredMemoryItem(
-                        speaker=speaker, utterance_id=utterance_id,
-                        turn_id=turn_id, proposition=prop, source_text=text,
-                        status='asserted', confidence=1.0, visibility='explicit',
-                        memory_type=mem_type,  # type: ignore[arg-type]
-                        created_turn_id=turn_id, tags=['name', name],
+                    results.append(_make(
+                        prop, text, status='asserted', confidence=1.0,
+                        visibility='explicit',
+                        memory_type='user_asserted_fact' if not is_agent else 'agent_self_utterance',
+                        tags=['name', name],
                     ))
                 break
 
@@ -253,12 +370,10 @@ class DialogueFactExtractor:
                 relation = m.group(2)
                 prop = f'{person}是用户的{relation}'
                 if not _fuzzy_proposition_match(prop, existing + results):
-                    results.append(AnchoredMemoryItem(
-                        speaker=speaker, utterance_id=utterance_id,
-                        turn_id=turn_id, proposition=prop, source_text=text,
-                        status='asserted', confidence=1.0, visibility='explicit',
-                        memory_type=mem_type,  # type: ignore[arg-type]
-                        created_turn_id=turn_id,
+                    results.append(_make(
+                        prop, text, status='asserted', confidence=1.0,
+                        visibility='explicit',
+                        memory_type='relationship_fact' if not is_agent else 'agent_self_utterance',
                         tags=['relationship', person, relation],
                     ))
 
@@ -268,12 +383,11 @@ class DialogueFactExtractor:
                 milestone = m.group(1)
                 prop = f'用户已经完成了{milestone}'
                 if not _fuzzy_proposition_match(prop, existing + results):
-                    results.append(AnchoredMemoryItem(
-                        speaker=speaker, utterance_id=utterance_id,
-                        turn_id=turn_id, proposition=prop, source_text=text,
-                        status='asserted', confidence=1.0, visibility='explicit',
-                        memory_type=mem_type,  # type: ignore[arg-type]
-                        created_turn_id=turn_id, tags=['milestone', milestone],
+                    results.append(_make(
+                        prop, text, status='asserted', confidence=1.0,
+                        visibility='explicit',
+                        memory_type='project_fact' if not is_agent else 'agent_self_utterance',
+                        tags=['milestone', milestone],
                     ))
 
         # ── 4. Current task / work-in-progress ─────────────────────────
@@ -286,12 +400,11 @@ class DialogueFactExtractor:
                     continue
                 prop = f'用户当前在{task_desc}'
                 if not _fuzzy_proposition_match(prop, existing + results):
-                    results.append(AnchoredMemoryItem(
-                        speaker=speaker, utterance_id=utterance_id,
-                        turn_id=turn_id, proposition=prop, source_text=text,
-                        status='asserted', confidence=0.9, visibility='explicit',
-                        memory_type=mem_type,  # type: ignore[arg-type]
-                        created_turn_id=turn_id, tags=['task', task_desc],
+                    results.append(_make(
+                        prop, text, status='asserted', confidence=0.9,
+                        visibility='explicit',
+                        memory_type='task_state' if not is_agent else 'agent_self_utterance',
+                        tags=['task', task_desc],
                     ))
 
         # ── 5. Preferences ─────────────────────────────────────────────
@@ -306,17 +419,16 @@ class DialogueFactExtractor:
                 else:
                     prop = f'用户喜欢{pref}'
                 if not _fuzzy_proposition_match(prop, existing + results):
-                    results.append(AnchoredMemoryItem(
-                        speaker=speaker, utterance_id=utterance_id,
-                        turn_id=turn_id, proposition=prop, source_text=text,
-                        status='asserted', confidence=0.95, visibility='explicit',
-                        memory_type=mem_type,  # type: ignore[arg-type]
-                        created_turn_id=turn_id, tags=['preference', pref],
+                    results.append(_make(
+                        prop, text, status='asserted', confidence=0.95,
+                        visibility='explicit' if not is_agent else 'strategy_only',
+                        memory_type='preference' if not is_agent else 'agent_self_utterance',
+                        tags=['preference', pref],
                     ))
                 break
 
         # ── 6. Behavior preferences ────────────────────────────────────
-        if speaker == 'user':
+        if not is_agent:
             for pattern, _mem_type in _BEHAVIOR_PREFERENCE_PATTERNS:
                 m = re.search(pattern, text)
                 if m:
@@ -336,44 +448,46 @@ class DialogueFactExtractor:
                     break
 
         # ── 7. Corrections (retract old, assert new) ────────────────────
-        for corr_pattern in _CORRECTION_PATTERNS:
-            m = corr_pattern.search(text)
-            if not m:
-                continue
+        # M8.5: only user corrections retract/assert; agent corrections are logged differently
+        if not is_agent:
+            for corr_pattern in _CORRECTION_PATTERNS:
+                m = corr_pattern.search(text)
+                if not m:
+                    continue
 
-            if m.re is _CORRECTION_PATTERNS[0]:
-                old_text = m.group(1).strip()
-                new_text = m.group(2).strip()
-            elif m.re is _CORRECTION_PATTERNS[1]:
-                old_text = ''
-                new_text = m.group(1).strip()
-            elif m.re in (_CORRECTION_PATTERNS[2], _CORRECTION_PATTERNS[3]):
-                old_text = ''
-                new_text = m.group(1).strip()
-            else:
-                continue
+                if m.re is _CORRECTION_PATTERNS[0]:
+                    old_text = m.group(1).strip()
+                    new_text = m.group(2).strip()
+                elif m.re is _CORRECTION_PATTERNS[1]:
+                    old_text = ''
+                    new_text = m.group(1).strip()
+                elif m.re in (_CORRECTION_PATTERNS[2], _CORRECTION_PATTERNS[3]):
+                    old_text = ''
+                    new_text = m.group(1).strip()
+                else:
+                    continue
 
-            if old_text and existing:
-                for old_item in existing:
-                    if old_item.status == 'retracted':
-                        continue
-                    if old_text in old_item.proposition or old_item.proposition in old_text:
-                        old_item.status = 'retracted'
-                        old_item.contradiction_ids.append(f'corrected-at-{turn_id}')
+                if old_text and existing:
+                    for old_item in existing:
+                        if old_item.status == 'retracted':
+                            continue
+                        if old_text in old_item.proposition or old_item.proposition in old_text:
+                            old_item.status = 'retracted'
+                            old_item.contradiction_ids.append(f'corrected-at-{turn_id}')
 
-            if new_text and len(new_text) >= 2:
-                prop = _clean_proposition(new_text)
-                if not any(kw in prop for kw in ('用户', '名字', '同学', '朋友', '同事', '完成', '喜欢', '在')):
-                    prop = f'用户陈述：{prop}'
-                if not _fuzzy_proposition_match(prop, existing + results):
-                    results.append(AnchoredMemoryItem(
-                        speaker=speaker, utterance_id=utterance_id,
-                        turn_id=turn_id, proposition=prop, source_text=text,
-                        status='asserted', confidence=1.0, visibility='explicit',
-                        memory_type='user_fact', created_turn_id=turn_id,
-                        tags=['correction'],
-                    ))
-            break
+                if new_text and len(new_text) >= 2:
+                    prop = _clean_proposition(new_text)
+                    if not any(kw in prop for kw in ('用户', '名字', '同学', '朋友', '同事', '完成', '喜欢', '在')):
+                        prop = f'用户陈述：{prop}'
+                    if not _fuzzy_proposition_match(prop, existing + results):
+                        results.append(AnchoredMemoryItem(
+                            speaker=speaker, utterance_id=utterance_id,
+                            turn_id=turn_id, proposition=prop, source_text=text,
+                            status='asserted', confidence=1.0, visibility='explicit',
+                            memory_type='user_asserted_fact', created_turn_id=turn_id,
+                            tags=['correction'],
+                        ))
+                break
 
         return results
 
@@ -386,10 +500,14 @@ class MemoryPermissionFilter:
     Rules (applied in order):
     1. ``retracted`` → ``forbidden`` (always).
     2. ``forbidden`` visibility → ``forbidden``.
-    3. ``asserted`` / ``corroborated`` + ``explicit`` → ``explicit_facts``.
-    4. ``hypothesis`` → ``cautious_hypotheses``.
-    5. ``strategy_only`` / ``private`` visibility → ``strategy_only``.
-    6. Anything else → ``forbidden`` (safety default).
+    3. ``agent_self_utterance`` → ``strategy_only`` (M8.5: agent utterances
+       must NOT enter explicit_facts).
+    4. ``asserted`` / ``corroborated`` + ``explicit`` → ``explicit_facts``.
+    5. ``hypothesis`` / ``system_inferred_hypothesis`` → ``cautious_hypotheses``.
+    6. ``strategy_only`` / ``private`` visibility → ``strategy_only``.
+    7. Anything else → ``forbidden`` (safety default).
+
+    Priority: retracted/forbidden > corroborated > asserted > hypothesis > legacy
     """
 
     @staticmethod
@@ -407,9 +525,14 @@ class MemoryPermissionFilter:
                 forbidden.append(item)
                 continue
 
+            # M8.5: agent_self_utterance must never enter explicit_facts
+            if item.memory_type == 'agent_self_utterance':
+                strategy_only.append(item)
+                continue
+
             if item.status in ('asserted', 'corroborated') and item.visibility == 'explicit':
                 explicit_facts.append(item)
-            elif item.status == 'hypothesis':
+            elif item.status == 'hypothesis' or item.memory_type == 'system_inferred_hypothesis':
                 cautious_hypotheses.append(item)
             elif item.visibility in ('strategy_only', 'private'):
                 strategy_only.append(item)
@@ -442,6 +565,7 @@ _MEMORY_CLAIM_PATTERNS: list[tuple[str, str]] = [
 
 _HYPOTHESIS_AS_FACT_PATTERNS: list[str] = [
     r'你肯定是',
+    r'你肯定',
     r'你一定',
     r'你绝对',
     r'你确实',
@@ -464,6 +588,10 @@ class MemoryCitationGuard:
     - References to retracted facts
     - Hypotheses stated as certain facts
     - Forbidden-topic references
+
+    M8.5: ``audit_structured`` returns ``MemoryCitationAudit`` with
+    risk_level and per-violation suggested_action for runtime dispatch.
+    ``audit`` returns legacy ``CitationAuditResult`` for backward compat.
     """
 
     @staticmethod
@@ -471,6 +599,7 @@ class MemoryCitationGuard:
         reply_text: str,
         anchored_items: list[AnchoredMemoryItem] | None = None,
     ) -> CitationAuditResult:
+        """Legacy audit returning CitationAuditResult (backward compat)."""
         items = list(anchored_items or [])
         result = CitationAuditResult()
 
@@ -511,5 +640,162 @@ class MemoryCitationGuard:
         for topic in _FORBIDDEN_TOPICS:
             if topic.lower() in reply_text.lower():
                 result.flags.append(f'forbidden_topic: {topic}')
+                result.forbidden_topic_referenced = True
 
         return result
+
+    @staticmethod
+    def audit_structured(
+        reply_text: str,
+        anchored_items: list[AnchoredMemoryItem] | None = None,
+    ) -> MemoryCitationAudit:
+        """M8.5: structured audit with risk_level and per-violation actions."""
+        items = list(anchored_items or [])
+        violations: list[MemoryCitationViolation] = []
+
+        explicit_propositions: dict[str, AnchoredMemoryItem] = {}
+        retracted_propositions: set[str] = set()
+        forbidden_propositions: set[str] = set()
+        hypothesis_propositions: dict[str, AnchoredMemoryItem] = {}
+
+        for item in items:
+            prop_lower = item.proposition.lower().strip()
+            if item.status == 'retracted':
+                retracted_propositions.add(prop_lower)
+            elif item.visibility == 'forbidden':
+                forbidden_propositions.add(prop_lower)
+            elif item.status in ('asserted', 'corroborated') and item.visibility == 'explicit':
+                explicit_propositions[prop_lower] = item
+            elif item.status == 'hypothesis' or item.memory_type in ('hypothesis', 'system_inferred_hypothesis'):
+                hypothesis_propositions[prop_lower] = item
+
+        # 1. Retracted fact references → blocking
+        for prop in retracted_propositions:
+            if len(prop) >= 4 and prop in reply_text.lower():
+                violations.append(MemoryCitationViolation(
+                    type='retracted_fact_referenced',
+                    span=prop[:80],
+                    message=f'Reply references retracted fact: {prop[:80]}',
+                    suggested_action='block',
+                ))
+
+        # 2. Forbidden topic/proposition references → blocking
+        for prop in forbidden_propositions:
+            if len(prop) >= 4 and prop in reply_text.lower():
+                violations.append(MemoryCitationViolation(
+                    type='forbidden_topic_referenced',
+                    span=prop[:80],
+                    message=f'Reply references forbidden fact: {prop[:80]}',
+                    suggested_action='block',
+                ))
+        for topic in _FORBIDDEN_TOPICS:
+            if topic.lower() in reply_text.lower():
+                violations.append(MemoryCitationViolation(
+                    type='forbidden_topic_referenced',
+                    span=topic,
+                    message=f'Reply references forbidden topic: {topic}',
+                    suggested_action='block',
+                ))
+
+        # 3. Hypothesis-as-fact language → retry (medium/high)
+        for pattern in _HYPOTHESIS_AS_FACT_PATTERNS:
+            m = re.search(pattern, reply_text)
+            if m:
+                violations.append(MemoryCitationViolation(
+                    type='hypothesis_as_fact',
+                    span=m.group(0),
+                    message=f'Certainty language without anchored support: {pattern}',
+                    suggested_action='retry',
+                ))
+
+        # 4. Unanchored memory claims → retry (medium)
+        for pattern, label in _MEMORY_CLAIM_PATTERNS:
+            if re.search(pattern, reply_text):
+                supported = any(
+                    prop in reply_text[:min(len(prop) + 20, len(reply_text))]
+                    for prop in list(explicit_propositions.keys()) if len(prop) >= 4
+                )
+                if not supported:
+                    violations.append(MemoryCitationViolation(
+                        type='unanchored_memory_claim',
+                        span=label,
+                        message=f'Memory-claim language without anchored support: {label}',
+                        suggested_action='retry',
+                    ))
+
+        # 5. Hallucinated detail risk → log (low/medium)
+        if not any(v.type == 'unanchored_memory_claim' for v in violations):
+            for pattern, label in _MEMORY_CLAIM_PATTERNS:
+                if re.search(pattern, reply_text):
+                    violations.append(MemoryCitationViolation(
+                        type='hallucinated_detail_risk',
+                        span=label,
+                        message=f'Potential hallucination risk: {label}',
+                        suggested_action='log_only',
+                    ))
+
+        # Compute aggregate risk level
+        has_blocking = any(
+            v.suggested_action in ('block', 'retry') for v in violations
+        )
+        has_violation = len(violations) > 0
+
+        if any(v.suggested_action == 'block' for v in violations):
+            risk_level = 'blocking'
+        elif any(v.suggested_action == 'retry' for v in violations):
+            risk_level = 'high'
+        elif has_violation:
+            risk_level = 'medium'
+        else:
+            risk_level = 'none'
+
+        return MemoryCitationAudit(
+            has_violation=has_violation,
+            has_blocking_violation=has_blocking,
+            risk_level=risk_level,
+            violations=violations,
+        )
+
+
+# ── M8.5 Conservative Retry Repair Instruction ────────────────────────────
+
+def build_memory_repair_instruction(audit: MemoryCitationAudit) -> str:
+    """Build a repair instruction for conservative retry based on audit violations.
+
+    The instruction tells the model its previous reply violated the memory
+    contract and gives specific constraints for the rewrite.
+    """
+    violation_types = {v.type for v in audit.violations}
+    lines = [
+        "上一版回复违反了记忆引用契约。请重写回复：",
+    ]
+
+    if 'retracted_fact_referenced' in violation_types:
+        lines.append("1. 不要引用任何已撤回或 forbidden 的用户事实。")
+    else:
+        lines.append("1. 只引用当前对话中明确确认的信息。")
+
+    if 'forbidden_topic_referenced' in violation_types:
+        lines.append("2. 不要提及被标记为禁止的话题或命题。")
+
+    if 'hypothesis_as_fact' in violation_types:
+        lines.append(
+            "3. 不要把假设当作确定事实。对不确定内容使用"
+            '"可能"、"似乎"、"我不确定"、"需要你确认"等措辞。'
+        )
+    else:
+        lines.append("3. 不要把假设当作确定事实。")
+
+    if 'unanchored_memory_claim' in violation_types:
+        lines.append(
+            '4. 如果没有 anchored memory 支持，不要说'
+            '"你之前说过"、"我记得你说过"、"你告诉过我"这类表达。'
+        )
+
+    if 'hallucinated_detail_risk' in violation_types:
+        lines.append("5. 不要编造用户没有明确说过的具体细节。")
+
+    lines.append("6. 回复应更短、更保守，只基于当前对话和明确锚点。")
+    lines.append("7. 对不确定内容使用'可能/似乎/需要确认'等措辞。")
+
+    return "\n".join(lines)

@@ -940,6 +940,16 @@ class RuleBasedGenerator:
         else:
             conflict = 0.0
             emotional = 0.5
+
+        # M8.5: memory repair instruction forces conservative reply
+        repair_instruction = str(dialogue_context.get("memory_repair_instruction", ""))
+        if repair_instruction:
+            self.last_diagnostics = {
+                "memory_repair_active": True,
+                "memory_repair_instruction": repair_instruction,
+            }
+            return "收到，我重新说一下。"
+
         current_turn = str(dialogue_context.get("current_turn", "")).strip()
         prior_turn = _latest_interlocutor_text(conversation_history)
         focus = _quote_focus(current_turn or prior_turn)
