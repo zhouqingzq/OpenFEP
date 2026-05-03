@@ -181,9 +181,13 @@ def _extract_and_store_dialogue_facts(
         utterance_id=utterance_id,
         speaker=speaker,
         existing_items=list(getattr(store, "anchored_items", [])),
+        current_cycle=getattr(agent, 'cycle', 0),
     )
     for item in items:
         store.add_anchored_item(item)
+    # M8.5: prune anchored items to prevent unbounded growth
+    if hasattr(store, 'prune_anchored'):
+        store.prune_anchored(current_cycle=getattr(agent, 'cycle', 0))
 
 
 def run_conversation(

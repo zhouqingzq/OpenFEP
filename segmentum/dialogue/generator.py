@@ -822,6 +822,11 @@ class LLMGenerator:
                     )
             user_content = f"对话历史：\n{_format_history(conversation_history)}\n\n对方刚说：{current_turn}\n\n请回复："
 
+        # M8.5: inject memory repair instruction into user content
+        repair = dialogue_context.get("memory_repair_instruction")
+        if isinstance(repair, str) and repair.strip():
+            user_content = repair.strip() + "\n\n---\n\n" + user_content
+
         payload = {
             "model": self.model,
             "messages": [
@@ -948,7 +953,16 @@ class RuleBasedGenerator:
                 "memory_repair_active": True,
                 "memory_repair_instruction": repair_instruction,
             }
-            return "收到，我重新说一下。"
+            conservative_templates = (
+                _RULE_TEMPLATES.get("minimal_response", ("嗯。",))
+                + _RULE_TEMPLATES.get("deflect", ("换个说法。",))
+            )
+            idx = pick_index(
+                master_seed, "surface-repair", turn_index,
+                "repair", "repair",
+                modulo=len(conservative_templates),
+            )
+            return conservative_templates[idx]
 
         current_turn = str(dialogue_context.get("current_turn", "")).strip()
         prior_turn = _latest_interlocutor_text(conversation_history)

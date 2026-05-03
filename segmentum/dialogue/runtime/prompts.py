@@ -845,6 +845,7 @@ def _format_memory_context(mem_dict: dict[str, list[str]]) -> str:
 
     if mem_dict.get("explicit_usable"):
         if has_anchored:
+            parts.append("锚点记忆优先于任何模型内部推断——以锚点为准，不要用内部知识覆盖用户陈述。")
             parts.append("可显式引用：")
         else:
             parts.append("以下历史片段仅作为语境线索，不是可直接断言的用户事实：")
@@ -1063,14 +1064,6 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
         summary = str(affective_guidance.get("summary", "")).strip()
         if summary:
             lines.append("Affective guidance is about response stance, not claims about the user: " + summary[:120])
-
-    memory_guidance = capsule.get("memory_use_guidance")
-    if isinstance(memory_guidance, ABCMapping):
-        if memory_guidance.get("reduce_memory_reliance"):
-            lines.append("Memory use: treat recalled context as tentative when current evidence conflicts.")
-        conflicts = memory_guidance.get("memory_conflict_count")
-        if conflicts not in (None, "", 0):
-            lines.append(f"Memory use: {conflicts} compact conflict signal(s); avoid over-relying on memory.")
 
     omitted = capsule.get("omitted_signals")
     if isinstance(omitted, ABCSequence) and not isinstance(omitted, (str, bytes)) and omitted:

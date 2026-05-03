@@ -70,6 +70,7 @@ class AnchoredMemoryItem:
     last_confirmed_turn_id: str | None = None
     contradiction_ids: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
+    created_at_cycle: int = 0
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -87,6 +88,7 @@ class AnchoredMemoryItem:
             'last_confirmed_turn_id': self.last_confirmed_turn_id,
             'contradiction_ids': list(self.contradiction_ids),
             'tags': list(self.tags),
+            'created_at_cycle': self.created_at_cycle,
         }
 
     @classmethod
@@ -112,6 +114,7 @@ class AnchoredMemoryItem:
                 str(x) for x in payload.get('contradiction_ids', []) or []
             ],
             tags=[str(t) for t in payload.get('tags', []) or []],
+            created_at_cycle=int(payload.get('created_at_cycle', 0)),
         )
 
 
@@ -296,10 +299,13 @@ class DialogueFactExtractor:
         utterance_id: str,
         speaker: str = 'user',
         existing_items: list[AnchoredMemoryItem] | None = None,
+        *,
+        current_cycle: int = 0,
     ) -> list[AnchoredMemoryItem]:
         """Extract anchored facts from *text* and return new AnchoredMemoryItem entries.
 
         *existing_items* is used to detect corrections (retract old, assert new).
+        *current_cycle* sets ``created_at_cycle`` on new items (for lifecycle pruning).
         """
         existing = list(existing_items or [])
         results: list[AnchoredMemoryItem] = []
@@ -488,6 +494,11 @@ class DialogueFactExtractor:
                             tags=['correction'],
                         ))
                 break
+
+        if current_cycle:
+            for item in results:
+                if not item.created_at_cycle:
+                    item.created_at_cycle = current_cycle
 
         return results
 

@@ -912,6 +912,31 @@ class MemoryStore:
             return []
         return [it for it in self.anchored_items if sub in it.proposition.lower()]
 
+    def prune_anchored(
+        self, *, max_count: int = 50, current_cycle: int = 0,
+    ) -> int:
+        """Prune anchored items to at most *max_count*, preferring newer items.
+
+        Retracted items are evicted first. Items with ``created_at_cycle == 0``
+        (pre-existing, no cycle info) are treated as oldest. Returns number
+        removed.
+        """
+        if len(self.anchored_items) <= max_count:
+            return 0
+        sorted_items = sorted(
+            self.anchored_items,
+            key=lambda it: (
+                0 if it.status == 'retracted' else 1,
+                it.created_at_cycle,
+            ),
+        )
+        to_remove = sorted_items[:len(self.anchored_items) - max_count]
+        remove_ids = {it.memory_id for it in to_remove}
+        self.anchored_items = [
+            it for it in self.anchored_items if it.memory_id not in remove_ids
+        ]
+        return len(remove_ids)
+
     def _should_abstract_entry(self, entry: MemoryEntry, elapsed: int) -> bool:
         if entry.store_level not in {StoreLevel.MID, StoreLevel.LONG}:
             return False
@@ -997,6 +1022,9 @@ class MemoryStore:
         self.cleanup_short()
         after_cleanup = {entry.id for entry in self.entries}
         report.deleted_short_residue = sorted(before_cleanup - after_cleanup)
+        # M8.5: prune anchored items during decay cycle
+        anchored_before = len(self.anchored_items)
+        report.anchored_pruned = self.prune_anchored(current_cycle=current_cycle)
         return report
 
     def delete_entry(self, entry_id: str) -> bool:

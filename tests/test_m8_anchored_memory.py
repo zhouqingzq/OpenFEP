@@ -566,3 +566,128 @@ def test_audit_to_dict_serializable():
     assert d["risk_level"] == "blocking"
     assert len(d["violations"]) == 1
     assert d["violations"][0]["type"] == "hypothesis_as_fact"
+
+
+# ── M8.5 Remediation: RuleBasedGenerator repair response ──────────────────
+
+def test_rulebased_generator_repair_uses_conservative_template():
+    """When memory_repair_instruction is present, RuleBasedGenerator must
+    return a conservative template, not a hardcoded string."""
+    from segmentum.dialogue.generator import RuleBasedGenerator
+
+    gen = RuleBasedGenerator()
+    ctx: dict[str, object] = {
+        "memory_repair_instruction": "test repair instruction",
+        "observation": {},
+    }
+    reply = gen.generate(
+        "ask_question", ctx, {}, [], master_seed=42, turn_index=1,
+    )
+    # Must not be the old hardcoded string
+    assert reply != "收到，我重新说一下。"
+    # Conservative templates are short
+    assert len(reply) <= 10
+    # Diagnostics must record repair
+    diag = gen.last_diagnostics
+    assert diag.get("memory_repair_active") is True
+
+
+# ── M8.5 Remediation: anchored item pruning ───────────────────────────────
+
+def test_prune_anchored_respects_max_count():
+    """prune_anchored must reduce items to max_count."""
+    store = MemoryStore()
+    for i in range(60):
+        item = _make_item(f"fact_{i}")
+        item.created_at_cycle = i
+        store.add_anchored_item(item)
+    removed = store.prune_anchored(max_count=50)
+    assert removed == 10
+    assert len(store.anchored_items) == 50
+
+
+def test_prune_anchored_removes_retracted_first():
+    """Retracted items must be evicted before active items."""
+    store = MemoryStore()
+    for i in range(55):
+        item = _make_item(f"fact_{i}")
+        item.created_at_cycle = i
+        store.add_anchored_item(item)
+    retracted_id_0 = store.anchored_items[0].memory_id
+    retracted_id_3 = store.anchored_items[3].memory_id
+    store.anchored_items[0].status = "retracted"
+    store.anchored_items[3].status = "retracted"
+    store.prune_anchored(max_count=50)
+    remaining_ids = {it.memory_id for it in store.anchored_items}
+    assert retracted_id_0 not in remaining_ids, (
+        "Retracted item should be pruned first"
+    )
+    assert retracted_id_3 not in remaining_ids, (
+        "Retracted item should be pruned first"
+    )
+
+
+def test_prune_anchored_noop_when_under_limit():
+    """prune_anchored must not remove anything when under max_count."""
+    store = MemoryStore()
+    for i in range(5):
+        store.add_anchored_item(_make_item(f"fact_{i}"))
+    removed = store.prune_anchored(max_count=50)
+    assert removed == 0
+    assert len(store.anchored_items) == 5
+
+
+def test_anchored_item_roundtrip_with_cycle():
+    """created_at_cycle must survive to_dict/from_dict round-trip."""
+    item = _make_item("用户已经完成了M7")
+    item.created_at_cycle = 42
+    d = item.to_dict()
+    assert d["created_at_cycle"] == 42
+    restored = AnchoredMemoryItem.from_dict(d)
+    assert restored.created_at_cycle == 42
+
+
+# ── M8.5 Remediation: FEP capsule no double render ────────────────────────
+
+def test_capsule_guidance_does_not_double_render_memory_constraints():
+    """_build_capsule_guidance must not emit duplicate memory guidance."""
+    from segmentum.dialogue.runtime.prompts import _build_capsule_guidance
+
+    capsule: dict[str, object] = {
+        "chosen_action": "ask_question",
+        "memory_use_guidance": {
+            "reduce_memory_reliance": True,
+            "memory_conflict_count": 2,
+        },
+    }
+    lines = _build_capsule_guidance(capsule)
+    memory_lines = [
+        l for l in lines
+        if isinstance(l, str) and ("Memory use" in l or "tentative" in l)
+    ]
+    # The two lines (reduce_memory_reliance, memory_conflict_count) are
+    # different constraint types — each should appear exactly once, not twice.
+    assert len(set(memory_lines)) == len(memory_lines), (
+        f"Memory guidance lines must not have duplicates, got: {memory_lines}"
+    )
+    assert len(memory_lines) >= 1, (
+        "Expected at least one memory guidance line from cognitive_guidance"
+    )
+
+
+# ── M8.5 Remediation: priority rule in memory context ─────────────────────
+
+def test_memory_context_includes_priority_rule():
+    """_format_memory_context must include anchor-first priority sentence
+    when anchored items exist."""
+    from segmentum.dialogue.runtime.prompts import _format_memory_context
+
+    mem_dict = {
+        "explicit_usable": ["用户说过：用户的名字是周青"],
+        "implicit_tone": [],
+        "do_not_use": [],
+    }
+    result = _format_memory_context(mem_dict)
+    assert "锚点记忆优先" in result, (
+        f"Priority rule must appear in anchored context, got: {result[:200]}"
+    )

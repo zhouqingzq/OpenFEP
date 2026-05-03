@@ -32,6 +32,7 @@ class DecayReport:
     reality_confidence_drifted: list[str] = field(default_factory=list)
     confidence_drifted: list[str] = field(default_factory=list)
     processed_entries: int = 0
+    anchored_pruned: int = 0
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -43,6 +44,7 @@ class DecayReport:
             "reality_confidence_drifted": list(self.reality_confidence_drifted),
             "confidence_drifted": list(self.confidence_drifted),
             "processed_entries": self.processed_entries,
+            "anchored_pruned": self.anchored_pruned,
         }
 
 
