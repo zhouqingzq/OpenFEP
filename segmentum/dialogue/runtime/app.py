@@ -42,6 +42,284 @@ def init_session() -> None:
         st.session_state.pending_user_message: str | None = None
 
 
+# Chat UI lives inside components.html so scroll JS runs in the same document as the
+# bubbles (Streamlit ≥1.5x isolates st.markdown from component iframes).
+_WECHAT_IFRAME_STYLES = """
+:root {
+    --wechat-bg: #1f1f1f;
+    --wechat-panel-bg: #202020;
+    --wechat-divider: #2f2f2f;
+    --bubble-other-bg: #2f3136;
+    --bubble-other-text: #e8e8e8;
+    --bubble-mine-bg: #3cd681;
+    --bubble-mine-text: #111111;
+    --name-color: #8a8a8a;
+    --time-color: #7b7b7b;
+    --bubble-max: 288px;
+}
+html, body {
+    margin: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: var(--wechat-bg);
+    color: var(--bubble-other-text);
+}
+.wechat-panel {
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--wechat-bg);
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+}
+.wechat-topbar {
+    flex: 0 0 auto;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wechat-bg);
+    border-bottom: 1px solid var(--wechat-divider);
+    font-size: 15px;
+    font-weight: 400;
+    color: #e7e7e7;
+}
+.wechat-subtitle {
+    margin-left: 8px;
+    color: #777777;
+    font-size: 13px;
+    font-weight: 400;
+}
+.wechat-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 16px 28px;
+    background: var(--wechat-bg);
+    scroll-padding-bottom: 48px;
+}
+.wechat-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+.wechat-row.user {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+.wechat-row.assistant {
+    justify-content: flex-start;
+}
+.wechat-row.user + .wechat-row.user {
+    margin-top: -7px;
+}
+.wechat-avatar {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    user-select: none;
+    overflow: hidden;
+}
+.wechat-row.user .wechat-avatar {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
+        linear-gradient(135deg, #5270df, #73b6ff 52%, #e7f0ff);
+    color: #101010;
+}
+.wechat-row.assistant .wechat-avatar {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
+        linear-gradient(135deg, #565b64, #252a31);
+}
+.wechat-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: fit-content;
+    max-width: min(280px, 88%);
+    min-width: 0;
+}
+.wechat-row.user .wechat-stack {
+    align-items: flex-end;
+}
+.wechat-name {
+    margin: -1px 0 4px;
+    color: var(--name-color);
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 400;
+}
+.wechat-bubble {
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    max-width: min(280px, 100%);
+    min-height: 34px;
+    padding: 8px 11px;
+    border-radius: 6px;
+    line-height: 1.45;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+.wechat-row.user .wechat-bubble {
+    background: var(--bubble-mine-bg);
+    color: var(--bubble-mine-text);
+    margin-right: 0;
+}
+.wechat-row.assistant .wechat-bubble {
+    background: var(--bubble-other-bg);
+    color: var(--bubble-other-text);
+    border: 0;
+    margin-left: 0;
+}
+.wechat-row.user .wechat-bubble::after {
+    content: "";
+    position: absolute;
+    top: 11px;
+    right: -5px;
+    border-width: 5px 0 5px 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--bubble-mine-bg);
+}
+.wechat-row.assistant .wechat-bubble::before {
+    content: "";
+    position: absolute;
+    top: 11px;
+    left: -5px;
+    border-width: 5px 5px 5px 0;
+    border-style: solid;
+    border-color: transparent var(--bubble-other-bg) transparent transparent;
+}
+.time-divider {
+    text-align: center;
+    color: var(--time-color);
+    font-size: 13px;
+    line-height: 1;
+    margin: 16px 0 14px;
+}
+.wechat-empty {
+    display: flex;
+    min-height: 240px;
+    align-items: center;
+    justify-content: center;
+    color: #777777;
+    font-size: 14px;
+}
+.wechat-body::-webkit-scrollbar {
+    width: 8px;
+}
+.wechat-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.wechat-body::-webkit-scrollbar-thumb {
+    background: #666666;
+    border-radius: 8px;
+}
+@media (max-width: 760px) {
+    .wechat-body {
+        padding: 14px 12px 22px;
+    }
+    .wechat-stack {
+        max-width: min(268px, 90%);
+    }
+    .wechat-bubble {
+        font-size: 14px;
+        max-width: min(268px, 100%);
+    }
+    .wechat-avatar {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+    }
+}
+"""
+
+
+def _chat_iframe_height(messages: list[dict[str, str]], *, pending: str | None) -> int:
+    """Bounded height so the Streamlit chat input below the iframe stays on-screen.
+
+    The iframe is only the message pane; tall iframes steal vertical space and push
+    ``st.chat_input`` below the fold. Extra history scrolls inside ``.wechat-body``.
+    """
+    n = len(messages) + (1 if pending else 0)
+    chars = sum(len(str(m.get("text", ""))) for m in messages)
+    # Cap ~420px: leaves room for app chrome + tabs + ~210px chat input on typical laptops.
+    content_hint = 175 + n * 40 + min(160, chars // 200)
+    cap = 420
+    floor = 300
+    return max(floor, min(cap, content_hint))
+
+
+def _render_wechat_chat_iframe(
+    message_parts_html: str,
+    loaded_name: str,
+    *,
+    messages: list[dict[str, str]],
+    pending: str | None,
+) -> None:
+    safe_title = escape(loaded_name)
+    inner = (
+        '<div class="wechat-panel">'
+        '<div class="wechat-topbar">Chat'
+        f'<span class="wechat-subtitle">{safe_title}</span>'
+        "</div>"
+        '<div class="wechat-body" id="wechat-scroll-root">'
+        + message_parts_html
+        + "</div></div>"
+    )
+    doc = (
+        "<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\"/>"
+        "<style>"
+        + _WECHAT_IFRAME_STYLES
+        + "</style></head><body>"
+        + inner
+        + """
+<script>
+(function () {
+  const el = document.getElementById("wechat-scroll-root");
+  function toBottom() {
+    if (!el) return;
+    el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight);
+  }
+  toBottom();
+  requestAnimationFrame(function () {
+    toBottom();
+    requestAnimationFrame(toBottom);
+  });
+  [0, 16, 48, 120, 280, 600, 1200, 2200].forEach(function (t) {
+    setTimeout(toBottom, t);
+  });
+  if (typeof ResizeObserver !== "undefined" && el) {
+    var ro = new ResizeObserver(toBottom);
+    ro.observe(el);
+    setTimeout(function () { ro.disconnect(); }, 10000);
+  }
+})();
+</script>
+</body></html>"""
+    )
+    components.html(doc, height=_chat_iframe_height(messages, pending=pending), scrolling=True)
+
+
 def inject_app_style() -> None:
     st.markdown(
         """
@@ -98,170 +376,6 @@ def inject_app_style() -> None:
         .stTabs [aria-selected="true"] {
             color: #e8e8e8;
             border-bottom: 2px solid var(--bubble-mine-bg);
-        }
-        .wechat-panel {
-            min-height: calc(100vh - 360px);
-            background: var(--wechat-bg);
-            border: 0;
-            border-bottom: 0;
-            border-radius: 0;
-            overflow: hidden;
-        }
-        .wechat-topbar {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--wechat-bg);
-            border-bottom: 1px solid var(--wechat-divider);
-            font-size: 16px;
-            font-weight: 400;
-            color: #e7e7e7;
-        }
-        .wechat-subtitle {
-            margin-left: 8px;
-            color: #777777;
-            font-size: 14px;
-            font-weight: 400;
-        }
-        .wechat-body {
-            min-height: calc(100vh - 410px);
-            max-height: calc(100vh - 360px);
-            overflow-y: auto;
-            padding: 20px 28px 12px;
-            background: var(--wechat-bg);
-            box-sizing: border-box;
-        }
-        .wechat-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin: 0 0 18px;
-        }
-        .wechat-row.user {
-            flex-direction: row-reverse;
-            justify-content: flex-start;
-        }
-        .wechat-row.assistant {
-            justify-content: flex-start;
-        }
-        .wechat-row.user + .wechat-row.user {
-            margin-top: -7px;
-        }
-        .wechat-avatar {
-            width: 42px;
-            height: 42px;
-            flex: 0 0 42px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            user-select: none;
-            overflow: hidden;
-        }
-        .wechat-row.user .wechat-avatar {
-            background:
-                linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
-                linear-gradient(135deg, #5270df, #73b6ff 52%, #e7f0ff);
-            color: #101010;
-        }
-        .wechat-row.assistant .wechat-avatar {
-            background:
-                linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
-                linear-gradient(135deg, #565b64, #252a31);
-        }
-        .wechat-stack {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            max-width: min(62vw, 460px);
-        }
-        .wechat-row.user .wechat-stack {
-            align-items: flex-end;
-        }
-        .wechat-name {
-            margin: -1px 0 6px;
-            color: var(--name-color);
-            font-size: 13px;
-            line-height: 1.2;
-            font-weight: 400;
-        }
-        .wechat-bubble {
-            position: relative;
-            display: inline-block;
-            width: fit-content;
-            max-width: min(58vw, 390px);
-            min-height: 38px;
-            padding: 11px 15px;
-            border-radius: 8px;
-            line-height: 1.5;
-            font-size: 15px;
-            font-weight: 400;
-            letter-spacing: 0;
-            white-space: pre-wrap;
-            word-break: break-word;
-            box-shadow: none;
-            box-sizing: border-box;
-        }
-        .wechat-row.user .wechat-bubble {
-            background: var(--bubble-mine-bg);
-            color: var(--bubble-mine-text);
-            margin-right: 0;
-        }
-        .wechat-row.assistant .wechat-bubble {
-            background: var(--bubble-other-bg);
-            color: var(--bubble-other-text);
-            border: 0;
-            margin-left: 0;
-        }
-        .wechat-row.user .wechat-bubble::after {
-            content: "";
-            position: absolute;
-            top: 13px;
-            right: -6px;
-            border-width: 6px 0 6px 6px;
-            border-style: solid;
-            border-color: transparent transparent transparent var(--bubble-mine-bg);
-        }
-        .wechat-row.assistant .wechat-bubble::before {
-            content: "";
-            position: absolute;
-            top: 13px;
-            left: -6px;
-            border-width: 6px 6px 6px 0;
-            border-style: solid;
-            border-color: transparent var(--bubble-other-bg) transparent transparent;
-        }
-        .time-divider {
-            text-align: center;
-            color: var(--time-color);
-            font-size: 15px;
-            line-height: 1;
-            margin: 20px 0 18px;
-        }
-        .wechat-empty {
-            display: flex;
-            min-height: 240px;
-            align-items: center;
-            justify-content: center;
-            color: #777777;
-            font-size: 16px;
-        }
-        .wechat-typing {
-            color: #8a8a8a;
-        }
-        .wechat-body::-webkit-scrollbar {
-            width: 8px;
-        }
-        .wechat-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .wechat-body::-webkit-scrollbar-thumb {
-            background: #666666;
-            border-radius: 8px;
         }
         [data-testid="stBottomBlockContainer"],
         [data-testid="stChatInputContainer"],
@@ -391,21 +505,6 @@ def inject_app_style() -> None:
                 padding-left: 0;
                 padding-right: 0;
             }
-            .wechat-body {
-                padding: 18px 20px 12px;
-            }
-            .wechat-stack {
-                max-width: min(70vw, 460px);
-            }
-            .wechat-bubble {
-                font-size: 15px;
-                max-width: min(70vw, 390px);
-            }
-            .wechat-avatar {
-                width: 40px;
-                height: 40px;
-                flex-basis: 40px;
-            }
             [data-testid="stChatInput"] {
                 padding-left: 24px !important;
                 padding-right: 24px !important;
@@ -445,27 +544,6 @@ def _message_html(role: str, text: str, *, assistant_name: str = "AI") -> str:
         f'<div class="wechat-bubble">{safe_text}</div>'
         "</div>"
         "</div>"
-    )
-
-
-def _auto_scroll_chat() -> None:
-    components.html(
-        """
-        <script>
-        const scrollChatToBottom = () => {
-          const doc = window.parent.document;
-          const bodies = doc.querySelectorAll(".wechat-body");
-          const body = bodies[bodies.length - 1];
-          if (!body) return;
-          body.scrollTop = body.scrollHeight;
-        };
-        requestAnimationFrame(scrollChatToBottom);
-        setTimeout(scrollChatToBottom, 120);
-        setTimeout(scrollChatToBottom, 450);
-        </script>
-        """,
-        height=0,
-        width=0,
     )
 
 
@@ -602,20 +680,12 @@ def render_chat() -> None:
             empty_text = "请先在左侧创建或加载一个 persona"
         message_parts.append(f'<div class="wechat-empty">{escape(empty_text)}</div>')
 
-    st.markdown(
-        (
-            '<div class="wechat-panel">'
-            '<div class="wechat-topbar">'
-            "Chat"
-            f'<span class="wechat-subtitle">{escape(loaded_name)}</span>'
-            "</div>"
-            '<div class="wechat-body">'
-            + "".join(message_parts)
-            + "</div></div>"
-        ),
-        unsafe_allow_html=True,
+    _render_wechat_chat_iframe(
+        "".join(message_parts),
+        loaded_name,
+        messages=st.session_state.messages,
+        pending=pending_text,
     )
-    _auto_scroll_chat()
 
     if pending_text and chat_iface.has_agent():
         chat_iface.sync_transcript_from_messages(
