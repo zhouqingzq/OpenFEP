@@ -14,6 +14,7 @@ from ..cognitive_paths import (
     select_cognitive_path_candidate,
 )
 from ..cognition import CognitiveLoop
+from ..memory_anchored import DialogueFactExtractor
 from ..memory_dynamics import (
     consolidate_successful_path_pattern,
     record_failed_path_outcome,
@@ -148,6 +149,39 @@ def _merge_meta_control_signals(
     )
 
 
+def _ensure_memory_store(agent: "SegmentAgent") -> object | None:
+    """Get or create the agent's MemoryStore for anchored fact storage."""
+    ltm = getattr(agent, "long_term_memory", None)
+    if ltm is None:
+        return None
+    if hasattr(ltm, "ensure_memory_store"):
+        ltm.ensure_memory_store()
+    return getattr(ltm, "memory_store", None)
+
+
+def _extract_and_store_dialogue_facts(
+    agent: "SegmentAgent",
+    text: str,
+    turn_id: str,
+    utterance_id: str,
+    speaker: str = "user",
+) -> None:
+    """Extract anchored facts from a dialogue turn and store them."""
+    store = _ensure_memory_store(agent)
+    if store is None:
+        return
+    extractor = DialogueFactExtractor()
+    items = extractor.extract(
+        text=text,
+        turn_id=turn_id,
+        utterance_id=utterance_id,
+        speaker=speaker,
+        existing_items=list(getattr(store, "anchored_items", [])),
+    )
+    for item in items:
+        store.add_anchored_item(item)
+
+
 def run_conversation(
     agent: "SegmentAgent",
     interlocutor_turns: list[str],
@@ -227,6 +261,16 @@ def run_conversation(
             timestamp=None,
         )
         channels = dict(obs_obj.channels)
+
+        # ── M8: Extract dialogue facts from user turn ────────────────
+        _extract_and_store_dialogue_facts(
+            agent=agent,
+            text=partner_text,
+            turn_id=turn_id,
+            utterance_id=f"{turn_id}_user",
+            speaker="user",
+        )
+
         publish_event(
             "ObservationEvent",
             "DialogueObserver.observe",
@@ -588,6 +632,16 @@ def run_conversation(
                 generation_diagnostics.update(chosen_policy_context)
         transcript.append(TranscriptUtterance(role="interlocutor", text=partner_text))
         transcript.append(TranscriptUtterance(role="agent", text=reply))
+
+        # ── M8: Extract facts from agent reply for self-consistency ──
+        if reply.strip():
+            _extract_and_store_dialogue_facts(
+                agent=agent,
+                text=reply,
+                turn_id=turn_id,
+                utterance_id=f"{turn_id}_agent",
+                speaker="agent",
+            )
 
         strat = None
         if diagnostics is not None:

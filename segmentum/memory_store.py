@@ -19,6 +19,7 @@ from .memory_decay import (
     decay_trace_strength_for_level,
     trace_decay_rate,
 )
+from .memory_anchored import AnchoredMemoryItem
 from .memory_model import MemoryClass, MemoryEntry, SourceType, StoreLevel
 
 
@@ -423,6 +424,7 @@ class MemoryStore:
     last_cleanup_report: dict[str, object] = field(default_factory=dict)
     semantic_schemas: list[dict[str, object]] = field(default_factory=list)
     latest_schema_update: dict[str, object] = field(default_factory=dict)
+    anchored_items: list[AnchoredMemoryItem] = field(default_factory=list)
 
     def _find_index(self, entry_id: str) -> int | None:
         for index, entry in enumerate(self.entries):
@@ -871,6 +873,45 @@ class MemoryStore:
         }
         return len(deleted)
 
+    # ── Anchored Memory Item methods (M8) ──────────────────────────────
+
+    def add_anchored_item(self, item: AnchoredMemoryItem) -> str:
+        """Add an AnchoredMemoryItem to the store. Returns its memory_id."""
+        self.anchored_items.append(item)
+        return item.memory_id
+
+    def get_anchored_items(
+        self,
+        *,
+        status_filter: str | None = None,
+        visibility_filter: str | None = None,
+        memory_type_filter: str | None = None,
+    ) -> list[AnchoredMemoryItem]:
+        """Retrieve anchored items with optional filters."""
+        result = self.anchored_items
+        if status_filter is not None:
+            result = [it for it in result if it.status == status_filter]
+        if visibility_filter is not None:
+            result = [it for it in result if it.visibility == visibility_filter]
+        if memory_type_filter is not None:
+            result = [it for it in result if it.memory_type == memory_type_filter]
+        return result
+
+    def retract_anchored_item(self, memory_id: str) -> bool:
+        """Mark an anchored item as retracted. Returns True if found."""
+        for item in self.anchored_items:
+            if item.memory_id == memory_id:
+                item.status = "retracted"
+                return True
+        return False
+
+    def find_anchored_by_proposition(self, substring: str) -> list[AnchoredMemoryItem]:
+        """Find anchored items whose proposition contains *substring*."""
+        sub = substring.strip().lower()
+        if not sub:
+            return []
+        return [it for it in self.anchored_items if sub in it.proposition.lower()]
+
     def _should_abstract_entry(self, entry: MemoryEntry, elapsed: int) -> bool:
         if entry.store_level not in {StoreLevel.MID, StoreLevel.LONG}:
             return False
@@ -1045,6 +1086,7 @@ class MemoryStore:
             "last_cleanup_report": dict(self.last_cleanup_report),
             "semantic_schemas": [dict(s) for s in self.semantic_schemas if isinstance(s, dict)],
             "latest_schema_update": dict(self.latest_schema_update),
+            "anchored_items": [it.to_dict() for it in self.anchored_items],
         }
 
     @classmethod
@@ -1087,6 +1129,11 @@ class MemoryStore:
             latest_schema_update=dict(payload.get("latest_schema_update", {}))
             if isinstance(payload.get("latest_schema_update"), dict)
             else {},
+            anchored_items=[
+                AnchoredMemoryItem.from_dict(it)
+                for it in payload.get("anchored_items", [])
+                if isinstance(it, dict)
+            ],
         )
 
     @classmethod

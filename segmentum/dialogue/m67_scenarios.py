@@ -8,7 +8,9 @@ core policy scoring untouched.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone as _timezone
+
+UTC = _timezone.utc
 import json
 from pathlib import Path
 from typing import Mapping, Sequence

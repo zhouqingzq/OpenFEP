@@ -755,25 +755,53 @@ def _build_action_policy(action: str, agent: "SegmentAgent") -> str:
     return "\n".join(lines)
 
 
-# ── Memory Context V2 (3-category) ──────────────────────────────────────
+# ── Memory Context V2 (M8 anchored-first) ────────────────────────────────
 
 def _build_memory_context_v2(agent: "SegmentAgent") -> dict[str, list[str]]:
-    """Extract recent episodic memories and categorize into 3 buckets."""
+    """Build memory context from anchored items (M8) with legacy fallback."""
+    from segmentum.memory_anchored import MemoryPermissionFilter
+
     store = getattr(agent, "memory_store", None)
     if store is None:
         return {"explicit_usable": [], "implicit_tone": [], "do_not_use": []}
 
+    # ── M8 anchored-first path ────────────────────────────────────
+    anchored = getattr(store, "anchored_items", None)
+    if anchored:
+        buckets = MemoryPermissionFilter.filter(anchored)
+        explicit: list[str] = []
+        implicit: list[str] = []
+        forbidden: list[str] = []
+
+        for item in buckets.explicit_facts:
+            if item.status == "asserted":
+                explicit.append(f"用户说过：{item.proposition}")
+            else:
+                explicit.append(f"{item.proposition}")
+
+        for item in buckets.cautious_hypotheses:
+            implicit.append(f"可能：{item.proposition}（置信度 {item.confidence:.1f}）。使用时必须保留不确定表达。")
+
+        for item in buckets.strategy_only:
+            implicit.append(f"只影响策略，不要直接说：{item.proposition}")
+
+        for item in buckets.forbidden:
+            forbidden.append(f"禁止：{item.proposition}")
+
+        if explicit or implicit or forbidden:
+            return {"explicit_usable": explicit, "implicit_tone": implicit, "do_not_use": forbidden}
+
+    # ── Legacy fallback (when no anchored items exist) ─────────────
     entries = store.episodic_entries()
     if not entries:
         return {"explicit_usable": [], "implicit_tone": [], "do_not_use": []}
 
-    recent = entries[-8:]  # Look at last 8 entries
-    explicit: list[str] = []
-    implicit: list[str] = []
-    forbidden: list[str] = []
+    recent = entries[-8:]
+    legacy_explicit: list[str] = []
+    legacy_implicit: list[str] = []
+    legacy_forbidden: list[str] = []
 
     for e in recent:
-        # MemoryEntry uses 'content', not 'summary'
         summary = getattr(e, "content", "") or ""
         if not summary:
             tags = list(getattr(e, "semantic_tags", []) or [])
@@ -783,45 +811,58 @@ def _build_memory_context_v2(agent: "SegmentAgent") -> dict[str, list[str]]:
                 summary = "关于" + "、".join(tags)
         if not summary:
             continue
+        # Skip legacy template content that adds no value
+        if summary.startswith("Legacy episode at cycle"):
+            continue
 
         salience = float(getattr(e, "salience", 0.5))
-        age = float(getattr(e, "created_at_tick", 0) or 0)
-        # Approximate recency: entries closer to the end are more recent
         idx = recent.index(e)
-        is_recent = idx >= len(recent) - 3  # Last 3 entries
+        is_recent = idx >= len(recent) - 3
 
-        # Sensitive tags
         tags = list(getattr(e, "tags", []) or [])
         is_sensitive = any(t in str(tags).lower()
                           for t in ("trauma", "敏感", "private", "secret"))
 
-        if is_sensitive or (age > 0 and age < -50):
-            forbidden.append(summary)
+        if is_sensitive:
+            legacy_forbidden.append(summary)
         elif salience >= 0.3 and is_recent:
-            explicit.append(summary)
+            legacy_explicit.append(summary)
         else:
-            implicit.append(summary)
+            legacy_implicit.append(summary)
 
-    return {"explicit_usable": explicit, "implicit_tone": implicit,
-            "do_not_use": forbidden}
+    return {"explicit_usable": legacy_explicit, "implicit_tone": legacy_implicit,
+            "do_not_use": legacy_forbidden}
 
 
 def _format_memory_context(mem_dict: dict[str, list[str]]) -> str:
-    """Format categorized memory into natural language sections."""
+    """Format categorized memory into natural language sections (M8 aware)."""
     parts: list[str] = []
+    has_anchored = any(
+        any(prefix in (item or "") for item in items)
+        for prefix in ("用户说过", "可能：", "只影响策略", "禁止：")
+        for items in [mem_dict.get("explicit_usable", [])]
+    )
 
     if mem_dict.get("explicit_usable"):
-        parts.append("可以在对话中自然提起的记忆：")
+        if has_anchored:
+            parts.append("可显式引用：")
+        else:
+            parts.append("可以在对话中自然提起的记忆：")
         for m in mem_dict["explicit_usable"]:
             parts.append(f"  - {m}")
-        parts.append("不要炫耀记忆——只在和当前话题强相关时才自然提起。"
-                     "显式提起时要轻：'你上次好像说过……'。不要说'根据我的记忆……'。")
+        if not has_anchored:
+            parts.append("不要炫耀记忆——只在和当前话题强相关时才自然提起。"
+                         "显式提起时要轻：'你上次好像说过……'。不要说'根据我的记忆……'。")
 
     if mem_dict.get("implicit_tone"):
-        parts.append("只影响语气、不要显式提起的记忆：")
+        if has_anchored:
+            parts.append("谨慎假设或策略影响：")
+        else:
+            parts.append("只影响语气、不要显式提起的记忆：")
         for m in mem_dict["implicit_tone"]:
             parts.append(f"  - {m}")
-        parts.append("优先隐式使用——让记忆影响你的态度和语气，而非直接引用。")
+        if not has_anchored:
+            parts.append("优先隐式使用——让记忆影响你的态度和语气，而非直接引用。")
 
     if mem_dict.get("do_not_use"):
         parts.append("绝对不能使用的记忆：")
