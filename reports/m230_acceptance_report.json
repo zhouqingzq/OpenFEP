@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.30",
   "status": "PASS",
-  "generated_at": "2026-04-15T10:29:15+00:00",
+  "generated_at": "2026-05-02T17:07:51+00:00",
   "seed_set": [
     230,
     460
@@ -22,13 +22,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
         "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-        "provenance_signature": "1c8953ed37e92580c21d5efdf7c89528a90427a0e44f550b7d51660ed7f532e8"
+        "provenance_signature": "f5780b9fd158dfd2026edf5b043332a7fb858b53086065c41052481dc7d8ef87"
       },
       {
         "suite": "tests/test_m230_subject_state_regression.py",
@@ -36,13 +36,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
         "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-        "provenance_signature": "71654a8ba06717081abe7a2f2b11b2160189a385b072a2c17d7a91a057bcc7ed"
+        "provenance_signature": "80887b7eb3a7a6bb55976c3262aef4893ce68bea1e1aa62565bf999f4765f314"
       },
       {
         "suite": "tests/test_m230_acceptance.py",
@@ -50,13 +50,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
         "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-        "provenance_signature": "dbe8ccc29fbb2f5289f8cb5f5a9d17341919a644d5cc4adab63de3cde36a9320"
+        "provenance_signature": "21a704c91c7d9f3ec1fb848372294295b6d8dc7f7e4811339b7f9012237a1c49"
       }
     ],
     "regressions": [
@@ -66,13 +66,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
         "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-        "provenance_signature": "7b987470f13b9c9b283860a59578d558caf41d1d24e4010605f3cb132a4552f8"
+        "provenance_signature": "540c2414c42dd5ba840683ca771dc266a81707c677bf0745bb777d9dd0b968e0"
       },
       {
         "suite": "tests/test_m229_verification_loop.py",
@@ -80,13 +80,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
         "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-        "provenance_signature": "082b2b596790608e1050a645c714959bb654182bf481b9ed6555b0f36ae9a007"
+        "provenance_signature": "4c0c303bc1d47b48ab8307b45b08cb532b1ad7598ee04610df48a1cfeb60f7dd"
       },
       {
         "suite": "tests/test_baseline_regressions.py",
@@ -94,13 +94,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
         "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-        "provenance_signature": "1978d6fabc264a560e63917b9bff4effab4d4b964c07b3bbe126970d4c9f58bd"
+        "provenance_signature": "22a8462b37f77bfb69c39932665a076cc3e6a311b07e9cc8a4679a1d7bf9dcad"
       }
     ]
   },
@@ -1519,13 +1519,13 @@
           "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
           "returncode": 0,
           "passed": true,
-          "started_at": "2026-04-15T10:29:15+00:00",
-          "completed_at": "2026-04-15T10:29:15+00:00",
+          "started_at": "2026-05-02T17:07:51+00:00",
+          "completed_at": "2026-05-02T17:07:51+00:00",
           "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
           "provenance_run_id": "test-run-id",
           "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
           "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-          "provenance_signature": "7b987470f13b9c9b283860a59578d558caf41d1d24e4010605f3cb132a4552f8"
+          "provenance_signature": "540c2414c42dd5ba840683ca771dc266a81707c677bf0745bb777d9dd0b968e0"
         },
         {
           "suite": "tests/test_m229_verification_loop.py",
@@ -1533,13 +1533,13 @@
           "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
           "returncode": 0,
           "passed": true,
-          "started_at": "2026-04-15T10:29:15+00:00",
-          "completed_at": "2026-04-15T10:29:15+00:00",
+          "started_at": "2026-05-02T17:07:51+00:00",
+          "completed_at": "2026-05-02T17:07:51+00:00",
           "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
           "provenance_run_id": "test-run-id",
           "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
           "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-          "provenance_signature": "082b2b596790608e1050a645c714959bb654182bf481b9ed6555b0f36ae9a007"
+          "provenance_signature": "4c0c303bc1d47b48ab8307b45b08cb532b1ad7598ee04610df48a1cfeb60f7dd"
         },
         {
           "suite": "tests/test_baseline_regressions.py",
@@ -1547,13 +1547,13 @@
           "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
           "returncode": 0,
           "passed": true,
-          "started_at": "2026-04-15T10:29:15+00:00",
-          "completed_at": "2026-04-15T10:29:15+00:00",
+          "started_at": "2026-05-02T17:07:51+00:00",
+          "completed_at": "2026-05-02T17:07:51+00:00",
           "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
           "provenance_run_id": "test-run-id",
           "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
           "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-          "provenance_signature": "1978d6fabc264a560e63917b9bff4effab4d4b964c07b3bbe126970d4c9f58bd"
+          "provenance_signature": "22a8462b37f77bfb69c39932665a076cc3e6a311b07e9cc8a4679a1d7bf9dcad"
         }
       ],
       "missing_suites": [],
@@ -1562,7 +1562,7 @@
     "artifact_freshness": {
       "passed": true,
       "evidence": {
-        "round_started_at": "2026-04-15T10:29:15+00:00",
+        "round_started_at": "2026-05-02T17:07:51+00:00",
         "current_round_test_evidence": true,
         "milestone_records": [
           {
@@ -1571,13 +1571,13 @@
             "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
             "returncode": 0,
             "passed": true,
-            "started_at": "2026-04-15T10:29:15+00:00",
-            "completed_at": "2026-04-15T10:29:15+00:00",
+            "started_at": "2026-05-02T17:07:51+00:00",
+            "completed_at": "2026-05-02T17:07:51+00:00",
             "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
             "provenance_run_id": "test-run-id",
             "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
             "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-            "provenance_signature": "1c8953ed37e92580c21d5efdf7c89528a90427a0e44f550b7d51660ed7f532e8"
+            "provenance_signature": "f5780b9fd158dfd2026edf5b043332a7fb858b53086065c41052481dc7d8ef87"
           },
           {
             "suite": "tests/test_m230_subject_state_regression.py",
@@ -1585,13 +1585,13 @@
             "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
             "returncode": 0,
             "passed": true,
-            "started_at": "2026-04-15T10:29:15+00:00",
-            "completed_at": "2026-04-15T10:29:15+00:00",
+            "started_at": "2026-05-02T17:07:51+00:00",
+            "completed_at": "2026-05-02T17:07:51+00:00",
             "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
             "provenance_run_id": "test-run-id",
             "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
             "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-            "provenance_signature": "71654a8ba06717081abe7a2f2b11b2160189a385b072a2c17d7a91a057bcc7ed"
+            "provenance_signature": "80887b7eb3a7a6bb55976c3262aef4893ce68bea1e1aa62565bf999f4765f314"
           },
           {
             "suite": "tests/test_m230_acceptance.py",
@@ -1599,13 +1599,13 @@
             "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
             "returncode": 0,
             "passed": true,
-            "started_at": "2026-04-15T10:29:15+00:00",
-            "completed_at": "2026-04-15T10:29:15+00:00",
+            "started_at": "2026-05-02T17:07:51+00:00",
+            "completed_at": "2026-05-02T17:07:51+00:00",
             "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
             "provenance_run_id": "test-run-id",
             "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
             "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-            "provenance_signature": "dbe8ccc29fbb2f5289f8cb5f5a9d17341919a644d5cc4adab63de3cde36a9320"
+            "provenance_signature": "21a704c91c7d9f3ec1fb848372294295b6d8dc7f7e4811339b7f9012237a1c49"
           }
         ],
         "regression_records": [
@@ -1615,13 +1615,13 @@
             "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
             "returncode": 0,
             "passed": true,
-            "started_at": "2026-04-15T10:29:15+00:00",
-            "completed_at": "2026-04-15T10:29:15+00:00",
+            "started_at": "2026-05-02T17:07:51+00:00",
+            "completed_at": "2026-05-02T17:07:51+00:00",
             "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
             "provenance_run_id": "test-run-id",
             "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
             "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-            "provenance_signature": "7b987470f13b9c9b283860a59578d558caf41d1d24e4010605f3cb132a4552f8"
+            "provenance_signature": "540c2414c42dd5ba840683ca771dc266a81707c677bf0745bb777d9dd0b968e0"
           },
           {
             "suite": "tests/test_m229_verification_loop.py",
@@ -1629,13 +1629,13 @@
             "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
             "returncode": 0,
             "passed": true,
-            "started_at": "2026-04-15T10:29:15+00:00",
-            "completed_at": "2026-04-15T10:29:15+00:00",
+            "started_at": "2026-05-02T17:07:51+00:00",
+            "completed_at": "2026-05-02T17:07:51+00:00",
             "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
             "provenance_run_id": "test-run-id",
             "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
             "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-            "provenance_signature": "082b2b596790608e1050a645c714959bb654182bf481b9ed6555b0f36ae9a007"
+            "provenance_signature": "4c0c303bc1d47b48ab8307b45b08cb532b1ad7598ee04610df48a1cfeb60f7dd"
           },
           {
             "suite": "tests/test_baseline_regressions.py",
@@ -1643,13 +1643,13 @@
             "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
             "returncode": 0,
             "passed": true,
-            "started_at": "2026-04-15T10:29:15+00:00",
-            "completed_at": "2026-04-15T10:29:15+00:00",
+            "started_at": "2026-05-02T17:07:51+00:00",
+            "completed_at": "2026-05-02T17:07:51+00:00",
             "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
             "provenance_run_id": "test-run-id",
             "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
             "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-            "provenance_signature": "1978d6fabc264a560e63917b9bff4effab4d4b964c07b3bbe126970d4c9f58bd"
+            "provenance_signature": "22a8462b37f77bfb69c39932665a076cc3e6a311b07e9cc8a4679a1d7bf9dcad"
           }
         ]
       }
@@ -1659,9 +1659,9 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "round_started_at": "2026-04-15T10:29:15+00:00",
-    "generated_at": "2026-04-15T10:29:15+00:00",
-    "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
+    "round_started_at": "2026-05-02T17:07:51+00:00",
+    "generated_at": "2026-05-02T17:07:51+00:00",
+    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m230_milestone_spec.md",
@@ -1673,31 +1673,31 @@
         "path": "E:\\workspace\\segments\\artifacts\\m230_slow_learning_trace.jsonl",
         "exists": true,
         "size_bytes": 12046,
-        "modified_at": "2026-04-15T10:29:15+00:00"
+        "modified_at": "2026-05-02T17:07:51+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m230_slow_learning_ablation.json",
         "exists": true,
         "size_bytes": 1261,
-        "modified_at": "2026-04-15T10:29:15+00:00"
+        "modified_at": "2026-05-02T17:07:51+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m230_slow_learning_stress.json",
         "exists": true,
         "size_bytes": 1201,
-        "modified_at": "2026-04-15T10:29:15+00:00"
+        "modified_at": "2026-05-02T17:07:51+00:00"
       },
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m230_acceptance_report.json",
         "exists": true,
         "size_bytes": 86472,
-        "modified_at": "2026-04-15T10:29:15+00:00"
+        "modified_at": "2026-05-02T17:07:51+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m230_acceptance_summary.md",
         "exists": true,
         "size_bytes": 252,
-        "modified_at": "2026-04-15T10:29:15+00:00"
+        "modified_at": "2026-05-02T17:07:51+00:00"
       }
     },
     "milestone_records": [
@@ -1707,13 +1707,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
         "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-        "provenance_signature": "1c8953ed37e92580c21d5efdf7c89528a90427a0e44f550b7d51660ed7f532e8"
+        "provenance_signature": "f5780b9fd158dfd2026edf5b043332a7fb858b53086065c41052481dc7d8ef87"
       },
       {
         "suite": "tests/test_m230_subject_state_regression.py",
@@ -1721,13 +1721,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
         "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-        "provenance_signature": "71654a8ba06717081abe7a2f2b11b2160189a385b072a2c17d7a91a057bcc7ed"
+        "provenance_signature": "80887b7eb3a7a6bb55976c3262aef4893ce68bea1e1aa62565bf999f4765f314"
       },
       {
         "suite": "tests/test_m230_acceptance.py",
@@ -1735,13 +1735,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m230_slow_variable_learning.py tests/test_m230_subject_state_regression.py tests/test_m230_acceptance.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "d1476350663313d2580eed1a0fe5c682271f02cb764f09f502b5aea2a8d6d411",
         "provenance_group": "tests/test_m230_slow_variable_learning.py,tests/test_m230_subject_state_regression.py,tests/test_m230_acceptance.py",
-        "provenance_signature": "dbe8ccc29fbb2f5289f8cb5f5a9d17341919a644d5cc4adab63de3cde36a9320"
+        "provenance_signature": "21a704c91c7d9f3ec1fb848372294295b6d8dc7f7e4811339b7f9012237a1c49"
       }
     ],
     "regression_records": [
@@ -1751,13 +1751,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
         "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-        "provenance_signature": "7b987470f13b9c9b283860a59578d558caf41d1d24e4010605f3cb132a4552f8"
+        "provenance_signature": "540c2414c42dd5ba840683ca771dc266a81707c677bf0745bb777d9dd0b968e0"
       },
       {
         "suite": "tests/test_m229_verification_loop.py",
@@ -1765,13 +1765,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
         "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-        "provenance_signature": "082b2b596790608e1050a645c714959bb654182bf481b9ed6555b0f36ae9a007"
+        "provenance_signature": "4c0c303bc1d47b48ab8307b45b08cb532b1ad7598ee04610df48a1cfeb60f7dd"
       },
       {
         "suite": "tests/test_baseline_regressions.py",
@@ -1779,13 +1779,13 @@
         "command": "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m pytest -q tests/test_m229_acceptance.py tests/test_m229_verification_loop.py tests/test_baseline_regressions.py",
         "returncode": 0,
         "passed": true,
-        "started_at": "2026-04-15T10:29:15+00:00",
-        "completed_at": "2026-04-15T10:29:15+00:00",
+        "started_at": "2026-05-02T17:07:51+00:00",
+        "completed_at": "2026-05-02T17:07:51+00:00",
         "provenance_runner": "segmentum.m230_audit.run_required_m230_pytest_suites.v1",
         "provenance_run_id": "test-run-id",
         "provenance_command_hash": "5e91dc7ca5226f83c124cc385bee79affe4156c4c2ab184940469fcb99edde6b",
         "provenance_group": "tests/test_m229_acceptance.py,tests/test_m229_verification_loop.py,tests/test_baseline_regressions.py",
-        "provenance_signature": "1978d6fabc264a560e63917b9bff4effab4d4b964c07b3bbe126970d4c9f58bd"
+        "provenance_signature": "22a8462b37f77bfb69c39932665a076cc3e6a311b07e9cc8a4679a1d7bf9dcad"
       }
     ]
   },

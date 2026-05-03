@@ -2,6 +2,6 @@
 
 - Status: PASS
 - Recommendation: ACCEPT
-- Generated at: 2026-04-15T10:29:15+00:00
+- Generated at: 2026-05-02T17:07:51+00:00
 - Seeds: 230, 460
 - Focus: slow-variable consolidation, continuity consistency, anti-collapse drift budgets, and snapshot persistence.

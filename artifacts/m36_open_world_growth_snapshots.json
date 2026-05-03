@@ -765,6 +765,7 @@
               "active": true
             }
           ],
+          "reusable_cognitive_paths": [],
           "max_episodes": 1024,
           "surprise_threshold": 0.4,
           "duplicate_similarity_threshold": 0.999,
@@ -1638,6 +1639,7 @@
               "active": true
             }
           ],
+          "reusable_cognitive_paths": [],
           "max_episodes": 1024,
           "surprise_threshold": 0.4,
           "duplicate_similarity_threshold": 0.999,
@@ -2504,6 +2506,7 @@
               "active": true
             }
           ],
+          "reusable_cognitive_paths": [],
           "max_episodes": 1024,
           "surprise_threshold": 0.4,
           "duplicate_similarity_threshold": 0.999,
@@ -3370,6 +3373,7 @@
               "active": true
             }
           ],
+          "reusable_cognitive_paths": [],
           "max_episodes": 1024,
           "surprise_threshold": 0.4,
           "duplicate_similarity_threshold": 0.999,
@@ -4233,6 +4237,7 @@
               "active": true
             }
           ],
+          "reusable_cognitive_paths": [],
           "max_episodes": 1024,
           "surprise_threshold": 0.4,
           "duplicate_similarity_threshold": 0.999,
@@ -5093,6 +5098,7 @@
               "active": true
             }
           ],
+          "reusable_cognitive_paths": [],
           "max_episodes": 1024,
           "surprise_threshold": 0.4,
           "duplicate_similarity_threshold": 0.999,

@@ -1405,10 +1405,10 @@
     {
       "cycle": 21,
       "choice": "exploit_shelter",
-      "free_energy_after": 0.571664,
+      "free_energy_after": 0.616396,
       "alive": true,
       "body_state": {
-        "dopamine": 0.034062738865119596,
+        "dopamine": 0.014034785121002893,
         "energy": 0.987,
         "fatigue": 0.52,
         "stress": 0.0,
@@ -1481,10 +1481,10 @@
     {
       "cycle": 22,
       "choice": "exploit_shelter",
-      "free_energy_after": 0.665841,
+      "free_energy_after": 0.753723,
       "alive": true,
       "body_state": {
-        "dopamine": 0.024525171982886108,
+        "dopamine": 0.010105045287122083,
         "energy": 0.974,
         "fatigue": 0.63,
         "stress": 0.0,
@@ -1496,10 +1496,10 @@
             "reconcile:conflict:continuity_anchor:ep-000016-hide|ep-000017-hide|ep-000019-scan:20",
             "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
             "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:2c437c32-31d2-488b-9a94-aa19ff5ec76f|c05ef452-3331-409c-94f1-1f51ccf7651c|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "shelter_security",
+            "thermal_rebalance",
             "resource_guard",
             "continuity_guard",
             "reconciliation_review"
@@ -1557,10 +1557,10 @@
     {
       "cycle": 23,
       "choice": "exploit_shelter",
-      "free_energy_after": 0.455518,
+      "free_energy_after": 0.570429,
       "alive": true,
       "body_state": {
-        "dopamine": 0.017658123827677997,
+        "dopamine": 0.0072756326067278995,
         "energy": 0.961,
         "fatigue": 0.74,
         "stress": 0.0,
@@ -1569,13 +1569,12 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000016-hide|ep-000017-hide|ep-000019-scan:20",
-            "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:2c437c32-31d2-488b-9a94-aa19ff5ec76f|c05ef452-3331-409c-94f1-1f51ccf7651c|ep-000020-exploit_shelter:21",
             "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:ep-000018-scan-merged|ep-000020-exploit_shelter|ep-000021-exploit_shelter:22",
+            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-capability-scan|commitment-survival-priority:22",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "shelter_security",
             "resource_guard",
             "continuity_guard",
             "reconciliation_review"
@@ -1633,10 +1632,10 @@
     {
       "cycle": 24,
       "choice": "exploit_shelter",
-      "free_energy_after": 0.449028,
+      "free_energy_after": 0.6706,
       "alive": true,
       "body_state": {
-        "dopamine": 0.022299768937201203,
+        "dopamine": 0.005238455476844087,
         "energy": 1.0,
         "fatigue": 0.42,
         "stress": 0.0,
@@ -1645,10 +1644,10 @@
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:2c437c32-31d2-488b-9a94-aa19ff5ec76f|c05ef452-3331-409c-94f1-1f51ccf7651c|ep-000020-exploit_shelter:21",
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:c05ef452-3331-409c-94f1-1f51ccf7651c|ep-000020-exploit_shelter|ep-000022-exploit_shelter:23",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:ep-000018-scan-merged|ep-000020-exploit_shelter|ep-000021-exploit_shelter:22",
+            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-capability-scan|commitment-survival-priority:22",
+            "reconcile:conflict:continuity_anchor:ep-000020-exploit_shelter|ep-000021-exploit_shelter|ep-000022-exploit_shelter:23",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "fatigue_recovery",

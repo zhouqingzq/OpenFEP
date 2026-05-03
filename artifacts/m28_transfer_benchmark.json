@@ -20,11 +20,11 @@
             "transfer_carryover": "world_specific_homeostatic_carryover"
           },
           "transferred": {
-            "mean_conditioned_prediction_error": 0.1109678020393895,
+            "mean_conditioned_prediction_error": 0.09630982037330471,
             "survival_score": 1.900625,
             "action_distribution": {
-              "hide": 0.475,
-              "rest": 0.525
+              "hide": 0.55,
+              "rest": 0.45
             }
           },
           "fresh": {
@@ -38,7 +38,7 @@
           "improvements": {
             "conditioned_prediction_error_reduction": 0.12,
             "survival_score_lift": 0.03049813622500852,
-            "first_50_cycle_regret_reduction": -0.04166666666666674
+            "first_50_cycle_regret_reduction": -0.08333333333333348
           }
         }
       ]
@@ -63,16 +63,16 @@
             "transfer_carryover": "world_specific_homeostatic_carryover"
           },
           "transferred": {
-            "mean_conditioned_prediction_error": 0.08370970436961275,
-            "survival_score": 1.7772499999999993,
+            "mean_conditioned_prediction_error": 0.08096642269321078,
+            "survival_score": 1.6847499999999995,
             "action_distribution": {
-              "hide": 0.4,
-              "rest": 0.6
+              "hide": 0.5,
+              "rest": 0.5
             }
           },
           "fresh": {
-            "mean_conditioned_prediction_error": 0.07120290723160264,
-            "survival_score": 1.5589999999999995,
+            "mean_conditioned_prediction_error": 0.07118909749060402,
+            "survival_score": 1.5571249999999994,
             "action_distribution": {
               "exploit_shelter": 0.025,
               "hide": 0.675,
@@ -81,8 +81,8 @@
             }
           },
           "improvements": {
-            "conditioned_prediction_error_reduction": -0.17565009104655083,
-            "survival_score_lift": 0.1399935856318153,
+            "conditioned_prediction_error_reduction": -0.13734301384979952,
+            "survival_score_lift": 0.08196194910492105,
             "first_50_cycle_regret_reduction": 0.05882352941176461
           }
         }

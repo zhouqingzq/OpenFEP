@@ -1,7 +1,7 @@
 {
   "schema_version": "m222_v1",
   "milestone_id": "M2.22",
-  "generated_at": "2026-04-15T09:52:52+00:00",
+  "generated_at": "2026-05-02T16:31:44+00:00",
   "seed_set": [
     222
   ],
@@ -487,7 +487,7 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.509495,
+            "mean_free_energy": 0.513877,
             "free_energy_spike_rate": 0.0,
             "action_entropy": 1.595079,
             "dominant_action_share": 0.541667,
@@ -518,9 +518,9 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.46893365015362215,
-            "avg_free_energy_after": 0.5094952790359075,
-            "avg_free_energy_drop": 0.0229286033220481,
+            "avg_free_energy_before": 0.4704174193134021,
+            "avg_free_energy_after": 0.5138766341156421,
+            "avg_free_energy_drop": 0.020031017402093388,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
@@ -552,7 +552,7 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.509495,
+          "mean": 0.513877,
           "std": 0.0
         },
         "free_energy_spike_rate": {
@@ -803,7 +803,7 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.509495,
+            "mean_free_energy": 0.513877,
             "free_energy_spike_rate": 0.0,
             "action_entropy": 1.595079,
             "dominant_action_share": 0.541667,
@@ -834,9 +834,9 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.46893365015362215,
-            "avg_free_energy_after": 0.5094952790359075,
-            "avg_free_energy_drop": 0.0229286033220481,
+            "avg_free_energy_before": 0.4704174193134021,
+            "avg_free_energy_after": 0.5138766341156421,
+            "avg_free_energy_drop": 0.020031017402093388,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
@@ -868,7 +868,7 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.509495,
+          "mean": 0.513877,
           "std": 0.0
         },
         "free_energy_spike_rate": {
@@ -961,7 +961,7 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.548554,
+            "mean_free_energy": 0.5681,
             "free_energy_spike_rate": 0.041667,
             "action_entropy": 1.905639,
             "dominant_action_share": 0.375,
@@ -992,9 +992,9 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.4823395455440096,
-            "avg_free_energy_after": 0.5485539199944748,
-            "avg_free_energy_drop": 0.016127197169690945,
+            "avg_free_energy_before": 0.4881563574266019,
+            "avg_free_energy_after": 0.5680996224735965,
+            "avg_free_energy_drop": 0.013659374375908466,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
@@ -1026,7 +1026,7 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.548554,
+          "mean": 0.5681,
           "std": 0.0
         },
         "free_energy_spike_rate": {
@@ -1119,7 +1119,7 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.509496,
+            "mean_free_energy": 0.513877,
             "free_energy_spike_rate": 0.0,
             "action_entropy": 1.595079,
             "dominant_action_share": 0.541667,
@@ -1150,9 +1150,9 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.46893594033131425,
-            "avg_free_energy_after": 0.5094963772793456,
-            "avg_free_energy_drop": 0.022929795256302066,
+            "avg_free_energy_before": 0.47041888846664076,
+            "avg_free_energy_after": 0.5138768432196636,
+            "avg_free_energy_drop": 0.02003227745131063,
             "min_energy": 0.81,
             "max_stress": 0.10999999999999999,
             "action_counts": {
@@ -1184,7 +1184,7 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.509496,
+          "mean": 0.513877,
           "std": 0.0
         },
         "free_energy_spike_rate": {
@@ -1277,15 +1277,15 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.613685,
-            "free_energy_spike_rate": 0.041667,
-            "action_entropy": 2.812907,
+            "mean_free_energy": 0.672301,
+            "free_energy_spike_rate": 0.166667,
+            "action_entropy": 2.927694,
             "dominant_action_share": 0.25,
             "max_action_streak": 3,
-            "action_switch_rate": 0.165942,
+            "action_switch_rate": 0.173188,
             "maintenance_completion_rate": 0.166667,
             "maintenance_interrupt_recovery_rate": 1.0,
-            "sleep_recovery_gain": 0.1634,
+            "sleep_recovery_gain": 0.1569,
             "resource_guard_success_rate": 1.0,
             "governance_violation_rate": 0.0,
             "catastrophic_failure_rate": 0.0,
@@ -1308,13 +1308,14 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.5034753290826917,
-            "avg_free_energy_after": 0.6136851307324747,
+            "avg_free_energy_before": 0.5581924167308109,
+            "avg_free_energy_after": 0.6723010125675097,
             "avg_free_energy_drop": 0.01484960416777694,
             "min_energy": 0.3599999999999992,
             "max_stress": 0.10999999999999999,
             "action_counts": {
               "append_workspace_note": 1,
+              "delete_workspace_note": 1,
               "exploit_shelter": 3,
               "fetch_remote_status": 1,
               "hide": 6,
@@ -1322,10 +1323,11 @@
               "scan": 1,
               "seek_contact": 2,
               "unstable_workspace_note": 1,
-              "write_workspace_note": 3
+              "write_workspace_note": 2
             },
             "action_distribution": {
               "append_workspace_note": 0.041666666666666664,
+              "delete_workspace_note": 0.041666666666666664,
               "exploit_shelter": 0.125,
               "fetch_remote_status": 0.041666666666666664,
               "hide": 0.25,
@@ -1333,15 +1335,15 @@
               "scan": 0.041666666666666664,
               "seek_contact": 0.08333333333333333,
               "unstable_workspace_note": 0.041666666666666664,
-              "write_workspace_note": 0.125
+              "write_workspace_note": 0.08333333333333333
             },
-            "action_switch_count": 16,
-            "unique_actions": 9,
-            "action_entropy": 2.812907291846956,
+            "action_switch_count": 17,
+            "unique_actions": 10,
+            "action_entropy": 2.9276942711037672,
             "dominant_action": "hide",
             "dominant_action_share": 0.25,
             "max_action_streak": 3,
-            "last_choice": "fetch_remote_status",
+            "last_choice": "delete_workspace_note",
             "termination_reason": "cycles_exhausted"
           }
         }
@@ -1352,15 +1354,15 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.613685,
+          "mean": 0.672301,
           "std": 0.0
         },
         "free_energy_spike_rate": {
-          "mean": 0.041667,
+          "mean": 0.166667,
           "std": 0.0
         },
         "action_entropy": {
-          "mean": 2.812907,
+          "mean": 2.927694,
           "std": 0.0
         },
         "dominant_action_share": {
@@ -1372,7 +1374,7 @@
           "std": 0.0
         },
         "action_switch_rate": {
-          "mean": 0.165942,
+          "mean": 0.173188,
           "std": 0.0
         },
         "maintenance_completion_rate": {
@@ -1384,7 +1386,7 @@
           "std": 0.0
         },
         "sleep_recovery_gain": {
-          "mean": 0.1634,
+          "mean": 0.1569,
           "std": 0.0
         },
         "resource_guard_success_rate": {
@@ -1445,7 +1447,7 @@
           "seed": 222,
           "metrics": {
             "survival_ratio": 1.0,
-            "mean_free_energy": 0.554972,
+            "mean_free_energy": 0.553977,
             "free_energy_spike_rate": 0.0,
             "action_entropy": 2.0,
             "dominant_action_share": 0.375,
@@ -1476,8 +1478,8 @@
             "telemetry_error_count": 0,
             "persistence_error_count": 0,
             "memory_hit_rate": 0.9583333333333334,
-            "avg_free_energy_before": 0.49068636224230255,
-            "avg_free_energy_after": 0.5549718396528008,
+            "avg_free_energy_before": 0.4881606407807122,
+            "avg_free_energy_after": 0.5539771623521681,
             "avg_free_energy_drop": 0.02976645613611147,
             "min_energy": 0.81,
             "max_stress": 0.19999999999999998,
@@ -1512,7 +1514,7 @@
           "std": 0.0
         },
         "mean_free_energy": {
-          "mean": 0.554972,
+          "mean": 0.553977,
           "std": 0.0
         },
         "free_energy_spike_rate": {

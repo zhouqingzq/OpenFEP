@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-29T12:29:47+00:00",
+  "generated_at": "2026-05-02T16:23:30+00:00",
   "seed_set": [
     221,
     240,
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "3cbde1b9137c80d9b30f092071998ba082cd63e1"
+    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8"
   }
 }

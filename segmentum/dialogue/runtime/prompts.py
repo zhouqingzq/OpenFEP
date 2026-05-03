@@ -902,13 +902,8 @@ def _predicted_outcome_phrase(outcome: str) -> str:
     return "这个方向整体偏中性，按当下语气自然回应就好。"
 
 
-def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
-    compressed = build_compressed_cognitive_guidance(capsule)
-    rendered = format_compressed_cognitive_guidance(compressed)
-    if rendered:
-        return rendered
-
-    action = _capsule_str(capsule, "chosen_action", "ask_question")
+def _natural_cn_capsule_supplement(capsule: Mapping[str, object]) -> list[str]:
+    """Chinese natural phrasing paired with FEP capsule signals (also appended after compressed guidance)."""
     risk_label = _capsule_str(capsule, "chosen_risk_label", "low")
     uncertainty = _capsule_str(capsule, "decision_uncertainty", "low")
     prediction_error_label = _capsule_str(capsule, "prediction_error_label", "stable")
@@ -916,9 +911,8 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
     previous = normalize_dialogue_outcome(_capsule_str(capsule, "previous_outcome", "neutral"))
     outcome = _capsule_str(capsule, "chosen_predicted_outcome", "neutral")
 
-    lines = [f"你此刻的回应方向：{_action_phrase(action)}"]
+    lines: list[str] = []
 
-    # Why was this direction chosen? (dominant FEP component)
     dominant = _capsule_str(capsule, "chosen_dominant_component", "")
     dominant_reason = _DOMINANT_COMPONENT_PHRASES.get(dominant)
     if dominant_reason:
@@ -990,6 +984,21 @@ def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
                     alt_names.append(_action_phrase(alt_action).rstrip("。"))
         if alt_names and uncertainty in {"high", "medium"}:
             lines.append("其他方向也接近，但这一轮先按当前方向轻轻落下。")
+
+    return lines
+
+
+def _build_capsule_guidance(capsule: Mapping[str, object]) -> list[str]:
+    compressed = build_compressed_cognitive_guidance(capsule)
+    rendered = format_compressed_cognitive_guidance(compressed)
+    supplement_cn = _natural_cn_capsule_supplement(capsule)
+    if rendered:
+        return list(rendered) + supplement_cn
+
+    action = _capsule_str(capsule, "chosen_action", "ask_question")
+
+    lines = [f"你此刻的回应方向：{_action_phrase(action)}"]
+    lines.extend(supplement_cn)
 
     self_prior = capsule.get("self_prior_summary")
     if isinstance(self_prior, ABCMapping):

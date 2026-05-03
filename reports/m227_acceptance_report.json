@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-04-15T10:29:03+00:00",
+  "generated_at": "2026-05-02T17:07:41+00:00",
   "seed_set": [
     227,
     342
@@ -447,11 +447,11 @@
         "phase_changes_bounded": true,
         "min_continuity_score": 0.504332,
         "max_continuity_score": 0.78154,
-        "final_continuity_score": 0.649815,
+        "final_continuity_score": 0.594117,
         "max_anchor_count": 12,
         "final_anchor_count": 12,
         "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 23,
+        "threatened_cycles": 17,
         "fragile_cycles": 71,
         "distinct_phases": [
           "consolidation",
@@ -467,23 +467,23 @@
           "cycle": 72,
           "current_phase": "consolidation",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.649815,
+          "continuity_score": 0.594117,
           "continuity_anchors": [
-            "ep-000071-rest",
-            "fa37dbd1-19af-4b54-bf84-e71b93395841",
-            "1d5bf8bb-d9ee-49c3-a88b-8a83f8e4187a",
-            "04c7f4ef-bcba-4593-8a7f-da8d8306bdc3",
-            "ep-000069-scan",
-            "ep-000050-rest-merged",
-            "ep-000057-exploit_shelter-merged",
-            "bba834cf-6dd4-49a9-8359-4449d1384030",
-            "28b5c8d9-10f6-431a-a254-62d7c8f9b8c8",
-            "de907af7-4191-4e8e-855f-497c74716310",
-            "16e1d0fd-4d6b-4ce2-8eb9-1a02120b5a31",
-            "ep-000049-hide"
+            "ep-000071-exploit_shelter",
+            "ep-000055-rest-merged",
+            "ep-000051-exploit_shelter-merged",
+            "ep-000039-hide",
+            "ep-000011-hide-merged",
+            "ep-000009-scan",
+            "ep-000003-rest-merged",
+            "ep-000001-hide",
+            "commitment-survival-priority",
+            "commitment-exploration-drive",
+            "commitment-capability-rest",
+            "commitment-capability-hide"
           ],
           "status_flags": {
-            "threatened": false,
+            "threatened": true,
             "repairing": false,
             "overloaded": true,
             "socially_destabilized": false,
@@ -499,7 +499,7 @@
             "need:maintenance",
             "unresolved maintenance discrepancy"
           ],
-          "last_choice": "rest"
+          "last_choice": "exploit_shelter"
         }
       }
     },
@@ -517,8 +517,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-04-15T10:29:03+00:00",
-    "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
+    "generated_at": "2026-05-02T17:07:41+00:00",
+    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -530,31 +530,31 @@
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
         "size_bytes": 86113,
-        "modified_at": "2026-04-15T10:28:54+00:00"
+        "modified_at": "2026-05-02T17:07:32+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1674,
-        "modified_at": "2026-04-15T10:28:54+00:00"
+        "modified_at": "2026-05-02T17:07:32+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
         "size_bytes": 15049,
-        "modified_at": "2026-04-15T10:28:54+00:00"
+        "modified_at": "2026-05-02T17:07:32+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 19013,
-        "modified_at": "2026-04-15T10:29:03+00:00"
+        "size_bytes": 18497,
+        "modified_at": "2026-05-02T17:07:41+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-04-15T04:20:56+00:00"
+        "modified_at": "2026-04-28T13:06:44+00:00"
       }
     }
   },

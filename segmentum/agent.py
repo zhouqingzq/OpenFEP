@@ -2151,6 +2151,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             self.energy < 0.30
             or self.fatigue > 0.75
             or len(self.episodes) >= 10
+            or self.long_term_memory.should_sleep(self.cycle)
             or (
                 self.cycle > 0
                 and self.long_term_memory.sleep_interval > 0

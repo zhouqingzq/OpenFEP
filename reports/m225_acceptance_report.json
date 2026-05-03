@@ -3,8 +3,8 @@
   "schema_version": "m225_v2",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-04-15T10:10:13+00:00",
-  "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
+  "generated_at": "2026-05-02T16:49:01+00:00",
+  "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
   "seed_set": [
     225,
     244,
@@ -443,8 +443,8 @@
         "std": 0.330719
       },
       "adapter_failure_recovery_rate": {
-        "mean": 0.310764,
-        "std": 0.404596
+        "mean": 0.0,
+        "std": 0.0
       },
       "error_attribution_accuracy": {
         "mean": 0.333333,
@@ -849,10 +849,10 @@
         "effect_passed": false
       },
       "adapter_failure_recovery_rate": {
-        "mean_delta": 0.060764,
-        "std_delta": 0.095833,
-        "t_statistic": 4.392915,
-        "effect_size": 0.634063,
+        "mean_delta": 0.371528,
+        "std_delta": 0.479908,
+        "t_statistic": 5.363566,
+        "effect_size": 0.774164,
         "significant": true,
         "effect_passed": true
       },
@@ -961,7 +961,7 @@
       "holdout_transfer_success_rate": 0.0
     },
     "adapter_degraded": {
-      "success_rate": 0.708333,
+      "success_rate": 0.625,
       "world_family_generalization_score": 0.211806,
       "holdout_transfer_success_rate": 0.208333
     }
@@ -1151,10 +1151,10 @@
           "effect_passed": true
         },
         "adapter_failure_recovery_rate": {
-          "mean_delta": 0.060764,
-          "std_delta": 0.095833,
-          "t_statistic": 4.392915,
-          "effect_size": 0.634063,
+          "mean_delta": 0.371528,
+          "std_delta": 0.479908,
+          "t_statistic": 5.363566,
+          "effect_size": 0.774164,
           "significant": true,
           "effect_passed": true
         },
@@ -1656,8 +1656,8 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m225_v2",
-    "generated_at": "2026-04-15T10:10:13+00:00",
-    "codebase_version": "ac1366c8c8af73d8412536298bd48c6cdc7763c5",
+    "generated_at": "2026-05-02T16:49:01+00:00",
+    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
     "seed_set": [
       225,
       244,
@@ -1686,7 +1686,7 @@
       "holdout_transfer": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_holdout_transfer.json",
         "exists": true,
-        "size_bytes": 9664083,
+        "size_bytes": 9663915,
         "fresh": true,
         "header_match": true
       },
@@ -1707,7 +1707,7 @@
       "adapter_degradation": {
         "path": "E:\\workspace\\segments\\artifacts\\m225_adapter_degradation.json",
         "exists": true,
-        "size_bytes": 4312690,
+        "size_bytes": 4312610,
         "fresh": true,
         "header_match": true
       },
@@ -1721,7 +1721,7 @@
       "report": {
         "path": "E:\\workspace\\segments\\reports\\m225_acceptance_report.json",
         "exists": true,
-        "size_bytes": 120995,
+        "size_bytes": 120956,
         "fresh": true,
         "header_match": true
       }
@@ -1989,8 +1989,8 @@
             "std": 0.330719
           },
           "adapter_failure_recovery_rate": {
-            "mean": 0.310764,
-            "std": 0.404596
+            "mean": 0.0,
+            "std": 0.0
           },
           "error_attribution_accuracy": {
             "mean": 0.333333,
@@ -2395,10 +2395,10 @@
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.060764,
-            "std_delta": 0.095833,
-            "t_statistic": 4.392915,
-            "effect_size": 0.634063,
+            "mean_delta": 0.371528,
+            "std_delta": 0.479908,
+            "t_statistic": 5.363566,
+            "effect_size": 0.774164,
             "significant": true,
             "effect_passed": true
           },
@@ -2607,10 +2607,10 @@
               "effect_passed": true
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.060764,
-              "std_delta": 0.095833,
-              "t_statistic": 4.392915,
-              "effect_size": 0.634063,
+              "mean_delta": 0.371528,
+              "std_delta": 0.479908,
+              "t_statistic": 5.363566,
+              "effect_size": 0.774164,
               "significant": true,
               "effect_passed": true
             },
@@ -2694,7 +2694,7 @@
           "holdout_transfer_success_rate": 0.0
         },
         "adapter_degraded": {
-          "success_rate": 0.708333,
+          "success_rate": 0.625,
           "world_family_generalization_score": 0.211806,
           "holdout_transfer_success_rate": 0.208333
         }
@@ -2952,8 +2952,8 @@
             "std": 0.330719
           },
           "adapter_failure_recovery_rate": {
-            "mean": 0.310764,
-            "std": 0.404596
+            "mean": 0.0,
+            "std": 0.0
           },
           "error_attribution_accuracy": {
             "mean": 0.333333,
@@ -3358,10 +3358,10 @@
             "effect_passed": false
           },
           "adapter_failure_recovery_rate": {
-            "mean_delta": 0.060764,
-            "std_delta": 0.095833,
-            "t_statistic": 4.392915,
-            "effect_size": 0.634063,
+            "mean_delta": 0.371528,
+            "std_delta": 0.479908,
+            "t_statistic": 5.363566,
+            "effect_size": 0.774164,
             "significant": true,
             "effect_passed": true
           },
@@ -3570,10 +3570,10 @@
               "effect_passed": true
             },
             "adapter_failure_recovery_rate": {
-              "mean_delta": 0.060764,
-              "std_delta": 0.095833,
-              "t_statistic": 4.392915,
-              "effect_size": 0.634063,
+              "mean_delta": 0.371528,
+              "std_delta": 0.479908,
+              "t_statistic": 5.363566,
+              "effect_size": 0.774164,
               "significant": true,
               "effect_passed": true
             },
@@ -3657,7 +3657,7 @@
           "holdout_transfer_success_rate": 0.0
         },
         "adapter_degraded": {
-          "success_rate": 0.708333,
+          "success_rate": 0.625,
           "world_family_generalization_score": 0.211806,
           "holdout_transfer_success_rate": 0.208333
         }
