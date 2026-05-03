@@ -160,12 +160,27 @@ class TestChatInterface:
             current_turn="你真的记得我说过什么吗？",
             fep_capsule=capsule,
         )
-        assert "弦外之音" in prompt or "没有直接说出来" in prompt
-        assert "修复" in prompt or "距离感" in prompt
-        assert "不要把话说满" in prompt or "先轻一点" in prompt
-        assert "更短" in prompt and "不要扩大战场" in prompt
-        assert "当前判断不稳" in prompt
-        assert "隐含意图" in prompt and "冲突张力" in prompt
+        def _fail(msg: str) -> str:
+            return f"{msg}\nPrompt excerpt: {prompt[:600]}"
+
+        assert "弦外之音" in prompt or "没有直接说出来" in prompt, _fail(
+            "Neither subtext marker found — hidden_intent_label should produce CN guidance"
+        )
+        assert "修复" in prompt or "距离感" in prompt, _fail(
+            "Neither repair/distance marker found"
+        )
+        assert "不要把话说满" in prompt or "先轻一点" in prompt, _fail(
+            "Neither uncertainty marker found"
+        )
+        assert "更短" in prompt and "不要扩大战场" in prompt, _fail(
+            "Risk-shortening markers missing"
+        )
+        assert "当前判断不稳" in prompt, _fail(
+            "Prediction-error marker missing"
+        )
+        assert "隐含意图" in prompt and "冲突张力" in prompt, _fail(
+            "Workspace focus markers missing"
+        )
         assert "expected_free_energy" not in prompt
         assert "policy_score" not in prompt
         assert "ranked_options" not in prompt

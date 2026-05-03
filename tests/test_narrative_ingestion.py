@@ -39,6 +39,9 @@ class TestNarrativeIngestion(unittest.TestCase):
         agent.long_term_memory.memory_threshold = 0
         agent.long_term_memory.minimum_support = 1
         agent.long_term_memory.sleep_minimum_support = 1
+        agent.long_term_memory.surprise_threshold = 0.0
+        agent.energy = 0.0
+        agent.fatigue = 1.0
         service = NarrativeIngestionService()
         episodes = [
             NarrativeEpisode(

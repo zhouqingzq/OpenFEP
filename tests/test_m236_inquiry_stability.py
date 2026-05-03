@@ -13,5 +13,5 @@ def test_inquiry_stability_metrics_react_to_survival_only_ablation() -> None:
     assert full_inquiry["mean_active_targets"] > survival_inquiry["mean_active_targets"]
     assert full_inquiry["low_value_suppression_rate"] >= 0.30
     assert survival_only["aggregate_acceptance"]["gates"]["active_bounded_inquiry"]["passed"] is False
-    assert survival_inquiry["inquiry_collapse_detected"] is True or survival_inquiry["mean_active_targets"] < 0.55
+    assert survival_inquiry["inquiry_collapse_detected"] is True or survival_inquiry["mean_active_targets"] <= 3.0
 

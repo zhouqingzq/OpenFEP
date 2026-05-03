@@ -1226,9 +1226,14 @@ def _phase_runtime_context(runtime: SegmentRuntime, phase: TrialPhase, *, varian
     runtime.agent.latest_narrative_experiment = _phase_experiment(phase, variant=variant)
     runtime.agent.prediction_ledger = _phase_prediction_ledger(phase, variant=variant)
     max_active_targets = 3
-    if variant == "maintenance_overload":
+    if variant in {"maintenance_overload", "survival_only"}:
         max_active_targets = 1
     runtime.agent.verification_loop = VerificationLoop(max_active_targets=max_active_targets)
+    if variant == "survival_only":
+        runtime.agent.inquiry_budget_scheduler.max_active_candidates = 1
+        runtime.agent.inquiry_budget_scheduler.max_workspace_slots = 1
+        runtime.agent.inquiry_budget_scheduler.max_verification_slots = 1
+        runtime.agent.inquiry_budget_scheduler.max_action_budget = 1
     if phase.phase_id in {"social_rupture", "conflict_reopen", "reconciliation", "recovery"}:
         _ensure_conflict(runtime, reopened=phase.reopen_conflict)
     if phase.reconciliation_window:
