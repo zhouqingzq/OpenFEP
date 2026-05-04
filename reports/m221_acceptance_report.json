@@ -2,7 +2,7 @@
   "milestone_id": "M2.21",
   "status": "PASS",
   "recommendation": "ACCEPT",
-  "generated_at": "2026-05-02T16:23:30+00:00",
+  "generated_at": "2026-05-04T10:17:48+00:00",
   "seed_set": [
     221,
     240,
@@ -197,7 +197,7 @@
           },
           "attention_target_consistency": {
             "mean": 0.987003,
-            "std": 0.005691712074001393
+            "std": 0.005691712074001394
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -238,7 +238,7 @@
           },
           "attention_target_consistency": {
             "mean": 0.8616366666666667,
-            "std": 0.02442163601990842
+            "std": 0.024421636019908415
           },
           "action_metric_retention": {
             "mean": 0.4881945,
@@ -322,7 +322,7 @@
           },
           "attention_target_consistency": {
             "mean": 0.9984581666666666,
-            "std": 6.233355614932009e-05
+            "std": 6.23335561493201e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -527,7 +527,7 @@
           },
           "attention_target_consistency": {
             "mean": 0.9984581666666666,
-            "std": 6.233355614932009e-05
+            "std": 6.23335561493201e-05
           },
           "action_metric_retention": {
             "mean": 1.0,
@@ -693,7 +693,7 @@
           },
           "attention_target_consistency": {
             "mean": 0.8542388333333334,
-            "std": 0.05677257881646933
+            "std": 0.056772578816469334
           },
           "action_metric_retention": {
             "mean": 0.9820706666666666,
@@ -848,7 +848,7 @@
       },
       "extreme_single_commitment_ratio": {
         "mean": 0.511422561221107,
-        "std": 0.05727958714310736
+        "std": 0.05727958714310735
       },
       "policy_distribution_l1_distance": {
         "mean": 0.11137133333333332,
@@ -864,7 +864,7 @@
     "multilingual_robustness": {
       "identity_commitment_jaccard": {
         "mean": 0.8666666666666667,
-        "std": 0.18856180831641267
+        "std": 0.1885618083164127
       },
       "policy_distribution_l1_distance": {
         "mean": 0.009866,
@@ -883,6 +883,6 @@
   "freshness": {
     "generated_this_round": true,
     "artifact_schema_version": "m221_v1",
-    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8"
+    "codebase_version": "6ed78955906277291030ae748f76f72132d3a368"
   }
 }

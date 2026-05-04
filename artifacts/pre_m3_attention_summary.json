@@ -71,19 +71,37 @@
       "survival_ratio_gte_0_95": false
     }
   },
-  "generated_at": "2026-05-02T16:20:08+00:00",
-  "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
+  "generated_at": "2026-05-04T10:12:12+00:00",
+  "codebase_version": "6ed78955906277291030ae748f76f72132d3a368",
   "codebase_provenance": {
-    "git_commit": "4160fd64b963957691263a53b58538cb1e188ea8",
+    "git_commit": "6ed78955906277291030ae748f76f72132d3a368",
     "dirty_worktree": true,
     "binding_scope": "workspace_snapshot",
-    "workspace_fingerprint": "3afc3e5e66e237c98f2057ac8dbe1d7b8a230979fac19b713217003a64a3c766",
+    "workspace_fingerprint": "c68d69d57a3f1c130b4e828db8731f5e57d5a55f110b637759b7a3f02e420b51",
     "status_entries": [
-      " M reports/m1_acceptance_report.json"
+      " M reports/m1_acceptance_report.json",
+      " M segmentum/cognitive_events.py",
+      " M segmentum/dialogue/conversation_loop.py",
+      " M segmentum/dialogue/runtime/prompts.py",
+      " M segmentum/memory_anchored.py",
+      " M segmentum/memory_store.py",
+      "?? segmentum/state_ownership.py",
+      "?? tests/test_m8_9_memory_write_intent.py",
+      "?? tests/test_m8_9_response_evidence_contract.py",
+      "?? tests/test_m8_9_state_ownership.py"
     ],
-    "changed_path_count": 1,
+    "changed_path_count": 10,
     "changed_paths": [
-      "reports/m1_acceptance_report.json"
+      "reports/m1_acceptance_report.json",
+      "segmentum/cognitive_events.py",
+      "segmentum/dialogue/conversation_loop.py",
+      "segmentum/dialogue/runtime/prompts.py",
+      "segmentum/memory_anchored.py",
+      "segmentum/memory_store.py",
+      "segmentum/state_ownership.py",
+      "tests/test_m8_9_memory_write_intent.py",
+      "tests/test_m8_9_response_evidence_contract.py",
+      "tests/test_m8_9_state_ownership.py"
     ],
     "reproducibility_scope": "strict_workspace_fingerprint"
   }

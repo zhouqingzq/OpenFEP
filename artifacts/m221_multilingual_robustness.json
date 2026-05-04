@@ -1,7 +1,7 @@
 {
   "identity_commitment_jaccard": {
     "mean": 0.8666666666666667,
-    "std": 0.18856180831641267
+    "std": 0.1885618083164127
   },
   "policy_distribution_l1_distance": {
     "mean": 0.009866,
