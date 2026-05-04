@@ -199,6 +199,13 @@ from .dialogue import (
     ObservabilityTier,
 )
 from .m45_audit import write_m45_acceptance_artifacts
+from .exploration import (
+    ExplorationPolicy,
+    LoopControl,
+    SelfThoughtProducer,
+    default_exploration_policy,
+    default_loop_control,
+)
 
 __all__ = [
     "AgentState",
@@ -365,4 +372,9 @@ __all__ = [
     "DialogueObserver",
     "ObservabilityTier",
     "write_m45_acceptance_artifacts",
+    "ExplorationPolicy",
+    "LoopControl",
+    "SelfThoughtProducer",
+    "default_exploration_policy",
+    "default_loop_control",
 ]

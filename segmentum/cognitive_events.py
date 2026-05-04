@@ -24,6 +24,8 @@ COGNITIVE_EVENT_TYPES: tuple[str, ...] = (
     "MemoryInterferenceEvent",
     "StatePatchProposal",
     "StateCommitEvent",
+    # M10.0: Self-initiated exploration
+    "SelfThoughtEvent",
 )
 
 
@@ -44,6 +46,8 @@ COGNITIVE_EVENT_CONSUMERS: dict[str, tuple[str, ...]] = {
     "MemoryInterferenceEvent": ("state_update", "trace", "evaluation"),
     "StatePatchProposal": ("state_update", "trace"),
     "StateCommitEvent": ("trace", "evaluation", "prompt_assembly_audit"),
+    # M10.0: Self-initiated exploration
+    "SelfThoughtEvent": ("state_update", "trace", "evaluation", "prompt_assembly_audit"),
 }
 
 
@@ -277,4 +281,70 @@ def make_cognitive_event(
         priority=float(priority),
         ttl=int(ttl),
         payload=event_payload,
+    )
+
+
+# M10.0: SelfThought event triggers
+SELF_THOUGHT_TRIGGERS: tuple[str, ...] = (
+    "high_prediction_error",
+    "low_decision_margin",
+    "memory_conflict",
+    "citation_audit_failure",
+    "repeated_negative_outcome",
+    "identity_or_commitment_tension",
+    "unresolved_user_question",
+    "long_running_open_uncertainty",
+)
+
+
+def make_self_thought_event(
+    *,
+    turn_id: str,
+    cycle: int,
+    session_id: str,
+    persona_id: str,
+    source: str,
+    sequence_index: int,
+    trigger: str,
+    target_gap_id: str,
+    confidence: float = 0.5,
+    salience: float = 0.5,
+    priority: float = 0.5,
+    ttl: int = 1,
+    proposed_intervention: str = "",
+    evidence_event_ids: tuple[str, ...] | None = None,
+    budget_cost: float = 0.0,
+    timestamp: str | None = None,
+) -> CognitiveEvent:
+    """Produce a SelfThoughtEvent that enters the bus like all other cognition.
+
+    SelfThought must not directly edit prompts, memory, or durable self-state.
+    It is consumed by CognitiveLoop and may affect next-turn caution, repair,
+    clarification, exploration target, or memory reliance.
+    """
+    if trigger not in SELF_THOUGHT_TRIGGERS:
+        raise ValueError(
+            f"Unknown SelfThought trigger: {trigger!r}. "
+            f"Allowed: {SELF_THOUGHT_TRIGGERS}"
+        )
+    return make_cognitive_event(
+        event_type="SelfThoughtEvent",
+        turn_id=turn_id,
+        cycle=cycle,
+        session_id=session_id,
+        persona_id=persona_id,
+        source=source,
+        sequence_index=sequence_index,
+        salience=salience,
+        priority=priority,
+        ttl=ttl,
+        timestamp=timestamp,
+        payload={
+            "trigger": trigger,
+            "target_gap_id": target_gap_id,
+            "confidence": float(confidence),
+            "proposed_intervention": proposed_intervention,
+            "evidence_event_ids": list(evidence_event_ids or ()),
+            "budget_cost": float(budget_cost),
+        },
     )

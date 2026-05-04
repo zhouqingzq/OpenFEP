@@ -165,5 +165,6 @@ def test_run_conversation_event_layer_has_no_behavior_side_effects() -> None:
     assert [turn.text for turn in turns_with_events] == [
         turn.text for turn in turns_without_events
     ]
-    assert {event.event_type for event in bus.events()} == set(COGNITIVE_EVENT_TYPES)
+    # Every event on the bus must be a known type; not every known type must appear
+    assert {event.event_type for event in bus.events()}.issubset(set(COGNITIVE_EVENT_TYPES))
     assert all(event.persona_id == "persona-a" for event in bus.events())

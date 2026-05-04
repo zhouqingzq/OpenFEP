@@ -206,6 +206,11 @@ class SelfAgenda:
     pending_repair: str
     exploration_target: str
     confidence: float
+    # M10.0: Extended fields
+    active_exploration_target: str
+    budget_remaining: float
+    cooldown: int
+    self_thought_count: int
 
 
 @dataclass(frozen=True)
@@ -325,6 +330,10 @@ def _default_self_agenda() -> SelfAgenda:
         pending_repair="",
         exploration_target="",
         confidence=0.5,
+        active_exploration_target="",
+        budget_remaining=1.0,
+        cooldown=0,
+        self_thought_count=0,
     )
 
 
@@ -914,12 +923,52 @@ def _derive_self_agenda(
     affect: AffectiveState,
     candidate_paths: CandidatePathState,
     previous_outcome: str,
+    events: Sequence[CognitiveEvent] | None = None,
 ) -> SelfAgenda:
     previous_items = (
         list(previous.self_agenda.unresolved_gaps)
         if previous is not None and hasattr(previous, "self_agenda")
         else []
     )
+    previous_exploration = (
+        previous.self_agenda.active_exploration_target
+        if previous is not None and hasattr(previous, "self_agenda")
+        else ""
+    )
+    previous_cooldown = (
+        int(previous.self_agenda.cooldown)
+        if previous is not None and hasattr(previous, "self_agenda")
+        else 0
+    )
+    previous_budget = (
+        float(previous.self_agenda.budget_remaining)
+        if previous is not None and hasattr(previous, "self_agenda")
+        else 1.0
+    )
+    previous_thought_count = (
+        int(getattr(previous.self_agenda, "self_thought_count", 0))
+        if previous is not None
+        else 0
+    )
+
+    # M10.0: Consume SelfThoughtEvents from bus
+    self_thought_events = [
+        e for e in (events or ()) if e.event_type == "SelfThoughtEvent"
+    ]
+    self_thought_targets: list[str] = []
+    self_thought_interventions: list[str] = []
+    total_budget_cost = 0.0
+    for event in self_thought_events:
+        payload = dict(event.payload) if isinstance(event.payload, Mapping) else {}
+        target = str(payload.get("target_gap_id", ""))
+        intervention = str(payload.get("proposed_intervention", ""))
+        cost = float(payload.get("budget_cost", 0.0))
+        if target:
+            self_thought_targets.append(target)
+        if intervention:
+            self_thought_interventions.append(intervention)
+        total_budget_cost += cost
+
     current_items: list[str] = []
     current_items.extend(gaps.blocking_gaps)
     current_items.extend(gaps.contextual_gaps)
@@ -938,16 +987,28 @@ def _derive_self_agenda(
     elif affect.repair_need >= 0.35:
         pending_repair = "affective repair pressure"
 
+    # M10.0: Self-thought can set exploration target
     exploration_target = ""
-    if gaps.contextual_gaps:
+    if self_thought_targets:
+        exploration_target = self_thought_targets[0]
+    elif gaps.contextual_gaps:
         exploration_target = gaps.contextual_gaps[0]
     elif gaps.epistemic_gaps:
         exploration_target = gaps.epistemic_gaps[0]
     elif unresolved:
         exploration_target = unresolved[0]
 
+    # M10.0: Active exploration target follows self-thought or previous
+    active_exploration_target = ""
+    if self_thought_targets:
+        active_exploration_target = self_thought_targets[0]
+    elif previous_exploration and previous_exploration in unresolved:
+        active_exploration_target = previous_exploration
+
     if pending_repair:
         next_action = "repair"
+    elif self_thought_interventions:
+        next_action = self_thought_interventions[0]
     elif exploration_target:
         next_action = "clarify"
     elif candidate_paths.alternative_selection:
@@ -965,6 +1026,12 @@ def _derive_self_agenda(
             affect.repair_need * 0.7,
         )
     )
+
+    # M10.0: Budget and cooldown accounting
+    budget_remaining = _clamp(previous_budget - total_budget_cost, 0.0, 1.0)
+    cooldown = max(0, previous_cooldown - 1)
+    thought_count = previous_thought_count + len(self_thought_events)
+
     return SelfAgenda(
         current_goal=task.current_goal,
         next_intended_action=next_action,
@@ -972,6 +1039,10 @@ def _derive_self_agenda(
         pending_repair=pending_repair,
         exploration_target=exploration_target,
         confidence=confidence,
+        active_exploration_target=active_exploration_target,
+        budget_remaining=budget_remaining,
+        cooldown=cooldown,
+        self_thought_count=thought_count,
     )
 
 
@@ -1120,6 +1191,7 @@ def update_cognitive_state(
         affect=affect,
         candidate_paths=candidate_paths,
         previous_outcome=previous_outcome,
+        events=events,
     )
     state = CognitiveStateMVP(
         task=task,

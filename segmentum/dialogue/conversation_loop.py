@@ -37,6 +37,7 @@ from ..m9_state_patch_runtime import (
     process_subject_patches_for_turn,
     proposals_from_memory_interference,
 )
+from ..exploration import SelfThoughtProducer
 from ..meta_control import MetaControlSignal, derive_meta_control_signal
 from ..meta_control_guidance import (
     generate_meta_control_guidance,
@@ -282,6 +283,101 @@ def _extract_and_store_dialogue_facts(
     # M8.5: prune anchored items to prevent unbounded growth
     if hasattr(store, 'prune_anchored'):
         store.prune_anchored(current_cycle=getattr(agent, 'cycle', 0))
+
+
+def _produce_self_thought_events_for_turn(
+    *,
+    agent: "SegmentAgent",
+    diagnostics: Any,
+    channels: dict[str, float],
+    outcome_label: str,
+    publish_event: Any,
+    turn_id: str,
+    persona_id: str,
+    session_id: str,
+) -> None:
+    """M10.0: Produce SelfThoughtEvents bounded by cooldown, budget, and triggers."""
+    if diagnostics is None:
+        return
+    previous_state = getattr(agent, "latest_cognitive_state", None)
+    cooldown = (
+        int(getattr(previous_state.self_agenda, "cooldown", 0))
+        if previous_state is not None
+        else 0
+    )
+    budget_spent = (
+        float(getattr(previous_state.self_agenda, "budget_remaining", 1.0))
+        if previous_state is not None
+        else 1.0
+    )
+    budget_spent = 1.0 - budget_spent  # spent = 1.0 - remaining
+    thought_count = (
+        int(getattr(previous_state.self_agenda, "self_thought_count", 0))
+        if previous_state is not None
+        else 0
+    )
+
+    producer = SelfThoughtProducer()
+    prediction_error = float(getattr(diagnostics, "prediction_error", 0.0))
+    ranked = list(getattr(diagnostics, "ranked_options", []) or [])
+    if len(ranked) >= 2:
+        policy_margin = abs(
+            float(getattr(ranked[0], "policy_score", 0.0))
+            - float(getattr(ranked[1], "policy_score", 0.0))
+        )
+        efe_margin = abs(
+            float(getattr(ranked[0], "expected_free_energy", 0.0))
+            - float(getattr(ranked[1], "expected_free_energy", 0.0))
+        )
+    else:
+        policy_margin = 1.0
+        efe_margin = 1.0
+
+    memory_conflicts_list = []
+    if previous_state is not None:
+        memory_conflicts_list = list(previous_state.memory.memory_conflicts)
+
+    negative_outcomes: list[str] = []
+    for ep in getattr(agent, "long_term_memory", None) and getattr(
+        agent.long_term_memory, "episodes", []
+    ) or []:
+        if isinstance(ep, dict) and "fail" in str(ep.get("outcome", "")).lower():
+            negative_outcomes.append(str(ep.get("outcome", "")))
+
+    identity_tension = float(channels.get("conflict_tension", 0.0))
+    commitment_tension = float(channels.get("commitment_tension", 0.0))
+
+    triggers = producer.detect_triggers(
+        prediction_error=prediction_error,
+        policy_margin=policy_margin,
+        efe_margin=efe_margin,
+        memory_conflicts=memory_conflicts_list,
+        previous_outcomes=negative_outcomes,
+        identity_tension=identity_tension,
+        commitment_tension=commitment_tension,
+    )
+
+    events = producer.produce(
+        turn_id=turn_id,
+        cycle=int(getattr(agent, "cycle", 0)),
+        session_id=session_id,
+        persona_id=persona_id,
+        sequence_index=0,
+        triggers=triggers,
+        thought_count_this_turn=0,
+        cooldown_remaining=cooldown,
+        budget_spent=budget_spent,
+    )
+
+    for event in events:
+        publish_event(
+            event.event_type,
+            event.source,
+            dict(event.payload),
+            salience=event.salience,
+            priority=event.priority,
+            ttl=event.ttl,
+        )
 
 
 def run_conversation(
@@ -542,6 +638,18 @@ def run_conversation(
             salience=0.82 if interf_detected else 0.38,
             priority=0.88 if interf_detected else 0.55,
             ttl=2,
+        )
+
+        # M10.0: Produce SelfThoughtEvents from gap/trigger signals
+        _produce_self_thought_events_for_turn(
+            agent=agent,
+            diagnostics=diagnostics,
+            channels=channels,
+            outcome_label=outcome_label or "",
+            publish_event=publish_event,
+            turn_id=turn_id,
+            persona_id=persona_id,
+            session_id=session_id,
         )
 
         cognitive_loop_result = CognitiveLoop(event_bus_for_turn).consume_and_update(
