@@ -404,7 +404,6 @@ def test_below_priority_threshold_blocked():
 def test_resolved_gap_removed_from_self_agenda():
     """When a gap is resolved (no longer in current gaps), it should be removed from unresolved_gaps."""
     previous = default_cognitive_state()
-    # Set a previous unresolved gap
     previous = CognitiveStateMVP(
         **{
             **previous.to_dict(),
@@ -423,33 +422,67 @@ def test_resolved_gap_removed_from_self_agenda():
         }
     )
 
-    # Now derive with no current gaps matching "old resolved gap"
+    # Current gaps only contain "uncertain claim" — neither old gap is still active
     agenda = _derive_self_agenda(
         previous=previous,
         task=_task_state(),
-        gaps=_gap_state(blocking=False),  # only "uncertain claim" is current
+        gaps=_gap_state(blocking=False),
         affect=_affective_state(),
         candidate_paths=_candidate_path_state(),
         previous_outcome="",
     )
 
-    # "old resolved gap" should NOT be in unresolved_gaps because it's not in current gaps
-    # But "persistent gap" is also not in current gaps, so it should be removed too
-    # Actually: _derive_self_agenda merges previous + current. Let me verify
-    # The function collects previous_items + current_items, then deduplicates with _strings
-    # So both old items are carried forward UNLESS resolved
-    # Actually, looking at the code, _derive_self_agenda doesn't filter by resolution.
-    # The test should verify that resolved gaps are NOT carried forward.
-    # Let me check: if a gap is no longer present in current_items, it should drop out.
-
-    # From the current implementation, unresolved = _strings([*previous_items, *current_items])
-    # This means old gaps persist. But the M10.0 contract says resolved gaps should decay.
-    # This is handled by: active_exploration_target only persists if still in unresolved
+    # Both old gaps are resolved; only the current "uncertain claim" should remain
+    assert "old resolved gap" not in agenda.unresolved_gaps
+    assert "persistent gap" not in agenda.unresolved_gaps
+    assert "uncertain claim" in agenda.unresolved_gaps
+    # The active_exploration_target for a resolved gap is not carried forward
     assert agenda.active_exploration_target == ""
-    # The old resolved gap still appears because we merge. But the cooldown budgets
-    # and thought counts are properly tracked.
-    assert agenda.cooldown == 0
-    assert agenda.budget_remaining <= 1.0
+
+
+def test_persistent_gap_stays_when_still_active():
+    """A gap that remains in current gaps should persist across turns."""
+    from segmentum.cognitive_state import GapState, Gap
+
+    previous = default_cognitive_state()
+    previous = CognitiveStateMVP(
+        **{
+            **previous.to_dict(),
+            "self_agenda": SelfAgenda(
+                current_goal="test goal",
+                next_intended_action="clarify",
+                unresolved_gaps=["persistent gap"],
+                pending_repair="",
+                exploration_target="persistent gap",
+                confidence=0.5,
+                active_exploration_target="persistent gap",
+                budget_remaining=1.0,
+                cooldown=0,
+                self_thought_count=0,
+            ),
+        }
+    )
+
+    # Current gaps include a gap whose description matches the previous gap text
+    agenda = _derive_self_agenda(
+        previous=previous,
+        task=_task_state(),
+        gaps=GapState(
+            epistemic_gaps=["persistent gap"],
+            contextual_gaps=[],
+            instrumental_gaps=[],
+            resource_gaps=[],
+            social_gaps=[],
+            blocking_gaps=[],
+            structured_gaps=[],
+        ),
+        affect=_affective_state(),
+        candidate_paths=_candidate_path_state(),
+        previous_outcome="",
+    )
+
+    assert "persistent gap" in agenda.unresolved_gaps
+    assert agenda.active_exploration_target == "persistent gap"
 
 
 def test_self_agenda_decays_when_gaps_resolve():
@@ -473,7 +506,6 @@ def test_self_agenda_decays_when_gaps_resolve():
         previous_outcome="",
     )
 
-    # With no gaps, pending_repair and exploration_target should be empty
     assert agenda.pending_repair == ""
     assert agenda.exploration_target == ""
     assert agenda.next_intended_action != "repair"
@@ -620,3 +652,199 @@ def test_self_thought_event_invalid_trigger_raises():
             trigger="invalid_trigger_name",
             target_gap_id="gap-1",
         )
+
+
+# ---------------------------------------------------------------------------
+# Cross-turn integration tests
+# ---------------------------------------------------------------------------
+
+
+def test_cooldown_activates_after_self_thought_across_turns():
+    """After a SelfThoughtEvent is consumed, cooldown should be set to 3 and
+    prevent next-turn production until it decays."""
+    from segmentum.cognitive_events import CognitiveEventBus, make_self_thought_event
+
+    # Turn 1: produce a SelfThoughtEvent and consume it
+    bus = CognitiveEventBus()
+    event = make_self_thought_event(
+        turn_id="turn-1", cycle=0, session_id="s", persona_id="p",
+        source="test", sequence_index=0,
+        trigger="high_prediction_error", target_gap_id="gap-pe",
+        confidence=0.7, priority=0.65, ttl=1,
+        proposed_intervention="lower_assertiveness",
+    )
+    bus.publish(event)
+
+    state1 = update_cognitive_state(
+        previous=None,
+        events=bus.events(),
+        diagnostics=None,
+        observation={"conflict_tension": 0.3},
+    )
+    agenda1 = state1.self_agenda
+    # Cooldown should be active after consuming a self-thought
+    assert agenda1.cooldown == 3
+    assert agenda1.self_thought_count == 1
+
+    # Turn 2: no new SelfThoughtEvent, cooldown should decrement
+    bus2 = CognitiveEventBus()
+    state2 = update_cognitive_state(
+        previous=state1,
+        events=bus2.events(),  # no events
+        diagnostics=None,
+        observation={"conflict_tension": 0.3},
+    )
+    agenda2 = state2.self_agenda
+    assert agenda2.cooldown == 2  # decremented from 3
+
+    # Turn 3: still decrementing
+    bus3 = CognitiveEventBus()
+    state3 = update_cognitive_state(
+        previous=state2,
+        events=bus3.events(),
+        diagnostics=None,
+        observation={"conflict_tension": 0.3},
+    )
+    assert state3.self_agenda.cooldown == 1
+
+    # Turn 4: cooldown reaches 0
+    bus4 = CognitiveEventBus()
+    state4 = update_cognitive_state(
+        previous=state3,
+        events=bus4.events(),
+        diagnostics=None,
+        observation={"conflict_tension": 0.3},
+    )
+    assert state4.self_agenda.cooldown == 0
+
+
+def test_cooldown_blocks_producer_until_decayed():
+    """The producer should reject events while cooldown > 0 from the previous state."""
+    producer = SelfThoughtProducer()
+    triggers = producer.detect_triggers(prediction_error=0.65)
+
+    # With cooldown active, no events produced
+    events = producer.produce(
+        turn_id="t", cycle=0, session_id="s", persona_id="p", sequence_index=0,
+        triggers=triggers, cooldown_remaining=3,
+    )
+    assert len(events) == 0
+
+    # After cooldown expires, event is produced
+    events = producer.produce(
+        turn_id="t", cycle=0, session_id="s", persona_id="p", sequence_index=0,
+        triggers=triggers, cooldown_remaining=0,
+    )
+    assert len(events) == 1
+
+
+def test_dedupe_blocks_same_gap_id_across_calls():
+    """prior_gap_ids should prevent repeated self-thought for the same gap."""
+    producer = SelfThoughtProducer()
+    triggers = producer.detect_triggers(prediction_error=0.6)
+
+    # First call succeeds
+    events1 = producer.produce(
+        turn_id="t1", cycle=0, session_id="s", persona_id="p", sequence_index=0,
+        triggers=triggers, gap_id="gap-pe",
+    )
+    assert len(events1) == 1
+
+    # Second call with same gap in prior_gap_ids is blocked
+    events2 = producer.produce(
+        turn_id="t2", cycle=0, session_id="s", persona_id="p", sequence_index=0,
+        triggers=triggers, gap_id="gap-pe",
+        prior_gap_ids=("gap-pe",),
+    )
+    assert len(events2) == 0
+
+
+def test_budget_exhaustion_carries_across_production():
+    """Budget spent should accumulate within a single produce() call."""
+    producer = SelfThoughtProducer()
+    triggers = [
+        {"trigger": "high_prediction_error", "confidence": 0.7, "priority": 0.6},
+        {"trigger": "memory_conflict", "confidence": 0.6, "priority": 0.55},
+        {"trigger": "identity_or_commitment_tension", "confidence": 0.55, "priority": 0.5},
+    ]
+
+    # Start with budget partly spent
+    events = producer.produce(
+        turn_id="t", cycle=0, session_id="s", persona_id="p", sequence_index=0,
+        triggers=triggers, budget_spent=0.25,
+    )
+    # budget_spent=0.25 + first event 0.15 = 0.40 <= 0.4 → 1 event passes
+    # second event: 0.40 + 0.15 = 0.55 > 0.4 → blocked
+    assert len(events) == 1
+
+
+def test_full_self_agenda_cycle_with_cooldown_and_resolution():
+    """Simulate a full cycle: self-thought → cooldown → gap resolution → decay."""
+    from segmentum.cognitive_events import CognitiveEventBus, make_self_thought_event
+    from segmentum.cognitive_state import GapState, Gap
+
+    # Turn 1: Self-thought triggered by prediction error
+    bus1 = CognitiveEventBus()
+    event1 = make_self_thought_event(
+        turn_id="turn-1", cycle=0, session_id="s", persona_id="p",
+        source="test", sequence_index=0,
+        trigger="high_prediction_error", target_gap_id="gap-ep-01",
+        confidence=0.7, priority=0.65,
+        proposed_intervention="lower_assertiveness",
+    )
+    bus1.publish(event1)
+
+    state1 = update_cognitive_state(
+        previous=None,
+        events=bus1.events(),
+        diagnostics=None,
+        observation={},
+    )
+    assert state1.self_agenda.cooldown == 3
+    assert state1.self_agenda.self_thought_count == 1
+    assert state1.self_agenda.active_exploration_target == "gap-ep-01"
+
+    # Turn 2: No self-thought, gap still present, cooldown decrementing
+    bus2 = CognitiveEventBus()
+    state2 = update_cognitive_state(
+        previous=state1,
+        events=bus2.events(),
+        diagnostics=None,
+        observation={},
+    )
+    assert state2.self_agenda.cooldown == 2
+
+    # Turn 3: Gap is now resolved (no more gaps) and cooldown still decrementing
+    bus3 = CognitiveEventBus()
+    state3 = update_cognitive_state(
+        previous=state2,
+        events=bus3.events(),
+        diagnostics=None,
+        observation={},
+    )
+    assert state3.self_agenda.cooldown == 1
+    # With empty gaps, the unresolved list should be empty after decay
+    # (the previous exploration target has no matching current gap)
+    assert state3.self_agenda.active_exploration_target == ""
+
+    # Turn 4: Cooldown expired, ready for new self-thought
+    bus4 = CognitiveEventBus()
+    event4 = make_self_thought_event(
+        turn_id="turn-4", cycle=0, session_id="s", persona_id="p",
+        source="test", sequence_index=0,
+        trigger="memory_conflict", target_gap_id="gap-mem",
+        confidence=0.6, priority=0.55,
+        proposed_intervention="mark_claim_as_unverified",
+    )
+    bus4.publish(event4)
+
+    state4 = update_cognitive_state(
+        previous=state3,
+        events=bus4.events(),
+        diagnostics=None,
+        observation={},
+    )
+    # Cooldown restarts after a new self-thought
+    assert state4.self_agenda.cooldown == 3
+    assert state4.self_agenda.self_thought_count == 2
+    assert state4.self_agenda.active_exploration_target == "gap-mem"

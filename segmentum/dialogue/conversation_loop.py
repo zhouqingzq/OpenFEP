@@ -317,6 +317,14 @@ def _produce_self_thought_events_for_turn(
         else 0
     )
 
+    # M10.0: prior gap ids for dedupe — use previous active exploration target
+    prior_gap_ids: tuple[str, ...] = ()
+    if previous_state is not None:
+        prev_active = getattr(previous_state.self_agenda, "active_exploration_target", "")
+        prev_exploration = getattr(previous_state.self_agenda, "exploration_target", "")
+        dedupe_ids = [s for s in (prev_active, prev_exploration) if s]
+        prior_gap_ids = tuple(dedupe_ids)
+
     producer = SelfThoughtProducer()
     prediction_error = float(getattr(diagnostics, "prediction_error", 0.0))
     ranked = list(getattr(diagnostics, "ranked_options", []) or [])
@@ -347,14 +355,46 @@ def _produce_self_thought_events_for_turn(
     identity_tension = float(channels.get("conflict_tension", 0.0))
     commitment_tension = float(channels.get("commitment_tension", 0.0))
 
+    # M10.0: Wire citation audit failures from memory store anchored items
+    citation_audit_failures: list[str] = []
+    store = _ensure_memory_store(agent)
+    if store:
+        anchored = list(getattr(store, "anchored_items", []))
+        for item in anchored:
+            audit = item.get("citation_audit") if isinstance(item, dict) else None
+            if isinstance(audit, dict) and audit.get("failed"):
+                citation_audit_failures.append(str(audit.get("reason", "citation_failure")))
+
+    # M10.0: Infer unresolved questions from high-ambiguity observation channels
+    unresolved_questions: list[str] = []
+    if float(channels.get("hidden_intent", 0.0)) >= 0.72:
+        unresolved_questions.append("user_intent_ambiguous")
+    if float(channels.get("contextual_uncertainty", 0.0)) >= 0.5:
+        unresolved_questions.append("context_insufficient")
+    if channels.get("missing_context", False) or float(channels.get("missing_context", 0.0)) >= 0.5:
+        unresolved_questions.append("missing_context")
+
+    # M10.0: Track open uncertainty duration from previous unresolved gaps
+    open_uncertainty_duration = 0
+    if previous_state is not None:
+        prev_unresolved = list(getattr(previous_state.self_agenda, "unresolved_gaps", []))
+        # If we have persistent unresolved gaps from previous turn, count duration
+        if prev_unresolved:
+            open_uncertainty_duration = 1 + int(
+                getattr(previous_state.self_agenda, "self_thought_count", 0)
+            )
+
     triggers = producer.detect_triggers(
         prediction_error=prediction_error,
         policy_margin=policy_margin,
         efe_margin=efe_margin,
         memory_conflicts=memory_conflicts_list,
+        citation_audit_failures=citation_audit_failures,
         previous_outcomes=negative_outcomes,
         identity_tension=identity_tension,
         commitment_tension=commitment_tension,
+        unresolved_questions=unresolved_questions,
+        open_uncertainty_duration=open_uncertainty_duration,
     )
 
     events = producer.produce(
@@ -367,6 +407,7 @@ def _produce_self_thought_events_for_turn(
         thought_count_this_turn=0,
         cooldown_remaining=cooldown,
         budget_spent=budget_spent,
+        prior_gap_ids=prior_gap_ids,
     )
 
     for event in events:

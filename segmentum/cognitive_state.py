@@ -977,7 +977,14 @@ def _derive_self_agenda(
     for gap in gaps.structured_gaps:
         if gap.status == "blocking" or gap.severity >= 0.7:
             current_items.append(gap.description)
-    unresolved = _strings([*previous_items, *current_items], limit=12, item_limit=128)
+
+    # M10.0: Resolved gaps decay — only carry forward previous gaps that
+    # still appear in current gaps or are actively being addressed.
+    still_relevant: list[str] = []
+    for item in previous_items:
+        if item in current_items:
+            still_relevant.append(item)
+    unresolved = _strings([*still_relevant, *current_items], limit=12, item_limit=128)
 
     pending_repair = ""
     if gaps.blocking_gaps:
@@ -1029,7 +1036,10 @@ def _derive_self_agenda(
 
     # M10.0: Budget and cooldown accounting
     budget_remaining = _clamp(previous_budget - total_budget_cost, 0.0, 1.0)
-    cooldown = max(0, previous_cooldown - 1)
+    if self_thought_events:
+        cooldown = 3
+    else:
+        cooldown = max(0, previous_cooldown - 1)
     thought_count = previous_thought_count + len(self_thought_events)
 
     return SelfAgenda(
