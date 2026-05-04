@@ -848,3 +848,65 @@ def test_full_self_agenda_cycle_with_cooldown_and_resolution():
     assert state4.self_agenda.cooldown == 3
     assert state4.self_agenda.self_thought_count == 2
     assert state4.self_agenda.active_exploration_target == "gap-mem"
+
+
+def test_budget_resets_per_turn_no_lifetime_exhaustion():
+    """Budget consumed in turn N should not carry into turn N+1."""
+    from segmentum.cognitive_events import CognitiveEventBus, make_self_thought_event
+
+    # Turn 1: two self-thoughts consume budget (0.15 + 0.15 = 0.30 spent, 0.70 remaining)
+    bus1 = CognitiveEventBus()
+    bus1.publish(make_self_thought_event(
+        turn_id="t1", cycle=0, session_id="s", persona_id="p",
+        source="test", sequence_index=0,
+        trigger="high_prediction_error", target_gap_id="g1",
+        confidence=0.7, priority=0.65, budget_cost=0.15,
+        proposed_intervention="lower_assertiveness",
+    ))
+    bus1.publish(make_self_thought_event(
+        turn_id="t1", cycle=0, session_id="s", persona_id="p",
+        source="test", sequence_index=1,
+        trigger="memory_conflict", target_gap_id="g2",
+        confidence=0.6, priority=0.55, budget_cost=0.15,
+        proposed_intervention="mark_claim_as_unverified",
+    ))
+    s1 = update_cognitive_state(None, events=bus1.events(), diagnostics=None, observation={})
+    assert s1.self_agenda.budget_remaining == 0.70  # 1.0 - 0.30
+    assert s1.self_agenda.cooldown == 3
+
+    # Turn 2: no self-thought, budget resets to 1.0
+    bus2 = CognitiveEventBus()
+    s2 = update_cognitive_state(s1, events=bus2.events(), diagnostics=None, observation={})
+    assert s2.self_agenda.budget_remaining == 1.0
+
+    # Turn 3-5: cooldown decays, budget stays fresh
+    for expected_cooldown in [2, 1, 0]:
+        bus = CognitiveEventBus()
+        s = update_cognitive_state(s1, events=bus.events(), diagnostics=None, observation={})
+        # Budget always resets when no self-thought consumed
+        assert s.self_agenda.budget_remaining == 1.0
+
+    # After cooldown expires, a new self-thought works
+    s_after = None
+    prev = s1
+    for _ in range(3):
+        bus = CognitiveEventBus()
+        s_after = update_cognitive_state(prev, events=bus.events(), diagnostics=None, observation={})
+        prev = s_after
+
+    assert s_after.self_agenda.cooldown == 0
+    assert s_after.self_agenda.budget_remaining == 1.0
+
+    # New self-thought on this fresh turn should work
+    bus_final = CognitiveEventBus()
+    bus_final.publish(make_self_thought_event(
+        turn_id="t-final", cycle=0, session_id="s", persona_id="p",
+        source="test", sequence_index=0,
+        trigger="unresolved_user_question", target_gap_id="g3",
+        confidence=0.55, priority=0.5, budget_cost=0.15,
+        proposed_intervention="ask_clarifying_question",
+    ))
+    s_final = update_cognitive_state(s_after, events=bus_final.events(), diagnostics=None, observation={})
+    assert s_final.self_agenda.budget_remaining == 0.85  # 1.0 - 0.15
+    assert s_final.self_agenda.self_thought_count == 3
+    assert s_final.self_agenda.cooldown == 3

@@ -1034,8 +1034,9 @@ def _derive_self_agenda(
         )
     )
 
-    # M10.0: Budget and cooldown accounting
-    budget_remaining = _clamp(previous_budget - total_budget_cost, 0.0, 1.0)
+    # M10.0: Budget resets per turn; only cooldown carries across turns.
+    # Budget consumed _this_ turn is total_budget_cost; next turn re-arms to 1.0.
+    budget_remaining = _clamp(1.0 - total_budget_cost, 0.0, 1.0)
     if self_thought_events:
         cooldown = 3
     else:

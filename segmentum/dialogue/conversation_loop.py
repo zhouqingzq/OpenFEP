@@ -305,12 +305,8 @@ def _produce_self_thought_events_for_turn(
         if previous_state is not None
         else 0
     )
-    budget_spent = (
-        float(getattr(previous_state.self_agenda, "budget_remaining", 1.0))
-        if previous_state is not None
-        else 1.0
-    )
-    budget_spent = 1.0 - budget_spent  # spent = 1.0 - remaining
+    # M10.0: Budget resets per turn — fresh 0.0 spent at turn start
+    budget_spent = 0.0
     thought_count = (
         int(getattr(previous_state.self_agenda, "self_thought_count", 0))
         if previous_state is not None
@@ -355,15 +351,19 @@ def _produce_self_thought_events_for_turn(
     identity_tension = float(channels.get("conflict_tension", 0.0))
     commitment_tension = float(channels.get("commitment_tension", 0.0))
 
-    # M10.0: Wire citation audit failures from memory store anchored items
+    # M10.0: Citation audit failures from previous turn's generation audit
     citation_audit_failures: list[str] = []
-    store = _ensure_memory_store(agent)
-    if store:
-        anchored = list(getattr(store, "anchored_items", []))
-        for item in anchored:
-            audit = item.get("citation_audit") if isinstance(item, dict) else None
-            if isinstance(audit, dict) and audit.get("failed"):
-                citation_audit_failures.append(str(audit.get("reason", "citation_failure")))
+    prev_audit = getattr(agent, "latest_citation_audit", None)
+    if isinstance(prev_audit, dict):
+        if prev_audit.get("has_blocking_violation") or prev_audit.get("violations"):
+            violations = prev_audit.get("violations", [])
+            if isinstance(violations, list):
+                for v in violations:
+                    reason = v.get("reason", "") if isinstance(v, dict) else str(v)
+                    if reason:
+                        citation_audit_failures.append(reason)
+            if not citation_audit_failures and prev_audit.get("has_blocking_violation"):
+                citation_audit_failures.append("blocking_violation")
 
     # M10.0: Infer unresolved questions from high-ambiguity observation channels
     unresolved_questions: list[str] = []
@@ -948,6 +948,8 @@ def run_conversation(
         anchored_items = list(getattr(store, "anchored_items", [])) if store else []
         audit = MemoryCitationGuard.audit_structured(reply, anchored_items)
         generation_diagnostics["memory_citation_audit"] = audit.to_dict()
+        # M10.0: Store for next-turn self-thought citation audit failure trigger
+        agent.latest_citation_audit = audit.to_dict()
 
         # Conservative retry on blocking violation
         if audit.has_blocking_violation:
@@ -968,6 +970,8 @@ def run_conversation(
             )
             generation_diagnostics["memory_citation_audit_retry"] = second_audit.to_dict()
             generation_diagnostics["memory_repair_triggered"] = True
+            # M10.0: Use retry audit for next-turn self-thought trigger
+            agent.latest_citation_audit = second_audit.to_dict()
             # Use retry result
             reply = retry_reply
             retry_diag = getattr(gen, "last_diagnostics", None)
