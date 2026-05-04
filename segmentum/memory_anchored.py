@@ -767,6 +767,104 @@ class MemoryCitationGuard:
             violations=violations,
         )
 
+    @staticmethod
+    def audit_against_evidence_contract(
+        reply_text: str,
+        contract: ResponseEvidenceContract,
+    ) -> MemoryCitationAudit:
+        """M8.9: audit reply claims against the evidence contract.
+
+        Flags specific factual details in the reply that cannot be traced
+        to current_input_facts, anchored_facts, retrieved_memories, or
+        external_evidence.
+
+        A claim that references content from unverified_claims or unknowns
+        is downgraded to uncertain stance; a claim referencing
+        forbidden_assumptions is blocked.
+        """
+        violations: list[MemoryCitationViolation] = []
+
+        # Build known-fact and forbidden-proposition index
+        known_texts: list[str] = []
+        for bucket_name in ResponseEvidenceContract._KNOWN_BUCKETS:
+            known_texts.extend(getattr(contract, bucket_name, ()))
+
+        forbidden_lower: set[str] = {
+            prop.lower().strip() for prop in contract.forbidden_assumptions
+        }
+        unverified_lower: set[str] = {
+            prop.lower().strip() for prop in contract.unverified_claims
+        }
+        unknown_lower: set[str] = {
+            prop.lower().strip() for prop in contract.unknowns
+        }
+
+        # 1. Forbidden assumption reference → blocking
+        for prop in contract.forbidden_assumptions:
+            if len(prop) >= 4 and prop.lower() in reply_text.lower():
+                violations.append(MemoryCitationViolation(
+                    type='forbidden_topic_referenced',
+                    span=prop[:80],
+                    message=f'Reply references forbidden assumption: {prop[:80]}',
+                    suggested_action='block',
+                ))
+
+        # 2. Claiming an unknown as fact
+        for prop in contract.unknowns:
+            if len(prop) >= 4 and prop.lower() in reply_text.lower():
+                violations.append(MemoryCitationViolation(
+                    type='unanchored_memory_claim',
+                    span=prop[:80],
+                    message=f'Reply claims unknown detail as fact: {prop[:80]}',
+                    suggested_action='retry',
+                ))
+
+        # 3. Asserting unverified claims with certainty
+        for pattern in _HYPOTHESIS_AS_FACT_PATTERNS:
+            if re.search(pattern, reply_text):
+                for prop in contract.unverified_claims:
+                    if len(prop) >= 4 and prop.lower() in reply_text.lower():
+                        violations.append(MemoryCitationViolation(
+                            type='hypothesis_as_fact',
+                            span=prop[:80],
+                            message=f'Unverified claim stated as fact: {prop[:80]}',
+                            suggested_action='retry',
+                        ))
+
+        # 4. Memory-claim language without supporting evidence
+        for pattern, label in _MEMORY_CLAIM_PATTERNS:
+            if re.search(pattern, reply_text):
+                supported = any(
+                    known_text.lower() in reply_text.lower()
+                    for known_text in known_texts if len(known_text) >= 4
+                )
+                if not supported:
+                    violations.append(MemoryCitationViolation(
+                        type='unanchored_memory_claim',
+                        span=label,
+                        message=f'Memory-claim without evidence support: {label}',
+                        suggested_action='retry',
+                    ))
+
+        has_blocking = any(v.suggested_action == 'block' for v in violations)
+        has_violation = len(violations) > 0
+
+        if any(v.suggested_action == 'block' for v in violations):
+            risk_level = 'blocking'
+        elif any(v.suggested_action == 'retry' for v in violations):
+            risk_level = 'high'
+        elif has_violation:
+            risk_level = 'medium'
+        else:
+            risk_level = 'none'
+
+        return MemoryCitationAudit(
+            has_violation=has_violation,
+            has_blocking_violation=has_blocking,
+            risk_level=risk_level,
+            violations=violations,
+        )
+
 
 # ── M8.5 Conservative Retry Repair Instruction ────────────────────────────
 
@@ -810,3 +908,242 @@ def build_memory_repair_instruction(audit: MemoryCitationAudit) -> str:
     lines.append("7. 对不确定内容使用'可能/似乎/需要确认'等措辞。")
 
     return "\n".join(lines)
+
+
+# ── M8.9 Write Intent Trace ──────────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class WriteIntentTrace:
+    """Provenance trace for a memory write intent.
+
+    Links an anchored memory item back to the event, turn, utterance,
+    and speaker that caused its extraction.  Survives serialization so
+    tests and audits can verify every anchored fact has a traceable source.
+    """
+
+    source_event_id: str = ""
+    source_turn_id: str = ""
+    source_utterance_id: str = ""
+    source_speaker: str = ""
+    extraction_cycle: int = 0
+    committed_at_cycle: int = 0
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "source_event_id": self.source_event_id,
+            "source_turn_id": self.source_turn_id,
+            "source_utterance_id": self.source_utterance_id,
+            "source_speaker": self.source_speaker,
+            "extraction_cycle": self.extraction_cycle,
+            "committed_at_cycle": self.committed_at_cycle,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object]) -> "WriteIntentTrace":
+        return cls(
+            source_event_id=str(payload.get("source_event_id", "")),
+            source_turn_id=str(payload.get("source_turn_id", "")),
+            source_utterance_id=str(payload.get("source_utterance_id", "")),
+            source_speaker=str(payload.get("source_speaker", "")),
+            extraction_cycle=int(payload.get("extraction_cycle", 0)),
+            committed_at_cycle=int(payload.get("committed_at_cycle", 0)),
+        )
+
+
+@dataclass(frozen=True)
+class MemoryWriteIntent:
+    """A traceable intent to write an anchored memory item to the store.
+
+    Each intent carries the item, a provenance trace, and the operation.
+    The cognitive loop (or its delegate) decides whether to commit, merge,
+    retract, or reject.  Rejected intents record the reason and are
+    preserved in trace but never committed to the store.
+    """
+
+    intent_id: str = ""
+    item: AnchoredMemoryItem | None = None
+    trace: WriteIntentTrace | None = None
+    operation: str = "create"  # create | merge | retract | reject
+    reason: str = ""
+    rejected_reason: str = ""
+
+    def to_dict(self) -> dict[str, object]:
+        result: dict[str, object] = {
+            "intent_id": self.intent_id,
+            "operation": self.operation,
+            "reason": self.reason,
+            "rejected_reason": self.rejected_reason,
+        }
+        if self.item is not None:
+            result["item"] = self.item.to_dict()
+        if self.trace is not None:
+            result["trace"] = self.trace.to_dict()
+        return result
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object]) -> "MemoryWriteIntent":
+        item_dict = payload.get("item")
+        item = (
+            AnchoredMemoryItem.from_dict(dict(item_dict))
+            if isinstance(item_dict, dict)
+            else None
+        )
+        trace_dict = payload.get("trace")
+        trace = (
+            WriteIntentTrace.from_dict(dict(trace_dict))
+            if isinstance(trace_dict, dict)
+            else None
+        )
+        return cls(
+            intent_id=str(payload.get("intent_id", "")),
+            item=item,
+            trace=trace,
+            operation=str(payload.get("operation", "create")),
+            reason=str(payload.get("reason", "")),
+            rejected_reason=str(payload.get("rejected_reason", "")),
+        )
+
+
+# ── M8.9 Response Evidence Contract ──────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class ResponseEvidenceContract:
+    """Generation-facing evidence boundary with 8 buckets.
+
+    Contract:
+    - Specific factual details must come from current_input_facts,
+      anchored_facts, retrieved_memories, or external_evidence.
+    - Unverified details must be rendered as uncertain.
+    - Missing long-term memory means unknown stance.
+    - Style constraints may warm or soften the reply; they may NOT
+      promote unknown details into facts.
+    """
+
+    contract_id: str = ""
+    turn_id: str = ""
+    current_input_facts: tuple[str, ...] = ()
+    anchored_facts: tuple[str, ...] = ()
+    retrieved_memories: tuple[str, ...] = ()
+    external_evidence: tuple[str, ...] = ()
+    unverified_claims: tuple[str, ...] = ()
+    unknowns: tuple[str, ...] = ()
+    forbidden_assumptions: tuple[str, ...] = ()
+    style_constraints: tuple[str, ...] = ()
+
+    _KNOWN_BUCKETS = (
+        "current_input_facts",
+        "anchored_facts",
+        "retrieved_memories",
+        "external_evidence",
+    )
+
+    def to_compact_prompt(self) -> str:
+        """Render the contract as prompt-safe compact text."""
+        lines: list[str] = ["[Evidence Boundary]"]
+
+        for label, field in [
+            ("Known from input", self.current_input_facts),
+            ("Anchored facts", self.anchored_facts),
+            ("Retrieved memories", self.retrieved_memories),
+            ("External evidence", self.external_evidence),
+        ]:
+            if field:
+                lines.append(f"  {label}: {'; '.join(field)}")
+
+        for label, field in [
+            ("Unverified", self.unverified_claims),
+            ("Unknown", self.unknowns),
+        ]:
+            if field:
+                lines.append(f"  {label} (do NOT assert as fact): {'; '.join(field)}")
+
+        if self.forbidden_assumptions:
+            lines.append(
+                "  Forbidden (do NOT reference): "
+                + "; ".join(self.forbidden_assumptions)
+            )
+
+        if self.style_constraints:
+            lines.append(
+                "  Style guidance: " + "; ".join(self.style_constraints)
+            )
+
+        return "\n".join(lines)
+
+    def is_claim_supported(self, claim: str) -> bool:
+        """Check whether a textual claim has evidence backing."""
+        normalized = claim.strip().lower()
+        if not normalized:
+            return False
+        all_known: list[str] = []
+        for bucket_name in self._KNOWN_BUCKETS:
+            all_known.extend(getattr(self, bucket_name, ()))
+        return any(normalized in known.lower() or known.lower() in normalized
+                   for known in all_known)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "contract_id": self.contract_id,
+            "turn_id": self.turn_id,
+            "current_input_facts": list(self.current_input_facts),
+            "anchored_facts": list(self.anchored_facts),
+            "retrieved_memories": list(self.retrieved_memories),
+            "external_evidence": list(self.external_evidence),
+            "unverified_claims": list(self.unverified_claims),
+            "unknowns": list(self.unknowns),
+            "forbidden_assumptions": list(self.forbidden_assumptions),
+            "style_constraints": list(self.style_constraints),
+        }
+
+
+def build_response_evidence_contract(
+    *,
+    turn_id: str = "",
+    current_turn_text: str = "",
+    anchored_items: list[AnchoredMemoryItem] | None = None,
+    retrieved_memory_texts: list[str] | None = None,
+    style_hints: list[str] | None = None,
+) -> ResponseEvidenceContract:
+    """Build a ResponseEvidenceContract from turn data and anchored items.
+
+    Routes anchored items through ``MemoryPermissionFilter`` so that
+    explicit/corroborated facts land in ``anchored_facts``, hypotheses
+    in ``unverified_claims``, retracted/forbidden in
+    ``forbidden_assumptions``, and strategy_only items are excluded.
+    """
+    from uuid import uuid4
+
+    buckets = MemoryPermissionFilter.filter(list(anchored_items or []))
+
+    anchored_props: list[str] = [
+        item.proposition for item in buckets.explicit_facts
+    ]
+    unverified_props: list[str] = [
+        item.proposition for item in buckets.cautious_hypotheses
+    ]
+    forbidden_props: list[str] = [
+        item.proposition for item in buckets.forbidden
+    ]
+
+    # Current input facts: extract explicit user assertions from the turn
+    input_facts = [current_turn_text] if current_turn_text.strip() else []
+
+    # Unknowns: if no retrieved memories exist, mark long-term memory as unknown
+    unknowns: list[str] = []
+    if not retrieved_memory_texts:
+        unknowns.append("long_term_memory_not_cued")
+
+    return ResponseEvidenceContract(
+        contract_id=str(uuid4()),
+        turn_id=turn_id,
+        current_input_facts=tuple(input_facts),
+        anchored_facts=tuple(anchored_props),
+        retrieved_memories=tuple(retrieved_memory_texts or []),
+        external_evidence=(),
+        unverified_claims=tuple(unverified_props),
+        unknowns=tuple(unknowns),
+        forbidden_assumptions=tuple(forbidden_props),
+        style_constraints=tuple(style_hints or []),
+    )

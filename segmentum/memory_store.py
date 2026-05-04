@@ -880,6 +880,36 @@ class MemoryStore:
         self.anchored_items.append(item)
         return item.memory_id
 
+    def commit_write_intent(self, intent) -> tuple[str, str]:
+        """Commit a MemoryWriteIntent to the store. Returns (memory_id, operation).
+
+        Records write-intent provenance tags on the anchored item so its
+        source turn, utterance, speaker, and extraction cycle are auditable.
+
+        Backward compat: this is an explicit commit path that wraps
+        add_anchored_item().  Direct add_anchored_item() still works for
+        callers that do not have a bus or intent infrastructure.
+        """
+        from segmentum.memory_anchored import MemoryWriteIntent  # late import
+
+        if not isinstance(intent, MemoryWriteIntent):
+            raise TypeError("commit_write_intent requires a MemoryWriteIntent")
+        if intent.operation == "reject":
+            return intent.item.memory_id if intent.item else "", "reject"
+        if intent.item is None:
+            raise ValueError("MemoryWriteIntent has no item to commit")
+
+        item = intent.item
+        if intent.trace is not None:
+            item.tags = list(item.tags or [])
+            item.tags.append(f"write_intent_id:{intent.intent_id}")
+            item.tags.append(f"source_turn:{intent.trace.source_turn_id}")
+            item.tags.append(f"source_speaker:{intent.trace.source_speaker}")
+            item.tags.append(f"committed_at_cycle:{item.created_at_cycle or 0}")
+
+        mid = self.add_anchored_item(item)
+        return mid, intent.operation
+
     def get_anchored_items(
         self,
         *,

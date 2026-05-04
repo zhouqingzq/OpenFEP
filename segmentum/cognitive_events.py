@@ -16,6 +16,9 @@ COGNITIVE_EVENT_TYPES: tuple[str, ...] = (
     "PromptAssemblyEvent",
     "GenerationEvent",
     "OutcomeEvent",
+    # M8.9: Memory write intent types
+    "DialogueFactExtractionEvent",
+    "MemoryWriteResultEvent",
 )
 
 
@@ -28,6 +31,9 @@ COGNITIVE_EVENT_CONSUMERS: dict[str, tuple[str, ...]] = {
     "PromptAssemblyEvent": ("prompt_assembly_audit", "trace"),
     "GenerationEvent": ("trace", "evaluation"),
     "OutcomeEvent": ("state_update", "trace", "evaluation"),
+    # M8.9: Memory write intent consumers
+    "DialogueFactExtractionEvent": ("state_update", "trace"),
+    "MemoryWriteResultEvent": ("trace", "evaluation"),
 }
 
 

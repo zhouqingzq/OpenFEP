@@ -17,7 +17,10 @@ from ..cognition import CognitiveLoop
 from ..memory_anchored import (
     DialogueFactExtractor,
     MemoryCitationGuard,
+    MemoryWriteIntent,
+    WriteIntentTrace,
     build_memory_repair_instruction,
+    build_response_evidence_contract,
 )
 from ..memory_dynamics import (
     consolidate_successful_path_pattern,
@@ -169,8 +172,21 @@ def _extract_and_store_dialogue_facts(
     turn_id: str,
     utterance_id: str,
     speaker: str = "user",
+    *,
+    event_bus: CognitiveEventBus | None = None,
+    session_id: str = "unknown",
+    persona_id: str = "unknown",
 ) -> None:
-    """Extract anchored facts from a dialogue turn and store them."""
+    """Extract anchored facts from a dialogue turn and store them.
+
+    When *event_bus* is provided, each extracted fact flows through the
+    M8.9 write-intent path:
+
+        DialogueFactExtractionEvent -> MemoryWriteIntent -> commit -> MemoryWriteResultEvent
+
+    When *event_bus* is None, falls back to direct ``store.add_anchored_item()``
+    for backward compatibility with callers that do not have a bus.
+    """
     store = _ensure_memory_store(agent)
     if store is None:
         return
@@ -183,8 +199,75 @@ def _extract_and_store_dialogue_facts(
         existing_items=list(getattr(store, "anchored_items", [])),
         current_cycle=getattr(agent, 'cycle', 0),
     )
-    for item in items:
-        store.add_anchored_item(item)
+    cycle_no = int(getattr(agent, 'cycle', 0))
+    committed_ids: list[str] = []
+
+    if event_bus is not None and hasattr(store, 'commit_write_intent'):
+        # M8.9 write-intent path: publish -> intent -> commit -> result
+        extraction_event = make_cognitive_event(
+            event_type="DialogueFactExtractionEvent",
+            turn_id=turn_id,
+            cycle=cycle_no,
+            session_id=session_id,
+            persona_id=persona_id,
+            source="dialogue_fact_extractor",
+            sequence_index=cycle_no,
+            payload={
+                "speaker": speaker,
+                "turn_id": turn_id,
+                "utterance_id": utterance_id,
+                "extracted_count": len(items),
+                "propositions": [item.proposition for item in items],
+            },
+            salience=0.6,
+            priority=0.6,
+        )
+        event_bus.publish(extraction_event)
+
+        for item in items:
+            trace = WriteIntentTrace(
+                source_event_id=extraction_event.event_id,
+                source_turn_id=turn_id,
+                source_utterance_id=utterance_id,
+                source_speaker=speaker,
+                extraction_cycle=cycle_no,
+            )
+            intent = MemoryWriteIntent(
+                intent_id=f"mwi_{item.memory_id}",
+                item=item,
+                trace=trace,
+                operation="create",
+                reason="dialogue_fact_extraction",
+            )
+            mid, op = store.commit_write_intent(intent)
+            committed_ids.append(mid)
+
+            result_payload: dict[str, object] = {
+                "memory_id": mid,
+                "operation": op,
+                "intent_id": intent.intent_id,
+                "proposition": item.proposition,
+                "status": item.status,
+                "visibility": item.visibility,
+            }
+            result_event = make_cognitive_event(
+                event_type="MemoryWriteResultEvent",
+                turn_id=turn_id,
+                cycle=cycle_no,
+                session_id=session_id,
+                persona_id=persona_id,
+                source="memory_write_result",
+                sequence_index=cycle_no,
+                payload=result_payload,
+                salience=0.5,
+                priority=0.5,
+            )
+            event_bus.publish(result_event)
+    else:
+        # Legacy path: direct store writes (backward compatible)
+        for item in items:
+            store.add_anchored_item(item)
+
     # M8.5: prune anchored items to prevent unbounded growth
     if hasattr(store, 'prune_anchored'):
         store.prune_anchored(current_cycle=getattr(agent, 'cycle', 0))
@@ -277,6 +360,9 @@ def run_conversation(
             turn_id=turn_id,
             utterance_id=f"{turn_id}_user",
             speaker="user",
+            event_bus=event_bus_for_turn,
+            session_id=session_id,
+            persona_id=persona_id,
         )
 
         publish_event(
@@ -554,6 +640,25 @@ def run_conversation(
         dialogue_context["meta_control_guidance"] = meta_control_guidance_dict
         dialogue_context["cognitive_control_guidance"] = cognitive_control_guidance
 
+        # ── M8.9: Build evidence contract for generation ────────────────
+        store_for_evidence = _ensure_memory_store(agent)
+        anchored_now = list(getattr(store_for_evidence, "anchored_items", [])) if store_for_evidence else []
+        retrieved_texts: list[str] = []
+        if diagnostics is not None:
+            for mem in getattr(diagnostics, "activated_memories", []) or []:
+                if hasattr(mem, "content"):
+                    retrieved_texts.append(str(mem.content))
+                elif isinstance(mem, dict):
+                    retrieved_texts.append(str(mem.get("content", "")))
+        evidence_contract = build_response_evidence_contract(
+            turn_id=turn_id,
+            current_turn_text=partner_text,
+            anchored_items=anchored_now,
+            retrieved_memory_texts=retrieved_texts,
+            style_hints=affective_maintenance_summary if isinstance(affective_maintenance_summary, list) else None,
+        )
+        dialogue_context["evidence_contract"] = evidence_contract
+
         personality_state: dict[str, object] = {
             "slow_traits": agent.slow_variable_learner.state.traits.to_dict(),
         }
@@ -684,6 +789,9 @@ def run_conversation(
                 turn_id=turn_id,
                 utterance_id=f"{turn_id}_agent",
                 speaker="agent",
+                event_bus=event_bus_for_turn,
+                session_id=session_id,
+                persona_id=persona_id,
             )
 
         strat = None

@@ -873,6 +873,17 @@ def _format_memory_context(mem_dict: dict[str, list[str]]) -> str:
     return "\n".join(parts)
 
 
+def _build_evidence_context(contract: object) -> str:
+    """Render a ResponseEvidenceContract as prompt-safe guidance text.
+
+    Known facts are listed.  Unknowns and forbidden assumptions are
+    rendered as negative constraints (what NOT to claim).
+    """
+    if not hasattr(contract, "to_compact_prompt"):
+        return ""
+    return contract.to_compact_prompt()
+
+
 # ── Dialogue Perception ──────────────────────────────────────────────────
 
 _CHANNEL_LABELS = {
@@ -1220,6 +1231,7 @@ class PromptBuilder:
         previous_outcome: str = "",
         efe_margin: float = 1.0,
         fep_capsule: Mapping[str, object] | None = None,
+        evidence_contract: object | None = None,
     ) -> str:
         """Assemble a 10-layer system prompt with conditional inclusion.
 
@@ -1283,6 +1295,12 @@ class PromptBuilder:
         if any(mem_dict.values()):
             mem_text = _format_memory_context(mem_dict)
             sections.append(("memory_context", mem_text, False))
+
+        # Layer 8.5: Evidence boundary (conditional: only if evidence_contract provided)
+        if evidence_contract is not None:
+            evidence_text = _build_evidence_context(evidence_contract)
+            if evidence_text:
+                sections.append(("evidence_boundary", evidence_text, False))
 
         # Layer 9: Output constraints (always)
         sections.append(("output_constraints",

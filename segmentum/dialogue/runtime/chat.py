@@ -97,6 +97,7 @@ class _PromptInjector:
                 if fep_capsule.get("previous_outcome") in (None, "", "neutral"):
                     fep_capsule["previous_outcome"] = previous_outcome
                 fep_capsule = dict(fep_capsule)
+            evidence_contract = dialogue_context.get("evidence_contract")
             system_prompt = builder.build_system_prompt(
                 agent, action, emotional, conflict,
                 turn_index=turn_index,
@@ -106,6 +107,7 @@ class _PromptInjector:
                 previous_outcome=previous_outcome,
                 efe_margin=efe_margin,
                 fep_capsule=fep_capsule if isinstance(fep_capsule, dict) else None,
+                evidence_contract=evidence_contract,
             )
             user_message = builder.build_user_message(current_turn, conversation_history)
             self._real.system_prompt = system_prompt
