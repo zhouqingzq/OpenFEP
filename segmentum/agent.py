@@ -55,6 +55,7 @@ from .inquiry_scheduler import (
     semantic_uncertainty_priority_bonus,
 )
 from .social_model import SocialMemory
+from .state_patch import StatePatchLog
 from .subject_state import SubjectState, derive_subject_state, subject_action_bias, subject_memory_threshold_delta
 from .prediction_ledger import PredictionLedger
 from .reconciliation import ReconciliationEngine
@@ -993,6 +994,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.reconciliation_engine = ReconciliationEngine()
         self.verification_loop = VerificationLoop()
         self.subject_state = SubjectState()
+        self.state_patch_log = StatePatchLog()
+        self.latest_m9_state_patch_trace: dict[str, object] = {}
         self.latest_narrative_uncertainty = UncertaintyDecompositionResult()
         self.narrative_uncertainty_history: list[dict[str, object]] = []
         self.narrative_experiment_designer = NarrativeExperimentDesigner()

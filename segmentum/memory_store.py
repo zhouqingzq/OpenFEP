@@ -676,6 +676,55 @@ class MemoryStore:
         internal["last_promotion"] = promotion_record
         return True
 
+    def _audit_m9_retention_for_entry(self, entry: MemoryEntry, *, cycle: int) -> dict[str, object]:
+        """M9.0: log value-based retention pressure and decay state on write."""
+        from .memory_dynamics import compute_decay_state, compute_retention_pressure
+
+        has_conflict = _has_reality_conflict(entry) or _has_source_conflict(entry)
+        tag_tuple = tuple(str(t) for t in (entry.semantic_tags or ())[:8])
+        conf = _clamp(
+            0.35
+            + 0.65
+            * _clamp((entry.reality_confidence + entry.source_confidence) / 2.0),
+        )
+        maint = 0.14 if entry.store_level is StoreLevel.SHORT else 0.06
+        rp = compute_retention_pressure(
+            identity_continuity_value=_clamp(entry.relevance_self),
+            relationship_continuity_value=_clamp(
+                entry.relevance_social * 0.65 + entry.valence * 0.25
+            ),
+            future_prediction_value=_clamp(entry.salience * 0.55 + entry.relevance_goal * 0.35),
+            affective_salience=_clamp(entry.arousal),
+            user_emphasis=_clamp(min(1.0, entry.retrieval_count / 10.0)),
+            maintenance_cost=maint,
+            confidence=conf,
+            has_conflict=has_conflict,
+            tags=tag_tuple,
+            memory_type=str(getattr(entry.memory_class, "value", entry.memory_class)),
+        )
+        decay_state = compute_decay_state(
+            retention_pressure=rp,
+            cycle=cycle,
+            created_at_cycle=entry.created_at,
+            last_access_cycles_ago=max(0, cycle - int(entry.last_accessed or 0)),
+            access_frequency=max(1, int(entry.retrieval_count or 0)),
+        )
+        snapshot: dict[str, object] = {
+            "logged_cycle": int(cycle),
+            "retention_pressure": rp.to_dict(),
+            "decay_state": decay_state,
+            "summary_reason": rp.decay_reason,
+        }
+        if entry.compression_metadata is None:
+            entry.compression_metadata = {}
+        history = entry.compression_metadata.get("m9_retention_history")
+        if not isinstance(history, list):
+            history = []
+        history.append(snapshot)
+        entry.compression_metadata["m9_retention_history"] = history
+        entry.compression_metadata["m9_retention"] = snapshot
+        return snapshot
+
     def add(
         self,
         entry: MemoryEntry,
@@ -707,6 +756,10 @@ class MemoryStore:
                 current_state.get("active_goals") if isinstance(current_state, dict) else []
             ),
         ).to_dict()
+        self._audit_m9_retention_for_entry(
+            entry,
+            cycle=max(entry.created_at, entry.last_accessed),
+        )
         return entry.id
 
     def upsert_legacy_episode(self, payload: dict[str, object], *, index: int = 0) -> str:

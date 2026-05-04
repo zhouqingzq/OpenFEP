@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Literal, NamedTuple
+from typing import ClassVar, Literal, Mapping, NamedTuple, Sequence
 from uuid import uuid4
 
 # ── Status & visibility literals ──────────────────────────────────────────
@@ -1031,8 +1031,10 @@ class ResponseEvidenceContract:
     unknowns: tuple[str, ...] = ()
     forbidden_assumptions: tuple[str, ...] = ()
     style_constraints: tuple[str, ...] = ()
+    unified_evidence: tuple[dict[str, object], ...] = ()
+    interference_controls: dict[str, object] = field(default_factory=dict)
 
-    _KNOWN_BUCKETS = (
+    _KNOWN_BUCKETS: ClassVar[tuple[str, ...]] = (
         "current_input_facts",
         "anchored_facts",
         "retrieved_memories",
@@ -1070,6 +1072,25 @@ class ResponseEvidenceContract:
                 "  Style guidance: " + "; ".join(self.style_constraints)
             )
 
+        if self.unified_evidence:
+            from .memory_evidence import MemoryEvidence, evidence_summary_for_prompt
+
+            ev_objs = [
+                MemoryEvidence.from_dict(d)
+                for d in self.unified_evidence
+                if isinstance(d, dict)
+            ]
+            if ev_objs:
+                lines.append(evidence_summary_for_prompt(ev_objs))
+
+        if self.interference_controls:
+            ic = self.interference_controls
+            if ic.get("interference_reason"):
+                lines.append(
+                    "  Memory interference controls: "
+                    + str(ic.get("interference_reason", ""))
+                )
+
         return "\n".join(lines)
 
     def is_claim_supported(self, claim: str) -> bool:
@@ -1095,6 +1116,8 @@ class ResponseEvidenceContract:
             "unknowns": list(self.unknowns),
             "forbidden_assumptions": list(self.forbidden_assumptions),
             "style_constraints": list(self.style_constraints),
+            "unified_evidence": [dict(row) for row in self.unified_evidence],
+            "interference_controls": dict(self.interference_controls),
         }
 
 
@@ -1104,7 +1127,10 @@ def build_response_evidence_contract(
     current_turn_text: str = "",
     anchored_items: list[AnchoredMemoryItem] | None = None,
     retrieved_memory_texts: list[str] | None = None,
+    retrieval_entries: Sequence[Mapping[str, object]] | None = None,
+    current_cue: str = "",
     style_hints: list[str] | None = None,
+    interference_controls: Mapping[str, object] | None = None,
 ) -> ResponseEvidenceContract:
     """Build a ResponseEvidenceContract from turn data and anchored items.
 
@@ -1114,6 +1140,8 @@ def build_response_evidence_contract(
     ``forbidden_assumptions``, and strategy_only items are excluded.
     """
     from uuid import uuid4
+
+    from .memory_evidence import unify_evidence
 
     buckets = MemoryPermissionFilter.filter(list(anchored_items or []))
 
@@ -1130,10 +1158,26 @@ def build_response_evidence_contract(
     # Current input facts: extract explicit user assertions from the turn
     input_facts = [current_turn_text] if current_turn_text.strip() else []
 
+    cue_text = (current_cue or current_turn_text or "").strip()
+    retrieval_seq = list(retrieval_entries or ())
+    unified = unify_evidence(
+        anchored_items=list(anchored_items or []),
+        retrieval_results=retrieval_seq,
+        hypotheses=(),
+        current_cue=cue_text,
+    )
+    unified_t = tuple(e.to_dict() for e in unified)
+
     # Unknowns: if no retrieved memories exist, mark long-term memory as unknown
     unknowns: list[str] = []
-    if not retrieved_memory_texts:
+    if not retrieved_memory_texts and not retrieval_seq:
         unknowns.append("long_term_memory_not_cued")
+    if not cue_text:
+        unknowns.append("ltm_requires_explicit_cue")
+
+    ctrl: dict[str, object] = {}
+    if interference_controls:
+        ctrl = {str(k): v for k, v in interference_controls.items()}
 
     return ResponseEvidenceContract(
         contract_id=str(uuid4()),
@@ -1146,4 +1190,6 @@ def build_response_evidence_contract(
         unknowns=tuple(unknowns),
         forbidden_assumptions=tuple(forbidden_props),
         style_constraints=tuple(style_hints or []),
+        unified_evidence=unified_t,
+        interference_controls=ctrl,
     )

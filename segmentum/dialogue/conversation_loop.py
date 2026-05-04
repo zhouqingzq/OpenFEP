@@ -23,8 +23,19 @@ from ..memory_anchored import (
     build_response_evidence_contract,
 )
 from ..memory_dynamics import (
+    MemoryInterferenceSignal,
+    apply_interference_to_evidence_contract,
     consolidate_successful_path_pattern,
+    derive_interference_feedback,
     record_failed_path_outcome,
+)
+from ..m9_bus_integration import (
+    build_memory_interference_event_payload,
+    build_memory_recall_event_payload,
+)
+from ..m9_state_patch_runtime import (
+    process_subject_patches_for_turn,
+    proposals_from_memory_interference,
 )
 from ..meta_control import MetaControlSignal, derive_meta_control_signal
 from ..meta_control_guidance import (
@@ -322,7 +333,7 @@ def run_conversation(
             salience: float = 0.5,
             priority: float = 0.5,
             ttl: int = 1,
-        ) -> None:
+        ) -> str:
             nonlocal event_sequence
             event = make_cognitive_event(
                 event_type=event_type,
@@ -340,6 +351,7 @@ def run_conversation(
             turn_events.append(event)
             event_bus_for_turn.publish(event)
             event_sequence += 1
+            return str(event.event_id)
 
         obs_obj = observer.observe(
             current_turn=partner_text,
@@ -497,6 +509,41 @@ def run_conversation(
             priority=0.75,
         )
 
+        store_m9 = _ensure_memory_store(agent)
+        anchored_m9 = list(getattr(store_m9, "anchored_items", [])) if store_m9 else []
+        recall_bus_payload = build_memory_recall_event_payload(
+            cue=partner_text,
+            diagnostics=diagnostics,
+            anchored_items=anchored_m9,
+            turn_id=turn_id,
+        )
+        publish_event(
+            "MemoryRecallEvent",
+            "m9_bus_integration",
+            recall_bus_payload,
+            salience=0.78,
+            priority=0.86,
+            ttl=2,
+        )
+        interference_bus_payload = build_memory_interference_event_payload(
+            diagnostics=diagnostics,
+            last_retrieval_result=getattr(agent, "last_retrieval_result", {}) or {},
+        )
+        inner_interf_raw = interference_bus_payload.get("interference")
+        if not isinstance(inner_interf_raw, dict):
+            inner_interf_raw = {}
+        interf_detected = (
+            isinstance(inner_interf_raw, dict) and bool(inner_interf_raw.get("detected"))
+        )
+        memory_interference_event_id = publish_event(
+            "MemoryInterferenceEvent",
+            "m9_bus_integration",
+            interference_bus_payload,
+            salience=0.82 if interf_detected else 0.38,
+            priority=0.88 if interf_detected else 0.55,
+            ttl=2,
+        )
+
         cognitive_loop_result = CognitiveLoop(event_bus_for_turn).consume_and_update(
             getattr(agent, "latest_cognitive_state", None),
             turn_id=turn_id,
@@ -508,6 +555,18 @@ def run_conversation(
         )
         cognitive_state = cognitive_loop_result.state
         agent.latest_cognitive_state = cognitive_state
+        if isinstance(inner_interf_raw, dict) and inner_interf_raw.get("detected"):
+            patch_props = proposals_from_memory_interference(
+                interference_payload=inner_interf_raw,
+                source_event_id=memory_interference_event_id,
+            )
+            process_subject_patches_for_turn(
+                agent,
+                patch_props,
+                publish_event,
+                cycle=cycle_at_turn_start,
+                interference_event_id=memory_interference_event_id,
+            )
         path_summary = path_competition_summary(
             cognitive_paths_from_diagnostics(diagnostics)
             if diagnostics is not None
@@ -640,22 +699,63 @@ def run_conversation(
         dialogue_context["meta_control_guidance"] = meta_control_guidance_dict
         dialogue_context["cognitive_control_guidance"] = cognitive_control_guidance
 
-        # ── M8.9: Build evidence contract for generation ────────────────
+        # ── M8.9 + M9.0: Evidence contract (unified MemoryEvidence + interference) ──
         store_for_evidence = _ensure_memory_store(agent)
         anchored_now = list(getattr(store_for_evidence, "anchored_items", [])) if store_for_evidence else []
         retrieved_texts: list[str] = []
+        retrieval_entries: list[dict[str, object]] = []
         if diagnostics is not None:
             for mem in getattr(diagnostics, "activated_memories", []) or []:
                 if hasattr(mem, "content"):
                     retrieved_texts.append(str(mem.content))
                 elif isinstance(mem, dict):
                     retrieved_texts.append(str(mem.get("content", "")))
+            for mem in getattr(diagnostics, "retrieved_memories", []) or []:
+                if isinstance(mem, dict):
+                    retrieval_entries.append(dict(mem))
+        overdom = bool(interference_bus_payload.get("overdominance"))
+        interf_signal = MemoryInterferenceSignal(
+            detected=bool(inner_interf_raw.get("detected"))
+            if isinstance(inner_interf_raw, dict)
+            else False,
+            kind=str(inner_interf_raw.get("kind", ""))
+            if isinstance(inner_interf_raw, dict)
+            else "",
+            severity=float(inner_interf_raw.get("severity", 0.0) or 0.0)
+            if isinstance(inner_interf_raw, dict)
+            else 0.0,
+            conflicting_episode_ids=tuple(
+                str(x)
+                for x in (inner_interf_raw.get("conflicting_episode_ids", []) or [])
+            )
+            if isinstance(inner_interf_raw, dict)
+            else (),
+            reasons=tuple(
+                str(x) for x in (inner_interf_raw.get("reasons", []) or [])
+            )
+            if isinstance(inner_interf_raw, dict)
+            else (),
+        )
+        interf_feedback = derive_interference_feedback(
+            interf_signal if interf_signal.detected else None,
+            overdominance_detected=overdom,
+            memory_retrieval_gain=float(cognitive_state.memory.memory_helpfulness),
+        )
+        interference_ctrl = apply_interference_to_evidence_contract(
+            interf_feedback,
+            current_caution_level=0.5,
+            current_assertiveness=0.5,
+            memory_retrieval_gain=float(cognitive_state.memory.memory_helpfulness),
+        )
         evidence_contract = build_response_evidence_contract(
             turn_id=turn_id,
             current_turn_text=partner_text,
             anchored_items=anchored_now,
             retrieved_memory_texts=retrieved_texts,
+            retrieval_entries=retrieval_entries,
+            current_cue=partner_text,
             style_hints=affective_maintenance_summary if isinstance(affective_maintenance_summary, list) else None,
+            interference_controls=dict(interference_ctrl),
         )
         dialogue_context["evidence_contract"] = evidence_contract
 

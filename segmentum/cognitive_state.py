@@ -500,11 +500,52 @@ def _self_prior_notes(self_prior_summary: Mapping[str, object] | str | None) -> 
     return [note for note in notes if note][:4]
 
 
+def _merge_memory_m9_bus_events(
+    events: Sequence[CognitiveEvent],
+) -> tuple[list[dict[str, object]], list[str], bool]:
+    """Consume M9.0 MemoryRecallEvent / MemoryInterferenceEvent overlays from the bus."""
+    extra_activated: list[dict[str, object]] = []
+    extra_conflicts: list[str] = []
+    bus_interference = False
+    for event in events:
+        if event.event_type == "MemoryRecallEvent":
+            payload = dict(event.payload or {})
+            for item in payload.get("unified_evidence", []) or []:
+                if not isinstance(item, Mapping):
+                    continue
+                row = dict(item)
+                summary = str(
+                    row.get("content_summary")
+                    or row.get("summary")
+                    or row.get("content")
+                    or "",
+                )[:160]
+                memory_id = str(row.get("memory_id", "") or "recall_evidence")
+                extra_activated.append(
+                    {
+                        "episode_id": memory_id,
+                        "summary": summary,
+                        "source": "MemoryRecallEvent",
+                        "bus_event_id": event.event_id,
+                    }
+                )
+        elif event.event_type == "MemoryInterferenceEvent":
+            inner = event.payload.get("interference") if isinstance(event.payload, Mapping) else None
+            if isinstance(inner, Mapping) and inner.get("detected"):
+                bus_interference = True
+                kind = str(inner.get("kind", "memory_interference"))
+                extra_conflicts.append(
+                    f"bus:MemoryInterferenceEvent:{event.event_id}:{kind}"
+                )
+    return extra_activated, extra_conflicts, bus_interference
+
+
 def _derive_memory(
     diagnostics: DecisionDiagnostics | None,
     self_prior_summary: Mapping[str, object] | str | None,
+    events: Sequence[CognitiveEvent] | None = None,
 ) -> MemoryState:
-    activated = _activated_memories(diagnostics)
+    activated = list(_activated_memories(diagnostics))
     summary = _text(getattr(diagnostics, "memory_context_summary", ""), limit=160)
     reusable = []
     if summary:
@@ -524,6 +565,18 @@ def _derive_memory(
         retrieved_memories=list(getattr(diagnostics, "retrieved_memories", []) or []),
         prediction_delta=prediction_delta,
     )
+    bus_extra_act, bus_conflicts, bus_interference_flag = _merge_memory_m9_bus_events(
+        events or (),
+    )
+    seen_ids = {str(a.get("episode_id", "")) for a in activated if a.get("episode_id")}
+    for row in bus_extra_act:
+        eid = str(row.get("episode_id", ""))
+        if eid and eid not in seen_ids:
+            seen_ids.add(eid)
+            activated.append(row)
+    for line in bus_conflicts:
+        if line not in conflicts:
+            conflicts.append(line)
     if interference.detected:
         for reason in interference.reasons:
             conflicts.append(f"{interference.kind}: {reason}")
@@ -542,8 +595,11 @@ def _derive_memory(
         helpfulness += 0.15
     if reusable:
         helpfulness += 0.10
-    if interference.detected:
-        helpfulness -= 0.10 + (interference.severity * 0.20)
+    if interference.detected or bus_interference_flag:
+        sev = float(interference.severity) if interference.detected else 0.35
+        helpfulness -= 0.10 + (sev * 0.20)
+        if bus_interference_flag and not interference.detected:
+            helpfulness -= 0.05
     elif conflicts:
         helpfulness -= 0.20
     return MemoryState(
@@ -1017,7 +1073,7 @@ def update_cognitive_state(
         for key, value in dict(observation or {}).items()
         if isinstance(value, (int, float))
     }
-    memory = _derive_memory(diagnostics, self_prior_summary)
+    memory = _derive_memory(diagnostics, self_prior_summary, events=events)
     gaps = _derive_gaps(
         diagnostics=diagnostics,
         observation=safe_observation,
