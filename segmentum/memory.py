@@ -14,6 +14,7 @@ from .memory_encoding import EncodingDynamics, EncodingDynamicsInput
 from .memory_store import MemoryStore
 from .preferences import PreferenceModel, ValueHierarchy
 from .semantic_schema import SemanticSchemaStore
+from .value_memory import value_memory_utility_from_metadata
 
 
 _LEGACY_MEMORY_WARNING_SUPPRESSED = contextvars.ContextVar(
@@ -140,6 +141,10 @@ class MemoryDecision:
     value_relevance: float = 0.0
     policy_delta: float = 0.0
     threat_significance: float = 0.0
+    future_path_utility: float = 0.0
+    reuse_gain: float = 0.0
+    error_avoidance_gain: float = 0.0
+    maintenance_cost: float = 0.0
     redundancy_penalty: float = 0.0
     support_delta: int = 0
     episode_id: str | None = None
@@ -162,6 +167,10 @@ class MemoryDecision:
             "value_relevance": self.value_relevance,
             "policy_delta": self.policy_delta,
             "threat_significance": self.threat_significance,
+            "future_path_utility": self.future_path_utility,
+            "reuse_gain": self.reuse_gain,
+            "error_avoidance_gain": self.error_avoidance_gain,
+            "maintenance_cost": self.maintenance_cost,
             "redundancy_penalty": self.redundancy_penalty,
             "support_delta": self.support_delta,
             "episode_id": self.episode_id,
@@ -628,6 +637,10 @@ class LongTermMemory:
                 value_relevance=gate["value_relevance"],
                 policy_delta=gate["policy_delta"],
                 threat_significance=gate["threat_significance"],
+                future_path_utility=gate["future_path_utility"],
+                reuse_gain=gate["reuse_gain"],
+                error_avoidance_gain=gate["error_avoidance_gain"],
+                maintenance_cost=gate["maintenance_cost"],
                 redundancy_penalty=gate["redundancy_penalty"],
                 gating_reasons=tuple([*gate["reasons"], "encoding_budget_denied"]),
             )
@@ -649,6 +662,10 @@ class LongTermMemory:
                 value_relevance=gate["value_relevance"],
                 policy_delta=gate["policy_delta"],
                 threat_significance=gate["threat_significance"],
+                future_path_utility=gate["future_path_utility"],
+                reuse_gain=gate["reuse_gain"],
+                error_avoidance_gain=gate["error_avoidance_gain"],
+                maintenance_cost=gate["maintenance_cost"],
                 redundancy_penalty=gate["redundancy_penalty"],
                 gating_reasons=tuple(gate["reasons"]),
             )
@@ -666,6 +683,10 @@ class LongTermMemory:
                 value_relevance=gate["value_relevance"],
                 policy_delta=gate["policy_delta"],
                 threat_significance=gate["threat_significance"],
+                future_path_utility=gate["future_path_utility"],
+                reuse_gain=gate["reuse_gain"],
+                error_avoidance_gain=gate["error_avoidance_gain"],
+                maintenance_cost=gate["maintenance_cost"],
                 redundancy_penalty=gate["redundancy_penalty"],
                 gating_reasons=tuple(gate["reasons"]),
             )
@@ -700,6 +721,10 @@ class LongTermMemory:
                 value_relevance=gate["value_relevance"],
                 policy_delta=gate["policy_delta"],
                 threat_significance=gate["threat_significance"],
+                future_path_utility=gate["future_path_utility"],
+                reuse_gain=gate["reuse_gain"],
+                error_avoidance_gain=gate["error_avoidance_gain"],
+                maintenance_cost=gate["maintenance_cost"],
                 redundancy_penalty=gate["redundancy_penalty"],
                 support_delta=1,
                 episode_id=str(merged_payload.get("episode_id", "")) or None,
@@ -725,6 +750,10 @@ class LongTermMemory:
             value_relevance=gate["value_relevance"],
             policy_delta=gate["policy_delta"],
             threat_significance=gate["threat_significance"],
+            future_path_utility=gate["future_path_utility"],
+            reuse_gain=gate["reuse_gain"],
+            error_avoidance_gain=gate["error_avoidance_gain"],
+            maintenance_cost=gate["maintenance_cost"],
             redundancy_penalty=gate["redundancy_penalty"],
             episode_id=str(payload.get("episode_id", "")) or None,
             gating_reasons=tuple(gate["reasons"]),
@@ -2069,13 +2098,48 @@ class LongTermMemory:
 
     def _episode_utility(self, payload: dict[str, object]) -> float:
         outcome = _coerce_float_dict(payload.get("outcome_state", payload.get("outcome")))
-        value_score = float(payload.get("value_score", 0.0))
+        value_score = value_memory_utility_from_metadata(
+            payload.get("compression_metadata") if isinstance(payload.get("compression_metadata"), dict) else None,
+            default=float(
+                payload.get(
+                    "future_path_utility",
+                    max(0.0, float(payload.get("value_score", 0.0))),
+                )
+            ),
+        )
         prediction_error = float(payload.get("prediction_error", 0.0))
         utility = outcome.get("free_energy_drop", 0.0) + value_score - prediction_error
         return max(-1.0, min(1.0, utility))
 
     def _score_episode_candidate(self, episode: Episode) -> dict[str, object]:
-        value_relevance = abs(float(episode.value_score))
+        future_path_utility = _clamp(
+            float(
+                episode.outcome_state.get(
+                    "future_path_utility",
+                    episode.outcome_state.get("value_memory_score", max(0.0, float(episode.value_score))),
+                )
+            ),
+            -1.0,
+            1.0,
+        )
+        reuse_gain = _clamp(
+            float(
+                episode.outcome_state.get(
+                    "reuse_gain",
+                    episode.outcome_state.get("future_reuse_gain", max(0.0, future_path_utility)),
+                )
+            )
+        )
+        error_avoidance_gain = _clamp(
+            float(
+                episode.outcome_state.get(
+                    "error_avoidance_gain",
+                    0.35 if episode.predicted_outcome in {"survival_threat", "integrity_loss"} else 0.0,
+                )
+            )
+        )
+        maintenance_cost = _clamp(float(episode.outcome_state.get("maintenance_cost", 0.10)))
+        value_relevance = max(0.0, future_path_utility)
         # When raw prediction error is very low, the preference model's risk
         # scores may reflect learned priors rather than an actual anomaly.
         # Dampen model-derived signals proportionally to raw PE.
@@ -2095,16 +2159,23 @@ class LongTermMemory:
         identity_critical = self._is_identity_critical_episode(episode)
         episode_score = (
             (0.38 * min(1.0, episode.total_surprise))
-            + (0.27 * value_relevance)
+            + (0.27 * max(0.0, future_path_utility))
+            + (0.12 * reuse_gain)
+            + (0.12 * error_avoidance_gain)
             + (0.17 * policy_delta)
-            + (0.24 * threat_significance)
+            + (0.12 * threat_significance)
+            - (0.16 * maintenance_cost)
             - (0.34 * redundancy_penalty)
         )
         reasons: list[str] = []
         if identity_critical:
             reasons.append("identity_critical_exception")
         if value_relevance >= 0.75:
-            reasons.append("high_value_relevance")
+            reasons.append("high_future_path_utility")
+        if reuse_gain >= 0.55:
+            reasons.append("high_reuse_gain")
+        if error_avoidance_gain >= 0.55:
+            reasons.append("high_error_avoidance_gain")
         if policy_delta >= 0.55:
             reasons.append("policy_relevant")
         if threat_significance >= 0.60:
@@ -2118,6 +2189,10 @@ class LongTermMemory:
             "value_relevance": value_relevance,
             "policy_delta": policy_delta,
             "threat_significance": threat_significance,
+            "future_path_utility": future_path_utility,
+            "reuse_gain": reuse_gain,
+            "error_avoidance_gain": error_avoidance_gain,
+            "maintenance_cost": maintenance_cost,
             "redundancy_penalty": redundancy_penalty,
             "identity_critical": identity_critical,
             "reasons": reasons,
@@ -2163,6 +2238,10 @@ class LongTermMemory:
             payload["value_relevance"] = float(gate.get("value_relevance", 0.0))
             payload["policy_delta"] = float(gate.get("policy_delta", 0.0))
             payload["threat_significance"] = float(gate.get("threat_significance", 0.0))
+            payload["future_path_utility"] = float(gate.get("future_path_utility", 0.0))
+            payload["reuse_gain"] = float(gate.get("reuse_gain", 0.0))
+            payload["error_avoidance_gain"] = float(gate.get("error_avoidance_gain", 0.0))
+            payload["maintenance_cost"] = float(gate.get("maintenance_cost", 0.0))
             payload["redundancy_penalty"] = float(gate.get("redundancy_penalty", 0.0))
             payload["gating_reasons"] = list(gate.get("reasons", []))
             identity_critical = bool(gate.get("identity_critical", False))
@@ -2283,6 +2362,19 @@ class LongTermMemory:
         payload["threat_significance"] = max(
             float(payload.get("threat_significance", 0.0)),
             float(gate["threat_significance"]),
+        )
+        payload["future_path_utility"] = max(
+            float(payload.get("future_path_utility", 0.0)),
+            float(gate["future_path_utility"]),
+        )
+        payload["reuse_gain"] = max(float(payload.get("reuse_gain", 0.0)), float(gate["reuse_gain"]))
+        payload["error_avoidance_gain"] = max(
+            float(payload.get("error_avoidance_gain", 0.0)),
+            float(gate["error_avoidance_gain"]),
+        )
+        payload["maintenance_cost"] = max(
+            float(payload.get("maintenance_cost", 0.0)),
+            float(gate["maintenance_cost"]),
         )
         payload["redundancy_penalty"] = max(
             float(payload.get("redundancy_penalty", 0.0)),

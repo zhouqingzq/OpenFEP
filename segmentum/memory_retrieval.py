@@ -15,6 +15,7 @@ from .memory_state import (
     identity_match_ratio_for_entry,
     normalize_agent_state,
 )
+from .value_memory import QUARANTINE_KIND, REJECTED_KIND
 
 if TYPE_CHECKING:
     from .memory_store import MemoryStore
@@ -1046,6 +1047,11 @@ def _filter_entries(query: RetrievalQuery, store: "MemoryStore") -> list[MemoryE
     candidates: list[MemoryEntry] = []
     for entry in store.entries:
         if entry.is_dormant:
+            continue
+        metadata = dict(entry.compression_metadata or {})
+        value_memory = metadata.get("value_memory")
+        candidate_kind = value_memory.get("candidate_kind") if isinstance(value_memory, dict) else None
+        if candidate_kind in {QUARANTINE_KIND, REJECTED_KIND}:
             continue
         if query.target_memory_class is not None and entry.memory_class is not query.target_memory_class:
             continue

@@ -21,6 +21,7 @@ from .memory_decay import (
 )
 from .memory_anchored import AnchoredMemoryItem
 from .memory_model import MemoryClass, MemoryEntry, SourceType, StoreLevel
+from .value_memory import QUARANTINE_KIND, REJECTED_KIND, value_memory_utility_from_metadata
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -281,14 +282,17 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
         arousal=_clamp(encoded_arousal),
         encoding_attention=_clamp(_coerce_float(payload.get("attention_budget_granted"), encoding_strength)),
         novelty=_clamp(_coerce_float(payload.get("fep_prediction_error", payload.get("prediction_error", 0.0)))),
-        relevance_goal=_clamp(abs(_coerce_float(payload.get("value_relevance", 0.0)))),
+        relevance_goal=_clamp(max(
+            abs(_coerce_float(payload.get("value_relevance", 0.0))),
+            _coerce_float(payload.get("future_path_utility", 0.0)),
+        )),
         relevance_threat=_clamp(_coerce_float(payload.get("threat_significance", 0.0))),
         relevance_self=1.0 if bool(payload.get("identity_critical", False)) else 0.0,
         relevance_social=_clamp(0.6 if str(payload.get("episode_family", "")) == "social_signal" else 0.0),
         relevance_reward=_clamp(abs(_coerce_float(payload.get("value_score", 0.0)))),
         relevance=_clamp(
             max(
-                _coerce_float(payload.get("value_relevance", 0.0)),
+                _coerce_float(payload.get("future_path_utility", payload.get("value_relevance", 0.0))),
                 _coerce_float(payload.get("threat_significance", 0.0)),
                 1.0 if bool(payload.get("identity_critical", False)) else 0.0,
             )
@@ -303,6 +307,7 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
             {
                 action,
                 outcome,
+                *[str(item) for item in payload.get("semantic_tags", []) if str(item)],
                 *[str(item) for item in payload.get("continuity_tags", []) if str(item)],
                 str(payload.get("episode_family", "")),
             }
@@ -310,6 +315,7 @@ def _legacy_entry_from_payload(payload: dict[str, object], index: int = 0) -> Me
         ),
         context_tags=sorted(
             {
+                *[str(item) for item in payload.get("context_tags", []) if str(item)],
                 *[str(item) for item in payload.get("gating_reasons", []) if str(item)],
                 str(payload.get("lifecycle_stage", "")),
             }
@@ -503,6 +509,10 @@ class MemoryStore:
         )
         retrieval_short = min(1.0, entry.retrieval_count / max(1, self.short_to_mid_retrieval_threshold))
         retrieval_long = min(1.0, entry.retrieval_count / max(1, self.mid_to_long_retrieval_threshold))
+        value_memory_utility = value_memory_utility_from_metadata(entry.compression_metadata)
+        value_memory = dict(entry.compression_metadata or {}).get("value_memory") if isinstance(entry.compression_metadata, dict) else None
+        value_memory_kind = value_memory.get("candidate_kind") if isinstance(value_memory, dict) else None
+        future_path_utility_signal = max(0.0, value_memory_utility)
         identity_bonus = entry.relevance_self * (0.18 + (0.10 * identity_active))
         abstraction_bonus = (
             entry.abstractness * 0.16
@@ -514,6 +524,7 @@ class MemoryStore:
             "retrieval_short_signal": round(retrieval_short * 0.16, 6),
             "retrieval_long_signal": round(retrieval_long * 0.22, 6),
             "identity_signal": round(identity_bonus, 6),
+            "future_path_utility_signal": round(future_path_utility_signal * 0.32, 6),
             "abstraction_bonus": round(abstraction_bonus, 6),
             "threat_snapshot_bonus": round(threat_snapshot_bonus, 6),
             "novelty_noise_penalty": round(novelty_noise_penalty, 6),
@@ -524,6 +535,7 @@ class MemoryStore:
             score_breakdown["salience_signal"]
             + score_breakdown["retrieval_short_signal"]
             + score_breakdown["identity_signal"]
+            + score_breakdown["future_path_utility_signal"]
             + score_breakdown["threat_snapshot_bonus"]
             + score_breakdown["selectivity_bias"]
             - score_breakdown["novelty_noise_penalty"]
@@ -540,6 +552,7 @@ class MemoryStore:
         mid_to_long_score = (
             (entry.salience * 0.44)
             + score_breakdown["retrieval_long_signal"]
+            + (future_path_utility_signal * 0.22)
             + score_breakdown["abstraction_bonus"]
             + (entry.relevance_self * (0.22 + (0.10 * identity_active)))
             + (threat_snapshot_bonus * 0.85)
@@ -552,6 +565,7 @@ class MemoryStore:
             for label, value in (
                 ("salience_signal", entry.salience),
                 ("retrieval_signal", max(retrieval_short, retrieval_long)),
+                ("future_path_utility", future_path_utility_signal),
                 ("identity_alignment", entry.relevance_self),
                 ("threat_snapshot", threat_snapshot_bonus),
             )
@@ -575,8 +589,11 @@ class MemoryStore:
             "base_short_to_mid_score": round(short_to_mid_score, 6),
             "boosted_short_to_mid_score": round(boosted_short_to_mid_score, 6),
             "score_cap_applied": bool(score_cap_applied),
+            "value_memory_candidate_kind": value_memory_kind,
         }
 
+        if value_memory_kind in {QUARANTINE_KIND, REJECTED_KIND}:
+            return
         if new_level is StoreLevel.SHORT and boosted_short_to_mid_score >= score_thresholds["short_to_mid"]:
             new_level = StoreLevel.MID
         if new_level is StoreLevel.MID and mid_to_long_score >= score_thresholds["mid_to_long"]:
@@ -811,6 +828,10 @@ class MemoryStore:
         normalized = {str(tag).strip().lower() for tag in tags if str(tag).strip()}
         scored: list[tuple[float, float, MemoryEntry]] = []
         for entry in self.entries:
+            value_memory = dict(entry.compression_metadata or {}).get("value_memory") if isinstance(entry.compression_metadata, dict) else None
+            value_memory_kind = value_memory.get("candidate_kind") if isinstance(value_memory, dict) else None
+            if value_memory_kind in {QUARANTINE_KIND, REJECTED_KIND}:
+                continue
             entry_tags = {tag.lower() for tag in [*entry.semantic_tags, *entry.context_tags]}
             overlap = len(normalized & entry_tags)
             if not overlap and normalized:

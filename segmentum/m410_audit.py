@@ -116,11 +116,11 @@ def _template_static_check() -> dict[str, object]:
 
 def _doc_supersession_check() -> dict[str, object]:
     docs = [
-        "prompts/m45_work_prompt.md",
-        "prompts/m46_work_prompt.md",
-        "prompts/m46_acceptance_criteria.md",
-        "prompts/m47_work_prompt.md",
-        "prompts/m47_acceptance_criteria.md",
+        "prompts/M4.5_Work_Prompt.md",
+        "prompts/M4.6_Work_Prompt.md",
+        "prompts/M4.6_Acceptance_Criteria.md",
+        "prompts/M4.7_Work_Prompt.md",
+        "prompts/M4.7_Acceptance_Criteria.md",
     ]
     missing: list[str] = []
     for relative in docs:

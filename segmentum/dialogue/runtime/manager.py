@@ -50,6 +50,7 @@ class PersonaManager:
         result = analyzer.analyze([description])
         bf = result.big_five
         self._apply_big_five(agent, bf)
+        self._ingest_description_value_memory(agent, description)
 
         if use_narrative_ingestion:
             from ...narrative_ingestion import NarrativeIngestionService
@@ -65,6 +66,56 @@ class PersonaManager:
             svc.ingest(agent=agent, episodes=[episode])
 
         return agent
+
+    @staticmethod
+    def _ingest_description_value_memory(agent: "SegmentAgent", description: str) -> None:
+        from ...memory import suppress_legacy_memory_warnings
+        from ...value_memory import ValueMemoryExtractor
+
+        extractor = ValueMemoryExtractor()
+        evaluations = extractor.extract(description, source_id=f"desc_{int(time.time())}")
+        if not evaluations:
+            return
+        memory = agent.long_term_memory
+        timestamp = int(time.time())
+        staged = list(memory.episodes)
+        for index, evaluation in enumerate(evaluations):
+            payload = {
+                "episode_id": f"desc-value-{timestamp}-{index}",
+                "timestamp": timestamp + index,
+                "cycle": timestamp + index,
+                "action": "apply_value_memory",
+                "predicted_outcome": evaluation.candidate_kind,
+                "value_label": evaluation.candidate_kind,
+                "value_score": evaluation.value_memory_score,
+                "future_path_utility": evaluation.future_path_utility,
+                "reuse_gain": evaluation.score_breakdown.future_reuse_gain,
+                "error_avoidance_gain": evaluation.score_breakdown.error_avoidance_gain,
+                "maintenance_cost": evaluation.score_breakdown.maintenance_cost,
+                "prediction_error": 0.0,
+                "risk": 0.0,
+                "total_surprise": max(0.05, abs(evaluation.future_path_utility)),
+                "weighted_surprise": max(0.05, abs(evaluation.future_path_utility)),
+                "content": evaluation.candidate.summary,
+                "memory_class": "semantic",
+                "source_type": "inference",
+                "semantic_tags": [
+                    "value_memory",
+                    evaluation.candidate_kind,
+                    *evaluation.candidate.trigger_conditions[:2],
+                ],
+                "context_tags": list(evaluation.candidate.applicability_bounds[:3]),
+                "compression_metadata": {
+                    "value_memory": evaluation.to_dict(),
+                    "description_source": True,
+                },
+                "support_count": max(1, len(evaluation.candidate.evidence_refs)),
+                "support": max(1, len(evaluation.candidate.evidence_refs)),
+            }
+            staged.append(payload)
+        with suppress_legacy_memory_warnings():
+            memory._commit_episode_projection(staged)
+        agent.sync_memory_awareness_to_long_term_memory()
 
     def create_from_questionnaire(
         self,

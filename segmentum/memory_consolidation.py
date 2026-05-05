@@ -720,10 +720,17 @@ def compress_episodic_cluster_to_semantic_skeleton(entries: list[MemoryEntry]) -
         "actions": action_values,
         "outcomes": outcome_values,
     }
+    trigger_summary = ", ".join(shared_semantic_tags[:3] or shared_context_tags[:3] or ["recurring context"])
+    action_summary = ", ".join(str(item) for item in action_values[:3] if item) or "reuse prior action pattern"
+    outcome_summary = ", ".join(str(item) for item in outcome_values[:3] if item) or "future expectation shaping"
+    skeleton_content = (
+        f"Reusable action structure: when cues match [{trigger_summary}], "
+        f"prefer actions [{action_summary}] to support [{outcome_summary}] within observed bounds."
+    )
     identity_cluster = any(entry.relevance_self >= 0.6 for entry in entries)
     lineage_type = "identity_consolidation" if identity_cluster else "episodic_compression"
     semantic = MemoryEntry(
-        content="semantic centroid display",
+        content=skeleton_content,
         memory_class=MemoryClass.SEMANTIC,
         store_level=StoreLevel.MID,
         source_type=SourceType.EXPERIENCE,
@@ -757,8 +764,8 @@ def compress_episodic_cluster_to_semantic_skeleton(entries: list[MemoryEntry]) -
             "abstraction_reason": "stabilized pattern across episodic cluster",
             "predictive_use_cases": ["pattern-guided recall", "future expectation shaping"],
             "lineage_type": lineage_type,
-            "display_content": "dynamics semantic centroid",
-            "content_role": "metadata_display_only",
+            "display_content": skeleton_content,
+            "content_role": "reusable_action_structure_summary",
             "behavior_inputs": ["centroid", "residual_norm_mean", "residual_norm_var", "support_ids"],
         },
         derived_from=support_ids,
