@@ -9,7 +9,11 @@ from pathlib import Path
 from segmentum.agent import SegmentAgent
 from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest, ChatResponse
 from segmentum.dialogue.runtime.dashboard import DashboardCollector, DashboardSnapshot
-from segmentum.dialogue.runtime.manager import PersonaManager
+from segmentum.dialogue.runtime.manager import (
+    PersonaManager,
+    read_material_file_bytes,
+    unique_persona_name,
+)
 from segmentum.dialogue.runtime.prompts import PromptBuilder
 from segmentum.dialogue.runtime.safety import SafetyCheck, SafetyLayer
 
@@ -39,6 +43,44 @@ class TestPersonaManager:
         # Traits should differ from neutral defaults
         traits = agent.slow_variable_learner.state.traits
         assert isinstance(traits.caution_bias, float)
+
+    def test_create_from_material_analysis_uses_llm_payload_without_analyzer(self, monkeypatch, tmp_path):
+        from segmentum import personality_analyzer
+
+        def fail_analyze(*args, **kwargs):
+            raise AssertionError("PersonalityAnalyzer must not be used for material-file creation")
+
+        monkeypatch.setattr(personality_analyzer.PersonalityAnalyzer, "analyze", fail_analyze)
+        pm = PersonaManager(storage_dir=tmp_path / "personas")
+        agent = pm.create_from_material_analysis(
+            {
+                "persona_name": "file_persona",
+                "habit_traits": {
+                    "big_five": {
+                        "openness": 0.82,
+                        "conscientiousness": 0.61,
+                        "extraversion": 0.28,
+                        "agreeableness": 0.74,
+                        "neuroticism": 0.37,
+                    }
+                },
+            }
+        )
+
+        assert isinstance(agent, SegmentAgent)
+        pp = agent.self_model.personality_profile
+        assert pp.openness == pytest.approx(0.82)
+        assert pp.conscientiousness == pytest.approx(0.61)
+        assert pp.extraversion == pytest.approx(0.28)
+        assert pp.agreeableness == pytest.approx(0.74)
+        assert pp.neuroticism == pytest.approx(0.37)
+
+    def test_material_file_reader_and_unique_names(self, tmp_path):
+        text = read_material_file_bytes("role.md", "\ufeff角色描述".encode("utf-8"))
+        assert text == "角色描述"
+        assert unique_persona_name("角色 A", {"角色_A"}) == "角色_A_2"
+        with pytest.raises(ValueError):
+            read_material_file_bytes("role.pdf", b"bad")
 
     def test_save_and_load_roundtrip(self, tmp_path):
         pm = PersonaManager(storage_dir=tmp_path / "personas")

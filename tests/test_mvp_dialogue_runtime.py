@@ -6,6 +6,8 @@ from segmentum.dialogue.runtime.mvp_loop import (
     MVPDialogueRuntime,
     MVPStateStore,
     OpenRouterJSONClient,
+    analyze_materials_into_personas,
+    build_free_energy_personality_analysis_prompt,
     retrieve_memories,
 )
 
@@ -18,37 +20,78 @@ class FakeJSONLLM:
         self.calls.append({"system": system_prompt, "user": user_prompt})
         if "自由能人格分析" in system_prompt:
             return {
-                "self_cognition": {
-                    "summary": "我谨慎但好奇。",
-                    "current_self_view": "我通过保持一致来维持自己。",
-                    "identity_tensions": ["想靠近别人但害怕误解"],
-                    "stable_values": ["诚实", "连续性"],
-                    "known_limits": ["没有材料支撑的履历不能编造"],
-                },
-                "long_term_memory": [
+                "personas": [
                     {
-                        "id": "ltm_python",
-                        "kind": "preference",
-                        "content": "我喜欢用 Python 做原型。",
-                        "salience": 0.8,
-                        "keywords": ["Python", "原型", "偏好"],
-                    }
+                        "persona_name": "测试人格",
+                        "source_role_evidence": ["我喜欢用 Python 做原型"],
+                        "self_cognition": {
+                            "summary": "我谨慎但好奇。",
+                            "current_self_view": "我通过保持一致来维持自己。",
+                            "identity_tensions": ["想靠近别人但害怕误解"],
+                            "stable_values": ["诚实", "连续性"],
+                            "known_limits": ["没有材料支撑的履历不能编造"],
+                        },
+                        "long_term_memory": [
+                            {
+                                "id": "ltm_python",
+                                "kind": "preference",
+                                "content": "我喜欢用 Python 做原型。",
+                                "salience": 0.8,
+                                "keywords": ["Python", "原型", "偏好"],
+                            }
+                        ],
+                        "self_basic_facts": {
+                            "name": "测试人格",
+                            "background": ["由材料生成"],
+                            "relationships": [],
+                            "do_not_invent": ["不要编造职业"],
+                        },
+                        "habit_traits": {
+                            "big_five": {"openness": 0.7, "conscientiousness": 0.6},
+                            "conversation_habits": ["先确认再展开"],
+                            "defense_style": ["不确定时承认不确定"],
+                            "memory_policy": ["记住会影响后续表达的偏好"],
+                        },
+                        "pending_expectations": [],
+                        "open_items": [],
+                        "short_term_memory": [],
+                    },
+                    {
+                        "persona_name": "另一个人格",
+                        "source_role_evidence": ["我讨厌编造履历"],
+                        "self_cognition": {
+                            "summary": "我对身份边界很敏感。",
+                            "current_self_view": "我需要避免没有证据的补全。",
+                            "identity_tensions": [],
+                            "stable_values": ["边界"],
+                            "known_limits": ["材料很少"],
+                        },
+                        "long_term_memory": [
+                            {
+                                "id": "ltm_boundary",
+                                "kind": "value",
+                                "content": "我讨厌凭空编造经历。",
+                                "salience": 0.7,
+                                "keywords": ["履历", "边界"],
+                            }
+                        ],
+                        "self_basic_facts": {
+                            "name": "另一个人格",
+                            "background": [],
+                            "relationships": [],
+                            "do_not_invent": ["不要编造履历"],
+                        },
+                        "habit_traits": {
+                            "big_five": {"openness": 0.4, "conscientiousness": 0.8},
+                            "conversation_habits": ["先划边界"],
+                            "defense_style": ["回避无证据补全"],
+                            "memory_policy": ["记住身份边界"],
+                        },
+                        "pending_expectations": [],
+                        "open_items": [],
+                        "short_term_memory": [],
+                    },
                 ],
-                "self_basic_facts": {
-                    "name": "测试人格",
-                    "background": ["由材料生成"],
-                    "relationships": [],
-                    "do_not_invent": ["不要编造职业"],
-                },
-                "habit_traits": {
-                    "big_five": {"openness": 0.7, "conscientiousness": 0.6},
-                    "conversation_habits": ["先确认再展开"],
-                    "defense_style": ["不确定时承认不确定"],
-                    "memory_policy": ["记住会影响后续表达的偏好"],
-                },
-                "pending_expectations": [],
-                "open_items": [],
-                "short_term_memory": [],
             }
         if "思考与回复模块" in system_prompt:
             return {
@@ -126,6 +169,53 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
     assert recalled["recall_count"] == 1
 
 
+def test_material_analysis_can_return_multiple_personas_and_write_isolated_files(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    personas = analyze_materials_into_personas(
+        llm,
+        ["测试人格喜欢 Python。另一个人格讨厌编造履历。"],
+    )
+
+    assert [persona["persona_name"] for persona in personas] == ["测试人格", "另一个人格"]
+
+    first_runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "测试人格"),
+        llm=llm,
+        persona_name="测试人格",
+    )
+    second_runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "另一个人格"),
+        llm=llm,
+        persona_name="另一个人格",
+    )
+    first_runtime.initialize_from_persona_payload(personas[0])
+    second_runtime.initialize_from_persona_payload(personas[1])
+
+    first = first_runtime.store.load()
+    second = second_runtime.store.load()
+    assert first["long_term_memory"][0]["id"] == "ltm_python"
+    assert second["long_term_memory"][0]["id"] == "ltm_boundary"
+    assert first["self_basic_facts"]["name"] == "测试人格"
+    assert second["self_basic_facts"]["name"] == "另一个人格"
+
+
+def test_material_analysis_prompt_contains_free_energy_constraints() -> None:
+    system_prompt, user_prompt = build_free_energy_personality_analysis_prompt(
+        ["角色材料"],
+        persona_name="候选人格",
+    )
+
+    combined = system_prompt + "\n" + user_prompt
+    assert "主动推理" in combined
+    assert "不是做关键词匹配" in combined
+    assert '"personas"' in combined
+    assert "机制" in combined
+    assert "证据" in combined
+    assert "置信度" in combined
+    assert "禁止精神疾病诊断" in combined
+    assert "不要为了完整而编造" in combined
+
+
 def test_retrieve_memories_uses_llm_supplied_keywords() -> None:
     state = {
         "short_term_memory": [],
@@ -180,6 +270,49 @@ def test_openrouter_json_client_retries_fallback_on_403(monkeypatch) -> None:
 
     assert result == {"ok": True}
     assert calls == ["blocked/model", "fallback/model"]
+
+
+def test_openrouter_json_client_retries_premature_response(monkeypatch) -> None:
+    calls: list[str] = []
+
+    class FakeResponse:
+        status_code = 200
+        text = '{"ok": true}'
+
+        def json(self) -> dict[str, object]:
+            return {"choices": [{"message": {"content": '{"ok": true}'}}]}
+
+    import requests
+
+    def fake_post(url, *, headers, json, timeout):
+        calls.append(json["model"])
+        if len(calls) == 1:
+            raise requests.exceptions.ChunkedEncodingError("Response ended prematurely")
+        return FakeResponse()
+
+    monkeypatch.setattr(requests, "post", fake_post)
+    client = OpenRouterJSONClient(
+        api_key="sk-test",
+        model="flaky/model",
+        fallback_models=(),
+        request_retries=1,
+    )
+
+    result = client.complete_json(system_prompt="s", user_prompt="u")
+
+    assert result == {"ok": True}
+    assert calls == ["flaky/model", "flaky/model"]
+
+
+def test_material_analysis_requires_llm_key() -> None:
+    client = OpenRouterJSONClient(api_key="")
+
+    try:
+        analyze_materials_into_personas(client, ["角色材料"])
+    except RuntimeError as exc:
+        assert "requires secrets/openrouter.json or OPENAI_API_KEY" in str(exc)
+    else:
+        raise AssertionError("material analysis should not fall back when no LLM key is configured")
 
 
 def test_chat_interface_lazily_enables_mvp_when_key_becomes_available(monkeypatch, tmp_path: Path) -> None:

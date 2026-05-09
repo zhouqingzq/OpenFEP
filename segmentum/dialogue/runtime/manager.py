@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Mapping
 
 from ..lifecycle import ImplantationConfig, implant_personality
 from ..maturity import big_five_to_slow_traits
@@ -12,6 +12,38 @@ from ..world import DialogueWorld
 
 if TYPE_CHECKING:
     from ...agent import SegmentAgent
+
+
+SUPPORTED_MATERIAL_EXTENSIONS = {".txt", ".md"}
+
+
+def safe_persona_name(name: str, *, fallback: str = "persona") -> str:
+    cleaned = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(name or ""))
+    cleaned = cleaned.strip("._-")
+    return cleaned or fallback
+
+
+def unique_persona_name(candidate: str, existing: set[str]) -> str:
+    base = safe_persona_name(candidate)
+    if base not in existing:
+        return base
+    index = 2
+    while f"{base}_{index}" in existing:
+        index += 1
+    return f"{base}_{index}"
+
+
+def read_material_file_bytes(filename: str, data: bytes) -> str:
+    suffix = Path(filename or "").suffix.lower()
+    if suffix not in SUPPORTED_MATERIAL_EXTENSIONS:
+        raise ValueError("Material file must be a .txt or .md file")
+    try:
+        text = data.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise ValueError("Material file must be UTF-8 encoded") from exc
+    if not text.strip():
+        raise ValueError("Material file is empty")
+    return text
 
 
 class PersonaManager:
@@ -123,6 +155,28 @@ class PersonaManager:
     ) -> "SegmentAgent":
         from ...agent import SegmentAgent
 
+        agent = SegmentAgent()
+        self._apply_big_five(agent, big_five)
+        return agent
+
+    def create_from_material_analysis(
+        self,
+        persona_payload: Mapping[str, Any],
+    ) -> "SegmentAgent":
+        """Create a persona from an LLM-produced material-analysis payload.
+
+        This intentionally does not call PersonalityAnalyzer or value-memory
+        keyword extraction.  The file-material path is LLM-only; durable MVP
+        self files are written by MVPDialogueRuntime from the same payload.
+        """
+        from ...agent import SegmentAgent
+
+        habit_traits = persona_payload.get("habit_traits", {})
+        big_five = {}
+        if isinstance(habit_traits, Mapping):
+            maybe_big_five = habit_traits.get("big_five", {})
+            if isinstance(maybe_big_five, Mapping):
+                big_five = dict(maybe_big_five)
         agent = SegmentAgent()
         self._apply_big_five(agent, big_five)
         return agent

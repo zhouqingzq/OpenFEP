@@ -49,6 +49,12 @@ SYSTEM_FILE_NAMES: dict[str, str] = {
     key: f"{key}.json" for key in SYSTEM_FILE_DEFAULTS
 }
 
+PERSONA_ANALYSIS_KEYS = (
+    "persona_name",
+    "source_role_evidence",
+    *SYSTEM_FILE_DEFAULTS.keys(),
+)
+
 
 def _utc_timestamp() -> int:
     return int(time.time())
@@ -93,9 +99,86 @@ def _string_list(value: Any, *, limit: int = 12) -> list[str]:
     return []
 
 
+def _mapping(value: Any) -> dict[str, Any]:
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _bounded_float(value: Any, *, default: float = 0.5) -> float:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        numeric = default
+    return max(0.0, min(1.0, numeric))
+
+
+def _normalize_big_five(value: Any) -> dict[str, float]:
+    raw = _mapping(value)
+    return {
+        "openness": _bounded_float(raw.get("openness"), default=0.5),
+        "conscientiousness": _bounded_float(raw.get("conscientiousness"), default=0.5),
+        "extraversion": _bounded_float(raw.get("extraversion"), default=0.5),
+        "agreeableness": _bounded_float(raw.get("agreeableness"), default=0.5),
+        "neuroticism": _bounded_float(raw.get("neuroticism"), default=0.5),
+    }
+
+
+def normalize_persona_payload(payload: Mapping[str, Any], *, fallback_name: str = "") -> dict[str, Any]:
+    persona: dict[str, Any] = {}
+    persona["persona_name"] = str(payload.get("persona_name") or fallback_name or "").strip() or "persona"
+    persona["source_role_evidence"] = _string_list(payload.get("source_role_evidence"), limit=8)
+    for key, default in SYSTEM_FILE_DEFAULTS.items():
+        value = payload.get(key, default)
+        if isinstance(default, list):
+            persona[key] = value if isinstance(value, list) else []
+        elif isinstance(default, dict):
+            persona[key] = dict(value) if isinstance(value, Mapping) else dict(default)
+        else:
+            persona[key] = value
+    facts = _mapping(persona.get("self_basic_facts"))
+    facts.setdefault("name", persona["persona_name"])
+    facts.setdefault("background", [])
+    facts.setdefault("relationships", [])
+    facts.setdefault("do_not_invent", list(SYSTEM_FILE_DEFAULTS["self_basic_facts"]["do_not_invent"]))
+    persona["self_basic_facts"] = facts
+    habits = _mapping(persona.get("habit_traits"))
+    habits["big_five"] = _normalize_big_five(habits.get("big_five"))
+    habits.setdefault("conversation_habits", [])
+    habits.setdefault("defense_style", [])
+    habits.setdefault("memory_policy", [])
+    persona["habit_traits"] = habits
+    return persona
+
+
+def normalize_persona_analysis_result(result: Mapping[str, Any], *, fallback_name: str = "") -> list[dict[str, Any]]:
+    personas = result.get("personas")
+    if isinstance(personas, list):
+        normalized = [
+            normalize_persona_payload(item, fallback_name=fallback_name)
+            for item in personas
+            if isinstance(item, Mapping)
+        ]
+        if normalized:
+            return normalized
+    return [normalize_persona_payload(result, fallback_name=fallback_name)]
+
+
 class JSONLLMClient(Protocol):
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]:
         ...
+
+
+def analyze_materials_into_personas(
+    llm: JSONLLMClient,
+    materials: list[str],
+    *,
+    persona_name: str = "",
+) -> list[dict[str, Any]]:
+    system_prompt, user_prompt = build_free_energy_personality_analysis_prompt(
+        materials,
+        persona_name=persona_name,
+    )
+    result = llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+    return normalize_persona_analysis_result(result, fallback_name=persona_name)
 
 
 @dataclass
@@ -106,6 +189,7 @@ class OpenRouterJSONClient:
     api_key: str | None = None
     base_url: str = "https://openrouter.ai/api/v1"
     fallback_models: tuple[str, ...] = ("deepseek/deepseek-v4-flash",)
+    request_retries: int = 1
 
     @classmethod
     def from_config(cls) -> "OpenRouterJSONClient":
@@ -131,6 +215,7 @@ class OpenRouterJSONClient:
                 )
                 if str(item).strip()
             ),
+            request_retries=int(config.get("request_retries", 1) or 0),
         )
 
     @classmethod
@@ -148,32 +233,61 @@ class OpenRouterJSONClient:
         errors: list[str] = []
         candidate_models = [self.model, *[m for m in self.fallback_models if m != self.model]]
         data: dict[str, Any] | None = None
+        retryable_statuses = {408, 429, 500, 502, 503, 504}
+        attempts = max(1, int(self.request_retries) + 1)
         for model in candidate_models:
-            response = requests.post(
-                f"{self.base_url.rstrip('/')}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "http://localhost/segmentum",
-                    "X-Title": "Segmentum Persona Runtime",
-                },
-                json={
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    "temperature": self.temperature,
-                    "response_format": {"type": "json_object"},
-                },
-                timeout=self.timeout_seconds,
-            )
-            if response.status_code == 200:
-                data = response.json()
+            for attempt in range(attempts):
+                try:
+                    response = requests.post(
+                        f"{self.base_url.rstrip('/')}/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": "http://localhost/segmentum",
+                            "X-Title": "Segmentum Persona Runtime",
+                        },
+                        json={
+                            "model": model,
+                            "messages": [
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_prompt},
+                            ],
+                            "temperature": self.temperature,
+                            "response_format": {"type": "json_object"},
+                            "stream": False,
+                        },
+                        timeout=self.timeout_seconds,
+                    )
+                except requests.exceptions.RequestException as exc:
+                    errors.append(
+                        f"{model}: request attempt {attempt + 1}/{attempts} failed: "
+                        f"{type(exc).__name__}: {exc}"
+                    )
+                    if attempt + 1 < attempts:
+                        continue
+                    break
+
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                    except ValueError as exc:
+                        errors.append(
+                            f"{model}: JSON response parse attempt {attempt + 1}/{attempts} failed: {exc}"
+                        )
+                        if attempt + 1 < attempts:
+                            continue
+                    break
+
+                message = self._error_message(response)
+                errors.append(f"{model}: HTTP {response.status_code}: {message}")
+                if response.status_code in retryable_statuses and attempt + 1 < attempts:
+                    continue
                 break
-            message = self._error_message(response)
-            errors.append(f"{model}: HTTP {response.status_code}: {message}")
-            if response.status_code not in {403, 502, 503}:
+            if data is not None:
+                break
+            if errors and "HTTP 403" not in errors[-1] and not any(
+                f"HTTP {status}" in errors[-1] for status in retryable_statuses
+            ) and "request attempt" not in errors[-1] and "JSON response parse" not in errors[-1]:
                 break
         if data is None:
             raise RuntimeError("OpenRouter chat completion failed; " + " | ".join(errors))
@@ -239,55 +353,115 @@ class MVPStateStore:
 
 
 def build_free_energy_personality_analysis_prompt(materials: list[str], *, persona_name: str = "") -> tuple[str, str]:
-    system_prompt = """你是数字人格系统的“自由能人格分析”模块。
-你的任务不是做关键词匹配，而是从材料中推断一个可持续对话人格的初始系统文件。
-请把人格理解为：在资源有限、记忆有限、不确定性持续存在的条件下，一个人会如何维持自我认知、关系预期、行动风格和情绪稳定。
+    system_prompt = """你是数字人格系统的“自由能人格分析”模块，也是一个基于自由能原理/主动推理（Active Inference）的人格与心理分析器，现在服务于数字人格系统初始化。
+你的任务不是做关键词匹配，而是阅读 txt/md 材料，识别其中一个或多个角色，并为每个角色生成独立的初始化系统文件。
 
-只输出 JSON，不要 Markdown。不要编造材料中没有支撑的具体履历。没有证据时写成不确定或留空。
+核心原则：
+1. 被分析对象是在有限能量、有限记忆和有限注意力下运行的人；他会长期寻找“自己以为会怎样”和“实际发生什么”之间的落差，并用习惯、关系策略、情绪反应和行动方式来降低这种落差。
+2. 人格不是标签，而是长期互动中固化下来的先验偏好结构：他倾向注意什么、什么会让他不安或兴奋、压力下会靠近、回避、控制、讨好、攻击还是冷处理。
+3. 必须解释“为什么这样做”，不要只贴标签。可以说“他看起来冷淡，是因为过往经验让他先拉开距离来保护自己”，不要只说“他内向”。
+4. 禁止鸡汤、道德评判、空泛描述。禁止精神疾病诊断；可以说“机制上类似于某种倾向”，不能冒充临床结论。
+5. 证据不够就写不够，不要为了完整而编造。所有具体背景、人物关系、经历都必须来自材料。
+6. 尽量使用日常语言。避免过多使用“预测、模型、误差”等概念词；必要时用“认为、不确定因素、过往经验、落差”表达。
+
+分析要求：
+- 每个角色都要有总体人格模型摘要：这个人默认把世界看成什么样；为了过下去发展出什么核心策略；策略好用和出问题时分别如何；最核心的矛盾是什么。
+- 提取核心证据：引用材料中的关键短句，说明它支持了哪个判断。
+- 解释内心运行方式：最想维持的感觉、最怕的情况、注意力偏好、默认解释方式。
+- 给出核心信念：关于自己、他人、世界的默认假设；每条要有证据来源和置信度（高/中/低）。
+- 给出情绪模式、防御方式、关系模式、核心循环、成长线索；材料不足时保守写入缺失信息。
+
+输出只能是 JSON object，不能包含 Markdown、解释性前后缀或代码块。
+JSON 顶层必须是 {"personas": [...]}。每个 persona 必须只保存该角色自己的内容，不要混入其他角色材料。
 """
-    user_prompt = f"""人格名称: {persona_name or "未命名人格"}
+    user_prompt = f"""建议人格名称（可为空；如果材料有多个角色，请忽略这个名字并使用材料中的角色名）: {persona_name or ""}
 
 材料:
 {_json_text(materials)}
 
 请生成 JSON，字段必须包含:
 {{
-  "self_cognition": {{
-    "summary": "第一人称自我认知摘要",
-    "current_self_view": "这个人格如何理解自己",
-    "identity_tensions": ["可能的身份冲突或不稳定点"],
-    "stable_values": ["稳定价值/驱动"],
-    "known_limits": ["已知限制，不知道的地方"]
-  }},
-  "long_term_memory": [
+  "personas": [
     {{
-      "id": "ltm_...",
-      "kind": "identity|background|relationship|preference|value|episode",
-      "content": "可被后续检索的记忆内容",
-      "salience": 0.0,
-      "keywords": ["检索关键词"],
-      "source": "materials",
-      "created_at": 0,
-      "last_recalled_at": null,
-      "recall_count": 0
+      "persona_name": "角色名，材料中没有就用简短稳定名称",
+      "source_role_evidence": ["说明为什么这些材料属于这个角色，引用关键短句"],
+      "self_cognition": {{
+        "summary": "300-500字以内的第一人称自我认知摘要，用通俗语言解释这个人的整套心理系统如何运转",
+        "current_self_view": "这个人格如何理解自己，以及为什么会这样理解",
+        "identity_tensions": [
+          {{"content": "核心矛盾或身份张力", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "stable_values": [
+          {{"content": "稳定价值/驱动", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "known_limits": ["材料不足、不能确定、不能编造的部分"]
+      }},
+      "long_term_memory": [
+        {{
+          "id": "ltm_...",
+          "kind": "identity|background|relationship|preference|value|episode|belief|defense|loop",
+          "content": "可被后续检索的长期记忆内容，必须有材料支撑",
+          "salience": 0.0,
+          "keywords": ["检索关键词"],
+          "evidence": "原文关键句或材料位置",
+          "confidence": "高|中|低",
+          "source": "materials",
+          "created_at": 0,
+          "last_recalled_at": null,
+          "recall_count": 0
+        }}
+      ],
+      "self_basic_facts": {{
+        "name": "角色名",
+        "background": [
+          {{"content": "有材料支撑的人物背景", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "relationships": [
+          {{"content": "有材料支撑的人物关系", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "do_not_invent": ["不能编造的身份边界、关系边界、经历边界"]
+      }},
+      "habit_traits": {{
+        "big_five": {{
+          "openness": 0.5,
+          "conscientiousness": 0.5,
+          "extraversion": 0.5,
+          "agreeableness": 0.5,
+          "neuroticism": 0.5
+        }},
+        "big_five_evidence": {{
+          "openness": {{"evidence": "材料关键句", "confidence": "高|中|低"}},
+          "conscientiousness": {{"evidence": "材料关键句", "confidence": "高|中|低"}},
+          "extraversion": {{"evidence": "材料关键句", "confidence": "高|中|低"}},
+          "agreeableness": {{"evidence": "材料关键句", "confidence": "高|中|低"}},
+          "neuroticism": {{"evidence": "材料关键句", "confidence": "高|中|低"}}
+        }},
+        "conversation_habits": [
+          {{"content": "说话习惯或语气模式", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "defense_style": [
+          {{"content": "压力/冲突下的防御方式；说明它保护什么、短期好处、长期代价", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "relationship_patterns": [
+          {{"content": "亲密关系/冲突/吸引与摩擦模式", "evidence": "材料关键句", "confidence": "高|中|低"}}
+        ],
+        "core_loop": "触发事件 → 如何理解 → 产生情绪 → 采取行动 → 结果 → 如何强化原有信念",
+        "one_line_logic": "一句直白机制性总结：这个底层逻辑是……",
+        "missing_information": ["还需要什么材料才能更准"],
+        "memory_policy": ["倾向记住什么、遗忘什么、被什么唤起"]
+      }},
+      "pending_expectations": [
+        {{"id": "exp_...", "content": "当前待验证的预期", "verify_on": "future_turn", "confidence": 0.0, "evidence": "材料关键句"}}
+      ],
+      "open_items": [
+        {{"id": "item_...", "content": "当前未完结事项或需要后续澄清的问题", "status": "open", "next_check": "later"}}
+      ],
+      "short_term_memory": []
     }}
-  ],
-  "self_basic_facts": {{
-    "name": "{persona_name}",
-    "background": ["有材料支撑的人物背景"],
-    "relationships": ["有材料支撑的人物关系"],
-    "do_not_invent": ["不能编造的身份边界"]
-  }},
-  "habit_traits": {{
-    "big_five": {{"openness": 0.5, "conscientiousness": 0.5, "extraversion": 0.5, "agreeableness": 0.5, "neuroticism": 0.5}},
-    "conversation_habits": ["说话习惯"],
-    "defense_style": ["不确定/冲突时的防御方式"],
-    "memory_policy": ["倾向记住什么、遗忘什么、被什么唤起"]
-  }},
-  "pending_expectations": [],
-  "open_items": [],
-  "short_term_memory": []
+  ]
 }}
+
+如果材料只有单一角色，也仍然放入 personas 数组。不要根据关键词硬分角色；要根据叙述对象、说话人、人物关系和证据归属来判断。
 """
     return system_prompt, user_prompt
 
@@ -430,16 +604,18 @@ class MVPDialogueRuntime:
     llm: JSONLLMClient
     persona_name: str = ""
 
-    def initialize_from_materials(self, materials: list[str]) -> dict[str, Any]:
-        system_prompt, user_prompt = build_free_energy_personality_analysis_prompt(
+    def analyze_personas_from_materials(self, materials: list[str]) -> list[dict[str, Any]]:
+        return analyze_materials_into_personas(
+            self.llm,
             materials,
             persona_name=self.persona_name,
         )
-        result = self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    def initialize_from_persona_payload(self, persona_payload: Mapping[str, Any]) -> dict[str, Any]:
         state = self.store.load()
+        payload = normalize_persona_payload(persona_payload, fallback_name=self.persona_name)
         for key in SYSTEM_FILE_DEFAULTS:
-            if key in result:
-                state[key] = result[key]
+            state[key] = payload[key]
         now = _utc_timestamp()
         for memory in state.get("long_term_memory", []):
             if isinstance(memory, dict):
@@ -447,8 +623,26 @@ class MVPDialogueRuntime:
                 memory.setdefault("source", "materials")
                 memory.setdefault("recall_count", 0)
         self.store.save(state)
-        self.store.append_log({"event": "initialize_from_materials", "at": now, "result": result})
+        self.store.append_log(
+            {
+                "event": "initialize_from_material_persona",
+                "at": now,
+                "persona_name": payload.get("persona_name", self.persona_name),
+                "source_role_evidence": payload.get("source_role_evidence", []),
+                "result": payload,
+            }
+        )
         return state
+
+    def initialize_from_materials(self, materials: list[str]) -> dict[str, Any]:
+        personas = self.analyze_personas_from_materials(materials)
+        selected = personas[0]
+        if self.persona_name:
+            for persona in personas:
+                if str(persona.get("persona_name", "")).strip() == self.persona_name:
+                    selected = persona
+                    break
+        return self.initialize_from_persona_payload(selected)
 
     def run_turn(
         self,

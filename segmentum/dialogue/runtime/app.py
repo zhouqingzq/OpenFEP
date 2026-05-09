@@ -19,9 +19,18 @@ st.set_page_config(page_title="M5.6 Persona Runtime", layout="wide")
 
 from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
 from segmentum.dialogue.runtime.dashboard import DashboardCollector
-from segmentum.dialogue.runtime.manager import PersonaManager
+from segmentum.dialogue.runtime.manager import (
+    PersonaManager,
+    read_material_file_bytes,
+    unique_persona_name,
+)
 from segmentum.dialogue.runtime.safety import SafetyLayer
-from segmentum.dialogue.runtime.mvp_loop import OpenRouterJSONClient
+from segmentum.dialogue.runtime.mvp_loop import (
+    MVPDialogueRuntime,
+    MVPStateStore,
+    OpenRouterJSONClient,
+    analyze_materials_into_personas,
+)
 
 
 def init_session() -> None:
@@ -632,22 +641,71 @@ def render_sidebar() -> None:
             st.success(f"Created & loaded '{q_name}'")
             st.rerun()
 
-    # ── Create from Description ──
-    with st.sidebar.expander("Create from Description", expanded=False):
-        desc = st.text_area("Describe the persona (Chinese or English)...", key="desc_text")
-        d_name = st.text_input("Persona name", "description_persona", key="desc_name")
-        if st.button("Create from Description", key="btn_create_d") and desc.strip():
-            with st.spinner("Analyzing description..."):
-                agent = pm.create_from_description(desc.strip())
-            pm.save(agent, d_name)
-            chat_iface.set_agent(agent, persona_name=d_name)
-            if chat_iface.use_llm:
-                with st.spinner("Building MVP self files with LLM..."):
-                    chat_iface.bootstrap_mvp_from_materials(desc.strip())
-            st.session_state.messages = []
-            st.session_state.loaded_persona = d_name
-            st.success(f"Created & loaded '{d_name}'")
-            st.rerun()
+    # ── Create from Material File ──
+    with st.sidebar.expander("Create from Material File", expanded=False):
+        material_file = st.file_uploader(
+            "Select .txt or .md material",
+            type=["txt", "md"],
+            key="material_file",
+        )
+        if st.button("Create from Material File", key="btn_create_material"):
+            if material_file is None:
+                st.warning("Please select a .txt or .md material file first.")
+            elif not OpenRouterJSONClient.available():
+                st.error("Material-file initialization requires secrets/openrouter.json or OPENAI_API_KEY.")
+            else:
+                try:
+                    material_text = read_material_file_bytes(
+                        material_file.name,
+                        material_file.getvalue(),
+                    )
+                    with st.spinner("Analyzing material with LLM..."):
+                        personas = analyze_materials_into_personas(
+                            OpenRouterJSONClient.from_config(),
+                            [material_text],
+                        )
+                    existing = set(pm.list_personas())
+                    created: list[str] = []
+                    loaded_agent = None
+                    loaded_name = ""
+                    for payload in personas:
+                        requested_name = str(payload.get("persona_name") or "persona")
+                        persona_name = unique_persona_name(requested_name, existing)
+                        existing.add(persona_name)
+                        payload["persona_name"] = persona_name
+                        if isinstance(payload.get("self_basic_facts"), dict):
+                            payload["self_basic_facts"]["name"] = persona_name
+                        agent = pm.create_from_material_analysis(payload)
+                        pm.save(agent, persona_name)
+                        runtime = MVPDialogueRuntime(
+                            store=MVPStateStore(
+                                _project_root / "artifacts" / "mvp_personas" / persona_name
+                            ),
+                            llm=OpenRouterJSONClient.from_config(),
+                            persona_name=persona_name,
+                        )
+                        runtime.initialize_from_persona_payload(payload)
+                        created.append(persona_name)
+                        if loaded_agent is None:
+                            loaded_agent = agent
+                            loaded_name = persona_name
+                    if loaded_agent is not None:
+                        chat_iface.set_agent(loaded_agent, persona_name=loaded_name)
+                        st.session_state.messages = []
+                        st.session_state.loaded_persona = loaded_name
+                    st.session_state.last_created_material_personas = created
+                    st.success(
+                        "Created: " + ", ".join(created)
+                        if created
+                        else "No personas were created."
+                    )
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Material-file initialization failed: {exc}")
+
+        created = st.session_state.get("last_created_material_personas", [])
+        if created:
+            st.caption("Last created: " + ", ".join(str(item) for item in created))
 
     # ── Load / Manage ──
     st.sidebar.subheader("Load Persona")
