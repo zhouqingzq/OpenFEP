@@ -951,7 +951,19 @@ def render_inner_world() -> None:
 
     markdown = chat_iface.get_conscious_markdown()
     latest = _latest_trace()
+    latest_diag = chat_iface.latest_response_diagnostics()
+    latest_thinking = latest_diag.get("llm_thinking_result", {})
+    if not isinstance(latest_thinking, dict):
+        latest_thinking = {}
     if not markdown or not latest:
+        if latest_thinking:
+            st.subheader("LLM 思考结果")
+            st.json(latest_thinking, expanded=True)
+            conscious_plan = latest_diag.get("conscious_plan", {})
+            if isinstance(conscious_plan, dict) and conscious_plan:
+                st.subheader("意识主循环结果")
+                st.json(conscious_plan, expanded=False)
+            return
         st.info("Send a message to generate the first conscious trace.")
         return
 
@@ -1053,6 +1065,18 @@ def render_inner_world() -> None:
             },
             expanded=False,
         )
+
+    generation = latest.get("generation_diagnostics", {})
+    trace_thinking = {}
+    if isinstance(generation, dict):
+        maybe_thinking = generation.get("llm_thinking_result", {})
+        if isinstance(maybe_thinking, dict):
+            trace_thinking = maybe_thinking
+    if not trace_thinking:
+        trace_thinking = latest_thinking
+    if trace_thinking:
+        st.subheader("LLM 思考结果")
+        st.json(trace_thinking, expanded=True)
 
     st.subheader("Conscious.md")
     st.markdown(markdown)

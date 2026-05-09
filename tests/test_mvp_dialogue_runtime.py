@@ -7,6 +7,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     MVPStateStore,
     OpenRouterJSONClient,
     analyze_materials_into_personas,
+    build_thinking_prompt,
     build_free_energy_personality_analysis_prompt,
     retrieve_memories,
 )
@@ -96,7 +97,13 @@ class FakeJSONLLM:
         if "思考与回复模块" in system_prompt:
             return {
                 "thought_type": "short",
-                "inner_thought": "这会唤起我对 Python 原型的偏好。",
+                "llm_thinking_result": {
+                    "user_intent_read": "用户在询问技术选型。",
+                    "state_or_memory_used": ["Python 原型偏好"],
+                    "response_choice": "用自我披露解释倾向。",
+                    "uncertainty": "项目细节仍缺失。",
+                    "debug_summary": "用户问 Python 是否合适；我用已知偏好给出保留余地的建议。",
+                },
                 "reply": "嗯，这个我会自然偏向先用 Python 搭个原型。",
                 "reply_action": "self_disclose",
                 "new_expectations": [
@@ -155,6 +162,9 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
     assert "Python" in result.reply
     assert result.action == "self_disclose"
     assert result.diagnostics["mvp_runtime"] is True
+    assert result.diagnostics["llm_thinking_result"]["debug_summary"].startswith(
+        "用户问 Python 是否合适"
+    )
     assert len(llm.calls) == 3
     assert "意识主循环" in llm.calls[1]["system"]
     assert "思考与回复模块" in llm.calls[2]["system"]
@@ -208,6 +218,31 @@ def test_material_analysis_prompt_contains_free_energy_constraints() -> None:
     combined = system_prompt + "\n" + user_prompt
     assert "主动推理" in combined
     assert "不是做关键词匹配" in combined
+
+
+def test_thinking_prompt_requests_latest_llm_thinking_result() -> None:
+    system_prompt, user_prompt = build_thinking_prompt(
+        state={},
+        user_text="现在都晚上了，要吃宵夜了，你想吃啥？",
+        conscious_plan={"current_task": "回应宵夜邀请"},
+        retrieved_memories=[],
+        turn_index=0,
+    )
+
+    combined = system_prompt + "\n" + user_prompt
+    assert "最近一次 LLM 思考结果" in combined
+    assert "llm_thinking_result" in combined
+    assert "inner_thought" not in combined
+    assert "表演式内心独白" in combined
+
+
+def test_material_analysis_prompt_requests_structured_evidence() -> None:
+    system_prompt, user_prompt = build_free_energy_personality_analysis_prompt(
+        ["角色材料"],
+        persona_name="候选人格",
+    )
+
+    combined = system_prompt + "\n" + user_prompt
     assert '"personas"' in combined
     assert "机制" in combined
     assert "证据" in combined
@@ -302,6 +337,69 @@ def test_openrouter_json_client_retries_premature_response(monkeypatch) -> None:
 
     assert result == {"ok": True}
     assert calls == ["flaky/model", "flaky/model"]
+
+
+def test_openrouter_json_client_retries_empty_content(monkeypatch) -> None:
+    calls: list[str] = []
+
+    class FakeResponse:
+        status_code = 200
+        text = "{}"
+
+        def __init__(self, content: str) -> None:
+            self._content = content
+
+        def json(self) -> dict[str, object]:
+            return {"choices": [{"message": {"content": self._content}}]}
+
+    import requests
+
+    def fake_post(url, *, headers, json, timeout):
+        calls.append(json["model"])
+        if len(calls) == 1:
+            return FakeResponse("")
+        return FakeResponse('{"ok": true}')
+
+    monkeypatch.setattr(requests, "post", fake_post)
+    client = OpenRouterJSONClient(
+        api_key="sk-test",
+        model="empty-once/model",
+        fallback_models=(),
+        request_retries=1,
+    )
+
+    result = client.complete_json(system_prompt="s", user_prompt="u")
+
+    assert result == {"ok": True}
+    assert calls == ["empty-once/model", "empty-once/model"]
+
+
+def test_openrouter_json_client_reports_non_json_content(monkeypatch) -> None:
+    class FakeResponse:
+        status_code = 200
+        text = "{}"
+
+        def json(self) -> dict[str, object]:
+            return {"choices": [{"message": {"content": "not json"}}]}
+
+    import requests
+
+    monkeypatch.setattr(requests, "post", lambda *args, **kwargs: FakeResponse())
+    client = OpenRouterJSONClient(
+        api_key="sk-test",
+        model="bad-json/model",
+        fallback_models=(),
+        request_retries=0,
+    )
+
+    try:
+        client.complete_json(system_prompt="s", user_prompt="u")
+    except RuntimeError as exc:
+        text = str(exc)
+        assert "JSON content parse attempt" in text
+        assert "not a JSON object" in text
+    else:
+        raise AssertionError("non-JSON content should raise a readable error")
 
 
 def test_material_analysis_requires_llm_key() -> None:

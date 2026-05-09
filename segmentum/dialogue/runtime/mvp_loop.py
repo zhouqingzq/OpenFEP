@@ -76,6 +76,8 @@ def _json_text(value: Any, *, limit: int = 12000) -> str:
 
 def _extract_json_object(text: str) -> dict[str, Any]:
     cleaned = str(text or "").strip()
+    if not cleaned:
+        raise ValueError("LLM response content was empty; expected a JSON object")
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
         cleaned = re.sub(r"\s*```$", "", cleaned)
@@ -84,8 +86,14 @@ def _extract_json_object(text: str) -> dict[str, Any]:
     except json.JSONDecodeError:
         match = re.search(r"\{.*\}", cleaned, flags=re.S)
         if not match:
-            raise
-        value = json.loads(match.group(0))
+            raise ValueError(
+                "LLM response content was not a JSON object; "
+                f"first characters: {cleaned[:120]!r}"
+            )
+        try:
+            value = json.loads(match.group(0))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"LLM response contained malformed JSON object: {exc}") from exc
     if not isinstance(value, dict):
         raise ValueError("LLM response must be a JSON object")
     return value
@@ -232,7 +240,6 @@ class OpenRouterJSONClient:
 
         errors: list[str] = []
         candidate_models = [self.model, *[m for m in self.fallback_models if m != self.model]]
-        data: dict[str, Any] | None = None
         retryable_statuses = {408, 429, 500, 502, 503, 504}
         attempts = max(1, int(self.request_retries) + 1)
         for model in candidate_models:
@@ -276,6 +283,17 @@ class OpenRouterJSONClient:
                         )
                         if attempt + 1 < attempts:
                             continue
+                        break
+                    try:
+                        content = self._message_content(data)
+                        return _extract_json_object(content)
+                    except (KeyError, IndexError, TypeError, ValueError) as exc:
+                        errors.append(
+                            f"{model}: JSON content parse attempt {attempt + 1}/{attempts} failed: "
+                            f"{exc}; response={self._response_snippet(data)}"
+                        )
+                        if attempt + 1 < attempts:
+                            continue
                     break
 
                 message = self._error_message(response)
@@ -283,16 +301,41 @@ class OpenRouterJSONClient:
                 if response.status_code in retryable_statuses and attempt + 1 < attempts:
                     continue
                 break
-            if data is not None:
-                break
             if errors and "HTTP 403" not in errors[-1] and not any(
                 f"HTTP {status}" in errors[-1] for status in retryable_statuses
-            ) and "request attempt" not in errors[-1] and "JSON response parse" not in errors[-1]:
+            ) and "request attempt" not in errors[-1] and "JSON response parse" not in errors[-1] and "JSON content parse" not in errors[-1]:
                 break
-        if data is None:
-            raise RuntimeError("OpenRouter chat completion failed; " + " | ".join(errors))
-        content = data["choices"][0]["message"]["content"]
-        return _extract_json_object(content)
+        raise RuntimeError("OpenRouter chat completion failed; " + " | ".join(errors))
+
+    @staticmethod
+    def _message_content(data: Mapping[str, Any]) -> str:
+        choices = data["choices"]
+        if not isinstance(choices, list) or not choices:
+            raise ValueError("OpenRouter response has no choices")
+        first = choices[0]
+        if not isinstance(first, Mapping):
+            raise ValueError("OpenRouter response choice is not an object")
+        message = first.get("message")
+        if not isinstance(message, Mapping):
+            raise ValueError("OpenRouter response choice has no message object")
+        content = message.get("content")
+        if isinstance(content, list):
+            parts = []
+            for part in content:
+                if isinstance(part, Mapping) and part.get("type") == "text":
+                    parts.append(str(part.get("text") or ""))
+                elif isinstance(part, str):
+                    parts.append(part)
+            content = "".join(parts)
+        return str(content or "")
+
+    @staticmethod
+    def _response_snippet(data: Mapping[str, Any]) -> str:
+        try:
+            text = json.dumps(data, ensure_ascii=False)
+        except TypeError:
+            text = str(data)
+        return text[:500]
 
     @staticmethod
     def _error_message(response: Any) -> str:
@@ -517,7 +560,10 @@ def build_thinking_prompt(
 ) -> tuple[str, str]:
     system_prompt = """你是数字人格系统的思考与回复模块。
 你必须根据人格特征、自我认知、基本事实、短期记忆、长期记忆和意识主循环计划来生成回复。
-这不是关键词匹配。你需要模拟这个人格在当下的判断：是否短思考、长思考、是否要更新记忆、设定什么预期、是否需要改写自我认知。
+这不是关键词匹配，也不是表演式内心独白。
+你要先给出最近一次 LLM 思考结果，再生成回复。
+LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、用了哪些状态或记忆、为什么选择当前回复动作、哪些不确定性需要保留。
+不要输出完整推理链，不要写舞台动作，不要把角色设定词堆成解释。
 只输出 JSON，不要 Markdown。
 """
     user_prompt = f"""turn_index: {turn_index}
@@ -536,7 +582,13 @@ def build_thinking_prompt(
 请输出 JSON:
 {{
   "thought_type": "none|short|long",
-  "inner_thought": "给系统看的内心判断，不直接展示给用户",
+  "llm_thinking_result": {{
+    "user_intent_read": "你对用户这句话的理解",
+    "state_or_memory_used": ["本轮实际用到的状态、记忆或意识主循环结果"],
+    "response_choice": "为什么选择这个回复动作",
+    "uncertainty": "仍不确定或需要下一轮验证的地方",
+    "debug_summary": "给调试者看的最近一次 LLM 思考结果，一到两句话"
+  }},
   "reply": "直接发给用户的自然对话回复",
   "reply_action": "answer|ask_question|empathize|clarify|disagree|deflect|self_disclose",
   "new_expectations": [
@@ -684,12 +736,19 @@ class MVPDialogueRuntime:
         if not reply:
             reply = "我需要想一下这个。"
         action = str(thinking.get("reply_action") or "answer")
+        llm_thinking_result = thinking.get("llm_thinking_result")
+        if not isinstance(llm_thinking_result, Mapping):
+            legacy_inner_thought = str(thinking.get("inner_thought") or "").strip()
+            llm_thinking_result = {
+                "debug_summary": legacy_inner_thought,
+            } if legacy_inner_thought else {}
         diagnostics = {
             "mvp_runtime": True,
             "bus_messages": bus,
             "conscious_plan": conscious,
             "retrieved_memories": retrieved,
             "thinking": thinking,
+            "llm_thinking_result": llm_thinking_result,
             "state_root": str(self.store.root),
             "system_files": {key: str(self.store.path_for(key)) for key in SYSTEM_FILE_DEFAULTS},
         }

@@ -82,6 +82,7 @@ _GENERATION_ALLOWED_KEYS = {
     "llm_error",
     "llm_latency_ms",
     "llm_model",
+    "llm_thinking_result",
     "llm_tokens_completion",
     "llm_tokens_prompt",
     "llm_tokens_total",
@@ -549,6 +550,9 @@ class ConsciousMarkdownWriter:
             "## 选择与理由",
             self._format_choice(latest),
             "",
+            "## LLM 思考结果",
+            self._format_llm_thinking(latest),
+            "",
             "## 提示引导",
             self._format_prompt_guidance(latest),
             "",
@@ -626,6 +630,34 @@ class ConsciousMarkdownWriter:
             f"- policy margin: {trace.get('policy_margin', 0.0)}\n"
             f"- EFE margin: {trace.get('efe_margin', 0.0)}"
         )
+
+    @staticmethod
+    def _format_llm_thinking(trace: Mapping[str, object]) -> str:
+        diagnostics = trace.get("generation_diagnostics", {})
+        if not isinstance(diagnostics, Mapping):
+            return "- 暂无 LLM 思考结果。"
+        thinking = diagnostics.get("llm_thinking_result", {})
+        if not isinstance(thinking, Mapping) or not thinking:
+            return "- 暂无 LLM 思考结果。"
+        summary = str(thinking.get("debug_summary", "") or "").strip()
+        intent = str(thinking.get("user_intent_read", "") or "").strip()
+        choice = str(thinking.get("response_choice", "") or "").strip()
+        uncertainty = str(thinking.get("uncertainty", "") or "").strip()
+        used = thinking.get("state_or_memory_used", [])
+        if not isinstance(used, list):
+            used = []
+        lines = []
+        if summary:
+            lines.append(f"- 摘要: {summary}")
+        if intent:
+            lines.append(f"- 用户意图读取: {intent}")
+        if used:
+            lines.append(f"- 使用信号: {', '.join(map(str, used[:4]))}")
+        if choice:
+            lines.append(f"- 回复选择: {choice}")
+        if uncertainty:
+            lines.append(f"- 保留不确定性: {uncertainty}")
+        return "\n".join(lines) if lines else "- 暂无 LLM 思考结果。"
 
     @staticmethod
     def _format_prompt_guidance(trace: Mapping[str, object]) -> str:

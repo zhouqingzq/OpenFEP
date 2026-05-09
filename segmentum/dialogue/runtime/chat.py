@@ -170,6 +170,7 @@ class ChatInterface:
         self._last_obs_channels: dict[str, float] = {}
         self._last_outcome: str = ""
         self._last_efe_margin: float = 1.0
+        self._last_response_diagnostics: dict[str, object] = {}
 
         if use_llm is None:
             use_llm = _llm_api_key_available()
@@ -252,6 +253,7 @@ class ChatInterface:
         self._last_obs_channels = {}
         self._last_outcome = "neutral"
         self._last_efe_margin = 1.0
+        self._last_response_diagnostics = {}
         self._transcript = []
         self._mvp_runtime = self._build_mvp_runtime() if self._use_llm and self._use_mvp_runtime else None
         if self._conscious_writer is not None:
@@ -376,7 +378,7 @@ class ChatInterface:
         self._dashboard.snapshot(self._agent)
         self._turn_index += 1
 
-        return ChatResponse(
+        response = ChatResponse(
             reply=safe_text, action=turn.action or "ask_question",
             observation=obs_channels, delta_traits=delta_traits,
             delta_big_five=delta_big_five,
@@ -384,6 +386,8 @@ class ChatInterface:
             safety_checks=checks, turn_index=self._turn_index,
             llm_latency_ms=llm_latency,
         )
+        self._last_response_diagnostics = dict(generation_diagnostics)
+        return response
 
     def chat(self, user_text: str) -> str:
         return self.send(ChatRequest(user_text=user_text)).reply
@@ -517,6 +521,10 @@ class ChatInterface:
             / "conscious_trace.jsonl"
         )
 
+    def latest_response_diagnostics(self) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        return dict(self._last_response_diagnostics)
+
     # ── Internal ──────────────────────────────────────────────────────
 
     def _record_baseline(self) -> None:
@@ -603,7 +611,7 @@ class ChatInterface:
             "mvp_runtime": True,
             "llm_latency_ms": llm_latency,
         }
-        return ChatResponse(
+        response = ChatResponse(
             reply=safe_text,
             action=action,
             observation=obs_channels,
@@ -614,6 +622,8 @@ class ChatInterface:
             turn_index=self._turn_index,
             llm_latency_ms=llm_latency,
         )
+        self._last_response_diagnostics = dict(diagnostics)
+        return response
 
     def _build_mvp_runtime(self) -> MVPDialogueRuntime:
         persona_id = self._resolved_persona_id()
@@ -658,6 +668,8 @@ class ChatInterface:
             self._mvp_root = Path(__file__).resolve().parents[3] / "artifacts" / "mvp_personas"
         if not hasattr(self, "_mvp_runtime"):
             self._mvp_runtime = None
+        if not hasattr(self, "_last_response_diagnostics"):
+            self._last_response_diagnostics = {}
 
     def _repair_high_conflict_reply(self, user_text: str, reply: str) -> str:
         text = user_text.strip()
