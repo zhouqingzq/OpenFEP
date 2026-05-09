@@ -17,3 +17,4 @@ data/m50_output/
 artifacts/conscious/personas/*
 !artifacts/conscious/personas/sample_persona/
 !artifacts/conscious/personas/sample_persona/**
+artifacts/mvp_personas/

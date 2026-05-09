@@ -21,6 +21,7 @@ from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
 from segmentum.dialogue.runtime.dashboard import DashboardCollector
 from segmentum.dialogue.runtime.manager import PersonaManager
 from segmentum.dialogue.runtime.safety import SafetyLayer
+from segmentum.dialogue.runtime.mvp_loop import OpenRouterJSONClient
 
 
 def init_session() -> None:
@@ -30,16 +31,47 @@ def init_session() -> None:
         )
     if "chat_iface" not in st.session_state:
         st.session_state.chat_iface = ChatInterface(
+            use_llm=True if OpenRouterJSONClient.available() else None,
             enable_conscious_trace=True,
             conscious_root=_project_root / "artifacts" / "conscious",
             session_id="m56_live",
         )
+    else:
+        _upgrade_chat_interface_if_needed()
     if "messages" not in st.session_state:
         st.session_state.messages: list[dict[str, str]] = []
     if "loaded_persona" not in st.session_state:
         st.session_state.loaded_persona: str | None = None
     if "pending_user_message" not in st.session_state:
         st.session_state.pending_user_message: str | None = None
+
+
+def _upgrade_chat_interface_if_needed() -> None:
+    """Replace old Streamlit-held ChatInterface instances after code updates.
+
+    Streamlit keeps Python objects in session_state across reruns.  A previously
+    created rule-mode ChatInterface can therefore keep using the old rule-based
+    generator even after the source code now supports the MVP LLM runtime.
+    """
+    iface = st.session_state.chat_iface
+    key_available = OpenRouterJSONClient.available()
+    needs_upgrade = not hasattr(iface, "_maybe_enable_mvp_llm_runtime")
+    needs_llm_switch = bool(key_available and getattr(iface, "_use_llm", False) is False)
+    if not (needs_upgrade or needs_llm_switch):
+        return
+
+    old_agent = getattr(iface, "agent", None)
+    old_persona = getattr(iface, "persona_name", "") or st.session_state.get("loaded_persona") or ""
+    replacement = ChatInterface(
+        use_llm=True if key_available else None,
+        persona_name=str(old_persona),
+        enable_conscious_trace=True,
+        conscious_root=_project_root / "artifacts" / "conscious",
+        session_id="m56_live",
+    )
+    if old_agent is not None:
+        replacement.set_agent(old_agent, persona_name=str(old_persona))
+    st.session_state.chat_iface = replacement
 
 
 # Chat UI lives inside components.html so scroll JS runs in the same document as the
@@ -557,6 +589,10 @@ def render_sidebar() -> None:
     mode = chat_iface.generator_type
     if mode == "llm":
         st.sidebar.success("LLM Mode")
+        if getattr(chat_iface, "mvp_runtime_active", False):
+            st.sidebar.caption("MVP loop: active")
+        else:
+            st.sidebar.error("MVP loop: inactive")
         with st.sidebar.expander("LLM Settings", expanded=False):
             current_model = chat_iface.get_model()
             new_model = st.selectbox(
@@ -605,6 +641,9 @@ def render_sidebar() -> None:
                 agent = pm.create_from_description(desc.strip())
             pm.save(agent, d_name)
             chat_iface.set_agent(agent, persona_name=d_name)
+            if chat_iface.use_llm:
+                with st.spinner("Building MVP self files with LLM..."):
+                    chat_iface.bootstrap_mvp_from_materials(desc.strip())
             st.session_state.messages = []
             st.session_state.loaded_persona = d_name
             st.success(f"Created & loaded '{d_name}'")

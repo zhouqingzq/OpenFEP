@@ -134,7 +134,7 @@ def _load_openrouter_config() -> dict:
     if not config_path.exists():
         return {}
 
-    with config_path.open("r", encoding="utf-8") as handle:
+    with config_path.open("r", encoding="utf-8-sig") as handle:
         data = json.load(handle)
 
     if not isinstance(data, dict):

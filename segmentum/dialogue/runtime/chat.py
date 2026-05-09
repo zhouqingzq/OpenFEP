@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import time
 from typing import TYPE_CHECKING, Any
 
 from ..conversation_loop import run_conversation
@@ -11,6 +12,7 @@ from ..generator import LLMGenerator, ResponseGenerator, RuleBasedGenerator
 from ..observer import DialogueObserver
 from ..turn_trace import ConsciousMarkdownWriter
 from ..types import TranscriptUtterance
+from .mvp_loop import MVPDialogueRuntime, MVPStateStore, OpenRouterJSONClient
 
 if TYPE_CHECKING:
     from ...agent import SegmentAgent
@@ -44,7 +46,7 @@ def _llm_api_key_available() -> bool:
     if not config_path.exists():
         return False
     try:
-        cfg = json.loads(config_path.read_text(encoding="utf-8"))
+        cfg = json.loads(config_path.read_text(encoding="utf-8-sig"))
     except (json.JSONDecodeError, OSError):
         return False
     return bool(cfg.get("api_key"))
@@ -129,6 +131,8 @@ class ChatInterface:
         enable_conscious_trace: bool = False,
         conscious_root: str | Path | None = None,
         session_id: str = "m56_live",
+        use_mvp_runtime: bool = True,
+        mvp_root: str | Path | None = None,
     ) -> None:
         from .dashboard import DashboardCollector
         from .safety import SafetyLayer
@@ -143,6 +147,11 @@ class ChatInterface:
         self._persona_name = persona_name
         self._transcript: list[TranscriptUtterance] = []
         self._session_id = str(session_id or "m56_live")
+        self._use_mvp_runtime = bool(use_mvp_runtime)
+        self._mvp_root = Path(mvp_root) if mvp_root is not None else (
+            Path(__file__).resolve().parents[3] / "artifacts" / "mvp_personas"
+        )
+        self._mvp_runtime: MVPDialogueRuntime | None = None
         self._enable_conscious_trace = bool(enable_conscious_trace)
         if conscious_root is None:
             conscious_root = (
@@ -187,7 +196,13 @@ class ChatInterface:
 
     @property
     def generator_type(self) -> str:
+        self._maybe_enable_mvp_llm_runtime()
         return "llm" if self._use_llm else "rule"
+
+    @property
+    def mvp_runtime_active(self) -> bool:
+        self._maybe_enable_mvp_llm_runtime()
+        return self._mvp_runtime is not None
 
     def set_temperature(self, temperature: float) -> None:
         if isinstance(self._generator, LLMGenerator):
@@ -238,6 +253,7 @@ class ChatInterface:
         self._last_outcome = "neutral"
         self._last_efe_margin = 1.0
         self._transcript = []
+        self._mvp_runtime = self._build_mvp_runtime() if self._use_llm and self._use_mvp_runtime else None
         if self._conscious_writer is not None:
             session_dir = self._conscious_writer.session_dir(
                 self._resolved_persona_id(), self._session_id
@@ -254,6 +270,7 @@ class ChatInterface:
         self._ensure_runtime_fields()
         if self._agent is None:
             raise RuntimeError("No persona loaded. Create or load a persona first.")
+        self._maybe_enable_mvp_llm_runtime()
 
         if request.override_traits:
             for name, value in request.override_traits.items():
@@ -261,6 +278,13 @@ class ChatInterface:
         if request.override_precisions:
             for channel, value in request.override_precisions.items():
                 self.set_precision(channel, value)
+
+        if self._mvp_runtime is not None:
+            return self._send_mvp(request)
+        if self._use_mvp_runtime:
+            raise RuntimeError(
+                "MVP LLM runtime is not active. Check secrets/openrouter.json and restart Streamlit."
+            )
 
         pre_traits = self._agent.slow_variable_learner.state.traits.to_dict()
         pp = self._agent.self_model.personality_profile
@@ -363,6 +387,15 @@ class ChatInterface:
 
     def chat(self, user_text: str) -> str:
         return self.send(ChatRequest(user_text=user_text)).reply
+
+    def bootstrap_mvp_from_materials(self, materials: list[str] | str) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        if self._mvp_runtime is None:
+            if not (self._use_llm and self._use_mvp_runtime):
+                return {}
+            self._mvp_runtime = self._build_mvp_runtime()
+        payload = [materials] if isinstance(materials, str) else list(materials)
+        return self._mvp_runtime.initialize_from_materials(payload)
 
     # ── Manual overrides ──────────────────────────────────────────────
 
@@ -497,6 +530,116 @@ class ChatInterface:
             "neuroticism": pp.neuroticism,
         }
 
+    def _send_mvp(self, request: ChatRequest) -> ChatResponse:
+        if self._agent is None or self._mvp_runtime is None:
+            raise RuntimeError("MVP runtime is not initialized")
+
+        pre_traits = self._agent.slow_variable_learner.state.traits.to_dict()
+        pp = self._agent.self_model.personality_profile
+        pre_big_five = {
+            "openness": pp.openness, "conscientiousness": pp.conscientiousness,
+            "extraversion": pp.extraversion, "agreeableness": pp.agreeableness,
+            "neuroticism": pp.neuroticism,
+        }
+        obs_obj = self._observer.observe(
+            current_turn=request.user_text,
+            conversation_history=list(self._transcript),
+            partner_uid=0,
+            session_context={},
+            session_id=self._session_id,
+            turn_index=self._turn_index,
+            speaker_uid=0,
+            timestamp=None,
+        )
+        obs_channels = dict(obs_obj.channels)
+        start = time.monotonic()
+        try:
+            result = self._mvp_runtime.run_turn(
+                request.user_text,
+                turn_index=self._turn_index,
+                bus_messages=[
+                    {
+                        "type": "ObservationEvent",
+                        "channels": obs_channels,
+                        "last_action": self._last_action,
+                        "last_outcome": self._last_outcome,
+                    }
+                ],
+            )
+            reply = result.reply
+            action = result.action
+            diagnostics = dict(result.diagnostics)
+        except Exception as exc:
+            reply = f"[MVP LLM 调用失败：{exc}]"
+            action = "llm_error"
+            diagnostics = {
+                "mvp_runtime": True,
+                "llm_error": type(exc).__name__,
+                "llm_error_detail": str(exc),
+            }
+        llm_latency = round((time.monotonic() - start) * 1000.0, 3)
+        safe_text, checks = self._safety.enforce(reply, obs_channels)
+
+        self._last_action = action
+        self._last_obs_channels = dict(obs_channels)
+        self._last_outcome = "neutral"
+        self._transcript.append(
+            TranscriptUtterance(role="interlocutor", text=request.user_text)
+        )
+        self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
+        self._dashboard.snapshot(self._agent)
+        self._turn_index += 1
+
+        post_traits = self._agent.slow_variable_learner.state.traits.to_dict()
+        post_big_five = {
+            "openness": pp.openness, "conscientiousness": pp.conscientiousness,
+            "extraversion": pp.extraversion, "agreeableness": pp.agreeableness,
+            "neuroticism": pp.neuroticism,
+        }
+        delta_traits = {k: round(post_traits[k] - pre_traits.get(k, 0.0), 6) for k in post_traits}
+        delta_big_five = {k: round(post_big_five[k] - pre_big_five.get(k, 0.0), 6) for k in post_big_five}
+        diagnostics["selected_action"] = action
+        diagnostics["llm_generation"] = {
+            "mvp_runtime": True,
+            "llm_latency_ms": llm_latency,
+        }
+        return ChatResponse(
+            reply=safe_text,
+            action=action,
+            observation=obs_channels,
+            delta_traits=delta_traits,
+            delta_big_five=delta_big_five,
+            diagnostics=diagnostics,
+            safety_checks=checks,
+            turn_index=self._turn_index,
+            llm_latency_ms=llm_latency,
+        )
+
+    def _build_mvp_runtime(self) -> MVPDialogueRuntime:
+        persona_id = self._resolved_persona_id()
+        safe_id = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in persona_id).strip("_") or "default"
+        root = self._mvp_root / safe_id
+        return MVPDialogueRuntime(
+            store=MVPStateStore(root),
+            llm=OpenRouterJSONClient.from_config(),
+            persona_name=self._persona_name,
+        )
+
+    def _maybe_enable_mvp_llm_runtime(self) -> None:
+        self._ensure_runtime_fields()
+        if not self._use_mvp_runtime or self._mvp_runtime is not None:
+            return
+        if not OpenRouterJSONClient.available():
+            return
+        self._use_llm = True
+        if not isinstance(self._generator, LLMGenerator):
+            self._generator = LLMGenerator()
+        if self._prompt_builder is None:
+            from .prompts import PromptBuilder
+
+            self._prompt_builder = PromptBuilder(persona_name=self._persona_name)
+        self._mvp_runtime = self._build_mvp_runtime()
+
     def _resolved_persona_id(self) -> str:
         return self._persona_name.strip() or "default"
 
@@ -509,6 +652,12 @@ class ChatInterface:
             self._enable_conscious_trace = False
         if not hasattr(self, "_conscious_writer"):
             self._conscious_writer = None
+        if not hasattr(self, "_use_mvp_runtime"):
+            self._use_mvp_runtime = True
+        if not hasattr(self, "_mvp_root"):
+            self._mvp_root = Path(__file__).resolve().parents[3] / "artifacts" / "mvp_personas"
+        if not hasattr(self, "_mvp_runtime"):
+            self._mvp_runtime = None
 
     def _repair_high_conflict_reply(self, user_text: str, reply: str) -> str:
         text = user_text.strip()

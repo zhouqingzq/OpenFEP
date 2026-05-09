@@ -761,7 +761,7 @@ class LLMGenerator:
         if not config_path.exists():
             return {}
         try:
-            data = json.loads(config_path.read_text(encoding="utf-8"))
+            data = json.loads(config_path.read_text(encoding="utf-8-sig"))
         except (json.JSONDecodeError, OSError):
             return {}
         return data if isinstance(data, dict) else {}
