@@ -7,6 +7,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     MVPStateStore,
     OpenRouterJSONClient,
     analyze_materials_into_personas,
+    build_conscious_loop_prompt,
     build_thinking_prompt,
     build_free_energy_personality_analysis_prompt,
     retrieve_memories,
@@ -138,6 +139,15 @@ class FakeJSONLLM:
                 "memory_search_keywords": ["Python", "原型", "偏好"],
                 "needs_self_cognition_update": False,
                 "self_cognition_update_reason": "",
+                "temporal_assessment": {
+                    "current_time_read": "当前时间可用。",
+                    "elapsed_since_last_turn_seconds": None,
+                    "time_gap_label": "first_turn",
+                    "temporal_shift_detected": False,
+                    "user_is_correcting_time_context": False,
+                    "continuity_risk": "low",
+                    "reply_guidance": "保持普通连续性，不需要主动强调时间。",
+                },
                 "thought_intensity_hint": "short",
                 "reasoning_notes": "需要检索相关偏好。",
             }
@@ -162,6 +172,9 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
     assert "Python" in result.reply
     assert result.action == "self_disclose"
     assert result.diagnostics["mvp_runtime"] is True
+    assert result.diagnostics["temporal_input"]["time_gap_label"] == "first_turn"
+    assert result.diagnostics["temporal_assessment"]["continuity_risk"] == "low"
+    assert "response_style_prior" in result.diagnostics
     assert result.diagnostics["llm_thinking_result"]["debug_summary"].startswith(
         "用户问 Python 是否合适"
     )
@@ -234,6 +247,113 @@ def test_thinking_prompt_requests_latest_llm_thinking_result() -> None:
     assert "llm_thinking_result" in combined
     assert "inner_thought" not in combined
     assert "表演式内心独白" in combined
+
+
+def test_conscious_prompt_requests_temporal_assessment() -> None:
+    system_prompt, user_prompt = build_conscious_loop_prompt(
+        state={},
+        user_text="现在都吃午饭了。",
+        bus_messages=[],
+        turn_index=1,
+        temporal_input={
+            "current_timestamp": 10000,
+            "current_local_time": "2026-05-10 12:05:00 CST",
+            "previous_turn_at": 1000,
+            "elapsed_since_previous_turn_seconds": 9000,
+            "time_gap_label": "medium_gap",
+            "previous_turn_summary": {
+                "user_text": "要吃宵夜吗？",
+                "reply": "走，吃宵夜。",
+            },
+        },
+    )
+
+    combined = system_prompt + "\n" + user_prompt
+    assert "时间事实输入" in combined
+    assert "elapsed_since_previous_turn_seconds" in combined
+    assert "temporal_assessment" in combined
+    assert "user_is_correcting_time_context" in combined
+
+
+def test_temporal_shift_assessment_reaches_thinking_prompt() -> None:
+    conscious_plan = {
+        "current_task": "回应用户纠正时间语境",
+        "temporal_assessment": {
+            "current_time_read": "已经是午饭时间。",
+            "elapsed_since_last_turn_seconds": 21600,
+            "time_gap_label": "medium_gap",
+            "temporal_shift_detected": True,
+            "user_is_correcting_time_context": True,
+            "continuity_risk": "medium",
+            "reply_guidance": "承认时间已经推进，不要强行沿用上一轮宵夜语境。",
+        },
+    }
+
+    system_prompt, user_prompt = build_thinking_prompt(
+        state={"habit_traits": {"learned_conversation_habits": ["轻松闲聊时避免冗长"]}},
+        user_text="现在都吃午饭了。",
+        conscious_plan=conscious_plan,
+        retrieved_memories=[],
+        turn_index=1,
+        response_style_prior={
+            "learned_conversation_habits": ["轻松闲聊时避免冗长"],
+            "policy": "倾向，不是硬性字数限制。",
+        },
+    )
+
+    combined = system_prompt + "\n" + user_prompt
+    assert "temporal_assessment" in combined
+    assert "承认时间已经推进" in combined
+    assert "表达习惯先验" in combined
+    assert "不是工程硬性字数限制" in combined
+
+
+def test_mvp_runtime_persists_temporal_state_between_turns(tmp_path: Path) -> None:
+    class TemporalFakeLLM(FakeJSONLLM):
+        def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+            result = super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+            if "llm_thinking_result" in user_prompt and "reply_action" in user_prompt:
+                if "承认时间推进" in user_prompt:
+                    result["reply"] = "也是，已经午饭点了。"
+                    result["habit_updates"] = [
+                        {
+                            "content": "轻松闲聊时避免冗长但保留幽默",
+                            "evidence": "用户指出回复偏长",
+                            "confidence": 0.8,
+                        }
+                    ]
+                return result
+            if "pending_expectations_to_verify" in user_prompt:
+                if "elapsed_since_previous_turn_seconds" in user_prompt and "9000" in user_prompt:
+                    result["temporal_assessment"] = {
+                        "current_time_read": "已经过了很久。",
+                        "elapsed_since_last_turn_seconds": 9000,
+                        "time_gap_label": "medium_gap",
+                        "temporal_shift_detected": True,
+                        "user_is_correcting_time_context": True,
+                        "continuity_risk": "medium",
+                        "reply_guidance": "承认时间推进。",
+                    }
+                return result
+            return result
+
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=TemporalFakeLLM(),
+        persona_name="测试人格",
+    )
+    runtime.run_turn("要吃宵夜吗？", turn_index=0, now=1000)
+    result = runtime.run_turn("现在都吃午饭了。", turn_index=1, now=10000)
+
+    assert result.reply == "也是，已经午饭点了。"
+    assert result.diagnostics["temporal_input"]["elapsed_since_previous_turn_seconds"] == 9000
+    assert result.diagnostics["temporal_assessment"]["temporal_shift_detected"] is True
+    assert result.diagnostics["temporal_assessment"]["user_is_correcting_time_context"] is True
+    saved = runtime.store.load()
+    assert saved["temporal_state"]["last_turn_at"] == 10000
+    assert saved["temporal_state"]["last_time_gap_label"] == "medium_gap"
+    learned = saved["habit_traits"]["learned_conversation_habits"]
+    assert any("避免冗长" in item["content"] for item in learned)
 
 
 def test_material_analysis_prompt_requests_structured_evidence() -> None:
