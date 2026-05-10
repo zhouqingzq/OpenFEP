@@ -7,10 +7,12 @@ from segmentum.dialogue.runtime.mvp_loop import (
     MVPStateStore,
     OpenRouterJSONClient,
     analyze_materials_into_personas,
+    build_memory_dynamics_guidance,
     build_conscious_loop_prompt,
     build_thinking_prompt,
     build_free_energy_personality_analysis_prompt,
     retrieve_memories,
+    retrieve_memories_for_guidance,
 )
 
 
@@ -386,6 +388,240 @@ def test_retrieve_memories_uses_llm_supplied_keywords() -> None:
 
     assert hits[0]["id"] == "a"
     assert hits[0]["_source_file"] == "long_term_memory"
+
+
+class ExpectationFakeLLM(FakeJSONLLM):
+    def __init__(self, status: str, pressure: float = 0.2) -> None:
+        super().__init__()
+        self.status = status
+        self.pressure = pressure
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        self.calls.append({"system": system_prompt, "user": user_prompt})
+        if "意识主循环" in system_prompt:
+            return {
+                "pending_expectations_to_verify": ["exp_prior"],
+                "expectation_results": [
+                    {
+                        "id": "exp_prior",
+                        "status": self.status,
+                        "evidence": "用户本轮给出了验证反馈",
+                        "self_update_pressure": self.pressure,
+                    }
+                ],
+                "current_task": "处理结构化检索方案反馈",
+                "next_task": "根据验证结果调整回复确定性",
+                "bus_messages_to_handle": ["UserUtteranceEvent"],
+                "memory_search_keywords": ["结构化检索", "验证反馈"],
+                "needs_self_cognition_update": self.status == "violated",
+                "self_cognition_update_reason": "预期被否定时需要降低断言",
+                "temporal_assessment": {
+                    "current_time_read": "当前时间可用。",
+                    "elapsed_since_last_turn_seconds": 30,
+                    "time_gap_label": "immediate",
+                    "temporal_shift_detected": False,
+                    "user_is_correcting_time_context": False,
+                    "continuity_risk": "low",
+                    "reply_guidance": "保持连续。",
+                },
+                "thought_intensity_hint": "short",
+                "reasoning_notes": "验证上一轮预期。",
+            }
+        if "思考与回复模块" in system_prompt:
+            return {
+                "thought_type": "short",
+                "llm_thinking_result": {"debug_summary": "按记忆动力学指导调整回复。"},
+                "reply": "我会按这个反馈调整判断。",
+                "reply_action": "answer",
+                "new_expectations": [],
+                "memory_writes": [],
+                "self_cognition_patch": {"apply": False},
+                "open_item_writes": [],
+                "habit_updates": [],
+                "memory_dynamics_note": "验证反馈被纳入控制指导。",
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+def _runtime_with_expectation_state(tmp_path: Path, llm: ExpectationFakeLLM) -> MVPDialogueRuntime:
+    store = MVPStateStore(tmp_path / "persona")
+    state = store.load()
+    state["pending_expectations"] = [
+        {
+            "id": "exp_prior",
+            "content": "用户会确认结构化检索方案",
+            "verify_on": "next_user_turn",
+            "confidence": 0.55,
+        }
+    ]
+    state["long_term_memory"] = [
+        {
+            "id": "ltm_structured_recall",
+            "kind": "preference",
+            "content": "用户正在讨论结构化检索方案。",
+            "salience": 0.4,
+            "keywords": ["结构化检索"],
+            "recall_count": 0,
+        }
+    ]
+    store.save(state)
+    return MVPDialogueRuntime(store=store, llm=llm, persona_name="测试人格")
+
+
+def test_confirmed_expectation_updates_memory_dynamics_and_recall(tmp_path: Path) -> None:
+    runtime = _runtime_with_expectation_state(tmp_path, ExpectationFakeLLM("confirmed", 0.3))
+
+    result = runtime.run_turn("对，我确认这个结构化检索方案是对的。", turn_index=1, now=2000)
+
+    guidance = result.diagnostics["memory_dynamics"]["control_guidance"]
+    assert guidance["assertion_strength"] >= 0.72
+    assert result.diagnostics["memory_dynamics"]["expectation_impact"]["confirmed"] == 1
+    saved = runtime.store.load()
+    assert saved["pending_expectations"] == []
+    assert any(item.get("kind") == "expectation_result" for item in saved["short_term_memory"])
+    recalled = saved["long_term_memory"][0]
+    assert recalled["recall_count"] == 1
+    assert recalled["salience"] > 0.4
+
+
+def test_violated_expectation_lowers_assertion_and_reaches_prompt(tmp_path: Path) -> None:
+    llm = ExpectationFakeLLM("violated", 0.8)
+    runtime = _runtime_with_expectation_state(tmp_path, llm)
+
+    result = runtime.run_turn("不对，刚才那个预期被验证失败了。", turn_index=1, now=2000)
+
+    guidance = result.diagnostics["memory_dynamics"]["control_guidance"]
+    assert guidance["repair_bias"] > 0.6
+    assert guidance["clarification_bias"] > 0.6
+    assert guidance["assertion_strength"] < 0.5
+    thinking_prompt = llm.calls[-1]["user"]
+    assert "记忆动力学指导" in thinking_prompt
+    assert "assertion_strength" in thinking_prompt
+    assert "violated" in thinking_prompt
+
+
+def test_adapter_write_candidates_require_content_confidence_and_evidence(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+    state = runtime.store.load()
+
+    applied = runtime._apply_memory_write_candidates(
+        state,
+        [
+            {"content": "", "confidence": 0.9, "evidence": "user_text", "salience": 0.9},
+            {"content": "低置信候选", "confidence": 0.2, "evidence": "user_text", "salience": 0.9},
+            {"content": "无证据候选", "confidence": 0.9, "salience": 0.9},
+            {
+                "content": "用户确认结构化检索方案有效。",
+                "confidence": 0.8,
+                "evidence": "user_text",
+                "salience": 0.7,
+                "keywords": ["结构化检索"],
+            },
+        ],
+        now=3000,
+    )
+
+    assert len(applied) == 1
+    assert applied[0]["source"] == "memory_dynamics_adapter"
+    assert any("结构化检索方案有效" in item["content"] for item in state["long_term_memory"])
+
+
+def test_structured_recall_can_use_expectation_id_without_keyword_match() -> None:
+    state = {
+        "short_term_memory": [],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [
+            {
+                "id": "exp_semantic_followup",
+                "kind": "expectation",
+                "content": "用户会继续评估适配层。",
+                "confidence": 0.6,
+            }
+        ],
+    }
+
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "expectation_ids": ["exp_semantic_followup"],
+            "memory_kinds": [],
+            "semantic_terms": ["完全不同的说法"],
+            "status_terms": [],
+            "source_priority": ["pending_expectations"],
+        },
+    )
+
+    assert hits[0]["id"] == "exp_semantic_followup"
+    assert hits[0]["why_relevant"] == ["expectation_id:exp_semantic_followup"]
+
+
+def test_prompt_uses_evidence_cards_without_unretrieved_raw_memory(tmp_path: Path) -> None:
+    class NoRecallLLM(FakeJSONLLM):
+        def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+            self.calls.append({"system": system_prompt, "user": user_prompt})
+            if "意识主循环" in system_prompt:
+                result = super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                result["memory_search_keywords"] = ["无匹配主题"]
+                return result
+            if "思考与回复模块" in system_prompt:
+                return {
+                    "thought_type": "short",
+                    "llm_thinking_result": {"debug_summary": "无检索记忆。"},
+                    "reply": "我先按当前信息回答。",
+                    "reply_action": "answer",
+                    "new_expectations": [],
+                    "memory_writes": [],
+                    "self_cognition_patch": {"apply": False},
+                    "open_item_writes": [],
+                    "habit_updates": [],
+                    "memory_dynamics_note": "",
+                }
+            return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    store = MVPStateStore(tmp_path / "persona")
+    state = store.load()
+    state["long_term_memory"] = [
+        {
+            "id": "ltm_private",
+            "kind": "fact",
+            "content": "敏感原始记忆不应在未检索时进入 thinking prompt。",
+            "salience": 0.9,
+        }
+    ]
+    store.save(state)
+    llm = NoRecallLLM()
+    runtime = MVPDialogueRuntime(store=store, llm=llm, persona_name="测试人格")
+
+    runtime.run_turn("聊一个无关主题。", turn_index=0, now=4000)
+
+    thinking_prompt = llm.calls[-1]["user"]
+    assert "敏感原始记忆" not in thinking_prompt
+    assert "memory content is provided through retrieved evidence cards only" in thinking_prompt
+
+
+def test_anti_keyword_feedback_does_not_create_reward_punishment_memory() -> None:
+    guidance = build_memory_dynamics_guidance(
+        {"short_term_memory": [], "long_term_memory": []},
+        "这不是成功，也不是奖励，更不是失败惩罚。",
+        {
+            "expectation_results": [],
+            "memory_search_keywords": ["成功", "奖励", "失败"],
+            "needs_self_cognition_update": False,
+        },
+        [],
+        {"time_gap_label": "immediate"},
+        5000,
+    )
+
+    assert guidance["control_guidance"]["assertion_strength"] == 0.72
+    assert guidance["control_guidance"]["repair_bias"] == 0.2
+    assert guidance["memory_value"]["salience"] == 0.35
+    assert all(item["target"] == "short_term" for item in guidance["write_candidates"])
 
 
 def test_openrouter_json_client_retries_fallback_on_403(monkeypatch) -> None:

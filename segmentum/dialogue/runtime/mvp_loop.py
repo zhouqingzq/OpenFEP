@@ -598,6 +598,7 @@ def build_thinking_prompt(
     retrieved_memories: list[Mapping[str, Any]],
     turn_index: int,
     response_style_prior: Mapping[str, Any] | None = None,
+    memory_guidance: Mapping[str, Any] | None = None,
 ) -> tuple[str, str]:
     system_prompt = """你是数字人格系统的思考与回复模块。
 你必须根据人格特征、自我认知、基本事实、短期记忆、长期记忆、表达习惯先验和意识主循环计划来生成回复。
@@ -605,6 +606,7 @@ def build_thinking_prompt(
 你要先给出最近一次 LLM 思考结果，再生成回复。
 意识主循环的 temporal_assessment 是本轮时间语境判断的来源；不要自己重新猜时间差。如果 temporal_assessment 判断用户在纠正时间语境或时间已经明显推进，回复要自然承认这一点，避免强行沿用上一轮的旧时间语境。
 表达习惯先验是逐渐形成的说话倾向，不是工程硬性字数限制；例如“避免冗长”应影响轻重和展开程度，但不要机械裁字数。
+记忆动力学指导是程序层压缩出的倾向和证据边界，不是角色台词；不要把它表演成“我被奖励/惩罚了”。如果指导要求修正、澄清或降低断言强度，要自然体现在回复策略里。
 LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、用了哪些状态或记忆、为什么选择当前回复动作、哪些不确定性需要保留。
 不要输出完整推理链，不要写舞台动作，不要把角色设定词堆成解释。
 只输出 JSON，不要 Markdown。
@@ -625,7 +627,10 @@ LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、�
 表达习惯先验（倾向，不是硬性规则）:
 {_json_text(dict(response_style_prior or {}))}
 
-检索到的相关记忆:
+记忆动力学指导（只作为回复控制和证据边界，不要当成要说出口的内容）:
+{_json_text(dict(memory_guidance or {}))}
+
+检索到的相关记忆证据卡（压缩证据，不是原始记忆转储）:
 {_json_text(retrieved_memories)}
 
 请输出 JSON:
@@ -644,7 +649,7 @@ LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、�
     {{"id": "exp_...", "content": "我预期接下来会看到/验证什么", "verify_on": "next_user_turn|later", "confidence": 0.0}}
   ],
   "memory_writes": [
-    {{"target": "short_term|long_term", "kind": "episode|fact|preference|relationship|identity|open_item", "content": "要写入的内容", "salience": 0.0, "keywords": ["检索词"], "reason": "为什么值得记"}}
+    {{"target": "short_term|long_term", "kind": "episode|fact|preference|relationship|identity|open_item", "content": "要写入的内容；未经证据卡或用户原话支持的候选不能写成事实", "salience": 0.0, "keywords": ["检索词"], "reason": "为什么值得记"}}
   ],
   "self_cognition_patch": {{
     "apply": false,
@@ -693,6 +698,304 @@ def retrieve_memories(state: Mapping[str, Any], keywords: list[str], *, limit: i
             scored.append((score, payload))
     scored.sort(key=lambda row: row[0], reverse=True)
     return [item for _, item in scored[:limit]]
+
+
+def _unique_strings(*values: Any, limit: int = 16) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        for item in _string_list(value, limit=limit):
+            key = item.casefold()
+            if key and key not in seen:
+                seen.add(key)
+                result.append(item)
+                if len(result) >= limit:
+                    return result
+    return result
+
+
+def _rough_terms(text: str, *, limit: int = 8) -> list[str]:
+    tokens = re.findall(r"[A-Za-z0-9_+#.-]+|[\u4e00-\u9fff]{2,}", str(text or ""))
+    return [token[:80] for token in tokens[:limit] if token.strip()]
+
+
+def _memory_pools(state: Mapping[str, Any]) -> list[tuple[str, Mapping[str, Any]]]:
+    pools: list[tuple[str, Mapping[str, Any]]] = []
+    for key in ("short_term_memory", "long_term_memory", "open_items", "pending_expectations"):
+        value = state.get(key, [])
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, Mapping):
+                    pools.append((key, item))
+    return pools
+
+
+def _memory_status(item: Mapping[str, Any]) -> str:
+    status = str(item.get("status", "")).strip()
+    if status:
+        return status
+    content = str(item.get("content", ""))
+    try:
+        parsed = json.loads(content)
+    except (TypeError, json.JSONDecodeError):
+        parsed = {}
+    if isinstance(parsed, Mapping):
+        return str(parsed.get("status", "")).strip()
+    return ""
+
+
+def _evidence_card(
+    source: str,
+    item: Mapping[str, Any],
+    *,
+    score: float,
+    reasons: list[str],
+    conflict_note: str = "",
+) -> dict[str, Any]:
+    kind = str(item.get("kind", source)).strip() or source
+    salience = _bounded_float(item.get("salience"), default=0.35)
+    confidence = _bounded_float(item.get("confidence"), default=max(0.2, min(0.9, 0.45 + salience * 0.35)))
+    status = _memory_status(item)
+    use_as_fact = source in {"short_term_memory", "long_term_memory"} and kind not in {
+        "expectation_result",
+        "open_item",
+    } and status not in {"violated", "uncertain"}
+    return {
+        "id": str(item.get("id", "")).strip(),
+        "kind": kind,
+        "content": str(item.get("content", "")).strip()[:600],
+        "source": source,
+        "confidence": round(confidence, 6),
+        "salience": round(salience, 6),
+        "why_relevant": reasons[:5],
+        "conflict_note": conflict_note,
+        "use_as_fact": bool(use_as_fact),
+        "_retrieval_score": round(score, 3),
+        "_source_file": source,
+    }
+
+
+def retrieve_memories_for_guidance(
+    state: Mapping[str, Any],
+    recall_query: Mapping[str, Any] | None,
+    *,
+    limit: int = 8,
+) -> list[dict[str, Any]]:
+    query = _mapping(recall_query)
+    expectation_ids = {item.casefold() for item in _string_list(query.get("expectation_ids"), limit=16)}
+    memory_kinds = {item.casefold() for item in _string_list(query.get("memory_kinds"), limit=12)}
+    semantic_terms = _unique_strings(
+        query.get("semantic_terms"),
+        query.get("relationship_terms"),
+        query.get("status_terms"),
+        limit=24,
+    )
+    source_priority = _string_list(
+        query.get("source_priority")
+        or ["pending_expectations", "short_term_memory", "long_term_memory", "open_items"],
+        limit=8,
+    )
+    priority_rank = {source: len(source_priority) - idx for idx, source in enumerate(source_priority)}
+    status_terms = {item.casefold() for item in _string_list(query.get("status_terms"), limit=8)}
+
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for source, item in _memory_pools(state):
+        reasons: list[str] = []
+        score = 0.0
+        item_id = str(item.get("id", "")).strip()
+        kind = str(item.get("kind", source)).strip()
+        text = json.dumps(item, ensure_ascii=False).casefold()
+        status = _memory_status(item).casefold()
+
+        if item_id and item_id.casefold() in expectation_ids:
+            score += 6.0
+            reasons.append(f"expectation_id:{item_id}")
+        kind_match = bool(kind and kind.casefold() in memory_kinds)
+        if kind_match and kind.casefold() in {"expectation", "expectation_result", "open_item"}:
+            score += 2.0
+            reasons.append(f"kind:{kind}")
+        if status and status in status_terms:
+            score += 1.2
+            reasons.append(f"status:{status}")
+        for term in semantic_terms:
+            lowered = term.casefold()
+            if not lowered:
+                continue
+            if lowered in text:
+                score += 1.5
+                reasons.append(f"term:{term}")
+            else:
+                parts = [part for part in re.split(r"\s+", lowered) if part]
+                part_hits = sum(1 for part in parts if part in text)
+                if part_hits:
+                    score += 0.25 * part_hits
+                    reasons.append(f"partial_term:{term}")
+        if score <= 0.0:
+            continue
+        if kind_match and kind.casefold() not in {"expectation", "expectation_result", "open_item"}:
+            score += 0.6
+            reasons.append(f"kind:{kind}")
+        if source in priority_rank:
+            score += priority_rank[source] * 0.05
+        conflict_note = ""
+        if "violated" in status_terms and status in {"violated", "uncertain"}:
+            conflict_note = "expectation verification is not settled as a fact"
+        scored.append(
+            (
+                score,
+                _evidence_card(source, item, score=score, reasons=reasons, conflict_note=conflict_note),
+            )
+        )
+
+    if not scored and semantic_terms:
+        fallback = retrieve_memories(state, semantic_terms, limit=limit)
+        return [
+            _evidence_card(
+                str(item.get("_source_file", "memory")),
+                item,
+                score=float(item.get("_retrieval_score", 0.0) or 0.0),
+                reasons=["fallback_keyword_match"],
+            )
+            for item in fallback
+        ]
+    scored.sort(key=lambda row: row[0], reverse=True)
+    return [item for _, item in scored[:limit]]
+
+
+def build_memory_dynamics_guidance(
+    state: Mapping[str, Any],
+    user_text: str,
+    conscious_plan: Mapping[str, Any],
+    bus_messages: list[Mapping[str, Any]],
+    temporal_input: Mapping[str, Any],
+    now: int,
+) -> dict[str, Any]:
+    del bus_messages
+    expectation_results = [
+        dict(item)
+        for item in conscious_plan.get("expectation_results", []) or []
+        if isinstance(item, Mapping)
+    ]
+    statuses = [str(item.get("status", "")).strip() for item in expectation_results]
+    confirmed = [item for item in expectation_results if str(item.get("status", "")) == "confirmed"]
+    violated = [item for item in expectation_results if str(item.get("status", "")) == "violated"]
+    uncertain = [item for item in expectation_results if str(item.get("status", "")) == "uncertain"]
+    pressure = max(
+        [_bounded_float(item.get("self_update_pressure"), default=0.2) for item in expectation_results],
+        default=0.0,
+    )
+    temporal_gap = str(temporal_input.get("time_gap_label", "first_turn"))
+    long_gap = temporal_gap in {"medium_gap", "long_gap"}
+
+    assertion_strength = 0.72
+    clarification_bias = 0.25
+    repair_bias = 0.20
+    conflict_level = 0.0
+    confidence_delta = 0.0
+    closure_delta = 0.0
+    salience_delta = 0.0
+    reasons: list[str] = []
+
+    if confirmed:
+        confidence_delta += 0.12 * len(confirmed)
+        closure_delta += 0.12
+        salience_delta += 0.08
+        reasons.append("expectation_confirmed")
+    if violated:
+        conflict_level = max(conflict_level, 0.45 + pressure * 0.45)
+        repair_bias = max(repair_bias, 0.35 + pressure * 0.45)
+        clarification_bias = max(clarification_bias, 0.40 + pressure * 0.40)
+        assertion_strength = min(assertion_strength, max(0.25, 0.66 - pressure * 0.35))
+        confidence_delta -= 0.16 * len(violated)
+        salience_delta += 0.16 + pressure * 0.20
+        reasons.append("expectation_violated")
+    if uncertain:
+        clarification_bias = max(clarification_bias, 0.45)
+        assertion_strength = min(assertion_strength, 0.58)
+        salience_delta += 0.06
+        reasons.append("expectation_uncertain")
+    if long_gap:
+        salience_delta += 0.05
+        clarification_bias = max(clarification_bias, 0.35)
+        reasons.append("temporal_gap")
+    if conscious_plan.get("needs_self_cognition_update"):
+        salience_delta += 0.10
+        repair_bias = max(repair_bias, 0.35)
+        reasons.append("self_cognition_pressure")
+
+    base_salience = 0.35 + salience_delta
+    should_encode = bool(expectation_results or reasons or len(str(user_text).strip()) >= 24)
+    semantic_terms = _unique_strings(
+        conscious_plan.get("memory_search_keywords"),
+        _rough_terms(user_text),
+        conscious_plan.get("current_task"),
+        conscious_plan.get("next_task"),
+        limit=16,
+    )
+    expectation_ids = _unique_strings(
+        [item.get("id") for item in expectation_results],
+        conscious_plan.get("pending_expectations_to_verify"),
+        limit=16,
+    )
+    memory_kinds = ["expectation_result", "episode", "preference", "relationship", "fact", "open_item"]
+    if violated or uncertain:
+        memory_kinds = ["expectation_result", "open_item", "episode", "fact", "preference"]
+
+    write_candidates: list[dict[str, Any]] = []
+    if should_encode:
+        candidate_confidence = max(0.35, min(0.9, 0.55 + confidence_delta + (0.08 if confirmed else 0.0)))
+        write_candidates.append(
+            {
+                "target": "short_term",
+                "kind": "episode",
+                "content": str(user_text).strip(),
+                "salience": round(min(1.0, base_salience), 6),
+                "confidence": round(candidate_confidence, 6),
+                "keywords": semantic_terms[:6],
+                "reason": ";".join(reasons[:4]) or "dialogue_turn_candidate",
+                "evidence": "user_text",
+                "created_at": now,
+            }
+        )
+
+    return {
+        "memory_value": {
+            "should_encode": should_encode,
+            "salience": round(min(1.0, base_salience), 6),
+            "confidence_delta": round(max(-1.0, min(1.0, confidence_delta)), 6),
+            "closure_delta": round(min(1.0, closure_delta), 6),
+            "reasons": reasons,
+        },
+        "recall_query": {
+            "expectation_ids": expectation_ids,
+            "memory_kinds": memory_kinds,
+            "semantic_terms": semantic_terms,
+            "relationship_terms": [],
+            "status_terms": [status for status in statuses if status],
+            "source_priority": ["pending_expectations", "short_term_memory", "long_term_memory", "open_items"],
+        },
+        "recall": {
+            "requested": True,
+            "retrieved": 0,
+            "ids": [],
+            "conflict_level": round(min(1.0, conflict_level), 6),
+        },
+        "control_guidance": {
+            "assertion_strength": round(max(0.0, min(1.0, assertion_strength)), 6),
+            "clarification_bias": round(max(0.0, min(1.0, clarification_bias)), 6),
+            "repair_bias": round(max(0.0, min(1.0, repair_bias)), 6),
+            "conflict_level": round(max(0.0, min(1.0, conflict_level)), 6),
+            "policy": "Use these as reply tendencies, not as visible emotional reward/punishment.",
+        },
+        "write_candidates": write_candidates,
+        "expectation_impact": {
+            "confirmed": len(confirmed),
+            "violated": len(violated),
+            "uncertain": len(uncertain),
+            "statuses": statuses,
+            "self_update_pressure": round(pressure, 6),
+        },
+    }
 
 
 def _temporal_input_from_state(state: Mapping[str, Any], *, now: int) -> dict[str, Any]:
@@ -812,6 +1115,23 @@ def _update_temporal_state(
     }
 
 
+def _prompt_safe_state(state: Mapping[str, Any]) -> dict[str, Any]:
+    safe = dict(state)
+    for key in ("short_term_memory", "long_term_memory"):
+        rows = state.get(key, [])
+        if isinstance(rows, list):
+            safe[key] = {
+                "count": len(rows),
+                "visible_policy": "memory content is provided through retrieved evidence cards only",
+                "recent_ids": [
+                    str(item.get("id", ""))
+                    for item in rows[-8:]
+                    if isinstance(item, Mapping) and item.get("id")
+                ],
+            }
+    return safe
+
+
 @dataclass
 class MVPTurnResult:
     reply: str
@@ -888,23 +1208,50 @@ class MVPDialogueRuntime:
             temporal_input=temporal_input,
         )
         conscious = self.llm.complete_json(system_prompt=conscious_system, user_prompt=conscious_user)
-        keywords = _string_list(conscious.get("memory_search_keywords"), limit=16)
-        retrieved = retrieve_memories(state, keywords or [user_text])
+        memory_dynamics = build_memory_dynamics_guidance(
+            state,
+            user_text,
+            conscious,
+            bus,
+            temporal_input,
+            now,
+        )
+        retrieved = retrieve_memories_for_guidance(
+            state,
+            _mapping(memory_dynamics.get("recall_query")),
+        )
+        memory_dynamics["recall"] = {
+            **_mapping(memory_dynamics.get("recall")),
+            "retrieved": len(retrieved),
+            "ids": [str(item.get("id", "")) for item in retrieved if item.get("id")],
+        }
         self._mark_recalled(state, retrieved, now)
         response_style_prior = _response_style_prior(state, retrieved)
 
         thinking_system, thinking_user = build_thinking_prompt(
-            state=state,
+            state=_prompt_safe_state(state),
             user_text=user_text,
             conscious_plan=conscious,
             retrieved_memories=retrieved,
             turn_index=turn_index,
             response_style_prior=response_style_prior,
+            memory_guidance={
+                "memory_value": memory_dynamics.get("memory_value", {}),
+                "recall": memory_dynamics.get("recall", {}),
+                "control_guidance": memory_dynamics.get("control_guidance", {}),
+                "write_candidates": memory_dynamics.get("write_candidates", []),
+                "expectation_impact": memory_dynamics.get("expectation_impact", {}),
+            },
         )
         thinking = self.llm.complete_json(system_prompt=thinking_system, user_prompt=thinking_user)
 
         self._apply_expectation_results(state, conscious.get("expectation_results"))
         self._apply_thinking_writes(state, thinking, user_text=user_text, now=now)
+        memory_candidates_applied = self._apply_memory_write_candidates(
+            state,
+            memory_dynamics.get("write_candidates"),
+            now=now,
+        )
         habit_updates_applied = _apply_habit_updates(state, thinking)
 
         reply = str(thinking.get("reply") or "").strip()
@@ -935,6 +1282,8 @@ class MVPDialogueRuntime:
             "conscious_plan": conscious,
             "temporal_input": temporal_input,
             "temporal_assessment": dict(temporal_assessment),
+            "memory_dynamics": memory_dynamics,
+            "memory_candidates_applied": memory_candidates_applied,
             "response_style_prior": response_style_prior,
             "habit_updates_applied": habit_updates_applied,
             "retrieved_memories": retrieved,
@@ -968,6 +1317,47 @@ class MVPDialogueRuntime:
                     row["last_recalled_at"] = now
                     row["recall_count"] = int(row.get("recall_count", 0) or 0) + 1
                     row["salience"] = min(1.0, float(row.get("salience", 0.2) or 0.2) + 0.05)
+
+    def _apply_memory_write_candidates(
+        self,
+        state: dict[str, Any],
+        candidates: Any,
+        *,
+        now: int,
+    ) -> list[dict[str, Any]]:
+        if not isinstance(candidates, list):
+            return []
+        applied: list[dict[str, Any]] = []
+        for candidate in candidates:
+            if not isinstance(candidate, Mapping):
+                continue
+            content = str(candidate.get("content", "")).strip()
+            evidence = str(candidate.get("evidence", "")).strip()
+            confidence = _bounded_float(candidate.get("confidence"), default=0.0)
+            if not content or not evidence or confidence < 0.60:
+                continue
+            salience = _bounded_float(candidate.get("salience"), default=0.35)
+            target = str(candidate.get("target", "short_term")).strip()
+            row = {
+                "id": f"{'ltm' if target == 'long_term' else 'stm'}_candidate_{now}_{len(applied)}",
+                "kind": str(candidate.get("kind", "episode")).strip() or "episode",
+                "content": content,
+                "salience": salience,
+                "confidence": confidence,
+                "keywords": _string_list(candidate.get("keywords"), limit=8),
+                "reason": str(candidate.get("reason", "")),
+                "evidence": evidence,
+                "source": "memory_dynamics_adapter",
+                "created_at": now,
+                "last_recalled_at": None,
+                "recall_count": 0,
+            }
+            if target == "long_term" or salience >= 0.68:
+                state.setdefault("long_term_memory", []).append(row)
+            else:
+                state.setdefault("short_term_memory", []).append(row)
+            applied.append(row)
+        return applied
 
     def _apply_expectation_results(self, state: dict[str, Any], results: Any) -> None:
         if not isinstance(results, list):
