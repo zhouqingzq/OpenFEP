@@ -609,6 +609,8 @@ def build_thinking_prompt(
 记忆动力学指导是程序层压缩出的倾向和证据边界，不是角色台词；不要把它表演成“我被奖励/惩罚了”。如果指导要求修正、澄清或降低断言强度，要自然体现在回复策略里。
 LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、用了哪些状态或记忆、为什么选择当前回复动作、哪些不确定性需要保留。
 不要输出完整推理链，不要写舞台动作，不要把角色设定词堆成解释。
+reply 字段只能包含会直接显示给用户的自然对话文本；禁止把 llm_thinking_result、conscious_plan、diagnostics、memory_dynamics、JSON 片段或调试字段混进 reply。
+如果记忆动力学指导里有 reply_contract，必须把它当作硬性回复协议执行。casual_fast 下优先一句话、一个动作、少角色表演、给用户留白；serious_thinking 下可以更完整，但仍不能泄露调试内容。
 只输出 JSON，不要 Markdown。
 """
     user_prompt = f"""turn_index: {turn_index}
@@ -664,6 +666,57 @@ LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、�
     {{"content": "从用户反馈或反复证据中学到的表达习惯", "evidence": "支持这个习惯的用户原话或记忆", "confidence": 0.0}}
   ],
   "memory_dynamics_note": "哪些记忆被唤起、为什么、是否强化或衰减"
+}}
+"""
+    return system_prompt, user_prompt
+
+
+def build_post_reply_observer_prompt(
+    *,
+    user_text: str,
+    reply: str,
+    thinking: Mapping[str, Any],
+    memory_dynamics: Mapping[str, Any],
+    retrieved_memories: list[Mapping[str, Any]],
+    temporal_assessment: Mapping[str, Any],
+    turn_index: int,
+) -> tuple[str, str]:
+    system_prompt = """你是数字人格系统的“回复后发观察模块”。
+你只判断刚发出的主回复是否需要追加一条很短的补充气泡。
+你不是第二个回复生成器，不能把长回复拆成多条，也不能继续角色表演或闲聊废话。
+只有漏接重要情绪、需要自我修正、需要澄清、需要修复关系、需要承认重要关系信号时，才允许追加。
+每轮最多追加一条，追加内容必须自然、短、像人后知后觉补一句。
+只输出 JSON，不要 Markdown。
+"""
+    user_prompt = f"""turn_index: {turn_index}
+用户刚说:
+{user_text}
+
+刚发出的主回复:
+{reply}
+
+thinking 摘要:
+{_json_text(dict(thinking))}
+
+记忆动力学:
+{_json_text(dict(memory_dynamics))}
+
+检索证据卡:
+{_json_text(retrieved_memories)}
+
+时间判断:
+{_json_text(dict(temporal_assessment))}
+
+请输出 JSON:
+{{
+  "needs_followup": false,
+  "followup_type": "missed_emotion|self_correction|clarification|repair|relationship_ack|none",
+  "confidence": 0.0,
+  "reason": "为什么需要或不需要追加",
+  "followup_text": "如果需要追加，这里写一条很短的补充气泡；否则为空",
+  "memory_updates": [
+    {{"kind": "conversation_habit|episode|open_item", "content": "只记录有证据支持的短期候选", "confidence": 0.0, "evidence": "用户原话或主回复"}}
+  ]
 }}
 """
     return system_prompt, user_prompt
@@ -742,6 +795,188 @@ def _memory_status(item: Mapping[str, Any]) -> str:
     if isinstance(parsed, Mapping):
         return str(parsed.get("status", "")).strip()
     return ""
+
+
+_BREVITY_FEEDBACK_MARKERS = (
+    "太长",
+    "啰嗦",
+    "罗嗦",
+    "短一点",
+    "简短",
+    "分开说",
+    "分开几条",
+    "一长串",
+    "一句话",
+)
+
+_SERIOUS_MARKERS = (
+    "代码",
+    "实现",
+    "计划",
+    "架构",
+    "技术",
+    "工程",
+    "评估",
+    "复盘",
+    "测试",
+    "接口",
+    "schema",
+    "api",
+    "pytest",
+    "debug",
+    "bug",
+    "修复",
+    "原因",
+    "分析",
+    "设计",
+    "方案",
+    "修改",
+    "提交",
+)
+
+_CASUAL_MARKERS = (
+    "晚上好",
+    "早上好",
+    "吃",
+    "撑",
+    "陪",
+    "陪伴",
+    "聊天",
+    "母亲节",
+    "家里",
+    "孩子",
+    "开心",
+    "难过",
+    "想你",
+    "睡觉",
+    "晚安",
+    "聊会",
+    "聊一会",
+    "唉",
+    "单挑",
+    "看你",
+    "好了",
+)
+
+
+def _has_any_marker(text: str, markers: tuple[str, ...]) -> bool:
+    lowered = str(text or "").casefold()
+    return any(marker.casefold() in lowered for marker in markers)
+
+
+def _learned_prefers_short_turns(state: Mapping[str, Any]) -> bool:
+    habits = _mapping(state.get("habit_traits"))
+    learned = habits.get("learned_conversation_habits", []) or []
+    combined = " ".join(_habit_text(item) for item in learned)
+    return _has_any_marker(combined, _BREVITY_FEEDBACK_MARKERS)
+
+
+def _compact_text_len(text: str) -> int:
+    return len(re.sub(r"\s+", "", str(text or "")))
+
+
+def _punctuation_count(text: str) -> int:
+    return len(re.findall(r"[。！？!?；;，,、.]", str(text or "")))
+
+
+def _reply_contract(mode: str, *, prefers_short: bool) -> dict[str, Any]:
+    if mode == "serious_thinking":
+        return {
+            "conversation_mode": "serious_thinking",
+            "max_sentences": 20,
+            "max_response_moves": 4,
+            "max_chars": 2400,
+            "roleplay_density": "light",
+            "catchphrase_limit": 1,
+            "question_policy": "only_if_needed",
+            "hard_rules": [
+                "reply may be multi-paragraph when the user asks for analysis or implementation details",
+                "never include diagnostics, JSON, conscious_plan, llm_thinking_result, or memory_dynamics in reply",
+            ],
+        }
+    if mode == "casual_fast":
+        return {
+            "conversation_mode": "casual_fast",
+            "max_sentences": 1,
+            "max_response_moves": 1,
+            "max_chars": 45 if prefers_short else 60,
+            "roleplay_density": "light",
+            "catchphrase_limit": 1,
+            "question_policy": "only_if_user_leaves_clear_opening",
+            "hard_rules": [
+                "reply in one natural sentence",
+                "do not combine empathy, roleplay, advice, and a question in one bubble",
+                "prefer leaving space for the user over adding a question",
+                "never include diagnostics, JSON, conscious_plan, llm_thinking_result, or memory_dynamics in reply",
+            ],
+        }
+    return {
+        "conversation_mode": "balanced",
+        "max_sentences": 2,
+        "max_response_moves": 2,
+        "max_chars": 140,
+        "roleplay_density": "light",
+        "catchphrase_limit": 1,
+        "question_policy": "optional_one",
+        "hard_rules": [
+            "reply in one or two natural sentences",
+            "avoid packing empathy, roleplay, advice, and a question into one reply",
+            "never include diagnostics, JSON, conscious_plan, llm_thinking_result, or memory_dynamics in reply",
+        ],
+    }
+
+
+def _pacing_guidance(
+    state: Mapping[str, Any],
+    user_text: str,
+    temporal_input: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    text = str(user_text or "")
+    serious = _has_any_marker(text, _SERIOUS_MARKERS)
+    casual = _has_any_marker(text, _CASUAL_MARKERS)
+    brevity_feedback = _has_any_marker(text, _BREVITY_FEEDBACK_MARKERS)
+    prefers_short = _learned_prefers_short_turns(state) or brevity_feedback
+    compact_len = _compact_text_len(text)
+    punctuation = _punctuation_count(text)
+    temporal = _mapping(temporal_input)
+    short_gap = str(temporal.get("time_gap_label", "")) in {"immediate", "short_gap"}
+    short_casual_shape = compact_len <= 18 and punctuation <= 3
+    medium_casual_shape = compact_len <= 34 and punctuation <= 4 and short_gap
+    if serious and not brevity_feedback:
+        contract = _reply_contract("serious_thinking", prefers_short=prefers_short)
+        return {
+            "conversation_mode": "serious_thinking",
+            "reply_pacing": "serious_thinking",
+            "max_response_moves": contract["max_response_moves"],
+            "question_policy": "only_if_needed",
+            "roleplay_density": "light",
+            "leave_space_for_user": False,
+            "followup_policy": "only_for_error_or_missed_emotion",
+            "reply_contract": contract,
+        }
+    if casual or prefers_short or short_casual_shape or medium_casual_shape:
+        contract = _reply_contract("casual_fast", prefers_short=prefers_short)
+        return {
+            "conversation_mode": "casual_fast",
+            "reply_pacing": "casual_fast",
+            "max_response_moves": contract["max_response_moves"],
+            "question_policy": contract["question_policy"],
+            "roleplay_density": "light",
+            "leave_space_for_user": True,
+            "followup_policy": "allowed_once_if_high_confidence",
+            "reply_contract": contract,
+        }
+    contract = _reply_contract("balanced", prefers_short=prefers_short)
+    return {
+        "conversation_mode": "balanced",
+        "reply_pacing": "balanced",
+        "max_response_moves": contract["max_response_moves"],
+        "question_policy": "optional_one",
+        "roleplay_density": "light",
+        "leave_space_for_user": True,
+        "followup_policy": "allowed_once_if_high_confidence",
+        "reply_contract": contract,
+    }
 
 
 def _evidence_card(
@@ -886,6 +1121,7 @@ def build_memory_dynamics_guidance(
     )
     temporal_gap = str(temporal_input.get("time_gap_label", "first_turn"))
     long_gap = temporal_gap in {"medium_gap", "long_gap"}
+    pacing = _pacing_guidance(state, user_text, temporal_input)
 
     assertion_strength = 0.72
     clarification_bias = 0.25
@@ -985,6 +1221,7 @@ def build_memory_dynamics_guidance(
             "clarification_bias": round(max(0.0, min(1.0, clarification_bias)), 6),
             "repair_bias": round(max(0.0, min(1.0, repair_bias)), 6),
             "conflict_level": round(max(0.0, min(1.0, conflict_level)), 6),
+            **pacing,
             "policy": "Use these as reply tendencies, not as visible emotional reward/punishment.",
         },
         "write_candidates": write_candidates,
@@ -1132,11 +1369,168 @@ def _prompt_safe_state(state: Mapping[str, Any]) -> dict[str, Any]:
     return safe
 
 
+_ALLOWED_FOLLOWUP_TYPES = {
+    "missed_emotion",
+    "self_correction",
+    "clarification",
+    "repair",
+    "relationship_ack",
+}
+
+
+def _validated_followup_text(observer: Mapping[str, Any]) -> str:
+    if not bool(observer.get("needs_followup", False)):
+        return ""
+    followup_type = str(observer.get("followup_type", "")).strip()
+    if followup_type not in _ALLOWED_FOLLOWUP_TYPES:
+        return ""
+    confidence = _bounded_float(observer.get("confidence"), default=0.0)
+    if confidence < 0.72:
+        return ""
+    text = " ".join(str(observer.get("followup_text", "")).strip().split())
+    if not text:
+        return ""
+    if len(text) > 120:
+        return ""
+    if text.count("。") + text.count("！") + text.count("？") + text.count(".") + text.count("!") + text.count("?") > 2:
+        return ""
+    return text
+
+
+_DEBUG_REPLY_MARKERS = (
+    "llm_thinking_result",
+    "conscious_plan",
+    "diagnostics",
+    "memory_dynamics",
+    "pending_expectations_to_verify",
+    "expectation_results",
+    "user_intent_read",
+    "state_or_memory_used",
+    "response_choice",
+    "debug_summary",
+)
+
+
+def _contains_debug_payload(text: str) -> bool:
+    lowered = str(text or "").casefold()
+    return any(marker.casefold() in lowered for marker in _DEBUG_REPLY_MARKERS)
+
+
+def _remove_fenced_blocks(text: str) -> str:
+    return re.sub(r"```.*?```", "", str(text or ""), flags=re.DOTALL).strip()
+
+
+def _strip_debug_payload(text: str) -> tuple[str, bool]:
+    cleaned = _remove_fenced_blocks(text)
+    changed = cleaned != str(text or "").strip()
+    if not _contains_debug_payload(cleaned):
+        return cleaned, changed
+    first_debug_index = min(
+        [idx for marker in _DEBUG_REPLY_MARKERS if (idx := cleaned.casefold().find(marker.casefold())) >= 0],
+        default=-1,
+    )
+    if first_debug_index > 0:
+        brace_index = cleaned.rfind("{", 0, first_debug_index)
+        newline_index = cleaned.rfind("\n", 0, first_debug_index)
+        cut_index = max(brace_index, newline_index)
+        if cut_index > 0:
+            candidate = cleaned[:cut_index].strip()
+            if candidate and not _contains_debug_payload(candidate):
+                return candidate, True
+    before_json = cleaned.split("{", 1)[0].strip()
+    if before_json and not _contains_debug_payload(before_json):
+        return before_json, True
+    return "", True
+
+
+def _sentence_chunks(text: str) -> list[str]:
+    chunks = re.findall(r"[^。！？!?；;\n]+[。！？!?；;]?", str(text or ""))
+    return [chunk.strip() for chunk in chunks if chunk.strip()]
+
+
+def _truncate_to_chars(text: str, max_chars: int) -> str:
+    if max_chars <= 0 or len(text) <= max_chars:
+        return text
+    return text[:max_chars].rstrip("，,、；;：: ") + "。"
+
+
+def _positive_int(value: Any, *, default: int) -> int:
+    try:
+        numeric = int(value)
+    except (TypeError, ValueError):
+        numeric = default
+    return max(0, numeric)
+
+
+def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tuple[str, dict[str, Any]]:
+    original = str(reply or "").strip()
+    contract_map = _mapping(contract)
+    mode = str(contract_map.get("conversation_mode") or contract_map.get("reply_pacing") or "balanced")
+    max_chars = _positive_int(contract_map.get("max_chars"), default=140)
+    max_sentences = _positive_int(contract_map.get("max_sentences"), default=2)
+    fallback = "我刚才说得有点乱，先简单说：我在。"
+    cleaned, stripped_debug = _strip_debug_payload(original)
+    actions: list[str] = []
+    if stripped_debug:
+        actions.append("stripped_debug_payload")
+    if not cleaned:
+        cleaned = fallback
+        actions.append("fallback_empty_or_debug_only")
+    chunks = _sentence_chunks(cleaned)
+    if chunks and len(chunks) > max_sentences:
+        cleaned = "".join(chunks[:max_sentences]).strip()
+        actions.append("trimmed_sentences")
+    if mode == "casual_fast" and len(cleaned) > max_chars:
+        first = chunks[0] if chunks else cleaned
+        cleaned = _truncate_to_chars(first, max_chars)
+        actions.append("compressed_casual_fast")
+    elif max_chars and len(cleaned) > max_chars:
+        cleaned = _truncate_to_chars(cleaned, max_chars)
+        actions.append("truncated_to_contract")
+    if _contains_debug_payload(cleaned):
+        cleaned = fallback
+        actions.append("fallback_remaining_debug_payload")
+    validation = {
+        "original_length": len(original),
+        "final_length": len(cleaned),
+        "conversation_mode": mode,
+        "max_chars": max_chars,
+        "max_sentences": max_sentences,
+        "changed": bool(actions),
+        "actions": actions,
+    }
+    return cleaned, validation
+
+
+def _should_run_post_reply_observer(
+    *,
+    user_text: str,
+    memory_dynamics: Mapping[str, Any],
+    reply_validation: Mapping[str, Any],
+) -> tuple[bool, str]:
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    mode = str(control.get("conversation_mode") or control.get("reply_pacing") or "balanced")
+    if bool(reply_validation.get("changed")):
+        return True, "reply_validation_changed"
+    conflict = _bounded_float(control.get("conflict_level"), default=0.0)
+    repair = _bounded_float(control.get("repair_bias"), default=0.0)
+    clarification = _bounded_float(control.get("clarification_bias"), default=0.0)
+    if conflict >= 0.55 or repair >= 0.60 or clarification >= 0.65:
+        return True, "high_conflict_or_repair_bias"
+    relationship_terms = ("陪伴", "想要你", "需要你", "你这样的", "朋友", "在我身边", "认真记住")
+    if any(term in str(user_text or "") for term in relationship_terms):
+        return True, "relationship_signal"
+    if mode == "serious_thinking":
+        return False, "serious_without_observer_trigger"
+    return False, "low_risk_short_reply"
+
+
 @dataclass
 class MVPTurnResult:
     reply: str
     action: str
     diagnostics: dict[str, Any] = field(default_factory=dict)
+    followup_replies: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -1254,16 +1648,70 @@ class MVPDialogueRuntime:
         )
         habit_updates_applied = _apply_habit_updates(state, thinking)
 
-        reply = str(thinking.get("reply") or "").strip()
-        if not reply:
-            reply = "我需要想一下这个。"
+        raw_reply = str(thinking.get("reply") or "").strip()
+        if not raw_reply:
+            raw_reply = "我需要想一下这个。"
+        control_guidance = _mapping(memory_dynamics.get("control_guidance"))
+        reply_contract = _mapping(control_guidance.get("reply_contract"))
+        reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
         action = str(thinking.get("reply_action") or "answer")
+        temporal_assessment = conscious.get("temporal_assessment")
+        if not isinstance(temporal_assessment, Mapping):
+            temporal_assessment = {}
+        post_reply_observer: dict[str, Any] = {"needs_followup": False, "followup_type": "none"}
+        post_reply_observer_skipped_reason = ""
+        followup_replies: list[str] = []
+        should_observe, observer_reason = _should_run_post_reply_observer(
+            user_text=user_text,
+            memory_dynamics=memory_dynamics,
+            reply_validation=reply_validation,
+        )
+        if should_observe:
+            try:
+                observer_system, observer_user = build_post_reply_observer_prompt(
+                    user_text=user_text,
+                    reply=reply,
+                    thinking=thinking,
+                    memory_dynamics=memory_dynamics,
+                    retrieved_memories=retrieved,
+                    temporal_assessment=temporal_assessment,
+                    turn_index=turn_index,
+                )
+                observer_result = self.llm.complete_json(
+                    system_prompt=observer_system,
+                    user_prompt=observer_user,
+                )
+                post_reply_observer = dict(observer_result)
+                post_reply_observer["trigger_reason"] = observer_reason
+                followup_text = _validated_followup_text(post_reply_observer)
+                if followup_text:
+                    followup_replies.append(followup_text)
+            except Exception as exc:
+                post_reply_observer = {
+                    "needs_followup": False,
+                    "followup_type": "none",
+                    "trigger_reason": observer_reason,
+                    "observer_error": type(exc).__name__,
+                    "observer_error_detail": str(exc),
+                }
+        else:
+            post_reply_observer_skipped_reason = observer_reason
+        post_reply_memory_updates_applied = self._apply_post_reply_memory_updates(
+            state,
+            post_reply_observer.get("memory_updates"),
+            now=now,
+        )
+        pacing_feedback_habits_applied = self._apply_pacing_feedback_habit(
+            state,
+            user_text=user_text,
+        )
+        visible_reply = "\n".join([reply, *followup_replies])
         _update_temporal_state(
             state,
             now=now,
             turn_index=turn_index,
             user_text=user_text,
-            reply=reply,
+            reply=visible_reply,
             temporal_input=temporal_input,
         )
         self.store.save(state)
@@ -1273,9 +1721,6 @@ class MVPDialogueRuntime:
             llm_thinking_result = {
                 "debug_summary": legacy_inner_thought,
             } if legacy_inner_thought else {}
-        temporal_assessment = conscious.get("temporal_assessment")
-        if not isinstance(temporal_assessment, Mapping):
-            temporal_assessment = {}
         diagnostics = {
             "mvp_runtime": True,
             "bus_messages": bus,
@@ -1284,6 +1729,16 @@ class MVPDialogueRuntime:
             "temporal_assessment": dict(temporal_assessment),
             "memory_dynamics": memory_dynamics,
             "memory_candidates_applied": memory_candidates_applied,
+            "post_reply_observer": post_reply_observer,
+            "post_reply_observer_skipped_reason": post_reply_observer_skipped_reason,
+            "post_reply_memory_updates_applied": post_reply_memory_updates_applied,
+            "pacing_feedback_habits_applied": pacing_feedback_habits_applied,
+            "followup_replies": followup_replies,
+            "conversation_mode": control_guidance.get("conversation_mode"),
+            "reply_contract": reply_contract,
+            "reply_validation": reply_validation,
+            "raw_reply": raw_reply,
+            "pacing_guidance": control_guidance,
             "response_style_prior": response_style_prior,
             "habit_updates_applied": habit_updates_applied,
             "retrieved_memories": retrieved,
@@ -1299,10 +1754,16 @@ class MVPDialogueRuntime:
                 "turn_index": turn_index,
                 "user_text": user_text,
                 "reply": reply,
+                "followup_replies": followup_replies,
                 "diagnostics": diagnostics,
             }
         )
-        return MVPTurnResult(reply=reply, action=action, diagnostics=diagnostics)
+        return MVPTurnResult(
+            reply=reply,
+            action=action,
+            diagnostics=diagnostics,
+            followup_replies=followup_replies,
+        )
 
     def _mark_recalled(self, state: dict[str, Any], retrieved: list[Mapping[str, Any]], now: int) -> None:
         ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
@@ -1358,6 +1819,90 @@ class MVPDialogueRuntime:
                 state.setdefault("short_term_memory", []).append(row)
             applied.append(row)
         return applied
+
+    def _apply_post_reply_memory_updates(
+        self,
+        state: dict[str, Any],
+        updates: Any,
+        *,
+        now: int,
+    ) -> list[dict[str, Any]]:
+        if not isinstance(updates, list):
+            return []
+        applied: list[dict[str, Any]] = []
+        for item in updates:
+            if not isinstance(item, Mapping):
+                continue
+            content = str(item.get("content", "")).strip()
+            evidence = str(item.get("evidence", "")).strip()
+            confidence = _bounded_float(item.get("confidence"), default=0.0)
+            kind = str(item.get("kind", "")).strip()
+            if not content or not evidence or confidence < 0.60:
+                continue
+            if kind == "conversation_habit":
+                habits = state.setdefault("habit_traits", {})
+                if not isinstance(habits, dict):
+                    habits = {}
+                    state["habit_traits"] = habits
+                target = habits.setdefault("learned_conversation_habits", [])
+                if not isinstance(target, list):
+                    target = []
+                    habits["learned_conversation_habits"] = target
+                row = {
+                    "content": content,
+                    "evidence": evidence,
+                    "confidence": confidence,
+                    "source": "post_reply_observer",
+                    "created_at": now,
+                }
+                target.append(row)
+                applied.append(row)
+                continue
+            row = {
+                "id": f"stm_post_reply_{now}_{len(applied)}",
+                "kind": kind or "episode",
+                "content": content,
+                "salience": 0.45,
+                "confidence": confidence,
+                "keywords": _string_list(item.get("keywords"), limit=6),
+                "reason": str(item.get("reason", "post_reply_observer")),
+                "evidence": evidence,
+                "source": "post_reply_observer",
+                "created_at": now,
+                "recall_count": 0,
+            }
+            state.setdefault("short_term_memory", []).append(row)
+            applied.append(row)
+        return applied
+
+    def _apply_pacing_feedback_habit(
+        self,
+        state: dict[str, Any],
+        *,
+        user_text: str,
+    ) -> list[dict[str, Any]]:
+        if not _has_any_marker(user_text, _BREVITY_FEEDBACK_MARKERS):
+            return []
+        habits = state.setdefault("habit_traits", {})
+        if not isinstance(habits, dict):
+            habits = {}
+            state["habit_traits"] = habits
+        target = habits.setdefault("learned_conversation_habits", [])
+        if not isinstance(target, list):
+            target = []
+            habits["learned_conversation_habits"] = target
+        content = "用户偏好闲聊时更短、更像分轮聊天；避免每轮把共情、角色表演、追问全部塞成一长串。"
+        existing = {_habit_text(item) for item in target if _habit_text(item)}
+        if content in existing:
+            return []
+        row = {
+            "content": content,
+            "evidence": str(user_text).strip()[:240],
+            "confidence": 0.82,
+            "source": "pacing_feedback",
+        }
+        target.append(row)
+        return [row]
 
     def _apply_expectation_results(self, state: dict[str, Any], results: Any) -> None:
         if not isinstance(results, list):

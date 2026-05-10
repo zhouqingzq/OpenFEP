@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from pathlib import Path
 import time
@@ -36,6 +36,7 @@ class ChatResponse:
     safety_checks: list[Any]
     turn_index: int
     llm_latency_ms: float = 0.0
+    followup_replies: list[str] = field(default_factory=list)
 
 
 def _llm_api_key_available() -> bool:
@@ -575,10 +576,12 @@ class ChatInterface:
                 ],
             )
             reply = result.reply
+            followup_replies = list(getattr(result, "followup_replies", []) or [])
             action = result.action
             diagnostics = dict(result.diagnostics)
         except Exception as exc:
             reply = f"[MVP LLM 调用失败：{exc}]"
+            followup_replies = []
             action = "llm_error"
             diagnostics = {
                 "mvp_runtime": True,
@@ -587,6 +590,15 @@ class ChatInterface:
             }
         llm_latency = round((time.monotonic() - start) * 1000.0, 3)
         safe_text, checks = self._safety.enforce(reply, obs_channels)
+        safe_followups: list[str] = []
+        followup_safety_checks: list[Any] = []
+        for followup in followup_replies:
+            safe_followup, followup_checks = self._safety.enforce(followup, obs_channels)
+            if safe_followup.strip():
+                safe_followups.append(safe_followup)
+            followup_safety_checks.extend(followup_checks)
+        diagnostics["safe_followup_replies"] = safe_followups
+        diagnostics["followup_safety_checks_count"] = len(followup_safety_checks)
 
         self._last_action = action
         self._last_obs_channels = dict(obs_channels)
@@ -595,6 +607,8 @@ class ChatInterface:
             TranscriptUtterance(role="interlocutor", text=request.user_text)
         )
         self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
+        for followup in safe_followups:
+            self._transcript.append(TranscriptUtterance(role="agent", text=followup))
         self._dashboard.snapshot(self._agent)
         self._turn_index += 1
 
@@ -618,9 +632,10 @@ class ChatInterface:
             delta_traits=delta_traits,
             delta_big_five=delta_big_five,
             diagnostics=diagnostics,
-            safety_checks=checks,
+            safety_checks=[*checks, *followup_safety_checks],
             turn_index=self._turn_index,
             llm_latency_ms=llm_latency,
+            followup_replies=safe_followups,
         )
         self._last_response_diagnostics = dict(diagnostics)
         return response

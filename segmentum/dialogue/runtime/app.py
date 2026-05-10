@@ -588,6 +588,19 @@ def _message_html(role: str, text: str, *, assistant_name: str = "AI") -> str:
     )
 
 
+def append_assistant_response_messages(
+    messages: list[dict[str, str]],
+    response: object,
+) -> None:
+    reply = str(getattr(response, "reply", "")).strip()
+    if reply:
+        messages.append({"role": "assistant", "text": reply})
+    for followup in getattr(response, "followup_replies", []) or []:
+        text = str(followup).strip()
+        if text:
+            messages.append({"role": "assistant", "text": text})
+
+
 def render_sidebar() -> None:
     st.sidebar.header("Persona Management")
 
@@ -792,9 +805,7 @@ def render_chat() -> None:
         with st.spinner("AI 正在回复..."):
             try:
                 resp = chat_iface.send(ChatRequest(user_text=pending_text))
-                st.session_state.messages.append(
-                    {"role": "assistant", "text": resp.reply}
-                )
+                append_assistant_response_messages(st.session_state.messages, resp)
             except Exception as exc:  # pragma: no cover - UI guardrail
                 st.session_state.messages.append(
                     {"role": "assistant", "text": f"发送失败：{exc}"}

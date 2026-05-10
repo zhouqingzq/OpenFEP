@@ -4,6 +4,7 @@ from pathlib import Path
 
 from segmentum.dialogue.runtime.mvp_loop import (
     MVPDialogueRuntime,
+    MVPTurnResult,
     MVPStateStore,
     OpenRouterJSONClient,
     analyze_materials_into_personas,
@@ -13,6 +14,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     build_free_energy_personality_analysis_prompt,
     retrieve_memories,
     retrieve_memories_for_guidance,
+    validate_visible_reply,
 )
 
 
@@ -153,7 +155,23 @@ class FakeJSONLLM:
                 "thought_intensity_hint": "short",
                 "reasoning_notes": "需要检索相关偏好。",
             }
+        if "回复后发观察模块" in system_prompt:
+            return {
+                "needs_followup": False,
+                "followup_type": "none",
+                "confidence": 0.0,
+                "reason": "主回复已经足够。",
+                "followup_text": "",
+                "memory_updates": [],
+            }
         return {}
+
+
+def _latest_prompt_for(llm: FakeJSONLLM, marker: str) -> str:
+    for call in reversed(llm.calls):
+        if marker in call["system"]:
+            return call["user"]
+    raise AssertionError(f"missing LLM call for {marker}")
 
 
 def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) -> None:
@@ -183,6 +201,7 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
     assert len(llm.calls) == 3
     assert "意识主循环" in llm.calls[1]["system"]
     assert "思考与回复模块" in llm.calls[2]["system"]
+    assert result.diagnostics["post_reply_observer_skipped_reason"]
 
     saved = runtime.store.load()
     assert saved["pending_expectations"][0]["id"] == "exp_project_detail"
@@ -440,6 +459,15 @@ class ExpectationFakeLLM(FakeJSONLLM):
                 "habit_updates": [],
                 "memory_dynamics_note": "验证反馈被纳入控制指导。",
             }
+        if "回复后发观察模块" in system_prompt:
+            return {
+                "needs_followup": False,
+                "followup_type": "none",
+                "confidence": 0.0,
+                "reason": "无需追加。",
+                "followup_text": "",
+                "memory_updates": [],
+            }
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
@@ -494,7 +522,7 @@ def test_violated_expectation_lowers_assertion_and_reaches_prompt(tmp_path: Path
     assert guidance["repair_bias"] > 0.6
     assert guidance["clarification_bias"] > 0.6
     assert guidance["assertion_strength"] < 0.5
-    thinking_prompt = llm.calls[-1]["user"]
+    thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
     assert "记忆动力学指导" in thinking_prompt
     assert "assertion_strength" in thinking_prompt
     assert "violated" in thinking_prompt
@@ -581,6 +609,15 @@ def test_prompt_uses_evidence_cards_without_unretrieved_raw_memory(tmp_path: Pat
                     "habit_updates": [],
                     "memory_dynamics_note": "",
                 }
+            if "回复后发观察模块" in system_prompt:
+                return {
+                    "needs_followup": False,
+                    "followup_type": "none",
+                    "confidence": 0.0,
+                    "reason": "无需追加。",
+                    "followup_text": "",
+                    "memory_updates": [],
+                }
             return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
     store = MVPStateStore(tmp_path / "persona")
@@ -599,7 +636,7 @@ def test_prompt_uses_evidence_cards_without_unretrieved_raw_memory(tmp_path: Pat
 
     runtime.run_turn("聊一个无关主题。", turn_index=0, now=4000)
 
-    thinking_prompt = llm.calls[-1]["user"]
+    thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
     assert "敏感原始记忆" not in thinking_prompt
     assert "memory content is provided through retrieved evidence cards only" in thinking_prompt
 
@@ -622,6 +659,238 @@ def test_anti_keyword_feedback_does_not_create_reward_punishment_memory() -> Non
     assert guidance["control_guidance"]["repair_bias"] == 0.2
     assert guidance["memory_value"]["salience"] == 0.35
     assert all(item["target"] == "short_term" for item in guidance["write_candidates"])
+
+
+def test_casual_input_gets_fast_pacing_in_thinking_prompt(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="测试人格",
+    )
+
+    runtime.run_turn("晚上好，今天吃牛肉吃撑了，想找你聊聊。", turn_index=0, now=6000)
+
+    thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
+    assert '"reply_pacing": "casual_fast"' in thinking_prompt
+    assert '"conversation_mode": "casual_fast"' in thinking_prompt
+    assert '"reply_contract"' in thinking_prompt
+    assert '"max_response_moves": 1' in thinking_prompt
+    assert '"roleplay_density": "light"' in thinking_prompt
+    result = runtime.run_turn("睡觉了吗？", turn_index=1, now=6060)
+    assert result.diagnostics["conversation_mode"] == "casual_fast"
+
+
+def test_short_playful_cue_gets_fast_pacing_without_keyword_dump(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+
+    result = runtime.run_turn("那还是看你单挑玛薇卡好了。。", turn_index=0, now=6070)
+
+    assert result.diagnostics["conversation_mode"] == "casual_fast"
+    assert result.diagnostics["reply_contract"]["max_sentences"] == 1
+    assert result.diagnostics["post_reply_observer_skipped_reason"] == "low_risk_short_reply"
+
+
+def test_serious_technical_input_keeps_serious_thinking_pacing() -> None:
+    guidance = build_memory_dynamics_guidance(
+        {"short_term_memory": [], "long_term_memory": []},
+        "请帮我设计这个 Python 项目的架构和测试计划。",
+        {"expectation_results": [], "memory_search_keywords": ["架构", "测试"]},
+        [],
+        {"time_gap_label": "immediate"},
+        6100,
+    )
+
+    control = guidance["control_guidance"]
+    assert control["conversation_mode"] == "serious_thinking"
+    assert control["reply_pacing"] == "serious_thinking"
+    assert control["max_response_moves"] == 4
+    assert control["reply_contract"]["conversation_mode"] == "serious_thinking"
+
+
+class FollowupFakeLLM(FakeJSONLLM):
+    def __init__(self, observer_payload: dict[str, object]) -> None:
+        super().__init__()
+        self.observer_payload = observer_payload
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "回复后发观察模块" in system_prompt:
+            self.calls.append({"system": system_prompt, "user": user_prompt})
+            return self.observer_payload
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+def test_post_reply_observer_adds_high_confidence_followup(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FollowupFakeLLM(
+            {
+                "needs_followup": True,
+                "followup_type": "missed_emotion",
+                "confidence": 0.86,
+                "reason": "主回复没有接住用户想要陪伴的情绪。",
+                "followup_text": "等等，你说想要这样的陪伴，这句我会认真记住。",
+                "memory_updates": [],
+            }
+        ),
+        persona_name="测试人格",
+    )
+
+    result = runtime.run_turn("我身边很想要你这样的开朗陪伴。", turn_index=0, now=6200)
+
+    assert result.followup_replies == ["等等，你说想要这样的陪伴，这句我会认真记住。"]
+    assert result.diagnostics["post_reply_observer"]["followup_type"] == "missed_emotion"
+
+
+def test_post_reply_observer_rejects_low_confidence_long_or_roleplay_followup(tmp_path: Path) -> None:
+    rejected_payloads = [
+        {
+            "needs_followup": True,
+            "followup_type": "missed_emotion",
+            "confidence": 0.5,
+            "reason": "低置信",
+            "followup_text": "我补一句。",
+            "memory_updates": [],
+        },
+        {
+            "needs_followup": True,
+            "followup_type": "missed_emotion",
+            "confidence": 0.9,
+            "reason": "太长",
+            "followup_text": "这是一条非常长的补充。" * 12,
+            "memory_updates": [],
+        },
+        {
+            "needs_followup": True,
+            "followup_type": "roleplay",
+            "confidence": 0.9,
+            "reason": "纯角色表演",
+            "followup_text": "嘿嘿，本堂主再来一段打油诗！",
+            "memory_updates": [],
+        },
+    ]
+    for index, payload in enumerate(rejected_payloads):
+        runtime = MVPDialogueRuntime(
+            store=MVPStateStore(tmp_path / f"persona_{index}"),
+            llm=FollowupFakeLLM(payload),
+            persona_name="测试人格",
+        )
+        result = runtime.run_turn("我身边很想要你这样的陪伴。", turn_index=0, now=6300 + index)
+        assert result.followup_replies == []
+
+
+def test_low_risk_casual_turn_skips_post_reply_observer(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="测试人格",
+    )
+
+    result = runtime.run_turn("睡觉了吗？", turn_index=0, now=6360)
+
+    assert len(llm.calls) == 2
+    assert result.diagnostics["conversation_mode"] == "casual_fast"
+    assert result.diagnostics["post_reply_observer_skipped_reason"] == "low_risk_short_reply"
+
+
+def test_visible_reply_validation_strips_debug_json_and_compresses_casual() -> None:
+    contract = {
+        "conversation_mode": "casual_fast",
+        "max_sentences": 1,
+        "max_chars": 45,
+    }
+    text = '嘿嘿，我先陪你缓一缓。{"user_intent_read": "debug", "conscious_plan": {}}'
+
+    reply, validation = validate_visible_reply(text, contract)
+
+    assert reply == "嘿嘿，我先陪你缓一缓。"
+    assert validation["changed"]
+    assert "stripped_debug_payload" in validation["actions"]
+
+
+def test_visible_reply_validation_compresses_overlong_casual_reply() -> None:
+    contract = {
+        "conversation_mode": "casual_fast",
+        "max_sentences": 1,
+        "max_chars": 18,
+    }
+
+    reply, validation = validate_visible_reply(
+        "嘿嘿，那我先坐在你旁边陪你消化一会儿，别急着开席下一盘。",
+        contract,
+    )
+
+    assert len(reply) <= 19
+    assert validation["changed"]
+    assert "compressed_casual_fast" in validation["actions"]
+
+
+def test_brevity_feedback_becomes_learned_habit_and_affects_next_pacing(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="测试人格",
+    )
+
+    runtime.run_turn("我觉得你刚才太啰嗦了，可以分开几条说。", turn_index=0, now=6400)
+    saved = runtime.store.load()
+    learned = saved["habit_traits"]["learned_conversation_habits"]
+    assert any("更短" in item["content"] for item in learned)
+
+    runtime.run_turn("今天吃撑了，想随便聊聊。", turn_index=1, now=6500)
+    thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
+    assert '"reply_pacing": "casual_fast"' in thinking_prompt
+    assert '"max_chars": 45' in thinking_prompt
+
+
+def test_chat_response_carries_followup_replies_to_transcript(tmp_path: Path) -> None:
+    from segmentum.agent import SegmentAgent
+    from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
+
+    class RuntimeStub:
+        def run_turn(self, *args, **kwargs):
+            return MVPTurnResult(
+                reply="主回复。",
+                action="answer",
+                diagnostics={"mvp_runtime": True},
+                followup_replies=["补一句。"],
+            )
+
+    chat = ChatInterface(use_llm=False, mvp_root=tmp_path / "mvp")
+    chat.set_agent(SegmentAgent(), persona_name="测试人格")
+    chat._mvp_runtime = RuntimeStub()
+    response = chat.send(ChatRequest(user_text="你好"))
+
+    assert response.reply == "主回复。"
+    assert response.followup_replies == ["补一句。"]
+    assert [item["text"] for item in chat._transcript if item["role"] == "agent"] == ["主回复。", "补一句。"]
+
+
+def test_app_appends_followup_as_separate_assistant_message() -> None:
+    from dataclasses import dataclass, field
+    from segmentum.dialogue.runtime.app import append_assistant_response_messages
+
+    @dataclass
+    class ResponseStub:
+        reply: str
+        followup_replies: list[str] = field(default_factory=list)
+
+    messages: list[dict[str, str]] = []
+    append_assistant_response_messages(
+        messages,
+        ResponseStub("主回复。", ["补一句。"]),
+    )
+
+    assert messages == [
+        {"role": "assistant", "text": "主回复。"},
+        {"role": "assistant", "text": "补一句。"},
+    ]
 
 
 def test_openrouter_json_client_retries_fallback_on_403(monkeypatch) -> None:
