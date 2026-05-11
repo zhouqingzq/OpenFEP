@@ -1,0 +1,136 @@
+{
+  "extractor_outputs": [
+    {
+      "calibration_need_band": "med",
+      "claims_made": [
+        {
+          "confidence_band": "high",
+          "content_summary": "prefers concise replies",
+          "domain": "self_reported_preferences",
+          "evidence_quote_ids": [
+            "q1"
+          ],
+          "id": "pref:brevity",
+          "modality": "factual"
+        }
+      ],
+      "contradiction_detections": [],
+      "hypothesis_activations": [],
+      "memory_value_band": "high",
+      "prediction_judgments": [],
+      "prediction_proposals": [],
+      "surprise_explanation": "captured scripted extractor diagnostic"
+    },
+    {
+      "calibration_need_band": "med",
+      "claims_made": [
+        {
+          "confidence_band": "high",
+          "content_summary": "prefers concise replies",
+          "domain": "self_reported_preferences",
+          "evidence_quote_ids": [
+            "q2"
+          ],
+          "id": "pref:brevity",
+          "modality": "factual"
+        }
+      ],
+      "contradiction_detections": [],
+      "hypothesis_activations": [],
+      "memory_value_band": "high",
+      "prediction_judgments": [],
+      "prediction_proposals": [],
+      "surprise_explanation": "captured scripted extractor diagnostic"
+    },
+    {
+      "calibration_need_band": "med",
+      "claims_made": [
+        {
+          "confidence_band": "high",
+          "content_summary": "prefers concise replies",
+          "domain": "self_reported_preferences",
+          "evidence_quote_ids": [
+            "q3"
+          ],
+          "id": "pref:brevity",
+          "modality": "factual"
+        }
+      ],
+      "contradiction_detections": [],
+      "hypothesis_activations": [],
+      "memory_value_band": "high",
+      "prediction_judgments": [],
+      "prediction_proposals": [],
+      "surprise_explanation": "captured scripted extractor diagnostic"
+    },
+    {
+      "calibration_need_band": "med",
+      "claims_made": [
+        {
+          "confidence_band": "high",
+          "content_summary": "prefers concise replies",
+          "domain": "self_reported_preferences",
+          "evidence_quote_ids": [
+            "q4"
+          ],
+          "id": "pref:brevity",
+          "modality": "factual"
+        }
+      ],
+      "contradiction_detections": [],
+      "hypothesis_activations": [],
+      "memory_value_band": "high",
+      "prediction_judgments": [],
+      "prediction_proposals": [],
+      "surprise_explanation": "captured scripted extractor diagnostic"
+    },
+    {
+      "calibration_need_band": "med",
+      "claims_made": [
+        {
+          "confidence_band": "high",
+          "content_summary": "prefers concise replies",
+          "domain": "self_reported_preferences",
+          "evidence_quote_ids": [
+            "q5"
+          ],
+          "id": "pref:brevity",
+          "modality": "factual"
+        }
+      ],
+      "contradiction_detections": [],
+      "hypothesis_activations": [],
+      "memory_value_band": "high",
+      "prediction_judgments": [],
+      "prediction_proposals": [],
+      "surprise_explanation": "captured scripted extractor diagnostic"
+    }
+  ],
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 1
+    },
+    {
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 2
+    },
+    {
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 4
+    },
+    {
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 5
+    }
+  ]
+}

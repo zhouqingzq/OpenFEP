@@ -1,0 +1,132 @@
+{
+  "final_reliability": {
+    "self_reported_preferences": 0.724879
+  },
+  "reliability_ledger_updates": [
+    [
+      {
+        "applied_statuses": [
+          "confirmed"
+        ],
+        "domain": "self_reported_preferences",
+        "ignored_judgment_ids": [],
+        "previous": {
+          "alpha": 2.0,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 0,
+          "reliability": 0.5,
+          "update_reason": "prior"
+        },
+        "updated": {
+          "alpha": 2.7,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 1,
+          "reliability": 0.574468,
+          "update_reason": "judgment_update"
+        }
+      }
+    ],
+    [
+      {
+        "applied_statuses": [
+          "confirmed"
+        ],
+        "domain": "self_reported_preferences",
+        "ignored_judgment_ids": [],
+        "previous": {
+          "alpha": 2.7,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 1,
+          "reliability": 0.574468,
+          "update_reason": "judgment_update"
+        },
+        "updated": {
+          "alpha": 3.376155,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 2,
+          "reliability": 0.627987,
+          "update_reason": "judgment_update"
+        }
+      }
+    ],
+    [
+      {
+        "applied_statuses": [
+          "confirmed"
+        ],
+        "domain": "self_reported_preferences",
+        "ignored_judgment_ids": [],
+        "previous": {
+          "alpha": 3.376155,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 2,
+          "reliability": 0.627987,
+          "update_reason": "judgment_update"
+        },
+        "updated": {
+          "alpha": 4.029279,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 3,
+          "reliability": 0.668285,
+          "update_reason": "judgment_update"
+        }
+      }
+    ],
+    [
+      {
+        "applied_statuses": [
+          "confirmed"
+        ],
+        "domain": "self_reported_preferences",
+        "ignored_judgment_ids": [],
+        "previous": {
+          "alpha": 4.029279,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 3,
+          "reliability": 0.668285,
+          "update_reason": "judgment_update"
+        },
+        "updated": {
+          "alpha": 4.660154,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 4,
+          "reliability": 0.699707,
+          "update_reason": "judgment_update"
+        }
+      }
+    ],
+    [
+      {
+        "applied_statuses": [
+          "confirmed"
+        ],
+        "domain": "self_reported_preferences",
+        "ignored_judgment_ids": [],
+        "previous": {
+          "alpha": 4.660154,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 4,
+          "reliability": 0.699707,
+          "update_reason": "judgment_update"
+        },
+        "updated": {
+          "alpha": 5.269539,
+          "beta": 2.0,
+          "domain": "self_reported_preferences",
+          "last_updated_turn": 5,
+          "reliability": 0.724879,
+          "update_reason": "judgment_update"
+        }
+      }
+    ]
+  ]
+}

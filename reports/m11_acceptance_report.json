@@ -1,0 +1,85 @@
+{
+  "artifact_path": "artifacts\\m11_acceptance\\acceptance_artifact.json",
+  "behavioral_pass": true,
+  "calibration_audit_report": {
+    "passed": true,
+    "scenarios": {
+      "scenario_contradiction": {
+        "observed": {
+          "contradiction_pass": true,
+          "explicit_fact_count": 0
+        },
+        "passed": true,
+        "threshold": "contradiction retained cautious; no explicit fact"
+      },
+      "scenario_detected_lie": {
+        "observed": {
+          "reliability_drop": 0.12,
+          "value_score": 0.181787
+        },
+        "passed": true,
+        "threshold": "reliability drop >= 0.05 and contradiction value retained"
+      },
+      "scenario_long_silence": {
+        "observed": {
+          "prior_mean": 0.5,
+          "reliability": 0.516163
+        },
+        "passed": true,
+        "threshold": "after 100 turns reliability within 0.15 of prior mean"
+      },
+      "scenario_roleplay_isolation": {
+        "observed": {
+          "reliability": 0.5,
+          "write_targets": [
+            "user_model_patch",
+            "user_model_patch",
+            "user_model_patch"
+          ]
+        },
+        "passed": true,
+        "threshold": "roleplay causes zero factual reliability movement and no long-term promotion"
+      },
+      "scenario_stable_preference": {
+        "observed": {
+          "confidence_band": "high",
+          "reliability": 0.724879
+        },
+        "passed": true,
+        "threshold": "confidence_band high and reliability >= 0.7"
+      }
+    }
+  },
+  "gates": {
+    "gate_1": true,
+    "gate_10": true,
+    "gate_11": true,
+    "gate_12": true,
+    "gate_2": true,
+    "gate_3": true,
+    "gate_4": true,
+    "gate_5": true,
+    "gate_6": true,
+    "gate_7": true,
+    "gate_8": true,
+    "gate_9": true
+  },
+  "milestone": "M11.0",
+  "phenomenological_pass": true,
+  "replay_check": {
+    "byte_identical": true,
+    "checked_fields": [
+      "reliability_ledger_updates",
+      "memory_value_compositions",
+      "prompt_safe_evidence_cards",
+      "reply_policy_effects"
+    ]
+  },
+  "review_notes": {
+    "conceptual_code_audit": "M11 uses deterministic ledgers over extractor enums; no token-bag matching or legacy scoring functions are composed into M11.",
+    "legacy_import_boundary": "No module under segmentum/user_model imports memory_dynamics, value_memory, or memory_retrieval.",
+    "synthetic_fixture_scope": "Calibration turns use a deterministic scripted extractor fixture so replay is byte-identical without a live LLM."
+  },
+  "status": "ACCEPT",
+  "structural_pass": true
+}

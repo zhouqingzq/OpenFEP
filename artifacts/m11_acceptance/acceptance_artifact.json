@@ -1,0 +1,4529 @@
+{
+  "calibration_audit_report": {
+    "passed": true,
+    "scenarios": {
+      "scenario_contradiction": {
+        "observed": {
+          "contradiction_pass": true,
+          "explicit_fact_count": 0
+        },
+        "passed": true,
+        "threshold": "contradiction retained cautious; no explicit fact"
+      },
+      "scenario_detected_lie": {
+        "observed": {
+          "reliability_drop": 0.12,
+          "value_score": 0.181787
+        },
+        "passed": true,
+        "threshold": "reliability drop >= 0.05 and contradiction value retained"
+      },
+      "scenario_long_silence": {
+        "observed": {
+          "prior_mean": 0.5,
+          "reliability": 0.516163
+        },
+        "passed": true,
+        "threshold": "after 100 turns reliability within 0.15 of prior mean"
+      },
+      "scenario_roleplay_isolation": {
+        "observed": {
+          "reliability": 0.5,
+          "write_targets": [
+            "user_model_patch",
+            "user_model_patch",
+            "user_model_patch"
+          ]
+        },
+        "passed": true,
+        "threshold": "roleplay causes zero factual reliability movement and no long-term promotion"
+      },
+      "scenario_stable_preference": {
+        "observed": {
+          "confidence_band": "high",
+          "reliability": 0.724879
+        },
+        "passed": true,
+        "threshold": "confidence_band high and reliability >= 0.7"
+      }
+    }
+  },
+  "evidence_cards": [
+    {
+      "confidence_band": "low",
+      "content_summary": "prefers concise replies",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:brevity",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "prefers concise replies",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:brevity",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "prefers concise replies",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:brevity",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "prefers concise replies",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:brevity",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "prefers concise replies",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:brevity",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "high",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "says they grew up in City A",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "hist:city",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "says they grew up in City A",
+      "contradiction_status": "unresolved",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "hist:city",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "says the earlier City A claim was false",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "hist:city:conflict",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "prefers Python examples",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:python",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "prefers JavaScript examples instead",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:js",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "prefers Python examples",
+      "contradiction_status": "unresolved",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "pref:python",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "cautious_hypothesis",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "strategy_only",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "strategy_only",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "strategy_only",
+      "source_reliability": "high",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "strategy_only",
+      "source_reliability": "high",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "strategy_only",
+      "source_reliability": "high",
+      "why_retrieved": "active_user_model_hypothesis"
+    },
+    {
+      "confidence_band": "high",
+      "content_summary": "states SQL examples are acceptable",
+      "contradiction_status": "none",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "tech:sql",
+      "permitted_use": "strategy_only",
+      "source_reliability": "med",
+      "why_retrieved": "active_user_model_hypothesis"
+    }
+  ],
+  "extractor_outputs": [
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q1"
+            ],
+            "id": "pref:brevity",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 0
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q2"
+            ],
+            "id": "pref:brevity",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 1
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q3"
+            ],
+            "id": "pref:brevity",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 2
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q4"
+            ],
+            "id": "pref:brevity",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 3
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q5"
+            ],
+            "id": "pref:brevity",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 4
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "med",
+            "content_summary": "says they grew up in City A",
+            "domain": "self_reported_history",
+            "evidence_quote_ids": [
+              "q1"
+            ],
+            "id": "hist:city",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_detected_lie",
+      "turn_index": 0
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "says the earlier City A claim was false",
+            "domain": "self_reported_history",
+            "evidence_quote_ids": [
+              "q2"
+            ],
+            "id": "hist:city:conflict",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [
+          {
+            "claim_id": "hist:city:conflict",
+            "conflicts_with_memory_id": "hist:city",
+            "severity_band": "major"
+          }
+        ],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_detected_lie",
+      "turn_index": 1
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_quote_ids": [
+              "q1"
+            ],
+            "id": "rp:1",
+            "modality": "roleplay"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_roleplay_isolation",
+      "turn_index": 0
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_quote_ids": [
+              "q2"
+            ],
+            "id": "rp:2",
+            "modality": "roleplay"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_roleplay_isolation",
+      "turn_index": 1
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_quote_ids": [
+              "q3"
+            ],
+            "id": "rp:3",
+            "modality": "roleplay"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_roleplay_isolation",
+      "turn_index": 2
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "med",
+            "content_summary": "prefers Python examples",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q1"
+            ],
+            "id": "pref:python",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_contradiction",
+      "turn_index": 0
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "med",
+            "content_summary": "prefers JavaScript examples instead",
+            "domain": "self_reported_preferences",
+            "evidence_quote_ids": [
+              "q2"
+            ],
+            "id": "pref:js",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [
+          {
+            "claim_id": "pref:js",
+            "conflicts_with_memory_id": "pref:python",
+            "severity_band": "major"
+          }
+        ],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_contradiction",
+      "turn_index": 1
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q1"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 0
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q2"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 1
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q3"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 2
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q4"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 3
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q5"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 4
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q6"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 5
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [
+          {
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_quote_ids": [
+              "q7"
+            ],
+            "id": "tech:sql",
+            "modality": "factual"
+          }
+        ],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "high",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 6
+    },
+    {
+      "output": {
+        "calibration_need_band": "med",
+        "claims_made": [],
+        "contradiction_detections": [],
+        "hypothesis_activations": [],
+        "memory_value_band": "low",
+        "prediction_judgments": [],
+        "prediction_proposals": [],
+        "surprise_explanation": "captured scripted extractor diagnostic"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 7
+    }
+  ],
+  "memory_value_compositions": [
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.629787,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.651195,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.667314,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.679883,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.689952,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:user_model_patch"
+      ],
+      "value_score": 0.629787,
+      "write_target": "user_model_patch"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "contradiction_penalty",
+        "write_target:short_term"
+      ],
+      "value_score": 0.181787,
+      "write_target": "short_term"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:user_model_patch"
+      ],
+      "value_score": 0.6,
+      "write_target": "user_model_patch"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:user_model_patch"
+      ],
+      "value_score": 0.6,
+      "write_target": "user_model_patch"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:user_model_patch"
+      ],
+      "value_score": 0.6,
+      "write_target": "user_model_patch"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:user_model_patch"
+      ],
+      "value_score": 0.629787,
+      "write_target": "user_model_patch"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "contradiction_penalty",
+        "write_target:short_term"
+      ],
+      "value_score": 0.181787,
+      "write_target": "short_term"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.629787,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.651195,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.667314,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.679883,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.689952,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.698195,
+      "write_target": "long_term_user_model"
+    },
+    {
+      "gating_reasons": [
+        "band_prior:high",
+        "source_reliability_factor",
+        "recency_weight",
+        "write_target:long_term_user_model"
+      ],
+      "value_score": 0.705064,
+      "write_target": "long_term_user_model"
+    }
+  ],
+  "prediction_ledger": {
+    "scenario_contradiction": {
+      "entries": [],
+      "proposals": []
+    },
+    "scenario_detected_lie": {
+      "entries": [],
+      "proposals": []
+    },
+    "scenario_long_silence": {
+      "entries": [],
+      "proposals": []
+    },
+    "scenario_roleplay_isolation": {
+      "entries": [],
+      "proposals": []
+    },
+    "scenario_stable_preference": {
+      "entries": [],
+      "proposals": []
+    }
+  },
+  "prediction_proposals": [],
+  "quarantined_hypotheses": [
+    "hist:city",
+    "pref:python"
+  ],
+  "reliability_ledger_updates": [
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 0,
+        "reliability": 0.5,
+        "update_reason": "prior"
+      },
+      "updated": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 3.376155,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 2,
+        "reliability": 0.627987,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 3.376155,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 2,
+        "reliability": 0.627987,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 4.029279,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 3,
+        "reliability": 0.668285,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 4.029279,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 3,
+        "reliability": 0.668285,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 4.660154,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 4,
+        "reliability": 0.699707,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 4.660154,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 4,
+        "reliability": 0.699707,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 5.269539,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 5,
+        "reliability": 0.724879,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_history",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 0,
+        "reliability": 0.5,
+        "update_reason": "prior"
+      },
+      "updated": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "violated"
+      ],
+      "domain": "self_reported_history",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 2.676155,
+        "beta": 3.4,
+        "domain": "self_reported_history",
+        "last_updated_turn": 2,
+        "reliability": 0.454468,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [],
+      "domain": "self_reported_history",
+      "ignored_judgment_ids": [
+        "claim:rp:1:1"
+      ],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 0,
+        "reliability": 0.5,
+        "update_reason": "prior"
+      },
+      "updated": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 1,
+        "reliability": 0.5,
+        "update_reason": "silence_decay"
+      }
+    },
+    {
+      "applied_statuses": [],
+      "domain": "self_reported_history",
+      "ignored_judgment_ids": [
+        "claim:rp:2:2"
+      ],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 1,
+        "reliability": 0.5,
+        "update_reason": "silence_decay"
+      },
+      "updated": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 2,
+        "reliability": 0.5,
+        "update_reason": "silence_decay"
+      }
+    },
+    {
+      "applied_statuses": [],
+      "domain": "self_reported_history",
+      "ignored_judgment_ids": [
+        "claim:rp:3:3"
+      ],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 2,
+        "reliability": 0.5,
+        "update_reason": "silence_decay"
+      },
+      "updated": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_history",
+        "last_updated_turn": 3,
+        "reliability": 0.5,
+        "update_reason": "silence_decay"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 0,
+        "reliability": 0.5,
+        "update_reason": "prior"
+      },
+      "updated": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "violated"
+      ],
+      "domain": "self_reported_preferences",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 2.676155,
+        "beta": 3.4,
+        "domain": "self_reported_preferences",
+        "last_updated_turn": 2,
+        "reliability": 0.454468,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.0,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 0,
+        "reliability": 0.5,
+        "update_reason": "prior"
+      },
+      "updated": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 2.7,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 1,
+        "reliability": 0.574468,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 3.376155,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 2,
+        "reliability": 0.627987,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 3.376155,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 2,
+        "reliability": 0.627987,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 4.029279,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 3,
+        "reliability": 0.668285,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 4.029279,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 3,
+        "reliability": 0.668285,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 4.660154,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 4,
+        "reliability": 0.699707,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 4.660154,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 4,
+        "reliability": 0.699707,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 5.269539,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 5,
+        "reliability": 0.724879,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 5.269539,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 5,
+        "reliability": 0.724879,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 5.858167,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 6,
+        "reliability": 0.745488,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [
+        "confirmed"
+      ],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 5.858167,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 6,
+        "reliability": 0.745488,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 6.426743,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 7,
+        "reliability": 0.76266,
+        "update_reason": "judgment_update"
+      }
+    },
+    {
+      "applied_statuses": [],
+      "domain": "technical_claims",
+      "ignored_judgment_ids": [],
+      "previous": {
+        "alpha": 6.426743,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 7,
+        "reliability": 0.76266,
+        "update_reason": "judgment_update"
+      },
+      "updated": {
+        "alpha": 2.133624,
+        "beta": 2.0,
+        "domain": "technical_claims",
+        "last_updated_turn": 108,
+        "reliability": 0.516163,
+        "update_reason": "silence_decay"
+      }
+    }
+  ],
+  "replay_check": {
+    "byte_identical": true,
+    "checked_fields": [
+      "reliability_ledger_updates",
+      "memory_value_compositions",
+      "prompt_safe_evidence_cards",
+      "reply_policy_effects"
+    ]
+  },
+  "reply_policy_effects": [
+    {
+      "adjustment": "prefer_shorter_reply",
+      "caused_by_id": "pref:brevity",
+      "reason": "reliable_active_preference"
+    },
+    {
+      "adjustment": "prefer_shorter_reply",
+      "caused_by_id": "pref:brevity",
+      "reason": "reliable_active_preference"
+    },
+    {
+      "adjustment": "prefer_shorter_reply",
+      "caused_by_id": "pref:brevity",
+      "reason": "reliable_active_preference"
+    }
+  ],
+  "turns": [
+    {
+      "scenario_id": "scenario_stable_preference",
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 1
+    },
+    {
+      "scenario_id": "scenario_stable_preference",
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 2
+    },
+    {
+      "scenario_id": "scenario_stable_preference",
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 3
+    },
+    {
+      "scenario_id": "scenario_stable_preference",
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 4
+    },
+    {
+      "scenario_id": "scenario_stable_preference",
+      "speaker": "user",
+      "text": "Please keep it concise.",
+      "turn_id": 5
+    },
+    {
+      "scenario_id": "scenario_detected_lie",
+      "speaker": "user",
+      "text": "I grew up in City A.",
+      "turn_id": 1
+    },
+    {
+      "scenario_id": "scenario_detected_lie",
+      "speaker": "user",
+      "text": "That was false; I grew up elsewhere.",
+      "turn_id": 2
+    },
+    {
+      "scenario_id": "scenario_roleplay_isolation",
+      "speaker": "user",
+      "text": "In character, I was a prince.",
+      "turn_id": 1
+    },
+    {
+      "scenario_id": "scenario_roleplay_isolation",
+      "speaker": "user",
+      "text": "In character, I was a prince.",
+      "turn_id": 2
+    },
+    {
+      "scenario_id": "scenario_roleplay_isolation",
+      "speaker": "user",
+      "text": "In character, I was a prince.",
+      "turn_id": 3
+    },
+    {
+      "scenario_id": "scenario_contradiction",
+      "speaker": "user",
+      "text": "Use Python examples.",
+      "turn_id": 1
+    },
+    {
+      "scenario_id": "scenario_contradiction",
+      "speaker": "user",
+      "text": "Actually use JavaScript examples.",
+      "turn_id": 2
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 1
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 2
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 3
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 4
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 5
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 6
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "SQL examples are fine.",
+      "turn_id": 7
+    },
+    {
+      "scenario_id": "scenario_long_silence",
+      "speaker": "user",
+      "text": "No relevant claim after a long silence.",
+      "turn_id": 108
+    }
+  ],
+  "user_model_before_after": [
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "low",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.574468
+        },
+        "user_id": "stable"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {},
+        "user_id": "stable"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 0
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "2",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.627987
+        },
+        "user_id": "stable"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "low",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.574468
+        },
+        "user_id": "stable"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 1
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "3",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "3",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.668285
+        },
+        "user_id": "stable"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "2",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.627987
+        },
+        "user_id": "stable"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 2
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "4",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "4",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.699707
+        },
+        "user_id": "stable"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "3",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "3",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.668285
+        },
+        "user_id": "stable"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 3
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "5",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "5",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.724879
+        },
+        "user_id": "stable"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:brevity",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "4",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "prefers concise replies",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ],
+            "hypothesis_id": "pref:brevity",
+            "last_confirmed_turn": "4",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.699707
+        },
+        "user_id": "stable"
+      },
+      "scenario_id": "scenario_stable_preference",
+      "turn_index": 4
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "hist:city",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "says they grew up in City A",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "says they grew up in City A",
+            "contradiction_refs": [],
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "hist:city",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.574468
+        },
+        "user_id": "lie"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {},
+        "user_id": "lie"
+      },
+      "scenario_id": "scenario_detected_lie",
+      "turn_index": 0
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "hist:city",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "says they grew up in City A",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "hist:city:conflict",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "says the earlier City A claim was false",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "contradiction",
+            "confidence_band": "low",
+            "content_summary": "says they grew up in City A",
+            "contradiction_refs": [
+              {
+                "quote_id": "hist:city",
+                "turn_id": "2"
+              }
+            ],
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "hist:city",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "2",
+            "permitted_use": "cautious_hypothesis"
+          },
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "low",
+            "content_summary": "says the earlier City A claim was false",
+            "contradiction_refs": [],
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ],
+            "hypothesis_id": "hist:city:conflict",
+            "last_confirmed_turn": "2",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.454468
+        },
+        "user_id": "lie"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "hist:city",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "says they grew up in City A",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "says they grew up in City A",
+            "contradiction_refs": [],
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "hist:city",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.574468
+        },
+        "user_id": "lie"
+      },
+      "scenario_id": "scenario_detected_lie",
+      "turn_index": 1
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "rp:1",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [
+          "rp:1"
+        ],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.5
+        },
+        "user_id": "roleplay"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {},
+        "user_id": "roleplay"
+      },
+      "scenario_id": "scenario_roleplay_isolation",
+      "turn_index": 0
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "rp:1",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "rp:2",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [
+          "rp:1",
+          "rp:2"
+        ],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.5
+        },
+        "user_id": "roleplay"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "rp:1",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [
+          "rp:1"
+        ],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.5
+        },
+        "user_id": "roleplay"
+      },
+      "scenario_id": "scenario_roleplay_isolation",
+      "turn_index": 1
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "rp:1",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "rp:2",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "rp:3",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "3",
+        "open_uncertainties": [
+          "rp:1",
+          "rp:2",
+          "rp:3"
+        ],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.5
+        },
+        "user_id": "roleplay"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "rp:1",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "rp:2",
+            "claim_kind": "unknown",
+            "confidence_band": "high",
+            "content_summary": "roleplay persona claims a fictional royal past",
+            "domain": "self_reported_history",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [
+          "rp:1",
+          "rp:2"
+        ],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_history": 0.5
+        },
+        "user_id": "roleplay"
+      },
+      "scenario_id": "scenario_roleplay_isolation",
+      "turn_index": 2
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:python",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "prefers Python examples",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "prefers Python examples",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "pref:python",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.574468
+        },
+        "user_id": "contradiction"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {},
+        "user_id": "contradiction"
+      },
+      "scenario_id": "scenario_contradiction",
+      "turn_index": 0
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:python",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "prefers Python examples",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "pref:js",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "prefers JavaScript examples instead",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "contradiction",
+            "confidence_band": "low",
+            "content_summary": "prefers Python examples",
+            "contradiction_refs": [
+              {
+                "quote_id": "pref:python",
+                "turn_id": "2"
+              }
+            ],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "pref:python",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "2",
+            "permitted_use": "cautious_hypothesis"
+          },
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "prefers JavaScript examples instead",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ],
+            "hypothesis_id": "pref:js",
+            "last_confirmed_turn": "2",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.454468
+        },
+        "user_id": "contradiction"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "pref:python",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "med",
+            "content_summary": "prefers Python examples",
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "prefers Python examples",
+            "contradiction_refs": [],
+            "domain": "self_reported_preferences",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "pref:python",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "self_reported_preferences": 0.574468
+        },
+        "user_id": "contradiction"
+      },
+      "scenario_id": "scenario_contradiction",
+      "turn_index": 1
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "low",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.574468
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [],
+        "cognitive_style_hypotheses": [],
+        "display_name": "",
+        "last_updated_turn_id": "",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {},
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 0
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "2",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.627987
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "low",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "1",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "1",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.574468
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 1
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "3",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "3",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.668285
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "med",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "2",
+            "last_violated_turn": "",
+            "permitted_use": "cautious_hypothesis"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "2",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.627987
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 2
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "4",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "4",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.699707
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "3",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "3",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.668285
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 3
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "5",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "5",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.724879
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "4",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "4",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.699707
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 4
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              },
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "6",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "6",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.745488
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "5",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "5",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.724879
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 5
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q7",
+                "turn_id": "7"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              },
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              },
+              {
+                "quote_id": "q7",
+                "turn_id": "7"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "7",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "7",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.76266
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              },
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "6",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "6",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.745488
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 6
+    },
+    {
+      "after": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q7",
+                "turn_id": "7"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              },
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              },
+              {
+                "quote_id": "q7",
+                "turn_id": "7"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "7",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "108",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.516163
+        },
+        "user_id": "silence"
+      },
+      "before": {
+        "boundaries_and_dislikes": [],
+        "claim_history_summary": [
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "1"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              }
+            ]
+          },
+          {
+            "claim_id": "tech:sql",
+            "claim_kind": "user_stated_claim",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q7",
+                "turn_id": "7"
+              }
+            ]
+          }
+        ],
+        "cognitive_style_hypotheses": [
+          {
+            "claim_kind": "inferred_hypothesis",
+            "confidence_band": "high",
+            "content_summary": "states SQL examples are acceptable",
+            "contradiction_refs": [],
+            "domain": "technical_claims",
+            "evidence_refs": [
+              {
+                "quote_id": "q2",
+                "turn_id": "2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "4"
+              },
+              {
+                "quote_id": "q5",
+                "turn_id": "5"
+              },
+              {
+                "quote_id": "q6",
+                "turn_id": "6"
+              },
+              {
+                "quote_id": "q7",
+                "turn_id": "7"
+              }
+            ],
+            "hypothesis_id": "tech:sql",
+            "last_confirmed_turn": "7",
+            "last_violated_turn": "",
+            "permitted_use": "strategy_only"
+          }
+        ],
+        "display_name": "",
+        "last_updated_turn_id": "7",
+        "open_uncertainties": [],
+        "personality_hypotheses": [],
+        "prediction_history_summary": [],
+        "preference_hypotheses": [],
+        "relationship_state": [],
+        "source_reliability_by_domain": {
+          "technical_claims": 0.76266
+        },
+        "user_id": "silence"
+      },
+      "scenario_id": "scenario_long_silence",
+      "turn_index": 7
+    }
+  ]
+}

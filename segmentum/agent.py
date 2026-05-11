@@ -896,6 +896,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         memory_cycle_interval: int = 5,
         memory_salience_config: SalienceConfig | None = None,
         memory_enabled: bool = True,
+        m11_user_model_enabled: bool = False,
     ) -> None:
         self.rng = rng or random.Random()
         self.energy = 0.80
@@ -957,6 +958,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.latest_cognitive_state: CognitiveStateMVP | None = None
         self.last_memory_context: dict[str, object] = {}
         self.memory_enabled: bool = memory_enabled
+        self.m11_user_model_enabled: bool = m11_user_model_enabled
         self.last_retrieval_result: dict[str, object] = {}
         self.latest_memory_consolidation: dict[str, object] = {}
         self.active_meta_control_signal: MetaControlSignal | None = None
@@ -2319,6 +2321,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 self.last_retrieval_result.get("reconstruction_trace", {}) or {}
             ),
             "memory_enabled": self.memory_enabled,
+            "m11_user_model_enabled": self.m11_user_model_enabled,
             "memory_bias": 0.0,
             "pattern_bias": 0.0,
         }
@@ -5231,6 +5234,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "memory_cycle_interval": self.memory_cycle_interval,
             "memory_backend": self._active_memory_backend(),
             "memory_enabled": self.memory_enabled,
+            "m11_user_model_enabled": self.m11_user_model_enabled,
             "memory_legacy_policy_bias_enabled": self.memory_legacy_policy_bias_enabled,
             "memory_action_rollups_enabled": self.memory_action_rollups_enabled,
             "memory_representation_prior_enabled": self.memory_representation_prior_enabled,
@@ -5330,6 +5334,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             agent.long_term_memory.memory_cycle_interval = int(payload.get("memory_cycle_interval", 5))
         agent.long_term_memory.memory_backend = str(payload.get("memory_backend", agent.long_term_memory.memory_backend))
         agent.memory_enabled = bool(payload.get("memory_enabled", True))
+        agent.m11_user_model_enabled = bool(payload.get("m11_user_model_enabled", False))
         agent.memory_legacy_policy_bias_enabled = bool(
             payload.get("memory_legacy_policy_bias_enabled", True)
         )
