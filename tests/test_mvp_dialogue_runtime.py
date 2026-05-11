@@ -198,9 +198,10 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
     assert result.diagnostics["llm_thinking_result"]["debug_summary"].startswith(
         "用户问 Python 是否合适"
     )
-    assert len(llm.calls) == 3
+    assert len(llm.calls) == 4
     assert "意识主循环" in llm.calls[1]["system"]
-    assert "思考与回复模块" in llm.calls[2]["system"]
+    assert "M11 user-model extractor" in llm.calls[2]["system"]
+    assert "思考与回复模块" in llm.calls[3]["system"]
     assert result.diagnostics["post_reply_observer_skipped_reason"]
 
     saved = runtime.store.load()
@@ -793,7 +794,7 @@ def test_low_risk_casual_turn_skips_post_reply_observer(tmp_path: Path) -> None:
 
     result = runtime.run_turn("睡觉了吗？", turn_index=0, now=6360)
 
-    assert len(llm.calls) == 2
+    assert len(llm.calls) == 3
     assert result.diagnostics["conversation_mode"] == "casual_fast"
     assert result.diagnostics["post_reply_observer_skipped_reason"] == "low_risk_short_reply"
 
@@ -870,6 +871,84 @@ def test_chat_response_carries_followup_replies_to_transcript(tmp_path: Path) ->
     assert response.reply == "主回复。"
     assert response.followup_replies == ["补一句。"]
     assert [item["text"] for item in chat._transcript if item["role"] == "agent"] == ["主回复。", "补一句。"]
+
+
+def test_chat_request_speaker_name_reaches_mvp_runtime(tmp_path: Path) -> None:
+    from segmentum.agent import SegmentAgent
+    from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
+
+    class RuntimeStub:
+        def __init__(self) -> None:
+            self.kwargs = {}
+
+        def run_turn(self, *args, **kwargs):
+            self.kwargs = dict(kwargs)
+            return MVPTurnResult(
+                reply="ok",
+                action="answer",
+                diagnostics={"mvp_runtime": True},
+                followup_replies=[],
+            )
+
+    stub = RuntimeStub()
+    chat = ChatInterface(use_llm=False, mvp_root=tmp_path / "mvp")
+    chat.set_agent(SegmentAgent(), persona_name="娴嬭瘯浜烘牸")
+    chat._mvp_runtime = stub
+
+    chat.send(ChatRequest(user_text="hello", speaker_name="Alice"))
+
+    assert stub.kwargs["speaker_name"] == "Alice"
+
+
+class M11SpeakerFakeLLM(FakeJSONLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "M11 user-model extractor" in system_prompt:
+            speaker = "default"
+            if "Current interlocutor display name: Alice" in user_prompt:
+                speaker = "Alice"
+            elif "Current interlocutor display name: Bob" in user_prompt:
+                speaker = "Bob"
+            return {
+                "claims_made": [
+                    {
+                        "id": f"pref:{speaker}",
+                        "domain": "self_reported_preferences",
+                        "modality": "factual",
+                        "content_summary": f"{speaker} prefers their own UI test style",
+                        "evidence_quote_ids": ["q_current"],
+                        "confidence_band": "high",
+                    }
+                ],
+                "prediction_judgments": [],
+                "prediction_proposals": [],
+                "hypothesis_activations": [],
+                "contradiction_detections": [],
+                "calibration_need_band": "med",
+                "memory_value_band": "high",
+                "surprise_explanation": "test-only diagnostic",
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+def test_mvp_runtime_m11_keeps_distinct_user_models_by_speaker_name(tmp_path: Path) -> None:
+    llm = M11SpeakerFakeLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="娴嬭瘯浜烘牸",
+    )
+
+    runtime.run_turn("I prefer short replies.", turn_index=0, speaker_name="Alice", now=7000)
+    runtime.run_turn("I prefer detailed replies.", turn_index=1, speaker_name="Bob", now=7100)
+    state = runtime.store.load()
+
+    models = state["m11_user_models"]
+    assert set(models) == {"Alice", "Bob"}
+    alice_summary = models["Alice"]["user_model"]["preference_hypotheses"][0]["content_summary"]
+    bob_summary = models["Bob"]["user_model"]["preference_hypotheses"][0]["content_summary"]
+    assert "Alice" in alice_summary
+    assert "Bob" in bob_summary
+    assert models["Alice"] != models["Bob"]
 
 
 def test_app_appends_followup_as_separate_assistant_message() -> None:

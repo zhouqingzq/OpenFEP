@@ -53,6 +53,10 @@ def init_session() -> None:
         st.session_state.loaded_persona: str | None = None
     if "pending_user_message" not in st.session_state:
         st.session_state.pending_user_message: str | None = None
+    if "pending_speaker_name" not in st.session_state:
+        st.session_state.pending_speaker_name: str | None = None
+    if "current_speaker_name" not in st.session_state:
+        st.session_state.current_speaker_name = "测试用户"
 
 
 def _upgrade_chat_interface_if_needed() -> None:
@@ -766,14 +770,22 @@ def render_chat() -> None:
     loaded_name = st.session_state.loaded_persona or "未加载人格"
     assistant_name = st.session_state.loaded_persona or chat_iface.persona_name or "AI"
     pending_text = st.session_state.pending_user_message
+    pending_speaker = (
+        st.session_state.pending_speaker_name
+        or st.session_state.current_speaker_name
+        or "测试用户"
+    )
 
     # Display message history in a WeChat-like conversation surface.
     message_parts: list[str] = []
     if st.session_state.messages:
         message_parts.append('<div class="time-divider">今天</div>')
     for msg in st.session_state.messages:
+        text = msg["text"]
+        if msg["role"] == "user" and msg.get("speaker_name"):
+            text = f'{msg["speaker_name"]}: {text}'
         message_parts.append(
-            _message_html(msg["role"], msg["text"], assistant_name=assistant_name)
+            _message_html(msg["role"], text, assistant_name=assistant_name)
         )
     if pending_text:
         message_parts.append(
@@ -804,7 +816,12 @@ def render_chat() -> None:
         )
         with st.spinner("AI 正在回复..."):
             try:
-                resp = chat_iface.send(ChatRequest(user_text=pending_text))
+                resp = chat_iface.send(
+                    ChatRequest(
+                        user_text=pending_text,
+                        speaker_name=str(pending_speaker).strip() or "测试用户",
+                    )
+                )
                 append_assistant_response_messages(st.session_state.messages, resp)
             except Exception as exc:  # pragma: no cover - UI guardrail
                 st.session_state.messages.append(
@@ -812,18 +829,30 @@ def render_chat() -> None:
                 )
             finally:
                 st.session_state.pending_user_message = None
+                st.session_state.pending_speaker_name = None
         st.rerun()
     elif pending_text and not chat_iface.has_agent():
         st.session_state.pending_user_message = None
+        st.session_state.pending_speaker_name = None
 
     disabled = not chat_iface.has_agent() or pending_text is not None
+    st.text_input(
+        "对话者姓名",
+        key="current_speaker_name",
+        disabled=disabled,
+        placeholder="例如：张三、李四",
+    )
     user_input = st.chat_input(
         "发消息" if not disabled else "先加载一个 persona...",
         disabled=disabled,
     )
     if user_input:
-        st.session_state.messages.append({"role": "user", "text": user_input})
+        speaker = str(st.session_state.current_speaker_name or "").strip() or "测试用户"
+        st.session_state.messages.append(
+            {"role": "user", "text": user_input, "speaker_name": speaker}
+        )
         st.session_state.pending_user_message = user_input
+        st.session_state.pending_speaker_name = speaker
         st.rerun()
 
 

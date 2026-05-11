@@ -16,6 +16,16 @@ import time
 from pathlib import Path
 from typing import Any, Mapping, Protocol
 
+from segmentum.user_model import (
+    M11RuntimeConfig,
+    M11RuntimeState,
+    UserModel,
+    UserPredictionLedger,
+    SourceReliabilityLedger,
+    run_m11_turn,
+)
+from segmentum.user_model.llm_extractor import ExtractorValidationError, noop_extraction
+
 
 SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
     "self_cognition": {
@@ -52,6 +62,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "last_elapsed_seconds": None,
         "last_time_gap_label": "first_turn",
     },
+    "m11_user_models": {},
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -134,6 +145,12 @@ def _string_list(value: Any, *, limit: int = 12) -> list[str]:
 
 def _mapping(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _safe_user_id(speaker_name: str) -> str:
+    name = str(speaker_name or "").strip() or "default_user"
+    safe = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in name)
+    return safe.strip("_") or "default_user"
 
 
 def _bounded_float(value: Any, *, default: float = 0.5) -> float:
@@ -539,6 +556,7 @@ def build_conscious_loop_prompt(
     *,
     state: Mapping[str, Any],
     user_text: str,
+    speaker_name: str = "",
     bus_messages: list[Mapping[str, Any]],
     turn_index: int,
     temporal_input: Mapping[str, Any] | None = None,
@@ -550,6 +568,9 @@ def build_conscious_loop_prompt(
 不要生成最终回复。
 """
     user_prompt = f"""turn_index: {turn_index}
+current_interlocutor:
+{speaker_name or "default_user"}
+
 外部输入:
 {user_text}
 
@@ -590,10 +611,35 @@ def build_conscious_loop_prompt(
     return system_prompt, user_prompt
 
 
+def build_m11_extractor_prompt(
+    *,
+    snapshot: Mapping[str, Any],
+    speaker_name: str,
+) -> tuple[str, str]:
+    system_prompt = """You are the M11 user-model extractor. Return strict JSON only.
+
+You may classify only bounded enum fields and short summaries. Do not output
+floats or numeric scores. Do not invent prediction_id or hypothesis_id values
+that are not present in the bounded snapshot. New proposal ids are allowed only
+when all source_hypothesis_ids and source_judgment_ids reference snapshot ids.
+Keep user claims separate from truth: a high-value claim is useful evidence for
+calibration, not verified fact.
+"""
+    user_prompt = f"""Current interlocutor display name: {speaker_name}
+
+Bounded snapshot:
+{_json_text(dict(snapshot))}
+
+Return JSON exactly with the M11 extractor schema fields.
+"""
+    return system_prompt, user_prompt
+
+
 def build_thinking_prompt(
     *,
     state: Mapping[str, Any],
     user_text: str,
+    speaker_name: str = "",
     conscious_plan: Mapping[str, Any],
     retrieved_memories: list[Mapping[str, Any]],
     turn_index: int,
@@ -1525,6 +1571,73 @@ def _should_run_post_reply_observer(
     return False, "low_risk_short_reply"
 
 
+def _load_m11_state(state: Mapping[str, Any], *, user_id: str, display_name: str) -> M11RuntimeState:
+    models = _mapping(state.get("m11_user_models"))
+    payload = _mapping(models.get(user_id))
+    if not payload:
+        return M11RuntimeState.clean(user_id=user_id, display_name=display_name)
+    user_model_payload = _mapping(payload.get("user_model"))
+    user_model = (
+        UserModel.from_dict(user_model_payload)
+        if user_model_payload
+        else UserModel(user_id=user_id, display_name=display_name)
+    )
+    return M11RuntimeState(
+        user_model=user_model,
+        prediction_ledger=UserPredictionLedger.from_dict(_mapping(payload.get("prediction_ledger"))),
+        reliability_ledger=SourceReliabilityLedger.from_dict(_mapping(payload.get("reliability_ledger"))),
+    )
+
+
+def _save_m11_state(state: dict[str, Any], *, user_id: str, m11_state: M11RuntimeState) -> None:
+    models = _mapping(state.get("m11_user_models"))
+    models[user_id] = m11_state.to_dict()
+    state["m11_user_models"] = models
+
+
+def _m11_enabled_for_state(state: Mapping[str, Any]) -> bool:
+    return bool(state.get("m11_user_model_enabled", True))
+
+
+def _m11_reply_policy_contract_patch(effects: list[Mapping[str, Any]]) -> dict[str, Any]:
+    patch: dict[str, Any] = {}
+    adjustments = {str(item.get("adjustment", "")) for item in effects}
+    if "prefer_shorter_reply" in adjustments:
+        patch["prefer_shorter_reply"] = True
+        patch["max_sentences"] = 1
+        patch["max_chars"] = 90
+    if "ask_clarifying_question" in adjustments:
+        patch["prefer_clarification"] = True
+    if "soften_social_evidence_language" in adjustments:
+        patch["soften_social_evidence_language"] = True
+    return patch
+
+
+def _merge_m11_into_memory_guidance(
+    memory_dynamics: dict[str, Any],
+    *,
+    speaker_name: str,
+    m11_result: Mapping[str, Any] | None,
+) -> None:
+    if not m11_result or not m11_result.get("enabled"):
+        return
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    contract = _mapping(control.get("reply_contract"))
+    effects = [
+        dict(item)
+        for item in m11_result.get("reply_policy_effects", [])
+        if isinstance(item, Mapping)
+    ]
+    contract.update(_m11_reply_policy_contract_patch(effects))
+    control["reply_contract"] = contract
+    control["m11_user_model"] = {
+        "current_interlocutor": speaker_name,
+        "prompt_safe_evidence_cards": list(m11_result.get("prompt_safe_evidence_cards", [])),
+        "reply_policy_effects": effects,
+    }
+    memory_dynamics["control_guidance"] = control
+
+
 @dataclass
 class MVPTurnResult:
     reply: str
@@ -1584,19 +1697,32 @@ class MVPDialogueRuntime:
         user_text: str,
         *,
         turn_index: int = 0,
+        speaker_name: str = "",
         bus_messages: list[Mapping[str, Any]] | None = None,
         now: int | None = None,
     ) -> MVPTurnResult:
         now = _utc_timestamp() if now is None else int(now)
         state = self.store.load()
+        display_name = str(speaker_name or "").strip() or "default_user"
+        user_id = _safe_user_id(display_name)
+        m11_state = _load_m11_state(state, user_id=user_id, display_name=display_name)
+        m11_result_dict: dict[str, Any] = {}
         temporal_input = _temporal_input_from_state(state, now=now)
         bus = list(bus_messages or [])
         bus.append({"type": "TemporalContextEvent", "turn_index": turn_index, **temporal_input})
-        bus.append({"type": "UserUtteranceEvent", "turn_index": turn_index, "text": user_text, "at": now})
+        bus.append({
+            "type": "UserUtteranceEvent",
+            "turn_index": turn_index,
+            "speaker_name": display_name,
+            "user_id": user_id,
+            "text": user_text,
+            "at": now,
+        })
 
         conscious_system, conscious_user = build_conscious_loop_prompt(
             state=state,
             user_text=user_text,
+            speaker_name=display_name,
             bus_messages=bus,
             turn_index=turn_index,
             temporal_input=temporal_input,
@@ -1621,10 +1747,52 @@ class MVPDialogueRuntime:
         }
         self._mark_recalled(state, retrieved, now)
         response_style_prior = _response_style_prior(state, retrieved)
+        if _m11_enabled_for_state(state):
+            def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+                system_prompt, user_prompt = build_m11_extractor_prompt(
+                    snapshot=snapshot,
+                    speaker_name=display_name,
+                )
+                try:
+                    return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                except Exception:
+                    return noop_extraction()
+
+            try:
+                m11_state, m11_turn = run_m11_turn(
+                    m11_state,
+                    user_id=user_id,
+                    turn_id=turn_index + 1,
+                    current_turn_quotes={"q_current": user_text},
+                    last_turn_summaries=[],
+                    extractor=_extract_m11,
+                    config=M11RuntimeConfig(m11_user_model_enabled=True, persona_kind="ui_chat"),
+                    legacy_memory_rows=[
+                        *(state.get("short_term_memory", []) if isinstance(state.get("short_term_memory"), list) else []),
+                        *(state.get("long_term_memory", []) if isinstance(state.get("long_term_memory"), list) else []),
+                    ],
+                )
+                _save_m11_state(state, user_id=user_id, m11_state=m11_state)
+                m11_result_dict = m11_turn.to_dict()
+            except (ExtractorValidationError, ValueError, TypeError) as exc:
+                m11_result_dict = {
+                    "enabled": True,
+                    "fallback": "noop_extraction",
+                    "error": type(exc).__name__,
+                    "error_detail": str(exc),
+                    "prompt_safe_evidence_cards": [],
+                    "reply_policy_effects": [],
+                }
+            _merge_m11_into_memory_guidance(
+                memory_dynamics,
+                speaker_name=display_name,
+                m11_result=m11_result_dict,
+            )
 
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state),
             user_text=user_text,
+            speaker_name=display_name,
             conscious_plan=conscious,
             retrieved_memories=retrieved,
             turn_index=turn_index,
@@ -1728,6 +1896,11 @@ class MVPDialogueRuntime:
             "temporal_input": temporal_input,
             "temporal_assessment": dict(temporal_assessment),
             "memory_dynamics": memory_dynamics,
+            "m11_user_model": m11_result_dict,
+            "current_interlocutor": {
+                "display_name": display_name,
+                "user_id": user_id,
+            },
             "memory_candidates_applied": memory_candidates_applied,
             "post_reply_observer": post_reply_observer,
             "post_reply_observer_skipped_reason": post_reply_observer_skipped_reason,

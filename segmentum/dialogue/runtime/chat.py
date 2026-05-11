@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 @dataclass
 class ChatRequest:
     user_text: str
+    speaker_name: str = ""
     override_traits: dict[str, float] | None = None
     override_precisions: dict[str, float] | None = None
 
@@ -566,6 +567,7 @@ class ChatInterface:
             result = self._mvp_runtime.run_turn(
                 request.user_text,
                 turn_index=self._turn_index,
+                speaker_name=request.speaker_name,
                 bus_messages=[
                     {
                         "type": "ObservationEvent",
