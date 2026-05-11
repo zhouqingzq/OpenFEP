@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import json
+import shutil
 import sys
+import uuid
 from html import escape
 from pathlib import Path
 
@@ -10,6 +15,9 @@ from pathlib import Path
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
+
+# In-process cache: (mtime_ns, data_uri) per slot; survives Streamlit reruns.
+_CHAT_AVATAR_DATA_URI_CACHE: dict[str, tuple[float, str]] = {}
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -32,8 +40,189 @@ from segmentum.dialogue.runtime.mvp_loop import (
     analyze_materials_into_personas,
 )
 
+_DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
+    "current_speaker_name",
+    "chat_avatar_user_label",
+    "chat_avatar_user_preset",
+    "chat_avatar_assistant_label",
+    "chat_avatar_assistant_preset",
+)
+
+
+def _read_query_did() -> str:
+    qp = st.query_params
+    raw = qp.get("did")
+    if isinstance(raw, list):
+        raw = raw[0] if raw else None
+    s = str(raw or "").strip()
+    return s[:64] if s else ""
+
+
+def ensure_dialogue_client_id() -> None:
+    """Assign a stable per-tab ``did`` query param so parallel browsers do not share MVP files."""
+    s = _read_query_did()
+    if len(s) >= 8:
+        old = st.session_state.get("dialogue_client_id")
+        st.session_state.dialogue_client_id = s
+        if old is not None and old != s:
+            st.session_state._dialogue_prefs_loaded = False
+            st.session_state.messages = []
+            st.session_state._last_persisted_prefs_blob = None
+        return
+    new_id = uuid.uuid4().hex[:16]
+    st.query_params["did"] = new_id
+    st.rerun()
+
+
+def _dialogue_client_prefs_path(did: str) -> Path:
+    base = _chat_avatar_dir() / "clients"
+    base.mkdir(parents=True, exist_ok=True)
+    safe = "".join(c if (c.isalnum() or c in "-_") else "_" for c in did).strip("_")[:64] or "client"
+    return base / f"{safe}.json"
+
+
+def _load_dialogue_client_prefs(did: str) -> dict[str, str]:
+    path = _dialogue_client_prefs_path(did)
+    if not path.is_file():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    return {str(k): str(v) for k, v in raw.items() if isinstance(k, str)}
+
+
+def _maybe_persist_dialogue_client_prefs(did: str) -> None:
+    if len(did) < 8:
+        return
+    data = {k: str(st.session_state.get(k, "")) for k in _DIALOGUE_PREF_FIELDS}
+    blob = json.dumps(data, ensure_ascii=False, sort_keys=True)
+    if st.session_state.get("_last_persisted_prefs_blob") == blob:
+        return
+    path = _dialogue_client_prefs_path(did)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    st.session_state._last_persisted_prefs_blob = blob
+
+
+def _speaker_avatar_stem(speaker_name: str) -> str:
+    n = str(speaker_name or "").strip() or "default_user"
+    return hashlib.sha256(n.encode("utf-8")).hexdigest()[:24]
+
+
+def _speakers_avatar_dir() -> Path:
+    d = _chat_avatar_dir() / "speakers"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _iter_speaker_avatar_paths(speaker_name: str):
+    stem = _speaker_avatar_stem(speaker_name)
+    base = _speakers_avatar_dir()
+    for ext in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
+        yield base / f"{stem}{ext}"
+
+
+def find_stored_chat_avatar_path_for_speaker(speaker_name: str) -> Path | None:
+    for p in _iter_speaker_avatar_paths(speaker_name):
+        if p.is_file():
+            return p
+    return None
+
+
+def _speaker_avatar_cache_key(speaker_name: str) -> str:
+    return f"sp:{_speaker_avatar_stem(speaker_name)}"
+
+
+def _migrate_legacy_user_avatar_for_speaker(speaker_name: str) -> None:
+    """If an old flat ``user.*`` avatar exists and this speaker has none, copy once."""
+    if find_stored_chat_avatar_path_for_speaker(speaker_name) is not None:
+        return
+    leg = find_stored_chat_avatar_path("user")
+    if leg is None or not leg.is_file():
+        return
+    dest_dir = _speakers_avatar_dir()
+    dest = dest_dir / f"{_speaker_avatar_stem(speaker_name)}{leg.suffix.lower()}"
+    try:
+        shutil.copy2(leg, dest)
+    except OSError:
+        return
+    _invalidate_chat_avatar_cache(_speaker_avatar_cache_key(speaker_name))
+
+
+def delete_chat_avatar_image_for_speaker(speaker_name: str) -> None:
+    for p in _iter_speaker_avatar_paths(speaker_name):
+        p.unlink(missing_ok=True)
+    _invalidate_chat_avatar_cache(_speaker_avatar_cache_key(speaker_name))
+
+
+def save_chat_avatar_image_for_speaker(speaker_name: str, data: bytes) -> tuple[bool, str]:
+    if len(data) > _MAX_CHAT_AVATAR_BYTES:
+        return False, f"文件过大（最大 {_MAX_CHAT_AVATAR_BYTES // 1000}KB）"
+    mime = _detect_image_mime(data)
+    if not mime:
+        return False, "仅支持 PNG / JPEG / GIF / WebP"
+    delete_chat_avatar_image_for_speaker(speaker_name)
+    out = _speakers_avatar_dir() / f"{_speaker_avatar_stem(speaker_name)}{_mime_to_ext(mime)}"
+    out.write_bytes(data)
+    _invalidate_chat_avatar_cache(_speaker_avatar_cache_key(speaker_name))
+    return True, ""
+
+
+def load_chat_avatar_data_uri_for_speaker(speaker_name: str) -> str | None:
+    stem = _speaker_avatar_stem(speaker_name)
+    cache_key = _speaker_avatar_cache_key(speaker_name)
+    path = find_stored_chat_avatar_path_for_speaker(speaker_name)
+    if path is None:
+        _invalidate_chat_avatar_cache(cache_key)
+        return None
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return None
+    hit = _CHAT_AVATAR_DATA_URI_CACHE.get(cache_key)
+    if hit is not None and hit[0] == mtime:
+        return hit[1]
+    data = path.read_bytes()
+    mime = _detect_image_mime(data)
+    if not mime:
+        return None
+    uri = f"data:{mime};base64,{base64.standard_b64encode(data).decode('ascii')}"
+    _CHAT_AVATAR_DATA_URI_CACHE[cache_key] = (mtime, uri)
+    return uri
+
+
+def _recreate_chat_iface_for_dialogue_session(did: str) -> None:
+    iface = st.session_state.chat_iface
+    old_agent = getattr(iface, "agent", None)
+    old_persona = getattr(iface, "persona_name", "") or st.session_state.get("loaded_persona") or ""
+    key_available = OpenRouterJSONClient.available()
+    replacement = ChatInterface(
+        use_llm=True if key_available else None,
+        persona_name=str(old_persona),
+        enable_conscious_trace=True,
+        conscious_root=_project_root / "artifacts" / "conscious",
+        session_id=did,
+    )
+    if old_agent is not None:
+        replacement.set_agent(old_agent, persona_name=str(old_persona))
+    st.session_state.chat_iface = replacement
+
 
 def init_session() -> None:
+    did = str(st.session_state.get("dialogue_client_id") or "").strip()[:64]
+    if len(did) < 8:
+        did = "m56_live"
+        st.session_state.dialogue_client_id = did
+
+    if not st.session_state.get("_dialogue_prefs_loaded"):
+        prefs = _load_dialogue_client_prefs(did)
+        for k in _DIALOGUE_PREF_FIELDS:
+            if k in prefs:
+                st.session_state[k] = prefs[k]
+        st.session_state._dialogue_prefs_loaded = True
+
     if "pm" not in st.session_state:
         st.session_state.pm = PersonaManager(
             storage_dir=_project_root / "artifacts" / "m56_personas"
@@ -43,10 +232,12 @@ def init_session() -> None:
             use_llm=True if OpenRouterJSONClient.available() else None,
             enable_conscious_trace=True,
             conscious_root=_project_root / "artifacts" / "conscious",
-            session_id="m56_live",
+            session_id=did,
         )
     else:
         _upgrade_chat_interface_if_needed()
+        if getattr(st.session_state.chat_iface, "_session_id", None) != did:
+            _recreate_chat_iface_for_dialogue_session(did)
     if "messages" not in st.session_state:
         st.session_state.messages: list[dict[str, str]] = []
     if "loaded_persona" not in st.session_state:
@@ -57,6 +248,31 @@ def init_session() -> None:
         st.session_state.pending_speaker_name: str | None = None
     if "current_speaker_name" not in st.session_state:
         st.session_state.current_speaker_name = "测试用户"
+    if "chat_avatar_user_label" not in st.session_state:
+        st.session_state.chat_avatar_user_label = "我"
+    if "chat_avatar_user_preset" not in st.session_state:
+        st.session_state.chat_avatar_user_preset = "ocean"
+    if "chat_avatar_assistant_label" not in st.session_state:
+        st.session_state.chat_avatar_assistant_label = ""
+    if "chat_avatar_assistant_preset" not in st.session_state:
+        st.session_state.chat_avatar_assistant_preset = "slate"
+    # Bump to reset st.file_uploader after save/clear so the widget does not
+    # keep returning the same file and re-trigger save+rerun forever.
+    if "chat_avatar_upload_nonce_user" not in st.session_state:
+        st.session_state.chat_avatar_upload_nonce_user = 0
+    if "chat_avatar_upload_nonce_assistant" not in st.session_state:
+        st.session_state.chat_avatar_upload_nonce_assistant = 0
+
+    sn0 = str(st.session_state.get("current_speaker_name") or "").strip()
+    if sn0:
+        _migrate_legacy_user_avatar_for_speaker(sn0)
+
+    if st.session_state.get("_last_persisted_prefs_blob") is None:
+        st.session_state._last_persisted_prefs_blob = json.dumps(
+            {k: str(st.session_state.get(k, "")) for k in _DIALOGUE_PREF_FIELDS},
+            ensure_ascii=False,
+            sort_keys=True,
+        )
 
 
 def _upgrade_chat_interface_if_needed() -> None:
@@ -75,16 +291,158 @@ def _upgrade_chat_interface_if_needed() -> None:
 
     old_agent = getattr(iface, "agent", None)
     old_persona = getattr(iface, "persona_name", "") or st.session_state.get("loaded_persona") or ""
+    did = str(st.session_state.get("dialogue_client_id") or "m56_live").strip()[:64]
+    if len(did) < 8:
+        did = "m56_live"
     replacement = ChatInterface(
         use_llm=True if key_available else None,
         persona_name=str(old_persona),
         enable_conscious_trace=True,
         conscious_root=_project_root / "artifacts" / "conscious",
-        session_id="m56_live",
+        session_id=did,
     )
     if old_agent is not None:
         replacement.set_agent(old_agent, persona_name=str(old_persona))
     st.session_state.chat_iface = replacement
+
+
+# Avatar preset → CSS class inside the chat iframe (whitelist only; no user CSS injection).
+CHAT_USER_AVATAR_PRESETS: dict[str, str] = {
+    "ocean": "av-u-ocean",
+    "mint": "av-u-mint",
+    "sunset": "av-u-sunset",
+    "lilac": "av-u-lilac",
+    "ember": "av-u-ember",
+}
+CHAT_USER_AVATAR_PRESET_LABELS: dict[str, str] = {
+    "ocean": "蓝紫（默认）",
+    "mint": "翠绿",
+    "sunset": "暖霞",
+    "lilac": "淡紫",
+    "ember": "赤陶",
+}
+CHAT_ASSISTANT_AVATAR_PRESETS: dict[str, str] = {
+    "slate": "av-a-slate",
+    "teal": "av-a-teal",
+    "rose": "av-a-rose",
+    "amber": "av-a-amber",
+    "midnight": "av-a-midnight",
+}
+CHAT_ASSISTANT_AVATAR_PRESET_LABELS: dict[str, str] = {
+    "slate": "岩灰（默认）",
+    "teal": "青绿",
+    "rose": "玫粉",
+    "amber": "琥珀",
+    "midnight": "午夜",
+}
+
+
+def _truncate_avatar_label(raw: str, *, max_chars: int = 4) -> str:
+    text = str(raw or "").strip()
+    if not text:
+        return "我"
+    return text[:max_chars]
+
+
+def _assistant_avatar_label_text(custom_label: str, assistant_name: str) -> str:
+    custom = str(custom_label or "").strip()
+    if custom:
+        return _truncate_avatar_label(custom, max_chars=4)
+    return _avatar_label(assistant_name)
+
+
+def _single_wide_char_label(label: str) -> bool:
+    """Use slightly larger type for single non-ASCII glyph (e.g. one emoji)."""
+    s = str(label or "").strip()
+    return len(s) == 1 and ord(s[0]) > 127
+
+
+_MAX_CHAT_AVATAR_BYTES = 400_000
+
+
+def _chat_avatar_dir() -> Path:
+    d = _project_root / "artifacts" / "chat_avatars"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _detect_image_mime(data: bytes) -> str | None:
+    if len(data) < 12:
+        return None
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if data[:6] in (b"GIF87a", b"GIF89a"):
+        return "image/gif"
+    if data[:4] == b"RIFF" and len(data) > 12 and data[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+def _mime_to_ext(mime: str) -> str:
+    return {
+        "image/png": ".png",
+        "image/jpeg": ".jpg",
+        "image/gif": ".gif",
+        "image/webp": ".webp",
+    }.get(mime, ".png")
+
+
+def _iter_avatar_paths(slot: str):
+    for ext in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
+        yield _chat_avatar_dir() / f"{slot}{ext}"
+
+
+def find_stored_chat_avatar_path(slot: str) -> Path | None:
+    for p in _iter_avatar_paths(slot):
+        if p.is_file():
+            return p
+    return None
+
+
+def _invalidate_chat_avatar_cache(slot: str) -> None:
+    _CHAT_AVATAR_DATA_URI_CACHE.pop(slot, None)
+
+
+def delete_chat_avatar_image(slot: str) -> None:
+    for p in _iter_avatar_paths(slot):
+        p.unlink(missing_ok=True)
+    _invalidate_chat_avatar_cache(slot)
+
+
+def save_chat_avatar_image(slot: str, data: bytes) -> tuple[bool, str]:
+    if len(data) > _MAX_CHAT_AVATAR_BYTES:
+        return False, f"文件过大（最大 {_MAX_CHAT_AVATAR_BYTES // 1000}KB）"
+    mime = _detect_image_mime(data)
+    if not mime:
+        return False, "仅支持 PNG / JPEG / GIF / WebP"
+    delete_chat_avatar_image(slot)
+    out = _chat_avatar_dir() / f"{slot}{_mime_to_ext(mime)}"
+    out.write_bytes(data)
+    _invalidate_chat_avatar_cache(slot)
+    return True, ""
+
+
+def load_chat_avatar_data_uri(slot: str) -> str | None:
+    path = find_stored_chat_avatar_path(slot)
+    if path is None:
+        _invalidate_chat_avatar_cache(slot)
+        return None
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return None
+    hit = _CHAT_AVATAR_DATA_URI_CACHE.get(slot)
+    if hit is not None and hit[0] == mtime:
+        return hit[1]
+    data = path.read_bytes()
+    mime = _detect_image_mime(data)
+    if not mime:
+        return None
+    uri = f"data:{mime};base64,{base64.standard_b64encode(data).decode('ascii')}"
+    _CHAT_AVATAR_DATA_URI_CACHE[slot] = (mtime, uri)
+    return uri
 
 
 # Chat UI lives inside components.html so scroll JS runs in the same document as the
@@ -158,9 +516,11 @@ body {
 .wechat-row.user {
     flex-direction: row-reverse;
     justify-content: flex-start;
+    gap: 14px;
 }
 .wechat-row.assistant {
     justify-content: flex-start;
+    gap: 14px;
 }
 .wechat-row.user + .wechat-row.user {
     margin-top: -7px;
@@ -169,7 +529,7 @@ body {
     width: 38px;
     height: 38px;
     flex: 0 0 38px;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -178,17 +538,87 @@ body {
     color: #ffffff;
     user-select: none;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
-.wechat-row.user .wechat-avatar {
+.wechat-avatar.av-single {
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1;
+}
+.wechat-avatar.with-img {
+    padding: 0;
+    line-height: 0;
+    background: transparent !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+    font-size: 0;
+    font-weight: 400;
+}
+.wechat-avatar.with-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+.wechat-row.user .wechat-avatar.av-u-ocean {
     background:
-        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
+        linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0)),
         linear-gradient(135deg, #5270df, #73b6ff 52%, #e7f0ff);
     color: #101010;
 }
-.wechat-row.assistant .wechat-avatar {
+.wechat-row.user .wechat-avatar.av-u-mint {
     background:
-        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0)),
+        linear-gradient(145deg, rgba(255,255,255,0.12), transparent),
+        linear-gradient(135deg, #0d7a62, #3cd681 55%, #b8ffe8);
+    color: #06221a;
+}
+.wechat-row.user .wechat-avatar.av-u-sunset {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), transparent),
+        linear-gradient(135deg, #c44a2d, #f0a050 50%, #ffd8a8);
+    color: #2a0f08;
+}
+.wechat-row.user .wechat-avatar.av-u-lilac {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), transparent),
+        linear-gradient(135deg, #6b4fb8, #a78bfa 52%, #e8e0ff);
+    color: #1e1038;
+}
+.wechat-row.user .wechat-avatar.av-u-ember {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.1), transparent),
+        linear-gradient(135deg, #8b1538, #d94a4a 48%, #ffb59a);
+    color: #1a0505;
+}
+.wechat-row.assistant .wechat-avatar.av-a-slate {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), transparent),
         linear-gradient(135deg, #565b64, #252a31);
+    color: #f0f0f0;
+}
+.wechat-row.assistant .wechat-avatar.av-a-teal {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.1), transparent),
+        linear-gradient(135deg, #0f5c5c, #1a8a8a 50%, #6ee7d8);
+    color: #031a18;
+}
+.wechat-row.assistant .wechat-avatar.av-a-rose {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.12), transparent),
+        linear-gradient(135deg, #7c3a5c, #c084b8 52%, #fce7f3);
+    color: #2a0a1f;
+}
+.wechat-row.assistant .wechat-avatar.av-a-amber {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.1), transparent),
+        linear-gradient(135deg, #8a5a12, #d4a017 48%, #fff2c4);
+    color: #2a1a00;
+}
+.wechat-row.assistant .wechat-avatar.av-a-midnight {
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.08), transparent),
+        linear-gradient(135deg, #1a2a4a, #2d4a8c 45%, #5a7fd4);
+    color: #e8f0ff;
 }
 .wechat-stack {
     display: flex;
@@ -229,30 +659,41 @@ body {
     background: var(--bubble-mine-bg);
     color: var(--bubble-mine-text);
     margin-right: 0;
+    border-radius: 8px;
 }
 .wechat-row.assistant .wechat-bubble {
     background: var(--bubble-other-bg);
     color: var(--bubble-other-text);
     border: 0;
     margin-left: 0;
+    border-radius: 8px;
 }
+/* Rotated square tail: avoids the vertical "stem" artifact of border-triangles. */
 .wechat-row.user .wechat-bubble::after {
     content: "";
     position: absolute;
-    top: 11px;
-    right: -5px;
-    border-width: 5px 0 5px 5px;
-    border-style: solid;
-    border-color: transparent transparent transparent var(--bubble-mine-bg);
+    width: 9px;
+    height: 9px;
+    top: 14px;
+    right: -3px;
+    background: var(--bubble-mine-bg);
+    transform: rotate(45deg);
+    border-radius: 0 2px 0 0;
+    z-index: 0;
+    pointer-events: none;
 }
 .wechat-row.assistant .wechat-bubble::before {
     content: "";
     position: absolute;
-    top: 11px;
-    left: -5px;
-    border-width: 5px 5px 5px 0;
-    border-style: solid;
-    border-color: transparent var(--bubble-other-bg) transparent transparent;
+    width: 9px;
+    height: 9px;
+    top: 14px;
+    left: -3px;
+    background: var(--bubble-other-bg);
+    transform: rotate(45deg);
+    border-radius: 0 0 0 2px;
+    z-index: 0;
+    pointer-events: none;
 }
 .time-divider {
     text-align: center;
@@ -300,17 +741,17 @@ body {
 
 
 def _chat_iframe_height(messages: list[dict[str, str]], *, pending: str | None) -> int:
-    """Bounded height so the Streamlit chat input below the iframe stays on-screen.
+    """Height (px) for the WeChat-style message iframe.
 
-    The iframe is only the message pane; tall iframes steal vertical space and push
-    ``st.chat_input`` below the fold. Extra history scrolls inside ``.wechat-body``.
+    Taller pane shows more history before the inner ``.wechat-body`` scrolls; the
+    Streamlit ``st.chat_input`` block below is kept compact so the middle region
+    dominates typical laptop viewports.
     """
     n = len(messages) + (1 if pending else 0)
     chars = sum(len(str(m.get("text", ""))) for m in messages)
-    # Cap ~420px: leaves room for app chrome + tabs + ~210px chat input on typical laptops.
-    content_hint = 175 + n * 40 + min(160, chars // 200)
-    cap = 420
-    floor = 300
+    content_hint = 220 + n * 46 + min(260, chars // 140)
+    cap = 620
+    floor = 420
     return max(floor, min(cap, content_hint))
 
 
@@ -434,15 +875,15 @@ def inject_app_style() -> None:
             position: relative;
             width: 100% !important;
             max-width: none !important;
-            height: 210px !important;
-            min-height: 210px !important;
+            height: 168px !important;
+            min-height: 168px !important;
             background: var(--wechat-bg) !important;
             border: 0 !important;
             border-top: 1px solid var(--wechat-divider) !important;
             border-radius: 0 !important;
             box-shadow: none !important;
             outline: 0 !important;
-            padding: 14px 30px 64px !important;
+            padding: 12px 30px 52px !important;
             margin-top: 0 !important;
             box-sizing: border-box !important;
         }
@@ -472,7 +913,7 @@ def inject_app_style() -> None:
         [data-testid="stChatInput"] > div {
             width: 100% !important;
             max-width: none !important;
-            min-height: 132px !important;
+            min-height: 104px !important;
             background: var(--input-bg) !important;
             border: 1px solid var(--input-border) !important;
             border-radius: 12px !important;
@@ -486,7 +927,7 @@ def inject_app_style() -> None:
         [data-testid="stChatInput"] [data-baseweb="textarea"] {
             width: 100% !important;
             max-width: none !important;
-            min-height: 130px !important;
+            min-height: 102px !important;
             background: var(--input-bg) !important;
             border: 0 !important;
             border-radius: 12px !important;
@@ -495,8 +936,8 @@ def inject_app_style() -> None:
             padding: 0 !important;
         }
         [data-testid="stChatInput"] textarea {
-            min-height: 130px !important;
-            max-height: 130px !important;
+            min-height: 102px !important;
+            max-height: 102px !important;
             background: var(--input-bg) !important;
             border: 0 !important;
             border-radius: 12px !important;
@@ -568,22 +1009,63 @@ def _avatar_label(name: str) -> str:
     return stripped[:2]
 
 
-def _message_html(role: str, text: str, *, assistant_name: str = "AI") -> str:
+def _message_html(
+    role: str,
+    text: str,
+    *,
+    assistant_name: str = "AI",
+    user_avatar_label: str = "我",
+    user_avatar_class: str = "av-u-ocean",
+    assistant_avatar_label: str = "",
+    assistant_avatar_class: str = "av-a-slate",
+    user_image_data_uri: str | None = None,
+    assistant_image_data_uri: str | None = None,
+) -> str:
     safe_text = escape(text)
     if role == "user":
+        if user_image_data_uri:
+            return (
+                '<div class="wechat-row user">'
+                '<div class="wechat-avatar with-img">'
+                f'<img src="{user_image_data_uri}" alt="" draggable="false"/>'
+                "</div>"
+                '<div class="wechat-stack">'
+                f'<div class="wechat-bubble">{safe_text}</div>'
+                "</div>"
+                "</div>"
+            )
+        u_lbl = _truncate_avatar_label(user_avatar_label)
+        safe_u = escape(u_lbl)
+        single_cls = " av-single" if _single_wide_char_label(u_lbl) else ""
+        safe_cls = escape(user_avatar_class)
         return (
             '<div class="wechat-row user">'
-            '<div class="wechat-avatar">我</div>'
+            f'<div class="wechat-avatar {safe_cls}{single_cls}">{safe_u}</div>'
             '<div class="wechat-stack">'
             f'<div class="wechat-bubble">{safe_text}</div>'
             "</div>"
             "</div>"
         )
     safe_name = escape(assistant_name or "AI")
-    safe_avatar = escape(_avatar_label(assistant_name or "AI"))
+    if assistant_image_data_uri:
+        return (
+            '<div class="wechat-row assistant">'
+            '<div class="wechat-avatar with-img">'
+            f'<img src="{assistant_image_data_uri}" alt="" draggable="false"/>'
+            "</div>"
+            '<div class="wechat-stack">'
+            f'<div class="wechat-name">{safe_name}</div>'
+            f'<div class="wechat-bubble">{safe_text}</div>'
+            "</div>"
+            "</div>"
+        )
+    asst_lbl = _assistant_avatar_label_text(assistant_avatar_label, assistant_name or "AI")
+    safe_avatar = escape(asst_lbl)
+    asst_single = " av-single" if _single_wide_char_label(asst_lbl) else ""
+    safe_acls = escape(assistant_avatar_class)
     return (
         '<div class="wechat-row assistant">'
-        f'<div class="wechat-avatar">{safe_avatar}</div>'
+        f'<div class="wechat-avatar {safe_acls}{asst_single}">{safe_avatar}</div>'
         '<div class="wechat-stack">'
         f'<div class="wechat-name">{safe_name}</div>'
         f'<div class="wechat-bubble">{safe_text}</div>'
@@ -746,6 +1228,109 @@ def render_sidebar() -> None:
     else:
         st.sidebar.info("No personas yet. Create one above.")
 
+    st.sidebar.divider()
+    st.sidebar.text_input(
+        "对话者姓名",
+        key="current_speaker_name",
+        disabled=(
+            not chat_iface.has_agent()
+            or st.session_state.get("pending_user_message") is not None
+        ),
+        placeholder="例如：张三、李四",
+        help="用于区分不同对话者；M11 用户模型按此名称分桶。头像预设与图片按此姓名绑定保存。",
+    )
+    _did_show = str(st.session_state.get("dialogue_client_id") or "")
+    st.sidebar.caption(
+        "地址栏里的 `did=…` 表示本聊天窗口；在此处改姓名后偏好会写入本机，下次同一链接自动还原。"
+        + (f" 当前会话：`{_did_show[:20]}…`" if len(_did_show) > 20 else f" 当前会话：`{_did_show}`")
+    )
+
+    with st.sidebar.expander("聊天头像", expanded=False):
+        st.caption("仅影响 Chat 气泡旁展示；不参与推理。")
+        st.text_input(
+            "我的头像文字",
+            key="chat_avatar_user_label",
+            max_chars=4,
+            help="最多 4 个字符，或单个 emoji。",
+        )
+        st.selectbox(
+            "我的头像底色",
+            options=list(CHAT_USER_AVATAR_PRESETS.keys()),
+            format_func=lambda k: CHAT_USER_AVATAR_PRESET_LABELS.get(k, k),
+            key="chat_avatar_user_preset",
+        )
+        st.text_input(
+            "对方头像文字",
+            key="chat_avatar_assistant_label",
+            max_chars=4,
+            placeholder="留空用人格名前两字",
+            help="不填则用当前已加载人格名称的前两个字符。",
+        )
+        st.selectbox(
+            "对方头像底色",
+            options=list(CHAT_ASSISTANT_AVATAR_PRESETS.keys()),
+            format_func=lambda k: CHAT_ASSISTANT_AVATAR_PRESET_LABELS.get(k, k),
+            key="chat_avatar_assistant_preset",
+        )
+
+        st.divider()
+        st.caption(
+            "「我的」图片按左侧「对话者姓名」存入 artifacts/chat_avatars/speakers/；"
+            "`clients/*.json` 存姓名与头像选项（同一 `did` 链接下自动恢复）。"
+        )
+        _spk = str(st.session_state.get("current_speaker_name") or "").strip() or "测试用户"
+        _nu = int(st.session_state.get("chat_avatar_upload_nonce_user", 0))
+        up_user = st.file_uploader(
+            "我的头像图片",
+            type=["png", "jpg", "jpeg", "gif", "webp"],
+            key=f"chat_avatar_upload_user_{_nu}",
+            help=f"绑定「{_spk}」；最大 {_MAX_CHAT_AVATAR_BYTES // 1000}KB，推荐方形。",
+        )
+        if up_user is not None:
+            ok_u, err_u = save_chat_avatar_image_for_speaker(_spk, up_user.getvalue())
+            if ok_u:
+                st.session_state.chat_avatar_upload_nonce_user = _nu + 1
+                st.success("已保存我的头像图片")
+                st.rerun()
+            else:
+                st.error(err_u)
+        path_user = find_stored_chat_avatar_path_for_speaker(_spk)
+        if path_user is not None:
+            st.image(str(path_user), width=56)
+            if st.button("清除我的头像图", key="btn_chat_avatar_clear_user"):
+                delete_chat_avatar_image_for_speaker(_spk)
+                st.session_state.chat_avatar_upload_nonce_user = int(
+                    st.session_state.get("chat_avatar_upload_nonce_user", 0)
+                ) + 1
+                st.success("已清除")
+                st.rerun()
+
+        _na = int(st.session_state.get("chat_avatar_upload_nonce_assistant", 0))
+        up_asst = st.file_uploader(
+            "对方头像图片",
+            type=["png", "jpg", "jpeg", "gif", "webp"],
+            key=f"chat_avatar_upload_assistant_{_na}",
+            help=f"最大 {_MAX_CHAT_AVATAR_BYTES // 1000}KB，推荐方形。",
+        )
+        if up_asst is not None:
+            ok_a, err_a = save_chat_avatar_image("assistant", up_asst.getvalue())
+            if ok_a:
+                st.session_state.chat_avatar_upload_nonce_assistant = _na + 1
+                st.success("已保存对方头像图片")
+                st.rerun()
+            else:
+                st.error(err_a)
+        path_asst = find_stored_chat_avatar_path("assistant")
+        if path_asst is not None:
+            st.image(str(path_asst), width=56)
+            if st.button("清除对方头像图", key="btn_chat_avatar_clear_assistant"):
+                delete_chat_avatar_image("assistant")
+                st.session_state.chat_avatar_upload_nonce_assistant = int(
+                    st.session_state.get("chat_avatar_upload_nonce_assistant", 0)
+                ) + 1
+                st.success("已清除")
+                st.rerun()
+
     # ── Actions on loaded persona ──
     if st.session_state.loaded_persona:
         st.sidebar.subheader("Actions")
@@ -764,6 +1349,20 @@ def render_sidebar() -> None:
             chat_iface.reset_to_baseline()
             st.sidebar.success("Reset to baseline traits")
 
+    _did = str(st.session_state.get("dialogue_client_id") or "")
+    _maybe_persist_dialogue_client_prefs(_did)
+
+
+def _user_message_visuals(msg: dict[str, str]) -> tuple[str, str, str | None]:
+    sp = str(msg.get("speaker_name") or "").strip() or "测试用户"
+    fallback_preset = str(st.session_state.get("chat_avatar_user_preset", "ocean"))
+    fallback_label = str(st.session_state.get("chat_avatar_user_label", "我"))
+    preset = str(msg.get("user_avatar_preset") or fallback_preset)
+    label = str(msg.get("user_avatar_label") or fallback_label)
+    u_cls = CHAT_USER_AVATAR_PRESETS.get(preset, CHAT_USER_AVATAR_PRESETS["ocean"])
+    img = load_chat_avatar_data_uri_for_speaker(sp)
+    return label, u_cls, img
+
 
 def render_chat() -> None:
     chat_iface: ChatInterface = st.session_state.chat_iface
@@ -776,16 +1375,39 @@ def render_chat() -> None:
         or "测试用户"
     )
 
+    a_preset = str(st.session_state.get("chat_avatar_assistant_preset", "slate"))
+    a_av_class = CHAT_ASSISTANT_AVATAR_PRESETS.get(a_preset, CHAT_ASSISTANT_AVATAR_PRESETS["slate"])
+    a_av_custom = str(st.session_state.get("chat_avatar_assistant_label", ""))
+    asst_img_uri = load_chat_avatar_data_uri("assistant")
+
     # Display message history in a WeChat-like conversation surface.
     message_parts: list[str] = []
     if st.session_state.messages:
         message_parts.append('<div class="time-divider">今天</div>')
     for msg in st.session_state.messages:
         text = msg["text"]
-        if msg["role"] == "user" and msg.get("speaker_name"):
-            text = f'{msg["speaker_name"]}: {text}'
+        if msg.get("role") == "user":
+            u_av_label, u_av_class, user_img_uri = _user_message_visuals(msg)
+        else:
+            # User-side avatar args are ignored for assistant rows in ``_message_html``.
+            u_av_label = str(st.session_state.get("chat_avatar_user_label", "我"))
+            u_av_class = CHAT_USER_AVATAR_PRESETS.get(
+                str(st.session_state.get("chat_avatar_user_preset", "ocean")),
+                CHAT_USER_AVATAR_PRESETS["ocean"],
+            )
+            user_img_uri = None
         message_parts.append(
-            _message_html(msg["role"], text, assistant_name=assistant_name)
+            _message_html(
+                msg["role"],
+                text,
+                assistant_name=assistant_name,
+                user_avatar_label=u_av_label,
+                user_avatar_class=u_av_class,
+                assistant_avatar_label=a_av_custom,
+                assistant_avatar_class=a_av_class,
+                user_image_data_uri=user_img_uri,
+                assistant_image_data_uri=asst_img_uri,
+            )
         )
     if pending_text:
         message_parts.append(
@@ -793,6 +1415,15 @@ def render_chat() -> None:
                 "assistant",
                 f"{assistant_name} 正在输入...",
                 assistant_name=assistant_name,
+                user_avatar_label=str(st.session_state.get("chat_avatar_user_label", "我")),
+                user_avatar_class=CHAT_USER_AVATAR_PRESETS.get(
+                    str(st.session_state.get("chat_avatar_user_preset", "ocean")),
+                    CHAT_USER_AVATAR_PRESETS["ocean"],
+                ),
+                assistant_avatar_label=a_av_custom,
+                assistant_avatar_class=a_av_class,
+                user_image_data_uri=None,
+                assistant_image_data_uri=asst_img_uri,
             )
         )
     if not message_parts:
@@ -836,12 +1467,6 @@ def render_chat() -> None:
         st.session_state.pending_speaker_name = None
 
     disabled = not chat_iface.has_agent() or pending_text is not None
-    st.text_input(
-        "对话者姓名",
-        key="current_speaker_name",
-        disabled=disabled,
-        placeholder="例如：张三、李四",
-    )
     user_input = st.chat_input(
         "发消息" if not disabled else "先加载一个 persona...",
         disabled=disabled,
@@ -849,7 +1474,13 @@ def render_chat() -> None:
     if user_input:
         speaker = str(st.session_state.current_speaker_name or "").strip() or "测试用户"
         st.session_state.messages.append(
-            {"role": "user", "text": user_input, "speaker_name": speaker}
+            {
+                "role": "user",
+                "text": user_input,
+                "speaker_name": speaker,
+                "user_avatar_preset": str(st.session_state.get("chat_avatar_user_preset", "ocean")),
+                "user_avatar_label": str(st.session_state.get("chat_avatar_user_label", "我")),
+            }
         )
         st.session_state.pending_user_message = user_input
         st.session_state.pending_speaker_name = speaker
@@ -1123,16 +1754,19 @@ def render_inner_world() -> None:
 
 
 def main() -> None:
+    ensure_dialogue_client_id()
     init_session()
     inject_app_style()
 
     st.title("Segmentum Persona Runtime")
+    _did_hdr = str(st.session_state.get("dialogue_client_id") or "")
     st.markdown(
         (
             '<div class="app-caption">'
             f"Loaded: {escape(st.session_state.loaded_persona or 'None')}"
             f"  |  Mode: {escape(st.session_state.chat_iface.generator_type.upper())}"
             f"  |  Storage: {escape(str(st.session_state.pm.storage_dir))}"
+            f"  |  Tab: {escape(_did_hdr[:14])}{'…' if len(_did_hdr) > 14 else ''}"
             "</div>"
         ),
         unsafe_allow_html=True,

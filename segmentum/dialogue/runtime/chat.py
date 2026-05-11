@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import json
+import shutil
 from pathlib import Path
 import time
 from typing import TYPE_CHECKING, Any
@@ -12,7 +13,12 @@ from ..generator import LLMGenerator, ResponseGenerator, RuleBasedGenerator
 from ..observer import DialogueObserver
 from ..turn_trace import ConsciousMarkdownWriter
 from ..types import TranscriptUtterance
-from .mvp_loop import MVPDialogueRuntime, MVPStateStore, OpenRouterJSONClient
+from .mvp_loop import (
+    MVPDialogueRuntime,
+    MVPStateStore,
+    OpenRouterJSONClient,
+    SYSTEM_FILE_NAMES,
+)
 
 if TYPE_CHECKING:
     from ...agent import SegmentAgent
@@ -38,6 +44,37 @@ class ChatResponse:
     turn_index: int
     llm_latency_ms: float = 0.0
     followup_replies: list[str] = field(default_factory=list)
+
+
+def _sanitize_dir_component(raw: str, *, max_len: int = 48) -> str:
+    s = "".join(c if (c.isalnum() or c in "-_") else "_" for c in str(raw or ""))
+    s = s.strip("_") or "default"
+    return s[:max_len]
+
+
+def _seed_mvp_session_store_if_needed(persona_root: Path, session_root: Path) -> None:
+    """Copy persona-root MVP JSON into a per-browser-tab session folder when empty.
+
+    Avoids two Streamlit sessions sharing one MVPStateStore (race on save).
+    """
+    if session_root.exists():
+        try:
+            if any(session_root.iterdir()):
+                return
+        except OSError:
+            return
+    try:
+        session_root.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return
+    for fname in SYSTEM_FILE_NAMES.values():
+        src = persona_root / fname
+        dst = session_root / fname
+        if src.is_file() and not dst.exists():
+            try:
+                shutil.copy2(src, dst)
+            except OSError:
+                continue
 
 
 def _llm_api_key_available() -> bool:
@@ -645,9 +682,12 @@ class ChatInterface:
     def _build_mvp_runtime(self) -> MVPDialogueRuntime:
         persona_id = self._resolved_persona_id()
         safe_id = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in persona_id).strip("_") or "default"
-        root = self._mvp_root / safe_id
+        persona_root = self._mvp_root / safe_id
+        sess = _sanitize_dir_component(self._session_id, max_len=48)
+        session_root = persona_root / "sessions" / sess
+        _seed_mvp_session_store_if_needed(persona_root, session_root)
         return MVPDialogueRuntime(
-            store=MVPStateStore(root),
+            store=MVPStateStore(session_root),
             llm=OpenRouterJSONClient.from_config(),
             persona_name=self._persona_name,
         )
