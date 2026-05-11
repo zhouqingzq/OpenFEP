@@ -126,6 +126,66 @@ class Hyperparams:
         default=6,
         metadata={"doc": "Canonical decimal precision for reproducible diagnostic floats."},
     )
+    reaction_expectation_unverified_fe: float = field(
+        default=0.64,
+        metadata={"doc": "Free energy carried by an unverified expectation about another user's reaction."},
+    )
+    reaction_expectation_verified_fe: float = field(
+        default=0.22,
+        metadata={"doc": "Residual free energy when the reaction expectation is already well verified."},
+    )
+    reaction_expectation_violated_fe: float = field(
+        default=0.82,
+        metadata={"doc": "Free energy after a recent violation of the predicted social reaction."},
+    )
+    reaction_expectation_incomprehensible_fe: float = field(
+        default=0.95,
+        metadata={"doc": "Free energy for reaction evidence that current cognition cannot explain."},
+    )
+    direct_share_resolution_ratio: float = field(
+        default=0.62,
+        metadata={"doc": "Fraction of reaction-expectation free energy expected to resolve after direct sharing."},
+    )
+    abstract_share_resolution_ratio: float = field(
+        default=0.38,
+        metadata={"doc": "Fraction of reaction-expectation free energy expected to resolve after abstract sharing."},
+    )
+    abstract_boundary_cost_ratio: float = field(
+        default=0.25,
+        metadata={"doc": "Remaining boundary cost after removing identifying details through abstraction."},
+    )
+    default_social_boundary_cost: float = field(
+        default=0.03,
+        metadata={"doc": "Small boundary cost when the source user declared no sharing constraint."},
+    )
+    restricted_implicit_boundary_cost: float = field(
+        default=0.32,
+        metadata={"doc": "Boundary cost for soft or implicit constraints where abstraction is usually preferred."},
+    )
+    restricted_explicit_boundary_cost: float = field(
+        default=1.0,
+        metadata={"doc": "Hard-blocking boundary cost for explicit secrecy or forbidden visibility."},
+    )
+    social_share_relationship_cost_base: float = field(
+        default=0.10,
+        metadata={"doc": "Baseline relationship free-energy cost before boundary and regret feedback are applied."},
+    )
+    direct_share_fe_reduction_threshold: float = field(
+        default=0.0,
+        metadata={"doc": "Minimum net expected free-energy reduction required for direct retelling."},
+    )
+    abstract_share_fe_reduction_threshold: float = field(
+        default=0.0,
+        metadata={"doc": "Minimum net expected free-energy reduction required for abstract reference."},
+    )
+    sharing_regret_feedback_increment: float = field(
+        default=0.18,
+        metadata={"doc": "Relationship-cost increase after negative feedback on cross-user sharing."},
+    )
+    sharing_regret_feedback_decay: float = field(
+        default=0.03,
+        metadata={"doc": "Small relationship-cost decay when a turn does not reinforce the sharing concern."},
+    )
 
     @property
     def prior_mean(self) -> float:

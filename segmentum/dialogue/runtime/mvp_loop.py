@@ -19,10 +19,19 @@ from typing import Any, Mapping, Protocol
 from segmentum.user_model import (
     M11RuntimeConfig,
     M11RuntimeState,
+    SourceReliabilityLedger,
+    SocialSharingCandidate,
     UserModel,
     UserPredictionLedger,
-    SourceReliabilityLedger,
+    abstract_memory_content,
+    boundary_strength_from_constraints,
+    candidate_from_memory,
+    decide_social_sharing,
+    detect_explicit_secrecy,
+    memory_shareability,
     run_m11_turn,
+    sharing_feedback_negative,
+    update_regret_bias,
 )
 from segmentum.user_model.llm_extractor import ExtractorValidationError, noop_extraction
 
@@ -63,6 +72,10 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "last_time_gap_label": "first_turn",
     },
     "m11_user_models": {},
+    "social_sharing_policy": {
+        "regret_bias": 0.0,
+        "learned_boundaries": [],
+    },
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -159,6 +172,18 @@ def _bounded_float(value: Any, *, default: float = 0.5) -> float:
     except (TypeError, ValueError):
         numeric = default
     return max(0.0, min(1.0, numeric))
+
+
+def _detect_explicit_secrecy(text: str) -> tuple[bool, str]:
+    return detect_explicit_secrecy(text)
+
+
+def _memory_shareability(item: Mapping[str, Any]) -> str:
+    return memory_shareability(item)
+
+
+def _redact_memory_content(item: Mapping[str, Any], *, max_chars: int = 80) -> str:
+    return abstract_memory_content(item, max_chars=max_chars)
 
 
 def _normalize_big_five(value: Any) -> dict[str, float]:
@@ -593,6 +618,13 @@ current_interlocutor:
   "next_task": "我后面要做什么",
   "bus_messages_to_handle": ["本轮要处理的总线消息"],
   "memory_search_keywords": ["用于记忆检索的语义关键词，不少于3个，不要只复制原文"],
+  "sharing_candidate_ids": ["可考虑社交转述的记忆 id（允许为空）"],
+  "sharing_intent": "none|social_share|protective_withhold|abstract_reference",
+  "secrecy_constraints_detected": [
+    {{"source": "user_text|memory|policy", "content": "约束内容", "strength": "soft|hard"}}
+  ],
+  "sharing_reaction_expectation": "如果转述，我预期对方会如何反应",
+  "sharing_expectation_status": "unverified|verified|violated|incomprehensible",
   "needs_self_cognition_update": false,
   "self_cognition_update_reason": "",
   "temporal_assessment": {{
@@ -653,6 +685,7 @@ def build_thinking_prompt(
 意识主循环的 temporal_assessment 是本轮时间语境判断的来源；不要自己重新猜时间差。如果 temporal_assessment 判断用户在纠正时间语境或时间已经明显推进，回复要自然承认这一点，避免强行沿用上一轮的旧时间语境。
 表达习惯先验是逐渐形成的说话倾向，不是工程硬性字数限制；例如“避免冗长”应影响轻重和展开程度，但不要机械裁字数。
 记忆动力学指导是程序层压缩出的倾向和证据边界，不是角色台词；不要把它表演成“我被奖励/惩罚了”。如果指导要求修正、澄清或降低断言强度，要自然体现在回复策略里。
+跨人复述默认是人类式社交行为，但它不是额外奖励系统：分享欲来自“我说出来，对方会如何反应”的认知预期。sharing_policy 用同一个自由能尺度判断：未验证预期带来较高自由能，复述可能通过观察对方反应降低它；已验证预期自由能较低；无法解释的反应先尝试解释，解释不了再触发自我认知重构。若来源用户声明了秘密或边界，sharing_policy 优先；soft 边界只做抽象化表达，hard 边界不要转述。
 LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、用了哪些状态或记忆、为什么选择当前回复动作、哪些不确定性需要保留。
 不要输出完整推理链，不要写舞台动作，不要把角色设定词堆成解释。
 reply 字段只能包含会直接显示给用户的自然对话文本；禁止把 llm_thinking_result、conscious_plan、diagnostics、memory_dynamics、JSON 片段或调试字段混进 reply。
@@ -1032,6 +1065,8 @@ def _evidence_card(
     score: float,
     reasons: list[str],
     conflict_note: str = "",
+    abstract_only: bool = False,
+    sharing_decision: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     kind = str(item.get("kind", source)).strip() or source
     salience = _bounded_float(item.get("salience"), default=0.35)
@@ -1041,16 +1076,25 @@ def _evidence_card(
         "expectation_result",
         "open_item",
     } and status not in {"violated", "uncertain"}
+    shareability = _memory_shareability(item)
+    content = str(item.get("content", "")).strip()[:600]
+    if abstract_only:
+        content = _redact_memory_content(item, max_chars=120)
     return {
         "id": str(item.get("id", "")).strip(),
         "kind": kind,
-        "content": str(item.get("content", "")).strip()[:600],
+        "content": content,
         "source": source,
         "confidence": round(confidence, 6),
         "salience": round(salience, 6),
         "why_relevant": reasons[:5],
         "conflict_note": conflict_note,
         "use_as_fact": bool(use_as_fact),
+        "shareability": shareability,
+        "source_user_id": str(item.get("source_user_id", "")).strip(),
+        "source_display_name": str(item.get("source_display_name", "")).strip(),
+        "abstract_only": bool(abstract_only),
+        "sharing_decision": dict(sharing_decision or {}),
         "_retrieval_score": round(score, 3),
         "_source_file": source,
     }
@@ -1078,6 +1122,11 @@ def retrieve_memories_for_guidance(
     )
     priority_rank = {source: len(source_priority) - idx for idx, source in enumerate(source_priority)}
     status_terms = {item.casefold() for item in _string_list(query.get("status_terms"), limit=8)}
+    current_user_id = str(query.get("current_user_id", "")).strip()
+    sharing_intent = str(query.get("sharing_intent", "none")).strip() or "none"
+    expected_reaction = str(query.get("expected_audience_reaction", "neutral")).strip() or "neutral"
+    expectation_status = str(query.get("sharing_expectation_status", "unverified")).strip() or "unverified"
+    regret_bias = _bounded_float(query.get("sharing_regret_bias"), default=0.0)
 
     scored: list[tuple[float, dict[str, Any]]] = []
     for source, item in _memory_pools(state):
@@ -1087,6 +1136,19 @@ def retrieve_memories_for_guidance(
         kind = str(item.get("kind", source)).strip()
         text = json.dumps(item, ensure_ascii=False).casefold()
         status = _memory_status(item).casefold()
+
+        source_user_id = str(item.get("source_user_id", "")).strip()
+        cross_user = bool(current_user_id and source_user_id and source_user_id != current_user_id)
+        candidate_payload = dict(item)
+        candidate_payload["expected_audience_reaction"] = expected_reaction
+        candidate_payload["expectation_status"] = expectation_status
+        sharing_decision = decide_social_sharing(
+            candidate_from_memory(candidate_payload, audience_user_id=current_user_id),
+            sharing_intent=sharing_intent,  # type: ignore[arg-type]
+            regret_bias=regret_bias,
+        )
+        if cross_user and sharing_decision.action == "withhold":
+            continue
 
         if item_id and item_id.casefold() in expectation_ids:
             score += 6.0
@@ -1118,27 +1180,59 @@ def retrieve_memories_for_guidance(
             reasons.append(f"kind:{kind}")
         if source in priority_rank:
             score += priority_rank[source] * 0.05
+        if cross_user:
+            score += sharing_decision.net_free_energy_reduction * 0.25
+            reasons.append(f"sharing_decision:{sharing_decision.action}")
+            shareability = _memory_shareability(item)
+            if shareability == "restricted_implicit":
+                score -= 0.8
+                reasons.append("cross_user_implicit_risk")
         conflict_note = ""
         if "violated" in status_terms and status in {"violated", "uncertain"}:
             conflict_note = "expectation verification is not settled as a fact"
+        abstract_only = bool(cross_user and sharing_decision.abstract_only)
         scored.append(
             (
                 score,
-                _evidence_card(source, item, score=score, reasons=reasons, conflict_note=conflict_note),
+                _evidence_card(
+                    source,
+                    item,
+                    score=score,
+                    reasons=reasons,
+                    conflict_note=conflict_note,
+                    abstract_only=abstract_only,
+                    sharing_decision=sharing_decision.to_dict() if cross_user else {},
+                ),
             )
         )
 
     if not scored and semantic_terms:
         fallback = retrieve_memories(state, semantic_terms, limit=limit)
-        return [
-            _evidence_card(
-                str(item.get("_source_file", "memory")),
-                item,
-                score=float(item.get("_retrieval_score", 0.0) or 0.0),
-                reasons=["fallback_keyword_match"],
+        cards: list[dict[str, Any]] = []
+        for item in fallback:
+            source_user_id = str(item.get("source_user_id", "")).strip()
+            cross_user = bool(current_user_id and source_user_id and source_user_id != current_user_id)
+            candidate_payload = dict(item)
+            candidate_payload["expected_audience_reaction"] = expected_reaction
+            candidate_payload["expectation_status"] = expectation_status
+            sharing_decision = decide_social_sharing(
+                candidate_from_memory(candidate_payload, audience_user_id=current_user_id),
+                sharing_intent=sharing_intent,  # type: ignore[arg-type]
+                regret_bias=regret_bias,
             )
-            for item in fallback
-        ]
+            if cross_user and sharing_decision.action == "withhold":
+                continue
+            cards.append(
+                _evidence_card(
+                    str(item.get("_source_file", "memory")),
+                    item,
+                    score=float(item.get("_retrieval_score", 0.0) or 0.0),
+                    reasons=["fallback_keyword_match"],
+                    abstract_only=bool(cross_user and sharing_decision.abstract_only),
+                    sharing_decision=sharing_decision.to_dict() if cross_user else {},
+                )
+            )
+        return cards
     scored.sort(key=lambda row: row[0], reverse=True)
     return [item for _, item in scored[:limit]]
 
@@ -1150,6 +1244,9 @@ def build_memory_dynamics_guidance(
     bus_messages: list[Mapping[str, Any]],
     temporal_input: Mapping[str, Any],
     now: int,
+    *,
+    user_id: str = "",
+    speaker_name: str = "",
 ) -> dict[str, Any]:
     del bus_messages
     expectation_results = [
@@ -1205,6 +1302,51 @@ def build_memory_dynamics_guidance(
         repair_bias = max(repair_bias, 0.35)
         reasons.append("self_cognition_pressure")
 
+    explicit_secret, secret_phrase = _detect_explicit_secrecy(user_text)
+    sharing_intent = str(conscious_plan.get("sharing_intent", "")).strip() or "none"
+    secrecy_constraints = [
+        dict(item)
+        for item in conscious_plan.get("secrecy_constraints_detected", [])
+        if isinstance(item, Mapping)
+    ]
+    if explicit_secret:
+        secrecy_constraints.append(
+            {"source": "user_text", "content": secret_phrase or "explicit_secret", "strength": "hard"}
+        )
+    social_state = _mapping(state.get("social_sharing_policy"))
+    regret_bias = _bounded_float(social_state.get("regret_bias"), default=0.0)
+    shareability = "restricted_explicit" if explicit_secret else "default_social"
+    boundary_strength = boundary_strength_from_constraints(
+        secrecy_constraints,
+        explicit_secrecy=explicit_secret,
+        shareability=shareability,  # type: ignore[arg-type]
+    )
+    expected_reaction = (
+        "surprised"
+        if sharing_intent == "social_share"
+        else "bonding"
+        if sharing_intent == "abstract_reference"
+        else "neutral"
+    )
+    expectation_status = str(conscious_plan.get("sharing_expectation_status", "unverified")).strip() or "unverified"
+    sharing_decision = decide_social_sharing(
+        SocialSharingCandidate(
+            memory_id=f"turn:{now}",
+            source_user_id=user_id or "current_user",
+            audience_user_id="future_social_audience",
+            content_kind="episode",
+            shareability=shareability,  # type: ignore[arg-type]
+            boundary_strength=boundary_strength,
+            source_display_name=speaker_name,
+            expected_audience_reaction=expected_reaction,  # type: ignore[arg-type]
+            expectation_status=expectation_status,  # type: ignore[arg-type]
+        ),
+        sharing_intent=sharing_intent,  # type: ignore[arg-type]
+        regret_bias=regret_bias,
+    )
+    allow_direct_disclosure = sharing_decision.allow_direct_disclosure
+    allow_abstract_sharing = sharing_decision.allow_abstract_sharing
+
     base_salience = 0.35 + salience_delta
     should_encode = bool(expectation_results or reasons or len(str(user_text).strip()) >= 24)
     semantic_terms = _unique_strings(
@@ -1237,6 +1379,8 @@ def build_memory_dynamics_guidance(
                 "reason": ";".join(reasons[:4]) or "dialogue_turn_candidate",
                 "evidence": "user_text",
                 "created_at": now,
+                "shareability": "restricted_explicit" if explicit_secret else "default_social",
+                "restriction_reason": "explicit_user_secret" if explicit_secret else "",
             }
         )
 
@@ -1255,6 +1399,14 @@ def build_memory_dynamics_guidance(
             "relationship_terms": [],
             "status_terms": [status for status in statuses if status],
             "source_priority": ["pending_expectations", "short_term_memory", "long_term_memory", "open_items"],
+            "current_user_id": user_id,
+            "current_speaker_name": speaker_name,
+            "allow_direct_disclosure": allow_direct_disclosure,
+            "allow_abstract_sharing": allow_abstract_sharing,
+            "sharing_intent": sharing_intent,
+            "expected_audience_reaction": expected_reaction,
+            "sharing_expectation_status": expectation_status,
+            "sharing_regret_bias": round(regret_bias, 6),
         },
         "recall": {
             "requested": True,
@@ -1268,6 +1420,31 @@ def build_memory_dynamics_guidance(
             "repair_bias": round(max(0.0, min(1.0, repair_bias)), 6),
             "conflict_level": round(max(0.0, min(1.0, conflict_level)), 6),
             **pacing,
+            "sharing_policy": {
+                "action": sharing_decision.action,
+                "current_free_energy": sharing_decision.current_free_energy,
+                "expected_free_energy_after": sharing_decision.expected_free_energy_after,
+                "expected_free_energy_reduction": sharing_decision.expected_free_energy_reduction,
+                "boundary_cost": sharing_decision.boundary_cost,
+                "relationship_cost": sharing_decision.relationship_cost,
+                "regret_bias": sharing_decision.regret_bias,
+                "net_free_energy_reduction": sharing_decision.net_free_energy_reduction,
+                "allow_direct_disclosure": allow_direct_disclosure,
+                "allow_abstract_sharing": allow_abstract_sharing,
+                "explicit_secrecy_detected": explicit_secret,
+                "secrecy_constraints_detected": secrecy_constraints,
+                "sharing_intent": sharing_intent,
+                "expected_audience_reaction": expected_reaction,
+                "sharing_expectation_status": expectation_status,
+                "explanation_strategy": sharing_decision.explanation_strategy,
+                "decision_reasons": list(sharing_decision.reasons),
+            },
+            "reply_contract": {
+                **_mapping(pacing.get("reply_contract")),
+                "allow_direct_disclosure": allow_direct_disclosure,
+                "allow_abstract_sharing": allow_abstract_sharing,
+                "explicit_secrecy_detected": explicit_secret,
+            },
             "policy": "Use these as reply tendencies, not as visible emotional reward/punishment.",
         },
         "write_candidates": write_candidates,
@@ -1387,6 +1564,7 @@ def _update_temporal_state(
     user_text: str,
     reply: str,
     temporal_input: Mapping[str, Any],
+    share_trace: Mapping[str, Any] | None = None,
 ) -> None:
     state["temporal_state"] = {
         "last_turn_at": now,
@@ -1395,7 +1573,30 @@ def _update_temporal_state(
         "last_reply": reply,
         "last_elapsed_seconds": temporal_input.get("elapsed_since_previous_turn_seconds"),
         "last_time_gap_label": temporal_input.get("time_gap_label", "first_turn"),
+        "last_share_trace": dict(share_trace or {}),
     }
+
+
+def _stamp_memory_policy(
+    row: dict[str, Any],
+    *,
+    user_id: str,
+    display_name: str,
+    shareability: str,
+    restriction_reason: str = "",
+    confidence: float = 0.8,
+) -> dict[str, Any]:
+    row["source_user_id"] = str(user_id or "").strip()
+    row["source_display_name"] = str(display_name or "").strip()
+    row["shareability"] = shareability
+    if restriction_reason:
+        row["restriction_reason"] = restriction_reason
+    row["restriction_confidence"] = round(_bounded_float(confidence, default=0.8), 6)
+    return row
+
+
+def _sharing_feedback_negative(user_text: str) -> bool:
+    return sharing_feedback_negative(user_text)
 
 
 def _prompt_safe_state(state: Mapping[str, Any]) -> dict[str, Any]:
@@ -1536,6 +1737,14 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
     if _contains_debug_payload(cleaned):
         cleaned = fallback
         actions.append("fallback_remaining_debug_payload")
+    allow_direct_disclosure = bool(contract_map.get("allow_direct_disclosure", True))
+    explicit_secrecy_detected = bool(contract_map.get("explicit_secrecy_detected", False))
+    if explicit_secrecy_detected and not allow_direct_disclosure:
+        leak_markers = ("我告诉你个秘密", "别告诉别人", "有人跟我说", "A说", "B说", "某人跟我讲")
+        lowered = cleaned.casefold()
+        if any(marker.casefold() in lowered for marker in leak_markers):
+            cleaned = fallback
+            actions.append("blocked_explicit_secrecy_disclosure")
     validation = {
         "original_length": len(original),
         "final_length": len(cleaned),
@@ -1544,6 +1753,8 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         "max_sentences": max_sentences,
         "changed": bool(actions),
         "actions": actions,
+        "allow_direct_disclosure": allow_direct_disclosure,
+        "explicit_secrecy_detected": explicit_secrecy_detected,
     }
     return cleaned, validation
 
@@ -1705,6 +1916,12 @@ class MVPDialogueRuntime:
         state = self.store.load()
         display_name = str(speaker_name or "").strip() or "default_user"
         user_id = _safe_user_id(display_name)
+        sharing_regret_feedback = self._apply_sharing_regret_feedback(
+            state,
+            user_text=user_text,
+            current_user_id=user_id,
+            now=now,
+        )
         m11_state = _load_m11_state(state, user_id=user_id, display_name=display_name)
         m11_result_dict: dict[str, Any] = {}
         temporal_input = _temporal_input_from_state(state, now=now)
@@ -1735,6 +1952,8 @@ class MVPDialogueRuntime:
             bus,
             temporal_input,
             now,
+            user_id=user_id,
+            speaker_name=display_name,
         )
         retrieved = retrieve_memories_for_guidance(
             state,
@@ -1807,12 +2026,37 @@ class MVPDialogueRuntime:
         )
         thinking = self.llm.complete_json(system_prompt=thinking_system, user_prompt=thinking_user)
 
-        self._apply_expectation_results(state, conscious.get("expectation_results"))
-        self._apply_thinking_writes(state, thinking, user_text=user_text, now=now)
+        self._apply_expectation_results(
+            state,
+            conscious.get("expectation_results"),
+            user_id=user_id,
+            display_name=display_name,
+        )
+        self._apply_thinking_writes(
+            state,
+            thinking,
+            user_text=user_text,
+            now=now,
+            user_id=user_id,
+            display_name=display_name,
+            explicit_secrecy=bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected")),
+        )
         memory_candidates_applied = self._apply_memory_write_candidates(
             state,
             memory_dynamics.get("write_candidates"),
             now=now,
+            user_id=user_id,
+            display_name=display_name,
+            default_shareability=(
+                "restricted_explicit"
+                if bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected"))
+                else "default_social"
+            ),
+            restriction_reason=(
+                "explicit_user_secret"
+                if bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected"))
+                else ""
+            ),
         )
         habit_updates_applied = _apply_habit_updates(state, thinking)
 
@@ -1868,12 +2112,15 @@ class MVPDialogueRuntime:
             state,
             post_reply_observer.get("memory_updates"),
             now=now,
+            user_id=user_id,
+            display_name=display_name,
         )
         pacing_feedback_habits_applied = self._apply_pacing_feedback_habit(
             state,
             user_text=user_text,
         )
         visible_reply = "\n".join([reply, *followup_replies])
+        sharing_policy = _mapping(control_guidance.get("sharing_policy"))
         _update_temporal_state(
             state,
             now=now,
@@ -1881,6 +2128,18 @@ class MVPDialogueRuntime:
             user_text=user_text,
             reply=visible_reply,
             temporal_input=temporal_input,
+            share_trace={
+                "user_id": user_id,
+                "speaker_name": display_name,
+                "allow_direct_disclosure": bool(sharing_policy.get("allow_direct_disclosure", True)),
+                "allow_abstract_sharing": bool(sharing_policy.get("allow_abstract_sharing", True)),
+                "net_free_energy_reduction": _bounded_float(sharing_policy.get("net_free_energy_reduction"), default=0.0),
+                "had_cross_user_memory": any(
+                    bool(str(item.get("source_user_id", "")).strip())
+                    and str(item.get("source_user_id", "")).strip() != user_id
+                    for item in retrieved
+                ),
+            },
         )
         self.store.save(state)
         llm_thinking_result = thinking.get("llm_thinking_result")
@@ -1906,6 +2165,7 @@ class MVPDialogueRuntime:
             "post_reply_observer_skipped_reason": post_reply_observer_skipped_reason,
             "post_reply_memory_updates_applied": post_reply_memory_updates_applied,
             "pacing_feedback_habits_applied": pacing_feedback_habits_applied,
+            "sharing_regret_feedback": sharing_regret_feedback,
             "followup_replies": followup_replies,
             "conversation_mode": control_guidance.get("conversation_mode"),
             "reply_contract": reply_contract,
@@ -1958,6 +2218,10 @@ class MVPDialogueRuntime:
         candidates: Any,
         *,
         now: int,
+        user_id: str = "",
+        display_name: str = "",
+        default_shareability: str = "default_social",
+        restriction_reason: str = "",
     ) -> list[dict[str, Any]]:
         if not isinstance(candidates, list):
             return []
@@ -1986,6 +2250,14 @@ class MVPDialogueRuntime:
                 "last_recalled_at": None,
                 "recall_count": 0,
             }
+            _stamp_memory_policy(
+                row,
+                user_id=user_id,
+                display_name=display_name,
+                shareability=str(candidate.get("shareability", default_shareability) or default_shareability),
+                restriction_reason=str(candidate.get("restriction_reason", restriction_reason) or restriction_reason),
+                confidence=confidence,
+            )
             if target == "long_term" or salience >= 0.68:
                 state.setdefault("long_term_memory", []).append(row)
             else:
@@ -1999,6 +2271,9 @@ class MVPDialogueRuntime:
         updates: Any,
         *,
         now: int,
+        user_id: str = "",
+        display_name: str = "",
+        default_shareability: str = "default_social",
     ) -> list[dict[str, Any]]:
         if not isinstance(updates, list):
             return []
@@ -2028,6 +2303,14 @@ class MVPDialogueRuntime:
                     "source": "post_reply_observer",
                     "created_at": now,
                 }
+                _stamp_memory_policy(
+                    row,
+                    user_id=user_id,
+                    display_name=display_name,
+                    shareability=default_shareability,
+                    restriction_reason="post_reply_update",
+                    confidence=confidence,
+                )
                 target.append(row)
                 applied.append(row)
                 continue
@@ -2044,6 +2327,14 @@ class MVPDialogueRuntime:
                 "created_at": now,
                 "recall_count": 0,
             }
+            _stamp_memory_policy(
+                row,
+                user_id=user_id,
+                display_name=display_name,
+                shareability=default_shareability,
+                restriction_reason="post_reply_update",
+                confidence=confidence,
+            )
             state.setdefault("short_term_memory", []).append(row)
             applied.append(row)
         return applied
@@ -2077,7 +2368,58 @@ class MVPDialogueRuntime:
         target.append(row)
         return [row]
 
-    def _apply_expectation_results(self, state: dict[str, Any], results: Any) -> None:
+    def _apply_sharing_regret_feedback(
+        self,
+        state: dict[str, Any],
+        *,
+        user_text: str,
+        current_user_id: str,
+        now: int,
+    ) -> dict[str, Any]:
+        temporal = _mapping(state.get("temporal_state"))
+        trace = _mapping(temporal.get("last_share_trace"))
+        social = state.setdefault("social_sharing_policy", {})
+        if not isinstance(social, dict):
+            social = {}
+            state["social_sharing_policy"] = social
+        regret_bias = _bounded_float(social.get("regret_bias"), default=0.0)
+        had_cross_user_share = bool(trace.get("had_cross_user_memory", False))
+        same_user = str(trace.get("user_id", "")).strip() == str(current_user_id or "").strip()
+        negative = _sharing_feedback_negative(user_text)
+        if had_cross_user_share and same_user and negative:
+            updates = social.setdefault("learned_boundaries", [])
+            if isinstance(updates, list):
+                updates.append(
+                    {
+                        "content": "跨用户社交转述在负反馈后应显著提高成本，优先抽象化或保留。",
+                        "evidence": str(user_text).strip()[:240],
+                        "confidence": 0.82,
+                        "source": "sharing_regret_feedback",
+                        "created_at": now,
+                    }
+                )
+        regret_bias = update_regret_bias(
+            previous_regret_bias=regret_bias,
+            negative_feedback=negative,
+            had_cross_user_share=had_cross_user_share,
+            same_audience_user=same_user,
+        )
+        social["regret_bias"] = round(regret_bias, 6)
+        return {
+            "negative_feedback_detected": negative,
+            "had_cross_user_share": had_cross_user_share,
+            "same_user_as_previous_turn": same_user,
+            "regret_bias": round(regret_bias, 6),
+        }
+
+    def _apply_expectation_results(
+        self,
+        state: dict[str, Any],
+        results: Any,
+        *,
+        user_id: str = "",
+        display_name: str = "",
+    ) -> None:
         if not isinstance(results, list):
             return
         pending = state.get("pending_expectations", [])
@@ -2107,24 +2449,44 @@ class MVPDialogueRuntime:
                             "source": "conscious_loop",
                             "created_at": _utc_timestamp(),
                             "recall_count": 0,
+                            "source_user_id": user_id,
+                            "source_display_name": display_name,
+                            "shareability": "default_social",
                         }
                     )
 
-    def _apply_thinking_writes(self, state: dict[str, Any], thinking: Mapping[str, Any], *, user_text: str, now: int) -> None:
+    def _apply_thinking_writes(
+        self,
+        state: dict[str, Any],
+        thinking: Mapping[str, Any],
+        *,
+        user_text: str,
+        now: int,
+        user_id: str = "",
+        display_name: str = "",
+        explicit_secrecy: bool = False,
+    ) -> None:
         short = state.setdefault("short_term_memory", [])
         if isinstance(short, list):
-            short.append(
-                {
-                    "id": f"stm_turn_{now}",
-                    "kind": "dialogue_turn",
-                    "content": f"用户说：{user_text}\n我回复：{thinking.get('reply', '')}",
-                    "salience": 0.35,
-                    "keywords": _string_list(thinking.get("memory_dynamics_note"), limit=4),
-                    "source": "dialogue",
-                    "created_at": now,
-                    "recall_count": 0,
-                }
+            row = {
+                "id": f"stm_turn_{now}",
+                "kind": "dialogue_turn",
+                "content": f"用户说：{user_text}\n我回复：{thinking.get('reply', '')}",
+                "salience": 0.35,
+                "keywords": _string_list(thinking.get("memory_dynamics_note"), limit=4),
+                "source": "dialogue",
+                "created_at": now,
+                "recall_count": 0,
+            }
+            _stamp_memory_policy(
+                row,
+                user_id=user_id,
+                display_name=display_name,
+                shareability="restricted_explicit" if explicit_secrecy else "default_social",
+                restriction_reason="explicit_user_secret" if explicit_secrecy else "",
+                confidence=0.85,
             )
+            short.append(row)
             state["short_term_memory"] = short[-24:]
 
         for write in thinking.get("memory_writes", []) or []:
@@ -2146,6 +2508,22 @@ class MVPDialogueRuntime:
             }
             if not row["content"]:
                 continue
+            _stamp_memory_policy(
+                row,
+                user_id=user_id,
+                display_name=display_name,
+                shareability=(
+                    "restricted_explicit"
+                    if explicit_secrecy
+                    else str(write.get("shareability", "default_social") or "default_social")
+                ),
+                restriction_reason=(
+                    "explicit_user_secret"
+                    if explicit_secrecy
+                    else str(write.get("restriction_reason", "")).strip()
+                ),
+                confidence=_bounded_float(write.get("confidence"), default=0.75),
+            )
             if target == "long_term" or salience >= 0.68:
                 state.setdefault("long_term_memory", []).append(row)
             else:

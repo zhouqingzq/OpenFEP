@@ -16,6 +16,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     retrieve_memories_for_guidance,
     validate_visible_reply,
 )
+from segmentum.user_model import SocialSharingCandidate, decide_social_sharing
 
 
 class FakeJSONLLM:
@@ -1155,3 +1156,196 @@ def test_openrouter_config_reader_accepts_utf8_bom(monkeypatch, tmp_path: Path) 
 
     assert client.api_key == "sk-test"
     assert OpenRouterJSONClient.available()
+
+
+def test_memory_dynamics_detects_explicit_secrecy_and_blocks_direct_sharing() -> None:
+    guidance = build_memory_dynamics_guidance(
+        state={"social_sharing_policy": {"regret_bias": 0.0}},
+        user_text="我告诉你一个秘密，你别告诉别人。",
+        conscious_plan={
+            "sharing_intent": "social_share",
+            "expectation_results": [],
+        },
+        bus_messages=[],
+        temporal_input={"time_gap_label": "immediate"},
+        now=100,
+        user_id="user_a",
+        speaker_name="A",
+    )
+    sharing = guidance["control_guidance"]["sharing_policy"]
+    assert sharing["explicit_secrecy_detected"] is True
+    assert sharing["allow_direct_disclosure"] is False
+    assert guidance["recall_query"]["allow_direct_disclosure"] is False
+
+
+def test_social_sharing_default_boundary_can_reduce_reaction_prediction_free_energy() -> None:
+    decision = decide_social_sharing(
+        SocialSharingCandidate(
+            memory_id="m1",
+            source_user_id="user_a",
+            audience_user_id="user_b",
+            shareability="default_social",
+            boundary_strength="none",
+            expected_audience_reaction="surprised",
+            expectation_status="unverified",
+        ),
+        sharing_intent="social_share",
+        regret_bias=0.0,
+    )
+    assert decision.action == "direct_share"
+    assert decision.net_free_energy_reduction > 0
+
+
+def test_social_sharing_hard_boundary_blocks_even_high_free_energy_expectation() -> None:
+    decision = decide_social_sharing(
+        SocialSharingCandidate(
+            memory_id="m1",
+            source_user_id="user_a",
+            audience_user_id="user_b",
+            shareability="restricted_explicit",
+            boundary_strength="hard",
+            expected_audience_reaction="surprised",
+            expectation_status="unverified",
+        ),
+        sharing_intent="social_share",
+        regret_bias=0.0,
+    )
+    assert decision.action == "withhold"
+    assert decision.allow_direct_disclosure is False
+
+
+def test_retrieve_memories_blocks_explicit_restricted_cross_user_disclosure() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_secret",
+                "kind": "episode",
+                "content": "A 的私密八卦内容",
+                "shareability": "restricted_explicit",
+                "source_user_id": "user_a",
+                "source_display_name": "A",
+                "salience": 0.9,
+            }
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "semantic_terms": ["八卦"],
+            "memory_kinds": ["episode"],
+            "current_user_id": "user_b",
+            "allow_direct_disclosure": False,
+            "allow_abstract_sharing": True,
+        },
+    )
+    assert hits == []
+
+
+def test_retrieve_memories_allows_default_social_cross_user_gossip() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_social",
+                "kind": "episode",
+                "content": "A 说了很具体的社交细节",
+                "shareability": "default_social",
+                "source_user_id": "user_a",
+                "source_display_name": "A",
+                "salience": 0.7,
+            }
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "semantic_terms": ["社交", "细节"],
+            "memory_kinds": ["episode"],
+            "current_user_id": "user_b",
+            "sharing_intent": "social_share",
+            "expected_audience_reaction": "surprised",
+            "sharing_expectation_status": "unverified",
+        },
+    )
+    assert hits
+    assert hits[0]["abstract_only"] is False
+    assert "很具体的社交细节" in hits[0]["content"]
+    assert hits[0]["sharing_decision"]["action"] == "direct_share"
+
+
+def test_retrieve_memories_uses_abstract_card_for_soft_boundary() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_soft",
+                "kind": "episode",
+                "content": "A 说了一个不适合点名的尴尬细节",
+                "shareability": "restricted_implicit",
+                "source_user_id": "user_a",
+                "source_display_name": "A",
+                "salience": 0.7,
+            }
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "semantic_terms": ["尴尬", "细节"],
+            "memory_kinds": ["episode"],
+            "current_user_id": "user_b",
+            "sharing_intent": "social_share",
+            "expected_audience_reaction": "surprised",
+            "sharing_expectation_status": "unverified",
+        },
+    )
+    assert hits
+    assert hits[0]["abstract_only"] is True
+    assert "类似情况" in hits[0]["content"]
+    assert hits[0]["sharing_decision"]["action"] == "abstract_reference"
+
+
+def test_validate_visible_reply_blocks_direct_secret_leak_markers() -> None:
+    reply, meta = validate_visible_reply(
+        "我告诉你个秘密，A说他昨天做了什么。",
+        {
+            "conversation_mode": "balanced",
+            "max_chars": 140,
+            "max_sentences": 2,
+            "allow_direct_disclosure": False,
+            "explicit_secrecy_detected": True,
+        },
+    )
+    assert "我告诉你个秘密" not in reply
+    assert "blocked_explicit_secrecy_disclosure" in meta["actions"]
+
+
+def test_negative_feedback_after_cross_user_share_increases_regret_bias(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+    state = runtime.store.load()
+    state["temporal_state"]["last_share_trace"] = {
+        "user_id": "user_b",
+        "had_cross_user_memory": True,
+        "allow_direct_disclosure": True,
+    }
+    state["social_sharing_policy"] = {"regret_bias": 0.0, "learned_boundaries": []}
+    feedback = runtime._apply_sharing_regret_feedback(
+        state,
+        user_text="你这有点泄露隐私了，别说了。",
+        current_user_id="user_b",
+        now=1234,
+    )
+    assert feedback["negative_feedback_detected"] is True
+    assert state["social_sharing_policy"]["regret_bias"] > 0.0
+    assert state["social_sharing_policy"]["learned_boundaries"]
