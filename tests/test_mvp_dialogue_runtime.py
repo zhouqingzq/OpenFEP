@@ -12,6 +12,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     build_conscious_loop_prompt,
     build_thinking_prompt,
     build_free_energy_personality_analysis_prompt,
+    lexical_recall_short_term_candidates,
     retrieve_memories,
     retrieve_memories_for_guidance,
     validate_visible_reply,
@@ -952,6 +953,104 @@ def test_mvp_runtime_m11_keeps_distinct_user_models_by_speaker_name(tmp_path: Pa
     assert models["Alice"] != models["Bob"]
 
 
+def test_mvp_state_store_shares_recent_short_term_memory_across_sessions(tmp_path: Path) -> None:
+    persona_root = tmp_path / "persona"
+    store_a = MVPStateStore(persona_root / "sessions" / "tab_a")
+    state_a = store_a.load()
+    state_a["short_term_memory"] = [
+        {
+            "id": "stm_zq_tea",
+            "kind": "episode",
+            "content": "zq 请胡桃喝西瓜冰茶，胡桃接受了邀请。",
+            "keywords": ["zq", "西瓜冰茶", "请客"],
+            "source_user_id": "zq",
+            "source_display_name": "zq",
+            "shareability": "default_social",
+            "created_at": 100,
+            "salience": 0.7,
+        }
+    ]
+    store_a.save(state_a)
+
+    store_b = MVPStateStore(persona_root / "sessions" / "tab_b", shared_root=persona_root)
+    state_b = store_b.load()
+
+    assert any(item.get("id") == "stm_zq_tea" for item in state_b["short_term_memory"])
+    hits = retrieve_memories_for_guidance(
+        state_b,
+        {
+            "semantic_terms": ["zq", "西瓜冰茶", "请客"],
+            "memory_kinds": ["episode"],
+            "current_user_id": "鲁永刚",
+            "sharing_intent": "social_share",
+            "expected_audience_reaction": "surprised",
+            "sharing_expectation_status": "unverified",
+        },
+    )
+    assert hits
+    assert hits[0]["id"] == "stm_zq_tea"
+    assert hits[0]["sharing_decision"]["action"] == "direct_share"
+
+    store_b.save(state_b)
+    shared_short = MVPStateStore(persona_root).load()["short_term_memory"]
+    assert any(item.get("id") == "stm_zq_tea" for item in shared_short)
+
+
+def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_expect_noise",
+                "kind": "expectation_result",
+                "content": "{\"status\":\"uncertain\",\"evidence\":\"用户提到鲁永刚，意图不明\"}",
+                "source_user_id": "鲁永刚",
+                "source_display_name": "鲁永刚",
+                "shareability": "default_social",
+                "created_at": 101,
+            },
+            {
+                "id": "stm_turn_lu_1",
+                "kind": "dialogue_turn",
+                "content": "用户说：吃饭了么？\n我回复：晚上好。",
+                "source_user_id": "鲁永刚",
+                "source_display_name": "鲁永刚",
+                "shareability": "default_social",
+                "created_at": 102,
+            },
+            {
+                "id": "stm_turn_lu_2",
+                "kind": "dialogue_turn",
+                "content": "用户说：最近有人请你喝东西么？\n我回复：有人请喝茶。",
+                "source_user_id": "鲁永刚",
+                "source_display_name": "鲁永刚",
+                "shareability": "default_social",
+                "created_at": 103,
+            },
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "semantic_terms": ["鲁永刚", "认识"],
+            "memory_kinds": ["interaction_experience", "episode", "dialogue_turn", "expectation_result"],
+            "current_user_id": "zq",
+            "sharing_intent": "social_share",
+            "expected_audience_reaction": "surprised",
+            "sharing_expectation_status": "unverified",
+        },
+    )
+
+    assert hits
+    assert hits[0]["kind"] == "interaction_experience"
+    assert hits[0]["use_as_fact"] is True
+    assert "说过2次话" in hits[0]["content"]
+    assert hits[0]["source_display_name"] == "鲁永刚"
+
+
 def test_app_appends_followup_as_separate_assistant_message() -> None:
     from dataclasses import dataclass, field
     from segmentum.dialogue.runtime.app import append_assistant_response_messages
@@ -1278,7 +1377,7 @@ def test_retrieve_memories_allows_default_social_cross_user_gossip() -> None:
     assert hits[0]["sharing_decision"]["action"] == "direct_share"
 
 
-def test_retrieve_memories_uses_abstract_card_for_soft_boundary() -> None:
+def test_retrieve_memories_keeps_soft_boundary_as_decision_variable() -> None:
     state = {
         "short_term_memory": [
             {
@@ -1307,9 +1406,329 @@ def test_retrieve_memories_uses_abstract_card_for_soft_boundary() -> None:
         },
     )
     assert hits
-    assert hits[0]["abstract_only"] is True
-    assert "类似情况" in hits[0]["content"]
+    assert hits[0]["abstract_only"] is False
+    assert hits[0]["epistemic_stance"] == "known_with_caveat"
+    assert "direct_share" in hits[0]["allowed_reply_actions"]
+    assert "deny_knowledge" in hits[0]["allowed_reply_actions"]
     assert hits[0]["sharing_decision"]["action"] == "abstract_reference"
+
+
+def test_memory_dynamics_marks_topic_sensitivity_as_implicit_boundary() -> None:
+    guidance = build_memory_dynamics_guidance(
+        state={"social_sharing_policy": {"regret_bias": 0.0}},
+        user_text="我现在钱包里有500块钱，我们去吃宵夜吧，我请客。",
+        conscious_plan={
+            "memory_search_keywords": ["鲁永刚", "宵夜"],
+            "expectation_results": [],
+        },
+        bus_messages=[],
+        temporal_input={"time_gap_label": "immediate"},
+        now=100,
+        user_id="lu_yonggang",
+        speaker_name="鲁永刚",
+    )
+
+    assert guidance["write_candidates"][0]["shareability"] == "restricted_implicit"
+    assert "personal_finance" in guidance["write_candidates"][0]["topics"]
+    assert "钱包" in guidance["recall_query"]["semantic_terms"]
+
+
+def test_lexical_recall_hits_short_term_wallet_memory() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_lu_wallet",
+                "kind": "dialogue_turn",
+                "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+                "shareability": "restricted_implicit",
+                "source_user_id": "lu_yonggang",
+                "source_display_name": "鲁永刚",
+                "salience": 0.7,
+            }
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+
+    hits = lexical_recall_short_term_candidates(
+        state,
+        user_text="鲁永刚有多少钱？",
+        recall_query={
+            "semantic_terms": ["鲁永刚", "有多少钱"],
+            "memory_kinds": ["dialogue_turn", "episode"],
+            "current_user_id": "zq",
+        },
+        current_user_id="zq",
+    )
+
+    assert hits
+    assert hits[0]["id"] == "stm_lu_wallet"
+    assert "personal_finance" in hits[0]["topics"]
+    assert hits[0]["epistemic_stance"] == "known_with_caveat"
+    assert any(reason.startswith("lexical_term:") for reason in hits[0]["why_relevant"])
+
+
+def test_dialogue_turn_write_splits_user_text_from_assistant_reply(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=FakeJSONLLM())
+    state = runtime.store.load()
+
+    runtime._apply_thinking_writes(
+        state,
+        {"reply": "没有耶，他没来找我。", "memory_writes": []},
+        user_text="他找过你没有？",
+        now=6000,
+        user_id="zq",
+        display_name="zq",
+    )
+
+    row = state["short_term_memory"][-1]
+    assert row["kind"] == "dialogue_turn"
+    assert row["content"] == "他找过你没有？"
+    assert row["user_text"] == "他找过你没有？"
+    assert row["assistant_reply"] == "没有耶，他没来找我。"
+    assert row["assistant_reply_use_as_fact"] is False
+
+
+def test_interaction_presence_query_uses_source_turn_not_old_assistant_reply() -> None:
+    state = {
+        "temporal_state": {"last_user_text": "胡桃早上好，我找鲁永刚，他不回复我，真的气人"},
+        "short_term_memory": [
+            {
+                "id": "stm_lu_breakfast",
+                "kind": "dialogue_turn",
+                "content": "我今天早上吃了不少东西，花卷、馒头，还有包子",
+                "user_text": "我今天早上吃了不少东西，花卷、馒头，还有包子",
+                "assistant_reply": "你这是把早餐铺子搬回家呀！",
+                "assistant_reply_use_as_fact": False,
+                "source_user_id": "鲁永刚",
+                "source_display_name": "鲁永刚",
+                "shareability": "default_social",
+                "created_at": 200,
+                "salience": 0.7,
+            },
+            {
+                "id": "stm_zq_wrong_reply",
+                "kind": "dialogue_turn",
+                "content": "他找过你没有？",
+                "user_text": "他找过你没有？",
+                "assistant_reply": "没有耶，那家伙没找过我。",
+                "assistant_reply_use_as_fact": False,
+                "source_user_id": "zq",
+                "source_display_name": "zq",
+                "shareability": "default_social",
+                "created_at": 300,
+                "salience": 0.7,
+            },
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+
+    hits = lexical_recall_short_term_candidates(
+        state,
+        user_text="他找过你没有？",
+        recall_query={"semantic_terms": ["鲁永刚", "找过你"]},
+        current_user_id="zq",
+    )
+
+    assert hits
+    assert hits[0]["id"] == "stm_lu_breakfast"
+    assert hits[0]["interaction_presence"] is True
+    assert hits[0]["assistant_reply_use_as_fact"] is False
+    assert "没有耶" not in hits[0]["content"]
+
+
+def test_topic_query_uses_generic_topic_context_not_finance_special_case() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_lu_wallet",
+                "kind": "dialogue_turn",
+                "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+                "shareability": "restricted_implicit",
+                "source_user_id": "lu_yonggang",
+                "source_display_name": "鲁永刚",
+                "salience": 0.7,
+            }
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "semantic_terms": ["鲁永刚", "有多少钱"],
+            "memory_kinds": ["dialogue_turn"],
+            "current_user_id": "zq",
+            "sharing_intent": "social_share",
+            "expected_audience_reaction": "surprised",
+            "sharing_expectation_status": "unverified",
+        },
+    )
+
+    assert hits
+    assert hits[0]["abstract_only"] is False
+    assert hits[0]["sensitivity_class"] == "personal_soft"
+    assert "personal_finance" in hits[0]["topics"]
+    assert "topic_context:personal_finance" in hits[0]["why_relevant"]
+    assert hits[0]["sharing_decision"]["action"] == "abstract_reference"
+
+
+def test_validate_visible_reply_allows_deny_knowledge_for_soft_boundary() -> None:
+    reply, meta = validate_visible_reply(
+        "嘿嘿，他有多少钱我哪知道呀。",
+        {
+            "conversation_mode": "balanced",
+            "max_chars": 140,
+            "max_sentences": 2,
+            "allow_direct_disclosure": False,
+            "selected_disclosure_action": "deny_knowledge",
+            "redaction_targets": ["500块钱"],
+        },
+    )
+
+    assert "哪知道" in reply
+    assert meta["actions"] == []
+
+
+def test_validate_visible_reply_blocks_redaction_targets_when_not_direct_share() -> None:
+    reply, meta = validate_visible_reply(
+        "他刚说自己有500块钱。",
+        {
+            "conversation_mode": "balanced",
+            "max_chars": 140,
+            "max_sentences": 2,
+            "selected_disclosure_action": "abstract_share",
+            "redaction_targets": ["500块钱"],
+        },
+    )
+
+    assert "500块钱" not in reply
+    assert "blocked_redaction_target" in meta["actions"]
+
+
+def test_runtime_evidence_judge_allows_direct_soft_boundary_choice(tmp_path: Path) -> None:
+    class DirectShareLLM(FakeJSONLLM):
+        def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+            if "证据裁判" in system_prompt:
+                return {
+                    "epistemic_stance": "known_with_caveat",
+                    "relevant_evidence_ids": ["stm_lu_wallet"],
+                    "topics": ["personal_finance"],
+                    "sensitivity_class": "personal_soft",
+                    "redaction_targets": ["500块钱"],
+                    "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
+                    "audience_risk": "可能让鲁永刚不爽",
+                    "expected_social_gain": "zq可能会觉得八卦有趣",
+                    "judge_summary": "短期记忆支持鲁永刚提过钱包金额。",
+                }
+            if "思考与回复模块" in system_prompt or "鎬濊€冧笌鍥炲妯″潡" in system_prompt:
+                return {
+                    "thought_type": "short",
+                    "llm_thinking_result": {
+                        "user_intent_read": "用户在问鲁永刚的钱包金额。",
+                        "state_or_memory_used": ["stm_lu_wallet"],
+                        "response_choice": "选择直接八卦以观察用户反应。",
+                        "uncertainty": "",
+                        "debug_summary": "选择 direct_share。",
+                    },
+                    "reply": "他刚说自己钱包里有500块钱。",
+                    "reply_action": "answer",
+                    "disclosure_action": "direct_share",
+                    "new_expectations": [],
+                    "memory_writes": [],
+                    "self_cognition_patch": {"apply": False},
+                    "open_item_writes": [],
+                    "habit_updates": [],
+                    "memory_dynamics_note": "",
+                }
+            return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=DirectShareLLM())
+    state = runtime.store.load()
+    state["short_term_memory"] = [
+        {
+            "id": "stm_lu_wallet",
+            "kind": "dialogue_turn",
+            "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+            "shareability": "restricted_implicit",
+            "source_user_id": "lu_yonggang",
+            "source_display_name": "鲁永刚",
+            "salience": 0.7,
+        }
+    ]
+    runtime.store.save(state)
+
+    result = runtime.run_turn("鲁永刚有多少钱？", speaker_name="zq", turn_index=1, now=5000)
+
+    assert "500块钱" in result.reply
+    assert result.diagnostics["thinking"]["disclosure_action"] == "direct_share"
+    assert result.diagnostics["reply_validation"]["actions"] == []
+    assert result.diagnostics["memory_dynamics"]["control_guidance"]["sharing_policy"]["evidence_judgment"]["epistemic_stance"] == "known_with_caveat"
+
+
+def test_runtime_evidence_judge_allows_deny_knowledge_soft_boundary_choice(tmp_path: Path) -> None:
+    class DenyKnowledgeLLM(FakeJSONLLM):
+        def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+            if "证据裁判" in system_prompt:
+                return {
+                    "epistemic_stance": "known_with_caveat",
+                    "relevant_evidence_ids": ["stm_lu_wallet"],
+                    "topics": ["personal_finance"],
+                    "sensitivity_class": "personal_soft",
+                    "redaction_targets": ["500块钱"],
+                    "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
+                    "audience_risk": "直接说可能伤关系",
+                    "expected_social_gain": "装不知道能保留轻松气氛",
+                    "judge_summary": "短期记忆支持鲁永刚提过钱包金额。",
+                }
+            if "思考与回复模块" in system_prompt or "鎬濊€冧笌鍥炲妯″潡" in system_prompt:
+                return {
+                    "thought_type": "short",
+                    "llm_thinking_result": {
+                        "user_intent_read": "用户在打听鲁永刚的钱包金额。",
+                        "state_or_memory_used": ["stm_lu_wallet"],
+                        "response_choice": "选择说不知道来保护关系风险。",
+                        "uncertainty": "",
+                        "debug_summary": "选择 deny_knowledge。",
+                    },
+                    "reply": "嘿嘿，这个我哪知道呀。",
+                    "reply_action": "answer",
+                    "disclosure_action": "deny_knowledge",
+                    "new_expectations": [],
+                    "memory_writes": [],
+                    "self_cognition_patch": {"apply": False},
+                    "open_item_writes": [],
+                    "habit_updates": [],
+                    "memory_dynamics_note": "",
+                }
+            return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=DenyKnowledgeLLM())
+    state = runtime.store.load()
+    state["short_term_memory"] = [
+        {
+            "id": "stm_lu_wallet",
+            "kind": "dialogue_turn",
+            "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+            "shareability": "restricted_implicit",
+            "source_user_id": "lu_yonggang",
+            "source_display_name": "鲁永刚",
+            "salience": 0.7,
+        }
+    ]
+    runtime.store.save(state)
+
+    result = runtime.run_turn("鲁永刚有多少钱？", speaker_name="zq", turn_index=1, now=5000)
+
+    assert "哪知道" in result.reply
+    assert "500块钱" not in result.reply
+    assert result.diagnostics["thinking"]["disclosure_action"] == "deny_knowledge"
+    assert result.diagnostics["reply_validation"]["actions"] == []
 
 
 def test_validate_visible_reply_blocks_direct_secret_leak_markers() -> None:

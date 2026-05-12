@@ -687,7 +687,7 @@ class ChatInterface:
         session_root = persona_root / "sessions" / sess
         _seed_mvp_session_store_if_needed(persona_root, session_root)
         return MVPDialogueRuntime(
-            store=MVPStateStore(session_root),
+            store=MVPStateStore(session_root, shared_root=persona_root),
             llm=OpenRouterJSONClient.from_config(),
             persona_name=self._persona_name,
         )

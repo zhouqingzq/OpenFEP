@@ -118,6 +118,44 @@ def _safe_json_load(path: Path, default: Any) -> Any:
         return default
 
 
+def _memory_sort_key(item: Mapping[str, Any]) -> tuple[float, str]:
+    raw_created = item.get("created_at", 0)
+    try:
+        created_at = float(raw_created)
+    except (TypeError, ValueError):
+        created_at = 0.0
+    return (created_at, str(item.get("id", "")))
+
+
+def _memory_identity(item: Mapping[str, Any], index: int) -> str:
+    item_id = str(item.get("id", "")).strip()
+    if item_id:
+        return f"id:{item_id}"
+    content = str(item.get("content", "")).strip()
+    source_user = str(item.get("source_user_id", "")).strip()
+    created = str(item.get("created_at", "")).strip()
+    return f"anon:{source_user}:{created}:{content[:160]}:{index}"
+
+
+def _merge_recent_memory(*groups: Any, limit: int = 96) -> list[dict[str, Any]]:
+    merged: dict[str, dict[str, Any]] = {}
+    order: list[str] = []
+    for group in groups:
+        if not isinstance(group, list):
+            continue
+        for index, item in enumerate(group):
+            if not isinstance(item, Mapping):
+                continue
+            key = _memory_identity(item, index)
+            if key not in merged:
+                order.append(key)
+            merged[key] = dict(item)
+    values = [merged[key] for key in order if key in merged]
+    values.sort(key=_memory_sort_key)
+    bounded_limit = max(1, int(limit or 96))
+    return values[-bounded_limit:]
+
+
 def _json_text(value: Any, *, limit: int = 12000) -> str:
     text = json.dumps(value, ensure_ascii=False, indent=2)
     return text[:limit]
@@ -179,11 +217,202 @@ def _detect_explicit_secrecy(text: str) -> tuple[bool, str]:
 
 
 def _memory_shareability(item: Mapping[str, Any]) -> str:
-    return memory_shareability(item)
+    return _shareability_for_memory_text(
+        _memory_fact_text(item),
+        item.get("evidence"),
+        item.get("keywords"),
+        requested=memory_shareability(item),
+    )
 
 
 def _redact_memory_content(item: Mapping[str, Any], *, max_chars: int = 80) -> str:
     return abstract_memory_content(item, max_chars=max_chars)
+
+
+@dataclass(frozen=True)
+class TopicEntry:
+    id: str
+    recall_synonyms: tuple[str, ...]
+    default_sensitivity_class: str = "public"
+    redaction_markers: tuple[str, ...] = ()
+
+
+TOPIC_TAXONOMY: tuple[TopicEntry, ...] = (
+    TopicEntry(
+        id="personal_finance",
+        recall_synonyms=(
+            "有多少钱",
+            "多少钱",
+            "钱包",
+            "金额",
+            "预算",
+            "请客",
+            "欠钱",
+            "欠我",
+            "还钱",
+            "身上有没有钱",
+            "块钱",
+            "兜里",
+            "钢镚",
+            "抠门",
+            "经济状况",
+        ),
+        default_sensitivity_class="personal_soft",
+        redaction_markers=("具体金额", "金额", "钱包", "块钱", "元"),
+    ),
+    TopicEntry(
+        id="health",
+        recall_synonyms=("身体", "健康", "生病", "病", "血压", "药", "医院", "症状", "不舒服"),
+        default_sensitivity_class="personal_soft",
+        redaction_markers=("病情", "症状", "诊断", "药名"),
+    ),
+    TopicEntry(
+        id="home_address",
+        recall_synonyms=("住哪", "住址", "地址", "家在哪", "小区", "门牌", "楼栋", "宿舍"),
+        default_sensitivity_class="personal_hard",
+        redaction_markers=("完整地址", "门牌", "楼栋", "住址"),
+    ),
+)
+
+_TOPIC_BY_ID = {entry.id: entry for entry in TOPIC_TAXONOMY}
+
+def _joined_text(*values: Any) -> str:
+    parts: list[str] = []
+    for value in values:
+        if value is None:
+            continue
+        if isinstance(value, Mapping):
+            parts.append(json.dumps(dict(value), ensure_ascii=False))
+        elif isinstance(value, (list, tuple, set)):
+            parts.extend(str(item) for item in value if str(item).strip())
+        else:
+            parts.append(str(value))
+    return " ".join(part for part in parts if part).casefold()
+
+
+def _topic_ids_for_text(*values: Any) -> set[str]:
+    text = _joined_text(*values)
+    if not text:
+        return set()
+    hits: set[str] = set()
+    for entry in TOPIC_TAXONOMY:
+        if any(term.casefold() in text for term in entry.recall_synonyms):
+            hits.add(entry.id)
+    if re.search(r"\d+\s*(?:块钱|块|元)", text):
+        hits.add("personal_finance")
+    return hits
+
+
+def _sensitive_topic_ids_for_text(*values: Any) -> set[str]:
+    text = _joined_text(*values)
+    hits = _topic_ids_for_text(*values) - {"personal_finance"}
+    finance_strong = (
+        "有多少钱",
+        "多少钱",
+        "钱包",
+        "金额",
+        "预算",
+        "欠钱",
+        "欠我",
+        "还钱",
+        "身上有没有钱",
+        "块钱",
+        "兜里",
+        "钢镚",
+    )
+    if any(marker.casefold() in text for marker in finance_strong) or re.search(r"\d+\s*(?:块钱|块|元)", text):
+        hits.add("personal_finance")
+    return hits
+
+
+def _append_topic_recall_terms(
+    terms: list[str],
+    topic_ids: set[str] | list[str] | tuple[str, ...],
+    *,
+    limit: int = 36,
+) -> list[str]:
+    result = list(terms)
+    seen = {item.casefold() for item in result}
+    for topic_id in topic_ids:
+        entry = _TOPIC_BY_ID.get(str(topic_id))
+        if not entry:
+            continue
+        for term in entry.recall_synonyms:
+            key = term.casefold()
+            if key in seen:
+                continue
+            result.append(term)
+            seen.add(key)
+            if len(result) >= limit:
+                return result
+    return result
+
+
+def _sensitivity_class_for_topics(topic_ids: set[str] | list[str] | tuple[str, ...]) -> str:
+    rank = {"public": 0, "social_soft": 1, "personal_soft": 2, "personal_hard": 3, "explicit_secret": 4}
+    selected = "public"
+    for topic_id in topic_ids:
+        entry = _TOPIC_BY_ID.get(str(topic_id))
+        if entry and rank.get(entry.default_sensitivity_class, 0) > rank.get(selected, 0):
+            selected = entry.default_sensitivity_class
+    return selected
+
+
+def _redaction_targets_for_text(
+    text: str,
+    topic_ids: set[str] | list[str] | tuple[str, ...],
+) -> list[str]:
+    targets: list[str] = []
+    for topic_id in topic_ids:
+        entry = _TOPIC_BY_ID.get(str(topic_id))
+        if not entry:
+            continue
+        for marker in entry.redaction_markers:
+            if marker not in targets:
+                targets.append(marker)
+    for amount in re.findall(r"\d+\s*(?:块钱|块|元)", str(text or "")):
+        if amount not in targets:
+            targets.append(amount)
+    return targets[:8]
+
+
+def _memory_sensitivity(item: Mapping[str, Any]) -> str:
+    return _sensitivity_class_for_topics(_sensitive_topic_ids_for_text(_memory_fact_text(item), item.get("evidence"), item.get("keywords")))
+
+
+def _memory_topics(item: Mapping[str, Any]) -> list[str]:
+    explicit = [str(topic).strip() for topic in item.get("topics", []) or [] if str(topic).strip()]
+    inferred = _topic_ids_for_text(_memory_fact_text(item), item.get("evidence"), item.get("keywords"))
+    return sorted({*explicit, *inferred})
+
+
+def _shareability_for_memory_text(
+    *values: Any,
+    explicit_secret: bool = False,
+    requested: str = "default_social",
+) -> str:
+    requested = str(requested or "default_social").strip()
+    if explicit_secret or requested == "restricted_explicit":
+        return "restricted_explicit"
+    sensitivity = _sensitivity_class_for_topics(_sensitive_topic_ids_for_text(*values))
+    if requested == "restricted_implicit" or sensitivity in {"personal_soft", "personal_hard"}:
+        return "restricted_implicit"
+    return "default_social"
+
+
+def _restriction_reason_for_shareability(
+    shareability: str,
+    *,
+    explicit_secret: bool = False,
+    existing: str = "",
+) -> str:
+    if explicit_secret or shareability == "restricted_explicit":
+        return "explicit_user_secret"
+    if existing:
+        return existing
+    if shareability == "restricted_implicit":
+        return "topic_implicit_boundary"
+    return ""
 
 
 def _normalize_big_five(value: Any) -> dict[str, float]:
@@ -425,8 +654,13 @@ class OpenRouterJSONClient:
 @dataclass
 class MVPStateStore:
     root: Path
+    shared_root: Path | None = None
+    shared_short_term_limit: int = 96
 
     def __post_init__(self) -> None:
+        self.root = Path(self.root)
+        if self.shared_root is not None:
+            self.shared_root = Path(self.shared_root)
         self.root.mkdir(parents=True, exist_ok=True)
         self.ensure_files()
 
@@ -435,6 +669,14 @@ class MVPStateStore:
             path = self.path_for(key)
             if not path.exists():
                 path.write_text(json.dumps(default, ensure_ascii=False, indent=2), encoding="utf-8")
+        if self._has_shared_short_term():
+            shared_path = self._shared_short_term_path()
+            shared_path.parent.mkdir(parents=True, exist_ok=True)
+            if not shared_path.exists():
+                shared_path.write_text(
+                    json.dumps(SYSTEM_FILE_DEFAULTS["short_term_memory"], ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
     def path_for(self, key: str) -> Path:
         if key not in SYSTEM_FILE_NAMES:
@@ -443,24 +685,76 @@ class MVPStateStore:
 
     def load(self) -> dict[str, Any]:
         self.ensure_files()
-        return {
+        state = {
             key: _safe_json_load(self.path_for(key), default)
             for key, default in SYSTEM_FILE_DEFAULTS.items()
         }
+        if self._has_shared_short_term():
+            state["short_term_memory"] = _merge_recent_memory(
+                *self._load_shared_short_term_groups(),
+                state.get("short_term_memory") if isinstance(state.get("short_term_memory"), list) else [],
+                limit=self.shared_short_term_limit,
+            )
+        return state
 
     def save(self, state: Mapping[str, Any]) -> None:
         self.ensure_files()
         for key, default in SYSTEM_FILE_DEFAULTS.items():
             value = state.get(key, default)
+            if key == "short_term_memory":
+                value = _merge_recent_memory(
+                    value if isinstance(value, list) else [],
+                    limit=self.shared_short_term_limit,
+                )
             self.path_for(key).write_text(
                 json.dumps(value, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+            if key == "short_term_memory" and self._has_shared_short_term():
+                shared = _safe_json_load(self._shared_short_term_path(), SYSTEM_FILE_DEFAULTS["short_term_memory"])
+                merged = _merge_recent_memory(
+                    shared if isinstance(shared, list) else [],
+                    value if isinstance(value, list) else [],
+                    limit=self.shared_short_term_limit,
+                )
+                self._shared_short_term_path().write_text(
+                    json.dumps(merged, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
     def append_log(self, row: Mapping[str, Any]) -> None:
         path = self.root / "conversation_log.jsonl"
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(dict(row), ensure_ascii=False) + "\n")
+
+    def _has_shared_short_term(self) -> bool:
+        return bool(self.shared_root and self.shared_root.resolve() != self.root.resolve())
+
+    def _shared_short_term_path(self) -> Path:
+        if self.shared_root is None:
+            return self.path_for("short_term_memory")
+        return self.shared_root / SYSTEM_FILE_NAMES["short_term_memory"]
+
+    def _load_shared_short_term_groups(self) -> list[list[Any]]:
+        groups: list[list[Any]] = []
+        shared = _safe_json_load(self._shared_short_term_path(), SYSTEM_FILE_DEFAULTS["short_term_memory"])
+        if isinstance(shared, list):
+            groups.append(shared)
+        if self.shared_root is None:
+            return groups
+        sessions_dir = self.shared_root / "sessions"
+        if not sessions_dir.is_dir():
+            return groups
+        for path in sessions_dir.glob(f"*/{SYSTEM_FILE_NAMES['short_term_memory']}"):
+            try:
+                if path.resolve() == self.path_for("short_term_memory").resolve():
+                    continue
+            except OSError:
+                pass
+            value = _safe_json_load(path, SYSTEM_FILE_DEFAULTS["short_term_memory"])
+            if isinstance(value, list):
+                groups.append(value)
+        return groups
 
 
 def build_free_energy_personality_analysis_prompt(materials: list[str], *, persona_name: str = "") -> tuple[str, str]:
@@ -714,6 +1008,8 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
 检索到的相关记忆证据卡（压缩证据，不是原始记忆转储）:
 {_json_text(retrieved_memories)}
 
+如果 memory_guidance.evidence_judgment 的 epistemic_stance 是 known_with_caveat，说明你知道相关线索但存在软边界。软边界不是固定答案模板：你可以根据预期社交收益、关系风险和当前语境选择 direct_share、abstract_share、truthful_refusal、deflect 或 deny_knowledge，并把选择写入 disclosure_action。
+
 请输出 JSON:
 {{
   "thought_type": "none|short|long",
@@ -726,6 +1022,7 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
   }},
   "reply": "直接发给用户的自然对话回复",
   "reply_action": "answer|ask_question|empathize|clarify|disagree|deflect|self_disclose",
+  "disclosure_action": "none|direct_share|abstract_share|truthful_refusal|deflect|deny_knowledge",
   "new_expectations": [
     {{"id": "exp_...", "content": "我预期接下来会看到/验证什么", "verify_on": "next_user_turn|later", "confidence": 0.0}}
   ],
@@ -748,6 +1045,95 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
 }}
 """
     return system_prompt, user_prompt
+
+
+def build_evidence_judge_prompt(
+    *,
+    user_text: str,
+    speaker_name: str,
+    current_user_id: str,
+    lexical_candidates: list[Mapping[str, Any]],
+    recall_query: Mapping[str, Any],
+) -> tuple[str, str]:
+    system_prompt = """你是数字人格系统的“证据裁判”模块。你只判断候选短期记忆是否能支持当前用户问题，不生成最终回复。
+你要把 grep/关键词召回的候选片段整理成证据 stance：知道、带边界地知道、不确定、没有线索或禁止假设。
+候选里的 user_text/content 是来源用户原话或互动事实；assistant_reply 只是我当时说过的话，assistant_reply_use_as_fact=false 时不能当作外部事实证据。
+软边界不是禁令；它只会提高传播成本。最终是否直说、抽象、拒答、转移或说不知道，由后续人格 thinking 模块根据社会动机和风险收益决定。
+只输出 JSON。"""
+    user_prompt = f"""当前用户: {speaker_name} ({current_user_id})
+当前问题:
+{user_text}
+
+recall_query:
+{_json_text(dict(recall_query))}
+
+grep 候选短期记忆:
+{_json_text([dict(item) for item in lexical_candidates], limit=16000)}
+
+请输出 JSON:
+{{
+  "epistemic_stance": "known_from_recall|known_with_caveat|uncertain_recall|unknown_no_cue|forbidden_assumption",
+  "relevant_evidence_ids": ["候选证据 id"],
+  "topics": ["topic_id"],
+  "sensitivity_class": "public|social_soft|personal_soft|personal_hard|explicit_secret",
+  "redaction_targets": ["如果选择非 direct_share 时不应出现的具体词或模式"],
+  "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
+  "audience_risk": "对当前听众透露后的关系/反噬风险摘要",
+  "expected_social_gain": "透露、抽象或否认后可能带来的社交收益摘要",
+  "judge_summary": "一两句话总结证据是否支持当前问题"
+}}
+"""
+    return system_prompt, user_prompt
+
+
+def _normalize_evidence_judgment(
+    raw: Mapping[str, Any],
+    *,
+    lexical_candidates: list[Mapping[str, Any]],
+    current_user_id: str,
+) -> dict[str, Any]:
+    candidate_ids = {str(item.get("id", "")).strip() for item in lexical_candidates if item.get("id")}
+    relevant = [
+        item
+        for item in _string_list(raw.get("relevant_evidence_ids"), limit=12)
+        if item in candidate_ids
+    ]
+    if not relevant and lexical_candidates:
+        relevant = [str(lexical_candidates[0].get("id", ""))]
+    topics = sorted({*set(_string_list(raw.get("topics"), limit=8)), *set().union(*(set(_string_list(item.get("topics"), limit=8)) for item in lexical_candidates if str(item.get("id", "")) in relevant))})
+    sensitivity = str(raw.get("sensitivity_class", "")).strip()
+    if sensitivity not in {"public", "social_soft", "personal_soft", "personal_hard", "explicit_secret"}:
+        sensitivity = _sensitivity_class_for_topics(topics)
+    stance = str(raw.get("epistemic_stance", "")).strip()
+    if stance not in {
+        "known_from_recall",
+        "known_with_caveat",
+        "uncertain_recall",
+        "unknown_no_cue",
+        "forbidden_assumption",
+    }:
+        stance = "known_with_caveat" if relevant and sensitivity in {"personal_soft", "personal_hard"} else "known_from_recall" if relevant else "unknown_no_cue"
+    redaction_targets = _string_list(raw.get("redaction_targets"), limit=12)
+    for item in lexical_candidates:
+        if str(item.get("id", "")) in relevant:
+            redaction_targets = _unique_strings(redaction_targets, item.get("redaction_targets"), limit=12)
+    allowed = _string_list(raw.get("allowed_reply_actions"), limit=8)
+    valid_actions = {"direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"}
+    allowed = [action for action in allowed if action in valid_actions]
+    if not allowed:
+        allowed = ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"] if stance == "known_with_caveat" else ["direct_share"]
+    return {
+        "epistemic_stance": stance,
+        "relevant_evidence_ids": relevant,
+        "topics": topics,
+        "sensitivity_class": sensitivity,
+        "redaction_targets": redaction_targets,
+        "allowed_reply_actions": allowed,
+        "audience_user_id": current_user_id,
+        "audience_risk": str(raw.get("audience_risk", "")).strip(),
+        "expected_social_gain": str(raw.get("expected_social_gain", "")).strip(),
+        "judge_summary": str(raw.get("judge_summary", "")).strip(),
+    }
 
 
 def build_post_reply_observer_prompt(
@@ -851,6 +1237,339 @@ def _rough_terms(text: str, *, limit: int = 8) -> list[str]:
     return [token[:80] for token in tokens[:limit] if token.strip()]
 
 
+def _dialogue_turn_parts(item: Mapping[str, Any]) -> tuple[str, str]:
+    user_part = str(item.get("user_text", "")).strip()
+    assistant_part = str(item.get("assistant_reply", "")).strip()
+    content = str(item.get("content", ""))
+    if (not user_part or not assistant_part) and str(item.get("kind", "")).strip() == "dialogue_turn":
+        match = re.match(r"\s*用户说[:：](?P<user>.*?)(?:\n\s*我回复[:：](?P<assistant>.*))?\s*$", content, flags=re.DOTALL)
+        if not match:
+            match = re.match(r"\s*鐢ㄦ埛璇达細(?P<user>.*?)(?:\n\s*鎴戝洖澶嶏細(?P<assistant>.*))?\s*$", content, flags=re.DOTALL)
+        if match:
+            user_part = user_part or str(match.group("user") or "").strip()
+            assistant_part = assistant_part or str(match.group("assistant") or "").strip()
+    return user_part, assistant_part
+
+
+def _memory_fact_text(item: Mapping[str, Any]) -> str:
+    if str(item.get("kind", "")).strip() == "dialogue_turn":
+        user_part, _ = _dialogue_turn_parts(item)
+        return user_part or str(item.get("content", "")).strip()
+    return str(item.get("content", "")).strip()
+
+
+def _memory_index_text(item: Mapping[str, Any]) -> str:
+    payload = dict(item)
+    if str(payload.get("kind", "")).strip() == "dialogue_turn":
+        user_part, _ = _dialogue_turn_parts(payload)
+        user_part = user_part or str(payload.get("content", "")).strip()
+        payload["content"] = user_part
+        payload["user_text"] = user_part
+        payload.pop("assistant_reply", None)
+    return json.dumps(payload, ensure_ascii=False)
+
+
+_FOLLOW_UP_PROBE_MARKERS = (
+    "真的不知道",
+    "真不知道",
+    "你确定",
+    "确定不知道",
+    "不是知道",
+    "没印象吗",
+    "不记得",
+)
+
+
+_INTERACTION_PRESENCE_MARKERS = (
+    "找过你",
+    "找你",
+    "来找你",
+    "找过",
+    "来过",
+    "联系过",
+    "联系你",
+    "聊过",
+    "说过话",
+    "来骚扰你",
+)
+
+
+def _is_follow_up_probe(text: str) -> bool:
+    lowered = str(text or "").casefold()
+    return any(marker.casefold() in lowered for marker in _FOLLOW_UP_PROBE_MARKERS)
+
+
+def _is_interaction_presence_query(text: str) -> bool:
+    lowered = str(text or "").casefold()
+    return any(marker.casefold() in lowered for marker in _INTERACTION_PRESENCE_MARKERS)
+
+
+def _specificity_bonus(term: str) -> float:
+    if re.fullmatch(r"\d+", term):
+        return 1.2
+    if re.search(r"\d", term):
+        return 0.9
+    if len(term) >= 4:
+        return 0.35
+    return 0.0
+
+
+def _lexical_recall_terms(
+    *,
+    state: Mapping[str, Any],
+    user_text: str,
+    recall_query: Mapping[str, Any] | None,
+    limit: int = 40,
+) -> list[str]:
+    query = _mapping(recall_query)
+    base_terms = _unique_strings(
+        query.get("semantic_terms"),
+        _rough_terms(user_text, limit=12),
+        limit=limit,
+    )
+    active_topics = _topic_ids_for_text(base_terms, user_text)
+    terms = _append_topic_recall_terms(base_terms, active_topics, limit=limit)
+    temporal = _mapping(state.get("temporal_state"))
+    previous_trace = _mapping(temporal.get("last_share_trace"))
+    if _is_follow_up_probe(user_text):
+        terms = _unique_strings(
+            terms,
+            previous_trace.get("lexical_recall_terms"),
+            previous_trace.get("evidence_topics"),
+            previous_trace.get("evidence_source_names"),
+            limit=limit,
+        )
+        terms = _append_topic_recall_terms(terms, set(_string_list(previous_trace.get("evidence_topics"), limit=8)), limit=limit)
+    return terms
+
+
+def _interaction_target_names(
+    state: Mapping[str, Any],
+    *,
+    user_text: str,
+    recall_query: Mapping[str, Any] | None,
+) -> set[str]:
+    query = _mapping(recall_query)
+    temporal = _mapping(state.get("temporal_state"))
+    haystack = _joined_text(
+        user_text,
+        query.get("semantic_terms"),
+        query.get("relationship_terms"),
+        _mapping(temporal.get("previous_turn_summary")).get("user_text"),
+        temporal.get("last_user_text"),
+    )
+    if not haystack:
+        return set()
+    names: set[str] = set()
+    rows = state.get("short_term_memory", [])
+    if not isinstance(rows, list):
+        return names
+    for item in rows:
+        if not isinstance(item, Mapping):
+            continue
+        for raw in (item.get("source_display_name"), item.get("source_user_id")):
+            name = str(raw or "").strip()
+            if name and name.casefold() in haystack:
+                names.add(name)
+    return names
+
+
+def _interaction_presence_candidates(
+    state: Mapping[str, Any],
+    *,
+    user_text: str,
+    recall_query: Mapping[str, Any] | None,
+    current_user_id: str = "",
+    limit: int = 4,
+) -> list[dict[str, Any]]:
+    if not _is_interaction_presence_query(user_text):
+        return []
+    target_names = _interaction_target_names(state, user_text=user_text, recall_query=recall_query)
+    if not target_names:
+        return []
+    rows = state.get("short_term_memory", [])
+    if not isinstance(rows, list):
+        return []
+    scored: list[tuple[float, dict[str, Any]]] = []
+    target_folded = {name.casefold() for name in target_names}
+    for item in rows:
+        if not isinstance(item, Mapping):
+            continue
+        if str(item.get("kind", "")).strip() not in {"dialogue_turn", "episode"}:
+            continue
+        source_names = {
+            str(item.get("source_user_id", "")).strip().casefold(),
+            str(item.get("source_display_name", "")).strip().casefold(),
+        }
+        if not source_names.intersection(target_folded):
+            continue
+        source_user_id = str(item.get("source_user_id", "")).strip()
+        if current_user_id and source_user_id == current_user_id:
+            continue
+        try:
+            created_at = float(item.get("created_at", 0) or 0)
+        except (TypeError, ValueError):
+            created_at = 0.0
+        card = _evidence_card(
+            "short_term_memory",
+            item,
+            score=5.0 + created_at * 0.000001,
+            reasons=["source_interaction_recent"],
+            conflict_note="",
+            abstract_only=False,
+            sharing_decision={},
+        )
+        card["epistemic_stance"] = "known_from_recall"
+        card["interaction_presence"] = True
+        card["assistant_reply_use_as_fact"] = False
+        scored.append((5.0 + created_at * 0.000001, card))
+    scored.sort(key=lambda row: row[0], reverse=True)
+    return [card for _, card in scored[:limit]]
+
+
+def lexical_recall_short_term_candidates(
+    state: Mapping[str, Any],
+    *,
+    user_text: str,
+    recall_query: Mapping[str, Any] | None = None,
+    current_user_id: str = "",
+    limit: int = 8,
+) -> list[dict[str, Any]]:
+    interaction_candidates = _interaction_presence_candidates(
+        state,
+        user_text=user_text,
+        recall_query=recall_query,
+        current_user_id=current_user_id,
+        limit=limit,
+    )
+    terms = _lexical_recall_terms(state=state, user_text=user_text, recall_query=recall_query, limit=48)
+    if not terms:
+        return interaction_candidates
+    rows = state.get("short_term_memory", [])
+    if not isinstance(rows, list):
+        return []
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for item in rows:
+        if not isinstance(item, Mapping):
+            continue
+        text = _memory_index_text(item).casefold()
+        matched = []
+        score = 0.0
+        for term in terms:
+            lowered = term.casefold()
+            if not lowered:
+                continue
+            if lowered in text:
+                matched.append(term)
+                score += 1.0 + _specificity_bonus(term)
+        if not matched:
+            continue
+        source_user_id = str(item.get("source_user_id", "")).strip()
+        cross_user = bool(current_user_id and source_user_id and source_user_id != current_user_id)
+        score += min(2.0, len(set(matched)) * 0.35)
+        try:
+            score += float(item.get("salience", 0.0) or 0.0) * 0.25
+        except (TypeError, ValueError):
+            pass
+        card = _evidence_card(
+            "short_term_memory",
+            item,
+            score=score,
+            reasons=[f"lexical_term:{term}" for term in matched[:6]],
+            conflict_note="",
+            abstract_only=False,
+            sharing_decision={},
+        )
+        card["matched_terms"] = matched[:8]
+        card["audience_user_id"] = current_user_id
+        card["is_cross_user"] = bool(cross_user)
+        if cross_user and card.get("shareability") == "restricted_implicit":
+            card["epistemic_stance"] = "known_with_caveat"
+        scored.append((score, card))
+    scored.sort(key=lambda row: row[0], reverse=True)
+    merged = [*interaction_candidates, *[card for _, card in scored]]
+    seen: set[str] = set()
+    deduped: list[dict[str, Any]] = []
+    for card in merged:
+        key = str(card.get("id", ""))
+        if key and key in seen:
+            continue
+        if key:
+            seen.add(key)
+        deduped.append(card)
+        if len(deduped) >= limit:
+            break
+    return deduped
+
+
+def _short_term_interaction_experiences(state: Mapping[str, Any]) -> list[dict[str, Any]]:
+    short = state.get("short_term_memory", [])
+    if not isinstance(short, list):
+        return []
+    grouped: dict[str, dict[str, Any]] = {}
+    for item in short:
+        if not isinstance(item, Mapping):
+            continue
+        kind = str(item.get("kind", "")).strip()
+        if kind not in {"dialogue_turn", "episode"}:
+            continue
+        if str(item.get("shareability", "default_social")).strip() != "default_social":
+            continue
+        display = str(item.get("source_display_name") or item.get("source_user_id") or "").strip()
+        user_id = str(item.get("source_user_id") or display).strip()
+        if not display and not user_id:
+            continue
+        key = user_id or display
+        row = grouped.setdefault(
+            key,
+            {
+                "source_user_id": user_id,
+                "source_display_name": display or user_id,
+                "count": 0,
+                "last_created_at": 0,
+                "last_content": "",
+            },
+        )
+        row["count"] = int(row.get("count", 0)) + 1
+        try:
+            created_at = int(float(item.get("created_at", 0) or 0))
+        except (TypeError, ValueError):
+            created_at = 0
+        if created_at >= int(row.get("last_created_at", 0) or 0):
+            row["last_created_at"] = created_at
+            row["last_content"] = _memory_fact_text(item)[:180]
+
+    experiences: list[dict[str, Any]] = []
+    for key, row in grouped.items():
+        count = int(row.get("count", 0) or 0)
+        if count < 2:
+            continue
+        display = str(row.get("source_display_name") or key).strip()
+        user_id = str(row.get("source_user_id") or display).strip()
+        snippet = str(row.get("last_content", "")).strip()
+        content = f"{display}最近和我说过{count}次话。"
+        if snippet:
+            content += f"最近一次片段：{snippet}"
+        safe_user_id = re.sub(r"[^0-9A-Za-z_\u4e00-\u9fff-]+", "_", user_id)[:48]
+        experiences.append(
+            {
+                "id": f"stm_interaction_experience_{safe_user_id}",
+                "kind": "interaction_experience",
+                "content": content,
+                "salience": min(0.85, 0.38 + count * 0.06),
+                "confidence": min(0.92, 0.58 + count * 0.05),
+                "keywords": [display, user_id, "说过话", "近期互动", "认识"],
+                "source": "memory_dynamics_adapter",
+                "created_at": int(row.get("last_created_at", 0) or 0),
+                "source_user_id": user_id,
+                "source_display_name": display,
+                "shareability": "default_social",
+                "restriction_confidence": 0.75,
+            }
+        )
+    return experiences
+
+
 def _memory_pools(state: Mapping[str, Any]) -> list[tuple[str, Mapping[str, Any]]]:
     pools: list[tuple[str, Mapping[str, Any]]] = []
     for key in ("short_term_memory", "long_term_memory", "open_items", "pending_expectations"):
@@ -859,6 +1578,8 @@ def _memory_pools(state: Mapping[str, Any]) -> list[tuple[str, Mapping[str, Any]
             for item in value:
                 if isinstance(item, Mapping):
                     pools.append((key, item))
+    for item in _short_term_interaction_experiences(state):
+        pools.append(("short_term_memory", item))
     return pools
 
 
@@ -1077,13 +1798,19 @@ def _evidence_card(
         "open_item",
     } and status not in {"violated", "uncertain"}
     shareability = _memory_shareability(item)
-    content = str(item.get("content", "")).strip()[:600]
+    topics = _memory_topics(item)
+    sensitivity = _memory_sensitivity(item)
+    user_part, assistant_part = _dialogue_turn_parts(item)
+    content = (_memory_fact_text(item) or str(item.get("content", "")).strip())[:600]
     if abstract_only:
         content = _redact_memory_content(item, max_chars=120)
     return {
         "id": str(item.get("id", "")).strip(),
         "kind": kind,
         "content": content,
+        "user_text": user_part,
+        "assistant_reply": assistant_part,
+        "assistant_reply_use_as_fact": False if assistant_part else None,
         "source": source,
         "confidence": round(confidence, 6),
         "salience": round(salience, 6),
@@ -1091,8 +1818,18 @@ def _evidence_card(
         "conflict_note": conflict_note,
         "use_as_fact": bool(use_as_fact),
         "shareability": shareability,
+        "topics": topics,
+        "sensitivity_class": sensitivity,
+        "sensitivity": sensitivity,
+        "redaction_targets": _redaction_targets_for_text(_memory_fact_text(item), topics),
         "source_user_id": str(item.get("source_user_id", "")).strip(),
         "source_display_name": str(item.get("source_display_name", "")).strip(),
+        "audience_user_id": "",
+        "is_cross_user": False,
+        "epistemic_stance": "known_from_recall",
+        "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"]
+        if shareability == "restricted_implicit"
+        else ["direct_share"],
         "abstract_only": bool(abstract_only),
         "sharing_decision": dict(sharing_decision or {}),
         "_retrieval_score": round(score, 3),
@@ -1109,11 +1846,21 @@ def retrieve_memories_for_guidance(
     query = _mapping(recall_query)
     expectation_ids = {item.casefold() for item in _string_list(query.get("expectation_ids"), limit=16)}
     memory_kinds = {item.casefold() for item in _string_list(query.get("memory_kinds"), limit=12)}
-    semantic_terms = _unique_strings(
+    base_semantic_terms = _unique_strings(
         query.get("semantic_terms"),
         query.get("relationship_terms"),
         query.get("status_terms"),
         limit=24,
+    )
+    active_topics = _topic_ids_for_text(
+        base_semantic_terms,
+        query.get("current_task"),
+        query.get("next_task"),
+    )
+    semantic_terms = (
+        _append_topic_recall_terms(base_semantic_terms, active_topics, limit=36)
+        if active_topics
+        else base_semantic_terms
     )
     source_priority = _string_list(
         query.get("source_priority")
@@ -1134,12 +1881,13 @@ def retrieve_memories_for_guidance(
         score = 0.0
         item_id = str(item.get("id", "")).strip()
         kind = str(item.get("kind", source)).strip()
-        text = json.dumps(item, ensure_ascii=False).casefold()
+        text = _memory_index_text(item).casefold()
         status = _memory_status(item).casefold()
 
         source_user_id = str(item.get("source_user_id", "")).strip()
         cross_user = bool(current_user_id and source_user_id and source_user_id != current_user_id)
         candidate_payload = dict(item)
+        candidate_payload["shareability"] = _memory_shareability(item)
         candidate_payload["expected_audience_reaction"] = expected_reaction
         candidate_payload["expectation_status"] = expectation_status
         sharing_decision = decide_social_sharing(
@@ -1157,9 +1905,20 @@ def retrieve_memories_for_guidance(
         if kind_match and kind.casefold() in {"expectation", "expectation_result", "open_item"}:
             score += 2.0
             reasons.append(f"kind:{kind}")
+        if kind.casefold() == "interaction_experience":
+            score += 2.4
+            reasons.append("kind:interaction_experience")
+        item_topics = set(_memory_topics(item))
+        if active_topics and item_topics.intersection(active_topics):
+            score += 2.0
+            reasons.extend(f"topic_context:{topic}" for topic in sorted(item_topics.intersection(active_topics))[:2])
         if status and status in status_terms:
             score += 1.2
             reasons.append(f"status:{status}")
+        source_names = {
+            str(item.get("source_user_id", "")).strip().casefold(),
+            str(item.get("source_display_name", "")).strip().casefold(),
+        }
         for term in semantic_terms:
             lowered = term.casefold()
             if not lowered:
@@ -1167,6 +1926,9 @@ def retrieve_memories_for_guidance(
             if lowered in text:
                 score += 1.5
                 reasons.append(f"term:{term}")
+                if lowered in source_names and kind.casefold() in {"dialogue_turn", "episode", "interaction_experience"}:
+                    score += 1.1
+                    reasons.append(f"source_interaction:{term}")
             else:
                 parts = [part for part in re.split(r"\s+", lowered) if part]
                 part_hits = sum(1 for part in parts if part in text)
@@ -1190,21 +1952,21 @@ def retrieve_memories_for_guidance(
         conflict_note = ""
         if "violated" in status_terms and status in {"violated", "uncertain"}:
             conflict_note = "expectation verification is not settled as a fact"
-        abstract_only = bool(cross_user and sharing_decision.abstract_only)
-        scored.append(
-            (
-                score,
-                _evidence_card(
-                    source,
-                    item,
-                    score=score,
-                    reasons=reasons,
-                    conflict_note=conflict_note,
-                    abstract_only=abstract_only,
-                    sharing_decision=sharing_decision.to_dict() if cross_user else {},
-                ),
-            )
+        abstract_only = bool(cross_user and sharing_decision.action == "withhold")
+        card = _evidence_card(
+            source,
+            item,
+            score=score,
+            reasons=reasons,
+            conflict_note=conflict_note,
+            abstract_only=abstract_only,
+            sharing_decision=sharing_decision.to_dict() if cross_user else {},
         )
+        card["audience_user_id"] = current_user_id
+        card["is_cross_user"] = bool(cross_user)
+        if cross_user and card.get("shareability") == "restricted_implicit":
+            card["epistemic_stance"] = "known_with_caveat"
+        scored.append((score, card))
 
     if not scored and semantic_terms:
         fallback = retrieve_memories(state, semantic_terms, limit=limit)
@@ -1213,6 +1975,7 @@ def retrieve_memories_for_guidance(
             source_user_id = str(item.get("source_user_id", "")).strip()
             cross_user = bool(current_user_id and source_user_id and source_user_id != current_user_id)
             candidate_payload = dict(item)
+            candidate_payload["shareability"] = _memory_shareability(item)
             candidate_payload["expected_audience_reaction"] = expected_reaction
             candidate_payload["expectation_status"] = expectation_status
             sharing_decision = decide_social_sharing(
@@ -1222,16 +1985,19 @@ def retrieve_memories_for_guidance(
             )
             if cross_user and sharing_decision.action == "withhold":
                 continue
-            cards.append(
-                _evidence_card(
-                    str(item.get("_source_file", "memory")),
-                    item,
-                    score=float(item.get("_retrieval_score", 0.0) or 0.0),
-                    reasons=["fallback_keyword_match"],
-                    abstract_only=bool(cross_user and sharing_decision.abstract_only),
-                    sharing_decision=sharing_decision.to_dict() if cross_user else {},
-                )
+            card = _evidence_card(
+                str(item.get("_source_file", "memory")),
+                item,
+                score=float(item.get("_retrieval_score", 0.0) or 0.0),
+                reasons=["fallback_keyword_match"],
+                abstract_only=False,
+                sharing_decision=sharing_decision.to_dict() if cross_user else {},
             )
+            card["audience_user_id"] = current_user_id
+            card["is_cross_user"] = bool(cross_user)
+            if cross_user and card.get("shareability") == "restricted_implicit":
+                card["epistemic_stance"] = "known_with_caveat"
+            cards.append(card)
         return cards
     scored.sort(key=lambda row: row[0], reverse=True)
     return [item for _, item in scored[:limit]]
@@ -1315,7 +2081,7 @@ def build_memory_dynamics_guidance(
         )
     social_state = _mapping(state.get("social_sharing_policy"))
     regret_bias = _bounded_float(social_state.get("regret_bias"), default=0.0)
-    shareability = "restricted_explicit" if explicit_secret else "default_social"
+    shareability = _shareability_for_memory_text(user_text, explicit_secret=explicit_secret)
     boundary_strength = boundary_strength_from_constraints(
         secrecy_constraints,
         explicit_secrecy=explicit_secret,
@@ -1349,21 +2115,32 @@ def build_memory_dynamics_guidance(
 
     base_salience = 0.35 + salience_delta
     should_encode = bool(expectation_results or reasons or len(str(user_text).strip()) >= 24)
-    semantic_terms = _unique_strings(
+    base_semantic_terms = _unique_strings(
         conscious_plan.get("memory_search_keywords"),
         _rough_terms(user_text),
         conscious_plan.get("current_task"),
         conscious_plan.get("next_task"),
-        limit=16,
+        limit=24,
+    )
+    active_topics = _topic_ids_for_text(
+        user_text,
+        conscious_plan.get("memory_search_keywords"),
+        conscious_plan.get("current_task"),
+        conscious_plan.get("next_task"),
+    )
+    semantic_terms = (
+        _append_topic_recall_terms(base_semantic_terms, active_topics, limit=32)
+        if active_topics
+        else base_semantic_terms
     )
     expectation_ids = _unique_strings(
         [item.get("id") for item in expectation_results],
         conscious_plan.get("pending_expectations_to_verify"),
         limit=16,
     )
-    memory_kinds = ["expectation_result", "episode", "preference", "relationship", "fact", "open_item"]
+    memory_kinds = ["interaction_experience", "expectation_result", "episode", "preference", "relationship", "fact", "open_item"]
     if violated or uncertain:
-        memory_kinds = ["expectation_result", "open_item", "episode", "fact", "preference"]
+        memory_kinds = ["interaction_experience", "expectation_result", "open_item", "episode", "fact", "preference"]
 
     write_candidates: list[dict[str, Any]] = []
     if should_encode:
@@ -1376,11 +2153,15 @@ def build_memory_dynamics_guidance(
                 "salience": round(min(1.0, base_salience), 6),
                 "confidence": round(candidate_confidence, 6),
                 "keywords": semantic_terms[:6],
+                "topics": sorted(active_topics),
                 "reason": ";".join(reasons[:4]) or "dialogue_turn_candidate",
                 "evidence": "user_text",
                 "created_at": now,
-                "shareability": "restricted_explicit" if explicit_secret else "default_social",
-                "restriction_reason": "explicit_user_secret" if explicit_secret else "",
+                "shareability": shareability,
+                "restriction_reason": _restriction_reason_for_shareability(
+                    shareability,
+                    explicit_secret=explicit_secret,
+                ),
             }
         )
 
@@ -1438,12 +2219,14 @@ def build_memory_dynamics_guidance(
                 "sharing_expectation_status": expectation_status,
                 "explanation_strategy": sharing_decision.explanation_strategy,
                 "decision_reasons": list(sharing_decision.reasons),
+                "soft_boundary_detected": bool(shareability == "restricted_implicit"),
             },
             "reply_contract": {
                 **_mapping(pacing.get("reply_contract")),
                 "allow_direct_disclosure": allow_direct_disclosure,
                 "allow_abstract_sharing": allow_abstract_sharing,
                 "explicit_secrecy_detected": explicit_secret,
+                "soft_boundary_detected": bool(shareability == "restricted_implicit"),
             },
             "policy": "Use these as reply tendencies, not as visible emotional reward/punishment.",
         },
@@ -1592,6 +2375,10 @@ def _stamp_memory_policy(
     if restriction_reason:
         row["restriction_reason"] = restriction_reason
     row["restriction_confidence"] = round(_bounded_float(confidence, default=0.8), 6)
+    topics = _memory_topics(row)
+    if topics:
+        row["topics"] = topics
+        row["sensitivity_class"] = _sensitivity_class_for_topics(topics)
     return row
 
 
@@ -1745,6 +2532,12 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         if any(marker.casefold() in lowered for marker in leak_markers):
             cleaned = fallback
             actions.append("blocked_explicit_secrecy_disclosure")
+    selected_disclosure_action = str(contract_map.get("selected_disclosure_action", "none") or "none")
+    redaction_targets = _string_list(contract_map.get("redaction_targets"), limit=12)
+    if redaction_targets and selected_disclosure_action != "direct_share":
+        if any(target and target.casefold() in cleaned.casefold() for target in redaction_targets):
+            cleaned = "这个我不方便替他说。"
+            actions.append("blocked_redaction_target")
     validation = {
         "original_length": len(original),
         "final_length": len(cleaned),
@@ -1755,6 +2548,8 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         "actions": actions,
         "allow_direct_disclosure": allow_direct_disclosure,
         "explicit_secrecy_detected": explicit_secrecy_detected,
+        "selected_disclosure_action": selected_disclosure_action,
+        "redaction_targets": redaction_targets,
     }
     return cleaned, validation
 
@@ -1846,6 +2641,28 @@ def _merge_m11_into_memory_guidance(
         "prompt_safe_evidence_cards": list(m11_result.get("prompt_safe_evidence_cards", [])),
         "reply_policy_effects": effects,
     }
+    memory_dynamics["control_guidance"] = control
+
+
+def _apply_evidence_judgment_contract(
+    memory_dynamics: dict[str, Any],
+    evidence_judgment: Mapping[str, Any],
+) -> None:
+    if not evidence_judgment:
+        return
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    contract = _mapping(control.get("reply_contract"))
+    contract["evidence_judgment"] = dict(evidence_judgment)
+    contract["epistemic_stance"] = str(evidence_judgment.get("epistemic_stance", ""))
+    contract["redaction_targets"] = _string_list(evidence_judgment.get("redaction_targets"), limit=12)
+    contract["allowed_reply_actions"] = _string_list(evidence_judgment.get("allowed_reply_actions"), limit=8)
+    control["reply_contract"] = contract
+    sharing_policy = _mapping(control.get("sharing_policy"))
+    sharing_policy["evidence_judgment"] = dict(evidence_judgment)
+    sharing_policy["soft_boundary_is_decision_variable"] = (
+        str(evidence_judgment.get("epistemic_stance", "")) == "known_with_caveat"
+    )
+    control["sharing_policy"] = sharing_policy
     memory_dynamics["control_guidance"] = control
 
 
@@ -1955,14 +2772,55 @@ class MVPDialogueRuntime:
             user_id=user_id,
             speaker_name=display_name,
         )
+        lexical_candidates = lexical_recall_short_term_candidates(
+            state,
+            user_text=user_text,
+            recall_query=_mapping(memory_dynamics.get("recall_query")),
+            current_user_id=user_id,
+        )
+        evidence_judgment: dict[str, Any] = {}
+        if lexical_candidates:
+            try:
+                judge_system, judge_user = build_evidence_judge_prompt(
+                    user_text=user_text,
+                    speaker_name=display_name,
+                    current_user_id=user_id,
+                    lexical_candidates=lexical_candidates,
+                    recall_query=_mapping(memory_dynamics.get("recall_query")),
+                )
+                evidence_judgment = _normalize_evidence_judgment(
+                    self.llm.complete_json(system_prompt=judge_system, user_prompt=judge_user),
+                    lexical_candidates=lexical_candidates,
+                    current_user_id=user_id,
+                )
+            except Exception as exc:
+                evidence_judgment = {
+                    "epistemic_stance": "uncertain_recall",
+                    "relevant_evidence_ids": [str(item.get("id", "")) for item in lexical_candidates[:3] if item.get("id")],
+                    "topics": sorted({topic for item in lexical_candidates for topic in _string_list(item.get("topics"), limit=8)}),
+                    "sensitivity_class": "public",
+                    "redaction_targets": [],
+                    "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
+                    "audience_user_id": user_id,
+                    "judge_error": type(exc).__name__,
+                    "judge_summary": "evidence judge failed; candidates are passed as uncertain recall",
+                }
+        _apply_evidence_judgment_contract(memory_dynamics, evidence_judgment)
         retrieved = retrieve_memories_for_guidance(
             state,
             _mapping(memory_dynamics.get("recall_query")),
         )
+        if lexical_candidates:
+            existing_ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
+            retrieved = [
+                *[item for item in lexical_candidates if str(item.get("id", "")) not in existing_ids],
+                *retrieved,
+            ][:8]
         memory_dynamics["recall"] = {
             **_mapping(memory_dynamics.get("recall")),
             "retrieved": len(retrieved),
             "ids": [str(item.get("id", "")) for item in retrieved if item.get("id")],
+            "lexical_candidate_ids": [str(item.get("id", "")) for item in lexical_candidates if item.get("id")],
         }
         self._mark_recalled(state, retrieved, now)
         response_style_prior = _response_style_prior(state, retrieved)
@@ -2022,6 +2880,7 @@ class MVPDialogueRuntime:
                 "control_guidance": memory_dynamics.get("control_guidance", {}),
                 "write_candidates": memory_dynamics.get("write_candidates", []),
                 "expectation_impact": memory_dynamics.get("expectation_impact", {}),
+                "evidence_judgment": evidence_judgment,
             },
         )
         thinking = self.llm.complete_json(system_prompt=thinking_system, user_prompt=thinking_user)
@@ -2065,6 +2924,7 @@ class MVPDialogueRuntime:
             raw_reply = "我需要想一下这个。"
         control_guidance = _mapping(memory_dynamics.get("control_guidance"))
         reply_contract = _mapping(control_guidance.get("reply_contract"))
+        reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
         reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
         action = str(thinking.get("reply_action") or "answer")
         temporal_assessment = conscious.get("temporal_assessment")
@@ -2139,6 +2999,18 @@ class MVPDialogueRuntime:
                     and str(item.get("source_user_id", "")).strip() != user_id
                     for item in retrieved
                 ),
+                "lexical_recall_terms": _lexical_recall_terms(
+                    state=state,
+                    user_text=user_text,
+                    recall_query=_mapping(memory_dynamics.get("recall_query")),
+                    limit=24,
+                ),
+                "evidence_topics": evidence_judgment.get("topics", []),
+                "evidence_source_names": [
+                    str(item.get("source_display_name", ""))
+                    for item in retrieved[:4]
+                    if item.get("source_display_name")
+                ],
             },
         )
         self.store.save(state)
@@ -2250,12 +3122,21 @@ class MVPDialogueRuntime:
                 "last_recalled_at": None,
                 "recall_count": 0,
             }
+            shareability = _shareability_for_memory_text(
+                content,
+                evidence,
+                candidate.get("keywords"),
+                requested=str(candidate.get("shareability", default_shareability) or default_shareability),
+            )
             _stamp_memory_policy(
                 row,
                 user_id=user_id,
                 display_name=display_name,
-                shareability=str(candidate.get("shareability", default_shareability) or default_shareability),
-                restriction_reason=str(candidate.get("restriction_reason", restriction_reason) or restriction_reason),
+                shareability=shareability,
+                restriction_reason=_restriction_reason_for_shareability(
+                    shareability,
+                    existing=str(candidate.get("restriction_reason", restriction_reason) or restriction_reason),
+                ),
                 confidence=confidence,
             )
             if target == "long_term" or salience >= 0.68:
@@ -2303,12 +3184,16 @@ class MVPDialogueRuntime:
                     "source": "post_reply_observer",
                     "created_at": now,
                 }
+                shareability = _shareability_for_memory_text(content, evidence, requested=default_shareability)
                 _stamp_memory_policy(
                     row,
                     user_id=user_id,
                     display_name=display_name,
-                    shareability=default_shareability,
-                    restriction_reason="post_reply_update",
+                    shareability=shareability,
+                    restriction_reason=_restriction_reason_for_shareability(
+                        shareability,
+                        existing="post_reply_update",
+                    ),
                     confidence=confidence,
                 )
                 target.append(row)
@@ -2327,12 +3212,21 @@ class MVPDialogueRuntime:
                 "created_at": now,
                 "recall_count": 0,
             }
+            shareability = _shareability_for_memory_text(
+                content,
+                evidence,
+                item.get("keywords"),
+                requested=default_shareability,
+            )
             _stamp_memory_policy(
                 row,
                 user_id=user_id,
                 display_name=display_name,
-                shareability=default_shareability,
-                restriction_reason="post_reply_update",
+                shareability=shareability,
+                restriction_reason=_restriction_reason_for_shareability(
+                    shareability,
+                    existing="post_reply_update",
+                ),
                 confidence=confidence,
             )
             state.setdefault("short_term_memory", []).append(row)
@@ -2468,22 +3362,33 @@ class MVPDialogueRuntime:
     ) -> None:
         short = state.setdefault("short_term_memory", [])
         if isinstance(short, list):
+            assistant_reply = str(thinking.get("reply", "")).strip()
             row = {
                 "id": f"stm_turn_{now}",
                 "kind": "dialogue_turn",
-                "content": f"用户说：{user_text}\n我回复：{thinking.get('reply', '')}",
+                "content": str(user_text).strip(),
+                "user_text": str(user_text).strip(),
+                "assistant_reply": assistant_reply,
+                "assistant_reply_use_as_fact": False,
                 "salience": 0.35,
                 "keywords": _string_list(thinking.get("memory_dynamics_note"), limit=4),
                 "source": "dialogue",
                 "created_at": now,
                 "recall_count": 0,
             }
+            shareability = _shareability_for_memory_text(
+                user_text,
+                explicit_secret=explicit_secrecy,
+            )
             _stamp_memory_policy(
                 row,
                 user_id=user_id,
                 display_name=display_name,
-                shareability="restricted_explicit" if explicit_secrecy else "default_social",
-                restriction_reason="explicit_user_secret" if explicit_secrecy else "",
+                shareability=shareability,
+                restriction_reason=_restriction_reason_for_shareability(
+                    shareability,
+                    explicit_secret=explicit_secrecy,
+                ),
                 confidence=0.85,
             )
             short.append(row)
@@ -2508,19 +3413,21 @@ class MVPDialogueRuntime:
             }
             if not row["content"]:
                 continue
+            shareability = _shareability_for_memory_text(
+                row["content"],
+                row.get("keywords"),
+                explicit_secret=explicit_secrecy,
+                requested=str(write.get("shareability", "default_social") or "default_social"),
+            )
             _stamp_memory_policy(
                 row,
                 user_id=user_id,
                 display_name=display_name,
-                shareability=(
-                    "restricted_explicit"
-                    if explicit_secrecy
-                    else str(write.get("shareability", "default_social") or "default_social")
-                ),
-                restriction_reason=(
-                    "explicit_user_secret"
-                    if explicit_secrecy
-                    else str(write.get("restriction_reason", "")).strip()
+                shareability=shareability,
+                restriction_reason=_restriction_reason_for_shareability(
+                    shareability,
+                    explicit_secret=explicit_secrecy,
+                    existing=str(write.get("restriction_reason", "")).strip(),
                 ),
                 confidence=_bounded_float(write.get("confidence"), default=0.75),
             )
