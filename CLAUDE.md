@@ -31,14 +31,18 @@ The cognitive loop is the orchestrator of current self-cognition. FEP, memory, s
 ## Current Roadmap
 
 ```text
-M6: Cognitive Loop
-M7: Bounded Causal Control
-M8: Anchored Memory Contract
-M8.9: MVP Architecture Contract Hardening
-M9.0: Memory Dynamics Integration
+M6:    Cognitive Loop
+M7:    Bounded Causal Control
+M8:    Anchored Memory Contract
+M8.9:  MVP Architecture Contract Hardening
+M9.0:  Memory Dynamics Integration
 M10.0: Self-Initiated Exploration Agenda
-M11.0: Conscious Projection Runtime
+M11.0: User Generative Model And Value Memory Dynamics
+M12.0: User Identity Continuity Model
+M12.1: Mechanistic Personality Model And Plain-Language Report
 ```
+
+The original M11 "Conscious Projection Runtime" scope was deferred; M11.0 now owns the user-modeling track, and M12 is split into M12.0 (identity continuity, alias claims, impersonation strangeness, entity binding) and M12.1 (mechanistic personality model with the eight-step plain-language report).
 
 ## Guardrails
 

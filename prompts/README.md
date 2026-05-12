@@ -25,13 +25,17 @@ For older milestones that historically used compact numbering, this directory no
 The post-M8 MVP architecture hardening path is:
 
 ```text
-M8.9: MVP Architecture Contract Hardening
-M9.0: Memory Dynamics Integration
+M8.9:  MVP Architecture Contract Hardening
+M9.0:  Memory Dynamics Integration
 M10.0: Self-Initiated Exploration Agenda
-M11.0: Conscious Projection Runtime
+M11.0: User Generative Model And Value Memory Dynamics
+M12.0: User Identity Continuity Model
+M12.1: Mechanistic Personality Model And Plain-Language Report
 ```
 
-M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M11 expand the system.
+M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M12 expand the system.
+
+M11.0 was repurposed from the earlier "Conscious Projection Runtime" scope to the user-modeling track. M12 is split into M12.0 (identity continuity, alias claims, impersonation strangeness, entity binding) and M12.1 (mechanistic personality model with the eight-step plain-language report). M12.1 reads M12.0 read-only and never writes back.
 
 ## Migration Note
 
