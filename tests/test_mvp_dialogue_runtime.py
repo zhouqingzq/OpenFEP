@@ -12,6 +12,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     build_conscious_loop_prompt,
     build_thinking_prompt,
     build_free_energy_personality_analysis_prompt,
+    build_entity_binding_context,
     lexical_recall_short_term_candidates,
     retrieve_memories,
     retrieve_memories_for_guidance,
@@ -595,7 +596,7 @@ def test_prompt_uses_evidence_cards_without_unretrieved_raw_memory(tmp_path: Pat
     class NoRecallLLM(FakeJSONLLM):
         def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
             self.calls.append({"system": system_prompt, "user": user_prompt})
-            if "意识主循环" in system_prompt:
+            if "意识主循环" in system_prompt and "思考与回复模块" not in system_prompt:
                 result = super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
                 result["memory_search_keywords"] = ["无匹配主题"]
                 return result
@@ -1538,6 +1539,235 @@ def test_interaction_presence_query_uses_source_turn_not_old_assistant_reply() -
     assert hits[0]["interaction_presence"] is True
     assert hits[0]["assistant_reply_use_as_fact"] is False
     assert "没有耶" not in hits[0]["content"]
+
+
+def test_query_planner_expands_loose_interaction_language_for_short_term_recall(tmp_path: Path) -> None:
+    class PlannerLLM(FakeJSONLLM):
+        def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+            if "grep 查询规划器" in system_prompt:
+                return {
+                    "search_terms": ["鲁永刚", "找过", "来过", "聊过", "联系过", "动静", "露面"],
+                    "referenced_entities": ["鲁永刚"],
+                    "topic_hints": [],
+                    "is_interaction_presence_query": True,
+                    "planner_summary": "把露面/动静改写成互动存在查询。",
+                }
+            if "证据裁判" in system_prompt:
+                return {
+                    "epistemic_stance": "known_from_recall",
+                    "relevant_evidence_ids": ["stm_lu_breakfast"],
+                    "topics": [],
+                    "sensitivity_class": "public",
+                    "redaction_targets": [],
+                    "allowed_reply_actions": ["direct_share", "deflect", "deny_knowledge"],
+                    "judge_summary": "鲁永刚早上有过一轮互动。",
+                }
+            if (
+                "思考与回复模块" in system_prompt
+                or "鎬濊€冧笌鍥炲妯″潡" in system_prompt
+                or '"reply_action"' in user_prompt
+            ):
+                return {
+                    "thought_type": "short",
+                    "llm_thinking_result": {
+                        "user_intent_read": "用户在问鲁永刚有没有露面。",
+                        "state_or_memory_used": ["stm_lu_breakfast"],
+                        "response_choice": "选择如实说他早上冒过头。",
+                        "uncertainty": "",
+                        "debug_summary": "planner 扩展后命中互动。",
+                    },
+                    "reply": "他早上倒是冒过头，还聊了早餐。",
+                    "reply_action": "answer",
+                    "disclosure_action": "direct_share",
+                    "new_expectations": [],
+                    "memory_writes": [],
+                    "self_cognition_patch": {"apply": False},
+                    "open_item_writes": [],
+                    "habit_updates": [],
+                    "memory_dynamics_note": "",
+                }
+            return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=PlannerLLM())
+    state = runtime.store.load()
+    state["short_term_memory"] = [
+        {
+            "id": "stm_lu_breakfast",
+            "kind": "dialogue_turn",
+            "content": "我今天早上吃了不少东西，花卷、馒头，还有包子",
+            "user_text": "我今天早上吃了不少东西，花卷、馒头，还有包子",
+            "assistant_reply": "你这是把早餐铺子搬回家呀！",
+            "assistant_reply_use_as_fact": False,
+            "source_user_id": "鲁永刚",
+            "source_display_name": "鲁永刚",
+            "shareability": "default_social",
+            "created_at": 200,
+            "salience": 0.7,
+        }
+    ]
+    runtime.store.save(state)
+
+    result = runtime.run_turn("他今天有动静没，露面了吗？", speaker_name="zq", turn_index=1, now=7000)
+
+    assert "早餐" in result.reply
+    assert result.diagnostics["memory_dynamics"]["recall"]["query_plan"]["is_interaction_presence_query"] is True
+    assert "stm_lu_breakfast" in result.diagnostics["memory_dynamics"]["recall"]["lexical_candidate_ids"]
+
+
+def test_entity_binding_records_current_user_alias_and_protects_third_party_target(tmp_path: Path) -> None:
+    class BindingLLM(FakeJSONLLM):
+        def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+            if "意识主循环" in system_prompt and "思考与回复模块" not in system_prompt:
+                if "欠我500" in user_prompt:
+                    return {
+                        "pending_expectations_to_verify": ["exp_wrong"],
+                        "expectation_results": [
+                            {
+                                "id": "exp_wrong",
+                                "status": "confirmed",
+                                "evidence": "用户说周青欠你钱并委托找人。",
+                                "self_update_pressure": 0.3,
+                            }
+                        ],
+                        "current_task": "处理找人追债请求",
+                        "next_task": "",
+                        "bus_messages_to_handle": ["UserUtteranceEvent"],
+                        "memory_search_keywords": ["周青", "欠债", "找人"],
+                        "needs_self_cognition_update": False,
+                        "self_cognition_update_reason": "",
+                        "temporal_assessment": {"continuity_risk": "low"},
+                        "thought_intensity_hint": "short",
+                        "reasoning_notes": "故意给一个会和 entity_binding 冲突的旧判断。",
+                    }
+                return {
+                    "pending_expectations_to_verify": [],
+                    "expectation_results": [],
+                    "current_task": "处理身份纠正",
+                    "next_task": "",
+                    "bus_messages_to_handle": ["UserUtteranceEvent"],
+                    "memory_search_keywords": ["周青", "身份纠正"],
+                    "needs_self_cognition_update": False,
+                    "self_cognition_update_reason": "",
+                    "temporal_assessment": {"continuity_risk": "low"},
+                    "thought_intensity_hint": "short",
+                    "reasoning_notes": "用户纠正当前说话人的别名。",
+                }
+            if "grep 查询规划器" in system_prompt:
+                assert '"target_person": "鲁永刚"' in user_prompt
+                assert '"debtor": "鲁永刚"' in user_prompt
+                assert '"creditor": "zq"' in user_prompt
+                return {
+                    "search_terms": ["鲁永刚", "欠我", "500", "找他"],
+                    "referenced_entities": ["鲁永刚"],
+                    "topic_hints": ["personal_finance"],
+                    "is_interaction_presence_query": False,
+                    "planner_summary": "代词他继承为鲁永刚。",
+                }
+            if (
+                "思考与回复模块" in system_prompt
+                or "鎬濊€冧笌鍥炲妯″潡" in system_prompt
+                or '"reply_action"' in user_prompt
+            ):
+                if "欠我500" in user_prompt:
+                    assert '"target_person": "鲁永刚"' in user_prompt
+                    assert '"周青"' in user_prompt
+                    return {
+                        "thought_type": "short",
+                        "llm_thinking_result": {
+                            "user_intent_read": "当前用户周青在说鲁永刚欠他钱。",
+                            "state_or_memory_used": ["entity_binding"],
+                            "response_choice": "承认刚才名字绕错，按鲁永刚作为目标处理。",
+                            "uncertainty": "",
+                            "debug_summary": "周青是当前用户别名，鲁永刚是被找的人。",
+                        },
+                        "reply": "噢，刚才我把名字绕错了：你是周青，要找的是鲁永刚。",
+                        "reply_action": "answer",
+                        "disclosure_action": "none",
+                        "new_expectations": [],
+                        "memory_writes": [],
+                        "self_cognition_patch": {"apply": False},
+                        "open_item_writes": [],
+                        "habit_updates": [],
+                        "memory_dynamics_note": "",
+                    }
+                return {
+                    "thought_type": "short",
+                    "llm_thinking_result": {
+                        "user_intent_read": "用户纠正自己是周青。",
+                        "state_or_memory_used": ["entity_binding"],
+                        "response_choice": "承认身份修正。",
+                        "uncertainty": "",
+                        "debug_summary": "记录 zq 的别名周青。",
+                    },
+                    "reply": "噢噢，你才是周青，我记住这个称呼。",
+                    "reply_action": "answer",
+                    "disclosure_action": "none",
+                    "new_expectations": [],
+                    "memory_writes": [],
+                    "self_cognition_patch": {"apply": False},
+                    "open_item_writes": [],
+                    "habit_updates": [],
+                    "memory_dynamics_note": "",
+                }
+            return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=BindingLLM())
+    state = runtime.store.load()
+    state["temporal_state"] = {
+        "last_user_text": "他今天有动静没，露面了吗？",
+        "last_share_trace": {"target_person": "鲁永刚", "evidence_source_names": ["鲁永刚"]},
+    }
+    state["short_term_memory"] = [
+        {
+            "id": "stm_lu_breakfast",
+            "kind": "dialogue_turn",
+            "content": "我今天早上吃了不少东西，花卷、馒头，还有包子",
+            "user_text": "我今天早上吃了不少东西，花卷、馒头，还有包子",
+            "assistant_reply_use_as_fact": False,
+            "source_user_id": "鲁永刚",
+            "source_display_name": "鲁永刚",
+            "shareability": "default_social",
+            "created_at": 200,
+        }
+    ]
+    runtime.store.save(state)
+
+    correction = runtime.run_turn("。。。不是，你是不是错乱了，我才是周青。。", speaker_name="zq", turn_index=1, now=8000)
+    saved_after_correction = runtime.store.load()
+    assert "周青" in saved_after_correction["m11_user_models"]["zq"]["aliases"]
+    assert correction.diagnostics["alias_updates_applied"] == ["周青"]
+
+    result = runtime.run_turn("是的，他不是欠我500块钱么？你帮我找到他。", speaker_name="zq", turn_index=2, now=8060)
+
+    assert "鲁永刚" in result.reply
+    assert "周青欠你钱" not in result.reply
+    assert result.diagnostics["entity_binding"]["target_person"] == "鲁永刚"
+    assert result.diagnostics["entity_binding"]["relationship_roles"] == {
+        "debtor": "鲁永刚",
+        "creditor": "zq",
+    }
+    saved = runtime.store.load()
+    expectation_rows = [
+        item for item in saved["short_term_memory"]
+        if item.get("kind") == "expectation_result" and "entity_binding_conflict" in item.get("content", "")
+    ]
+    assert expectation_rows
+    assert '"status": "uncertain"' in expectation_rows[-1]["content"]
+
+
+def test_entity_binding_allows_explicit_self_reference_for_current_alias() -> None:
+    state = {"m11_user_models": {"zq": {"aliases": ["周青"]}}, "short_term_memory": []}
+
+    binding = build_entity_binding_context(
+        state=state,
+        user_text="我周青自己有没有找过你？",
+        display_name="zq",
+        user_id="zq",
+        temporal_input={},
+    )
+
+    assert binding["target_person"] == "zq"
+    assert binding["target_reason"] == "explicit_self_reference"
 
 
 def test_topic_query_uses_generic_topic_context_not_finance_special_case() -> None:
