@@ -19,6 +19,22 @@ from segmentum.dialogue.runtime.mvp_loop import (
     validate_visible_reply,
 )
 from segmentum.user_model import SocialSharingCandidate, decide_social_sharing
+from segmentum.user_continuity import M12RuntimeConfig, M12RuntimeState, run_m12_turn
+
+
+def _m12_extractor_noop() -> dict[str, object]:
+    return {
+        "identity_claims": [],
+        "continuity_cues": [],
+        "strangeness_band": "low",
+        "surprise_explanation": "",
+    }
+
+
+def _maybe_m12_extractor_response(system_prompt: str) -> dict[str, object] | None:
+    if "identity-continuity extractor" in system_prompt:
+        return _m12_extractor_noop()
+    return None
 
 
 class FakeJSONLLM:
@@ -27,6 +43,9 @@ class FakeJSONLLM:
 
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
         self.calls.append({"system": system_prompt, "user": user_prompt})
+        m12_hit = _maybe_m12_extractor_response(system_prompt)
+        if m12_hit is not None:
+            return m12_hit
         if "自由能人格分析" in system_prompt:
             return {
                 "personas": [
@@ -201,10 +220,13 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
     assert result.diagnostics["llm_thinking_result"]["debug_summary"].startswith(
         "用户问 Python 是否合适"
     )
-    assert len(llm.calls) == 4
-    assert "意识主循环" in llm.calls[1]["system"]
-    assert "M11 user-model extractor" in llm.calls[2]["system"]
-    assert "思考与回复模块" in llm.calls[3]["system"]
+    systems = [c["system"] for c in llm.calls]
+    assert any("identity-continuity extractor" in s for s in systems)
+    m12_idx = next(i for i, s in enumerate(systems) if "identity-continuity extractor" in s)
+    con_idx = next(i for i, s in enumerate(systems) if "意识主循环" in s)
+    m11_idx = next(i for i, s in enumerate(systems) if "M11 user-model extractor" in s)
+    think_idx = next(i for i, s in enumerate(systems) if "思考与回复模块" in s)
+    assert m12_idx < con_idx < m11_idx < think_idx
     assert result.diagnostics["post_reply_observer_skipped_reason"]
 
     saved = runtime.store.load()
@@ -421,6 +443,9 @@ class ExpectationFakeLLM(FakeJSONLLM):
 
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
         self.calls.append({"system": system_prompt, "user": user_prompt})
+        m12_hit = _maybe_m12_extractor_response(system_prompt)
+        if m12_hit is not None:
+            return m12_hit
         if "意识主循环" in system_prompt:
             return {
                 "pending_expectations_to_verify": ["exp_prior"],
@@ -596,6 +621,9 @@ def test_prompt_uses_evidence_cards_without_unretrieved_raw_memory(tmp_path: Pat
     class NoRecallLLM(FakeJSONLLM):
         def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
             self.calls.append({"system": system_prompt, "user": user_prompt})
+            m12_hit = _maybe_m12_extractor_response(system_prompt)
+            if m12_hit is not None:
+                return m12_hit
             if "意识主循环" in system_prompt and "思考与回复模块" not in system_prompt:
                 result = super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
                 result["memory_search_keywords"] = ["无匹配主题"]
@@ -725,6 +753,9 @@ class FollowupFakeLLM(FakeJSONLLM):
         if "回复后发观察模块" in system_prompt:
             self.calls.append({"system": system_prompt, "user": user_prompt})
             return self.observer_payload
+        m12_hit = _maybe_m12_extractor_response(system_prompt)
+        if m12_hit is not None:
+            return m12_hit
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
@@ -930,6 +961,9 @@ class M11SpeakerFakeLLM(FakeJSONLLM):
                 "memory_value_band": "high",
                 "surprise_explanation": "test-only diagnostic",
             }
+        m12_hit = _maybe_m12_extractor_response(system_prompt)
+        if m12_hit is not None:
+            return m12_hit
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
@@ -982,7 +1016,7 @@ def test_mvp_state_store_shares_recent_short_term_memory_across_sessions(tmp_pat
         {
             "semantic_terms": ["zq", "西瓜冰茶", "请客"],
             "memory_kinds": ["episode"],
-            "current_user_id": "鲁永刚",
+            "current_user_id": "PersonB",
             "sharing_intent": "social_share",
             "expected_audience_reaction": "surprised",
             "sharing_expectation_status": "unverified",
@@ -1003,9 +1037,9 @@ def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None
             {
                 "id": "stm_expect_noise",
                 "kind": "expectation_result",
-                "content": "{\"status\":\"uncertain\",\"evidence\":\"用户提到鲁永刚，意图不明\"}",
-                "source_user_id": "鲁永刚",
-                "source_display_name": "鲁永刚",
+                "content": "{\"status\":\"uncertain\",\"evidence\":\"用户提到PersonB，意图不明\"}",
+                "source_user_id": "PersonB",
+                "source_display_name": "PersonB",
                 "shareability": "default_social",
                 "created_at": 101,
             },
@@ -1013,8 +1047,8 @@ def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None
                 "id": "stm_turn_lu_1",
                 "kind": "dialogue_turn",
                 "content": "用户说：吃饭了么？\n我回复：晚上好。",
-                "source_user_id": "鲁永刚",
-                "source_display_name": "鲁永刚",
+                "source_user_id": "PersonB",
+                "source_display_name": "PersonB",
                 "shareability": "default_social",
                 "created_at": 102,
             },
@@ -1022,8 +1056,8 @@ def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None
                 "id": "stm_turn_lu_2",
                 "kind": "dialogue_turn",
                 "content": "用户说：最近有人请你喝东西么？\n我回复：有人请喝茶。",
-                "source_user_id": "鲁永刚",
-                "source_display_name": "鲁永刚",
+                "source_user_id": "PersonB",
+                "source_display_name": "PersonB",
                 "shareability": "default_social",
                 "created_at": 103,
             },
@@ -1036,7 +1070,7 @@ def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None
     hits = retrieve_memories_for_guidance(
         state,
         {
-            "semantic_terms": ["鲁永刚", "认识"],
+            "semantic_terms": ["PersonB", "认识"],
             "memory_kinds": ["interaction_experience", "episode", "dialogue_turn", "expectation_result"],
             "current_user_id": "zq",
             "sharing_intent": "social_share",
@@ -1049,7 +1083,7 @@ def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None
     assert hits[0]["kind"] == "interaction_experience"
     assert hits[0]["use_as_fact"] is True
     assert "说过2次话" in hits[0]["content"]
-    assert hits[0]["source_display_name"] == "鲁永刚"
+    assert hits[0]["source_display_name"] == "PersonB"
 
 
 def test_app_appends_followup_as_separate_assistant_message() -> None:
@@ -1419,14 +1453,14 @@ def test_memory_dynamics_marks_topic_sensitivity_as_implicit_boundary() -> None:
         state={"social_sharing_policy": {"regret_bias": 0.0}},
         user_text="我现在钱包里有500块钱，我们去吃宵夜吧，我请客。",
         conscious_plan={
-            "memory_search_keywords": ["鲁永刚", "宵夜"],
+            "memory_search_keywords": ["PersonB", "宵夜"],
             "expectation_results": [],
         },
         bus_messages=[],
         temporal_input={"time_gap_label": "immediate"},
         now=100,
         user_id="lu_yonggang",
-        speaker_name="鲁永刚",
+        speaker_name="PersonB",
     )
 
     assert guidance["write_candidates"][0]["shareability"] == "restricted_implicit"
@@ -1440,10 +1474,10 @@ def test_lexical_recall_hits_short_term_wallet_memory() -> None:
             {
                 "id": "stm_lu_wallet",
                 "kind": "dialogue_turn",
-                "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+                "content": "PersonB说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
                 "shareability": "restricted_implicit",
                 "source_user_id": "lu_yonggang",
-                "source_display_name": "鲁永刚",
+                "source_display_name": "PersonB",
                 "salience": 0.7,
             }
         ],
@@ -1454,9 +1488,9 @@ def test_lexical_recall_hits_short_term_wallet_memory() -> None:
 
     hits = lexical_recall_short_term_candidates(
         state,
-        user_text="鲁永刚有多少钱？",
+        user_text="PersonB有多少钱？",
         recall_query={
-            "semantic_terms": ["鲁永刚", "有多少钱"],
+            "semantic_terms": ["PersonB", "有多少钱"],
             "memory_kinds": ["dialogue_turn", "episode"],
             "current_user_id": "zq",
         },
@@ -1493,7 +1527,7 @@ def test_dialogue_turn_write_splits_user_text_from_assistant_reply(tmp_path: Pat
 
 def test_interaction_presence_query_uses_source_turn_not_old_assistant_reply() -> None:
     state = {
-        "temporal_state": {"last_user_text": "胡桃早上好，我找鲁永刚，他不回复我，真的气人"},
+        "temporal_state": {"last_user_text": "胡桃早上好，我找PersonB，他不回复我，真的气人"},
         "short_term_memory": [
             {
                 "id": "stm_lu_breakfast",
@@ -1502,8 +1536,8 @@ def test_interaction_presence_query_uses_source_turn_not_old_assistant_reply() -
                 "user_text": "我今天早上吃了不少东西，花卷、馒头，还有包子",
                 "assistant_reply": "你这是把早餐铺子搬回家呀！",
                 "assistant_reply_use_as_fact": False,
-                "source_user_id": "鲁永刚",
-                "source_display_name": "鲁永刚",
+                "source_user_id": "PersonB",
+                "source_display_name": "PersonB",
                 "shareability": "default_social",
                 "created_at": 200,
                 "salience": 0.7,
@@ -1530,7 +1564,7 @@ def test_interaction_presence_query_uses_source_turn_not_old_assistant_reply() -
     hits = lexical_recall_short_term_candidates(
         state,
         user_text="他找过你没有？",
-        recall_query={"semantic_terms": ["鲁永刚", "找过你"]},
+        recall_query={"semantic_terms": ["PersonB", "找过你"]},
         current_user_id="zq",
     )
 
@@ -1546,8 +1580,8 @@ def test_query_planner_expands_loose_interaction_language_for_short_term_recall(
         def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
             if "grep 查询规划器" in system_prompt:
                 return {
-                    "search_terms": ["鲁永刚", "找过", "来过", "聊过", "联系过", "动静", "露面"],
-                    "referenced_entities": ["鲁永刚"],
+                    "search_terms": ["PersonB", "找过", "来过", "聊过", "联系过", "动静", "露面"],
+                    "referenced_entities": ["PersonB"],
                     "topic_hints": [],
                     "is_interaction_presence_query": True,
                     "planner_summary": "把露面/动静改写成互动存在查询。",
@@ -1560,7 +1594,7 @@ def test_query_planner_expands_loose_interaction_language_for_short_term_recall(
                     "sensitivity_class": "public",
                     "redaction_targets": [],
                     "allowed_reply_actions": ["direct_share", "deflect", "deny_knowledge"],
-                    "judge_summary": "鲁永刚早上有过一轮互动。",
+                    "judge_summary": "PersonB早上有过一轮互动。",
                 }
             if (
                 "思考与回复模块" in system_prompt
@@ -1570,7 +1604,7 @@ def test_query_planner_expands_loose_interaction_language_for_short_term_recall(
                 return {
                     "thought_type": "short",
                     "llm_thinking_result": {
-                        "user_intent_read": "用户在问鲁永刚有没有露面。",
+                        "user_intent_read": "用户在问PersonB有没有露面。",
                         "state_or_memory_used": ["stm_lu_breakfast"],
                         "response_choice": "选择如实说他早上冒过头。",
                         "uncertainty": "",
@@ -1586,6 +1620,9 @@ def test_query_planner_expands_loose_interaction_language_for_short_term_recall(
                     "habit_updates": [],
                     "memory_dynamics_note": "",
                 }
+            m12_hit = _maybe_m12_extractor_response(system_prompt)
+            if m12_hit is not None:
+                return m12_hit
             return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=PlannerLLM())
@@ -1598,8 +1635,8 @@ def test_query_planner_expands_loose_interaction_language_for_short_term_recall(
             "user_text": "我今天早上吃了不少东西，花卷、馒头，还有包子",
             "assistant_reply": "你这是把早餐铺子搬回家呀！",
             "assistant_reply_use_as_fact": False,
-            "source_user_id": "鲁永刚",
-            "source_display_name": "鲁永刚",
+            "source_user_id": "PersonB",
+            "source_display_name": "PersonB",
             "shareability": "default_social",
             "created_at": 200,
             "salience": 0.7,
@@ -1625,14 +1662,14 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
                             {
                                 "id": "exp_wrong",
                                 "status": "confirmed",
-                                "evidence": "用户说周青欠你钱并委托找人。",
+                                "evidence": "用户说AliasR欠你钱并委托找人。",
                                 "self_update_pressure": 0.3,
                             }
                         ],
                         "current_task": "处理找人追债请求",
                         "next_task": "",
                         "bus_messages_to_handle": ["UserUtteranceEvent"],
-                        "memory_search_keywords": ["周青", "欠债", "找人"],
+                        "memory_search_keywords": ["AliasR", "欠债", "找人"],
                         "needs_self_cognition_update": False,
                         "self_cognition_update_reason": "",
                         "temporal_assessment": {"continuity_risk": "low"},
@@ -1645,7 +1682,7 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
                     "current_task": "处理身份纠正",
                     "next_task": "",
                     "bus_messages_to_handle": ["UserUtteranceEvent"],
-                    "memory_search_keywords": ["周青", "身份纠正"],
+                    "memory_search_keywords": ["AliasR", "身份纠正"],
                     "needs_self_cognition_update": False,
                     "self_cognition_update_reason": "",
                     "temporal_assessment": {"continuity_risk": "low"},
@@ -1653,15 +1690,15 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
                     "reasoning_notes": "用户纠正当前说话人的别名。",
                 }
             if "grep 查询规划器" in system_prompt:
-                assert '"target_person": "鲁永刚"' in user_prompt
-                assert '"debtor": "鲁永刚"' in user_prompt
+                assert '"target_person": "PersonB"' in user_prompt
+                assert '"debtor": "PersonB"' in user_prompt
                 assert '"creditor": "zq"' in user_prompt
                 return {
-                    "search_terms": ["鲁永刚", "欠我", "500", "找他"],
-                    "referenced_entities": ["鲁永刚"],
+                    "search_terms": ["PersonB", "欠我", "500", "找他"],
+                    "referenced_entities": ["PersonB"],
                     "topic_hints": ["personal_finance"],
                     "is_interaction_presence_query": False,
-                    "planner_summary": "代词他继承为鲁永刚。",
+                    "planner_summary": "代词他继承为PersonB。",
                 }
             if (
                 "思考与回复模块" in system_prompt
@@ -1669,18 +1706,18 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
                 or '"reply_action"' in user_prompt
             ):
                 if "欠我500" in user_prompt:
-                    assert '"target_person": "鲁永刚"' in user_prompt
-                    assert '"周青"' in user_prompt
+                    assert '"target_person": "PersonB"' in user_prompt
+                    assert '"AliasR"' in user_prompt
                     return {
                         "thought_type": "short",
                         "llm_thinking_result": {
-                            "user_intent_read": "当前用户周青在说鲁永刚欠他钱。",
+                            "user_intent_read": "当前用户AliasR在说PersonB欠他钱。",
                             "state_or_memory_used": ["entity_binding"],
-                            "response_choice": "承认刚才名字绕错，按鲁永刚作为目标处理。",
+                            "response_choice": "承认刚才名字绕错，按PersonB作为目标处理。",
                             "uncertainty": "",
-                            "debug_summary": "周青是当前用户别名，鲁永刚是被找的人。",
+                            "debug_summary": "AliasR是当前用户别名，PersonB是被找的人。",
                         },
-                        "reply": "噢，刚才我把名字绕错了：你是周青，要找的是鲁永刚。",
+                        "reply": "噢，刚才我把名字绕错了：你是AliasR，要找的是PersonB。",
                         "reply_action": "answer",
                         "disclosure_action": "none",
                         "new_expectations": [],
@@ -1693,13 +1730,13 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
                 return {
                     "thought_type": "short",
                     "llm_thinking_result": {
-                        "user_intent_read": "用户纠正自己是周青。",
+                        "user_intent_read": "用户纠正自己是AliasR。",
                         "state_or_memory_used": ["entity_binding"],
                         "response_choice": "承认身份修正。",
                         "uncertainty": "",
-                        "debug_summary": "记录 zq 的别名周青。",
+                        "debug_summary": "记录 zq 的别名AliasR。",
                     },
-                    "reply": "噢噢，你才是周青，我记住这个称呼。",
+                    "reply": "噢噢，你才是AliasR，我记住这个称呼。",
                     "reply_action": "answer",
                     "disclosure_action": "none",
                     "new_expectations": [],
@@ -1709,13 +1746,16 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
                     "habit_updates": [],
                     "memory_dynamics_note": "",
                 }
+            m12_hit = _maybe_m12_extractor_response(system_prompt)
+            if m12_hit is not None:
+                return m12_hit
             return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=BindingLLM())
     state = runtime.store.load()
     state["temporal_state"] = {
         "last_user_text": "他今天有动静没，露面了吗？",
-        "last_share_trace": {"target_person": "鲁永刚", "evidence_source_names": ["鲁永刚"]},
+        "last_share_trace": {"target_person": "PersonB", "evidence_source_names": ["PersonB"]},
     }
     state["short_term_memory"] = [
         {
@@ -1724,26 +1764,26 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
             "content": "我今天早上吃了不少东西，花卷、馒头，还有包子",
             "user_text": "我今天早上吃了不少东西，花卷、馒头，还有包子",
             "assistant_reply_use_as_fact": False,
-            "source_user_id": "鲁永刚",
-            "source_display_name": "鲁永刚",
+            "source_user_id": "PersonB",
+            "source_display_name": "PersonB",
             "shareability": "default_social",
             "created_at": 200,
         }
     ]
     runtime.store.save(state)
 
-    correction = runtime.run_turn("。。。不是，你是不是错乱了，我才是周青。。", speaker_name="zq", turn_index=1, now=8000)
+    correction = runtime.run_turn("。。。不是，你是不是错乱了，我才是AliasR。。", speaker_name="zq", turn_index=1, now=8000)
     saved_after_correction = runtime.store.load()
-    assert "周青" in saved_after_correction["m11_user_models"]["zq"]["aliases"]
-    assert correction.diagnostics["alias_updates_applied"] == ["周青"]
+    assert "AliasR" in saved_after_correction["m11_user_models"]["zq"]["aliases"]
+    assert correction.diagnostics["alias_updates_applied"] == ["AliasR"]
 
     result = runtime.run_turn("是的，他不是欠我500块钱么？你帮我找到他。", speaker_name="zq", turn_index=2, now=8060)
 
-    assert "鲁永刚" in result.reply
-    assert "周青欠你钱" not in result.reply
-    assert result.diagnostics["entity_binding"]["target_person"] == "鲁永刚"
+    assert "PersonB" in result.reply
+    assert "AliasR欠你钱" not in result.reply
+    assert result.diagnostics["entity_binding"]["target_person"] == "PersonB"
     assert result.diagnostics["entity_binding"]["relationship_roles"] == {
-        "debtor": "鲁永刚",
+        "debtor": "PersonB",
         "creditor": "zq",
     }
     saved = runtime.store.load()
@@ -1756,11 +1796,11 @@ def test_entity_binding_records_current_user_alias_and_protects_third_party_targ
 
 
 def test_entity_binding_allows_explicit_self_reference_for_current_alias() -> None:
-    state = {"m11_user_models": {"zq": {"aliases": ["周青"]}}, "short_term_memory": []}
+    state = {"m11_user_models": {"zq": {"aliases": ["AliasR"]}}, "short_term_memory": []}
 
     binding = build_entity_binding_context(
         state=state,
-        user_text="我周青自己有没有找过你？",
+        user_text="我自己有没有找过你？",
         display_name="zq",
         user_id="zq",
         temporal_input={},
@@ -1770,16 +1810,88 @@ def test_entity_binding_allows_explicit_self_reference_for_current_alias() -> No
     assert binding["target_reason"] == "explicit_self_reference"
 
 
+def test_entity_binding_does_not_promote_raw_alias_assertion_when_m12_enabled() -> None:
+    state = {
+        "m12_identity_continuity_enabled": True,
+        "m11_user_models": {},
+        "short_term_memory": [],
+    }
+    binding = build_entity_binding_context(
+        state=state,
+        user_text="我才是AliasR。",
+        display_name="zq",
+        user_id="zq",
+        temporal_input={},
+    )
+    assert binding["alias_assertions"] == ["AliasR"]
+    assert "AliasR" not in binding["current_interlocutor"]["aliases"]
+    assert binding["binding_confidence"] == "ambiguous"
+
+
+def test_entity_binding_after_m12_pre_pass_does_not_promote_aliases_observed_without_corroboration() -> None:
+    """M12 writes asserted alias into profile before entity binding; aliases must not bypass promotion gates."""
+    m12_state, turn = run_m12_turn(
+        M12RuntimeState.clean(),
+        user_id="zq",
+        display_name="zq",
+        turn_id="turn_0001",
+        current_turn_quotes={"q_current": "我才是AliasR。"},
+        extractor=lambda _snapshot: {
+            "identity_claims": [
+                {
+                    "id": "claim:1",
+                    "claimant_user_id": "zq",
+                    "asserted_alias": "AliasR",
+                    "modality": "factual",
+                    "evidence_quote_ids": ["q_current"],
+                    "confidence_band": "high",
+                }
+            ],
+            "continuity_cues": [],
+            "strangeness_band": "low",
+            "surprise_explanation": "",
+        },
+        config=M12RuntimeConfig(m12_identity_continuity_enabled=True),
+    )
+    prof = m12_state.profiles_by_user["zq"]
+    assert any(str(obs.alias_text) == "AliasR" for obs in prof.aliases_observed)
+    assert prof.identity_state != "corroborated"
+
+    mvp_state = {
+        "m12_identity_continuity_enabled": True,
+        "m12_user_continuity": m12_state.to_dict(),
+        "m11_user_models": {},
+        "short_term_memory": [],
+        "temporal_state": {
+            "last_turn_at": None,
+            "last_turn_index": None,
+            "last_user_text": "",
+            "last_reply": "",
+            "last_elapsed_seconds": None,
+            "last_time_gap_label": "first_turn",
+        },
+    }
+    binding = build_entity_binding_context(
+        state=mvp_state,
+        user_text="我才是AliasR。",
+        display_name="zq",
+        user_id="zq",
+        temporal_input={},
+        m12_turn_result=turn.to_dict(),
+    )
+    assert "AliasR" not in binding["current_interlocutor"]["aliases"]
+
+
 def test_topic_query_uses_generic_topic_context_not_finance_special_case() -> None:
     state = {
         "short_term_memory": [
             {
                 "id": "stm_lu_wallet",
                 "kind": "dialogue_turn",
-                "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+                "content": "PersonB说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
                 "shareability": "restricted_implicit",
                 "source_user_id": "lu_yonggang",
-                "source_display_name": "鲁永刚",
+                "source_display_name": "PersonB",
                 "salience": 0.7,
             }
         ],
@@ -1791,7 +1903,7 @@ def test_topic_query_uses_generic_topic_context_not_finance_special_case() -> No
     hits = retrieve_memories_for_guidance(
         state,
         {
-            "semantic_terms": ["鲁永刚", "有多少钱"],
+            "semantic_terms": ["PersonB", "有多少钱"],
             "memory_kinds": ["dialogue_turn"],
             "current_user_id": "zq",
             "sharing_intent": "social_share",
@@ -1825,6 +1937,37 @@ def test_validate_visible_reply_allows_deny_knowledge_for_soft_boundary() -> Non
     assert meta["actions"] == []
 
 
+def test_validate_visible_reply_blocks_identity_anchored_action_when_denied() -> None:
+    reply, meta = validate_visible_reply(
+        "行，我帮你确认他是不是AliasR。",
+        {
+            "conversation_mode": "balanced",
+            "max_chars": 140,
+            "max_sentences": 2,
+            "identity_anchored_action": True,
+            "deny_identity_anchored_action": True,
+        },
+    )
+    assert "不能直接替人确认" in reply
+    assert "blocked_identity_anchored_action" in meta["actions"]
+
+
+def test_validate_visible_reply_enforces_identity_verification_when_required() -> None:
+    reply, meta = validate_visible_reply(
+        "他就是AliasR，我直接告诉你。",
+        {
+            "conversation_mode": "balanced",
+            "max_chars": 140,
+            "max_sentences": 2,
+            "identity_anchored_action": True,
+            "enforce_identity_verification": True,
+            "selected_disclosure_action": "direct_share",
+        },
+    )
+    assert "先不直接确认" in reply
+    assert "enforced_identity_verification" in meta["actions"]
+
+
 def test_validate_visible_reply_blocks_redaction_targets_when_not_direct_share() -> None:
     reply, meta = validate_visible_reply(
         "他刚说自己有500块钱。",
@@ -1852,15 +1995,15 @@ def test_runtime_evidence_judge_allows_direct_soft_boundary_choice(tmp_path: Pat
                     "sensitivity_class": "personal_soft",
                     "redaction_targets": ["500块钱"],
                     "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
-                    "audience_risk": "可能让鲁永刚不爽",
+                    "audience_risk": "可能让PersonB不爽",
                     "expected_social_gain": "zq可能会觉得八卦有趣",
-                    "judge_summary": "短期记忆支持鲁永刚提过钱包金额。",
+                    "judge_summary": "短期记忆支持PersonB提过钱包金额。",
                 }
             if "思考与回复模块" in system_prompt or "鎬濊€冧笌鍥炲妯″潡" in system_prompt:
                 return {
                     "thought_type": "short",
                     "llm_thinking_result": {
-                        "user_intent_read": "用户在问鲁永刚的钱包金额。",
+                        "user_intent_read": "用户在问PersonB的钱包金额。",
                         "state_or_memory_used": ["stm_lu_wallet"],
                         "response_choice": "选择直接八卦以观察用户反应。",
                         "uncertainty": "",
@@ -1876,6 +2019,9 @@ def test_runtime_evidence_judge_allows_direct_soft_boundary_choice(tmp_path: Pat
                     "habit_updates": [],
                     "memory_dynamics_note": "",
                 }
+            m12_hit = _maybe_m12_extractor_response(system_prompt)
+            if m12_hit is not None:
+                return m12_hit
             return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=DirectShareLLM())
@@ -1884,16 +2030,16 @@ def test_runtime_evidence_judge_allows_direct_soft_boundary_choice(tmp_path: Pat
         {
             "id": "stm_lu_wallet",
             "kind": "dialogue_turn",
-            "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+            "content": "PersonB说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
             "shareability": "restricted_implicit",
             "source_user_id": "lu_yonggang",
-            "source_display_name": "鲁永刚",
+            "source_display_name": "PersonB",
             "salience": 0.7,
         }
     ]
     runtime.store.save(state)
 
-    result = runtime.run_turn("鲁永刚有多少钱？", speaker_name="zq", turn_index=1, now=5000)
+    result = runtime.run_turn("PersonB有多少钱？", speaker_name="zq", turn_index=1, now=5000)
 
     assert "500块钱" in result.reply
     assert result.diagnostics["thinking"]["disclosure_action"] == "direct_share"
@@ -1914,13 +2060,13 @@ def test_runtime_evidence_judge_allows_deny_knowledge_soft_boundary_choice(tmp_p
                     "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
                     "audience_risk": "直接说可能伤关系",
                     "expected_social_gain": "装不知道能保留轻松气氛",
-                    "judge_summary": "短期记忆支持鲁永刚提过钱包金额。",
+                    "judge_summary": "短期记忆支持PersonB提过钱包金额。",
                 }
             if "思考与回复模块" in system_prompt or "鎬濊€冧笌鍥炲妯″潡" in system_prompt:
                 return {
                     "thought_type": "short",
                     "llm_thinking_result": {
-                        "user_intent_read": "用户在打听鲁永刚的钱包金额。",
+                        "user_intent_read": "用户在打听PersonB的钱包金额。",
                         "state_or_memory_used": ["stm_lu_wallet"],
                         "response_choice": "选择说不知道来保护关系风险。",
                         "uncertainty": "",
@@ -1936,6 +2082,9 @@ def test_runtime_evidence_judge_allows_deny_knowledge_soft_boundary_choice(tmp_p
                     "habit_updates": [],
                     "memory_dynamics_note": "",
                 }
+            m12_hit = _maybe_m12_extractor_response(system_prompt)
+            if m12_hit is not None:
+                return m12_hit
             return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "persona"), llm=DenyKnowledgeLLM())
@@ -1944,16 +2093,16 @@ def test_runtime_evidence_judge_allows_deny_knowledge_soft_boundary_choice(tmp_p
         {
             "id": "stm_lu_wallet",
             "kind": "dialogue_turn",
-            "content": "鲁永刚说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
+            "content": "PersonB说：我现在钱包里有500块钱。我们去吃宵夜吧，我请客。",
             "shareability": "restricted_implicit",
             "source_user_id": "lu_yonggang",
-            "source_display_name": "鲁永刚",
+            "source_display_name": "PersonB",
             "salience": 0.7,
         }
     ]
     runtime.store.save(state)
 
-    result = runtime.run_turn("鲁永刚有多少钱？", speaker_name="zq", turn_index=1, now=5000)
+    result = runtime.run_turn("PersonB有多少钱？", speaker_name="zq", turn_index=1, now=5000)
 
     assert "哪知道" in result.reply
     assert "500块钱" not in result.reply
@@ -1998,3 +2147,65 @@ def test_negative_feedback_after_cross_user_share_increases_regret_bias(tmp_path
     assert feedback["negative_feedback_detected"] is True
     assert state["social_sharing_policy"]["regret_bias"] > 0.0
     assert state["social_sharing_policy"]["learned_boundaries"]
+
+
+def test_m12_state_persists_via_mvp_system_files(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path / "persona")
+    state = store.load()
+    state["m12_identity_continuity_enabled"] = True
+    blob: dict[str, object] = {
+        "profiles_by_user": {},
+        "claim_ledger": {"entries": []},
+        "conflict_records": [],
+    }
+    state["m12_user_continuity"] = blob
+    store.save(state)
+    reloaded = store.load()
+    assert reloaded["m12_identity_continuity_enabled"] is True
+    assert reloaded["m12_user_continuity"] == blob
+
+
+def test_initialize_from_persona_payload_defaults_m12_on_for_fresh_persona(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+    runtime.initialize_from_persona_payload(
+        {
+            "persona_name": "测试人格",
+            "source_role_evidence": ["测试材料"],
+            "self_cognition": {"summary": "x"},
+            "short_term_memory": [],
+            "long_term_memory": [],
+            "pending_expectations": [],
+            "open_items": [],
+            "self_basic_facts": {"name": "测试人格"},
+            "habit_traits": {"big_five": {}},
+            "temporal_state": {"last_turn_at": None},
+            "m11_user_models": {},
+            "social_sharing_policy": {"regret_bias": 0.0, "learned_boundaries": []},
+        }
+    )
+    saved = runtime.store.load()
+    assert saved["m12_identity_continuity_enabled"] is True
+
+
+def test_mvp_m12_identity_extractor_runs_before_conscious_when_enabled(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    store = MVPStateStore(tmp_path / "persona")
+    state = store.load()
+    state["m12_identity_continuity_enabled"] = True
+    store.save(state)
+    runtime = MVPDialogueRuntime(
+        store=store,
+        llm=llm,
+        persona_name="测试人格",
+    )
+    runtime.initialize_from_materials(["喜欢快速原型，讨厌凭空编造经历。"])
+    llm.calls.clear()
+    runtime.run_turn("你好。", turn_index=0)
+    systems = [c["system"] for c in llm.calls]
+    m12_idx = next(i for i, s in enumerate(systems) if "identity-continuity extractor" in s)
+    con_idx = next(i for i, s in enumerate(systems) if "意识主循环" in s)
+    assert m12_idx < con_idx

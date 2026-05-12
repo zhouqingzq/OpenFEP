@@ -33,7 +33,15 @@ from segmentum.user_model import (
     sharing_feedback_negative,
     update_regret_bias,
 )
+from segmentum.cognitive_events import CognitiveEventBus
 from segmentum.user_model.llm_extractor import ExtractorValidationError, noop_extraction
+from segmentum.user_continuity import (
+    IdentityProfile,
+    M12RuntimeConfig,
+    M12RuntimeState,
+    run_m12_turn,
+    select_reply_policy,
+)
 
 
 SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
@@ -72,6 +80,12 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "last_time_gap_label": "first_turn",
     },
     "m11_user_models": {},
+    "m12_identity_continuity_enabled": False,
+    "m12_user_continuity": {
+        "profiles_by_user": {},
+        "claim_ledger": {"entries": []},
+        "conflict_records": [],
+    },
     "social_sharing_policy": {
         "regret_bias": 0.0,
         "learned_boundaries": [],
@@ -966,6 +980,32 @@ Return JSON exactly with the M11 extractor schema fields.
     return system_prompt, user_prompt
 
 
+def build_m12_identity_extractor_prompt(
+    *,
+    snapshot: Mapping[str, Any],
+    speaker_name: str,
+) -> tuple[str, str]:
+    system_prompt = """You are the M12 identity-continuity extractor. Return strict JSON only.
+
+Extract only:
+- identity_claims
+- continuity_cues
+- strangeness_band
+- surprise_explanation
+
+Do not output floats. Do not output unknown fields. Do not decide durable writes,
+conflict severity, or reply policy. Keep language plain and bounded.
+"""
+    user_prompt = f"""Current interlocutor display name: {speaker_name}
+
+Bounded snapshot:
+{_json_text(dict(snapshot))}
+
+Return JSON exactly with the M12 extractor schema fields.
+"""
+    return system_prompt, user_prompt
+
+
 def build_thinking_prompt(
     *,
     state: Mapping[str, Any],
@@ -1401,6 +1441,8 @@ def _record_interlocutor_aliases(
     evidence: str,
     now: int,
 ) -> list[str]:
+    if _m12_enabled_for_state(state):
+        return []
     clean_aliases = [
         alias
         for alias in _unique_strings(aliases, limit=12)
@@ -1451,17 +1493,40 @@ def build_entity_binding_context(
     display_name: str,
     user_id: str,
     temporal_input: Mapping[str, Any] | None = None,
+    m12_turn_result: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     temporal = _mapping(state.get("temporal_state"))
     previous_summary = _mapping((temporal_input or {}).get("previous_turn_summary"))
     previous_user_text = str(previous_summary.get("user_text") or temporal.get("last_user_text") or "")
     previous_trace = _mapping(temporal.get("last_share_trace"))
     alias_assertions = _extract_alias_assertions(user_text, display_name=display_name, user_id=user_id)
-    current_aliases = _unique_strings(
-        _interlocutor_aliases(state, user_id=user_id, display_name=display_name),
-        alias_assertions,
-        limit=16,
-    )
+    m12_enabled = _m12_enabled_for_state(state)
+    current_aliases = _interlocutor_aliases(state, user_id=user_id, display_name=display_name)
+    if not m12_enabled:
+        current_aliases = _unique_strings(current_aliases, alias_assertions, limit=16)
+    if m12_enabled:
+        m12_state = _load_m12_state(state)
+        prof = m12_state.profiles_by_user.get(user_id)
+        if prof is not None:
+            reply_policy_dict = _m12_reply_policy_dict_for_entity_binding(
+                m12_state=m12_state,
+                profile=prof,
+                m12_turn_result=m12_turn_result,
+            )
+            promote = _m12_claim_alias_promotable(
+                reply_policy_dict,
+                identity_state=str(prof.identity_state),
+                confidence_band=str(prof.binding_confidence_band),
+            )
+            if str(prof.identity_state) == "corroborated":
+                for obs in prof.aliases_observed:
+                    t = str(obs.alias_text or "").strip()
+                    if t:
+                        current_aliases = _unique_strings(current_aliases, [t], limit=16)
+            elif promote and prof.aliases_observed:
+                latest = str(prof.aliases_observed[-1].alias_text or "").strip()
+                if latest:
+                    current_aliases = _unique_strings(current_aliases, [latest], limit=16)
     current_alias_folded = {alias.casefold() for alias in current_aliases}
     previous_target = str(previous_trace.get("target_person") or "").strip()
     source_names = _source_names_from_short_memory(state)
@@ -1526,7 +1591,11 @@ def build_entity_binding_context(
         "target_reason": target_reason,
         "pronoun_bindings": pronoun_bindings,
         "relationship_roles": relationship_roles,
-        "binding_confidence": "certain" if target_person or alias_assertions else "ambiguous",
+        "binding_confidence": (
+            "certain"
+            if target_person or (alias_assertions and not m12_enabled)
+            else "ambiguous"
+        ),
         "conflicts": conflicts,
     }
 
@@ -2906,6 +2975,19 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         if any(target and target.casefold() in cleaned.casefold() for target in redaction_targets):
             cleaned = "这个我不方便替他说。"
             actions.append("blocked_redaction_target")
+    identity_anchored_action = bool(contract_map.get("identity_anchored_action", False))
+    if identity_anchored_action and bool(contract_map.get("deny_identity_anchored_action", False)):
+        cleaned = "这个涉及身份与安全，我不能直接替人确认或执行。"
+        actions.append("blocked_identity_anchored_action")
+    elif identity_anchored_action and bool(contract_map.get("enforce_identity_verification", False)):
+        if selected_disclosure_action in {"direct_share", "abstract_share", "none"}:
+            cleaned = "这个我先不直接确认，你先提供可核对线索（例如你和对方的关系或上下文）。"
+            actions.append("enforced_identity_verification")
+    if bool(contract_map.get("avoid_identity_assertion", False)):
+        assertion_pattern = r"(你|他|她)(才)?是[\u4e00-\u9fffA-Za-z0-9_]{1,24}"
+        if re.search(assertion_pattern, cleaned):
+            cleaned = "我先不下身份结论，先按你这轮提供的信息继续观察。"
+            actions.append("softened_identity_assertion")
     validation = {
         "original_length": len(original),
         "final_length": len(cleaned),
@@ -2918,6 +3000,7 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         "explicit_secrecy_detected": explicit_secrecy_detected,
         "selected_disclosure_action": selected_disclosure_action,
         "redaction_targets": redaction_targets,
+        "identity_anchored_action": identity_anchored_action,
     }
     return cleaned, validation
 
@@ -2976,6 +3059,182 @@ def _save_m11_state(state: dict[str, Any], *, user_id: str, m11_state: M11Runtim
 
 def _m11_enabled_for_state(state: Mapping[str, Any]) -> bool:
     return bool(state.get("m11_user_model_enabled", True))
+
+
+def _load_m12_state(state: Mapping[str, Any]) -> M12RuntimeState:
+    payload = _mapping(state.get("m12_user_continuity"))
+    if not payload:
+        return M12RuntimeState.clean()
+    return M12RuntimeState.from_dict(payload)
+
+
+def _save_m12_state(state: dict[str, Any], *, m12_state: M12RuntimeState) -> None:
+    state["m12_user_continuity"] = m12_state.to_dict()
+
+
+def _m12_enabled_for_state(state: Mapping[str, Any]) -> bool:
+    return bool(state.get("m12_identity_continuity_enabled", False))
+
+
+def _should_default_enable_m12_for_persona_init(state: Mapping[str, Any]) -> bool:
+    temporal = _mapping(state.get("temporal_state"))
+    if temporal.get("last_turn_at") is not None:
+        return False
+    if state.get("short_term_memory"):
+        return False
+    if _mapping(state.get("m11_user_models")):
+        return False
+    m12_payload = _mapping(state.get("m12_user_continuity"))
+    if _mapping(m12_payload.get("profiles_by_user")):
+        return False
+    if _mapping(m12_payload.get("claim_ledger")).get("entries"):
+        return False
+    if m12_payload.get("conflict_records"):
+        return False
+    return True
+
+
+def _identity_anchored_action_sensitive(user_text: str) -> bool:
+    """True when the user turn requests identity-bound secrets or high-risk verification."""
+    t = str(user_text or "").casefold()
+    literal_needles = (
+        "密码",
+        "验证码",
+        "银行卡",
+        "身份证",
+        "转账",
+        "验证身份",
+        "确认你是",
+        "证明你是",
+        "otp",
+        "2fa",
+        "ssn",
+        "passphrase",
+        "private key",
+        "帮我找到",
+        "帮我找",
+        "替我确认",
+        "确认他是谁",
+        "确认她是谁",
+        "告诉我他有没有来过",
+        "告诉我她有没有来过",
+        "他有没有来过",
+        "她有没有来过",
+        "有没有露面",
+        "是不是周青",
+        "是不是鲁永刚",
+    )
+    if any(n in t for n in literal_needles):
+        return True
+    regex_needles = (
+        r"(确认|证明|核对).{0,8}(他|她|对方).{0,6}(是谁|身份)",
+        r"(帮我|替我).{0,8}(联系|找到|查一下).{0,8}(他|她|对方)",
+        r"(他|她|对方).{0,8}(是不是|到底是).{0,8}[\u4e00-\u9fffA-Za-z0-9_]{1,24}",
+    )
+    return any(re.search(pattern, t) for pattern in regex_needles)
+
+
+def _m12_reply_policy_dict_for_entity_binding(
+    *,
+    m12_state: M12RuntimeState,
+    profile: IdentityProfile,
+    m12_turn_result: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    if m12_turn_result and m12_turn_result.get("enabled"):
+        return dict(_mapping(m12_turn_result.get("reply_policy")))
+    open_conflicts = tuple(
+        row for row in m12_state.conflict_records if row.resolution_status in {"open", "probed"}
+    )
+    return select_reply_policy(
+        profile=profile,
+        active_conflicts=open_conflicts,
+        strangeness_signal=None,
+        identity_anchored_action=False,
+    ).to_dict()
+
+
+def _m12_claim_alias_promotable(reply_policy: Mapping[str, Any], *, identity_state: str, confidence_band: str) -> bool:
+    if identity_state == "corroborated":
+        return True
+    permitted = str(reply_policy.get("permitted_response", "accept") or "accept")
+    return confidence_band == "high" and permitted in {"accept", "probe"}
+
+
+def _merge_m12_into_entity_binding(
+    entity_binding: dict[str, Any],
+    m12_result: Mapping[str, Any] | None,
+) -> None:
+    """Attach M12 fields without overwriting third-party entity_binding targets."""
+    if not m12_result or not m12_result.get("enabled"):
+        return
+    ctx = _mapping(m12_result.get("entity_binding_context"))
+    claimed = str(ctx.get("claimed_alias") or "").strip()
+    identity_state = str(ctx.get("identity_state", ""))
+    confidence_band = str(ctx.get("binding_confidence_band", ""))
+    reply_policy = _mapping(m12_result.get("reply_policy"))
+    promote_claimed_alias = _m12_claim_alias_promotable(
+        reply_policy,
+        identity_state=identity_state,
+        confidence_band=confidence_band,
+    )
+    cur = _mapping(entity_binding.get("current_interlocutor"))
+    aliases = list(cur.get("aliases") or [])
+    if claimed and promote_claimed_alias:
+        aliases = _unique_strings(aliases, [claimed], limit=16)
+    entity_binding["current_interlocutor"] = {**cur, "aliases": aliases}
+    entity_binding["m12_identity"] = {
+        "claimed_alias": claimed,
+        "claimed_alias_promoted": promote_claimed_alias,
+        "identity_state": identity_state,
+        "binding_confidence_band": confidence_band,
+        "reply_policy": dict(reply_policy),
+        "prompt_safe_evidence_cards": [
+            dict(item)
+            for item in m12_result.get("prompt_safe_evidence_cards", [])
+            if isinstance(item, Mapping)
+        ],
+    }
+
+
+def _m12_reply_policy_contract_patch(permitted_response: str) -> dict[str, Any]:
+    if permitted_response == "accept":
+        return {}
+    if permitted_response == "probe":
+        return {"prefer_clarification": True}
+    if permitted_response == "hedge":
+        return {"soften_social_evidence_language": True}
+    if permitted_response == "ask":
+        return {"prefer_clarification": True, "enforce_identity_verification": True}
+    if permitted_response == "observe":
+        return {"avoid_identity_assertion": True}
+    if permitted_response == "refuse":
+        return {"deny_identity_anchored_action": True, "prefer_clarification": True}
+    return {}
+
+
+def _merge_m12_into_memory_guidance(
+    memory_dynamics: dict[str, Any],
+    *,
+    m12_result: Mapping[str, Any] | None,
+) -> None:
+    if not m12_result or not m12_result.get("enabled"):
+        return
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    contract = _mapping(control.get("reply_contract"))
+    reply_policy = _mapping(m12_result.get("reply_policy"))
+    permitted_response = str(reply_policy.get("permitted_response", "accept"))
+    contract.update(_m12_reply_policy_contract_patch(permitted_response))
+    contract["m12_identity"] = {
+        "reply_policy": dict(reply_policy),
+        "entity_binding_context": dict(_mapping(m12_result.get("entity_binding_context"))),
+        "prompt_safe_evidence_cards": [
+            dict(item)
+            for item in m12_result.get("prompt_safe_evidence_cards", [])
+            if isinstance(item, Mapping)
+        ],
+    }
+    control["reply_contract"] = contract
+    memory_dynamics["control_guidance"] = control
 
 
 def _m11_reply_policy_contract_patch(effects: list[Mapping[str, Any]]) -> dict[str, Any]:
@@ -3062,9 +3321,23 @@ class MVPDialogueRuntime:
 
     def initialize_from_persona_payload(self, persona_payload: Mapping[str, Any]) -> dict[str, Any]:
         state = self.store.load()
+        # Persona material analysis does not author M12 continuity; keep existing disk values.
+        prior_m12_enabled = state.get("m12_identity_continuity_enabled")
+        prior_m12_blob = state.get("m12_user_continuity")
+        default_enable_m12 = _should_default_enable_m12_for_persona_init(state)
         payload = normalize_persona_payload(persona_payload, fallback_name=self.persona_name)
         for key in SYSTEM_FILE_DEFAULTS:
             state[key] = payload[key]
+        if isinstance(prior_m12_enabled, bool):
+            state["m12_identity_continuity_enabled"] = (
+                True if (default_enable_m12 and not prior_m12_enabled) else prior_m12_enabled
+            )
+        elif prior_m12_enabled is not None:
+            state["m12_identity_continuity_enabled"] = bool(prior_m12_enabled)
+        elif default_enable_m12:
+            state["m12_identity_continuity_enabled"] = True
+        if isinstance(prior_m12_blob, Mapping):
+            state["m12_user_continuity"] = dict(prior_m12_blob)
         now = _utc_timestamp()
         for memory in state.get("long_term_memory", []):
             if isinstance(memory, dict):
@@ -3125,13 +3398,72 @@ class MVPDialogueRuntime:
             "text": user_text,
             "at": now,
         })
+        identity_anchored_action = _identity_anchored_action_sensitive(user_text)
+        m12_pre_result: dict[str, Any] | None = None
+        turn_key = f"turn_{turn_index + 1:04d}"
+        m12_cognitive_bus = CognitiveEventBus()
+        if _m12_enabled_for_state(state):
+            m12_state = _load_m12_state(state)
+            m11_readonly_pre: dict[str, object] = {}
+
+            def _extract_m12_pre(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+                system_prompt, user_prompt = build_m12_identity_extractor_prompt(
+                    snapshot=snapshot,
+                    speaker_name=display_name,
+                )
+                try:
+                    return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                except Exception:
+                    return {
+                        "identity_claims": [],
+                        "continuity_cues": [],
+                        "strangeness_band": "low",
+                        "surprise_explanation": "",
+                    }
+
+            legacy_aliases_pre: list[str] = []
+            legacy_user_models_pre = _mapping(state.get("m11_user_models"))
+            legacy_row_pre = _mapping(legacy_user_models_pre.get(user_id))
+            for alias in _string_list(legacy_row_pre.get("aliases"), limit=8):
+                legacy_aliases_pre.append(alias)
+            identity_binding_pre = _mapping(legacy_row_pre.get("identity_binding"))
+            for alias in _string_list(identity_binding_pre.get("aliases"), limit=8):
+                legacy_aliases_pre.append(alias)
+            m12_state, m12_turn = run_m12_turn(
+                m12_state,
+                user_id=user_id,
+                display_name=display_name,
+                turn_id=turn_key,
+                current_turn_quotes={"q_current": user_text},
+                m11_readonly_summary=m11_readonly_pre,
+                legacy_aliases=legacy_aliases_pre,
+                extractor=_extract_m12_pre,
+                config=M12RuntimeConfig(m12_identity_continuity_enabled=True, persona_kind="ui_chat"),
+                event_bus=m12_cognitive_bus,
+                session_id=str(self.store.root.resolve()),
+                persona_id=self.persona_name or "default",
+                cycle=turn_index,
+                event_sequence_index=0,
+                identity_anchored_action=identity_anchored_action,
+            )
+            _save_m12_state(state, m12_state=m12_state)
+            m12_pre_result = m12_turn.to_dict()
+            for seq_idx, ev in enumerate(m12_cognitive_bus.events()):
+                bus.append({
+                    "type": ev.event_type,
+                    "turn_index": turn_index,
+                    "sequence": seq_idx,
+                    "cognitive_event": ev.to_dict(),
+                })
         entity_binding = build_entity_binding_context(
             state=state,
             user_text=user_text,
             display_name=display_name,
             user_id=user_id,
             temporal_input=temporal_input,
+            m12_turn_result=m12_pre_result,
         )
+        _merge_m12_into_entity_binding(entity_binding, m12_pre_result)
         alias_updates_applied = _record_interlocutor_aliases(
             state,
             user_id=user_id,
@@ -3147,7 +3479,9 @@ class MVPDialogueRuntime:
                 display_name=display_name,
                 user_id=user_id,
                 temporal_input=temporal_input,
+                m12_turn_result=m12_pre_result,
             )
+            _merge_m12_into_entity_binding(entity_binding, m12_pre_result)
         bus.append({
             "type": "EntityBindingEvent",
             "turn_index": turn_index,
@@ -3261,6 +3595,7 @@ class MVPDialogueRuntime:
         }
         self._mark_recalled(state, retrieved, now)
         response_style_prior = _response_style_prior(state, retrieved)
+        m11_result_dict: dict[str, Any] = {}
         if _m11_enabled_for_state(state):
             def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                 system_prompt, user_prompt = build_m11_extractor_prompt(
@@ -3301,6 +3636,11 @@ class MVPDialogueRuntime:
                 memory_dynamics,
                 speaker_name=display_name,
                 m11_result=m11_result_dict,
+            )
+        if m12_pre_result is not None:
+            _merge_m12_into_memory_guidance(
+                memory_dynamics,
+                m12_result=m12_pre_result,
             )
 
         thinking_system, thinking_user = build_thinking_prompt(
@@ -3365,6 +3705,7 @@ class MVPDialogueRuntime:
             raw_reply = "我需要想一下这个。"
         control_guidance = _mapping(memory_dynamics.get("control_guidance"))
         reply_contract = _mapping(control_guidance.get("reply_contract"))
+        reply_contract["identity_anchored_action"] = identity_anchored_action
         reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
         reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
         action = str(thinking.get("reply_action") or "answer")
