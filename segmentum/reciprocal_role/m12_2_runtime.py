@@ -24,9 +24,11 @@ from .reciprocal_model import (
     ReciprocalRoleModel,
     UncertaintyPoint,
     apply_model_patch,
+    mark_group_contradicted,
 )
 from .safety_linter import apply_safety_linter, findings_to_dict
 from .second_order_extractor import (
+    bound_extractor_snapshot,
     insufficient_output,
     validate_first_order_output,
     validate_second_order_output,
@@ -132,7 +134,7 @@ class M122TurnResult:
             "prompt_safe_evidence_cards": list(self.prompt_safe_evidence_cards),
             "reply_policy_hints": [hint.to_dict() for hint in self.reply_policy_hints],
             "safety_linter_findings": [dict(item) for item in self.safety_linter_findings],
-            "recorded_extractor_outputs": dict(self.recorded_extractor_outputs),
+            "recorded_extractor_outputs": _json_safe(self.recorded_extractor_outputs),
             "published_event_ids": list(self.published_event_ids),
         }
 
@@ -159,6 +161,7 @@ def run_m12_2_tick(
     persona_id: str = "default",
     cycle: int = 0,
     event_sequence_index: int = 0,
+    event_timestamp: str | None = None,
 ) -> tuple[M122RuntimeState, M122TurnResult]:
     config = config or M122RuntimeConfig()
     before = state.to_dict()
@@ -180,6 +183,7 @@ def run_m12_2_tick(
         turn_index=turn_index,
         hour_bucket=hour_bucket,
         assessment=assessment,
+        hyperparams=hyperparams,
     )
     decision = decide_trigger(trigger, hyperparams=hyperparams)
     durable_candidates: tuple[InformationGainCandidate, ...] = ()
@@ -189,7 +193,7 @@ def run_m12_2_tick(
     event_ids: tuple[str, ...] = ()
     durable_ran = decision.should_run
     if decision.should_run:
-        snapshot = _snapshot(
+        snapshot = bound_extractor_snapshot(_snapshot(
             user_id=user_id,
             turn_id=turn_id,
             current_turn_quotes=quotes,
@@ -198,7 +202,7 @@ def run_m12_2_tick(
             m12_readonly_summary=m12_readonly_summary,
             m121_readonly_summary=m121_readonly_summary,
             model=model,
-        )
+        ), hyperparams=hyperparams)
         first_raw = _run_extractor(extractors, "first_order", snapshot, default=insufficient_output("first_order"))
         second_raw = _run_extractor(extractors, "second_order", snapshot, default=insufficient_output("second_order"))
         first = validate_first_order_output(first_raw, snapshot=snapshot, hyperparams=hyperparams)
@@ -220,16 +224,28 @@ def run_m12_2_tick(
         allowed_candidates, findings = apply_safety_linter(raw_candidates)
         safety_findings = tuple(findings_to_dict(findings))
         durable_candidates = rank_or_no_action(tuple(item for item in allowed_candidates if isinstance(item, InformationGainCandidate)))
+        patch_base_model = model
+        if decision.kind == "contradiction_or_misread":
+            affected_group_id = _first_open_second_order_group_id(model)
+            if affected_group_id:
+                patch_base_model = mark_group_contradicted(
+                    model,
+                    group_id=affected_group_id,
+                    turn_id=turn_id,
+                    turn_index=turn_index,
+                    hyperparams=hyperparams,
+                )
         next_model = apply_model_patch(
-            model,
+            patch_base_model,
             turn_id=turn_id,
             turn_index=turn_index,
             group_updates=groups,
             claims=claims,
             uncertainty_points=points,
             candidates=durable_candidates,
-            direct_probe_turn_ids=_direct_probe_turn_ids(assessment),
-            contradiction_triggered=decision.kind == "contradiction_or_misread",
+            direct_probe_turn_ids=_direct_probe_turn_ids(model, assessment),
+            observed_probe_turn_ids=_observed_probe_turn_ids(assessment),
+            decay_cooldown=patch_base_model is model,
             hyperparams=hyperparams,
         )
         if next_model.to_json() != model.to_json() and event_bus is not None:
@@ -244,7 +260,7 @@ def run_m12_2_tick(
                 salience=0.35,
                 priority=0.3,
                 ttl=1,
-                timestamp="1970-01-01T00:00:00Z",
+                timestamp=event_timestamp,
                 payload={
                     "user_id": user_id,
                     "patch_summary": {
@@ -270,7 +286,7 @@ def run_m12_2_tick(
     )
     durable_hints = hints_from_candidates(durable_candidates, source="durable") if durable_ran else ()
     hints = reconcile_hints(assessment.reply_policy_hints, durable_hints, durable_ran=durable_ran)
-    cards = evidence_cards_from_candidates(durable_candidates)
+    cards = evidence_cards_from_candidates(durable_candidates, model=next_model)
     return next_state, M122TurnResult(
         True,
         decision,
@@ -294,8 +310,22 @@ def _default_trigger_input(
     turn_index: int,
     hour_bucket: int,
     assessment: ReciprocalTurnAssessment,
+    hyperparams: M122Hyperparams,
 ) -> TriggerPolicyInput:
     records = state.run_records_by_user.get(user_id, ())
+    turns_since_run = turn_index - max((record.turn_index for record in records), default=-999)
+    contradiction_or_misread = (
+        assessment.observed_user_probe in {"adversarial", "boundary_test"}
+        and any(claim.status != "contradicted" for claim in model.user_about_persona_claims)
+    )
+    relationship_turning_point = (
+        assessment.observed_user_probe == "boundary_test"
+        or any(
+            token in point.plain_question.casefold()
+            for point in assessment.top_uncertainty_points
+            for token in ("trust", "boundary", "limit", "consent")
+        )
+    )
     return TriggerPolicyInput(
         user_id=user_id,
         current_turn_index=turn_index,
@@ -305,6 +335,9 @@ def _default_trigger_input(
         has_existing_model=bool(model.last_consolidated_turn_id or model.all_claims()),
         explicit_user_request=assessment.observed_user_probe == "explicit",
         high_second_order_uncertainty=assessment.user_about_persona_uncertainty_band == "high" and assessment.observed_user_probe in {"explicit", "adversarial", "boundary_test"},
+        relationship_turning_point=relationship_turning_point,
+        contradiction_or_misread=contradiction_or_misread,
+        periodic_refresh_due=bool(model.last_consolidated_turn_id and turns_since_run >= max(6, hyperparams.min_turn_window_between_consolidations * 3)),
         evidence_sparse=assessment.insufficient_evidence,
         contradiction_cooldown=model.contradiction_cooldown,
     )
@@ -392,7 +425,40 @@ def _candidate(row: Mapping[str, object], *, source: str) -> InformationGainCand
     return InformationGainCandidate.from_dict(data)
 
 
-def _direct_probe_turn_ids(assessment: ReciprocalTurnAssessment) -> tuple[str, ...]:
+def _direct_probe_turn_ids(model: ReciprocalRoleModel, assessment: ReciprocalTurnAssessment) -> tuple[str, ...]:
+    if assessment.observed_user_probe not in {"explicit", "adversarial", "boundary_test"}:
+        return tuple(model.recent_probe_turn_ids)
+    current = tuple(ref.turn_id for hint in assessment.reply_policy_hints for ref in hint.evidence_refs if ref.turn_id)
+    return tuple(dict.fromkeys((*model.recent_probe_turn_ids, *current)))
+
+
+def _observed_probe_turn_ids(assessment: ReciprocalTurnAssessment) -> tuple[str, ...]:
     if assessment.observed_user_probe not in {"explicit", "adversarial", "boundary_test"}:
         return ()
     return tuple(ref.turn_id for hint in assessment.reply_policy_hints for ref in hint.evidence_refs if ref.turn_id)
+
+
+def _first_open_second_order_group_id(model: ReciprocalRoleModel) -> str:
+    second_order_claim_group_ids = {
+        claim.group_id
+        for claim in model.user_about_persona_claims
+        if claim.status != "contradicted"
+    }
+    for group in model.reciprocal_claim_groups:
+        if group.group_id in second_order_claim_group_ids and group.status != "contradicted":
+            return group.group_id
+    return ""
+
+
+def _json_safe(value: object) -> object:
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    if isinstance(value, Mapping):
+        return {str(key): _json_safe(item) for key, item in value.items()}
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return [_json_safe(item) for item in value]
+    if hasattr(value, "to_dict"):
+        converted = value.to_dict()
+        if isinstance(converted, Mapping):
+            return _json_safe(converted)
+    return str(value)

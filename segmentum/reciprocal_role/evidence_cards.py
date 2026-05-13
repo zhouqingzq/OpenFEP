@@ -34,7 +34,11 @@ class ReciprocalEvidenceCard:
         return self.to_dict()
 
 
-def evidence_cards_from_candidates(candidates: Sequence[InformationGainCandidate]) -> tuple[ReciprocalEvidenceCard, ...]:
+def evidence_cards_from_candidates(
+    candidates: Sequence[InformationGainCandidate],
+    *,
+    model: ReciprocalRoleModel | None = None,
+) -> tuple[ReciprocalEvidenceCard, ...]:
     cards: list[ReciprocalEvidenceCard] = []
     for candidate in candidates:
         if candidate.kind == "no_action" or candidate.blocked_by_safety:
@@ -53,7 +57,7 @@ def evidence_cards_from_candidates(candidates: Sequence[InformationGainCandidate
                 source="m12_2_reciprocal_role",
                 kind=kind,
                 content_summary=text,
-                confidence_band="low" if candidate.target_axis == "user_about_persona" else "medium",
+                confidence_band=_confidence_for_candidate(candidate, model=model),
                 priority=candidate.expected_gain_band,
                 evidence_refs=candidate.evidence_refs,
             )
@@ -177,3 +181,11 @@ def _lower_hint_priority(hint: ReplyPolicyHint) -> ReplyPolicyHint | None:
     if hint.priority == "medium":
         return replace(hint, priority="low")
     return None
+
+
+def _confidence_for_candidate(candidate: InformationGainCandidate, *, model: ReciprocalRoleModel | None) -> str:
+    if model is not None and candidate.claim_id:
+        for claim in model.all_claims():
+            if claim.claim_id == candidate.claim_id:
+                return claim.confidence_band
+    return "low" if candidate.target_axis == "user_about_persona" else "medium"

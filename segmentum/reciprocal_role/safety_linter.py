@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import Mapping, Sequence
+import re
+from typing import Sequence
 
 
 @dataclass(frozen=True)
@@ -38,7 +39,7 @@ SENSITIVE_TERMS = (
     "secret",
     "password",
     "private key",
-    "家人隐私",
+    "family privacy",
     "创伤",
     "性生活",
     "诊断",
@@ -72,7 +73,7 @@ def lint_candidate(candidate: object) -> tuple[SafetyFinding, ...]:
         for attr in ("plain_action", "target_axis", "kind", "consent_requirement")
     ).casefold()
     findings: list[SafetyFinding] = []
-    if any(term.casefold() in text for term in SENSITIVE_TERMS):
+    if any(_term_matches(term, text) for term in SENSITIVE_TERMS):
         findings.append(
             SafetyFinding(
                 candidate_id=candidate_id,
@@ -81,7 +82,7 @@ def lint_candidate(candidate: object) -> tuple[SafetyFinding, ...]:
                 reason="candidate asks for sensitive details not required by the current dialogue",
             )
         )
-    if any(term.casefold() in text for term in MANIPULATION_TERMS):
+    if any(_term_matches(term, text) for term in MANIPULATION_TERMS):
         findings.append(
             SafetyFinding(
                 candidate_id=candidate_id,
@@ -91,6 +92,17 @@ def lint_candidate(candidate: object) -> tuple[SafetyFinding, ...]:
             )
         )
     return tuple(findings)
+
+
+def _term_matches(term: str, text: str) -> bool:
+    folded = term.casefold()
+    if folded == "dependency" and any(phrase in text for phrase in ("dependency injection", "package dependency", "software dependency")):
+        return False
+    if folded == "secret" and any(phrase in text for phrase in ("secret recipe", "secretary")):
+        return False
+    if folded.isascii():
+        return bool(re.search(rf"(?<![a-z0-9_]){re.escape(folded)}(?![a-z0-9_])", text))
+    return folded in text
 
 
 def apply_safety_linter(candidates: Sequence[object]) -> tuple[tuple[object, ...], tuple[SafetyFinding, ...]]:

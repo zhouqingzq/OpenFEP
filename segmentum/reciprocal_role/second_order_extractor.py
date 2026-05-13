@@ -47,7 +47,7 @@ def build_extractor_prompt(extractor: str, snapshot: Mapping[str, object]) -> tu
         "extractor": extractor,
         "schema_keys": schema,
         "allowed_evidence_quote_refs": list(_allowed_refs(snapshot)),
-        "snapshot": _bounded_snapshot(snapshot),
+        "snapshot": bound_extractor_snapshot(snapshot),
     }
     return f"You are an M12.2 reciprocal-role extractor. {negative}", json.dumps(user_prompt, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
@@ -89,12 +89,16 @@ def validate_second_order_output(
 ) -> dict[str, object]:
     result = _validate_axis_payload("second_order", payload, snapshot=snapshot, hyperparams=hyperparams)
     claims = result.get("user_about_persona_claims", [])
-    has_direct_quote = any(_refs(row.get("evidence_refs")) for row in claims if isinstance(row, Mapping))
-    if claims and not has_direct_quote:
-        raise SecondOrderExtractorValidationError("second-order claims require direct quoted evidence")
     for row in claims if isinstance(claims, list) else []:
-        if isinstance(row, Mapping) and str(row.get("confidence_band")) == "high":
+        if not isinstance(row, Mapping):
+            continue
+        refs = _refs(row.get("evidence_refs"))
+        if not refs:
+            raise SecondOrderExtractorValidationError("each second-order claim requires direct quoted evidence")
+        if str(row.get("confidence_band")) == "high":
             raise SecondOrderExtractorValidationError("second-order extractor may not emit high confidence")
+        if str(row.get("confidence_band")) == "medium" and not refs:
+            raise SecondOrderExtractorValidationError("medium second-order claims require quoted evidence")
     if not claims and not bool(result.get("insufficient_evidence", False)):
         raise SecondOrderExtractorValidationError("second-order sparse output must mark insufficient_evidence")
     return result
@@ -165,13 +169,100 @@ def _validate_row(key: str, row: object, *, snapshot: Mapping[str, object], hype
     return result
 
 
-def _bounded_snapshot(snapshot: Mapping[str, object]) -> dict[str, object]:
-    out = dict(snapshot)
-    for key in ("transcript_quote_refs", "m11_readonly_summary", "m12_readonly_summary", "m121_readonly_summary"):
-        value = out.get(key)
-        if isinstance(value, list):
-            out[key] = value[: DEFAULT_HYPERPARAMS.max_transcript_quote_refs]
+def bound_extractor_snapshot(
+    snapshot: Mapping[str, object],
+    *,
+    hyperparams: M122Hyperparams = DEFAULT_HYPERPARAMS,
+) -> dict[str, object]:
+    out: dict[str, object] = {}
+    for key, value in snapshot.items():
+        if key == "current_turn_quotes" and isinstance(value, Mapping):
+            out[key] = {
+                str(quote_id): str(quote)[: hyperparams.max_summary_chars]
+                for quote_id, quote in sorted(value.items())[: hyperparams.max_readonly_summary_items]
+            }
+        elif key == "transcript_quote_refs" and isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            out[key] = [_json_safe(item, hyperparams=hyperparams, depth=1) for item in value[: hyperparams.max_transcript_quote_refs]]
+        elif key in {"m11_readonly_summary", "m12_readonly_summary", "m121_readonly_summary"}:
+            out[key] = _bounded_readonly_summary(key, value, hyperparams=hyperparams)
+        elif key == "model":
+            out[key] = _bounded_model_summary(value, hyperparams=hyperparams)
+        elif key == "allowed_evidence_quote_refs" and isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            out[key] = [str(item) for item in value[: hyperparams.max_transcript_quote_refs]]
+        elif isinstance(value, str):
+            out[key] = value[: hyperparams.max_summary_chars]
+        else:
+            out[key] = _json_safe(value, hyperparams=hyperparams, depth=1)
     return out
+
+
+def _bounded_readonly_summary(key: str, value: object, *, hyperparams: M122Hyperparams) -> dict[str, object]:
+    if not isinstance(value, Mapping):
+        return {}
+    if key == "m11_readonly_summary":
+        allowed = ("m11_evidence_cards", "prompt_safe_evidence_cards", "reply_policy_effects", "active_hypotheses")
+    elif key == "m12_readonly_summary":
+        allowed = ("entity_binding_context", "reply_policy", "prompt_safe_evidence_cards", "trigger_decision", "identity_state", "binding_confidence_band", "new_evidence_count")
+    else:
+        allowed = ("enabled", "trigger_decision", "prompt_safe_evidence_cards", "published_event_ids")
+    out: dict[str, object] = {}
+    for summary_key in allowed:
+        if summary_key in value:
+            out[summary_key] = _json_safe(value.get(summary_key), hyperparams=hyperparams, depth=2)
+        if len(out) >= hyperparams.max_readonly_summary_items:
+            break
+    if key == "m121_readonly_summary":
+        orchestrator = value.get("orchestrator_result")
+        if isinstance(orchestrator, Mapping):
+            report = orchestrator.get("report")
+            if isinstance(report, Mapping):
+                out["latest_report"] = {
+                    "report_status": str(report.get("report_status", ""))[: hyperparams.max_summary_chars],
+                    "report_id": str(report.get("report_id", ""))[: hyperparams.max_summary_chars],
+                }
+    return out
+
+
+def _bounded_model_summary(value: object, *, hyperparams: M122Hyperparams) -> dict[str, object]:
+    if not hasattr(value, "to_dict"):
+        return {}
+    raw = value.to_dict()
+    if not isinstance(raw, Mapping):
+        return {}
+    return {
+        "user_id": str(raw.get("user_id", ""))[: hyperparams.max_summary_chars],
+        "persona_label": str(raw.get("persona_label", ""))[: hyperparams.max_summary_chars],
+        "last_consolidated_turn_id": str(raw.get("last_consolidated_turn_id", ""))[: hyperparams.max_summary_chars],
+        "contradiction_cooldown": int(raw.get("contradiction_cooldown", 0) or 0),
+        "recent_probe_turn_ids": list(raw.get("recent_probe_turn_ids", []))[-hyperparams.second_order_high_recent_probe_turns:] if isinstance(raw.get("recent_probe_turn_ids", []), list) else [],
+        "open_group_count": len(raw.get("reciprocal_claim_groups", [])) if isinstance(raw.get("reciprocal_claim_groups"), list) else 0,
+        "claim_count": (
+            len(raw.get("persona_about_user_claims", [])) if isinstance(raw.get("persona_about_user_claims"), list) else 0
+        ) + (
+            len(raw.get("user_about_persona_claims", [])) if isinstance(raw.get("user_about_persona_claims"), list) else 0
+        ),
+    }
+
+
+def _json_safe(value: object, *, hyperparams: M122Hyperparams, depth: int) -> object:
+    if value is None or isinstance(value, (bool, int)):
+        return value
+    if isinstance(value, float):
+        return str(value)
+    if isinstance(value, str):
+        return value[: hyperparams.max_action_chars]
+    if isinstance(value, Mapping):
+        if depth <= 0:
+            return {"truncated": True, "keys": sorted(str(key) for key in value)[: hyperparams.max_readonly_summary_items]}
+        out: dict[str, object] = {}
+        for idx, key in enumerate(sorted(value, key=str)):
+            if idx >= hyperparams.max_readonly_summary_items:
+                break
+            out[str(key)] = _json_safe(value.get(key), hyperparams=hyperparams, depth=depth - 1)
+        return out
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return [_json_safe(item, hyperparams=hyperparams, depth=depth - 1) for item in value[: hyperparams.max_readonly_summary_items]]
+    return str(value)[: hyperparams.max_summary_chars]
 
 
 def _allowed_refs(snapshot: Mapping[str, object]) -> set[str]:

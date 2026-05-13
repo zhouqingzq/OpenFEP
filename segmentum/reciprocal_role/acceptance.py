@@ -24,6 +24,9 @@ from .reciprocal_model import InformationGainCandidate
 from .trigger_policy import TriggerPolicyInput
 
 
+FIXED_EVENT_TIMESTAMP = "1970-01-01T00:00:00Z"
+
+
 def build_m12_2_acceptance_artifact() -> dict[str, object]:
     disabled_state = M122RuntimeState.clean()
     disabled_next, disabled_result = run_m12_2_tick(
@@ -62,6 +65,7 @@ def build_m12_2_acceptance_artifact() -> dict[str, object]:
             explicit_user_request=True,
         ),
         config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+        event_timestamp=FIXED_EVENT_TIMESTAMP,
     )
     initial = M122RuntimeState(models_by_user={"acceptance-user": ReciprocalRoleModel.empty(user_id="acceptance-user")})
     phase_b_state, phase_b_result = run_m12_2_tick(initial, event_bus=bus_a, event_sequence_index=1, **replay_kwargs)
@@ -76,6 +80,14 @@ def build_m12_2_acceptance_artifact() -> dict[str, object]:
     )
     _allowed, safety_findings = apply_safety_linter([risky])
     model = phase_b_state.models_by_user["acceptance-user"]
+    before_contradiction = model
+    after_contradiction = mark_group_contradicted(
+        before_contradiction,
+        group_id="g_persona_consistency",
+        turn_id="t3",
+        turn_index=3,
+    )
+    contradiction_downgrade_trace = _contradiction_downgrade_trace(before_contradiction, after_contradiction)
     model = mark_group_contradicted(model, group_id="g_persona_consistency", turn_id="t3", turn_index=3)
     model = mark_group_contradicted(model, group_id="g_persona_consistency", turn_id="t4", turn_index=4)
     model = mark_group_contradicted(model, group_id="g_persona_consistency", turn_id="t5", turn_index=5)
@@ -107,6 +119,7 @@ def build_m12_2_acceptance_artifact() -> dict[str, object]:
             explicit_user_request=True,
         ),
         config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+        event_timestamp=FIXED_EVENT_TIMESTAMP,
     )
     artifact = {
         "artifact_id": "m12_2_acceptance_report",
@@ -157,10 +170,20 @@ def build_m12_2_acceptance_artifact() -> dict[str, object]:
                 "scenarios": {
                     "scenario_user_asks_how_persona_models_them": {"passed": bool(phase_b_result.reply_policy_hints)},
                     "scenario_user_tests_persona_memory_and_consistency": {"passed": any(hint.kind == "clarify_persona_stance" for hint in phase_b_result.reply_policy_hints)},
-                    "scenario_high_gain_question_blocked_by_privacy_boundary": {"passed": bool(safety_findings)},
+                    "scenario_high_gain_question_blocked_by_privacy_boundary": {
+                        "passed": bool(phase_b_result.safety_linter_findings)
+                        and "cand_high_private" not in {item["candidate_id"] for item in phase_b_state.models_by_user["acceptance-user"].to_dict()["high_gain_candidates"]},
+                        "blocked_candidate_ids": [finding["candidate_id"] for finding in phase_b_result.safety_linter_findings],
+                    },
                     "scenario_persona_clarifies_self_without_overclaiming": {"passed": all("may" in claim["claim_text_plain"] for claim in phase_b_state.models_by_user["acceptance-user"].to_dict()["user_about_persona_claims"])},
                     "scenario_sparse_transcript_no_second_order_overfit": {"passed": sparse_state.models_by_user["acceptance-user"].to_dict()["user_about_persona_claims"] == []},
-                    "scenario_contradicted_second_order_claim_is_downgraded": {"passed": True},
+                    "scenario_contradicted_second_order_claim_is_downgraded": {
+                        "passed": contradiction_downgrade_trace["before_confidence"] == "medium"
+                        and contradiction_downgrade_trace["after_confidence"] in {"low", "insufficient_evidence"}
+                        and contradiction_downgrade_trace["after_status"] == "contradicted"
+                        and contradiction_downgrade_trace["after_group_status"] == "contradicted",
+                        "trace": contradiction_downgrade_trace,
+                    },
                     "scenario_user_requests_bidirectional_free_energy_analysis": {
                         "passed": bool(meta_state.models_by_user["acceptance-user"].all_claims())
                         and all(not lint_text(card.content_summary, section="phase_c.meta_card") for card in meta_result.evidence_cards),
@@ -322,6 +345,22 @@ def _group_summary(result: object) -> dict[str, object]:
     return {
         "before": before.get("models_by_user", {}),
         "after": after.get("models_by_user", {}),
+    }
+
+
+def _contradiction_downgrade_trace(
+    before: ReciprocalRoleModel,
+    after: ReciprocalRoleModel,
+) -> dict[str, object]:
+    before_claim = next(claim for claim in before.user_about_persona_claims if claim.claim_id == "c_user_checks_consistency")
+    after_claim = next(claim for claim in after.user_about_persona_claims if claim.claim_id == "c_user_checks_consistency")
+    after_group = next(group for group in after.reciprocal_claim_groups if group.group_id == "g_persona_consistency")
+    return {
+        "claim_id": before_claim.claim_id,
+        "before_confidence": before_claim.confidence_band,
+        "after_confidence": after_claim.confidence_band,
+        "after_status": after_claim.status,
+        "after_group_status": after_group.status,
     }
 
 

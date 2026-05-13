@@ -47,6 +47,8 @@ class EvidenceRef:
 
     @classmethod
     def from_any(cls, value: object) -> "EvidenceRef":
+        if isinstance(value, EvidenceRef):
+            return value
         if isinstance(value, Mapping):
             return cls(ref_id=str(value.get("ref_id", value.get("evidence_quote_ref", ""))), ref_kind=str(value.get("ref_kind", "evidence_quote_ref")))
         return cls(ref_id=str(value or ""), ref_kind="evidence_quote_ref")
@@ -234,6 +236,7 @@ class ReciprocalRoleModel:
     safety_boundaries: tuple[str, ...] = ()
     contradiction_cooldown: int = 0
     contradiction_turn_ids: tuple[int, ...] = ()
+    recent_probe_turn_ids: tuple[str, ...] = ()
     last_consolidated_turn_id: str = ""
     version: str = DEFAULT_HYPERPARAMS.hyperparams_version
 
@@ -261,6 +264,7 @@ class ReciprocalRoleModel:
             "safety_boundaries": list(self.safety_boundaries),
             "contradiction_cooldown": self.contradiction_cooldown,
             "contradiction_turn_ids": list(self.contradiction_turn_ids),
+            "recent_probe_turn_ids": list(self.recent_probe_turn_ids),
             "last_consolidated_turn_id": self.last_consolidated_turn_id,
             "version": self.version,
         }
@@ -281,6 +285,7 @@ class ReciprocalRoleModel:
             safety_boundaries=_strings(payload.get("safety_boundaries")),
             contradiction_cooldown=int(payload.get("contradiction_cooldown", 0) or 0),
             contradiction_turn_ids=tuple(int(item) for item in _strings(payload.get("contradiction_turn_ids"))),
+            recent_probe_turn_ids=_strings(payload.get("recent_probe_turn_ids")),
             last_consolidated_turn_id=str(payload.get("last_consolidated_turn_id", "")),
             version=str(payload.get("version", DEFAULT_HYPERPARAMS.hyperparams_version)),
         )
@@ -304,7 +309,9 @@ def apply_model_patch(
     candidates: Sequence[InformationGainCandidate] = (),
     safety_boundaries: Sequence[str] = (),
     direct_probe_turn_ids: Sequence[str] = (),
+    observed_probe_turn_ids: Sequence[str] = (),
     contradiction_triggered: bool = False,
+    decay_cooldown: bool = True,
     hyperparams: M122Hyperparams = DEFAULT_HYPERPARAMS,
 ) -> ReciprocalRoleModel:
     groups = {group.group_id: group for group in model.reciprocal_claim_groups}
@@ -316,7 +323,7 @@ def apply_model_patch(
         _ensure_plain(claim)
         claim = _enforce_confidence_ceiling(claim, direct_probe_turn_ids=direct_probe_turn_ids, hyperparams=hyperparams)
         target = first_claims if claim.target_axis == "persona_about_user" else second_claims
-        target.append(claim)
+        _upsert_claim(target, claim)
         group = groups.get(claim.group_id) or ReciprocalClaimGroup(
             group_id=claim.group_id,
             target_axis=claim.target_axis,
@@ -331,34 +338,44 @@ def apply_model_patch(
     contradiction_turn_ids = tuple(
         turn for turn in model.contradiction_turn_ids if turn_index - turn <= hyperparams.cooldown_window_turns
     )
-    cooldown = max(0, model.contradiction_cooldown - 1)
+    cooldown = max(0, model.contradiction_cooldown - 1) if decay_cooldown else model.contradiction_cooldown
     if contradiction_triggered:
         contradiction_turn_ids = (*contradiction_turn_ids, turn_index)
         if len(contradiction_turn_ids) > hyperparams.cooldown_threshold:
             cooldown = hyperparams.cooldown_turns
             first_claims = [_downgrade_claim(claim) for claim in first_claims]
             second_claims = [_downgrade_claim(claim) for claim in second_claims]
+    recent_probe_turn_ids = _unique((*model.recent_probe_turn_ids, *observed_probe_turn_ids))[-hyperparams.second_order_high_recent_probe_turns:]
     return replace(
         model,
         persona_about_user_claims=tuple(first_claims[-hyperparams.max_claims_per_axis:]),
         user_about_persona_claims=tuple(second_claims[-hyperparams.max_claims_per_axis:]),
-        reciprocal_claim_groups=tuple(sorted(groups.values(), key=lambda item: item.group_id))[-hyperparams.max_groups_per_axis * 2:],
+        reciprocal_claim_groups=_trim_groups(groups.values(), hyperparams=hyperparams),
         unresolved_uncertainty_points=tuple((*model.unresolved_uncertainty_points, *uncertainty_points))[-hyperparams.max_uncertainty_points:],
         high_gain_candidates=tuple((*model.high_gain_candidates, *candidates))[-hyperparams.max_candidates:],
         safety_boundaries=_unique((*model.safety_boundaries, *safety_boundaries))[-hyperparams.max_boundaries:],
         contradiction_cooldown=cooldown,
         contradiction_turn_ids=contradiction_turn_ids,
+        recent_probe_turn_ids=recent_probe_turn_ids,
         last_consolidated_turn_id=turn_id if claims or uncertainty_points or candidates else model.last_consolidated_turn_id,
     )
 
 
-def promote_claim_with_evidence(model: ReciprocalRoleModel, *, group_id: str, claim_id: str, turn_id: str) -> ReciprocalRoleModel:
+def promote_claim_with_evidence(
+    model: ReciprocalRoleModel,
+    *,
+    group_id: str,
+    claim_id: str,
+    turn_id: str,
+    direct_probe_turn_ids: Sequence[str] = (),
+    hyperparams: M122Hyperparams = DEFAULT_HYPERPARAMS,
+) -> ReciprocalRoleModel:
     first: list[ReciprocalClaim] = []
     second: list[ReciprocalClaim] = []
     for claim in model.persona_about_user_claims:
-        first.append(_promoted_if_match(claim, claim_id=claim_id, turn_id=turn_id))
+        first.append(_promoted_if_match(claim, claim_id=claim_id, turn_id=turn_id, direct_probe_turn_ids=direct_probe_turn_ids, hyperparams=hyperparams))
     for claim in model.user_about_persona_claims:
-        second.append(_promoted_if_match(claim, claim_id=claim_id, turn_id=turn_id))
+        second.append(_promoted_if_match(claim, claim_id=claim_id, turn_id=turn_id, direct_probe_turn_ids=direct_probe_turn_ids, hyperparams=hyperparams))
     all_claims = first + second
     groups = tuple(
         _resolve_group_status(group, all_claims, turn_id=turn_id) if group.group_id == group_id else group
@@ -393,10 +410,18 @@ def mark_group_contradicted(
     )
 
 
-def _promoted_if_match(claim: ReciprocalClaim, *, claim_id: str, turn_id: str) -> ReciprocalClaim:
+def _promoted_if_match(
+    claim: ReciprocalClaim,
+    *,
+    claim_id: str,
+    turn_id: str,
+    direct_probe_turn_ids: Sequence[str],
+    hyperparams: M122Hyperparams,
+) -> ReciprocalClaim:
     if claim.claim_id != claim_id:
         return claim
-    return replace(claim, confidence_band=raise_band(claim.confidence_band), updated_turn_id=turn_id)
+    promoted = replace(claim, confidence_band=raise_band(claim.confidence_band), updated_turn_id=turn_id)
+    return _enforce_confidence_ceiling(promoted, direct_probe_turn_ids=direct_probe_turn_ids, hyperparams=hyperparams)
 
 
 def _resolve_group_status(group: ReciprocalClaimGroup, claims: Sequence[ReciprocalClaim], *, turn_id: str) -> ReciprocalClaimGroup:
@@ -450,6 +475,24 @@ def _downgrade_claim(claim: ReciprocalClaim) -> ReciprocalClaim:
         confidence_band=lower_band(claim.confidence_band),
         confidence_adjustment_reasons=(*claim.confidence_adjustment_reasons, "contradiction_cooldown_downgrade"),
     )
+
+
+def _upsert_claim(claims: list[ReciprocalClaim], claim: ReciprocalClaim) -> None:
+    for idx, existing in enumerate(claims):
+        if existing.claim_id == claim.claim_id:
+            claims[idx] = claim
+            return
+    claims.append(claim)
+
+
+def _trim_groups(groups: Sequence[ReciprocalClaimGroup], *, hyperparams: M122Hyperparams) -> tuple[ReciprocalClaimGroup, ...]:
+    ranked = sorted(groups, key=lambda item: (_turn_sort_key(item.updated_turn_id), item.group_id))
+    return tuple(ranked[-hyperparams.max_groups_per_axis * 2:])
+
+
+def _turn_sort_key(turn_id: str) -> tuple[int, str]:
+    digits = "".join(ch for ch in str(turn_id) if ch.isdigit())
+    return (int(digits) if digits else -1, str(turn_id))
 
 
 def _axis(value: object) -> TargetAxis:

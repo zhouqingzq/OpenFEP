@@ -57,11 +57,11 @@
   "phase_b": {
     "evidence_cards": [
       {
-        "confidence_band": "low",
+        "confidence_band": "medium",
         "content_summary": "Give a direct explanation of what is known, uncertain, and bounded.",
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -74,7 +74,7 @@
         "content_summary": "Ask which acceptance checks matter most right now.",
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -91,7 +91,7 @@
         "consent_requirement": "none",
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -110,7 +110,7 @@
         "consent_requirement": "none",
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -136,7 +136,7 @@
               "consent_requirement": "none",
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t2:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -155,7 +155,7 @@
               "consent_requirement": "none",
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t2:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -179,7 +179,7 @@
               "created_turn_id": "t2",
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t2:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -191,6 +191,9 @@
             }
           ],
           "persona_label": "hutao",
+          "recent_probe_turn_ids": [
+            "t2"
+          ],
           "reciprocal_claim_groups": [
             {
               "created_turn_id": "t2",
@@ -220,7 +223,7 @@
             {
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t2:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -235,7 +238,7 @@
             {
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t2:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -258,7 +261,7 @@
               "created_turn_id": "t2",
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t2:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -281,6 +284,7 @@
           "last_consolidated_turn_id": "",
           "persona_about_user_claims": [],
           "persona_label": "hutao",
+          "recent_probe_turn_ids": [],
           "reciprocal_claim_groups": [],
           "safety_boundaries": [],
           "unresolved_uncertainty_points": [],
@@ -304,7 +308,7 @@
                 "consent_requirement": "none",
                 "evidence_refs": [
                   {
-                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_id": "t2:q1",
                     "ref_kind": "evidence_quote_ref"
                   }
                 ],
@@ -323,7 +327,7 @@
                 "consent_requirement": "none",
                 "evidence_refs": [
                   {
-                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_id": "t2:q1",
                     "ref_kind": "evidence_quote_ref"
                   }
                 ],
@@ -347,7 +351,7 @@
                 "created_turn_id": "t2",
                 "evidence_refs": [
                   {
-                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_id": "t2:q1",
                     "ref_kind": "evidence_quote_ref"
                   }
                 ],
@@ -359,6 +363,9 @@
               }
             ],
             "persona_label": "hutao",
+            "recent_probe_turn_ids": [
+              "t2"
+            ],
             "reciprocal_claim_groups": [
               {
                 "created_turn_id": "t2",
@@ -388,7 +395,7 @@
               {
                 "evidence_refs": [
                   {
-                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_id": "t2:q1",
                     "ref_kind": "evidence_quote_ref"
                   }
                 ],
@@ -403,7 +410,7 @@
               {
                 "evidence_refs": [
                   {
-                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_id": "t2:q1",
                     "ref_kind": "evidence_quote_ref"
                   }
                 ],
@@ -426,7 +433,7 @@
                 "created_turn_id": "t2",
                 "evidence_refs": [
                   {
-                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_id": "t2:q1",
                     "ref_kind": "evidence_quote_ref"
                   }
                 ],
@@ -462,6 +469,7 @@
             "last_consolidated_turn_id": "",
             "persona_about_user_claims": [],
             "persona_label": "hutao",
+            "recent_probe_turn_ids": [],
             "reciprocal_claim_groups": [],
             "safety_boundaries": [],
             "unresolved_uncertainty_points": [],
@@ -656,7 +664,7 @@
         "claim_id": "c_user_checks_consistency",
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -672,7 +680,7 @@
         "claim_id": "",
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -712,7 +720,7 @@
       {
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -727,7 +735,7 @@
       {
         "evidence_refs": [
           {
-            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_id": "t2:q1",
             "ref_kind": "evidence_quote_ref"
           }
         ],
@@ -783,9 +791,19 @@
           ]
         },
         "scenario_contradicted_second_order_claim_is_downgraded": {
-          "passed": true
+          "passed": true,
+          "trace": {
+            "after_confidence": "low",
+            "after_group_status": "contradicted",
+            "after_status": "contradicted",
+            "before_confidence": "medium",
+            "claim_id": "c_user_checks_consistency"
+          }
         },
         "scenario_high_gain_question_blocked_by_privacy_boundary": {
+          "blocked_candidate_ids": [
+            "cand_high_private"
+          ],
           "passed": true
         },
         "scenario_persona_clarifies_self_without_overclaiming": {
@@ -800,11 +818,11 @@
         "scenario_user_requests_bidirectional_free_energy_analysis": {
           "cards": [
             {
-              "confidence_band": "low",
+              "confidence_band": "medium",
               "content_summary": "Give a direct explanation of what is known, uncertain, and bounded.",
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t7:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t7:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],
@@ -817,7 +835,7 @@
               "content_summary": "Ask which acceptance checks matter most right now.",
               "evidence_refs": [
                 {
-                  "ref_id": "EvidenceRef(ref_id='t7:q1', ref_kind='evidence_quote_ref')",
+                  "ref_id": "t7:q1",
                   "ref_kind": "evidence_quote_ref"
                 }
               ],

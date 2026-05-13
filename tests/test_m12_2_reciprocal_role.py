@@ -26,6 +26,7 @@ from segmentum.reciprocal_role import (
     run_m12_2_tick,
     validate_second_order_output,
 )
+from segmentum.reciprocal_role.second_order_extractor import bound_extractor_snapshot
 
 
 def _refs():
@@ -477,3 +478,157 @@ def test_second_order_schema_rejects_high_confidence_and_unknown_refs():
     bad_ref["user_about_persona_claims"][0]["evidence_refs"] = ["missing:q9"]
     with pytest.raises(SecondOrderExtractorValidationError):
         validate_second_order_output(bad_ref, snapshot=snapshot)
+
+
+def test_m12_2_evidence_refs_are_not_repr_polluted_after_runtime_conversion():
+    state, result = run_m12_2_tick(
+        M122RuntimeState(models_by_user={"u1": ReciprocalRoleModel.empty(user_id="u1")}),
+        user_id="u1",
+        turn_id="t1",
+        turn_index=3,
+        hour_bucket=1,
+        user_text="Can you explain whether you remember me consistently?",
+        current_turn_quotes={"q1": "Can you explain whether you remember me consistently?"},
+        transcript_quote_refs=[{"turn_id": "t1", "quote_id": "q1"}],
+        extractors=_extractors(),
+        trigger_input=_trigger(),
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+    ref_ids = _collect_ref_ids({"state": state.to_dict(), "result": result.to_dict()})
+    assert ref_ids
+    assert all("EvidenceRef(" not in ref_id for ref_id in ref_ids)
+    assert all(ref_id.count(":") == 1 and all(part for part in ref_id.split(":", 1)) for ref_id in ref_ids)
+
+
+def test_m12_2_safety_linter_uses_term_boundaries_for_common_false_positives():
+    candidates = [
+        InformationGainCandidate("secretary", "ask_question", "persona_about_user", "Ask whether the secretary sent the agenda.", "medium", "low"),
+        InformationGainCandidate("dependency", "ask_question", "persona_about_user", "Ask whether dependency injection is acceptable in this code.", "medium", "low"),
+    ]
+    allowed, findings = apply_safety_linter(candidates)
+    assert [candidate.candidate_id for candidate in allowed] == ["secretary", "dependency"]
+    assert findings == ()
+
+
+def test_m12_2_plain_language_linter_blocks_chinese_prompt_examples_and_allows_prior_to():
+    for text in ("对你的预测", "更新预测", "对你的模型", "建模你"):
+        assert lint_text(text, section="reply"), text
+    assert not lint_text("This happened prior to the meeting.", section="reply")
+
+
+def test_m12_2_bounded_snapshot_drops_full_reports_and_truncates_raw_quotes():
+    long_text = "x" * 400
+    snapshot = {
+        "turn_id": "t9",
+        "current_turn_quotes": {"q1": long_text},
+        "transcript_quote_refs": [{"turn_id": f"t{i}", "quote_id": "q"} for i in range(20)],
+        "m11_readonly_summary": {"active_hypotheses": [{"id": i, "text": long_text} for i in range(20)], "full_memory_dump": long_text},
+        "m12_readonly_summary": {"identity_state": "ready", "full_prompt": long_text},
+        "m121_readonly_summary": {"orchestrator_result": {"report": {"report_status": "ready", "full_report": long_text}}},
+        "model": ReciprocalRoleModel.empty(user_id="u1"),
+    }
+    bounded = bound_extractor_snapshot(snapshot)
+    encoded = json.dumps(bounded, ensure_ascii=False, sort_keys=True)
+    assert "full_memory_dump" not in encoded
+    assert "full_prompt" not in encoded
+    assert "full_report" not in encoded
+    assert bounded["current_turn_quotes"]["q1"] == long_text[:260]
+    assert len(bounded["transcript_quote_refs"]) == 12
+
+
+def test_m12_2_default_contradiction_trigger_marks_group_and_records_cooldown():
+    model = ReciprocalRoleModel.empty(user_id="u1")
+    group = ReciprocalClaimGroup("g", "user_about_persona", "persona_consistency", ("c",))
+    claim = ReciprocalClaim(
+        "c",
+        "g",
+        "user_about_persona",
+        "internal",
+        "The user may be checking consistency.",
+        confidence_band="medium",
+        evidence_refs=(EvidenceRef("t1:q1"),),
+    )
+    model = apply_model_patch(model, turn_id="t1", turn_index=1, group_updates=[group], claims=[claim], direct_probe_turn_ids=("t1",))
+    state, result = run_m12_2_tick(
+        M122RuntimeState(models_by_user={"u1": model}),
+        user_id="u1",
+        turn_id="t2",
+        turn_index=4,
+        hour_bucket=1,
+        user_text="Are you sure you are not lying about what you remember?",
+        current_turn_quotes={"q1": "Are you sure you are not lying about what you remember?"},
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+    next_model = state.models_by_user["u1"]
+    assert result.trigger_decision.kind == "contradiction_or_misread"
+    assert next_model.contradiction_turn_ids == (4,)
+    assert next_model.user_about_persona_claims[0].status == "contradicted"
+
+
+def test_second_order_schema_rejects_each_claim_without_evidence_refs():
+    snapshot = {"turn_id": "t1", "current_turn_quotes": {"q1": "Do you remember me?"}, "allowed_evidence_quote_refs": ["t1:q1"]}
+    payload = _second_output()
+    payload["user_about_persona_claims"].append(
+        {
+            "claim_id": "c_missing_refs",
+            "group_id": "g_persona_consistency",
+            "topic_label": "missing_refs",
+            "claim_text_internal": "User is probing.",
+            "claim_text_plain": "The user may be probing.",
+            "evidence_refs": [],
+            "confidence_band": "low",
+            "uncertainty_band": "high",
+            "status": "inferred_hypothesis",
+        }
+    )
+    with pytest.raises(SecondOrderExtractorValidationError):
+        validate_second_order_output(payload, snapshot=snapshot)
+
+
+def test_m12_2_promote_claim_with_evidence_cannot_bypass_second_order_ceiling():
+    model = ReciprocalRoleModel.empty(user_id="u1")
+    group = ReciprocalClaimGroup("g", "user_about_persona", "persona_consistency", ("c",))
+    claim = ReciprocalClaim(
+        "c",
+        "g",
+        "user_about_persona",
+        "internal",
+        "The user may be checking consistency.",
+        confidence_band="medium",
+        evidence_refs=(EvidenceRef("t1:q1"),),
+    )
+    model = apply_model_patch(model, turn_id="t1", group_updates=[group], claims=[claim], direct_probe_turn_ids=("t1",))
+    promoted = promote_claim_with_evidence(model, group_id="g", claim_id="c", turn_id="t9")
+    assert promoted.user_about_persona_claims[0].confidence_band == "medium"
+
+
+def test_m12_2_claim_patch_upserts_by_claim_id():
+    model = ReciprocalRoleModel.empty(user_id="u1")
+    claim = ReciprocalClaim("c", "g1", "persona_about_user", "internal", "The user may want review.", confidence_band="low", evidence_refs=_refs())
+    model = apply_model_patch(model, turn_id="t1", claims=[claim])
+    replacement = ReciprocalClaim("c", "g1", "persona_about_user", "internal", "The user may want implementation review.", confidence_band="medium", evidence_refs=_refs())
+    model = apply_model_patch(model, turn_id="t2", claims=[replacement])
+    assert [item.claim_id for item in model.persona_about_user_claims] == ["c"]
+    assert model.persona_about_user_claims[0].claim_text_plain == "The user may want implementation review."
+
+
+def test_m12_2_mvp_loop_passes_cognitive_event_bus_to_m12_2_runtime():
+    text = Path("segmentum/dialogue/runtime/mvp_loop.py").read_text(encoding="utf-8")
+    assert "event_bus=m12_cognitive_bus" in text
+    assert "m12_2_event_start" in text
+
+
+def _collect_ref_ids(value):
+    if isinstance(value, dict):
+        out = []
+        if "ref_id" in value:
+            out.append(str(value["ref_id"]))
+        for child in value.values():
+            out.extend(_collect_ref_ids(child))
+        return out
+    if isinstance(value, list):
+        out = []
+        for child in value:
+            out.extend(_collect_ref_ids(child))
+        return out
+    return []

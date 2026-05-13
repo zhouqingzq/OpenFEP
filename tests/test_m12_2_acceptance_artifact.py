@@ -26,3 +26,23 @@ def test_m12_2_acceptance_artifact_exists_matches_builder_and_covers_phases():
     }
     assert required <= set(scenarios)
     assert all(row["passed"] for row in scenarios.values())
+    ref_ids = _collect_ref_ids(saved)
+    assert ref_ids
+    assert all("EvidenceRef(" not in ref_id for ref_id in ref_ids)
+    assert all(ref_id.count(":") == 1 and all(part for part in ref_id.split(":", 1)) for ref_id in ref_ids)
+
+
+def _collect_ref_ids(value):
+    if isinstance(value, dict):
+        out = []
+        if "ref_id" in value:
+            out.append(str(value["ref_id"]))
+        for child in value.values():
+            out.extend(_collect_ref_ids(child))
+        return out
+    if isinstance(value, list):
+        out = []
+        for child in value:
+            out.extend(_collect_ref_ids(child))
+        return out
+    return []

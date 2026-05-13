@@ -3875,6 +3875,7 @@ class MVPDialogueRuntime:
 
                 return _extract
 
+            m12_2_event_start = len(m12_cognitive_bus.events())
             m12_2_state, m12_2_turn = run_m12_2_tick(
                 m12_2_state,
                 user_id=user_id,
@@ -3895,9 +3896,17 @@ class MVPDialogueRuntime:
                 persona_id=self.persona_name or "default",
                 cycle=turn_index,
                 event_sequence_index=2,
+                event_bus=m12_cognitive_bus,
             )
             _save_m12_2_state(state, m12_2_state=m12_2_state)
             m12_2_result_dict = m12_2_turn.to_dict()
+            for seq_idx, ev in enumerate(m12_cognitive_bus.events()[m12_2_event_start:], start=m12_2_event_start):
+                bus.append({
+                    "type": ev.event_type,
+                    "turn_index": turn_index,
+                    "sequence": seq_idx,
+                    "cognitive_event": ev.to_dict(),
+                })
             _merge_m12_2_into_memory_guidance(
                 memory_dynamics,
                 m12_2_result=m12_2_result_dict,

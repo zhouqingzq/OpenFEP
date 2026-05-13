@@ -14,7 +14,6 @@ ALWAYS_BLOCKED = (
     "expected information gain",
     "information gain",
     "bayesian",
-    "posterior",
     "prior update",
     "likelihood function",
     "latent state",
@@ -27,9 +26,10 @@ ALWAYS_BLOCKED = (
     "期望自由能",
     "信息增益",
     "贝叶斯",
-    "后验",
-    "先验",
-    "似然",
+    "后验更新",
+    "先验更新",
+    "似然函数",
+    "潜在状态",
     "隐变量",
     "主动推断",
     "预测系统",
@@ -101,7 +101,8 @@ def _contextual_english_findings(source: str, *, section: str) -> tuple[PlainLan
         (r"\bprediction(s)?\s+(was|were|is|are|failed|updated|output|score)\b", "prediction", "technical_prediction_usage"),
         (r"\b(user|persona|role|second-order|internal)\s+model\b", "model", "technical_model_usage"),
         (r"\bmodel\s+of\s+(the\s+)?(user|persona|you|me|interlocutor)\b", "model", "technical_model_usage"),
-        (r"\b(prior|posterior)\b", "prior/posterior", "technical_probability_usage"),
+        (r"\bposterior\b", "posterior", "technical_probability_usage"),
+        (r"\bprior\b(?!\s+to\b)", "prior", "technical_probability_usage"),
     )
     for pattern, token, rule in patterns:
         match = re.search(pattern, folded)
@@ -113,9 +114,13 @@ def _contextual_english_findings(source: str, *, section: str) -> tuple[PlainLan
 def _contextual_chinese_findings(source: str, *, section: str) -> tuple[PlainLanguageFinding, ...]:
     findings: list[PlainLanguageFinding] = []
     patterns = (
-        (r"(用户|人格|角色|内部).{0,4}模型", "模型", "technical_model_usage"),
-        (r"模型.{0,4}(用户|人格|角色|你|我)", "模型", "technical_model_usage"),
-        (r"(系统|内部).{0,4}预测", "预测", "technical_prediction_usage"),
+        (r"(用户|人格|角色|内部|你|我|对你|对你的|对我).{0,4}模型", "模型", "technical_model_usage"),
+        (r"模型.{0,4}(用户|人格|角色|你|我|对方)", "模型", "technical_model_usage"),
+        (r"建模.{0,4}(你|我|用户|人格|角色)", "建模", "technical_model_usage"),
+        (r"(系统|内部|用户|人格|角色|你|我|对你|对你的|对我).{0,4}预测", "预测", "technical_prediction_usage"),
+        (r"更新.{0,4}预测", "预测", "technical_prediction_usage"),
+        (r"预测.{0,4}(输出|结果|错误|更新|分数)", "预测", "technical_prediction_usage"),
+        (r"(先验|后验)(?!之前)", "先验/后验", "technical_probability_usage"),
     )
     for pattern, token, rule in patterns:
         match = re.search(pattern, source)
