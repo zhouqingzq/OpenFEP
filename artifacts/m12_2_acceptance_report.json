@@ -31,12 +31,6 @@
           "rule": "always_blocked_jargon",
           "section": "phase_a",
           "token": "information gain"
-        },
-        {
-          "raw_quote": "information gain from a user model",
-          "rule": "technical_model_usage",
-          "section": "phase_a",
-          "token": "model"
         }
       ],
       "ordinary_allowed": []

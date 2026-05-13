@@ -10,6 +10,7 @@ from segmentum.reciprocal_role import (
     InformationGainCandidate,
     M122RuntimeConfig,
     M122RuntimeState,
+    PlainLanguageFinding,
     ReciprocalClaim,
     ReciprocalClaimGroup,
     ReciprocalRoleModel,
@@ -251,7 +252,7 @@ def test_m12_2_blocks_manipulative_or_over_intimate_candidates():
 
 def test_m12_2_plain_language_linter_blocks_jargon_tokens():
     findings = lint_text("This has expected information gain and a user model.", section="card")
-    assert {finding.rule for finding in findings} >= {"always_blocked_jargon", "technical_model_usage"}
+    assert {finding.rule for finding in findings} == {"always_blocked_jargon"}
 
 
 def test_m12_2_plain_language_linter_allows_ordinary_use_of_predict_and_model():
@@ -510,10 +511,36 @@ def test_m12_2_safety_linter_uses_term_boundaries_for_common_false_positives():
     assert findings == ()
 
 
-def test_m12_2_plain_language_linter_blocks_chinese_prompt_examples_and_allows_prior_to():
-    for text in ("对你的预测", "更新预测", "对你的模型", "建模你"):
-        assert lint_text(text, section="reply"), text
+def test_m12_2_plain_language_linter_leaves_internal_explanation_to_observer_hook():
+    for text in ("对你的预测", "更新预测", "对你的模型", "建模你", "your prediction was updated", "user model"):
+        assert not lint_text(text, section="reply"), text
+
+    def observer(text: str, section: str):
+        if "对你的模型" not in text:
+            return ()
+        return (
+            PlainLanguageFinding(
+                token="observer",
+                section=section,
+                rule="observer_internal_explanation",
+                raw_quote=text,
+            ),
+        )
+
+    findings = lint_text("对你的模型", section="reply", observer=observer)
+    assert [finding.rule for finding in findings] == ["observer_internal_explanation"]
     assert not lint_text("This happened prior to the meeting.", section="reply")
+
+
+def test_m12_2_plain_language_linter_allows_ordinary_chinese_model_and_prediction_uses():
+    allowed = (
+        "我的模型车放在桌上。",
+        "你的模型号是多少？",
+        "我预测这周会下雨。",
+        "我猜周末可能会去爬山。",
+    )
+    for text in allowed:
+        assert not lint_text(text, section="reply"), text
 
 
 def test_m12_2_bounded_snapshot_drops_full_reports_and_truncates_raw_quotes():

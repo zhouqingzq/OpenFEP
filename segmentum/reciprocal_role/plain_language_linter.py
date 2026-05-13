@@ -1,10 +1,13 @@
-"""Context-sensitive plain-language linter for M12.2 user-facing surfaces."""
+"""Plain-language linter for M12.2 user-facing surfaces.
+
+This layer only blocks explicit jargon. Higher-order observers can be plugged
+in to judge whether a phrase is exposing internal reasoning in context.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-import re
-from typing import Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 
 ALWAYS_BLOCKED = (
@@ -62,7 +65,15 @@ class PlainLanguageFinding:
         )
 
 
-def lint_text(text: str, *, section: str = "unknown") -> tuple[PlainLanguageFinding, ...]:
+PlainLanguageObserver = Callable[[str, str], Sequence[PlainLanguageFinding]]
+
+
+def lint_text(
+    text: str,
+    *,
+    section: str = "unknown",
+    observer: PlainLanguageObserver | None = None,
+) -> tuple[PlainLanguageFinding, ...]:
     source = str(text or "")
     folded = source.casefold()
     findings: list[PlainLanguageFinding] = []
@@ -70,8 +81,8 @@ def lint_text(text: str, *, section: str = "unknown") -> tuple[PlainLanguageFind
         idx = folded.find(token.casefold())
         if idx >= 0:
             findings.append(_finding(source, idx, token, section, "always_blocked_jargon"))
-    findings.extend(_contextual_english_findings(source, section=section))
-    findings.extend(_contextual_chinese_findings(source, section=section))
+    if observer is not None:
+        findings.extend(observer(source, section))
     return tuple(_dedupe(findings))
 
 
@@ -91,42 +102,6 @@ def lint_user_facing_fields(rows: Sequence[Mapping[str, object]] | Mapping[str, 
 
 def passes_plain_language(text: str) -> bool:
     return not lint_text(text)
-
-
-def _contextual_english_findings(source: str, *, section: str) -> tuple[PlainLanguageFinding, ...]:
-    findings: list[PlainLanguageFinding] = []
-    folded = source.casefold()
-    patterns = (
-        (r"\b(the|this|that|system|user|persona|my|your)\s+prediction(s)?\b", "prediction", "technical_prediction_usage"),
-        (r"\bprediction(s)?\s+(was|were|is|are|failed|updated|output|score)\b", "prediction", "technical_prediction_usage"),
-        (r"\b(user|persona|role|second-order|internal)\s+model\b", "model", "technical_model_usage"),
-        (r"\bmodel\s+of\s+(the\s+)?(user|persona|you|me|interlocutor)\b", "model", "technical_model_usage"),
-        (r"\bposterior\b", "posterior", "technical_probability_usage"),
-        (r"\bprior\b(?!\s+to\b)", "prior", "technical_probability_usage"),
-    )
-    for pattern, token, rule in patterns:
-        match = re.search(pattern, folded)
-        if match:
-            findings.append(_finding(source, match.start(), token, section, rule))
-    return tuple(findings)
-
-
-def _contextual_chinese_findings(source: str, *, section: str) -> tuple[PlainLanguageFinding, ...]:
-    findings: list[PlainLanguageFinding] = []
-    patterns = (
-        (r"(用户|人格|角色|内部|你|我|对你|对你的|对我).{0,4}模型", "模型", "technical_model_usage"),
-        (r"模型.{0,4}(用户|人格|角色|你|我|对方)", "模型", "technical_model_usage"),
-        (r"建模.{0,4}(你|我|用户|人格|角色)", "建模", "technical_model_usage"),
-        (r"(系统|内部|用户|人格|角色|你|我|对你|对你的|对我).{0,4}预测", "预测", "technical_prediction_usage"),
-        (r"更新.{0,4}预测", "预测", "technical_prediction_usage"),
-        (r"预测.{0,4}(输出|结果|错误|更新|分数)", "预测", "technical_prediction_usage"),
-        (r"(先验|后验)(?!之前)", "先验/后验", "technical_probability_usage"),
-    )
-    for pattern, token, rule in patterns:
-        match = re.search(pattern, source)
-        if match:
-            findings.append(_finding(source, match.start(), token, section, rule))
-    return tuple(findings)
 
 
 def _finding(source: str, idx: int, token: str, section: str, rule: str) -> PlainLanguageFinding:
