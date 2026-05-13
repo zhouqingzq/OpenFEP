@@ -2,15 +2,6 @@
   "deterministic_replay": true,
   "evidence_cards": [
     {
-      "confidence_band": "high",
-      "content_summary": "Usually seeks concrete proof before trusting a direction.",
-      "memory_class": "inferred_hypothesis",
-      "memory_id": "m12_1:u_accept:step_1",
-      "permitted_use": "cautious_hypothesis",
-      "section_kind": "step_1",
-      "why_retrieved": "active_personality_profile"
-    },
-    {
       "confidence_band": "med",
       "content_summary": "Moves from doubt to trust when checks are visible.",
       "memory_class": "inferred_hypothesis",
@@ -56,21 +47,30 @@
       "why_retrieved": "active_personality_profile"
     },
     {
+      "confidence_band": "med",
+      "content_summary": "clear proof lowers resistance",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_8",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_8",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "This predictive system checks completion.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_1",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_1",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
       "confidence_band": "low",
       "content_summary": "I trust what survives checks.",
       "memory_class": "inferred_hypothesis",
       "memory_id": "m12_1:u_accept:step_4",
       "permitted_use": "cautious_hypothesis",
       "section_kind": "step_4",
-      "why_retrieved": "active_personality_profile"
-    },
-    {
-      "confidence_band": "low",
-      "content_summary": "insufficient_evidence",
-      "memory_class": "inferred_hypothesis",
-      "memory_id": "m12_1:u_accept:step_8",
-      "permitted_use": "strategy_only",
-      "section_kind": "step_8",
       "why_retrieved": "active_personality_profile"
     }
   ],
@@ -91,38 +91,11 @@
         "step_7": "t4",
         "step_8": "t4"
       },
-      "section_last_insufficient": {
-        "step_8": {
-          "claim_state": "insufficient_evidence",
-          "confidence_band": "low",
-          "evidence_refs": [
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
-            }
-          ],
-          "hyperparams_version": "m12.1.v1",
-          "last_updated_turn_id": "t4",
-          "reason": "growth hints need more stable evidence",
-          "status": "insufficient_evidence"
-        }
-      },
+      "section_last_insufficient": {},
       "step_1_summary": {
         "claim_state": "inferred_hypothesis",
-        "confidence_band": "high",
+        "confidence_band": "low",
         "evidence_refs": [
-          {
-            "quote_id": "q1",
-            "turn_id": "t1"
-          },
-          {
-            "quote_id": "q2",
-            "turn_id": "t2"
-          },
-          {
-            "quote_id": "q3",
-            "turn_id": "t3"
-          },
           {
             "quote_id": "q4",
             "turn_id": "t4"
@@ -131,7 +104,7 @@
         "hyperparams_version": "m12.1.v1",
         "last_updated_turn_id": "t4",
         "status": "inferred_hypothesis",
-        "summary": "Usually seeks concrete proof before trusting a direction."
+        "summary": "This predictive system checks completion."
       },
       "step_2_evidence": {
         "claim_state": "inferred_hypothesis",
@@ -612,18 +585,44 @@
         "status": "inferred_hypothesis"
       },
       "step_8_growth_hints": {
-        "claim_state": "insufficient_evidence",
-        "confidence_band": "low",
+        "claim_state": "inferred_hypothesis",
+        "communication_styles_likely_accepted": [
+          "show changed files and targeted tests"
+        ],
+        "communication_styles_that_trigger_defenses": [
+          "asserting readiness without evidence"
+        ],
+        "confidence_band": "med",
         "evidence_refs": [
+          {
+            "quote_id": "q1",
+            "turn_id": "t1"
+          },
+          {
+            "quote_id": "q2",
+            "turn_id": "t2"
+          },
+          {
+            "quote_id": "q3",
+            "turn_id": "t3"
+          },
           {
             "quote_id": "q4",
             "turn_id": "t4"
           }
         ],
+        "fragile_spots": [
+          "thin tests and vague completion claims"
+        ],
         "hyperparams_version": "m12.1.v1",
         "last_updated_turn_id": "t4",
-        "reason": "growth hints need more stable evidence",
-        "status": "insufficient_evidence"
+        "soft_spots": [
+          "clear proof lowers resistance"
+        ],
+        "stable_parts": [
+          "will keep asking for evidence"
+        ],
+        "status": "inferred_hypothesis"
       },
       "user_id": "u_accept"
     },
@@ -632,19 +631,9 @@
       "hyperparams_version": "m12.1.v1",
       "last_full_report_status": "draft",
       "last_full_report_turn_id": "",
-      "section_freshness": {
-        "step_1": "t3"
-      },
+      "section_freshness": {},
       "section_last_insufficient": {},
-      "step_1_summary": {
-        "claim_state": "inferred_hypothesis",
-        "confidence_band": "med",
-        "evidence_refs": [],
-        "hyperparams_version": "m12.1.v1",
-        "last_updated_turn_id": "t3",
-        "status": "inferred_hypothesis",
-        "summary": "Usually seeks concrete proof before trusting a direction."
-      },
+      "step_1_summary": null,
       "step_2_evidence": null,
       "step_3_prediction_system_account": null,
       "step_4_core_beliefs": null,
@@ -660,27 +649,15 @@
       "hyperparams_version": "m12.1.v1",
       "linter_findings": [],
       "prior_report_id": "",
-      "report_id": "m12_1_report:134f67221cf76ca1",
+      "report_id": "m12_1_report:d7ab481a16db5acc",
       "report_status": "ready",
       "sections": [
         {
-          "confidence_band": "high",
+          "confidence_band": "low",
           "content": {
             "claim_state": "inferred_hypothesis",
-            "confidence_band": "high",
+            "confidence_band": "low",
             "evidence_refs": [
-              {
-                "quote_id": "q1",
-                "turn_id": "t1"
-              },
-              {
-                "quote_id": "q2",
-                "turn_id": "t2"
-              },
-              {
-                "quote_id": "q3",
-                "turn_id": "t3"
-              },
               {
                 "quote_id": "q4",
                 "turn_id": "t4"
@@ -689,9 +666,9 @@
             "hyperparams_version": "m12.1.v1",
             "last_updated_turn_id": "t4",
             "status": "inferred_hypothesis",
-            "summary": "Usually seeks concrete proof before trusting a direction."
+            "summary": "This predictive system checks completion."
           },
-          "rendered": "Usually seeks concrete proof before trusting a direction.",
+          "rendered": "This predictive system checks completion.",
           "report_section": "step_1",
           "section_kind": "step_1",
           "status": "inferred_hypothesis"
@@ -1217,25 +1194,51 @@
           "status": "inferred_hypothesis"
         },
         {
-          "confidence_band": "low",
+          "confidence_band": "med",
           "content": {
-            "claim_state": "insufficient_evidence",
-            "confidence_band": "low",
+            "claim_state": "inferred_hypothesis",
+            "communication_styles_likely_accepted": [
+              "show changed files and targeted tests"
+            ],
+            "communication_styles_that_trigger_defenses": [
+              "asserting readiness without evidence"
+            ],
+            "confidence_band": "med",
             "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "t1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "t2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "t3"
+              },
               {
                 "quote_id": "q4",
                 "turn_id": "t4"
               }
             ],
+            "fragile_spots": [
+              "thin tests and vague completion claims"
+            ],
             "hyperparams_version": "m12.1.v1",
             "last_updated_turn_id": "t4",
-            "reason": "growth hints need more stable evidence",
-            "status": "insufficient_evidence"
+            "soft_spots": [
+              "clear proof lowers resistance"
+            ],
+            "stable_parts": [
+              "will keep asking for evidence"
+            ],
+            "status": "inferred_hypothesis"
           },
-          "rendered": "insufficient_evidence",
+          "rendered": "will keep asking for evidence | thin tests and vague completion claims | clear proof lowers resistance | show changed files and targeted tests | asserting readiness without evidence",
           "report_section": "step_8",
           "section_kind": "step_8",
-          "status": "insufficient_evidence"
+          "status": "inferred_hypothesis"
         }
       ],
       "trigger_kind": "explicit_request",
@@ -1244,15 +1247,6 @@
     }
   ],
   "prompt_safe_evidence_cards": [
-    {
-      "confidence_band": "high",
-      "content_summary": "Usually seeks concrete proof before trusting a direction.",
-      "memory_class": "inferred_hypothesis",
-      "memory_id": "m12_1:u_accept:step_1",
-      "permitted_use": "cautious_hypothesis",
-      "section_kind": "step_1",
-      "why_retrieved": "active_personality_profile"
-    },
     {
       "confidence_band": "med",
       "content_summary": "Moves from doubt to trust when checks are visible.",
@@ -1299,6 +1293,24 @@
       "why_retrieved": "active_personality_profile"
     },
     {
+      "confidence_band": "med",
+      "content_summary": "clear proof lowers resistance",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_8",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_8",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "This predictive system checks completion.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_1",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_1",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
       "confidence_band": "low",
       "content_summary": "I trust what survives checks.",
       "memory_class": "inferred_hypothesis",
@@ -1306,27 +1318,15 @@
       "permitted_use": "cautious_hypothesis",
       "section_kind": "step_4",
       "why_retrieved": "active_personality_profile"
-    },
-    {
-      "confidence_band": "low",
-      "content_summary": "insufficient_evidence",
-      "memory_class": "inferred_hypothesis",
-      "memory_id": "m12_1:u_accept:step_8",
-      "permitted_use": "strategy_only",
-      "section_kind": "step_8",
-      "why_retrieved": "active_personality_profile"
     }
   ],
   "step_extractor_outputs": {
     "1": {
-      "confidence_band": "high",
+      "confidence_band": "low",
       "evidence_quote_refs": [
-        "t1:q1",
-        "t2:q2",
-        "t3:q3",
         "t4:q4"
       ],
-      "summary": "Usually seeks concrete proof before trusting a direction."
+      "summary": "This predictive system checks completion."
     },
     "2": {
       "evidence_items": [
@@ -1479,11 +1479,28 @@
       "trigger_event": "a milestone is claimed complete"
     },
     "8": {
+      "communication_styles_likely_accepted": [
+        "show changed files and targeted tests"
+      ],
+      "communication_styles_that_trigger_defenses": [
+        "asserting readiness without evidence"
+      ],
+      "confidence_band": "high",
       "evidence_quote_refs": [
+        "t1:q1",
+        "t2:q2",
+        "t3:q3",
         "t4:q4"
       ],
-      "reason": "growth hints need more stable evidence",
-      "status": "insufficient_evidence"
+      "fragile_spots": [
+        "thin tests and vague completion claims"
+      ],
+      "soft_spots": [
+        "clear proof lowers resistance"
+      ],
+      "stable_parts": [
+        "will keep asking for evidence"
+      ]
     }
   },
   "trace": {
@@ -1503,38 +1520,11 @@
         "step_7": "t4",
         "step_8": "t4"
       },
-      "section_last_insufficient": {
-        "step_8": {
-          "claim_state": "insufficient_evidence",
-          "confidence_band": "low",
-          "evidence_refs": [
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
-            }
-          ],
-          "hyperparams_version": "m12.1.v1",
-          "last_updated_turn_id": "t4",
-          "reason": "growth hints need more stable evidence",
-          "status": "insufficient_evidence"
-        }
-      },
+      "section_last_insufficient": {},
       "step_1_summary": {
         "claim_state": "inferred_hypothesis",
-        "confidence_band": "high",
+        "confidence_band": "low",
         "evidence_refs": [
-          {
-            "quote_id": "q1",
-            "turn_id": "t1"
-          },
-          {
-            "quote_id": "q2",
-            "turn_id": "t2"
-          },
-          {
-            "quote_id": "q3",
-            "turn_id": "t3"
-          },
           {
             "quote_id": "q4",
             "turn_id": "t4"
@@ -1543,7 +1533,7 @@
         "hyperparams_version": "m12.1.v1",
         "last_updated_turn_id": "t4",
         "status": "inferred_hypothesis",
-        "summary": "Usually seeks concrete proof before trusting a direction."
+        "summary": "This predictive system checks completion."
       },
       "step_2_evidence": {
         "claim_state": "inferred_hypothesis",
@@ -2024,18 +2014,44 @@
         "status": "inferred_hypothesis"
       },
       "step_8_growth_hints": {
-        "claim_state": "insufficient_evidence",
-        "confidence_band": "low",
+        "claim_state": "inferred_hypothesis",
+        "communication_styles_likely_accepted": [
+          "show changed files and targeted tests"
+        ],
+        "communication_styles_that_trigger_defenses": [
+          "asserting readiness without evidence"
+        ],
+        "confidence_band": "med",
         "evidence_refs": [
+          {
+            "quote_id": "q1",
+            "turn_id": "t1"
+          },
+          {
+            "quote_id": "q2",
+            "turn_id": "t2"
+          },
+          {
+            "quote_id": "q3",
+            "turn_id": "t3"
+          },
           {
             "quote_id": "q4",
             "turn_id": "t4"
           }
         ],
+        "fragile_spots": [
+          "thin tests and vague completion claims"
+        ],
         "hyperparams_version": "m12.1.v1",
         "last_updated_turn_id": "t4",
-        "reason": "growth hints need more stable evidence",
-        "status": "insufficient_evidence"
+        "soft_spots": [
+          "clear proof lowers resistance"
+        ],
+        "stable_parts": [
+          "will keep asking for evidence"
+        ],
+        "status": "inferred_hypothesis"
       },
       "user_id": "u_accept"
     },
@@ -2044,19 +2060,9 @@
       "hyperparams_version": "m12.1.v1",
       "last_full_report_status": "draft",
       "last_full_report_turn_id": "",
-      "section_freshness": {
-        "step_1": "t3"
-      },
+      "section_freshness": {},
       "section_last_insufficient": {},
-      "step_1_summary": {
-        "claim_state": "inferred_hypothesis",
-        "confidence_band": "med",
-        "evidence_refs": [],
-        "hyperparams_version": "m12.1.v1",
-        "last_updated_turn_id": "t3",
-        "status": "inferred_hypothesis",
-        "summary": "Usually seeks concrete proof before trusting a direction."
-      },
+      "step_1_summary": null,
       "step_2_evidence": null,
       "step_3_prediction_system_account": null,
       "step_4_core_beliefs": null,
@@ -2070,27 +2076,15 @@
       "hyperparams_version": "m12.1.v1",
       "linter_findings": [],
       "prior_report_id": "",
-      "report_id": "m12_1_report:134f67221cf76ca1",
+      "report_id": "m12_1_report:d7ab481a16db5acc",
       "report_status": "ready",
       "sections": [
         {
-          "confidence_band": "high",
+          "confidence_band": "low",
           "content": {
             "claim_state": "inferred_hypothesis",
-            "confidence_band": "high",
+            "confidence_band": "low",
             "evidence_refs": [
-              {
-                "quote_id": "q1",
-                "turn_id": "t1"
-              },
-              {
-                "quote_id": "q2",
-                "turn_id": "t2"
-              },
-              {
-                "quote_id": "q3",
-                "turn_id": "t3"
-              },
               {
                 "quote_id": "q4",
                 "turn_id": "t4"
@@ -2099,9 +2093,9 @@
             "hyperparams_version": "m12.1.v1",
             "last_updated_turn_id": "t4",
             "status": "inferred_hypothesis",
-            "summary": "Usually seeks concrete proof before trusting a direction."
+            "summary": "This predictive system checks completion."
           },
-          "rendered": "Usually seeks concrete proof before trusting a direction.",
+          "rendered": "This predictive system checks completion.",
           "report_section": "step_1",
           "section_kind": "step_1",
           "status": "inferred_hypothesis"
@@ -2627,25 +2621,51 @@
           "status": "inferred_hypothesis"
         },
         {
-          "confidence_band": "low",
+          "confidence_band": "med",
           "content": {
-            "claim_state": "insufficient_evidence",
-            "confidence_band": "low",
+            "claim_state": "inferred_hypothesis",
+            "communication_styles_likely_accepted": [
+              "show changed files and targeted tests"
+            ],
+            "communication_styles_that_trigger_defenses": [
+              "asserting readiness without evidence"
+            ],
+            "confidence_band": "med",
             "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "t1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "t2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "t3"
+              },
               {
                 "quote_id": "q4",
                 "turn_id": "t4"
               }
             ],
+            "fragile_spots": [
+              "thin tests and vague completion claims"
+            ],
             "hyperparams_version": "m12.1.v1",
             "last_updated_turn_id": "t4",
-            "reason": "growth hints need more stable evidence",
-            "status": "insufficient_evidence"
+            "soft_spots": [
+              "clear proof lowers resistance"
+            ],
+            "stable_parts": [
+              "will keep asking for evidence"
+            ],
+            "status": "inferred_hypothesis"
           },
-          "rendered": "insufficient_evidence",
+          "rendered": "will keep asking for evidence | thin tests and vague completion claims | clear proof lowers resistance | show changed files and targeted tests | asserting readiness without evidence",
           "report_section": "step_8",
           "section_kind": "step_8",
-          "status": "insufficient_evidence"
+          "status": "inferred_hypothesis"
         }
       ],
       "trigger_kind": "explicit_request",
@@ -2668,15 +2688,7 @@
           "q4": "I want actual checks before accepting the milestone."
         },
         "display_name": "Acceptance User",
-        "existing_section": {
-          "claim_state": "inferred_hypothesis",
-          "confidence_band": "med",
-          "evidence_refs": [],
-          "hyperparams_version": "m12.1.v1",
-          "last_updated_turn_id": "t3",
-          "status": "inferred_hypothesis",
-          "summary": "Usually seeks concrete proof before trusting a direction."
-        },
+        "existing_section": null,
         "hyperparams_version": "m12.1.v1",
         "m11_readonly_summary": {
           "active_hypotheses": [
@@ -2704,9 +2716,7 @@
           ],
           "strangeness_band": ""
         },
-        "profile_section_freshness": {
-          "step_1": "t3"
-        },
+        "profile_section_freshness": {},
         "step": 1,
         "transcript_quote_refs": [
           {
@@ -3229,14 +3239,11 @@
     ],
     "step_extractor_outputs": [
       {
-        "confidence_band": "high",
+        "confidence_band": "low",
         "evidence_quote_refs": [
-          "t1:q1",
-          "t2:q2",
-          "t3:q3",
           "t4:q4"
         ],
-        "summary": "Usually seeks concrete proof before trusting a direction."
+        "summary": "This predictive system checks completion."
       },
       {
         "evidence_items": [
@@ -3389,11 +3396,28 @@
         "trigger_event": "a milestone is claimed complete"
       },
       {
+        "communication_styles_likely_accepted": [
+          "show changed files and targeted tests"
+        ],
+        "communication_styles_that_trigger_defenses": [
+          "asserting readiness without evidence"
+        ],
+        "confidence_band": "high",
         "evidence_quote_refs": [
+          "t1:q1",
+          "t2:q2",
+          "t3:q3",
           "t4:q4"
         ],
-        "reason": "growth hints need more stable evidence",
-        "status": "insufficient_evidence"
+        "fragile_spots": [
+          "thin tests and vague completion claims"
+        ],
+        "soft_spots": [
+          "clear proof lowers resistance"
+        ],
+        "stable_parts": [
+          "will keep asking for evidence"
+        ]
       }
     ],
     "step_statuses": [
@@ -3404,7 +3428,7 @@
       "updated",
       "updated",
       "updated",
-      "insufficient_evidence"
+      "updated"
     ],
     "trigger_kind": "explicit_request"
   },

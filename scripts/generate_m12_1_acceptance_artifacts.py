@@ -168,7 +168,7 @@ def _run_scenario(name: str, outputs: dict[int, dict[str, object]], *, profile: 
         "linter_findings": [finding.to_dict() for finding in result.report.linter_findings],
         "evidence_cards": [card.to_dict() for card in cards],
         "prompt_safe_evidence_cards": list(prompt_safe_cards(cards)),
-        "linter_pass_fail_decisions": {
+        "validation_decisions": {
             "report_status": result.report.report_status,
             "ready_channel_returned": assemble_personality_report(result.profile, turn_id="t4", trigger_kind=trigger.kind).report_status == "ready",
         },
@@ -229,9 +229,9 @@ def main() -> None:
     scenarios = {
         "rich_evidence_full_report": _run_scenario("rich_evidence_full_report", rich, profile=_profile_with_prior_med()),
         "sparse_evidence_insufficient_at_step_8": _run_scenario("sparse_evidence_insufficient_at_step_8", sparse, profile=_profile_with_prior_med()),
-        "engineering_jargon_caught_by_linter": _run_scenario("engineering_jargon_caught_by_linter", jargon),
-        "dsm_label_caught_by_linter": _run_scenario("dsm_label_caught_by_linter", dsm),
-        "moral_verdict_caught_by_linter": _run_scenario("moral_verdict_caught_by_linter", moral),
+        "engineering_jargon_saved_as_analysis": _run_scenario("engineering_jargon_saved_as_analysis", jargon),
+        "dsm_label_saved_as_analysis": _run_scenario("dsm_label_saved_as_analysis", dsm),
+        "moral_verdict_saved_as_analysis": _run_scenario("moral_verdict_saved_as_analysis", moral),
         "roleplay_does_not_destabilise_profile": _run_scenario("roleplay_does_not_destabilise_profile", roleplay, profile=roleplay_profile),
     }
     audit = {
@@ -261,8 +261,8 @@ def _scenario_threshold(name: str) -> str:
         return "ready report, all eight sections non-empty, at least one high confidence section"
     if name == "sparse_evidence_insufficient_at_step_8":
         return "Step 8 records insufficient_evidence without blocking report assembly"
-    if "linter" in name or "label" in name or "moral" in name:
-        return "report_status linter_failed and no evidence cards emitted"
+    if name in {"engineering_jargon_saved_as_analysis", "dsm_label_saved_as_analysis", "moral_verdict_saved_as_analysis"}:
+        return "keyword-like text is saved as structured analysis and evidence cards are emitted"
     return "prior ready profile sections are not replaced by roleplay-only sparse output"
 
 
@@ -281,8 +281,8 @@ def _scenario_passed(name: str, row: Mapping[str, object]) -> bool:
         )
     if name == "sparse_evidence_insufficient_at_step_8":
         return report["report_status"] == "ready" and report["sections"][7]["status"] == "insufficient_evidence"
-    if name in {"engineering_jargon_caught_by_linter", "dsm_label_caught_by_linter", "moral_verdict_caught_by_linter"}:
-        return report["report_status"] == "linter_failed" and cards == []
+    if name in {"engineering_jargon_saved_as_analysis", "dsm_label_saved_as_analysis", "moral_verdict_saved_as_analysis"}:
+        return report["report_status"] == "ready" and bool(cards)
     if name == "roleplay_does_not_destabilise_profile":
         after = row["personality_profiles_before_after"]["after"]
         before = row["personality_profiles_before_after"]["before"]

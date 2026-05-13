@@ -20,7 +20,7 @@ from .hyperparams import (
 )
 
 ConfidenceBand = Literal["low", "med", "high"]
-ReportStatus = Literal["draft", "linter_failed", "ready", "stale", "superseded"]
+ReportStatus = Literal["draft", "linter_failed", "validation_failed", "ready", "stale", "superseded"]
 SectionKind = Literal[
     "step_1",
     "step_2",
@@ -664,7 +664,7 @@ def _claim_state(value: object) -> ClaimState:
 
 def _report_status(value: object) -> ReportStatus:
     text = str(value or "draft")
-    if text in {"draft", "linter_failed", "ready", "stale", "superseded"}:
+    if text in {"draft", "linter_failed", "validation_failed", "ready", "stale", "superseded"}:
         return text  # type: ignore[return-value]
     return "draft"
 

@@ -148,7 +148,7 @@ def test_single_snippet_does_not_promote_confidence_to_high():
     assert band != "high"
 
 
-def test_report_assembled_deterministically_and_ready_channel_blocks_failed_report():
+def test_report_assembled_deterministically_and_keyword_text_does_not_block_report():
     profile = PersonalityProfile(user_id="u1")
     result = run_personality_orchestrator(
         profile,
@@ -172,8 +172,10 @@ def test_report_assembled_deterministically_and_ready_channel_blocks_failed_repo
         base_snapshot=_base_snapshot(),
         extractors=_extractors(bad_outputs),
     )
-    assert bad.report.report_status == "linter_failed"
-    assert ready_report_or_none(bad.report) is None
+    assert bad.report.report_status == "ready"
+    assert ready_report_or_none(bad.report) is not None
+    assert bad.profile.step_1_summary is not None
+    assert bad.trace.step_statuses[0] == "updated"
 
 
 def test_step_4_each_belief_has_evidence_refs_and_step_7_has_exactly_six_stages():
@@ -194,13 +196,13 @@ def test_step_4_each_belief_has_evidence_refs_and_step_7_has_exactly_six_stages(
     assert len(loop.stages) == 6
 
 
-def test_step_extractor_rejects_float_unknown_field_jargon_and_unknown_quote():
+def test_step_extractor_rejects_float_unknown_field_and_unknown_quote_but_not_keywords():
     with pytest.raises(StepExtractorValidationError):
         validate_step_output(1, {"summary": "Careful", "evidence_quote_refs": ["t1:q1"], "confidence_band": 0.7}, snapshot=_base_snapshot())
     with pytest.raises(StepExtractorValidationError):
         validate_step_output(1, {"summary": "Careful", "evidence_quote_refs": ["t1:q1"], "confidence_band": "low", "extra": "x"}, snapshot=_base_snapshot())
-    with pytest.raises(StepExtractorValidationError):
-        validate_step_output(1, {"summary": "Uses a model of people.", "evidence_quote_refs": ["t1:q1"], "confidence_band": "low"}, snapshot=_base_snapshot())
+    accepted = validate_step_output(1, {"summary": "Uses a model of people.", "evidence_quote_refs": ["t1:q1"], "confidence_band": "low"}, snapshot=_base_snapshot())
+    assert accepted["summary"] == "Uses a model of people."
     with pytest.raises(StepExtractorValidationError):
         validate_step_output(1, {"summary": "Careful.", "evidence_quote_refs": ["missing:q9"], "confidence_band": "low"}, snapshot=_base_snapshot())
 
@@ -240,7 +242,7 @@ def test_trigger_policy_rules_are_pure_and_respect_caps_and_sparse_suspension():
     assert decide_trigger(explicit).kind == "explicit_request"
 
 
-def test_evidence_cards_never_emit_for_linter_failed_and_step4_or_7_insufficient_is_strategy_only():
+def test_evidence_cards_emit_keyword_text_and_step4_or_7_insufficient_is_strategy_only():
     result = run_personality_orchestrator(
         PersonalityProfile(user_id="u1"),
         turn_id="t3",
@@ -250,8 +252,17 @@ def test_evidence_cards_never_emit_for_linter_failed_and_step4_or_7_insufficient
     )
     cards = evidence_cards_from_personality_profile(result.profile, report_status="ready")
     assert cards
-    assert all("model" not in card.content_summary.casefold() for card in cards)
-    assert evidence_cards_from_personality_profile(result.profile, report_status="linter_failed") == ()
+    keyword_outputs = _rich_step_outputs()
+    keyword_outputs[1] = {"summary": "Uses a model of people.", "evidence_quote_refs": ["t1:q1"], "confidence_band": "low"}
+    keyword_result = run_personality_orchestrator(
+        PersonalityProfile(user_id="u1"),
+        turn_id="t3",
+        trigger_kind="explicit_request",
+        base_snapshot=_base_snapshot(),
+        extractors=_extractors(keyword_outputs),
+    )
+    keyword_cards = evidence_cards_from_personality_profile(keyword_result.profile, report_status=keyword_result.report.report_status)
+    assert any("model" in card.content_summary.casefold() for card in keyword_cards)
 
     sparse_outputs = _rich_step_outputs()
     sparse_outputs[4] = {"status": "insufficient_evidence", "reason": "not enough stable belief evidence"}
@@ -369,9 +380,9 @@ def test_acceptance_artifact_exists_and_covers_required_scenarios():
     required = {
         "rich_evidence_full_report",
         "sparse_evidence_insufficient_at_step_8",
-        "engineering_jargon_caught_by_linter",
-        "dsm_label_caught_by_linter",
-        "moral_verdict_caught_by_linter",
+        "engineering_jargon_saved_as_analysis",
+        "dsm_label_saved_as_analysis",
+        "moral_verdict_saved_as_analysis",
         "roleplay_does_not_destabilise_profile",
     }
     assert required <= set(payload["calibration_audit_report"]["scenarios"])

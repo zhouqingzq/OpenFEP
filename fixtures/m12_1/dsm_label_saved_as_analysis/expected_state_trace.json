@@ -1,23 +1,85 @@
 {
   "deterministic_replay": true,
-  "evidence_cards": [],
-  "linter_findings": [
+  "evidence_cards": [
     {
-      "raw_quote": "you should just trust it",
-      "rule": "moral_or_chicken_soup",
-      "section": "step_8.content_summary",
-      "token": "should"
+      "confidence_band": "med",
+      "content_summary": "Usually seeks concrete proof before trusting a direction.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_1",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_1",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "Moves from doubt to trust when checks are visible.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_2",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_2",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "checks whether the claim was earned",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_3",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_3",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "asks for direct verification before moving forward",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_5",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_5",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "presses for proof, then relaxes when the proof holds",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_6",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_6",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "a milestone is claimed complete",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_7",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_7",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "clear proof lowers resistance",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_8",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_8",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "I trust what survives checks.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_4",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_4",
+      "why_retrieved": "active_personality_profile"
     }
   ],
-  "linter_pass_fail_decisions": {
-    "ready_channel_returned": true,
-    "report_status": "linter_failed"
-  },
+  "linter_findings": [],
   "personality_profiles_before_after": {
     "after": {
       "display_name_hint": "Acceptance User",
       "hyperparams_version": "m12.1.v1",
-      "last_full_report_status": "linter_failed",
+      "last_full_report_status": "ready",
       "last_full_report_turn_id": "t4",
       "section_freshness": {
         "step_1": "t4",
@@ -29,17 +91,7 @@
         "step_7": "t4",
         "step_8": "t4"
       },
-      "section_last_insufficient": {
-        "step_8": {
-          "claim_state": "insufficient_evidence",
-          "confidence_band": "low",
-          "evidence_refs": [],
-          "hyperparams_version": "m12.1.v1",
-          "last_updated_turn_id": "t4",
-          "reason": "linter_or_schema_failed:StepExtractorValidationError",
-          "status": "insufficient_evidence"
-        }
-      },
+      "section_last_insufficient": {},
       "step_1_summary": {
         "claim_state": "inferred_hypothesis",
         "confidence_band": "med",
@@ -179,25 +231,13 @@
       "step_4_core_beliefs": {
         "about_others": {
           "claim_state": "inferred_hypothesis",
-          "confidence_band": "med",
-          "content_summary": "Others can overstate readiness.",
+          "confidence_band": "low",
+          "content_summary": "Others seem narcissistic personality driven.",
           "core_belief": "about_others",
           "evidence_refs": [
             {
-              "quote_id": "q1",
-              "turn_id": "t1"
-            },
-            {
               "quote_id": "q2",
               "turn_id": "t2"
-            },
-            {
-              "quote_id": "q3",
-              "turn_id": "t3"
-            },
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
             }
           ]
         },
@@ -214,38 +254,18 @@
             {
               "quote_id": "q2",
               "turn_id": "t2"
-            },
-            {
-              "quote_id": "q3",
-              "turn_id": "t3"
-            },
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
             }
           ]
         },
         "about_world": {
           "claim_state": "inferred_hypothesis",
-          "confidence_band": "med",
+          "confidence_band": "low",
           "content_summary": "Strong work is inspectable.",
           "core_belief": "about_world",
           "evidence_refs": [
             {
-              "quote_id": "q1",
-              "turn_id": "t1"
-            },
-            {
-              "quote_id": "q2",
-              "turn_id": "t2"
-            },
-            {
               "quote_id": "q3",
               "turn_id": "t3"
-            },
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
             }
           ]
         },
@@ -545,13 +565,44 @@
         "status": "inferred_hypothesis"
       },
       "step_8_growth_hints": {
-        "claim_state": "insufficient_evidence",
-        "confidence_band": "low",
-        "evidence_refs": [],
+        "claim_state": "inferred_hypothesis",
+        "communication_styles_likely_accepted": [
+          "show changed files and targeted tests"
+        ],
+        "communication_styles_that_trigger_defenses": [
+          "asserting readiness without evidence"
+        ],
+        "confidence_band": "med",
+        "evidence_refs": [
+          {
+            "quote_id": "q1",
+            "turn_id": "t1"
+          },
+          {
+            "quote_id": "q2",
+            "turn_id": "t2"
+          },
+          {
+            "quote_id": "q3",
+            "turn_id": "t3"
+          },
+          {
+            "quote_id": "q4",
+            "turn_id": "t4"
+          }
+        ],
+        "fragile_spots": [
+          "thin tests and vague completion claims"
+        ],
         "hyperparams_version": "m12.1.v1",
         "last_updated_turn_id": "t4",
-        "reason": "linter_or_schema_failed:StepExtractorValidationError",
-        "status": "insufficient_evidence"
+        "soft_spots": [
+          "clear proof lowers resistance"
+        ],
+        "stable_parts": [
+          "will keep asking for evidence"
+        ],
+        "status": "inferred_hypothesis"
       },
       "user_id": "u_accept"
     },
@@ -576,17 +627,10 @@
   "personality_reports": [
     {
       "hyperparams_version": "m12.1.v1",
-      "linter_findings": [
-        {
-          "raw_quote": "you should just trust it",
-          "rule": "moral_or_chicken_soup",
-          "section": "step_8.content_summary",
-          "token": "should"
-        }
-      ],
+      "linter_findings": [],
       "prior_report_id": "",
-      "report_id": "m12_1_report:07ad23346971d7ab",
-      "report_status": "linter_failed",
+      "report_id": "m12_1_report:14cf750a9446275e",
+      "report_status": "ready",
       "sections": [
         {
           "confidence_band": "med",
@@ -750,25 +794,13 @@
           "content": {
             "about_others": {
               "claim_state": "inferred_hypothesis",
-              "confidence_band": "med",
-              "content_summary": "Others can overstate readiness.",
+              "confidence_band": "low",
+              "content_summary": "Others seem narcissistic personality driven.",
               "core_belief": "about_others",
               "evidence_refs": [
                 {
-                  "quote_id": "q1",
-                  "turn_id": "t1"
-                },
-                {
                   "quote_id": "q2",
                   "turn_id": "t2"
-                },
-                {
-                  "quote_id": "q3",
-                  "turn_id": "t3"
-                },
-                {
-                  "quote_id": "q4",
-                  "turn_id": "t4"
                 }
               ]
             },
@@ -785,38 +817,18 @@
                 {
                   "quote_id": "q2",
                   "turn_id": "t2"
-                },
-                {
-                  "quote_id": "q3",
-                  "turn_id": "t3"
-                },
-                {
-                  "quote_id": "q4",
-                  "turn_id": "t4"
                 }
               ]
             },
             "about_world": {
               "claim_state": "inferred_hypothesis",
-              "confidence_band": "med",
+              "confidence_band": "low",
               "content_summary": "Strong work is inspectable.",
               "core_belief": "about_world",
               "evidence_refs": [
                 {
-                  "quote_id": "q1",
-                  "turn_id": "t1"
-                },
-                {
-                  "quote_id": "q2",
-                  "turn_id": "t2"
-                },
-                {
                   "quote_id": "q3",
                   "turn_id": "t3"
-                },
-                {
-                  "quote_id": "q4",
-                  "turn_id": "t4"
                 }
               ]
             },
@@ -827,7 +839,7 @@
             "last_updated_turn_id": "t4",
             "status": "inferred_hypothesis"
           },
-          "rendered": "I trust what survives checks. | Others can overstate readiness. | Strong work is inspectable.",
+          "rendered": "I trust what survives checks. | Others seem narcissistic personality driven. | Strong work is inspectable.",
           "report_section": "step_4",
           "section_kind": "step_4",
           "status": "inferred_hypothesis"
@@ -1142,20 +1154,51 @@
           "status": "inferred_hypothesis"
         },
         {
-          "confidence_band": "low",
+          "confidence_band": "med",
           "content": {
-            "claim_state": "insufficient_evidence",
-            "confidence_band": "low",
-            "evidence_refs": [],
+            "claim_state": "inferred_hypothesis",
+            "communication_styles_likely_accepted": [
+              "show changed files and targeted tests"
+            ],
+            "communication_styles_that_trigger_defenses": [
+              "asserting readiness without evidence"
+            ],
+            "confidence_band": "med",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "t1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "t2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "t3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "t4"
+              }
+            ],
+            "fragile_spots": [
+              "thin tests and vague completion claims"
+            ],
             "hyperparams_version": "m12.1.v1",
             "last_updated_turn_id": "t4",
-            "reason": "linter_or_schema_failed:StepExtractorValidationError",
-            "status": "insufficient_evidence"
+            "soft_spots": [
+              "clear proof lowers resistance"
+            ],
+            "stable_parts": [
+              "will keep asking for evidence"
+            ],
+            "status": "inferred_hypothesis"
           },
-          "rendered": "insufficient_evidence",
+          "rendered": "will keep asking for evidence | thin tests and vague completion claims | clear proof lowers resistance | show changed files and targeted tests | asserting readiness without evidence",
           "report_section": "step_8",
           "section_kind": "step_8",
-          "status": "insufficient_evidence"
+          "status": "inferred_hypothesis"
         }
       ],
       "trigger_kind": "explicit_request",
@@ -1163,7 +1206,80 @@
       "user_id": "u_accept"
     }
   ],
-  "prompt_safe_evidence_cards": [],
+  "prompt_safe_evidence_cards": [
+    {
+      "confidence_band": "med",
+      "content_summary": "Usually seeks concrete proof before trusting a direction.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_1",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_1",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "Moves from doubt to trust when checks are visible.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_2",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_2",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "checks whether the claim was earned",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_3",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_3",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "asks for direct verification before moving forward",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_5",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_5",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "presses for proof, then relaxes when the proof holds",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_6",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_6",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "a milestone is claimed complete",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_7",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_7",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "med",
+      "content_summary": "clear proof lowers resistance",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_8",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_8",
+      "why_retrieved": "active_personality_profile"
+    },
+    {
+      "confidence_band": "low",
+      "content_summary": "I trust what survives checks.",
+      "memory_class": "inferred_hypothesis",
+      "memory_id": "m12_1:u_accept:step_4",
+      "permitted_use": "cautious_hypothesis",
+      "section_kind": "step_4",
+      "why_retrieved": "active_personality_profile"
+    }
+  ],
   "step_extractor_outputs": {
     "1": {
       "confidence_band": "high",
@@ -1220,33 +1336,25 @@
     },
     "4": {
       "about_others": {
-        "confidence_band": "high",
-        "content_summary": "Others can overstate readiness.",
+        "confidence_band": "low",
+        "content_summary": "Others seem narcissistic personality driven.",
         "evidence_quote_refs": [
-          "t1:q1",
-          "t2:q2",
-          "t3:q3",
-          "t4:q4"
+          "t2:q2"
         ]
       },
       "about_self": {
-        "confidence_band": "high",
+        "confidence_band": "med",
         "content_summary": "I trust what survives checks.",
         "evidence_quote_refs": [
           "t1:q1",
-          "t2:q2",
-          "t3:q3",
-          "t4:q4"
+          "t2:q2"
         ]
       },
       "about_world": {
-        "confidence_band": "high",
+        "confidence_band": "low",
         "content_summary": "Strong work is inspectable.",
         "evidence_quote_refs": [
-          "t1:q1",
-          "t2:q2",
-          "t3:q3",
-          "t4:q4"
+          "t3:q3"
         ]
       }
     },
@@ -1327,21 +1435,23 @@
     },
     "8": {
       "communication_styles_likely_accepted": [
-        "show tests"
+        "show changed files and targeted tests"
       ],
       "communication_styles_that_trigger_defenses": [
-        "you should just trust it"
+        "asserting readiness without evidence"
       ],
-      "confidence_band": "med",
+      "confidence_band": "high",
       "evidence_quote_refs": [
         "t1:q1",
-        "t2:q2"
+        "t2:q2",
+        "t3:q3",
+        "t4:q4"
       ],
       "fragile_spots": [
-        "thin tests"
+        "thin tests and vague completion claims"
       ],
       "soft_spots": [
-        "clear proof helps"
+        "clear proof lowers resistance"
       ],
       "stable_parts": [
         "will keep asking for evidence"
@@ -1349,11 +1459,11 @@
     }
   },
   "trace": {
-    "aborted_reason": "linter_failed:moral_or_chicken_soup:should:step_8.content_summary",
+    "aborted_reason": "",
     "profile_after": {
       "display_name_hint": "Acceptance User",
       "hyperparams_version": "m12.1.v1",
-      "last_full_report_status": "linter_failed",
+      "last_full_report_status": "ready",
       "last_full_report_turn_id": "t4",
       "section_freshness": {
         "step_1": "t4",
@@ -1365,17 +1475,7 @@
         "step_7": "t4",
         "step_8": "t4"
       },
-      "section_last_insufficient": {
-        "step_8": {
-          "claim_state": "insufficient_evidence",
-          "confidence_band": "low",
-          "evidence_refs": [],
-          "hyperparams_version": "m12.1.v1",
-          "last_updated_turn_id": "t4",
-          "reason": "linter_or_schema_failed:StepExtractorValidationError",
-          "status": "insufficient_evidence"
-        }
-      },
+      "section_last_insufficient": {},
       "step_1_summary": {
         "claim_state": "inferred_hypothesis",
         "confidence_band": "med",
@@ -1515,25 +1615,13 @@
       "step_4_core_beliefs": {
         "about_others": {
           "claim_state": "inferred_hypothesis",
-          "confidence_band": "med",
-          "content_summary": "Others can overstate readiness.",
+          "confidence_band": "low",
+          "content_summary": "Others seem narcissistic personality driven.",
           "core_belief": "about_others",
           "evidence_refs": [
             {
-              "quote_id": "q1",
-              "turn_id": "t1"
-            },
-            {
               "quote_id": "q2",
               "turn_id": "t2"
-            },
-            {
-              "quote_id": "q3",
-              "turn_id": "t3"
-            },
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
             }
           ]
         },
@@ -1550,38 +1638,18 @@
             {
               "quote_id": "q2",
               "turn_id": "t2"
-            },
-            {
-              "quote_id": "q3",
-              "turn_id": "t3"
-            },
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
             }
           ]
         },
         "about_world": {
           "claim_state": "inferred_hypothesis",
-          "confidence_band": "med",
+          "confidence_band": "low",
           "content_summary": "Strong work is inspectable.",
           "core_belief": "about_world",
           "evidence_refs": [
             {
-              "quote_id": "q1",
-              "turn_id": "t1"
-            },
-            {
-              "quote_id": "q2",
-              "turn_id": "t2"
-            },
-            {
               "quote_id": "q3",
               "turn_id": "t3"
-            },
-            {
-              "quote_id": "q4",
-              "turn_id": "t4"
             }
           ]
         },
@@ -1881,13 +1949,44 @@
         "status": "inferred_hypothesis"
       },
       "step_8_growth_hints": {
-        "claim_state": "insufficient_evidence",
-        "confidence_band": "low",
-        "evidence_refs": [],
+        "claim_state": "inferred_hypothesis",
+        "communication_styles_likely_accepted": [
+          "show changed files and targeted tests"
+        ],
+        "communication_styles_that_trigger_defenses": [
+          "asserting readiness without evidence"
+        ],
+        "confidence_band": "med",
+        "evidence_refs": [
+          {
+            "quote_id": "q1",
+            "turn_id": "t1"
+          },
+          {
+            "quote_id": "q2",
+            "turn_id": "t2"
+          },
+          {
+            "quote_id": "q3",
+            "turn_id": "t3"
+          },
+          {
+            "quote_id": "q4",
+            "turn_id": "t4"
+          }
+        ],
+        "fragile_spots": [
+          "thin tests and vague completion claims"
+        ],
         "hyperparams_version": "m12.1.v1",
         "last_updated_turn_id": "t4",
-        "reason": "linter_or_schema_failed:StepExtractorValidationError",
-        "status": "insufficient_evidence"
+        "soft_spots": [
+          "clear proof lowers resistance"
+        ],
+        "stable_parts": [
+          "will keep asking for evidence"
+        ],
+        "status": "inferred_hypothesis"
       },
       "user_id": "u_accept"
     },
@@ -1910,17 +2009,10 @@
     },
     "report": {
       "hyperparams_version": "m12.1.v1",
-      "linter_findings": [
-        {
-          "raw_quote": "you should just trust it",
-          "rule": "moral_or_chicken_soup",
-          "section": "step_8.content_summary",
-          "token": "should"
-        }
-      ],
+      "linter_findings": [],
       "prior_report_id": "",
-      "report_id": "m12_1_report:07ad23346971d7ab",
-      "report_status": "linter_failed",
+      "report_id": "m12_1_report:14cf750a9446275e",
+      "report_status": "ready",
       "sections": [
         {
           "confidence_band": "med",
@@ -2084,25 +2176,13 @@
           "content": {
             "about_others": {
               "claim_state": "inferred_hypothesis",
-              "confidence_band": "med",
-              "content_summary": "Others can overstate readiness.",
+              "confidence_band": "low",
+              "content_summary": "Others seem narcissistic personality driven.",
               "core_belief": "about_others",
               "evidence_refs": [
                 {
-                  "quote_id": "q1",
-                  "turn_id": "t1"
-                },
-                {
                   "quote_id": "q2",
                   "turn_id": "t2"
-                },
-                {
-                  "quote_id": "q3",
-                  "turn_id": "t3"
-                },
-                {
-                  "quote_id": "q4",
-                  "turn_id": "t4"
                 }
               ]
             },
@@ -2119,38 +2199,18 @@
                 {
                   "quote_id": "q2",
                   "turn_id": "t2"
-                },
-                {
-                  "quote_id": "q3",
-                  "turn_id": "t3"
-                },
-                {
-                  "quote_id": "q4",
-                  "turn_id": "t4"
                 }
               ]
             },
             "about_world": {
               "claim_state": "inferred_hypothesis",
-              "confidence_band": "med",
+              "confidence_band": "low",
               "content_summary": "Strong work is inspectable.",
               "core_belief": "about_world",
               "evidence_refs": [
                 {
-                  "quote_id": "q1",
-                  "turn_id": "t1"
-                },
-                {
-                  "quote_id": "q2",
-                  "turn_id": "t2"
-                },
-                {
                   "quote_id": "q3",
                   "turn_id": "t3"
-                },
-                {
-                  "quote_id": "q4",
-                  "turn_id": "t4"
                 }
               ]
             },
@@ -2161,7 +2221,7 @@
             "last_updated_turn_id": "t4",
             "status": "inferred_hypothesis"
           },
-          "rendered": "I trust what survives checks. | Others can overstate readiness. | Strong work is inspectable.",
+          "rendered": "I trust what survives checks. | Others seem narcissistic personality driven. | Strong work is inspectable.",
           "report_section": "step_4",
           "section_kind": "step_4",
           "status": "inferred_hypothesis"
@@ -2476,20 +2536,51 @@
           "status": "inferred_hypothesis"
         },
         {
-          "confidence_band": "low",
+          "confidence_band": "med",
           "content": {
-            "claim_state": "insufficient_evidence",
-            "confidence_band": "low",
-            "evidence_refs": [],
+            "claim_state": "inferred_hypothesis",
+            "communication_styles_likely_accepted": [
+              "show changed files and targeted tests"
+            ],
+            "communication_styles_that_trigger_defenses": [
+              "asserting readiness without evidence"
+            ],
+            "confidence_band": "med",
+            "evidence_refs": [
+              {
+                "quote_id": "q1",
+                "turn_id": "t1"
+              },
+              {
+                "quote_id": "q2",
+                "turn_id": "t2"
+              },
+              {
+                "quote_id": "q3",
+                "turn_id": "t3"
+              },
+              {
+                "quote_id": "q4",
+                "turn_id": "t4"
+              }
+            ],
+            "fragile_spots": [
+              "thin tests and vague completion claims"
+            ],
             "hyperparams_version": "m12.1.v1",
             "last_updated_turn_id": "t4",
-            "reason": "linter_or_schema_failed:StepExtractorValidationError",
-            "status": "insufficient_evidence"
+            "soft_spots": [
+              "clear proof lowers resistance"
+            ],
+            "stable_parts": [
+              "will keep asking for evidence"
+            ],
+            "status": "inferred_hypothesis"
           },
-          "rendered": "insufficient_evidence",
+          "rendered": "will keep asking for evidence | thin tests and vague completion claims | clear proof lowers resistance | show changed files and targeted tests | asserting readiness without evidence",
           "report_section": "step_8",
           "section_kind": "step_8",
-          "status": "insufficient_evidence"
+          "status": "inferred_hypothesis"
         }
       ],
       "trigger_kind": "explicit_request",
@@ -2522,6 +2613,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -2587,6 +2679,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -2654,6 +2747,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -2722,6 +2816,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -2791,6 +2886,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -2861,6 +2957,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -2932,6 +3029,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -3004,6 +3102,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -3109,33 +3208,25 @@
       },
       {
         "about_others": {
-          "confidence_band": "high",
-          "content_summary": "Others can overstate readiness.",
+          "confidence_band": "low",
+          "content_summary": "Others seem narcissistic personality driven.",
           "evidence_quote_refs": [
-            "t1:q1",
-            "t2:q2",
-            "t3:q3",
-            "t4:q4"
+            "t2:q2"
           ]
         },
         "about_self": {
-          "confidence_band": "high",
+          "confidence_band": "med",
           "content_summary": "I trust what survives checks.",
           "evidence_quote_refs": [
             "t1:q1",
-            "t2:q2",
-            "t3:q3",
-            "t4:q4"
+            "t2:q2"
           ]
         },
         "about_world": {
-          "confidence_band": "high",
+          "confidence_band": "low",
           "content_summary": "Strong work is inspectable.",
           "evidence_quote_refs": [
-            "t1:q1",
-            "t2:q2",
-            "t3:q3",
-            "t4:q4"
+            "t3:q3"
           ]
         }
       },
@@ -3216,21 +3307,23 @@
       },
       {
         "communication_styles_likely_accepted": [
-          "show tests"
+          "show changed files and targeted tests"
         ],
         "communication_styles_that_trigger_defenses": [
-          "you should just trust it"
+          "asserting readiness without evidence"
         ],
-        "confidence_band": "med",
+        "confidence_band": "high",
         "evidence_quote_refs": [
           "t1:q1",
-          "t2:q2"
+          "t2:q2",
+          "t3:q3",
+          "t4:q4"
         ],
         "fragile_spots": [
-          "thin tests"
+          "thin tests and vague completion claims"
         ],
         "soft_spots": [
-          "clear proof helps"
+          "clear proof lowers resistance"
         ],
         "stable_parts": [
           "will keep asking for evidence"
@@ -3245,7 +3338,7 @@
       "updated",
       "updated",
       "updated",
-      "linter_failed"
+      "updated"
     ],
     "trigger_kind": "explicit_request"
   },
@@ -3261,5 +3354,9 @@
     "t2",
     "t3",
     "t4"
-  ]
+  ],
+  "validation_decisions": {
+    "ready_channel_returned": true,
+    "report_status": "ready"
+  }
 }

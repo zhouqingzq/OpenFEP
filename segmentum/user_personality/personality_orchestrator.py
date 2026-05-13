@@ -28,7 +28,6 @@ from .personality_profile import (
     bounded_confidence_band,
 )
 from .personality_report import PersonalityReport, assemble_personality_report
-from .plain_language_linter import LinterFinding
 
 StepExtractor = Callable[[Mapping[str, object]], Mapping[str, object]]
 
@@ -103,9 +102,8 @@ def run_personality_orchestrator(
         try:
             validated = validate_step_output(step, raw_output, snapshot=snapshot, hyperparams=hyperparams)
         except StepExtractorValidationError as exc:
-            findings = tuple(item for item in getattr(exc, "findings", ()) if isinstance(item, LinterFinding))
             marker = InsufficientEvidence(
-                reason=f"linter_or_schema_failed:{type(exc).__name__}",
+                reason=f"validation_failed:{type(exc).__name__}",
                 last_updated_turn_id=turn_id,
                 hyperparams_version=hyperparams.hyperparams_version,
             )
@@ -123,16 +121,16 @@ def run_personality_orchestrator(
                 user_id=report.user_id,
                 turn_id=report.turn_id,
                 hyperparams_version=report.hyperparams_version,
-                report_status="linter_failed",
+                report_status="validation_failed",
                 sections=report.sections,
-                linter_findings=findings,
+                linter_findings=(),
                 trigger_kind=trigger_kind,
                 prior_report_id=prior_report_id,
             )
             outputs.append(raw_output)
-            statuses.append("linter_failed")
+            statuses.append("validation_failed")
             aborted_reason = str(exc)
-            current = current.with_report_state(turn_id=turn_id, report_status="linter_failed")
+            current = current.with_report_state(turn_id=turn_id, report_status="validation_failed")
             trace = PersonalityRunTrace(
                 trigger_kind=trigger_kind,
                 snapshots=tuple(snapshots),
@@ -288,8 +286,8 @@ def _section_from_payload(
         return PredictionSystemAccount(
             wants=str(payload.get("wants", ""))[: hyperparams.max_summary_chars],
             fears=str(payload.get("fears", ""))[: hyperparams.max_summary_chars],
-            hypersensitive_to=_strings(payload.get("hypersensitive_to")),
-            ignores=_strings(payload.get("ignores")),
+            hypersensitive_to=_strings(payload.get("hypersensitive_to"), hyperparams=hyperparams),
+            ignores=_strings(payload.get("ignores"), hyperparams=hyperparams),
             default_interpretation=str(payload.get("default_interpretation", ""))[: hyperparams.max_summary_chars],
             **base,
         )
@@ -354,11 +352,11 @@ def _section_from_payload(
         return CoreLoop(stages=stages, **base)
     if step == 8:
         return GrowthHints(
-            stable_parts=_strings(payload.get("stable_parts")),
-            fragile_spots=_strings(payload.get("fragile_spots")),
-            soft_spots=_strings(payload.get("soft_spots")),
-            communication_styles_likely_accepted=_strings(payload.get("communication_styles_likely_accepted")),
-            communication_styles_that_trigger_defenses=_strings(payload.get("communication_styles_that_trigger_defenses")),
+            stable_parts=_strings(payload.get("stable_parts"), hyperparams=hyperparams),
+            fragile_spots=_strings(payload.get("fragile_spots"), hyperparams=hyperparams),
+            soft_spots=_strings(payload.get("soft_spots"), hyperparams=hyperparams),
+            communication_styles_likely_accepted=_strings(payload.get("communication_styles_likely_accepted"), hyperparams=hyperparams),
+            communication_styles_that_trigger_defenses=_strings(payload.get("communication_styles_that_trigger_defenses"), hyperparams=hyperparams),
             **base,
         )
     raise ValueError("unknown step")
@@ -383,7 +381,7 @@ def _core_belief(kind: str, value: object, *, turn_id: str, hyperparams: M121Hyp
     refs = _refs(row.get("evidence_quote_refs"), default_turn_id=turn_id)
     return CoreBelief(
         core_belief=kind,  # type: ignore[arg-type]
-        content_summary=str(row.get("content_summary", ""))[:80],
+        content_summary=str(row.get("content_summary", ""))[: hyperparams.max_summary_chars],
         evidence_refs=refs[: hyperparams.max_evidence_refs_per_claim],
         confidence_band=bounded_confidence_band(
             str(row.get("confidence_band", "low")),
@@ -412,18 +410,37 @@ def _relationship_target(value: object, *, turn_id: str, hyperparams: M121Hyperp
 
 def _bounded_m11_summary(payload: Mapping[str, object], *, hyperparams: M121Hyperparams) -> dict[str, object]:
     active = payload.get("active_hypotheses", payload.get("hypotheses", ()))
+    evidence_cards = payload.get("m11_evidence_cards", payload.get("prompt_safe_evidence_cards", ()))
     rows = []
     if isinstance(active, Sequence) and not isinstance(active, (str, bytes)):
         for row in active[: hyperparams.max_m11_hypothesis_refs]:
             if isinstance(row, Mapping):
                 rows.append(
                     {
-                        "hypothesis_id": str(row.get("hypothesis_id", "")),
+                        "hypothesis_id": str(row.get("hypothesis_id", row.get("memory_id", ""))),
                         "content_summary": str(row.get("content_summary", ""))[: hyperparams.max_summary_chars],
                         "confidence_band": str(row.get("confidence_band", "low")),
                     }
                 )
-    return {"active_hypotheses": rows, "reliability_summary": dict(payload.get("reliability_summary", {})) if isinstance(payload.get("reliability_summary"), Mapping) else {}}
+    card_rows = []
+    if isinstance(evidence_cards, Sequence) and not isinstance(evidence_cards, (str, bytes)):
+        for row in evidence_cards[: hyperparams.max_m11_hypothesis_refs]:
+            if isinstance(row, Mapping):
+                card_rows.append(
+                    {
+                        "memory_id": str(row.get("memory_id", row.get("hypothesis_id", ""))),
+                        "memory_class": str(row.get("memory_class", "")),
+                        "content_summary": str(row.get("content_summary", ""))[: hyperparams.max_summary_chars],
+                        "confidence_band": str(row.get("confidence_band", "low")),
+                        "permitted_use": str(row.get("permitted_use", "")),
+                        "why_retrieved": str(row.get("why_retrieved", ""))[: hyperparams.max_summary_chars],
+                    }
+                )
+    return {
+        "active_hypotheses": rows,
+        "m11_evidence_cards": card_rows,
+        "reliability_summary": dict(payload.get("reliability_summary", {})) if isinstance(payload.get("reliability_summary"), Mapping) else {},
+    }
 
 
 def _bounded_m12_summary(payload: Mapping[str, object], *, hyperparams: M121Hyperparams) -> dict[str, object]:
@@ -454,10 +471,10 @@ def _refs(value: object, *, default_turn_id: str) -> tuple[EvidenceQuoteRef, ...
     return tuple(EvidenceQuoteRef.from_any(item, default_turn_id=default_turn_id) for item in value)
 
 
-def _strings(value: object) -> tuple[str, ...]:
+def _strings(value: object, *, hyperparams: M121Hyperparams) -> tuple[str, ...]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
         return ()
-    return tuple(str(item)[: DEFAULT_HYPERPARAMS.max_summary_chars] for item in value if str(item).strip())
+    return tuple(str(item)[: hyperparams.max_summary_chars] for item in value if str(item).strip())
 
 
 def _object_list(value: object) -> tuple[Mapping[str, object], ...]:

@@ -9,7 +9,7 @@ from typing import Mapping
 
 from .hyperparams import DEFAULT_HYPERPARAMS, M121Hyperparams, SECTION_KINDS
 from .personality_profile import InsufficientEvidence, PersonalityProfile, ReportStatus
-from .plain_language_linter import LinterFinding, lint_report_dict
+from .plain_language_linter import LinterFinding
 
 
 @dataclass(frozen=True)
@@ -112,23 +112,8 @@ def assemble_personality_report(
     if step1.status in {"insufficient_evidence", "never_computed"}:
         status = "stale"
     findings: tuple[LinterFinding, ...] = ()
-    draft = _report_payload(
-        report_id="pending",
-        profile=profile,
-        turn_id=turn_id,
-        trigger_kind=trigger_kind,
-        prior_report_id=prior_report_id,
-        status=status,
-        sections=sections,
-        findings=findings,
-        hyperparams=hyperparams,
-    )
-    if run_linter:
-        findings = lint_report_dict(draft, hyperparams=hyperparams)
-        if findings:
-            status = "linter_failed"
-        elif status == "draft":
-            status = "ready"
+    if run_linter and status == "draft":
+        status = "ready"
     report_id = _deterministic_report_id(
         _report_payload(
             report_id="",
@@ -257,6 +242,6 @@ def _deterministic_report_id(payload: Mapping[str, object]) -> str:
 
 def _status(value: object) -> ReportStatus:
     text = str(value or "draft")
-    if text in {"draft", "linter_failed", "ready", "stale", "superseded"}:
+    if text in {"draft", "linter_failed", "validation_failed", "ready", "stale", "superseded"}:
         return text  # type: ignore[return-value]
     return "draft"

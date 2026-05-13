@@ -75,10 +75,6 @@
     }
   ],
   "linter_findings": [],
-  "linter_pass_fail_decisions": {
-    "ready_channel_returned": true,
-    "report_status": "ready"
-  },
   "personality_profiles_before_after": {
     "after": {
       "display_name_hint": "Acceptance User",
@@ -3966,6 +3962,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4114,6 +4111,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4222,6 +4220,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4375,6 +4374,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4503,6 +4503,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4650,6 +4651,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4882,6 +4884,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -4995,6 +4998,7 @@
               "hypothesis_id": "h_accept_1"
             }
           ],
+          "m11_evidence_cards": [],
           "reliability_summary": {
             "task_requirements": "med"
           }
@@ -5127,5 +5131,9 @@
     "t2",
     "t3",
     "t4"
-  ]
+  ],
+  "validation_decisions": {
+    "ready_channel_returned": true,
+    "report_status": "ready"
+  }
 }

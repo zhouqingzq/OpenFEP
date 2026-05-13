@@ -45,6 +45,7 @@ from segmentum.user_continuity import (
 from segmentum.user_personality import (
     M121RuntimeConfig,
     M121RuntimeState,
+    build_step_extractor_prompt,
     run_m12_1_tick,
 )
 
@@ -3330,11 +3331,34 @@ def _merge_m12_1_into_memory_guidance(
     if not cards:
         return
     control = _mapping(memory_dynamics.get("control_guidance"))
+    orchestrator = _mapping(m12_1_result.get("orchestrator_result"))
+    report = _mapping(orchestrator.get("report"))
     control["m12_1_personality"] = {
         "prompt_safe_evidence_cards": cards,
-        "permitted_surface": "evidence_cards_only",
+        "latest_report_status": str(report.get("report_status", "")),
+        "compact_profile_sections": _compact_m12_1_profile_sections(report),
+        "permitted_surface": "internal_thinking_material",
     }
     memory_dynamics["control_guidance"] = control
+
+
+def _compact_m12_1_profile_sections(report: Mapping[str, Any]) -> list[dict[str, str]]:
+    sections = report.get("sections", [])
+    if not isinstance(sections, list):
+        return []
+    rows: list[dict[str, str]] = []
+    for section in sections[:8]:
+        if not isinstance(section, Mapping):
+            continue
+        rows.append(
+            {
+                "section_kind": str(section.get("section_kind", "")),
+                "status": str(section.get("status", "")),
+                "confidence_band": str(section.get("confidence_band", "")),
+                "summary": str(section.get("rendered", ""))[:240],
+            }
+        )
+    return rows
 
 
 def _apply_evidence_judgment_contract(
@@ -3725,6 +3749,17 @@ class MVPDialogueRuntime:
                     **_mapping(m12_pre_result.get("entity_binding_context")),
                     "new_evidence_count": len(_mapping(m12_pre_result.get("state_after")).get("conflict_records", []) or []),
                 }
+
+            def _extract_m12_1_step(step: int):
+                def _extract(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+                    system_prompt, user_prompt = build_step_extractor_prompt(step, snapshot)
+                    try:
+                        return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                    except Exception:
+                        return {"status": "insufficient_evidence", "reason": f"step_{step}_llm_error"}
+
+                return _extract
+
             m12_1_state, m12_1_turn = run_m12_1_tick(
                 m12_1_state,
                 user_id=user_id,
@@ -3735,10 +3770,10 @@ class MVPDialogueRuntime:
                 current_turn_quotes={"q_current": user_text},
                 transcript_quote_refs=(),
                 m11_readonly_summary={
-                    "active_hypotheses": list(m11_result_dict.get("prompt_safe_evidence_cards", [])),
+                    "m11_evidence_cards": list(m11_result_dict.get("prompt_safe_evidence_cards", [])),
                 },
                 m12_readonly_summary=m12_summary_for_personality,
-                extractors=None,
+                extractors={step: _extract_m12_1_step(step) for step in range(1, 9)},
                 config=M121RuntimeConfig(m12_1_personality_enabled=True, persona_kind="ui_chat"),
                 session_id=str(self.store.root.resolve()),
                 persona_id=self.persona_name or "default",

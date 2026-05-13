@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from segmentum.dialogue.runtime.mvp_loop import (
@@ -37,6 +38,67 @@ def _maybe_m12_extractor_response(system_prompt: str) -> dict[str, object] | Non
     return None
 
 
+def _maybe_m12_1_step_response(system_prompt: str, user_prompt: str) -> dict[str, object] | None:
+    if "M12.1 bounded step extractor" not in system_prompt:
+        return None
+    step = int(json.loads(user_prompt).get("step", 0))
+    refs = ["q_current"]
+    outputs: dict[int, dict[str, object]] = {
+        1: {"summary": "Uses direct checks before trusting a result.", "evidence_quote_refs": refs, "confidence_band": "low"},
+        2: {"evidence_items": [{"kind": "style", "content_summary": "Asks for visible evidence.", "evidence_quote_refs": refs, "confidence_band": "low"}]},
+        3: {
+            "wants": "wants grounded work",
+            "fears": "fears weak claims",
+            "hypersensitive_to": ["thin proof"],
+            "ignores": ["decorative language"],
+            "default_interpretation": "checks whether evidence supports the claim",
+            "evidence_quote_refs": refs,
+            "confidence_band": "low",
+        },
+        4: {
+            "about_self": {"content_summary": "I trust checked work.", "evidence_quote_refs": refs, "confidence_band": "low"},
+            "about_others": {"content_summary": "Others can overstate readiness.", "evidence_quote_refs": refs, "confidence_band": "low"},
+            "about_world": {"content_summary": "Good work can be inspected.", "evidence_quote_refs": refs, "confidence_band": "low"},
+        },
+        5: {
+            "dominant_emotional_baseline": "alert",
+            "threat_response": "asks for verification",
+            "defenses": [{"defense_kind": "control", "protects_what": "trust", "short_term_benefit": "finds weak spots", "long_term_cost": "slows handoff", "evidence_quote_refs": refs, "confidence_band": "low"}],
+            "evidence_quote_refs": refs,
+            "confidence_band": "low",
+        },
+        6: {
+            "close_relationship_role": "direct reviewer",
+            "recurring_loop_summary": "asks for proof before relaxing",
+            "conflict_style": "confront",
+            "drawn_to": {"kind": "careful builders", "why": "they show work", "evidence_quote_refs": refs, "confidence_band": "low"},
+            "clashes_with": {"kind": "vague finishers", "why": "they make trust harder", "evidence_quote_refs": refs, "confidence_band": "low"},
+            "evidence_quote_refs": refs,
+            "confidence_band": "low",
+        },
+        7: {
+            "trigger_event": "a claim is made",
+            "interpretation": "looks for proof",
+            "emotion": "alert",
+            "action": "asks for checks",
+            "outcome": "evidence guides trust",
+            "belief_reinforcement": "checked work earns trust",
+            "evidence_quote_refs": refs,
+            "confidence_band": "low",
+        },
+        8: {
+            "stable_parts": ["asks for evidence"],
+            "fragile_spots": ["vague completion claims"],
+            "soft_spots": ["clear proof"],
+            "communication_styles_likely_accepted": ["show tests"],
+            "communication_styles_that_trigger_defenses": ["claiming readiness without evidence"],
+            "evidence_quote_refs": refs,
+            "confidence_band": "low",
+        },
+    }
+    return outputs[step]
+
+
 class FakeJSONLLM:
     def __init__(self) -> None:
         self.calls: list[dict[str, str]] = []
@@ -46,6 +108,9 @@ class FakeJSONLLM:
         m12_hit = _maybe_m12_extractor_response(system_prompt)
         if m12_hit is not None:
             return m12_hit
+        m12_1_hit = _maybe_m12_1_step_response(system_prompt, user_prompt)
+        if m12_1_hit is not None:
+            return m12_1_hit
         if "自由能人格分析" in system_prompt:
             return {
                 "personas": [
@@ -237,6 +302,42 @@ def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) 
         if item.get("id") == "ltm_python"
     ][0]
     assert recalled["recall_count"] == 1
+
+
+def test_mvp_m12_1_runs_eight_llm_steps_and_reaches_thinking_prompt(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="测试人格",
+    )
+    runtime.initialize_from_materials(["喜欢快速原型，讨厌凭空编造经历。"])
+    state = runtime.store.load()
+    state["m12_1_user_personality"]["run_records_by_user"] = {
+        "default_user": [
+            {
+                "turn_id": "turn_0001",
+                "turn_index": 0,
+                "hour_bucket": 0,
+                "trigger_kind": "explicit_request",
+                "report_status": "ready",
+                "step_1_status": "updated",
+            }
+        ]
+    }
+    runtime.store.save(state)
+    llm.calls.clear()
+
+    result = runtime.run_turn("请检查这个里程碑是否真的完成。", turn_index=7)
+
+    systems = [c["system"] for c in llm.calls]
+    assert sum(1 for s in systems if "M12.1 bounded step extractor" in s) == 8
+    saved = runtime.store.load()
+    assert saved["m12_1_user_personality"]["profiles_by_user"]
+    assert result.diagnostics["m12_1_personality"]["orchestrator_result"]["report"]["report_status"] == "ready"
+    thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
+    assert "m12_1_personality" in thinking_prompt
+    assert "internal_thinking_material" in thinking_prompt
 
 
 def test_material_analysis_can_return_multiple_personas_and_write_isolated_files(tmp_path: Path) -> None:
@@ -2189,6 +2290,7 @@ def test_initialize_from_persona_payload_defaults_m12_on_for_fresh_persona(tmp_p
     )
     saved = runtime.store.load()
     assert saved["m12_identity_continuity_enabled"] is True
+    assert saved["m12_1_personality_enabled"] is True
 
 
 def test_mvp_m12_identity_extractor_runs_before_conscious_when_enabled(tmp_path: Path) -> None:

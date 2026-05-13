@@ -9,7 +9,6 @@ from segmentum.memory_evidence import MemoryEvidence
 
 from .hyperparams import CARD_CONFIDENCE_PRIORITY, DEFAULT_HYPERPARAMS, M121Hyperparams, PERMITTED_PRIORITY, SECTION_KINDS
 from .personality_profile import InsufficientEvidence, PersonalityProfile
-from .plain_language_linter import lint_user_facing_fields
 
 CONFIDENCE_FLOATS = {
     "low": DEFAULT_HYPERPARAMS.card_confidence_float_low,
@@ -68,8 +67,6 @@ def evidence_cards_from_personality_profile(
     report_status: str | None = None,
     hyperparams: M121Hyperparams = DEFAULT_HYPERPARAMS,
 ) -> tuple[PersonalityEvidenceCard, ...]:
-    if (report_status or profile.last_full_report_status) == "linter_failed":
-        return ()
     cards: list[PersonalityEvidenceCard] = []
     restrict_to_strategy = _section_insufficient(profile, "step_4") or _section_insufficient(profile, "step_7")
     for section_kind in SECTION_KINDS:
@@ -95,9 +92,6 @@ def evidence_cards_from_personality_profile(
             section_kind=section_kind,
             why_retrieved="active_personality_profile",
         )
-        findings = lint_user_facing_fields(card.prompt_safe_dict(), hyperparams=hyperparams)
-        if findings:
-            continue
         cards.append(card)
     cards.sort(
         key=lambda card: (

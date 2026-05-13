@@ -10,7 +10,6 @@ import copy
 from typing import Mapping, Sequence
 
 from .hyperparams import DEFAULT_HYPERPARAMS, M121Hyperparams
-from .plain_language_linter import lint_user_facing_fields
 
 ALLOWED_BANDS = {"low", "med", "high"}
 ALLOWED_DEFENSES = {
@@ -70,7 +69,7 @@ def build_step_extractor_prompt(step: int, snapshot: Mapping[str, object]) -> tu
         "Do not invent turn ids, quote ids, hypothesis ids, or cue ids. "
         "Use only allowed evidence_quote_refs. Do not output floats. "
         "If evidence is thin, return {\"status\":\"insufficient_evidence\",\"reason\":\"...\"}. "
-        "Use ordinary social language; no diagnoses, moral verdicts, or engineering jargon."
+        "Return the best structured analysis supported by the snapshot."
     )
     user_prompt = {
         "step": step,
@@ -117,13 +116,6 @@ def validate_step_output(
         raise StepExtractorValidationError(f"unknown step {step} fields: {sorted(unknown)}")
     result = copy.deepcopy(dict(payload))
     _validate_step_shape(step, result, snapshot=snapshot, hyperparams=hyperparams)
-    findings = lint_user_facing_fields(_surface_rows_for_lint(step, result), hyperparams=hyperparams)
-    if findings:
-        first = findings[0]
-        raise StepExtractorValidationError(
-            f"linter_failed:{first.rule}:{first.token}:{first.section}",
-            findings=findings,
-        )
     return result
 
 
@@ -217,7 +209,7 @@ def _validate_step_shape(
         for key in ("about_self", "about_others", "about_world"):
             row = _object(payload.get(key), key)
             _check_keys(row, {"content_summary", "evidence_quote_refs", "confidence_band"}, key)
-            _bounded_string(row.get("content_summary"), 80, f"{key}.content_summary")
+            _bounded_string(row.get("content_summary"), hyperparams.max_summary_chars, f"{key}.content_summary")
             _band(row.get("confidence_band"), f"{key}.confidence_band")
             _quote_refs(row.get("evidence_quote_refs"), snapshot=snapshot)
     elif step == 5:
